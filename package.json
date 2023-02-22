@@ -4,13 +4,15 @@
   "description": "Critterbase API",
   "main": "./src/server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "nodemon -r dotenv/config ./src/server.ts"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.4.0",
     "@types/node": "^18.14.0",
+    "jest": "^29.4.3",
     "nodemon": "^2.0.20",
     "prisma": "^4.10.1",
     "ts-node": "^10.9.1",

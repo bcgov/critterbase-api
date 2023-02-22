@@ -37,4 +37,8 @@ const errorHandler = (
   res.status(500).json({ error: err?.message ?? "Some error occurred..." });
 };
 
-export { errorLogger, errorHandler, catchErrors };
+const root = (req: Request, res: Response, next: NextFunction) => {
+  return res.json("Welcome to Critterbase API");
+};
+
+export { errorLogger, errorHandler, catchErrors, root };

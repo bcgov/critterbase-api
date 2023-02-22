@@ -1,6 +1,6 @@
 import express from "express";
 import type { Request, Response } from "express";
-import { catchErrors } from "../../utils/helpers";
+import { catchErrors } from "../../utils/express_handlers";
 import { getCritter } from "./critter.service";
 
 export const critterRouter = express.Router();
