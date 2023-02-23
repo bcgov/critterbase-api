@@ -37,8 +37,26 @@ const errorHandler = (
   res.status(500).json({ error: err?.message ?? "Some error occurred..." });
 };
 
-const root = (req: Request, res: Response, next: NextFunction) => {
-  return res.json("Welcome to Critterbase API");
+/**
+ ** Logs basic details about the current supported routes
+ * @params All four express params.
+ */
+const home = (req: Request, res: Response, next: NextFunction) => {
+  return res.json([
+    "Welcome to Critterbase API",
+    "Temp details before swagger integration",
+    {
+      routes: [
+        {
+          "api/critters": {
+            "/": ["get"],
+            "/new": ["post"],
+            "/:id": ["get", "put", "delete"],
+          },
+        },
+      ],
+    },
+  ]);
 };
 
-export { errorLogger, errorHandler, catchErrors, root };
+export { errorLogger, errorHandler, catchErrors, home };
