@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { cError } from "./global_types";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -15,7 +16,7 @@ const catchErrors =
  * @params All four express params.
  */
 const errorLogger = (
-  err: Error,
+  err: Error | cError,
   req: Request,
   res: Response,
   next: NextFunction
@@ -29,12 +30,16 @@ const errorLogger = (
  * @params All four express params.
  */
 const errorHandler = (
-  err: Error,
+  err: Error | cError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  res.status(500).json({ error: err?.message ?? "Some error occurred..." });
+  if (err instanceof cError) {
+    return res.status(err.status).json({ error: err.message });
+  } else {
+    res.status(400).json({ error: err?.message ?? "Some error occurred..." });
+  }
 };
 
 /**

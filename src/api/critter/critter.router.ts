@@ -2,6 +2,7 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/express_handlers";
 import { getCritter } from "./critter.service";
+import { cError } from "../../utils/global_types";
 
 export const critterRouter = express.Router();
 
@@ -18,7 +19,7 @@ critterRouter.post(
   "/new",
   catchErrors(async (req: Request, res: Response) => {
     const id = req.params.id;
-    return res.status(200).json(`Post new critter`);
+    return res.status(201).json(`Post new critter`);
   })
 );
 /**
@@ -32,7 +33,7 @@ critterRouter
       //Check if critter exists before running next routes.
       //Temp for testing
       if (!["1", "2", "3"].includes(critter_id)) {
-        throw new Error("Critter ID not found");
+        throw new cError("Critter ID not found", 404);
       }
       next();
     })
