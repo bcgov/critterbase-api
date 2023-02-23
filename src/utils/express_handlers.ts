@@ -1,4 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
+import { app } from "../server";
+import { IS_TEST, PORT } from "./constants";
 import { cError } from "./global_types";
 
 /**
@@ -64,4 +66,12 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   ]);
 };
 
-export { errorLogger, errorHandler, catchErrors, home };
+const startServer = () => {
+  if (!IS_TEST) {
+    app.listen(PORT, () => {
+      console.log(`listening on ${PORT}`);
+    });
+  }
+};
+
+export { errorLogger, errorHandler, catchErrors, home, startServer };

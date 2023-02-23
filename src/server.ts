@@ -7,8 +7,9 @@ import {
   errorHandler,
   home,
   catchErrors,
+  startServer,
 } from "./utils/express_handlers";
-import { PORT } from "./utils/constants";
+import { IS_TEST, PORT } from "./utils/constants";
 
 const app = express();
 
@@ -20,6 +21,6 @@ app.use("/api/critters", critterRouter);
 app.use(errorLogger);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`listening on port ${PORT}`);
-});
+startServer();
+
+export { app };

@@ -1,5 +1,5 @@
 /**
- ** Custom critterbase error class. Includes a status code with the message.
+ ** Custom Critterbase Error. Includes a status code with the message.
  */
 class cError {
   message: string;

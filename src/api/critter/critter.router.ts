@@ -6,22 +6,26 @@ import { cError } from "../../utils/global_types";
 
 export const critterRouter = express.Router();
 
+/**
+ ** Critter Router Home
+ */
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     return res.status(200).json("Critter Router");
   })
 );
+
 /**
  ** Create new critter
  */
 critterRouter.post(
   "/new",
   catchErrors(async (req: Request, res: Response) => {
-    const id = req.params.id;
     return res.status(201).json(`Post new critter`);
   })
 );
+
 /**
  * * All critter_id related routes
  */

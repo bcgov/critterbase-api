@@ -2,4 +2,6 @@ const PORT = process.env.PORT;
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
-export { PORT, IS_DEV };
+const IS_TEST = process.env.NODE_ENV === "test";
+
+export { PORT, IS_DEV, IS_TEST };
