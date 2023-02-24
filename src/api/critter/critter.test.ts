@@ -1,4 +1,4 @@
-import { request } from "../../utils/test_helpers";
+import { request } from "../../utils/constants";
 import { getCritter } from "./critter.service";
 
 describe("Critter", () => {

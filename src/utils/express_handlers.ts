@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
 import { IS_TEST, PORT } from "./constants";
 import { cError } from "./global_types";
@@ -40,7 +41,9 @@ const errorHandler = (
   if (err instanceof cError) {
     return res.status(err.status).json({ error: err.message });
   } else {
-    res.status(400).json({ error: err?.message ?? "Some error occurred..." });
+    return res
+      .status(400)
+      .json({ error: err?.message ?? "Some error occurred..." });
   }
 };
 
@@ -67,11 +70,11 @@ const home = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const startServer = () => {
-  if (!IS_TEST) {
-    app.listen(PORT, () => {
+  app.listen(PORT, () => {
+    if (!IS_TEST) {
       console.log(`listening on ${PORT}`);
-    });
-  }
+    }
+  });
 };
 
 export { errorLogger, errorHandler, catchErrors, home, startServer };

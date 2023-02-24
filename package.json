@@ -4,7 +4,7 @@
   "description": "Critterbase API",
   "main": "./src/server.ts",
   "scripts": {
-    "test": "jest",
+    "test": "jest --forceExit",
     "start": "nodemon -r dotenv/config ./src/server.ts"
   },
   "author": "",

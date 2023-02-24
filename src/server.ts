@@ -1,15 +1,13 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import helmet from "helmet";
 import { critterRouter } from "./api/critter/critter.router";
 import {
-  errorLogger,
   errorHandler,
+  errorLogger,
   home,
-  catchErrors,
   startServer,
 } from "./utils/express_handlers";
-import { IS_TEST, PORT } from "./utils/constants";
 
 const app = express();
 
