@@ -1,7 +1,7 @@
 import { request } from "../../utils/constants";
 import { getCritter } from "./critter.service";
 
-describe("Critter", () => {
+describe("API: Critter", () => {
   describe("SERVICES", () => {
     describe("getCritter()", () => {
       it("returns a Critter", async () => {

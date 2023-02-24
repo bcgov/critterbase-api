@@ -2,12 +2,8 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { critterRouter } from "./api/critter/critter.router";
-import {
-  errorHandler,
-  errorLogger,
-  home,
-  startServer,
-} from "./utils/express_handlers";
+import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
+import { errorHandler, errorLogger, home } from "./utils/express_handlers";
 
 const app = express();
 
@@ -19,6 +15,10 @@ app.use("/api/critters", critterRouter);
 app.use(errorLogger);
 app.use(errorHandler);
 
-startServer();
+if (IS_DEV || IS_PROD) {
+  app.listen(PORT, () => {
+    console.log(`listening on ${PORT}`);
+  });
+}
 
 export { app };
