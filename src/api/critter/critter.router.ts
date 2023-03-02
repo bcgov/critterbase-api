@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
-import { catchErrors } from "../../utils/express_handlers";
+import { catchErrors } from "../../utils/middleware";
 import { getCritter } from "./critter.service";
 import { cError } from "../../utils/global_types";
 

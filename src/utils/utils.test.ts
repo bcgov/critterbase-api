@@ -3,12 +3,7 @@ import { Server, IncomingMessage, ServerResponse } from "http";
 import { reset } from "nodemon";
 import { app } from "../server";
 import { request } from "./constants";
-import {
-  catchErrors,
-  errorHandler,
-  errorLogger,
-  home,
-} from "./express_handlers";
+import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
 import { cError } from "./global_types";
 
 let mockError = {} as Error | cError;

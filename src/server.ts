@@ -3,7 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import { critterRouter } from "./api/critter/critter.router";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
-import { errorHandler, errorLogger, home } from "./utils/express_handlers";
+import { errorHandler, errorLogger, home } from "./utils/middleware";
 
 const app = express();
 

@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
-import { cError } from "./global_types";
+import { cError } from "./types";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
