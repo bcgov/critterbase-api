@@ -6,6 +6,7 @@ type ErrorType =
   | "syntaxIssue"
   | "serverIssue"
   | "notFound";
+
 class apiError {
   message: string;
   status: number;
@@ -38,7 +39,15 @@ class apiError {
   }
 
   toString() {
-    return `error: ${this.message} status: ${this.status}`;
+    return `error: ${this.message} `;
+  }
+
+  toDevString() {
+    return {
+      message: this.message,
+      status: this.status,
+      errorType: this.errorType,
+    };
   }
 }
 
