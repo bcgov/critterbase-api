@@ -5,7 +5,7 @@
   "main": "./src/server.ts",
   "scripts": {
     "test": "jest --forceExit",
-    "start": "nodemon -r dotenv/config ./src/server.ts"
+    "start:dev": "nodemon -r dotenv/config ./src/server.ts"
   },
   "author": "",
   "license": "ISC",

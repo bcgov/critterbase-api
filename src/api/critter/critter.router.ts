@@ -1,7 +1,7 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/express_handlers";
-import { getCritter } from "./critter.service";
+import { getCritters } from "./critter.service";
 import { cError } from "../../utils/global_types";
 
 export const critterRouter = express.Router();
@@ -20,7 +20,7 @@ critterRouter.get(
  ** Create new critter
  */
 critterRouter.post(
-  "/new",
+  "/create",
   catchErrors(async (req: Request, res: Response) => {
     return res.status(201).json(`Post new critter`);
   })
@@ -45,7 +45,7 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = getCritter();
+      const critter = getCritters();
       return res.status(200).json(critter);
     })
   )
