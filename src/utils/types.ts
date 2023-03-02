@@ -22,12 +22,8 @@ class apiError {
     return new apiError(propertyName, 400, "requiredProperty");
   }
 
-  static notFound() {
-    return new apiError(
-      "No results were found for this request",
-      404,
-      "notFound"
-    );
+  static notFound(message: string) {
+    return new apiError(message, 404, "notFound");
   }
 
   static syntaxIssue(message: string) {
