@@ -1,11 +1,654 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto(schema: "crypto"), postgis]
+}
+
+model artifact {
+  artifact_id                                                                          String                    @id(map: "artifact_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                                                           String                    @db.Uuid
+  artifact_url                                                                         String                    @unique(map: "artifact_url_unique")
+  artifact_comment                                                                     String?
+  capture_id                                                                           String?                   @db.Uuid
+  mortality_id                                                                         String?                   @db.Uuid
+  measurement_qualitative                                                              String?                   @db.Uuid
+  measurement_quantitative                                                             String?                   @db.Uuid
+  create_user                                                                          String                    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                                          String                    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                                     DateTime                  @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                                     DateTime                  @default(now()) @db.Timestamptz(6)
+  user_artifact_create_userTouser                                                      user                      @relation("artifact_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  critter                                                                              critter                   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  measurement_qualitative_artifact_measurement_qualitativeTomeasurement_qualitative    measurement_qualitative?  @relation("artifact_measurement_qualitativeTomeasurement_qualitative", fields: [measurement_qualitative], references: [measurement_qualitative_id], onDelete: NoAction, onUpdate: NoAction)
+  measurement_quantitative_artifact_measurement_quantitativeTomeasurement_quantitative measurement_quantitative? @relation("artifact_measurement_quantitativeTomeasurement_quantitative", fields: [measurement_quantitative], references: [measurement_quantitative_id], onDelete: NoAction, onUpdate: NoAction)
+  user_artifact_update_userTouser                                                      user                      @relation("artifact_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model audit_log {
+  audit_log_id                     String   @id(map: "audit_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  table_name                       String
+  operation                        String
+  before_value                     Json?
+  after_value                      Json?
+  create_user                      String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                      String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                 DateTime @default(now()) @db.Timestamptz(6)
+  update_timestamp                 DateTime @default(now()) @db.Timestamptz(6)
+  user_audit_log_create_userTouser user     @relation("audit_log_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_audit_log_create_user")
+  user_audit_log_update_userTouser user     @relation("audit_log_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_audit_log_update_user")
+}
+
+model capture {
+  capture_id                                     String    @id(map: "capture_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                     String    @db.Uuid
+  capture_location_id                            String?   @db.Uuid
+  release_location_id                            String?   @db.Uuid
+  capture_timestamp                              DateTime  @db.Timestamptz(6)
+  release_timestamp                              DateTime? @db.Timestamptz(6)
+  capture_comment                                String?
+  release_comment                                String?
+  create_user                                    String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                    String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                               DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp                               DateTime  @default(now()) @db.Timestamptz(6)
+  location_capture_capture_location_idTolocation location? @relation("capture_capture_location_idTolocation", fields: [capture_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cap_location_fk")
+  user_capture_create_userTouser                 user      @relation("capture_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cu_fk")
+  critter                                        critter   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_fk")
+  location_capture_release_location_idTolocation location? @relation("capture_release_location_idTolocation", fields: [release_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_rel_location_fk")
+  user_capture_update_userTouser                 user      @relation("capture_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_uu_fk")
+}
+
+model critter {
+  critter_id                                    String                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  taxon_id                                      String                     @db.Uuid
+  wlh_id                                        String?
+  animal_id                                     String?
+  sex                                           sex
+  responsible_region_nr_id                      String?                    @default(dbgenerated("get_nr_region_id('Unknown'::text)")) @db.Uuid
+  create_user                                   String                     @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                   String                     @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                              DateTime                   @default(now()) @db.Timestamptz(6)
+  update_timestamp                              DateTime                   @default(now()) @db.Timestamptz(6)
+  previous_version_id                           String?                    @db.Uuid
+  critter_comment                               String?
+  artifact                                      artifact[]
+  capture                                       capture[]
+  lk_region_nr                                  lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
+  lk_taxon                                      lk_taxon                   @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_taxon_fk")
+  user_critter_create_userTouser                user                       @relation("critter_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_create_user")
+  user_critter_update_userTouser                user                       @relation("critter_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_update_user")
+  critter_collection_unit                       critter_collection_unit[]
+  family_child                                  family_child[]
+  family_parent                                 family_parent[]
+  marking                                       marking[]
+  measurement_qualitative                       measurement_qualitative[]
+  measurement_quantitative                      measurement_quantitative[]
+  mortality                                     mortality[]
+  relationship_relationship_child_idTocritter   relationship[]             @relation("relationship_child_idTocritter")
+  relationship_relationship_critter_idTocritter relationship[]             @relation("relationship_critter_idTocritter")
+  relationship_relationship_parent_idTocritter  relationship[]             @relation("relationship_parent_idTocritter")
+  relationship_relationship_sibling_idTocritter relationship[]             @relation("relationship_sibling_idTocritter")
+
+  @@unique([critter_id, taxon_id], map: "critter_un")
+}
+
+model critter_collection_unit {
+  critter_collection_unit_id                     String               @id(map: "collection_unit_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                     String               @db.Uuid
+  collection_unit_id                             String               @db.Uuid
+  create_user                                    String               @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                    String               @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                               DateTime             @default(now()) @db.Timestamptz(6)
+  update_timestamp                               DateTime             @default(now()) @db.Timestamptz(6)
+  critter                                        critter              @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "collection_unit_critter_id_fkey")
+  xref_collection_unit                           xref_collection_unit @relation(fields: [collection_unit_id], references: [collection_unit_id], onDelete: NoAction, onUpdate: NoAction, map: "collection_unit_taxon_collection_unit_id_fkey")
+  user_critter_collection_unit_create_userTouser user                 @relation("critter_collection_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_collection_unit_create_user")
+  user_critter_collection_unit_update_userTouser user                 @relation("critter_collection_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_collection_unit_update_user")
+}
+
+model family {
+  family_id        String          @id(map: "sibling_group_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  family_label     String
+  create_user      String          @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user      String          @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp DateTime        @default(now()) @db.Timestamptz(6)
+  update_timestamp DateTime        @default(now()) @db.Timestamptz(6)
+  family_child     family_child[]
+  family_parent    family_parent[]
+}
+
+model family_child {
+  family_id        String   @db.Uuid
+  child_critter_id String   @db.Uuid
+  create_user      String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user      String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp DateTime @default(now()) @db.Timestamptz(6)
+  update_timestamp DateTime @default(now()) @db.Timestamptz(6)
+  critter          critter  @relation(fields: [child_critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_sibling_group_children_critter_fk")
+  family           family   @relation(fields: [family_id], references: [family_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_sibling_group_children_group_fk")
+
+  @@id([family_id, child_critter_id], map: "xref_sibling_group_children_pk")
+}
+
+model family_parent {
+  family_id         String   @db.Uuid
+  parent_critter_id String   @db.Uuid
+  create_user       String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user       String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp  DateTime @default(now()) @db.Timestamptz(6)
+  update_timestamp  DateTime @default(now()) @db.Timestamptz(6)
+  critter           critter  @relation(fields: [parent_critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_sibling_group_parent_critter_fk")
+  family            family   @relation(fields: [family_id], references: [family_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_sibling_group_parent_group_fk")
+
+  @@id([family_id, parent_critter_id], map: "xref_sibling_group_parent_pk")
+}
+
+model lk_cause_of_death {
+  cod_id                                                             String      @id(map: "xref_cause_of_death_reason_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  cod_category                                                       String
+  cod_reason                                                         String?
+  create_user                                                        String      @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                        String      @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                   DateTime    @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                   DateTime    @default(now()) @db.Timestamptz(6)
+  user_lk_cause_of_death_create_userTouser                           user        @relation("lk_cause_of_death_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_cause_of_death_create_user")
+  user_lk_cause_of_death_update_userTouser                           user        @relation("lk_cause_of_death_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_cause_of_death_update_user")
+  mortality_mortality_proximate_cause_of_death_idTolk_cause_of_death mortality[] @relation("mortality_proximate_cause_of_death_idTolk_cause_of_death")
+  mortality_mortality_ultimate_cause_of_death_idTolk_cause_of_death  mortality[] @relation("mortality_ultimate_cause_of_death_idTolk_cause_of_death")
+}
+
+model lk_collection_category {
+  collection_category_id                        String                           @id(map: "xref_taxon_collection_category_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  category_name                                 String                           @unique(map: "xref_taxon_collection_category_category_name_key")
+  description                                   String?
+  create_user                                   String                           @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                   String                           @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                              DateTime                         @default(now()) @db.Timestamptz(6)
+  update_timestamp                              DateTime                         @default(now()) @db.Timestamptz(6)
+  user_lk_collection_category_create_userTouser user                             @relation("lk_collection_category_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_create_user")
+  user_lk_collection_category_update_userTouser user                             @relation("lk_collection_category_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_update_user")
+  xref_collection_unit                          xref_collection_unit[]
+  xref_taxon_collection_category                xref_taxon_collection_category[]
+}
+
+model lk_colour {
+  colour_id                                      String    @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  colour                                         String
+  hex_code                                       String?
+  description                                    String?
+  create_user                                    String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                    String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                               DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp                               DateTime  @default(now()) @db.Timestamptz(6)
+  user_lk_colour_create_userTouser               user      @relation("lk_colour_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_colour_create_user")
+  user_lk_colour_update_userTouser               user      @relation("lk_colour_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_colour_update_user")
+  marking_marking_primary_colour_idTolk_colour   marking[] @relation("marking_primary_colour_idTolk_colour")
+  marking_marking_secondary_colour_idTolk_colour marking[] @relation("marking_secondary_colour_idTolk_colour")
+  marking_marking_text_colour_idTolk_colour      marking[] @relation("marking_text_colour_idTolk_colour")
+}
+
+model lk_marking_material {
+  marking_material_id                        String    @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  material                                   String?   @unique(map: "critterbase_marking_material_unq")
+  description                                String?
+  create_user                                String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                           DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp                           DateTime  @default(now()) @db.Timestamptz(6)
+  user_lk_marking_material_create_userTouser user      @relation("lk_marking_material_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_marking_material_create_user")
+  user_lk_marking_material_update_userTouser user      @relation("lk_marking_material_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_marking_material_update_user")
+  marking                                    marking[]
+}
+
+model lk_marking_type {
+  marking_type_id                        String    @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  name                                   String
+  description                            String?
+  create_user                            String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                            String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                       DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp                       DateTime  @default(now()) @db.Timestamptz(6)
+  user_lk_marking_type_create_userTouser user      @relation("lk_marking_type_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_marking_type_create_user")
+  user_lk_marking_type_update_userTouser user      @relation("lk_marking_type_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_marking_type_update_user")
+  marking                                marking[]
+}
+
+model lk_population_unit_temp {
+  population_unit_id String                   @id(map: "newtable_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  unit_name          String?
+  unit_geom          Unsupported("geometry(multipolygon, 4326)")?
+  //Index required for post_gis unsupported types
+  //https://freddydumont.com/blog/prisma-postgis
+  @@index([unit_geom], name: "unit_geom_idx", type: Gist)
+}
+
+model lk_region_env {
+  region_env_id                        String                   @id(map: "lk_region_env_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  region_env_name                      String
+  description                          String?
+  region_geom                          Unsupported("geometry(multipolygon, 4326)")?
+  create_user                          String                   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                          String                   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                     DateTime                 @default(now()) @db.Timestamptz(6)
+  update_timestamp                     DateTime                 @default(now()) @db.Timestamptz(6)
+  user_lk_region_env_create_userTouser user                     @relation("lk_region_env_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_create_user")
+  user_lk_region_env_update_userTouser user                     @relation("lk_region_env_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_update_user")
+  location                             location[]
+  @@index([region_geom], name: "region_env_geom_idx", type: Gist)
+}
+
+model lk_region_nr {
+  region_nr_id                        String                   @id(map: "lk_region_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  region_nr_name                      String
+  description                         String?
+  region_geom                         Unsupported("geometry(polygon, 4326)")?
+  create_user                         String                   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                         String                   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                    DateTime                 @default(now()) @db.Timestamptz(6)
+  update_timestamp                    DateTime                 @default(now()) @db.Timestamptz(6)
+  critter                             critter[]
+  user_lk_region_nr_create_userTouser user                     @relation("lk_region_nr_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_create_user")
+  user_lk_region_nr_update_userTouser user                     @relation("lk_region_nr_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_update_user")
+  location                            location[]
+  @@index([region_geom], name: "region_nr_geom_idx", type: Gist)
+}
+
+model lk_taxon {
+  taxon_id                                                     String                                @id(map: "taxon_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  kingdom_id                                                   String?                               @db.Uuid
+  phylum_id                                                    String?                               @db.Uuid
+  class_id                                                     String?                               @db.Uuid
+  order_id                                                     String?                               @db.Uuid
+  family_id                                                    String?                               @db.Uuid
+  genus_id                                                     String?                               @db.Uuid
+  species_id                                                   String?                               @db.Uuid
+  sub_species_id                                               String?                               @db.Uuid
+  taxon_name_common                                            String?
+  taxon_name_latin                                             String
+  spi_taxonomy_id                                              Int                                   @default(-1)
+  taxon_description                                            String?
+  create_user                                                  String                                @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                  String                                @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                             DateTime                              @default(now()) @db.Timestamptz(6)
+  update_timestamp                                             DateTime                              @default(now()) @db.Timestamptz(6)
+  critter                                                      critter[]
+  user_lk_taxon_create_userTouser                              user                                  @relation("lk_taxon_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_taxon_create_user")
+  user_lk_taxon_update_userTouser                              user                                  @relation("lk_taxon_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_taxon_update_user")
+  lk_taxon_lk_taxon_class_idTolk_taxon                         lk_taxon?                             @relation("lk_taxon_class_idTolk_taxon", fields: [class_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_class_idTolk_taxon                   lk_taxon[]                            @relation("lk_taxon_class_idTolk_taxon")
+  lk_taxon_lk_taxon_family_idTolk_taxon                        lk_taxon?                             @relation("lk_taxon_family_idTolk_taxon", fields: [family_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_family_idTolk_taxon                  lk_taxon[]                            @relation("lk_taxon_family_idTolk_taxon")
+  lk_taxon_lk_taxon_genus_idTolk_taxon                         lk_taxon?                             @relation("lk_taxon_genus_idTolk_taxon", fields: [genus_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_genus_idTolk_taxon                   lk_taxon[]                            @relation("lk_taxon_genus_idTolk_taxon")
+  lk_taxon_lk_taxon_kingdom_idTolk_taxon                       lk_taxon?                             @relation("lk_taxon_kingdom_idTolk_taxon", fields: [kingdom_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_kingdom_idTolk_taxon                 lk_taxon[]                            @relation("lk_taxon_kingdom_idTolk_taxon")
+  lk_taxon_lk_taxon_order_idTolk_taxon                         lk_taxon?                             @relation("lk_taxon_order_idTolk_taxon", fields: [order_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_order_idTolk_taxon                   lk_taxon[]                            @relation("lk_taxon_order_idTolk_taxon")
+  lk_taxon_lk_taxon_phylum_idTolk_taxon                        lk_taxon?                             @relation("lk_taxon_phylum_idTolk_taxon", fields: [phylum_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_phylum_idTolk_taxon                  lk_taxon[]                            @relation("lk_taxon_phylum_idTolk_taxon")
+  lk_taxon_lk_taxon_species_idTolk_taxon                       lk_taxon?                             @relation("lk_taxon_species_idTolk_taxon", fields: [species_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_species_idTolk_taxon                 lk_taxon[]                            @relation("lk_taxon_species_idTolk_taxon")
+  lk_taxon_lk_taxon_sub_species_idTolk_taxon                   lk_taxon?                             @relation("lk_taxon_sub_species_idTolk_taxon", fields: [sub_species_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
+  other_lk_taxon_lk_taxon_sub_species_idTolk_taxon             lk_taxon[]                            @relation("lk_taxon_sub_species_idTolk_taxon")
+  mortality_mortality_proximate_predated_by_taxon_idTolk_taxon mortality[]                           @relation("mortality_proximate_predated_by_taxon_idTolk_taxon")
+  mortality_mortality_ultimate_predated_by_taxon_idTolk_taxon  mortality[]                           @relation("mortality_ultimate_predated_by_taxon_idTolk_taxon")
+  xref_taxon_collection_category                               xref_taxon_collection_category[]
+  xref_taxon_marking_body_location                             xref_taxon_marking_body_location[]
+  xref_taxon_measurement_qualitative                           xref_taxon_measurement_qualitative[]
+  xref_taxon_measurement_quantitative                          xref_taxon_measurement_quantitative[]
+}
+
+model lk_wildlife_management_unit {
+  wmu_id                                             String                   @id(map: "pk_lk_wildlife_management_unit") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  wmu_name                                           String                   @unique(map: "lk_wildlife_management_unit_un")
+  description                                        String?
+  wmu_geom                                           Unsupported("geometry(polygon, 4326)")?
+  create_user                                        String                   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                        String                   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                   DateTime                 @default(now()) @db.Timestamptz(6)
+  update_timestamp                                   DateTime                 @default(now()) @db.Timestamptz(6)
+  user_lk_wildlife_management_unit_create_userTouser user                     @relation("lk_wildlife_management_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_create_user")
+  user_lk_wildlife_management_unit_update_userTouser user                     @relation("lk_wildlife_management_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_update_user")
+  location                                           location[]
+  @@index([wmu_geom], name: "wmu_geom_idx", type: Gist)
+}
+
+model location {
+  location_id                                   String                       @id(map: "location_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  latitude                                      Float?
+  longitude                                     Float?
+  coordinate_uncertainty                        Float?
+  coordinate_uncertainty_unit                   coordinate_uncertainty_unit?
+  wmu_id                                        String?                      @db.Uuid
+  region_nr_id                                  String?                      @db.Uuid
+  region_env_id                                 String?                      @db.Uuid
+  elevation                                     Float?
+  temperature                                   Float?
+  location_comment                              String?
+  create_user                                   String                       @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                   String                       @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                              DateTime                     @default(now()) @db.Timestamptz(6)
+  update_timestamp                              DateTime                     @default(now()) @db.Timestamptz(6)
+  capture_capture_capture_location_idTolocation capture[]                    @relation("capture_capture_location_idTolocation")
+  capture_capture_release_location_idTolocation capture[]                    @relation("capture_release_location_idTolocation")
+  user_location_create_userTouser               user                         @relation("location_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_create_user")
+  user_location_update_userTouser               user                         @relation("location_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_update_user")
+  lk_wildlife_management_unit                   lk_wildlife_management_unit? @relation(fields: [wmu_id], references: [wmu_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_wmu_id_user")
+  lk_region_env                                 lk_region_env?               @relation(fields: [region_env_id], references: [region_env_id], onDelete: NoAction, onUpdate: NoAction, map: "location_env_fk")
+  lk_region_nr                                  lk_region_nr?                @relation(fields: [region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "location_nrr_fk")
+  mortality                                     mortality[]
+}
+
+model marking {
+  marking_id                                       String                           @id(map: "marking_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                       String                           @db.Uuid
+  capture_id                                       String?                          @db.Uuid
+  mortality_id                                     String?                          @db.Uuid
+  taxon_marking_body_location_id                   String                           @db.Uuid
+  marking_type_id                                  String?                          @db.Uuid
+  marking_material_id                              String?                          @db.Uuid
+  primary_colour_id                                String?                          @db.Uuid
+  secondary_colour_id                              String?                          @db.Uuid
+  text_colour_id                                   String?                          @db.Uuid
+  identifier                                       String?
+  frequency                                        Float?
+  frequency_unit                                   frequency_unit?
+  order                                            Int?
+  comment                                          String?
+  attached_timestamp                               DateTime                         @default(now()) @db.Timestamptz(6)
+  removed_timestamp                                DateTime?                        @db.Timestamptz(6)
+  create_user                                      String                           @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                      String                           @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                 DateTime                         @default(now()) @db.Timestamptz(6)
+  update_timestamp                                 DateTime                         @default(now()) @db.Timestamptz(6)
+  user_marking_create_userTouser                   user                             @relation("marking_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_marking_create_user")
+  user_marking_update_userTouser                   user                             @relation("marking_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_marking_update_user")
+  critter                                          critter                          @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  lk_marking_material                              lk_marking_material?             @relation(fields: [marking_material_id], references: [marking_material_id], onDelete: NoAction, onUpdate: NoAction)
+  lk_marking_type                                  lk_marking_type?                 @relation(fields: [marking_type_id], references: [marking_type_id], onDelete: NoAction, onUpdate: NoAction)
+  lk_colour_marking_primary_colour_idTolk_colour   lk_colour?                       @relation("marking_primary_colour_idTolk_colour", fields: [primary_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
+  lk_colour_marking_secondary_colour_idTolk_colour lk_colour?                       @relation("marking_secondary_colour_idTolk_colour", fields: [secondary_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
+  xref_taxon_marking_body_location                 xref_taxon_marking_body_location @relation(fields: [taxon_marking_body_location_id], references: [taxon_marking_body_location_id], onDelete: NoAction, onUpdate: NoAction, map: "marking_taxon_marking_location_id_fkey")
+  lk_colour_marking_text_colour_idTolk_colour      lk_colour?                       @relation("marking_text_colour_idTolk_colour", fields: [text_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model measurement_qualitative {
+  measurement_qualitative_id                                         String                                    @id(map: "critter_measurement_qualitative_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                                         String                                    @db.Uuid
+  taxon_measurement_id                                               String                                    @db.Uuid
+  capture_id                                                         String?                                   @db.Uuid
+  mortality_id                                                       String?                                   @db.Uuid
+  qualitative_option_id                                              String                                    @db.Uuid
+  measurement_comment                                                String?
+  measured_timestamp                                                 DateTime?                                 @db.Timestamptz(6)
+  create_user                                                        String                                    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                        String                                    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                   DateTime                                  @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                   DateTime                                  @default(now()) @db.Timestamptz(6)
+  artifact_artifact_measurement_qualitativeTomeasurement_qualitative artifact[]                                @relation("artifact_measurement_qualitativeTomeasurement_qualitative")
+  xref_taxon_measurement_qualitative_option                          xref_taxon_measurement_qualitative_option @relation(fields: [qualitative_option_id, taxon_measurement_id], references: [qualitative_option_id, taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_measurement_qualitative_fk")
+  user_measurement_qualitative_create_userTouser                     user                                      @relation("measurement_qualitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_measurement_qualitative_create_user")
+  user_measurement_qualitative_update_userTouser                     user                                      @relation("measurement_qualitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_measurement_qualitative_update_user")
+  critter                                                            critter                                   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_qualitative_fk")
+}
+
+model measurement_quantitative {
+  measurement_quantitative_id                                          String                              @id(map: "critter_measurement_empirical_tax_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                                           String                              @db.Uuid
+  taxon_measurement_id                                                 String                              @db.Uuid
+  capture_id                                                           String?                             @db.Uuid
+  mortality_id                                                         String?                             @db.Uuid
+  value                                                                Float
+  measurement_comment                                                  String?
+  measured_timestamp                                                   DateTime?                           @db.Timestamptz(6)
+  create_user                                                          String                              @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                          String                              @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                     DateTime                            @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                     DateTime                            @default(now()) @db.Timestamptz(6)
+  artifact_artifact_measurement_quantitativeTomeasurement_quantitative artifact[]                          @relation("artifact_measurement_quantitativeTomeasurement_quantitative")
+  critter                                                              critter                             @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_empirical_critter_fk")
+  xref_taxon_measurement_quantitative                                  xref_taxon_measurement_quantitative @relation(fields: [taxon_measurement_id], references: [taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_empirical_tax_fk")
+}
+
+model mortality {
+  mortality_id                                                               String             @id(map: "mortality_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                                                                 String             @db.Uuid
+  location_id                                                                String?            @db.Uuid
+  mortality_timestamp                                                        DateTime           @db.Timestamptz(6)
+  proximate_cause_of_death_id                                                String             @db.Uuid
+  proximate_cause_of_death_confidence                                        cod_confidence?
+  proximate_predated_by_taxon_id                                             String?            @db.Uuid
+  ultimate_cause_of_death_id                                                 String?            @db.Uuid
+  ultimate_cause_of_death_confidence                                         cod_confidence?
+  ultimate_predated_by_taxon_id                                              String?            @db.Uuid
+  mortality_comment                                                          String?
+  create_user                                                                String             @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                                String             @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                           DateTime           @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                           DateTime           @default(now()) @db.Timestamptz(6)
+  user_mortality_create_userTouser                                           user               @relation("mortality_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mortality_create_user")
+  user_mortality_update_userTouser                                           user               @relation("mortality_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mortality_update_user")
+  critter                                                                    critter            @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_fk")
+  location                                                                   location?          @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_location_fk")
+  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death lk_cause_of_death  @relation("mortality_proximate_cause_of_death_idTolk_cause_of_death", fields: [proximate_cause_of_death_id], references: [cod_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_pcod_fk")
+  lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon                lk_taxon?          @relation("mortality_proximate_predated_by_taxon_idTolk_taxon", fields: [proximate_predated_by_taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_pcod_taxon_fk")
+  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death  lk_cause_of_death? @relation("mortality_ultimate_cause_of_death_idTolk_cause_of_death", fields: [ultimate_cause_of_death_id], references: [cod_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_ucod_fk")
+  lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon                 lk_taxon?          @relation("mortality_ultimate_predated_by_taxon_idTolk_taxon", fields: [ultimate_predated_by_taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_ucod_taxon_fk")
+}
+
+model relationship {
+  relationship_id                          String   @id(map: "relationship_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                               String   @db.Uuid
+  parent_id                                String?  @db.Uuid
+  child_id                                 String?  @db.Uuid
+  sibling_id                               String?  @db.Uuid
+  create_user                              String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                              String   @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                         DateTime @default(now()) @db.Timestamptz(6)
+  update_timestamp                         DateTime @default(now()) @db.Timestamptz(6)
+  critter_relationship_child_idTocritter   critter? @relation("relationship_child_idTocritter", fields: [child_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  user_relationship_create_userTouser      user     @relation("relationship_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  critter_relationship_critter_idTocritter critter  @relation("relationship_critter_idTocritter", fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  critter_relationship_parent_idTocritter  critter? @relation("relationship_parent_idTocritter", fields: [parent_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  critter_relationship_sibling_idTocritter critter? @relation("relationship_sibling_idTocritter", fields: [sibling_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  user_relationship_update_userTouser      user     @relation("relationship_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([critter_id, child_id])
+  @@unique([critter_id, parent_id])
+  @@unique([critter_id, sibling_id])
+}
+
+model user {
+  user_id                                                                                               String                                      @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  system_user_id                                                                                        String                                      @unique(map: "critterbase_user_system_user_id_unq")
+  system_name                                                                                           String
+  keycloak_uuid                                                                                         String?                                     @db.Uuid
+  create_user                                                                                           String                                      @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                                                           String                                      @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                                                      DateTime                                    @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                                                      DateTime                                    @default(now()) @db.Timestamptz(6)
+  artifact_artifact_create_userTouser                                                                   artifact[]                                  @relation("artifact_create_userTouser")
+  artifact_artifact_update_userTouser                                                                   artifact[]                                  @relation("artifact_update_userTouser")
+  audit_log_audit_log_create_userTouser                                                                 audit_log[]                                 @relation("audit_log_create_userTouser")
+  audit_log_audit_log_update_userTouser                                                                 audit_log[]                                 @relation("audit_log_update_userTouser")
+  capture_capture_create_userTouser                                                                     capture[]                                   @relation("capture_create_userTouser")
+  capture_capture_update_userTouser                                                                     capture[]                                   @relation("capture_update_userTouser")
+  critter_critter_create_userTouser                                                                     critter[]                                   @relation("critter_create_userTouser")
+  critter_critter_update_userTouser                                                                     critter[]                                   @relation("critter_update_userTouser")
+  critter_collection_unit_critter_collection_unit_create_userTouser                                     critter_collection_unit[]                   @relation("critter_collection_unit_create_userTouser")
+  critter_collection_unit_critter_collection_unit_update_userTouser                                     critter_collection_unit[]                   @relation("critter_collection_unit_update_userTouser")
+  lk_cause_of_death_lk_cause_of_death_create_userTouser                                                 lk_cause_of_death[]                         @relation("lk_cause_of_death_create_userTouser")
+  lk_cause_of_death_lk_cause_of_death_update_userTouser                                                 lk_cause_of_death[]                         @relation("lk_cause_of_death_update_userTouser")
+  lk_collection_category_lk_collection_category_create_userTouser                                       lk_collection_category[]                    @relation("lk_collection_category_create_userTouser")
+  lk_collection_category_lk_collection_category_update_userTouser                                       lk_collection_category[]                    @relation("lk_collection_category_update_userTouser")
+  lk_colour_lk_colour_create_userTouser                                                                 lk_colour[]                                 @relation("lk_colour_create_userTouser")
+  lk_colour_lk_colour_update_userTouser                                                                 lk_colour[]                                 @relation("lk_colour_update_userTouser")
+  lk_marking_material_lk_marking_material_create_userTouser                                             lk_marking_material[]                       @relation("lk_marking_material_create_userTouser")
+  lk_marking_material_lk_marking_material_update_userTouser                                             lk_marking_material[]                       @relation("lk_marking_material_update_userTouser")
+  lk_marking_type_lk_marking_type_create_userTouser                                                     lk_marking_type[]                           @relation("lk_marking_type_create_userTouser")
+  lk_marking_type_lk_marking_type_update_userTouser                                                     lk_marking_type[]                           @relation("lk_marking_type_update_userTouser")
+  lk_region_env_lk_region_env_create_userTouser                                                         lk_region_env[]                             @relation("lk_region_env_create_userTouser")
+  lk_region_env_lk_region_env_update_userTouser                                                         lk_region_env[]                             @relation("lk_region_env_update_userTouser")
+  lk_region_nr_lk_region_nr_create_userTouser                                                           lk_region_nr[]                              @relation("lk_region_nr_create_userTouser")
+  lk_region_nr_lk_region_nr_update_userTouser                                                           lk_region_nr[]                              @relation("lk_region_nr_update_userTouser")
+  lk_taxon_lk_taxon_create_userTouser                                                                   lk_taxon[]                                  @relation("lk_taxon_create_userTouser")
+  lk_taxon_lk_taxon_update_userTouser                                                                   lk_taxon[]                                  @relation("lk_taxon_update_userTouser")
+  lk_wildlife_management_unit_lk_wildlife_management_unit_create_userTouser                             lk_wildlife_management_unit[]               @relation("lk_wildlife_management_unit_create_userTouser")
+  lk_wildlife_management_unit_lk_wildlife_management_unit_update_userTouser                             lk_wildlife_management_unit[]               @relation("lk_wildlife_management_unit_update_userTouser")
+  location_location_create_userTouser                                                                   location[]                                  @relation("location_create_userTouser")
+  location_location_update_userTouser                                                                   location[]                                  @relation("location_update_userTouser")
+  marking_marking_create_userTouser                                                                     marking[]                                   @relation("marking_create_userTouser")
+  marking_marking_update_userTouser                                                                     marking[]                                   @relation("marking_update_userTouser")
+  measurement_qualitative_measurement_qualitative_create_userTouser                                     measurement_qualitative[]                   @relation("measurement_qualitative_create_userTouser")
+  measurement_qualitative_measurement_qualitative_update_userTouser                                     measurement_qualitative[]                   @relation("measurement_qualitative_update_userTouser")
+  mortality_mortality_create_userTouser                                                                 mortality[]                                 @relation("mortality_create_userTouser")
+  mortality_mortality_update_userTouser                                                                 mortality[]                                 @relation("mortality_update_userTouser")
+  relationship_relationship_create_userTouser                                                           relationship[]                              @relation("relationship_create_userTouser")
+  relationship_relationship_update_userTouser                                                           relationship[]                              @relation("relationship_update_userTouser")
+  user_user_create_userTouser                                                                           user                                        @relation("user_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_create_user")
+  other_user_user_create_userTouser                                                                     user[]                                      @relation("user_create_userTouser")
+  user_user_update_userTouser                                                                           user                                        @relation("user_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_update_user")
+  other_user_user_update_userTouser                                                                     user[]                                      @relation("user_update_userTouser")
+  xref_collection_unit_xref_collection_unit_create_userTouser                                           xref_collection_unit[]                      @relation("xref_collection_unit_create_userTouser")
+  xref_collection_unit_xref_collection_unit_update_userTouser                                           xref_collection_unit[]                      @relation("xref_collection_unit_update_userTouser")
+  xref_taxon_marking_body_location_xref_taxon_marking_body_location_create_userTouser                   xref_taxon_marking_body_location[]          @relation("xref_taxon_marking_body_location_create_userTouser")
+  xref_taxon_marking_body_location_xref_taxon_marking_body_location_update_userTouser                   xref_taxon_marking_body_location[]          @relation("xref_taxon_marking_body_location_update_userTouser")
+  xref_taxon_measurement_qualitative_xref_taxon_measurement_qualitative_create_userTouser               xref_taxon_measurement_qualitative[]        @relation("xref_taxon_measurement_qualitative_create_userTouser")
+  xref_taxon_measurement_qualitative_xref_taxon_measurement_qualitative_update_userTouser               xref_taxon_measurement_qualitative[]        @relation("xref_taxon_measurement_qualitative_update_userTouser")
+  xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_create_userTouser xref_taxon_measurement_qualitative_option[] @relation("xref_taxon_measurement_qualitative_option_create_userTouser")
+  xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser xref_taxon_measurement_qualitative_option[] @relation("xref_taxon_measurement_qualitative_option_update_userTouser")
+  xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_create_userTouser")
+  xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_update_userTouser")
+}
+
+model xref_collection_unit {
+  collection_unit_id                          String                    @id(map: "xref_species_collection_unit_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  collection_category_id                      String                    @db.Uuid
+  unit_name                                   String
+  description                                 String?
+  create_user                                 String                    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                 String                    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                            DateTime                  @default(now()) @db.Timestamptz(6)
+  update_timestamp                            DateTime                  @default(now()) @db.Timestamptz(6)
+  critter_collection_unit                     critter_collection_unit[]
+  lk_collection_category                      lk_collection_category    @relation(fields: [collection_category_id], references: [collection_category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_collection_unit_category")
+  user_xref_collection_unit_create_userTouser user                      @relation("xref_collection_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_collection_unit_create_user")
+  user_xref_collection_unit_update_userTouser user                      @relation("xref_collection_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_collection_unit_update_user")
+}
+
+model xref_taxon_collection_category {
+  collection_category_id String                 @db.Uuid
+  taxon_id               String                 @db.Uuid
+  create_user            String                 @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user            String                 @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp       DateTime               @default(now()) @db.Timestamptz(6)
+  update_timestamp       String                 @default(dbgenerated("now()")) @db.VarChar
+  lk_collection_category lk_collection_category @relation(fields: [collection_category_id], references: [collection_category_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_collection_category_category_fk")
+  lk_taxon               lk_taxon               @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_collection_category_taxon_fk")
+
+  @@id([collection_category_id, taxon_id], map: "xref_taxon_collection_category_pk")
+}
+
+model xref_taxon_marking_body_location {
+  taxon_marking_body_location_id                          String    @id(map: "xref_species_marking_location_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  taxon_id                                                String    @db.Uuid
+  body_location                                           String
+  description                                             String?
+  create_user                                             String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                             String    @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                        DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp                                        DateTime  @default(now()) @db.Timestamptz(6)
+  marking                                                 marking[]
+  user_xref_taxon_marking_body_location_create_userTouser user      @relation("xref_taxon_marking_body_location_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_marking_location_create_user")
+  user_xref_taxon_marking_body_location_update_userTouser user      @relation("xref_taxon_marking_body_location_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_marking_location_update_user")
+  lk_taxon                                                lk_taxon  @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_marking_location_taxon_id_fkey")
+
+  @@unique([taxon_id, body_location], map: "xref_species_marking_location_un")
+}
+
+model xref_taxon_measurement_qualitative {
+  taxon_measurement_id                                      String                                      @id(map: "taxon_measurement_qualitative_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  taxon_id                                                  String                                      @db.Uuid
+  measurement_name                                          String                                      @db.VarChar
+  measurement_desc                                          String?                                     @db.VarChar
+  create_user                                               String                                      @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                               String                                      @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
+  update_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
+  user_xref_taxon_measurement_qualitative_create_userTouser user                                        @relation("xref_taxon_measurement_qualitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_create_user")
+  lk_taxon                                                  lk_taxon                                    @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_taxon")
+  user_xref_taxon_measurement_qualitative_update_userTouser user                                        @relation("xref_taxon_measurement_qualitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_update_user")
+  xref_taxon_measurement_qualitative_option                 xref_taxon_measurement_qualitative_option[]
+}
+
+model xref_taxon_measurement_qualitative_option {
+  qualitative_option_id                                            String                             @id(map: "qualitative_option_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  taxon_measurement_id                                             String                             @db.Uuid
+  option_label                                                     String?
+  option_value                                                     Int
+  option_desc                                                      String?                            @db.VarChar
+  create_user                                                      String                             @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                      String                             @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                                 DateTime                           @default(now()) @db.Timestamptz(6)
+  update_timestamp                                                 DateTime                           @default(now()) @db.Timestamptz(6)
+  measurement_qualitative                                          measurement_qualitative[]
+  user_xref_taxon_measurement_qualitative_option_create_userTouser user                               @relation("xref_taxon_measurement_qualitative_option_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_option_create_user")
+  user_xref_taxon_measurement_qualitative_option_update_userTouser user                               @relation("xref_taxon_measurement_qualitative_option_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_option_update_user")
+  xref_taxon_measurement_qualitative                               xref_taxon_measurement_qualitative @relation(fields: [taxon_measurement_id], references: [taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "qualitative_option_fk")
+
+  @@unique([qualitative_option_id, taxon_measurement_id], map: "qualitative_option_un")
+}
+
+model xref_taxon_measurement_quantitative {
+  taxon_measurement_id                                       String                     @id(map: "taxon_measurement_empirical_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  taxon_id                                                   String                     @db.Uuid
+  measurement_name                                           String
+  measurement_desc                                           String?
+  min_value                                                  Float?                     @default(0)
+  max_value                                                  Float?
+  unit                                                       measurement_unit?
+  create_user                                                String                     @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                                String                     @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                           DateTime                   @default(now()) @db.Timestamptz(6)
+  update_timestamp                                           DateTime                   @default(now()) @db.Timestamptz(6)
+  measurement_quantitative                                   measurement_quantitative[]
+  user_xref_taxon_measurement_quantitative_create_userTouser user                       @relation("xref_taxon_measurement_quantitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_create_user")
+  user_xref_taxon_measurement_quantitative_update_userTouser user                       @relation("xref_taxon_measurement_quantitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_update_user")
+  lk_taxon                                                   lk_taxon                   @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "taxon_measurement_empirical_fk")
+}
+
+enum cod_confidence {
+  Probable
+  Definite
+}
+
+enum coordinate_uncertainty_unit {
+  m
+}
+
+enum frequency_unit {
+  Hz
+  KHz
+  MHz
+}
+
+enum measurement_unit {
+  millimeter
+  centimeter
+  meter
+  milligram
+  gram
+  kilogram
+}
+
+enum sex {
+  Male
+  Female
+  Unknown
+  Hermaphroditic
 }
