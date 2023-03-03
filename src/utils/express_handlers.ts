@@ -69,4 +69,10 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   ]);
 };
 
-export { errorLogger, errorHandler, catchErrors, home };
+const stripAuditFields = (req: Request, res: Response, next: NextFunction) => {
+  console.log("called");
+  console.log(res);
+  next();
+};
+
+export { errorLogger, errorHandler, catchErrors, home, stripAuditFields };

@@ -74,7 +74,6 @@ model critter {
   update_user                                   String                     @default(dbgenerated("critterbase.getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                              DateTime                   @default(now()) @db.Timestamptz(6)
   update_timestamp                              DateTime                   @default(now()) @db.Timestamptz(6)
-  previous_version_id                           String?                    @db.Uuid
   critter_comment                               String?
   artifact                                      artifact[]
   capture                                       capture[]
