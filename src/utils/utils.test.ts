@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { Server, IncomingMessage, ServerResponse } from "http";
 import { reset } from "nodemon";
+import supertest from "supertest";
 import { app } from "../server";
-import { request } from "./constants";
 import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
 import { apiError } from "./types";
+export const request = supertest(app);
 
 let mockError = {} as apiError;
 let mockRequest = {} as Request;

@@ -1,4 +1,3 @@
-import supertest from "supertest";
 import { app } from "../server";
 import { PrismaClient } from "@prisma/client";
 
@@ -10,8 +9,6 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 const IS_TEST = process.env.NODE_ENV === "test";
 
-const request = supertest(app);
-
 const prisma = new PrismaClient();
 
-export { PORT, IS_DEV, IS_PROD, IS_TEST, request, prisma };
+export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma };
