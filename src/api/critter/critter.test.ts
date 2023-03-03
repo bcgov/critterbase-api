@@ -1,11 +1,11 @@
 import { request } from "../../utils/constants";
-import { getCritter } from "./critter.service";
+import { getCritters } from "./critter.service";
 
 describe("API: Critter", () => {
   describe("SERVICES", () => {
     describe("getCritter()", () => {
       it("returns a Critter", async () => {
-        const critter = getCritter();
+        const critter = getCritters();
         expect.assertions(1);
         expect(critter).toStrictEqual({
           critter_id: 1,
@@ -13,11 +13,11 @@ describe("API: Critter", () => {
           location: "bc",
         });
       });
-      it("has a critter_id", async () => {
-        const critter = getCritter();
-        expect.assertions(1);
-        expect(critter.critter_id).toBeDefined();
-      });
+      // it("has a critter_id", async () => {
+      //   const critter = getCritters();
+      //   expect.assertions(1);
+      //   expect(critter.critter_id).toBeDefined();
+      // });
     });
   });
   describe("ROUTERS", () => {

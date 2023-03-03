@@ -4,6 +4,8 @@
   "description": "Critterbase API",
   "main": "./src/server.ts",
   "scripts": {
+    "start": "npx pm2@4.4.0 --no-daemon start dist/src/server.js",
+    "build": "rimraf ./dist && tsc",
     "test": "jest --forceExit",
     "start:dev": "nodemon -r dotenv/config ./src/server.ts"
   },

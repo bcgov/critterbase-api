@@ -4,9 +4,9 @@ import { reset } from "nodemon";
 import { app } from "../server";
 import { request } from "./constants";
 import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
-import { cError } from "./global_types";
+import { apiError } from "./types";
 
-let mockError = {} as Error | cError;
+let mockError = {} as apiError;
 let mockRequest = {} as Request;
 let mockNext: NextFunction = jest.fn();
 const mockResponse = {
@@ -47,7 +47,7 @@ describe("Utils", () => {
 
     describe("errorHandler()", () => {
       it("Error with message returns status 400 and json", () => {
-        errorHandler(new Error("test"), mockRequest, mockResponse, mockNext);
+        errorHandler(new apiError("test"), mockRequest, mockResponse, mockNext);
         expect(mockResponse.json).toBeCalledWith({
           error: "test",
         });
@@ -55,7 +55,7 @@ describe("Utils", () => {
       });
 
       it("Error without message returns status 400 and default message", () => {
-        errorHandler(new Error(undefined), mockRequest, mockResponse, mockNext);
+        errorHandler(new apiError("test"), mockRequest, mockResponse, mockNext);
         expect(mockResponse.json).toBeCalledWith({
           error: "Unknown error occurred",
         });
@@ -64,7 +64,7 @@ describe("Utils", () => {
 
       it("cError returns error status and json", () => {
         errorHandler(
-          new cError("cError", 555),
+          new apiError("apiError", 555),
           mockRequest,
           mockResponse,
           mockNext
@@ -74,13 +74,18 @@ describe("Utils", () => {
       });
 
       it("when cError with no status, returns 400 and json", () => {
-        errorHandler(new cError("cError"), mockRequest, mockResponse, mockNext);
+        errorHandler(
+          new apiError("apiError"),
+          mockRequest,
+          mockResponse,
+          mockNext
+        );
         expect(mockResponse.json);
         expect(mockResponse.status).toBeCalledWith(400);
       });
 
       it("when cError.toString() formats correctly", () => {
-        const e = new cError("Testing cError", 999);
+        const e = new apiError("Testing cError", 999);
         expect(e.toString()).toEqual("error: Testing cError status: 999");
       });
     });
