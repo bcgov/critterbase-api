@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
-import { cError } from "./global_types";
+import { apiError } from "./types";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -19,7 +19,7 @@ const catchErrors =
  * @params All four express params.
  */
 const errorLogger = (
-  err: Error | cError,
+  err: apiError,
   req: Request,
   res: Response,
   next: NextFunction
@@ -33,18 +33,19 @@ const errorLogger = (
  * @params All four express params.
  */
 const errorHandler = (
-  err: Error | cError,
+  err: apiError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if (err instanceof cError) {
+  if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
-  } else {
-    return res
-      .status(400)
-      .json({ error: err.message || "Unknown error occurred" });
   }
+  // else {
+  //   return res
+  //     .status(400)
+  //     .json({ error: err.message || "Unknown error occurred" });
+  // }
 };
 
 /**
