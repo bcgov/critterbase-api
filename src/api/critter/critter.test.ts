@@ -1,4 +1,4 @@
-import { request } from "../../utils/constants";
+import { request } from "../../utils/utils.test";
 import { getCritters } from "./critter.service";
 
 describe("API: Critter", () => {
