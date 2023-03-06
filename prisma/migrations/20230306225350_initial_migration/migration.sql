@@ -1,28 +1,9 @@
 CREATE SCHEMA IF NOT EXISTS "crypto";
-CREATE SCHEMA IF NOT EXISTS "public";
 -- CreateExtension
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "crypto";
--- This might cause issues
--- SET search_path TO "public";
 
 -- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "postgis";
-
-
--- CreateEnum
-CREATE TYPE critterbase."cod_confidence" AS ENUM ('Probable', 'Definite');
-
--- CreateEnum
-CREATE TYPE critterbase."coordinate_uncertainty_unit" AS ENUM ('m');
-
--- CreateEnum
-CREATE TYPE critterbase."frequency_unit" AS ENUM ('Hz', 'KHz', 'MHz');
-
--- CreateEnum
-CREATE TYPE critterbase."measurement_unit" AS ENUM ('millimeter', 'centimeter', 'meter', 'milligram', 'gram', 'kilogram');
-
--- CreateEnum
-CREATE TYPE critterbase."sex" AS ENUM ('Male', 'Female', 'Unknown', 'Hermaphroditic');
+CREATE EXTENSION IF NOT EXISTS "postgis" WITH SCHEMA "public";
 
 CREATE OR REPLACE FUNCTION critterbase.api_get_context_user_id()
  RETURNS uuid
@@ -233,48 +214,6 @@ $function$
 ALTER FUNCTION critterbase.get_table_primary_key(text) OWNER TO critterbase;
 GRANT ALL ON FUNCTION critterbase.get_table_primary_key(text) TO critterbase;
 
-CREATE OR REPLACE FUNCTION critterbase.get_taxon_ids(t_id uuid)
- RETURNS uuid[]
- LANGUAGE plpgsql
-AS $function$
--- *******************************************************************
--- Procedure: get_taxon_ids
--- Purpose: retrieves the entire taxonomic hierarchy above this 
--- taxon rank UUID, excludes NULL's
---
--- MODIFICATION HISTORY
--- Person           Date        Comments
--- ---------------- ----------- --------------------------------------
--- mac.deluca@quartech.com
---                  2023-02-02  initial release
--- *******************************************************************
-	DECLARE
-	
-	ids uuid[] := (SELECT array_remove(ARRAY [
-		taxon_id,
-		kingdom_id,
-		phylum_id,
-		class_id,
-		order_id,
-		family_id,
-		genus_id,
-		species_id,
-		sub_species_id], NULL)
-		FROM lk_taxon
-		WHERE taxon_id = t_id);
-
-
-	BEGIN
-		RETURN ids;
-	END;
-$function$
-;
-
--- Permissions
-
-ALTER FUNCTION critterbase.get_taxon_ids(uuid) OWNER TO critterbase;
-GRANT ALL ON FUNCTION critterbase.get_taxon_ids(uuid) TO critterbase;
-
 CREATE OR REPLACE FUNCTION critterbase.get_taxon_ids(t_id text)
  RETURNS uuid[]
  LANGUAGE plpgsql
@@ -318,12 +257,54 @@ $function$
 ALTER FUNCTION critterbase.get_taxon_ids(text) OWNER TO critterbase;
 GRANT ALL ON FUNCTION critterbase.get_taxon_ids(text) TO critterbase;
 
+CREATE OR REPLACE FUNCTION critterbase.get_taxon_ids(t_id uuid)
+ RETURNS uuid[]
+ LANGUAGE plpgsql
+AS $function$
+-- *******************************************************************
+-- Procedure: get_taxon_ids
+-- Purpose: retrieves the entire taxonomic hierarchy above this 
+-- taxon rank UUID, excludes NULL's
+--
+-- MODIFICATION HISTORY
+-- Person           Date        Comments
+-- ---------------- ----------- --------------------------------------
+-- mac.deluca@quartech.com
+--                  2023-02-02  initial release
+-- *******************************************************************
+	DECLARE
+	
+	ids uuid[] := (SELECT array_remove(ARRAY [
+		taxon_id,
+		kingdom_id,
+		phylum_id,
+		class_id,
+		order_id,
+		family_id,
+		genus_id,
+		species_id,
+		sub_species_id], NULL)
+		FROM lk_taxon
+		WHERE taxon_id = t_id);
+
+
+	BEGIN
+		RETURN ids;
+	END;
+$function$
+;
+
+-- Permissions
+
+ALTER FUNCTION critterbase.get_taxon_ids(uuid) OWNER TO critterbase;
+GRANT ALL ON FUNCTION critterbase.get_taxon_ids(uuid) TO critterbase;
+
 CREATE OR REPLACE FUNCTION critterbase.getuserid(sys_user_id text)
  RETURNS uuid
  LANGUAGE plpgsql
 AS $function$
 -- *******************************************************************
--- Procedure: critterbase.getuserid
+-- Procedure: getuserid
 -- Purpose: retrieves the internal UUID for this system based off an
 -- external user id string 
 --
@@ -799,6 +780,21 @@ ALTER FUNCTION critterbase.trg_xref_taxon_collection_unit_upsert() OWNER TO crit
 GRANT ALL ON FUNCTION critterbase.trg_xref_taxon_collection_unit_upsert() TO critterbase;
 
 
+-- CreateEnum
+CREATE TYPE "cod_confidence" AS ENUM ('Probable', 'Definite');
+
+-- CreateEnum
+CREATE TYPE "coordinate_uncertainty_unit" AS ENUM ('m');
+
+-- CreateEnum
+CREATE TYPE "frequency_unit" AS ENUM ('Hz', 'KHz', 'MHz');
+
+-- CreateEnum
+CREATE TYPE "measurement_unit" AS ENUM ('millimeter', 'centimeter', 'meter', 'milligram', 'gram', 'kilogram');
+
+-- CreateEnum
+CREATE TYPE "sex" AS ENUM ('Male', 'Female', 'Unknown', 'Hermaphroditic');
+
 -- CreateTable
 CREATE TABLE "artifact" (
     "artifact_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
@@ -809,8 +805,8 @@ CREATE TABLE "artifact" (
     "mortality_id" UUID,
     "measurement_qualitative" UUID,
     "measurement_quantitative" UUID,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -824,8 +820,8 @@ CREATE TABLE "audit_log" (
     "operation" TEXT NOT NULL,
     "before_value" JSONB,
     "after_value" JSONB,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -842,8 +838,8 @@ CREATE TABLE "capture" (
     "release_timestamp" TIMESTAMPTZ(6),
     "capture_comment" TEXT,
     "release_comment" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -857,12 +853,11 @@ CREATE TABLE "critter" (
     "wlh_id" TEXT,
     "animal_id" TEXT,
     "sex" "sex" NOT NULL,
-    "responsible_region_nr_id" UUID DEFAULT critterbase.get_nr_region_id('Unknown'::text),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "responsible_region_nr_id" UUID DEFAULT get_nr_region_id('Unknown'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "previous_version_id" UUID,
     "critter_comment" TEXT,
 
     CONSTRAINT "critter_real_pk" PRIMARY KEY ("critter_id")
@@ -873,8 +868,8 @@ CREATE TABLE "critter_collection_unit" (
     "critter_collection_unit_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "critter_id" UUID NOT NULL,
     "collection_unit_id" UUID NOT NULL,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -885,8 +880,8 @@ CREATE TABLE "critter_collection_unit" (
 CREATE TABLE "family" (
     "family_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "family_label" TEXT NOT NULL,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -897,8 +892,8 @@ CREATE TABLE "family" (
 CREATE TABLE "family_child" (
     "family_id" UUID NOT NULL,
     "child_critter_id" UUID NOT NULL,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -909,8 +904,8 @@ CREATE TABLE "family_child" (
 CREATE TABLE "family_parent" (
     "family_id" UUID NOT NULL,
     "parent_critter_id" UUID NOT NULL,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -922,8 +917,8 @@ CREATE TABLE "lk_cause_of_death" (
     "cod_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "cod_category" TEXT NOT NULL,
     "cod_reason" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -935,8 +930,8 @@ CREATE TABLE "lk_collection_category" (
     "collection_category_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "category_name" TEXT NOT NULL,
     "description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -949,8 +944,8 @@ CREATE TABLE "lk_colour" (
     "colour" TEXT NOT NULL,
     "hex_code" TEXT,
     "description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -962,8 +957,8 @@ CREATE TABLE "lk_marking_material" (
     "marking_material_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "material" TEXT,
     "description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -975,8 +970,8 @@ CREATE TABLE "lk_marking_type" (
     "marking_type_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -987,7 +982,7 @@ CREATE TABLE "lk_marking_type" (
 CREATE TABLE "lk_population_unit_temp" (
     "population_unit_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "unit_name" TEXT,
-    "unit_geom" geometry(multipolygon, 4326),
+    "unit_geom" public.geometry(multipolygon, 4326),
 
     CONSTRAINT "newtable_pk" PRIMARY KEY ("population_unit_id")
 );
@@ -997,9 +992,9 @@ CREATE TABLE "lk_region_env" (
     "region_env_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "region_env_name" TEXT NOT NULL,
     "description" TEXT,
-    "region_geom" geometry(multipolygon, 4326),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "region_geom" public.geometry(multipolygon, 4326),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1011,9 +1006,9 @@ CREATE TABLE "lk_region_nr" (
     "region_nr_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "region_nr_name" TEXT NOT NULL,
     "description" TEXT,
-    "region_geom" geometry(polygon, 4326),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "region_geom" public.geometry(polygon, 4326),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1035,8 +1030,8 @@ CREATE TABLE "lk_taxon" (
     "taxon_name_latin" TEXT NOT NULL,
     "spi_taxonomy_id" INTEGER NOT NULL DEFAULT -1,
     "taxon_description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1048,9 +1043,9 @@ CREATE TABLE "lk_wildlife_management_unit" (
     "wmu_id" UUID NOT NULL DEFAULT crypto.gen_random_uuid(),
     "wmu_name" TEXT NOT NULL,
     "description" TEXT,
-    "wmu_geom" geometry(polygon, 4326),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "wmu_geom" public.geometry(polygon, 4326),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1070,8 +1065,8 @@ CREATE TABLE "location" (
     "elevation" DOUBLE PRECISION,
     "temperature" DOUBLE PRECISION,
     "location_comment" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1097,8 +1092,8 @@ CREATE TABLE "marking" (
     "comment" TEXT,
     "attached_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "removed_timestamp" TIMESTAMPTZ(6),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1115,8 +1110,8 @@ CREATE TABLE "measurement_qualitative" (
     "qualitative_option_id" UUID NOT NULL,
     "measurement_comment" TEXT,
     "measured_timestamp" TIMESTAMPTZ(6),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1133,8 +1128,8 @@ CREATE TABLE "measurement_quantitative" (
     "value" DOUBLE PRECISION NOT NULL,
     "measurement_comment" TEXT,
     "measured_timestamp" TIMESTAMPTZ(6),
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1154,8 +1149,8 @@ CREATE TABLE "mortality" (
     "ultimate_cause_of_death_confidence" "cod_confidence",
     "ultimate_predated_by_taxon_id" UUID,
     "mortality_comment" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1169,8 +1164,8 @@ CREATE TABLE "relationship" (
     "parent_id" UUID,
     "child_id" UUID,
     "sibling_id" UUID,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1183,8 +1178,8 @@ CREATE TABLE "user" (
     "system_user_id" TEXT NOT NULL,
     "system_name" TEXT NOT NULL,
     "keycloak_uuid" UUID,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1197,8 +1192,8 @@ CREATE TABLE "xref_collection_unit" (
     "collection_category_id" UUID NOT NULL,
     "unit_name" TEXT NOT NULL,
     "description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1209,8 +1204,8 @@ CREATE TABLE "xref_collection_unit" (
 CREATE TABLE "xref_taxon_collection_category" (
     "collection_category_id" UUID NOT NULL,
     "taxon_id" UUID NOT NULL,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" VARCHAR NOT NULL DEFAULT now(),
 
@@ -1223,8 +1218,8 @@ CREATE TABLE "xref_taxon_marking_body_location" (
     "taxon_id" UUID NOT NULL,
     "body_location" TEXT NOT NULL,
     "description" TEXT,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1237,8 +1232,8 @@ CREATE TABLE "xref_taxon_measurement_qualitative" (
     "taxon_id" UUID NOT NULL,
     "measurement_name" VARCHAR NOT NULL,
     "measurement_desc" VARCHAR,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1252,8 +1247,8 @@ CREATE TABLE "xref_taxon_measurement_qualitative_option" (
     "option_label" TEXT,
     "option_value" INTEGER NOT NULL,
     "option_desc" VARCHAR,
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -1269,8 +1264,8 @@ CREATE TABLE "xref_taxon_measurement_quantitative" (
     "min_value" DOUBLE PRECISION DEFAULT 0,
     "max_value" DOUBLE PRECISION,
     "unit" "measurement_unit",
-    "create_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
-    "update_user" UUID NOT NULL DEFAULT critterbase.getuserid('SYSTEM'::text),
+    "create_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
+    "update_user" UUID NOT NULL DEFAULT getuserid('SYSTEM'::text),
     "create_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
