@@ -46,18 +46,18 @@ critterRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const critters = getCritters();
-      return res.status(200).json(critters);
+      return res.status(200).json({ hello: "world" });
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      return res.status(200).json(`Update critter ${id}`);
+      res.status(200).json(`Update critter ${id}`);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      return res.status(200).json(`Delete critter ${id}`);
+      res.status(200).json(`Delete critter ${id}`);
     })
   );

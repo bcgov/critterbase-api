@@ -1,11 +1,11 @@
 import { AuditColumns } from "./types";
 /**
- ** Used to strip properties from DB records. Defaults to audit properties.
+ ** Used to exclude properties from DB records. Defaults to audit properties.
  * @param record ie: critter, measurement, marking
  * @param properties array of additional properties to be deleted. ie: 'description'
  * @deleteAudit boolean
  */
-const strip = <T extends AuditColumns>(
+const exclude = <T extends AuditColumns>(
   record: T | T[],
   deleteAudit: boolean = true,
   properties?: Array<keyof T>
@@ -27,4 +27,4 @@ const strip = <T extends AuditColumns>(
   return record;
 };
 
-export { strip };
+export { exclude };
