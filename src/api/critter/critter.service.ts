@@ -3,7 +3,7 @@ import type { critter } from "@prisma/client";
 
 const getCritters = async (): Promise<critter[]> => {
   const allCritters = await prisma.critter.findMany();
-  return [];
+  return allCritters;
 };
 
 export { getCritters };

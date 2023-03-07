@@ -45,8 +45,8 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = getCritters();
-      return res.status(200).json(critter);
+      const critters = getCritters();
+      return res.status(200).json(critters);
     })
   )
   .put(
