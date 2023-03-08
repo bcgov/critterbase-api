@@ -1,3 +1,5 @@
+type uuid = string | null;
+
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
  */
@@ -67,4 +69,4 @@ type UserAuditColumns = {
 
 type AuditColumns = DateAuditColumns & UserAuditColumns;
 
-export { apiError, AuditColumns };
+export { uuid, apiError, AuditColumns };

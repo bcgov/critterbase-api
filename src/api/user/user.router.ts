@@ -2,7 +2,7 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { deleteUser, getUser, getUsers, updateUser } from "./user.service";
-import { apiError } from "../../utils/types";
+import { apiError, uuid } from "../../utils/types";
 
 export const userRouter = express.Router();
 
@@ -34,11 +34,14 @@ userRouter
   .route("/:user_id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const user_id = req.params.user_id;
+      const id = req.params.user_id;
+      if (!id) {
+        throw apiError.requiredProperty("user_id");
+      }
       //Check if user exists before running next routes.
-      const user = await getUser(user_id);
+      const user = await getUser(id);
       if (!user) {
-        throw apiError.notFound("User ID not found");
+        throw apiError.notFound(`User ID "${id}" not found`);
       }
       next();
     })
@@ -52,15 +55,15 @@ userRouter
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const user_id = req.params.user_id;
-      const user = await updateUser(user_id, req.body);
+      const id = req.params.user_id;
+      const user = await updateUser(id, req.body);
       return res.status(200).json(user);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const user_id = req.params.user_id;
-      await deleteUser(user_id);
-      return res.status(200).json(`User ${user_id} has been deleted`);
+      const id = req.params.user_id;
+      await deleteUser(id);
+      return res.status(200).json(`User ${id} has been deleted`);
     })
   );
