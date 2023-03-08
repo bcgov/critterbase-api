@@ -26,7 +26,7 @@ const recursiveTaxon = async (prisma: PrismaClient, node: TreeNode<Taxon>, toInh
     });
     
     for(const child of node.children) {
-        recursiveTaxon(prisma, child, [...toInherit, node.value], depth + 1);
+        await recursiveTaxon(prisma, child, [...toInherit, node.value], depth + 1);
     }
 }
 
@@ -37,7 +37,7 @@ const insertDefaultTaxons = async (prisma: PrismaClient) => {
         children: []
     }
     const cLupisTaxon: TreeNode<Taxon> = { 
-        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Canis lupis'},
+        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Canis lupus'},
         children: []
     }
     const aAlcesTaxon: TreeNode<Taxon> = { 
@@ -102,8 +102,7 @@ const insertDefaultTaxons = async (prisma: PrismaClient) => {
         value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Animalia'}, 
         children: [chordataTaxon]
     }
-
-    recursiveTaxon(prisma, animaliaTaxon, [], 0);
+    await recursiveTaxon(prisma, animaliaTaxon, [], 0);
 }
 
 export {insertDefaultTaxons}
