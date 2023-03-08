@@ -88,10 +88,13 @@ const excludeAuditFields = (
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const checkUuidParam = (req: Request, res: Response, next: NextFunction) => {
+  console.log('checkUuid Ran: ', req.params)
   if (!('id' in req.params)) {
-    next();
+    console.log('non-id route')
+    return next();
   }
   const { id } = req.params;
+  console.log('id route')
   if (!uuidRegex.test(id)) {
     return res.status(400).json({ error: 'Invalid id parameter' });
   }
