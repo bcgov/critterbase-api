@@ -88,11 +88,7 @@ model critter {
   measurement_qualitative                       measurement_qualitative[]
   measurement_quantitative                      measurement_quantitative[]
   mortality                                     mortality[]
-  relationship_relationship_child_idTocritter   relationship[]             @relation("relationship_child_idTocritter")
-  relationship_relationship_critter_idTocritter relationship[]             @relation("relationship_critter_idTocritter")
-  relationship_relationship_parent_idTocritter  relationship[]             @relation("relationship_parent_idTocritter")
-  relationship_relationship_sibling_idTocritter relationship[]             @relation("relationship_sibling_idTocritter")
-
+ 
   @@unique([critter_id, taxon_id], map: "critter_un")
 }
 
@@ -440,28 +436,6 @@ model mortality {
   lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon                 lk_taxon?          @relation("mortality_ultimate_predated_by_taxon_idTolk_taxon", fields: [ultimate_predated_by_taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_ucod_taxon_fk")
 }
 
-model relationship {
-  relationship_id                          String   @id(map: "relationship_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  critter_id                               String   @db.Uuid
-  parent_id                                String?  @db.Uuid
-  child_id                                 String?  @db.Uuid
-  sibling_id                               String?  @db.Uuid
-  create_user                              String   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                              String   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                         DateTime @default(now()) @db.Timestamptz(6)
-  update_timestamp                         DateTime @default(now()) @db.Timestamptz(6)
-  critter_relationship_child_idTocritter   critter? @relation("relationship_child_idTocritter", fields: [child_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
-  user_relationship_create_userTouser      user     @relation("relationship_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-  critter_relationship_critter_idTocritter critter  @relation("relationship_critter_idTocritter", fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
-  critter_relationship_parent_idTocritter  critter? @relation("relationship_parent_idTocritter", fields: [parent_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
-  critter_relationship_sibling_idTocritter critter? @relation("relationship_sibling_idTocritter", fields: [sibling_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
-  user_relationship_update_userTouser      user     @relation("relationship_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@unique([critter_id, child_id])
-  @@unique([critter_id, parent_id])
-  @@unique([critter_id, sibling_id])
-}
-
 model user {
   user_id                                                                                               String                                      @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   system_user_id                                                                                        String                                      @unique(map: "critterbase_user_system_user_id_unq")
@@ -507,8 +481,6 @@ model user {
   measurement_qualitative_measurement_qualitative_update_userTouser                                     measurement_qualitative[]                   @relation("measurement_qualitative_update_userTouser")
   mortality_mortality_create_userTouser                                                                 mortality[]                                 @relation("mortality_create_userTouser")
   mortality_mortality_update_userTouser                                                                 mortality[]                                 @relation("mortality_update_userTouser")
-  relationship_relationship_create_userTouser                                                           relationship[]                              @relation("relationship_create_userTouser")
-  relationship_relationship_update_userTouser                                                           relationship[]                              @relation("relationship_update_userTouser")
   user_user_create_userTouser                                                                           user                                        @relation("user_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_create_user")
   other_user_user_create_userTouser                                                                     user[]                                      @relation("user_create_userTouser")
   user_user_update_userTouser                                                                           user                                        @relation("user_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_update_user")
