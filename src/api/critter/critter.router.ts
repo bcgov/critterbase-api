@@ -12,6 +12,7 @@ export const critterRouter = express.Router();
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
+    //throw apiError.serverIssue();
     return res.status(200).json("Critter Router");
   })
 );
@@ -45,19 +46,19 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = getCritters();
-      return res.status(200).json(critter);
+      const critters = getCritters();
+      return res.status(200).json({ hello: "world" });
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      return res.status(200).json(`Update critter ${id}`);
+      res.status(200).json(`Update critter ${id}`);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      return res.status(200).json(`Delete critter ${id}`);
+      res.status(200).json(`Delete critter ${id}`);
     })
   );

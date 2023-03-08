@@ -1,6 +1,9 @@
 {
   "name": "critterbase-api",
   "version": "1.0.0",
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "description": "Critterbase API",
   "main": "./src/server.ts",
   "scripts": {
