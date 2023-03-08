@@ -42,6 +42,7 @@ const errorHandler = (
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
   }
+  next(err);
   // else {
   //   return res
   //     .status(400)

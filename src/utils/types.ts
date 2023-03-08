@@ -12,7 +12,7 @@ class apiError extends Error {
   status: number;
   errorType?: ErrorType;
 
-  constructor(message: string, status?: number, errorType?: ErrorType) {
+  constructor(message?: string, status?: number, errorType?: ErrorType) {
     super(message);
     this.status = status ?? 400;
     this.errorType = errorType;
@@ -47,8 +47,8 @@ class apiError extends Error {
   /**
    ** Internal server issue or problem occurs
    */
-  static serverIssue(message?: string) {
-    return new apiError(message ?? "Internal Server Error", 500, "serverIssue");
+  static serverIssue() {
+    return new apiError(`Internal Server Error`, 500, "serverIssue");
   }
 
   toString() {

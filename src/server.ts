@@ -8,6 +8,7 @@ import {
   errorLogger,
   home,
   excludeAuditFields,
+  catchErrors,
 } from "./utils/middleware";
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(excludeAuditFields);
 app.get("/api/", home);
 app.use("/api/critters", critterRouter);
 
+//app.use(catchErrors);
 app.use(errorLogger);
 app.use(errorHandler);
 

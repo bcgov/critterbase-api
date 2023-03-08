@@ -12,6 +12,7 @@ export const critterRouter = express.Router();
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
+    throw apiError.serverIssue();
     return res.status(200).json("Critter Router");
   })
 );
