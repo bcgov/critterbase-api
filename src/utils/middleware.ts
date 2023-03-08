@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
+import { exclude } from "./helper_functions";
 import { apiError } from "./types";
 
 /**
@@ -24,7 +25,11 @@ const errorLogger = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(`${req.originalUrl} error: ${err.message}`);
+  console.error(
+    `🛑 ${req.method}${" " + err?.status} ${
+      req.originalUrl
+    } -> ${err.toString()}`
+  );
   next(err);
 };
 
@@ -41,6 +46,7 @@ const errorHandler = (
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
   }
+  next(err);
   // else {
   //   return res
   //     .status(400)
@@ -56,24 +62,27 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   return res.json([
     "Welcome to Critterbase API",
     "Temp details before swagger integration",
-    {
-      routes: [
-        {
-          "api/critters": {
-            "/": ["get"],
-            "/new": ["post"],
-            "/:id": ["get", "put", "delete"],
-          },
-        },
-      ],
-    },
   ]);
 };
 
-const stripAuditFields = (req: Request, res: Response, next: NextFunction) => {
-  console.log("called");
-  console.log(res);
+const excludeAuditFields = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if ("audit" in req.query) {
+    console.log("keeping audit cols");
+    next();
+  }
+
+  const oldSend = res.send;
+  res.send = function (data) {
+    console.log("excluding audit cols");
+    exclude(data);
+    res.send = oldSend;
+    return res.send(data);
+  };
   next();
 };
 
-export { errorLogger, errorHandler, catchErrors, home, stripAuditFields };
+export { errorLogger, errorHandler, catchErrors, home, excludeAuditFields };
