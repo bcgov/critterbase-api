@@ -2,7 +2,6 @@
  ** Custom Critterbase Error. Includes a status code with the message.
  */
 type ErrorType =
-  | "default"
   | "requiredProperty"
   | "syntaxIssue"
   | "serverIssue"
@@ -51,16 +50,8 @@ class apiError extends Error {
     return new apiError(`Internal Server Error`, 500, "serverIssue");
   }
 
-  toString() {
-    return `error: ${this.message} `;
-  }
-
-  toDevString() {
-    return {
-      message: this.message,
-      status: this.status,
-      errorType: this.errorType,
-    };
+  toString(): string {
+    return `error: ${this.message}`;
   }
 }
 

@@ -1,3 +1,5 @@
+import { app } from "../server";
+import { IS_DEV, IS_PROD, PORT } from "./constants";
 import { AuditColumns } from "./types";
 /**
  ** Used to exclude properties from DB records. Defaults to audit properties.
@@ -27,4 +29,12 @@ const exclude = <T extends AuditColumns>(
   return record;
 };
 
-export { exclude };
+const startServer = () => {
+  if (IS_DEV || IS_PROD) {
+    app.listen(PORT, () => {
+      console.log(`listening on ${PORT}`);
+    });
+  }
+};
+
+export { exclude, startServer };

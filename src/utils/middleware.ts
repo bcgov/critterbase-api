@@ -25,7 +25,11 @@ const errorLogger = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(`${req.originalUrl} error: ${err.message}`);
+  console.error(
+    `🛑 ${req.method}${" " + err?.status} ${
+      req.originalUrl
+    } -> ${err.toString()}`
+  );
   next(err);
 };
 

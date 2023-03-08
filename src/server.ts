@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import { critterRouter } from "./api/critter/critter.router";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
+import { startServer } from "./utils/helper_functions";
 import {
   errorHandler,
   errorLogger,
@@ -21,14 +22,9 @@ app.use(excludeAuditFields);
 app.get("/api/", home);
 app.use("/api/critters", critterRouter);
 
-//app.use(catchErrors);
 app.use(errorLogger);
 app.use(errorHandler);
 
-if (IS_DEV || IS_PROD) {
-  app.listen(PORT, () => {
-    console.log(`listening on ${PORT}`);
-  });
-}
+startServer();
 
 export { app };
