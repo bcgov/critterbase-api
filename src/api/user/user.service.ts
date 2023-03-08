@@ -47,18 +47,17 @@ const createUser = async (data:user): Promise<user> => {
 };
 
 const getUsers = async (): Promise<user[]> => {
-  const allUsers = generateMockUserData(); //prisma.user.findMany();
-  return allUsers; // return mock data for now
+  const allUsers = await prisma.user.findMany();
+  return allUsers; 
 };
 
-const getUser = async (user_id: string): Promise<user> => {
-    // const user = await prisma.user.findUnique({
-    //   where: {
-    //     user_id: user_id
-    //   }
-    // });
-  console.log(user_id)
-  return generateMockUserData()[parseInt(user_id)-1]; // return mock data for now
+const getUser = async (user_id: string): Promise<user | null> => {
+    const user = await prisma.user.findUnique({
+      where: {
+        user_id: user_id
+      }
+    });
+  return user; 
 };
 
 const updateUser = async (user_id: string, data: user): Promise<user> => {

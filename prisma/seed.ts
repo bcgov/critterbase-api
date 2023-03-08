@@ -25,6 +25,28 @@ async function main() {
     })
 
     /**
+     * Create mock users to test users endpoint.
+     */
+    const generateMockUserData = (count: number): Prisma.userCreateManyInput[] => {
+        const mockUsers: Prisma.userCreateManyInput[] = [];
+      
+        for (let i = 0; i < count; i++) {
+          mockUsers.push({
+            system_user_id: `${i + 1}`,
+            system_name: `Mock User ${i + 1}`,
+            create_user: systemUserUUID,
+            update_user: systemUserUUID
+          });
+        }
+        return mockUsers;
+      };
+
+    const mockUsers = generateMockUserData(10);
+    await prisma.user.createMany({
+        data: mockUsers,
+    });
+    
+    /**
      * Insert all region table values.
      * Need to do this all with raw SQL as the geometry types are not supported by prisma.
      */
