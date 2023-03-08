@@ -33,10 +33,10 @@ userRouter.post(
  ** All user_id related routes
  */
 userRouter
-  .route("/:user_id")
+  .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const id = req.params.user_id;
+      const id = req.params.id;
       if (!id) {
         throw apiError.requiredProperty("user_id");
       }
@@ -50,21 +50,21 @@ userRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.user_id;
+      const id = req.params.id;
       const user = await getUser(id);
       return res.status(200).json(user);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.user_id;
+      const id = req.params.id;
       const user = await updateUser(id, req.body);
       return res.status(200).json(user);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.user_id;
+      const id = req.params.id;
       await deleteUser(id);
       return res.status(200).json(`User ${id} has been deleted`);
     })
