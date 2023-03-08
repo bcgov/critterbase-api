@@ -1,7 +1,7 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getUsers } from "./user.service";
+import { deleteUser, getUser, getUsers, updateUser } from "./user.service";
 import { apiError } from "../../utils/types";
 
 export const userRouter = express.Router();
@@ -12,7 +12,8 @@ export const userRouter = express.Router();
 userRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(200).json("User Router");
+    const users = await getUsers();
+    return res.status(200).json(users);
   })
 );
 
@@ -27,7 +28,7 @@ userRouter.post(
 );
 
 /**
- * * All user_id related routes
+ ** All user_id related routes
  */
 userRouter
   .route("/:user_id")
@@ -35,8 +36,8 @@ userRouter
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       const user_id = req.params.user_id;
       //Check if user exists before running next routes.
-      //Temp for testing
-      if (!["1", "2", "3"].includes(user_id)) {
+      const user = await getUser(user_id);
+      if (!user) {
         throw apiError.notFound("User ID not found");
       }
       next();
@@ -44,20 +45,22 @@ userRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const user = getUsers();
+      const id = req.params.user_id;
+      const user = await getUser(id);
       return res.status(200).json(user);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      return res.status(200).json(`Update user ${id}`);
+      const user_id = req.params.user_id;
+      const user = await updateUser(user_id, req.body);
+      return res.status(200).json(user);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      return res.status(200).json(`Delete user ${id}`);
+      const user_id = req.params.user_id;
+      await deleteUser(user_id);
+      return res.status(200).json(`User ${user_id} has been deleted`);
     })
   );
