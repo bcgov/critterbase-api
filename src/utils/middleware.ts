@@ -3,7 +3,7 @@ import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
 import { exclude } from "./helper_functions";
-import { apiError } from "./types";
+import { apiError, uuid } from "./types";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -87,19 +87,16 @@ const excludeAuditFields = (
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const checkUuidParam = (req: Request, res: Response, next: NextFunction) => {
-  console.log('checkUuid Ran: ', req.params)
+const validateUuidParam = (req: Request): string => {
   if (!('id' in req.params)) {
-    console.log('non-id route')
-    return next();
+    throw apiError.requiredProperty("user_id");
   }
-  const { id } = req.params;
-  console.log('id route')
+  const id = req.params.id;
   if (!uuidRegex.test(id)) {
-    return res.status(400).json({ error: 'Invalid id parameter' });
+    throw apiError.syntaxIssue("Invalid ID Parameter");
   }
-  next();
+  return id;
 };
 
 
-export { errorLogger, errorHandler, catchErrors, home, excludeAuditFields, checkUuidParam };
+export { errorLogger, errorHandler, catchErrors, home, excludeAuditFields, validateUuidParam, uuidRegex };

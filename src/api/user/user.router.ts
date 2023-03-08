@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
-import { catchErrors } from "../../utils/middleware";
+import { catchErrors, validateUuidParam } from "../../utils/middleware";
 import { createUser, deleteUser, getUser, getUsers, updateUser } from "./user.service";
 import { apiError, uuid } from "../../utils/types";
 
@@ -36,11 +36,8 @@ userRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const id = req.params.id;
-      if (!id) {
-        throw apiError.requiredProperty("user_id");
-      }
-      //Check if user exists before running next routes.
+      // validate user id and confirm that user exists
+      const id = validateUuidParam(req);
       const user = await getUser(id);
       if (!user) {
         throw apiError.notFound(`User ID "${id}" not found`);
