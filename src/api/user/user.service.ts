@@ -41,6 +41,11 @@ const generateMockUserData = (): user[] => {
   return mockUsers;
 };
 
+const createUser = async (data:user): Promise<user> => {
+    const newUser = await prisma.user.create({ data });
+    return newUser;
+};
+
 const getUsers = async (): Promise<user[]> => {
   const allUsers = generateMockUserData(); //prisma.user.findMany();
   return allUsers; // return mock data for now
@@ -75,4 +80,4 @@ const updateUser = async (user_id: string, data: user): Promise<user> => {
     return deletedUser;
   };
 
-export { getUsers, getUser, updateUser, deleteUser };
+export { createUser, getUsers, getUser, updateUser, deleteUser };

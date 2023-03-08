@@ -1,8 +1,9 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { deleteUser, getUser, getUsers, updateUser } from "./user.service";
+import { createUser, deleteUser, getUser, getUsers, updateUser } from "./user.service";
 import { apiError } from "../../utils/types";
+import { create } from "domain";
 
 export const userRouter = express.Router();
 
@@ -23,6 +24,8 @@ userRouter.get(
 userRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
+    const userData = req.body;
+    const newUser = await createUser(userData);
     return res.status(201).json(`Post new user`);
   })
 );
