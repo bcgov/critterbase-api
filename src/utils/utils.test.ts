@@ -3,7 +3,6 @@ import supertest from "supertest";
 import { app } from "../server";
 import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
 import { apiError } from "./types";
-export const request = supertest(app);
 
 describe("Utils", () => {
   describe("File: middleware.ts", () => {
