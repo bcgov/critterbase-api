@@ -1,7 +1,8 @@
-import { request } from "../../utils/utils.test";
-import { getUsers } from "./user.service";
+import { request } from "../../utils/constants";
+import { createUser, getUsers } from "./user.service";
 import type { user } from "@prisma/client";
 import { uuidRegex } from "../../utils/middleware";
+import { randomInt } from "crypto";
 
 
 function isUser(user: any): user is user {
@@ -20,6 +21,14 @@ function isUser(user: any): user is user {
 
 describe("API: User", () => {
   describe("SERVICES", () => {
+    describe("createUser()", () => {
+      it("returns a user",async () => {
+        const system_user_id = randomInt(99999999).toString();
+        const user = await createUser({system_name:"TEST_USER", system_user_id:system_user_id});
+        expect.assertions(1);
+        expect(isUser(user)).toBe(true);
+      })
+    });
     describe("getUsers()", () => {
       it("returns an array", async () => {
         const users = await getUsers();
