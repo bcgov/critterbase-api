@@ -1,9 +1,10 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { queryRandomUUID } from "./prisma_utils";
+import { queryRandomUUID } from "../prisma_utils";
 
 interface Taxon {
     taxon_uuid: string,
-    taxon_name: string
+    taxon_name: string,
+    common_name?: string
 }
 
 type TreeNode<T> = {
@@ -16,7 +17,8 @@ const levels: Array<keyof Prisma.lk_taxonUncheckedCreateInput> = ['kingdom_id', 
 const recursiveTaxon = async (prisma: PrismaClient, node: TreeNode<Taxon>, toInherit: Taxon[], depth: number) => {
     let toInsert: Prisma.lk_taxonUncheckedCreateInput = {
         taxon_id: node.value.taxon_uuid, 
-        taxon_name_latin: node.value.taxon_name
+        taxon_name_latin: node.value.taxon_name,
+        taxon_name_common: node.value.common_name
     };
     for(let i = 0; i < toInherit.length; i ++) {
         toInsert = {...toInsert, [levels[i]]: toInherit[i].taxon_uuid}
@@ -33,19 +35,19 @@ const recursiveTaxon = async (prisma: PrismaClient, node: TreeNode<Taxon>, toInh
 
 const insertDefaultTaxons = async (prisma: PrismaClient) => {
     const rTarandusTaxon: TreeNode<Taxon> = { 
-        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Rangifer tarandus'},
+        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Rangifer tarandus', common_name: 'Caribou'},
         children: []
     }
     const cLupisTaxon: TreeNode<Taxon> = { 
-        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Canis lupus'},
+        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Canis lupus', common_name: 'Grey Wolf'},
         children: []
     }
     const aAlcesTaxon: TreeNode<Taxon> = { 
-        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Alces alces'},
+        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Alces alces', common_name: 'Moose'},
         children: []
     }
     const uArctosTaxon: TreeNode<Taxon> = { 
-        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Usrsus arctos'},
+        value: {taxon_uuid: await queryRandomUUID(prisma), taxon_name: 'Usrsus arctos', common_name: 'Grizzly Bear'},
         children: []
     }
     

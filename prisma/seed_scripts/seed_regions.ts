@@ -1,7 +1,7 @@
-import nrRegionJson from './region_data/ADM_NR_REGIONS_SP.json'
-import envRegionJson from './region_data/EADM_WLAP_REGION_BND_AREA_SVW.json'
-import wmuJson from './region_data/WAA_WILDLIFE_MGMT_UNITS_SVW.json'
-import popUnitJson from './region_data/GCPB_CARIBOU_POPULATION_SP.json'
+import nrRegionJson from '../region_data/ADM_NR_REGIONS_SP.json'
+import envRegionJson from '../region_data/EADM_WLAP_REGION_BND_AREA_SVW.json'
+import wmuJson from '../region_data/WAA_WILDLIFE_MGMT_UNITS_SVW.json'
+import popUnitJson from '../region_data/GCPB_CARIBOU_POPULATION_SP.json'
 
 interface RegionStructure {
     tableName: string,

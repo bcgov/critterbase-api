@@ -1,7 +1,8 @@
 import { Prisma, PrismaClient } from '@prisma/client'
 import { queryRandomUUID } from './prisma_utils';
-import { regionStructureList } from './seed_regions'
-import { insertDefaultTaxons } from './seed_taxons';
+import { regionStructureList } from './seed_scripts/seed_regions'
+import { insertDefaultTaxons } from './seed_scripts/seed_taxons';
+import * as fs from 'fs';
 const prisma = new PrismaClient();
 
 
@@ -121,8 +122,6 @@ async function main() {
         }
     })
 
-    const allTaxons = await prisma.lk_taxon.findMany();
-
     const rangiferTarandusUUID = (await prisma.lk_taxon.findFirst({
         where: {
             taxon_name_latin: 'Rangifer tarandus'
@@ -192,7 +191,7 @@ async function main() {
 
     const qualitativeResults = await prisma.xref_taxon_measurement_qualitative.findMany();
     for (const q of qualitativeMeasures) {
-        const uuid = qualitativeResults.find(a => a.measurement_name === q.name)?.taxon_measurement_id;
+        const uuid = qualitativeResults.find(a => a.measurement_name === q.name && a.taxon_id === q.taxon)?.taxon_measurement_id;
         if(!uuid) throw Error('Could not find a required measurement id');
         await prisma.xref_taxon_measurement_qualitative_option.createMany({
             data: q.options.map((o, idx) => {return {taxon_measurement_id: uuid, option_label: o, option_value: idx}})
@@ -207,6 +206,15 @@ async function main() {
         data: quantitativeMeasures.map(q => {return {measurement_name: q.name, taxon_id: q.taxon }})
     })
     
+    /*
+    const sql = fs
+    .readFileSync('./seed_scripts/import_bctw_animal_data.sql')
+    .toString()
+    .replace(/(\r\n|\n|\r)/gm, ' ') // remove newlines
+    .replace(/\s+/g, ' ') // excess white space
+
+    await prisma.$executeRawUnsafe(sql);
+    */
 
 }
 
