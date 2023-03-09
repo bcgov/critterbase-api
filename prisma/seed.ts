@@ -1,10 +1,9 @@
-import { Prisma, PrismaClient } from '@prisma/client'
 import { queryRandomUUID } from './prisma_utils';
 import { regionStructureList } from './seed_scripts/seed_regions'
 import { insertDefaultTaxons } from './seed_scripts/seed_taxons';
+import { prisma } from '../src/utils/constants'
 import * as fs from 'fs';
 import path from 'path';
-const prisma = new PrismaClient();
 
 
 
