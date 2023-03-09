@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { queryRandomUUID } from "./prisma_utils";
+import { queryRandomUUID } from "../prisma_utils";
 
 interface Taxon {
     taxon_uuid: string,

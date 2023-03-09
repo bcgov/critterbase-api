@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client'
 import { queryRandomUUID } from './prisma_utils';
-import { regionStructureList } from './seed_regions'
-import { insertDefaultTaxons } from './seed_taxons';
+import { regionStructureList } from './seed_scripts/seed_regions'
+import { insertDefaultTaxons } from './seed_scripts/seed_taxons';
 import * as fs from 'fs';
 const prisma = new PrismaClient();
 
@@ -100,8 +100,6 @@ async function main() {
         }
     })
 
-    const allTaxons = await prisma.lk_taxon.findMany();
-
     const rangiferTarandusUUID = (await prisma.lk_taxon.findFirst({
         where: {
             taxon_name_latin: 'Rangifer tarandus'
@@ -186,7 +184,7 @@ async function main() {
         data: quantitativeMeasures.map(q => {return {measurement_name: q.name, taxon_id: q.taxon }})
     })
     
-
+    /*
     const sql = fs
     .readFileSync('./seed_scripts/import_bctw_animal_data.sql')
     .toString()
@@ -194,6 +192,7 @@ async function main() {
     .replace(/\s+/g, ' ') // excess white space
 
     await prisma.$executeRawUnsafe(sql);
+    */
 
 }
 
