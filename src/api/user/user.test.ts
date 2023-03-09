@@ -1,8 +1,8 @@
 import { request } from "../../utils/constants";
-import { createUser, getUsers } from "./user.service";
-import type { user } from "@prisma/client";
+import { createUser, deleteUser, getUser, getUserBySystemId, getUsers, updateUser, upsertUser } from "./user.service";
+import type { Prisma, user } from "@prisma/client";
 import { uuidRegex } from "../../utils/middleware";
-import { randomInt } from "crypto";
+import { randomInt, randomUUID } from "crypto";
 
 
 function isUser(user: any): user is user {
@@ -18,16 +18,44 @@ function isUser(user: any): user is user {
   );
 }
 
+function newUser(): Prisma.userCreateInput {
+  const num = randomInt(99999999);
+  return {
+    system_user_id: num.toString(),
+    system_name: `USER_${num}`,
+    keycloak_uuid: null,
+  };
+}
 
 describe("API: User", () => {
   describe("SERVICES", () => {
     describe("createUser()", () => {
-      it("returns a user",async () => {
-        const system_user_id = randomInt(99999999).toString();
-        const user = await createUser({system_name:"TEST_USER", system_user_id:system_user_id});
+      it("returns a user", async () => {
+      const mockUser = newUser();
+      const returnedUser = await createUser(mockUser);
         expect.assertions(1);
-        expect(isUser(user)).toBe(true);
+        expect(isUser(returnedUser)).toBe(true);
+      });
+      it("returned user matches the input", async () => {
+        const mockUser = newUser();
+        const returnedUser = await createUser(mockUser);
+        expect.assertions(1);
+        expect(returnedUser).toMatchObject(mockUser);
       })
+    });
+    describe("upsertUser()", () => {
+      it("returns a user", async () => {
+        const mockUser = newUser();
+        const returnedUser = await upsertUser(mockUser);
+          expect.assertions(1);
+          expect(isUser(returnedUser)).toBe(true);
+        });
+        it("returned user matches the input", async () => {
+          const mockUser = newUser();
+          const returnedUser = await upsertUser(mockUser);
+          expect.assertions(1);
+          expect(returnedUser).toMatchObject(mockUser);
+        })
     });
     describe("getUsers()", () => {
       it("returns an array", async () => {
@@ -45,7 +73,72 @@ describe("API: User", () => {
         }
       });
     });
+    describe("getUser()", () => {
+      it("returns a user when given a valid user ID", async () => {
+        const mockUser = newUser();
+        const createdUser = await createUser(mockUser);
+        const returnedUser = await getUser(createdUser.user_id);
+        expect.assertions(2);
+        expect(isUser(returnedUser)).toBe(true);
+        expect(returnedUser).toMatchObject(createdUser);
+      });
+
+      it("returns null when given an invalid system user ID", async () => {
+        const returnedUser = await getUser(randomUUID());
+        expect.assertions(1);
+        expect(returnedUser).toBeNull();
+      });
+    });
+    
+    describe("getUserBySystemId()", () => {
+      it("returns a user when given a valid system user ID", async () => {
+        const mockUser = newUser();
+        const createdUser = await createUser(mockUser);
+        const returnedUser = await getUserBySystemId(createdUser.system_user_id);
+        expect.assertions(2);
+        expect(isUser(returnedUser)).toBe(true);
+        expect(returnedUser).toMatchObject(createdUser);
+      });
+    
+      it("returns null when given an invalid system user ID", async () => {
+        const returnedUser = await getUserBySystemId("invalid_system_user_id");
+        expect.assertions(1);
+        expect(returnedUser).toBeNull();
+      });
+    });
+describe("updateUser()", () => {
+      it("returns a user with the updated data", async () => {
+        const mockUser = newUser();
+        const createdUser = await createUser(mockUser);
+        const updateData: Prisma.userUpdateInput = {
+          system_name: "UPDATED_NAME",
+        };
+        const updatedUser = await updateUser(createdUser.user_id, updateData);
+        expect.assertions(2);
+        expect(isUser(updatedUser)).toBe(true);
+        expect(updatedUser).toMatchObject({
+          ...createdUser,
+          ...updateData,
+          update_user: updatedUser.update_user, // ignore, as it will be different
+          update_timestamp: updatedUser.update_timestamp, // ignore, as it will be different
+        });
+      });
+    });
+
+    describe("deleteUser()", () => {
+      it("deletes a user", async () => {
+        const mockUser = newUser();
+        const createdUser = await createUser(mockUser);
+        const deletedUser = await deleteUser(createdUser.user_id);
+        expect.assertions(3);
+        expect(isUser(deletedUser)).toBe(true);
+        expect(deletedUser).toMatchObject(createdUser);
+        const returnedUser = await getUser(createdUser.user_id);
+        expect(returnedUser).toBeNull();
+      });
+    });
   });
+
 
   describe("ROUTERS", () => {
     describe("GET /api/users", () => {
