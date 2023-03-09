@@ -10,6 +10,7 @@
     "start": "npx pm2 --no-daemon start dist/server.js",
     "build": "rimraf ./dist && tsc",
     "test": "jest --forceExit",
+    "test:watch": "jest --watchAll --forceExit",
     "start:dev": "nodemon -r dotenv/config ./src/server.ts"
   },
   "author": "",

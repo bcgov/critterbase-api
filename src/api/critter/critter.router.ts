@@ -1,7 +1,7 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getCritters } from "./critter.service";
+import { getAllCritters } from "./critter.service";
 import { apiError } from "../../utils/types";
 
 export const critterRouter = express.Router();
@@ -12,8 +12,8 @@ export const critterRouter = express.Router();
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    //throw apiError.serverIssue();
-    return res.status(200).json("Critter Router");
+    const allCritters = getAllCritters();
+    return res.status(200).json(allCritters);
   })
 );
 
@@ -46,7 +46,6 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critters = getCritters();
       return res.status(200).json({ hello: "world" });
     })
   )

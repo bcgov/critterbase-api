@@ -12,7 +12,7 @@ class apiError extends Error {
   errorType?: ErrorType;
 
   constructor(message?: string, status?: number, errorType?: ErrorType) {
-    super(message);
+    super(message ?? "Unknown error occurred");
     this.status = status ?? 400;
     this.errorType = errorType;
     Object.setPrototypeOf(this, new.target.prototype);
