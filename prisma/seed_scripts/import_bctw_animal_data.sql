@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS bctw.animal;
+DROP SCHEMA IF EXISTS bctw;
+
 CREATE SCHEMA bctw;
 
 CREATE TABLE bctw.animal (
@@ -21,7 +24,7 @@ CREATE TABLE bctw.animal (
 	estimated_age float8 NULL,
 	juvenile_at_heel varchar(300) NULL,
 	life_stage varchar(300) NULL,
-	map_colour varchar(30) NULL DEFAULT bctw_dapi_v1.get_random_colour_code_id(),
+	map_colour varchar(30) NULL,
 	mortality_comment varchar(200) NULL,
 	mortality_date timestamptz NULL,
 	mortality_latitude float8 NULL,
@@ -61,10 +64,10 @@ CREATE TABLE bctw.animal (
 	captivity_status_ind bool NULL,
 	mortality_captivity_status_ind bool NULL,
 	ucod_predator_species varchar(20) NULL,
-	pcod_confidence int4 NULL,
-	ucod_confidence int4 NULL,
+	pcod_confidence varchar(300) NULL,
+	ucod_confidence varchar(300) NULL,
 	mortality_report_ind bool NULL,
-	mortality_investigation int4 NULL,
+	mortality_investigation varchar(300) NULL,
 	device_id int4 NULL,
 	you varchar(13) NULL,
 	CONSTRAINT animal_pkey PRIMARY KEY (critter_transaction_id)
@@ -237,11 +240,10 @@ INSERT INTO bctw.animal (critter_id,critter_transaction_id,animal_id,animal_stat
 	 ('958fc223-2a4f-4d87-9fee-d1fff480ec85','86acc57c-2405-472e-99a0-e99c5f3f0408','17-10658','Unknown',NULL,NULL,NULL,'2018-01-19 00:00:00-08',56.0,-125.0,NULL,NULL,10,NULL,NULL,'','',NULL,NULL,NULL,NULL,NULL,NULL,'#73B2FF','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Wolverine',false,'Omineca',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Caribou',false,'17-10658',' No status field provided.  ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2021-11-30 12:59:37.065719-08',NULL,'2021-11-30 12:59:37.065719-08',0,NULL);
 
 
-
 INSERT INTO critter (critter_id, taxon_id, wlh_id, animal_id, sex, responsible_region_nr_id)
 WITH spatial AS (
 SELECT region_nr_name, unit_name FROM lk_region_nr lrn JOIN lk_population_unit_temp lput 
-ON (lput.unit_geom && lrn.region_geom AND ST_Relate(lrn.region_geom, lput.unit_geom, '2********'))
+ON (public.ST_Intersects(lput.unit_geom, lrn.region_geom) AND public.ST_Relate(lrn.region_geom, lput.unit_geom, '2********'))
 ),
 single_units AS (
 SELECT unit_name FROM spatial GROUP BY unit_name HAVING count(*) = 1
@@ -277,7 +279,7 @@ SELECT
 	(CASE WHEN sex::text != ALL(enum_range(null::sex)::text[]) OR sex IS NULL THEN 'Unknown'::sex ELSE sex::sex END),
 	(SELECT region_nr_id FROM lk_region_nr WHERE region_nr_name = um.region_nr_name)
 	FROM 
-	bctw.animal_v a LEFT JOIN unit_mapping um ON a.population_unit = um.unit_name
+	bctw.animal a LEFT JOIN unit_mapping um ON a.population_unit = um.unit_name
 WHERE valid_to IS NULL AND species IS NOT NULL;
 
 
@@ -289,7 +291,7 @@ SELECT
 crypto.gen_random_uuid() AS critter_collection_unit_id,
 critter_id, 
 (SELECT collection_unit_id FROM xref_collection_unit xcu WHERE unit_name = population_unit)
-FROM bctw.animal_v 
+FROM bctw.animal 
 WHERE valid_to IS NULL AND population_unit IS NOT NULL AND population_unit NOT ILIKE '%wmu%';
 
 
@@ -298,11 +300,11 @@ WHERE valid_to IS NULL AND population_unit IS NOT NULL AND population_unit NOT I
  * Skips animal rows if they have NULL mortality date.
  */
 
-CREATE TEMP TABLE IF NOT EXISTS temp_table AS 
+CREATE TEMP TABLE IF NOT EXISTS mortality_locations AS 
 WITH tform AS (
-SELECT critter_id, critter_transaction_id, st_transform(st_setsrid(st_makepoint(mortality_utm_easting, mortality_utm_northing), 32600 + mortality_utm_zone), 4326) AS stf  
+SELECT critter_id, critter_transaction_id, public.st_transform(public.st_setsrid(public.st_makepoint(mortality_utm_easting, mortality_utm_northing), 32600 + mortality_utm_zone), 4326) AS stf  
 FROM 
-bctw.animal_v 
+bctw.animal 
 WHERE 
 mortality_utm_easting IS NOT NULL AND 
 mortality_utm_northing IS NOT NULL AND
@@ -310,10 +312,10 @@ mortality_utm_zone IS NOT NULL
 ),
 coords AS (
 	SELECT 
-		(CASE WHEN mortality_latitude IS NULL THEN st_y(tform.stf) ELSE mortality_latitude END) AS latitude,
-		(CASE WHEN mortality_longitude IS NULL THEN st_x(tform.stf) ELSE mortality_longitude END) AS longitude,
+		(CASE WHEN mortality_latitude IS NULL THEN public.st_y(tform.stf) ELSE mortality_latitude END) AS latitude,
+		(CASE WHEN mortality_longitude IS NULL THEN public.st_x(tform.stf) ELSE mortality_longitude END) AS longitude,
 		a.critter_transaction_id
-	FROM bctw.animal_v a LEFT JOIN tform ON a.critter_transaction_id = tform.critter_transaction_id
+	FROM bctw.animal a LEFT JOIN tform ON a.critter_transaction_id = tform.critter_transaction_id
 )
 SELECT
 	crypto.gen_random_uuid() AS location_id,
@@ -322,17 +324,18 @@ SELECT
 	longitude,
 	NULL::float8 as coordinate_uncertainty,
 	NULL::coordinate_uncertainty_unit,
-	(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE st_contains(wmu_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS wmu_id,
-	(SELECT region_nr_id FROM lk_region_nr WHERE st_contains(region_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS region_nr_id,
-	(SELECT region_env_id FROM lk_region_env WHERE st_contains(region_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS region_env_id
+	(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE public.st_contains(wmu_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS wmu_id,
+	(SELECT region_nr_id FROM lk_region_nr WHERE public.st_contains(region_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS region_nr_id,
+	(SELECT region_env_id FROM lk_region_env WHERE public.st_contains(region_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS region_env_id
 FROM 
-	bctw.animal_v a JOIN coords t ON a.critter_transaction_id = t.critter_transaction_id
+	bctw.animal a JOIN coords t ON a.critter_transaction_id = t.critter_transaction_id
 	 WHERE valid_to IS NULL AND mortality_date IS NOT NULL
+	 AND num_nonnulls(mortality_latitude, mortality_longitude, mortality_utm_easting, mortality_utm_northing) > 0
 ;
 
-INSERT INTO "location" (location_id, latitude, longitude, coordinate_uncertainty, "coordinate_uncertainty_unit", wmu_id, region_nr_id, region_env_id)
+INSERT INTO location (location_id, latitude, longitude, coordinate_uncertainty, "coordinate_uncertainty_unit", wmu_id, region_nr_id, region_env_id)
 SELECT location_id, latitude, longitude, coordinate_uncertainty, "coordinate_uncertainty_unit", wmu_id, region_nr_id, region_env_id
-FROM temp_table;
+FROM mortality_locations;
 
 INSERT INTO mortality (mortality_id, critter_id, location_id, mortality_timestamp, 
 proximate_cause_of_death_id, proximate_cause_of_death_confidence, proximate_predated_by_taxon_id,
@@ -340,7 +343,7 @@ ultimate_cause_of_death_id, ultimate_cause_of_death_confidence, ultimate_predate
 SELECT
 	crypto.gen_random_uuid() AS mortality_id,
 	a.critter_id,
-	(SELECT location_id FROM temp_table WHERE temp_table.critter_id = a.critter_id),
+	(SELECT location_id FROM mortality_locations WHERE mortality_locations.critter_id = a.critter_id),
 	mortality_date AS mortality_timestamp,
 	(
 		CASE WHEN proximate_cause_of_death IS NULL THEN 
@@ -356,21 +359,22 @@ SELECT
 	(SELECT taxon_id FROM lk_taxon WHERE taxon_name_common = ucod_predator_species) AS  ultimate_predated_by_taxon_id,
 	mortality_comment
 FROM 
-	bctw.animal_v a  WHERE valid_to IS NULL AND mortality_date IS NOT NULL
+	bctw.animal a  WHERE valid_to IS NULL AND mortality_date IS NOT NULL
 ;
 
 /*
  * Converts capture related columns from BCTW to capture table entries in Critterbase.
+ * We create these temporary tables so that we can include critter_id, making it easier to associate
+ * locations with critters later.
  */
-
 CREATE TEMP TABLE IF NOT EXISTS capture_locations AS
 WITH tform AS (
 	SELECT 
 		critter_id, 
 		critter_transaction_id, 
-		st_transform(st_setsrid(st_makepoint(capture_utm_easting, capture_utm_northing), 32600 + capture_utm_zone), 4326) AS stf  
+		public.st_transform(public.st_setsrid(public.st_makepoint(capture_utm_easting, capture_utm_northing), 32600 + capture_utm_zone), 4326) AS stf  
 	FROM 
-	bctw.animal_v 
+	bctw.animal 
 	WHERE 
 	capture_utm_easting  IS NOT NULL AND 
 	capture_utm_northing  IS NOT NULL AND
@@ -378,44 +382,53 @@ WITH tform AS (
 ),
 coords AS (
 	SELECT 
-		(CASE WHEN capture_latitude  IS NULL THEN st_y(tform.stf) ELSE capture_latitude  END) AS latitude,
-		(CASE WHEN capture_longitude  IS NULL THEN st_x(tform.stf) ELSE capture_longitude  END) AS longitude,
+		(CASE WHEN capture_latitude  IS NULL THEN public.st_y(tform.stf) ELSE capture_latitude  END) AS latitude,
+		(CASE WHEN capture_longitude  IS NULL THEN public.st_x(tform.stf) ELSE capture_longitude  END) AS longitude,
 		a.critter_transaction_id
-	FROM bctw.animal_v a LEFT JOIN tform ON a.critter_transaction_id = tform.critter_transaction_id
+	FROM bctw.animal a LEFT JOIN tform ON a.critter_transaction_id = tform.critter_transaction_id
 )
 SELECT 
 crypto.gen_random_uuid() AS location_id,
 a.critter_id,
 latitude,
 longitude,
-(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE st_contains(wmu_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS wmu_id,
-(SELECT region_nr_id FROM lk_region_nr WHERE st_contains(region_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS region_nr_id,
-(SELECT region_env_id FROM lk_region_env WHERE st_contains(region_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS region_env_id
+NULL::float8 AS coordinate_uncertainty,
+NULL::coordinate_uncertainty_unit AS coordinate_uncertainty_unit,
+(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE public.st_contains(wmu_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS wmu_id,
+(SELECT region_nr_id FROM lk_region_nr WHERE public.st_contains(region_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS region_nr_id,
+(SELECT region_env_id FROM lk_region_env WHERE public.st_contains(region_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS region_env_id
 FROM 
-	bctw.animal_v a JOIN coords t ON a.critter_transaction_id = t.critter_transaction_id
-WHERE valid_to IS NULL AND capture_date IS NOT NULL;
+	bctw.animal a JOIN coords t ON a.critter_transaction_id = t.critter_transaction_id
+WHERE valid_to IS NULL AND capture_date IS NOT NULL
+AND num_nonnulls(capture_latitude, capture_longitude, capture_utm_easting, capture_utm_northing) > 0;
 
-INSERT INTO capture_locations 
-longest_line AS (SELECT unit_name, ST_Centroid(unit_geom) AS unit_center, ST_LongestLine(unit_geom, ST_Centroid(unit_geom)) AS linestring FROM lk_population_unit_temp),
-pop_uncertainty AS (SELECT unit_name, unit_center, ST_DistanceSphere(st_pointn(longest_line.linestring, 1), st_pointn(longest_line.linestring, 2)) AS uncertainty FROM longest_line)
+
+/*
+* Special case where critters do not have capture information but do belong to a population unit.
+* In this case we take the centroid of the herd boundary as capture coordinate and use the longest line between the centroid and a vertex of the polygon
+* as the coordinate uncertainty.
+*/
+INSERT INTO capture_locations
+WITH
+longest_line AS (SELECT unit_name, public.st_Centroid(unit_geom) AS unit_center, public.st_LongestLine(unit_geom, public.st_Centroid(unit_geom)) AS linestring FROM lk_population_unit_temp),
+pop_uncertainty AS (SELECT unit_name, unit_center, public.st_DistanceSphere(public.st_pointn(longest_line.linestring, 1), public.st_pointn(longest_line.linestring, 2)) AS uncertainty FROM longest_line)
 SELECT 
 crypto.gen_random_uuid() AS location_id,
 a.critter_id, 
-st_y(unit_center) AS latitude,
-st_x(unit_center) AS longitude,
+public.st_y(unit_center) AS latitude,
+public.st_x(unit_center) AS longitude,
 uncertainty AS coordinate_uncertainty,
 'm' AS "coordinate_uncertainty_unit",
-(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE st_contains(wmu_geom, st_setsrid(unit_center, 4326))) AS wmu_id,
-(SELECT region_nr_id FROM lk_region_nr WHERE st_contains(region_geom, st_setsrid(unit_center, 4326))) AS region_nr_id,
-(SELECT region_env_id FROM lk_region_env WHERE st_contains(region_geom, st_setsrid(unit_center, 4326))) AS region_env_id
-FROM bctw.animal_v a LEFT JOIN pop_uncertainty p ON a.population_unit = p.unit_name
+(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE public.st_contains(wmu_geom, public.st_setsrid(unit_center, 4326))) AS wmu_id,
+(SELECT region_nr_id FROM lk_region_nr WHERE public.st_contains(region_geom, public.st_setsrid(unit_center, 4326))) AS region_nr_id,
+(SELECT region_env_id FROM lk_region_env WHERE public.st_contains(region_geom, public.st_setsrid(unit_center, 4326))) AS region_env_id
+FROM bctw.animal a LEFT JOIN pop_uncertainty p ON a.population_unit = p.unit_name
 WHERE valid_to IS NULL AND 
-num_nonnulls(a.capture_latitude, a.capture_longitude, a.capture_utm_easting, a.capture_utm_northing, a.capture_utm_zone) = 0 AND 
+num_nonnulls(a.capture_latitude, a.capture_longitude, a.capture_utm_easting, a.capture_utm_northing) = 0 AND 
 a.population_unit IS NOT NULL AND 
 a.capture_date IS NOT NULL;
 
-
-INSERT INTO "location" (location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id)
+INSERT INTO location (location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id)
 SELECT location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id FROM capture_locations;
 
 CREATE TEMP TABLE IF NOT EXISTS release_locations AS
@@ -423,9 +436,9 @@ WITH tform AS (
 	SELECT 
 		critter_id, 
 		critter_transaction_id, 
-		st_transform(st_setsrid(st_makepoint(release_utm_easting, release_utm_northing), 32600 + release_utm_zone), 4326) AS stf  
+		public.st_transform(public.st_setsrid(public.st_makepoint(release_utm_easting, release_utm_northing), 32600 + release_utm_zone), 4326) AS stf  
 	FROM 
-	bctw.animal_v 
+	bctw.animal 
 	WHERE 
 	release_utm_easting IS NOT NULL AND 
 	release_utm_northing IS NOT NULL AND
@@ -433,24 +446,24 @@ WITH tform AS (
 ),
 coords AS (
 	SELECT 
-		(CASE WHEN release_latitude IS NULL THEN st_y(tform.stf) ELSE release_latitude  END) AS latitude,
-		(CASE WHEN release_longitude  IS NULL THEN st_x(tform.stf) ELSE release_longitude  END) AS longitude,
+		(CASE WHEN release_latitude IS NULL THEN public.st_y(tform.stf) ELSE release_latitude  END) AS latitude,
+		(CASE WHEN release_longitude  IS NULL THEN public.st_x(tform.stf) ELSE release_longitude  END) AS longitude,
 		a.critter_transaction_id
-	FROM bctw.animal_v a LEFT JOIN tform ON a.critter_transaction_id = tform.critter_transaction_id
+	FROM bctw.animal a LEFT JOIN tform ON a.critter_transaction_id = tform.critter_transaction_id
 )
 SELECT 
 crypto.gen_random_uuid() AS location_id,
 a.critter_id,
 latitude,
 longitude,
-(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE st_contains(wmu_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS wmu_id,
-(SELECT region_nr_id FROM lk_region_nr WHERE st_contains(region_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS region_nr_id,
-(SELECT region_env_id FROM lk_region_env WHERE st_contains(region_geom, st_setsrid(st_makepoint(longitude, latitude ), 4326))) AS region_env_id
+(SELECT wmu_id FROM lk_wildlife_management_unit lwmu WHERE public.st_contains(wmu_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS wmu_id,
+(SELECT region_nr_id FROM lk_region_nr WHERE public.st_contains(region_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS region_nr_id,
+(SELECT region_env_id FROM lk_region_env WHERE public.st_contains(region_geom, public.st_setsrid(public.st_makepoint(longitude, latitude ), 4326))) AS region_env_id
 FROM 
-	bctw.animal_v a JOIN coords t ON a.critter_transaction_id = t.critter_transaction_id
+	bctw.animal a JOIN coords t ON a.critter_transaction_id = t.critter_transaction_id
 WHERE valid_to IS NULL AND release_date IS NOT NULL;
 
-INSERT INTO "location" (location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id)
+INSERT INTO location (location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id)
 SELECT location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id FROM release_locations;
 
 INSERT INTO capture (capture_id, critter_id, capture_location_id, release_location_id, capture_timestamp, release_timestamp, capture_comment, release_comment)
@@ -461,18 +474,15 @@ a.critter_id,
 (SELECT location_id FROM release_locations WHERE release_locations.critter_id = a.critter_id) AS release_location_id,
 capture_date AS capture_timestamp,
 release_date AS release_timestamp,
-(CASE WHEN num_nonnulls(a.capture_latitude, a.capture_longitude, a.capture_utm_easting, a.capture_utm_northing, a.capture_utm_zone) = 0 THEN 
+(CASE WHEN num_nonnulls(a.capture_latitude, a.capture_longitude, a.capture_utm_easting, a.capture_utm_northing) = 0 THEN 
 	capture_comment || '<Note: Real capture coordinates were missing from BCTW, this data is approximated.>'
 ELSE
 	capture_comment
 END),
 release_comment
 FROM 
-	bctw.animal_v a
+	bctw.animal a
 WHERE valid_to IS NULL AND capture_date IS NOT NULL;
-
-SELECT * FROM capture;
-
 
 /*
  * Converts ear_tag_left_id column of BCTW to marking table entries in Critterbase.
@@ -483,7 +493,7 @@ sec AS (
 SELECT
 		critter_transaction_id,
 		(regexp_matches(ear_tag_left_id, '([a-zA-Z]+?)(w|WITH|with)([a-zA-Z]+?)(\d+?|button|button\d+?)'))[3] AS ear_tag_secondary
-FROM bctw.animal_v
+FROM bctw.animal
 )
 SELECT 
 crypto.gen_random_uuid() AS marking_id,
@@ -492,14 +502,14 @@ NULL::uuid AS capture_id,
 NULL::uuid AS mortality_id,
 (SELECT taxon_marking_body_location_id FROM xref_taxon_marking_body_location WHERE body_location = 'Left Ear') AS taxon_marking_body_location_id,
 (SELECT marking_type_id FROM lk_marking_type WHERE name = 'Ear Tag') AS marking_type_id,
-(SELECT marking_material_id FROM lk_material_type WHERE material = 'Plastic') AS marking_material_id,
+(SELECT marking_material_id FROM lk_marking_material  WHERE material = 'Plastic') AS marking_material_id,
 (SELECT colour_id FROM lk_colour WHERE  substring(a.ear_tag_left_id, '[a-zA-Z]+') ~* ('^' || colour)) AS primary_colour,
 (SELECT colour_id FROM lk_colour WHERE  ear_tag_secondary ~* ('^' || colour)) AS secondary_colour,
 (SELECT substring(a.ear_tag_left_id, '\d*-?\d+')) AS identifier,
-(SELECT capture_date FROM bctw.animal_v a2 WHERE a.ear_tag_left_id = a2.ear_tag_left_id AND a.critter_id = a2.critter_id ORDER BY capture_date ASC LIMIT 1) AS attached_timestamp,
+(SELECT capture_date FROM bctw.animal a2 WHERE a.ear_tag_left_id = a2.ear_tag_left_id AND a.critter_id = a2.critter_id ORDER BY capture_date ASC LIMIT 1) AS attached_timestamp,
 'Ported from BCTW, original data: < ' || a.ear_tag_left_id || ' >' AS comment
 FROM 
-bctw.animal_v a LEFT JOIN sec ON a.critter_transaction_id  = sec.critter_transaction_id
+bctw.animal a LEFT JOIN sec ON a.critter_transaction_id  = sec.critter_transaction_id
 WHERE a.ear_tag_left_id IS NOT NULL AND a.ear_tag_left_id != '' AND a.ear_tag_left_id != 'None' AND a.ear_tag_left_id != 'NR' 
 AND valid_to IS NULL;
 
@@ -512,7 +522,7 @@ sec AS (
 SELECT
 		critter_transaction_id,
 		(regexp_matches(ear_tag_right_id, '([a-zA-Z]+?)(w|WITH|with)([a-zA-Z]+?)(\d+?|button|button\d+?)'))[3] AS ear_tag_secondary
-FROM bctw.animal_v
+FROM bctw.animal
 )
 SELECT 
 crypto.gen_random_uuid() AS marking_id,
@@ -521,14 +531,14 @@ NULL::uuid AS capture_id,
 NULL::uuid AS mortality_id,
 (SELECT taxon_marking_body_location_id FROM xref_taxon_marking_body_location WHERE body_location = 'Right Ear') AS taxon_marking_body_location_id,
 (SELECT marking_type_id FROM lk_marking_type WHERE name = 'Ear Tag') AS marking_type_id,
-(SELECT marking_material_id FROM lk_material_type WHERE material = 'Plastic') AS marking_material_id,
+(SELECT marking_material_id FROM lk_marking_material  WHERE material = 'Plastic') AS marking_material_id,
 (SELECT colour_id FROM lk_colour WHERE  substring(a.ear_tag_right_id, '[a-zA-Z]+') ~* ('^' || colour)) AS primary_colour,
 (SELECT colour_id FROM lk_colour WHERE  ear_tag_secondary ~* ('^' || colour)) AS secondary_colour,
 (SELECT substring(a.ear_tag_right_id, '\d*-?\d+')) AS identifier,
-(SELECT capture_date FROM bctw.animal_v a2 WHERE a.ear_tag_right_id = a2.ear_tag_right_id AND a.critter_id = a2.critter_id ORDER BY capture_date ASC LIMIT 1) AS attachment_start,
+(SELECT capture_date FROM bctw.animal a2 WHERE a.ear_tag_right_id = a2.ear_tag_right_id AND a.critter_id = a2.critter_id ORDER BY capture_date ASC LIMIT 1) AS attachment_start,
 'Ported from BCTW, original data: < ' || a.ear_tag_right_id || ' >' AS comment
 FROM 
-bctw.animal_v a LEFT JOIN sec ON a.critter_transaction_id  = sec.critter_transaction_id
+bctw.animal a LEFT JOIN sec ON a.critter_transaction_id  = sec.critter_transaction_id
 WHERE a.ear_tag_right_id IS NOT NULL AND a.ear_tag_right_id != '' AND a.ear_tag_right_id != 'None' AND a.ear_tag_right_id != 'NR'
 AND valid_to IS NULL;
 
@@ -544,13 +554,13 @@ SELECT
 	NULL::uuid AS capture_id,
 	NULL::uuid AS mortality_id,
 	(CASE WHEN juvenile_at_heel = 'Yes' THEN 
-		(SELECT qualitative_option_id FROM xref_taxon_measurement_qualitative_option WHERE option_label = 'Yes')
+		(SELECT qualitative_option_id FROM xref_taxon_measurement_qualitative_option WHERE option_label = 'True')
 	ELSE
-		(SELECT qualitative_option_id FROM xref_taxon_measurement_qualitative_option WHERE option_label = 'No')
+		(SELECT qualitative_option_id FROM xref_taxon_measurement_qualitative_option WHERE option_label = 'False')
 	END) AS qualitative_option_id,
 	'Ported from BCTW, original data: < ' || juvenile_at_heel || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal_v WHERE valid_to IS NULL AND juvenile_at_heel IS NOT NULL AND juvenile_at_heel != 'Unknown';
+FROM bctw.animal WHERE valid_to IS NULL AND juvenile_at_heel IS NOT NULL AND juvenile_at_heel != 'Unknown';
 
 /*
  * Converts BCTW rows with juvenile_at_heel = No to a quantitative row with value 0
@@ -565,7 +575,7 @@ SELECT
 	0 AS value,
 	'Ported from BCTW, original data: < ' || juvenile_at_heel || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal_v WHERE valid_to IS NULL AND juvenile_at_heel = 'No';
+FROM bctw.animal WHERE valid_to IS NULL AND juvenile_at_heel = 'No';
 
 
 
@@ -593,14 +603,14 @@ SELECT
 	NULL::uuid AS capture_id,
 	NULL::uuid AS mortality_id,
 	(CASE WHEN species ='Grey Wolf' THEN 
-		(SELECT qualitative_option_id FROM options_with_taxon WHERE taxon_name_latin = 'Canis lupus' AND option_label ILIKE life_stage)
+		(SELECT qualitative_option_id FROM options_with_taxons WHERE taxon_name_latin = 'Canis lupus' AND option_label ILIKE life_stage)
 	 ELSE
-		(SELECT qualitative_option_id FROM options_with_taxon WHERE taxon_name_latin = 'Artiodactyla' AND option_label ILIKE life_stage)
+		(SELECT qualitative_option_id FROM options_with_taxons WHERE taxon_name_latin = 'Artiodactyla' AND option_label ILIKE life_stage)
 	 END
 	) AS qualitative_option_id,
 	'Ported from BCTW, original data: < ' || life_stage || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal_v WHERE valid_to IS NULL AND life_stage IS NOT NULL;
+FROM bctw.animal WHERE valid_to IS NULL AND life_stage IS NOT NULL;
 
 /*
  * Converts BCTW rows with estimated_age to a quantitative measurement
@@ -615,7 +625,7 @@ SELECT
 	estimated_age AS value,
 	'Ported from BCTW, original data: < ' || estimated_age || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal_v WHERE valid_to IS NULL AND estimated_age IS NOT NULL;
+FROM bctw.animal WHERE valid_to IS NULL AND estimated_age IS NOT NULL;
 
 DROP TABLE bctw.animal;
 DROP SCHEMA bctw;

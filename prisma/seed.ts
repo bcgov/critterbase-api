@@ -3,6 +3,7 @@ import { queryRandomUUID } from './prisma_utils';
 import { regionStructureList } from './seed_scripts/seed_regions'
 import { insertDefaultTaxons } from './seed_scripts/seed_taxons';
 import * as fs from 'fs';
+import path from 'path';
 const prisma = new PrismaClient();
 
 
@@ -75,7 +76,7 @@ async function main() {
         })
     }
 
-    const colours = ['Blue', 'Red', 'Yellow', 'Orange', 'Black', 'Green', 'Pink', 'White', ' Purple'];
+    const colours = ['Blue', 'Red', 'Yellow', 'Orange', 'Black', 'Green', 'Pink', 'White', 'Purple'];
     await prisma.lk_colour.createMany({
         data: colours.map(c => {return {colour: c}})
     })
@@ -188,16 +189,33 @@ async function main() {
         data: quantitativeMeasures.map(q => {return {measurement_name: q.name, taxon_id: q.taxon }})
     })
     
-    /*
-    const sql = fs
-    .readFileSync('./seed_scripts/import_bctw_animal_data.sql')
+    //Have to do this mess of string manipulation because prisma execute raw will only allow you to run one statement at a time.
+    const sqls = fs
+    .readFileSync(path.join(__dirname, './seed_scripts/import_bctw_animal_data.sql'))
     .toString()
     .replace(/(\r\n|\n|\r)/gm, ' ') // remove newlines
-    .replace(/\s+/g, ' ') // excess white space
+    .split(/\s*;\s*(?=(?:[^']*'[^']*')*[^']*$)/); //this just scans for semicolons that are not enclosed in strings. yes there are semicolons in some of this data...
 
-    await prisma.$executeRawUnsafe(sql);
-    */
+    for(const sql of sqls) {
+        await prisma.$executeRawUnsafe(sql);
+    }
+    
 
+}
+
+async function test() {
+    prisma.$connect();
+    const sqls = fs
+    .readFileSync(path.join(__dirname, './seed_scripts/import_bctw_animal_data.sql'))
+    .toString()
+    .replace(/(\r\n|\n|\r)/gm, ' ') // remove newlines
+    .split(/\s*;\s*(?=(?:[^']*'[^']*')*[^']*$)/); //this just scans for semicolons that are not enclosed in strings. yes there are semicolons in some of this data...
+
+    for(const sql of sqls) {
+        console.log('~~~~~~~~~~~~~~~')
+        console.log(sql);
+        console.log('~~~~~~~~~~~~~~~')
+    }
 }
 
 main()
