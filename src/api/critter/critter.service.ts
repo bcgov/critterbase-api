@@ -1,9 +1,8 @@
 import { prisma } from "../../utils/constants";
 import type { critter } from "@prisma/client";
 
-const getCritters = async (): Promise<critter[]> => {
-  const allCritters = await prisma.critter.findMany();
-  return allCritters;
+const getAllCritters = async (): Promise<critter[]> => {
+  return await prisma.critter.findMany();
 };
 
-export { getCritters };
+export { getAllCritters };
