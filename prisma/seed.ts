@@ -10,6 +10,8 @@ const prisma = new PrismaClient();
 async function main() {
     const systemUserUUID = await queryRandomUUID(prisma);
 
+    await prisma.$executeRaw`ALTER TABLE critterbase."user" DISABLE TRIGGER all`;
+
     /**
      * Create system user, which is required for auto filling the create and update user of all subsequent rows.
      */
@@ -24,6 +26,8 @@ async function main() {
             update_user: systemUserUUID
         }
     })
+
+    await prisma.$executeRaw`ALTER TABLE critterbase."user" ENABLE TRIGGER all`;
 
     /**
      * Insert all region table values.
