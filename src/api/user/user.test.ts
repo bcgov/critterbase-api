@@ -1,10 +1,27 @@
 import { request } from "../../utils/utils.test";
 import { getUsers } from "./user.service";
+import type { user } from "@prisma/client";
+import { uuidRegex } from "../../utils/middleware";
+
+
+function isUser(user: any): user is user {
+  return (
+    typeof user.user_id === "string" && uuidRegex.test(user.user_id) &&
+    typeof user.system_user_id === "string" &&
+    typeof user.system_name === "string" &&
+    (user.keycloak_uuid === null || typeof user.keycloak_uuid === "string") &&
+    typeof user.create_user === "string" && uuidRegex.test(user.create_user) &&
+    typeof user.update_user === "string" && uuidRegex.test(user.update_user) &&
+    user.create_timestamp instanceof Date &&
+    user.update_timestamp instanceof Date
+  );
+}
+
 
 describe("API: User", () => {
   describe("SERVICES", () => {
     describe("getUsers()", () => {
-      it("returns an array of users", async () => {
+      it("returns an array", async () => {
         const users = await getUsers();
         expect.assertions(2);
         expect(users).toBeInstanceOf(Array);
@@ -13,16 +30,9 @@ describe("API: User", () => {
 
       it("returns users with correct properties", async () => {
         const users = await getUsers();
-        expect.assertions(users.length * 8);
+        expect.assertions(users.length);
         for (const user of users) {
-          expect(user.user_id).toBeDefined();
-          expect(user.system_user_id).toBeDefined();
-          expect(user.system_name).toBeDefined();
-          expect(user.keycloak_uuid).toBeDefined();
-          expect(user.create_user).toBeDefined();
-          expect(user.update_user).toBeDefined();
-          expect(user.create_timestamp).toBeDefined();
-          expect(user.update_timestamp).toBeDefined();
+          expect(isUser(user)).toBe(true);
         }
       });
     });
@@ -44,9 +54,9 @@ describe("API: User", () => {
       });
 
       it("should return users with correct properties", async () => {
-        expect.assertions(9);
         const res = await request.get("/api/users");
         const users = res.body;
+        expect.assertions(users.length * 8);
         for (const user of users) {
           expect(user.user_id).toBeDefined();
           expect(user.system_user_id).toBeDefined();
