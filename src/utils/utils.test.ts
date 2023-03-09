@@ -16,7 +16,7 @@ describe("Utils", () => {
     } as unknown as Response;
     let server: any;
 
-    beforeEach((done) => {
+    beforeAll((done) => {
       server = app.listen(4000, () => {
         done();
       });
@@ -24,7 +24,7 @@ describe("Utils", () => {
       jest.spyOn(console, "log").mockImplementation(() => {});
     });
 
-    afterEach((done) => {
+    afterAll((done) => {
       server && server.close(done);
     });
     describe("home()", () => {
