@@ -25,7 +25,7 @@ userRouter.post(
   catchErrors(async (req: Request, res: Response) => {
     const userData = req.body;
     const newUser = await createUser(userData);
-    return res.status(201).json(`Post new user`);
+    return res.status(201).json(newUser);
   })
 );
 

@@ -1,8 +1,9 @@
 import { prisma } from "../../utils/constants";
-import type { user } from "@prisma/client";
+import type { user, Prisma } from "@prisma/client";
 
-const createUser = async (data: user): Promise<user> => {
-  const newUser = await prisma.user.create({ data });
+const createUser = async (newUserData: Prisma.userCreateInput): Promise<user> => {
+  console.log(newUserData)
+  const newUser = await prisma.user.create({ data:newUserData, });
   return newUser;
 };
 
@@ -32,7 +33,6 @@ const updateUser = async (user_id: string, data: user): Promise<user> => {
 
 const deleteUser = async (user_id: string): Promise<user> => {
   const deletedUser = await prisma.user.delete({
-    //TODO: implement soft-deletion?
     where: {
       user_id: user_id,
     },
