@@ -1,7 +1,15 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors, validateUuidParam } from "../../utils/middleware";
-import { createUser, deleteUser, getUser, getUsers, updateUser } from "./user.service";
+import {
+  createUser,
+  deleteUser,
+  getUser,
+  getUserBySystemId,
+  getUsers,
+  updateUser,
+  upsertUser,
+} from "./user.service";
 import { apiError, uuid } from "../../utils/types";
 
 export const userRouter = express.Router();
@@ -24,7 +32,7 @@ userRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const userData = req.body;
-    const newUser = await createUser(userData);
+    const newUser = await upsertUser(userData);
     return res.status(201).json(newUser);
   })
 );
@@ -55,6 +63,19 @@ userRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
+
+      // check if any unique columns are being updated
+      const { user_id, system_user_id } = req.body;
+      if (system_user_id) {
+        // requesting id change
+        const currentSUI = (await getUser(id))?.system_user_id;
+        if (
+          system_user_id !== currentSUI && // new id is different
+          !!(await getUserBySystemId(system_user_id)) // id exists already
+        ) {
+          throw apiError.conflictIssue(`system_user_id ${system_user_id} already exists`);
+        }
+      }
       const user = await updateUser(id, req.body);
       return res.status(200).json(user);
     })
