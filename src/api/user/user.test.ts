@@ -70,6 +70,7 @@ describe("API: User", () => {
         expect.assertions(1);
         expect(isUser(returnedUser)).toBe(true);
       });
+
       it("returned user matches the input", async () => {
         const mockUser = newUser();
         const returnedUser = await createUser(mockUser);
@@ -84,6 +85,7 @@ describe("API: User", () => {
         expect.assertions(1);
         expect(isUser(returnedUser)).toBe(true);
       });
+
       it("returned user matches the input", async () => {
         const mockUser = newUser();
         const returnedUser = await upsertUser(mockUser);
@@ -142,6 +144,7 @@ describe("API: User", () => {
         expect(returnedUser).toBeNull();
       });
     });
+
     describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
         const mockUser = newUser();
@@ -198,6 +201,7 @@ describe("API: User", () => {
         }
       });
     });
+
     describe("POST /api/users/create", () => {
       it("returns status 201", async () => {
         expect.assertions(1);
@@ -210,6 +214,27 @@ describe("API: User", () => {
         const user = res.body;
         expect.assertions(1);
         expect(isUser(user)).toBe(true);
+      });
+
+      it("returns status 400 when data contains invalid fields", async () => {
+        const user = newUser();
+        const res = await request
+          .post("/api/users/create")
+          .send({ ...user, invalidField: "qwerty123" });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const user = newUser();
+        const res = await request
+          .post("/api/users/create")
+          .send({ // system_user_id is left out
+            system_name: user.system_name,
+            keycloak_uuid: user.keycloak_uuid,
+          });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
       });
     });
   });
