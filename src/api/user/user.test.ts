@@ -22,9 +22,17 @@ function newUser(): Prisma.userCreateInput {
   const num = randomInt(99999999);
   return {
     system_user_id: num.toString(),
-    system_name: `USER_${num}`,
+    system_name: `TEST_USER_${num}`,
     keycloak_uuid: null,
   };
+}
+
+async function cleanup() {
+  const users = await getUsers();
+  const testUserIds = users
+    .filter((user) => user.system_name.startsWith("TEST_USER_"))
+    .map((user) => user.user_id);
+  await Promise.all(testUserIds.map(deleteUser));
 }
 
 describe("API: User", () => {
@@ -106,12 +114,12 @@ describe("API: User", () => {
         expect(returnedUser).toBeNull();
       });
     });
-describe("updateUser()", () => {
+    describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
         const mockUser = newUser();
         const createdUser = await createUser(mockUser);
         const updateData: Prisma.userUpdateInput = {
-          system_name: "UPDATED_NAME",
+          system_name: mockUser.system_name + "_UPDATED",
         };
         const updatedUser = await updateUser(createdUser.user_id, updateData);
         expect.assertions(2);
@@ -172,4 +180,9 @@ describe("updateUser()", () => {
       });
     });
   });
+
+  afterAll(async () => {
+    await cleanup();
+  });
+  
 });
