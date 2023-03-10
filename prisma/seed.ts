@@ -28,7 +28,7 @@ async function main() {
     })
 
     await prisma.$executeRaw`ALTER TABLE critterbase."user" ENABLE TRIGGER all`;
-    
+
     /**
      * Insert all region table values.
      * Need to do this all with raw SQL as the geometry types are not supported by prisma.
