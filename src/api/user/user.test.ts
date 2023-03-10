@@ -12,20 +12,35 @@ import type { Prisma, user } from "@prisma/client";
 import { uuidRegex } from "../../utils/middleware";
 import { randomInt, randomUUID } from "crypto";
 
+const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
 function isUser(user: any): user is user {
-  console.log(user)
+  const isUserId =
+    typeof user.user_id === "string" && uuidRegex.test(user.user_id);
+  const isSystemUserId = typeof user.system_user_id === "string";
+  const isSystemUserName = typeof user.system_name === "string";
+  const isUserKeycloak =
+    user.keycloak_uuid === null || typeof user.keycloak_uuid === "string";
+  const isCreateUser =
+    typeof user.create_user === "string" && uuidRegex.test(user.create_user);
+  const isUpdateUser =
+    typeof user.update_user === "string" && uuidRegex.test(user.update_user);
+  const isCreateDate =
+    iso8601Regex.test(user.create_timestamp) ||
+    user.create_timestamp instanceof Date;
+  const isUpdateDate =
+    iso8601Regex.test(user.update_timestamp) ||
+    user.update_timestamp instanceof Date;
+
   return (
-    typeof user.user_id === "string" &&
-    uuidRegex.test(user.user_id) &&
-    typeof user.system_user_id === "string" &&
-    typeof user.system_name === "string" &&
-    (user.keycloak_uuid === null || typeof user.keycloak_uuid === "string") &&
-    typeof user.create_user === "string" &&
-    uuidRegex.test(user.create_user) &&
-    typeof user.update_user === "string" &&
-    uuidRegex.test(user.update_user) &&
-    user.create_timestamp instanceof Date &&
-    user.update_timestamp instanceof Date
+    isUserId &&
+    isSystemUserId &&
+    isSystemUserName &&
+    isUserKeycloak &&
+    isCreateUser &&
+    isUpdateUser &&
+    isCreateDate &&
+    isUpdateDate
   );
 }
 
@@ -195,7 +210,7 @@ describe("API: User", () => {
         const user = res.body;
         expect.assertions(1);
         expect(isUser(user)).toBe(true);
-      })
+      });
     });
   });
 
