@@ -13,6 +13,7 @@ import { uuidRegex } from "../../utils/middleware";
 import { randomInt, randomUUID } from "crypto";
 
 function isUser(user: any): user is user {
+  console.log(user)
   return (
     typeof user.user_id === "string" &&
     uuidRegex.test(user.user_id) &&
@@ -161,34 +162,40 @@ describe("API: User", () => {
 
   describe("ROUTERS", () => {
     describe("GET /api/users", () => {
-      it("should return status 200", async () => {
+      it("returns status 200", async () => {
         expect.assertions(1);
         const res = await request.get("/api/users");
         expect(res.status).toBe(200);
       });
 
-      it("should return an array of users", async () => {
-        expect.assertions(2);
+      it("returns an array", async () => {
+        expect.assertions(1);
         const res = await request.get("/api/users");
-        expect(res.status).toBe(200);
         expect(res.body).toBeInstanceOf(Array);
       });
 
-      it("should return users with correct properties", async () => {
+      it("returns users with correct properties", async () => {
         const res = await request.get("/api/users");
         const users = res.body;
-        expect.assertions(users.length * 8);
+        expect.assertions(users.length);
         for (const user of users) {
-          expect(user.user_id).toBeDefined();
-          expect(user.system_user_id).toBeDefined();
-          expect(user.system_name).toBeDefined();
-          expect(user.keycloak_uuid).toBeDefined();
-          expect(user.create_user).toBeDefined();
-          expect(user.update_user).toBeDefined();
-          expect(user.create_timestamp).toBeDefined();
-          expect(user.update_timestamp).toBeDefined();
+          expect(isUser(user)).toBe(true);
         }
       });
+    });
+    describe("POST /api/users/create", () => {
+      it("returns status 201", async () => {
+        expect.assertions(1);
+        const res = await request.post("/api/users/create").send(newUser());
+        expect(res.status).toBe(201);
+      });
+
+      it("returns a user", async () => {
+        const res = await request.post("/api/users/create").send(newUser());
+        const user = res.body;
+        expect.assertions(1);
+        expect(isUser(user)).toBe(true);
+      })
     });
   });
 
