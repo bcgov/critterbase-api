@@ -1,4 +1,4 @@
-import { request } from "../../utils/constants";
+import { request, uuidRegex } from "../../utils/constants";
 import {
   createUser,
   deleteUser,
@@ -9,9 +9,7 @@ import {
   upsertUser,
 } from "./user.service";
 import type { Prisma, user } from "@prisma/client";
-import { uuidRegex } from "../../utils/middleware";
 import { randomInt, randomUUID } from "crypto";
-import { Console } from "console";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
