@@ -240,7 +240,7 @@ INSERT INTO bctw.animal (critter_id,critter_transaction_id,animal_id,animal_stat
 	 ('958fc223-2a4f-4d87-9fee-d1fff480ec85','86acc57c-2405-472e-99a0-e99c5f3f0408','17-10658','Unknown',NULL,NULL,NULL,'2018-01-19 00:00:00-08',56.0,-125.0,NULL,NULL,10,NULL,NULL,'','',NULL,NULL,NULL,NULL,NULL,NULL,'#73B2FF','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Wolverine',false,'Omineca',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Caribou',false,'17-10658',' No status field provided.  ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2021-11-30 12:59:37.065719-08',NULL,'2021-11-30 12:59:37.065719-08',0,NULL);
 
 
-INSERT INTO critter (critter_id, taxon_id, wlh_id, animal_id, sex, responsible_region_nr_id)
+INSERT INTO critter (critter_id, taxon_id, wlh_id, animal_id, sex, responsible_region_nr_id, critter_comment)
 WITH spatial AS (
 SELECT region_nr_name, unit_name FROM lk_region_nr lrn JOIN lk_population_unit_temp lput 
 ON (public.ST_Intersects(lput.unit_geom, lrn.region_geom) AND public.ST_Relate(lrn.region_geom, lput.unit_geom, '2********'))
@@ -277,7 +277,8 @@ SELECT
 	wlh_id, 
 	animal_id, 
 	(CASE WHEN sex::text != ALL(enum_range(null::sex)::text[]) OR sex IS NULL THEN 'Unknown'::sex ELSE sex::sex END),
-	(SELECT region_nr_id FROM lk_region_nr WHERE region_nr_name = um.region_nr_name)
+	(SELECT region_nr_id FROM lk_region_nr WHERE region_nr_name = um.region_nr_name),
+	animal_comment
 	FROM 
 	bctw.animal a LEFT JOIN unit_mapping um ON a.population_unit = um.unit_name
 WHERE valid_to IS NULL AND species IS NOT NULL;
@@ -428,8 +429,8 @@ num_nonnulls(a.capture_latitude, a.capture_longitude, a.capture_utm_easting, a.c
 a.population_unit IS NOT NULL AND 
 a.capture_date IS NOT NULL;
 
-INSERT INTO location (location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id)
-SELECT location_id, latitude, longitude, wmu_id, region_nr_id, region_env_id FROM capture_locations;
+INSERT INTO location (location_id, latitude, longitude, coordinate_uncertainty, coordinate_uncertainty_unit, wmu_id, region_nr_id, region_env_id)
+SELECT location_id, latitude, longitude, coordinate_uncertainty, coordinate_uncertainty_unit, wmu_id, region_nr_id, region_env_id FROM capture_locations;
 
 CREATE TEMP TABLE IF NOT EXISTS release_locations AS
 WITH tform AS (
@@ -475,7 +476,7 @@ a.critter_id,
 capture_date AS capture_timestamp,
 release_date AS release_timestamp,
 (CASE WHEN num_nonnulls(a.capture_latitude, a.capture_longitude, a.capture_utm_easting, a.capture_utm_northing) = 0 THEN 
-	capture_comment || '<Note: Real capture coordinates were missing from BCTW, this data is approximated.>'
+	COALESCE(capture_comment, '') || '<Note: Real capture coordinates were missing from BCTW, this data is approximated.>'
 ELSE
 	capture_comment
 END),
@@ -498,7 +499,7 @@ FROM bctw.animal
 SELECT 
 crypto.gen_random_uuid() AS marking_id,
 critter_id, 
-NULL::uuid AS capture_id,
+(SELECT capture_id FROM capture c WHERE a.critter_id = c.critter_id),
 NULL::uuid AS mortality_id,
 (SELECT taxon_marking_body_location_id FROM xref_taxon_marking_body_location WHERE body_location = 'Left Ear') AS taxon_marking_body_location_id,
 (SELECT marking_type_id FROM lk_marking_type WHERE name = 'Ear Tag') AS marking_type_id,
@@ -527,7 +528,7 @@ FROM bctw.animal
 SELECT 
 crypto.gen_random_uuid() AS marking_id,
 critter_id, 
-NULL::uuid AS capture_id,
+(SELECT capture_id FROM capture c WHERE a.critter_id = c.critter_id),
 NULL::uuid AS mortality_id,
 (SELECT taxon_marking_body_location_id FROM xref_taxon_marking_body_location WHERE body_location = 'Right Ear') AS taxon_marking_body_location_id,
 (SELECT marking_type_id FROM lk_marking_type WHERE name = 'Ear Tag') AS marking_type_id,
@@ -551,7 +552,7 @@ SELECT
 	crypto.gen_random_uuid() AS measurement_qualitative_id,
 	critter_id,
 	(SELECT taxon_measurement_id FROM xref_taxon_measurement_qualitative WHERE measurement_name = 'Juvenile at heel indicator') AS taxon_measurement_id,
-	NULL::uuid AS capture_id,
+	(SELECT capture_id FROM capture c WHERE a.critter_id = c.critter_id),
 	NULL::uuid AS mortality_id,
 	(CASE WHEN juvenile_at_heel = 'Yes' THEN 
 		(SELECT qualitative_option_id FROM xref_taxon_measurement_qualitative_option WHERE option_label = 'True')
@@ -560,7 +561,7 @@ SELECT
 	END) AS qualitative_option_id,
 	'Ported from BCTW, original data: < ' || juvenile_at_heel || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal WHERE valid_to IS NULL AND juvenile_at_heel IS NOT NULL AND juvenile_at_heel != 'Unknown';
+FROM bctw.animal a WHERE valid_to IS NULL AND juvenile_at_heel IS NOT NULL AND juvenile_at_heel != 'Unknown';
 
 /*
  * Converts BCTW rows with juvenile_at_heel = No to a quantitative row with value 0
@@ -570,12 +571,12 @@ SELECT
 	crypto.gen_random_uuid() AS measurement_quantitative_id,
 	critter_id,
 	(SELECT taxon_measurement_id FROM xref_taxon_measurement_quantitative WHERE measurement_name = 'Juvenile count') AS taxon_measurement_id,
-	NULL::uuid AS capture_id,
+	(SELECT capture_id FROM capture c WHERE a.critter_id = c.critter_id),
 	NULL::uuid AS mortality_id,
 	0 AS value,
 	'Ported from BCTW, original data: < ' || juvenile_at_heel || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal WHERE valid_to IS NULL AND juvenile_at_heel = 'No';
+FROM bctw.animal a WHERE valid_to IS NULL AND juvenile_at_heel = 'No';
 
 
 
@@ -600,7 +601,7 @@ SELECT
 	 ELSE
 	 	(SELECT taxon_measurement_id FROM qualitative_with_taxons WHERE taxon_name_latin = 'Artiodactyla' AND measurement_name = 'Life Stage')
 	 END) AS taxon_measurement_id,
-	NULL::uuid AS capture_id,
+	(SELECT capture_id FROM capture c WHERE a.critter_id = c.critter_id),
 	NULL::uuid AS mortality_id,
 	(CASE WHEN species ='Grey Wolf' THEN 
 		(SELECT qualitative_option_id FROM options_with_taxons WHERE taxon_name_latin = 'Canis lupus' AND option_label ILIKE life_stage)
@@ -610,7 +611,7 @@ SELECT
 	) AS qualitative_option_id,
 	'Ported from BCTW, original data: < ' || life_stage || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal WHERE valid_to IS NULL AND life_stage IS NOT NULL;
+FROM bctw.animal a WHERE valid_to IS NULL AND life_stage IS NOT NULL;
 
 /*
  * Converts BCTW rows with estimated_age to a quantitative measurement
@@ -620,12 +621,12 @@ SELECT
 	crypto.gen_random_uuid() AS measurement_quantitative_id,
 	critter_id,
 	(SELECT taxon_measurement_id FROM xref_taxon_measurement_quantitative WHERE measurement_name = 'Estimated age') AS taxon_measurement_id,
-	NULL::uuid AS capture_id,
+	(SELECT capture_id FROM capture c WHERE a.critter_id = c.critter_id),
 	NULL::uuid AS mortality_id,
 	estimated_age AS value,
 	'Ported from BCTW, original data: < ' || estimated_age || ' >' AS measurement_comment,
 	NULL::timestamptz AS measured_timestamp
-FROM bctw.animal WHERE valid_to IS NULL AND estimated_age IS NOT NULL;
+FROM bctw.animal a WHERE valid_to IS NULL AND estimated_age IS NOT NULL;
 
-DROP TABLE bctw.animal;
-DROP SCHEMA bctw;
+--DROP TABLE bctw.animal;
+--DROP SCHEMA bctw;
