@@ -4,7 +4,6 @@ import { insertDefaultTaxons } from './seed_scripts/seed_taxons';
 import { prisma } from '../src/utils/constants'
 import * as fs from 'fs';
 import path from 'path';
-import { Prisma } from '@prisma/client';
 
 
 
