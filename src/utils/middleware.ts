@@ -85,6 +85,10 @@ const excludeAuditFields = (
   next();
 };
 
+/**
+ * * Returns a uuid validated against a regex or throws an error
+ * @param {Request} req - Express request
+ */
 const validateUuidParam = (req: Request): string => {
   if (!("id" in req.params)) {
     throw apiError.requiredProperty("user_id");

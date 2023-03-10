@@ -13,6 +13,10 @@ import { randomInt, randomUUID } from "crypto";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
+/**
+ * * Checks if an object matches the format for a user.
+ * @param {*} user
+ */
 function isUser(user: any): user is user {
   const isUserId =
     typeof user.user_id === "string" && uuidRegex.test(user.user_id);
@@ -43,6 +47,9 @@ function isUser(user: any): user is user {
   );
 }
 
+/**
+ * * Returns a randomly generated user that can be insterted to the database
+ */
 function newUser(): Prisma.userCreateInput {
   const num = randomInt(99999999);
   return {
@@ -52,6 +59,9 @@ function newUser(): Prisma.userCreateInput {
   };
 }
 
+/**
+ * * Removes all test generated users from the database
+ */
 async function cleanup() {
   const users = await getUsers();
   const testUserIds = users
