@@ -2,7 +2,6 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors, validateUuidParam } from "../../utils/middleware";
 import {
-  createUser,
   deleteUser,
   getUser,
   getUserBySystemId,
@@ -10,7 +9,7 @@ import {
   updateUser,
   upsertUser,
 } from "./user.service";
-import { apiError, uuid } from "../../utils/types";
+import { apiError } from "../../utils/types";
 
 export const userRouter = express.Router();
 
