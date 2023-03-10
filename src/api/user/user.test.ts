@@ -165,7 +165,7 @@ describe("API: User", () => {
     });
 
     describe("deleteUser()", () => {
-      it("deletes a user", async () => {
+      it("returns deleted user and removes user from database", async () => {
         const mockUser = newUser();
         const createdUser = await createUser(mockUser);
         const deletedUser = await deleteUser(createdUser.user_id);
@@ -216,6 +216,20 @@ describe("API: User", () => {
         expect(isUser(user)).toBe(true);
       });
 
+      it("updates an existing user if the system_user_id already present", async() => {
+        const res = await request.post("/api/users/create").send(newUser());
+        const user = res.body;
+        const res2 = await request.post("/api/users/create").send({ ...newUser(), system_user_id:user.system_user_id });
+        const user2 = res2.body;
+        console.log(user, user2)
+        expect.assertions(5);
+        expect(user.system_user_id).toStrictEqual(user2.system_user_id);
+        expect(user.user_id).toStrictEqual(user2.user_id);
+        expect(user.system_name === user2.system_name).toBeFalsy(); //name was updated
+        expect(user.create_timestamp).toStrictEqual(user2.create_timestamp);
+        expect(user.update_timestamp === user2.update_timestamp).toBeFalsy(); //timestamp updated
+      });
+
       it("returns status 400 when data contains invalid fields", async () => {
         const user = newUser();
         const res = await request
@@ -235,6 +249,28 @@ describe("API: User", () => {
           });
         expect.assertions(1);
         expect(res.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/users/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.get(`/api/users/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      })
+
+      it("returns status 200", async() => {
+        const user = await createUser(newUser());
+        const res = await request.get(`/api/users/${user.user_id}`)
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a user", async () => {
+        const user = await createUser(newUser());
+        const res = await request.get(`/api/users/${user.user_id}`)
+        expect.assertions(1);
+        expect(isUser(res.body)).toBe(true);
       });
     });
   });
