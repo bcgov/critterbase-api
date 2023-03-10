@@ -11,6 +11,7 @@ import {
 import type { Prisma, user } from "@prisma/client";
 import { uuidRegex } from "../../utils/middleware";
 import { randomInt, randomUUID } from "crypto";
+import { Console } from "console";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
@@ -216,12 +217,14 @@ describe("API: User", () => {
         expect(isUser(user)).toBe(true);
       });
 
-      it("updates an existing user if the system_user_id already present", async() => {
+      it("updates an existing user if the system_user_id already present", async () => {
         const res = await request.post("/api/users/create").send(newUser());
         const user = res.body;
-        const res2 = await request.post("/api/users/create").send({ ...newUser(), system_user_id:user.system_user_id });
+        const res2 = await request
+          .post("/api/users/create")
+          .send({ ...newUser(), system_user_id: user.system_user_id });
         const user2 = res2.body;
-        console.log(user, user2)
+        console.log(user, user2);
         expect.assertions(5);
         expect(user.system_user_id).toStrictEqual(user2.system_user_id);
         expect(user.user_id).toStrictEqual(user2.user_id);
@@ -241,12 +244,11 @@ describe("API: User", () => {
 
       it("returns status 400 when data is missing required fields", async () => {
         const user = newUser();
-        const res = await request
-          .post("/api/users/create")
-          .send({ // system_user_id is left out
-            system_name: user.system_name,
-            keycloak_uuid: user.keycloak_uuid,
-          });
+        const res = await request.post("/api/users/create").send({
+          // system_user_id is left out
+          system_name: user.system_name,
+          keycloak_uuid: user.keycloak_uuid,
+        });
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
@@ -257,20 +259,74 @@ describe("API: User", () => {
         const res = await request.get(`/api/users/${randomUUID()}`);
         expect.assertions(1);
         expect(res.status).toBe(404);
-      })
+      });
 
-      it("returns status 200", async() => {
+      it("returns status 200", async () => {
         const user = await createUser(newUser());
-        const res = await request.get(`/api/users/${user.user_id}`)
+        const res = await request.get(`/api/users/${user.user_id}`);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns a user", async () => {
         const user = await createUser(newUser());
-        const res = await request.get(`/api/users/${user.user_id}`)
+        const res = await request.get(`/api/users/${user.user_id}`);
         expect.assertions(1);
         expect(isUser(res.body)).toBe(true);
+      });
+    });
+
+    describe("PUT /api/users/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.put(`/api/users/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const user = await createUser(newUser());
+        const res = await request.put(`/api/users/${user.user_id}`);
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a user", async () => {
+        const user = await createUser(newUser());
+        const res = await request.put(`/api/users/${user.user_id}`);
+        expect.assertions(1);
+        expect(isUser(res.body)).toBe(true);
+      });
+
+      it("returns status 409 when system_user_id already taken", async () => {
+        const user1 = await createUser(newUser());
+        const user2 = await createUser(newUser());
+        const res = await request
+          .put(`/api/users/${user2.user_id}`)
+          .send({ system_user_id: user1.system_user_id });
+        expect.assertions(1);
+        expect(res.status).toBe(409);
+      });
+    });
+
+    describe("DELETE /api/users/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.delete(`/api/users/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const user = await createUser(newUser());
+        const res = await request.delete(`/api/users/${user.user_id}`);
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns user deleted message", async () => {
+        const user = await createUser(newUser());
+        const res = await request.delete(`/api/users/${user.user_id}`);
+        expect.assertions(1);
+        expect(res.body).toStrictEqual(`User ${user.user_id} has been deleted`);
       });
     });
   });
