@@ -1,18 +1,28 @@
 import { request } from "../../utils/constants";
-import { createUser, deleteUser, getUser, getUserBySystemId, getUsers, updateUser, upsertUser } from "./user.service";
+import {
+  createUser,
+  deleteUser,
+  getUser,
+  getUserBySystemId,
+  getUsers,
+  updateUser,
+  upsertUser,
+} from "./user.service";
 import type { Prisma, user } from "@prisma/client";
 import { uuidRegex } from "../../utils/middleware";
 import { randomInt, randomUUID } from "crypto";
 
-
 function isUser(user: any): user is user {
   return (
-    typeof user.user_id === "string" && uuidRegex.test(user.user_id) &&
+    typeof user.user_id === "string" &&
+    uuidRegex.test(user.user_id) &&
     typeof user.system_user_id === "string" &&
     typeof user.system_name === "string" &&
     (user.keycloak_uuid === null || typeof user.keycloak_uuid === "string") &&
-    typeof user.create_user === "string" && uuidRegex.test(user.create_user) &&
-    typeof user.update_user === "string" && uuidRegex.test(user.update_user) &&
+    typeof user.create_user === "string" &&
+    uuidRegex.test(user.create_user) &&
+    typeof user.update_user === "string" &&
+    uuidRegex.test(user.update_user) &&
     user.create_timestamp instanceof Date &&
     user.update_timestamp instanceof Date
   );
@@ -39,8 +49,8 @@ describe("API: User", () => {
   describe("SERVICES", () => {
     describe("createUser()", () => {
       it("returns a user", async () => {
-      const mockUser = newUser();
-      const returnedUser = await createUser(mockUser);
+        const mockUser = newUser();
+        const returnedUser = await createUser(mockUser);
         expect.assertions(1);
         expect(isUser(returnedUser)).toBe(true);
       });
@@ -49,21 +59,21 @@ describe("API: User", () => {
         const returnedUser = await createUser(mockUser);
         expect.assertions(1);
         expect(returnedUser).toMatchObject(mockUser);
-      })
+      });
     });
     describe("upsertUser()", () => {
       it("returns a user", async () => {
         const mockUser = newUser();
         const returnedUser = await upsertUser(mockUser);
-          expect.assertions(1);
-          expect(isUser(returnedUser)).toBe(true);
-        });
-        it("returned user matches the input", async () => {
-          const mockUser = newUser();
-          const returnedUser = await upsertUser(mockUser);
-          expect.assertions(1);
-          expect(returnedUser).toMatchObject(mockUser);
-        })
+        expect.assertions(1);
+        expect(isUser(returnedUser)).toBe(true);
+      });
+      it("returned user matches the input", async () => {
+        const mockUser = newUser();
+        const returnedUser = await upsertUser(mockUser);
+        expect.assertions(1);
+        expect(returnedUser).toMatchObject(mockUser);
+      });
     });
     describe("getUsers()", () => {
       it("returns an array", async () => {
@@ -97,17 +107,19 @@ describe("API: User", () => {
         expect(returnedUser).toBeNull();
       });
     });
-    
+
     describe("getUserBySystemId()", () => {
       it("returns a user when given a valid system user ID", async () => {
         const mockUser = newUser();
         const createdUser = await createUser(mockUser);
-        const returnedUser = await getUserBySystemId(createdUser.system_user_id);
+        const returnedUser = await getUserBySystemId(
+          createdUser.system_user_id
+        );
         expect.assertions(2);
         expect(isUser(returnedUser)).toBe(true);
         expect(returnedUser).toMatchObject(createdUser);
       });
-    
+
       it("returns null when given an invalid system user ID", async () => {
         const returnedUser = await getUserBySystemId("invalid_system_user_id");
         expect.assertions(1);
@@ -147,7 +159,6 @@ describe("API: User", () => {
     });
   });
 
-
   describe("ROUTERS", () => {
     describe("GET /api/users", () => {
       it("should return status 200", async () => {
@@ -184,5 +195,4 @@ describe("API: User", () => {
   afterAll(async () => {
     await cleanup();
   });
-  
 });

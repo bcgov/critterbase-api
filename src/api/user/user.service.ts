@@ -44,7 +44,10 @@ const getUserBySystemId = async (
   return user;
 };
 
-const updateUser = async (user_id: string, data: Prisma.userUpdateInput): Promise<user> => {
+const updateUser = async (
+  user_id: string,
+  data: Prisma.userUpdateInput
+): Promise<user> => {
   const updatedUser = await prisma.user.update({
     where: {
       user_id: user_id,

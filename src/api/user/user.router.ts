@@ -72,7 +72,9 @@ userRouter
           system_user_id !== currentSUI && // new id is different
           !!(await getUserBySystemId(system_user_id)) // id exists already
         ) {
-          throw apiError.conflictIssue(`system_user_id ${system_user_id} already exists`);
+          throw apiError.conflictIssue(
+            `system_user_id ${system_user_id} already exists`
+          );
         }
       }
       const user = await updateUser(id, req.body);
