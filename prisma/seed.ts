@@ -174,7 +174,9 @@ async function main() {
     const qualitativeResults = await prisma.xref_taxon_measurement_qualitative.findMany();
     for (const q of qualitativeMeasures) {
         const uuid = qualitativeResults.find(a => a.measurement_name === q.name && a.taxon_id === q.taxon)?.taxon_measurement_id;
-        if(!uuid) throw Error('Could not find a required measurement id');
+        if(!uuid)  {
+            throw Error('Could not find a required measurement id');
+        }
         await prisma.xref_taxon_measurement_qualitative_option.createMany({
             data: q.options.map((o, idx) => {return {taxon_measurement_id: uuid, option_label: o, option_value: idx}})
         })
@@ -200,21 +202,6 @@ async function main() {
     }
     
 
-}
-
-async function test() {
-    prisma.$connect();
-    const sqls = fs
-    .readFileSync(path.join(__dirname, './seed_scripts/import_bctw_animal_data.sql'))
-    .toString()
-    .replace(/(\r\n|\n|\r)/gm, ' ') // remove newlines
-    .split(/\s*;\s*(?=(?:[^']*'[^']*')*[^']*$)/); //this just scans for semicolons that are not enclosed in strings. yes there are semicolons in some of this data...
-
-    for(const sql of sqls) {
-        console.log('~~~~~~~~~~~~~~~')
-        console.log(sql);
-        console.log('~~~~~~~~~~~~~~~')
-    }
 }
 
 main()
