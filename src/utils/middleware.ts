@@ -3,7 +3,7 @@ import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
 import { exclude } from "./helper_functions";
-import { apiError, uuid } from "./types";
+import { apiError } from "./types";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
