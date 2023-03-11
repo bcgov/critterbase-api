@@ -96,11 +96,12 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
+/**
+ * * Ensures that a create user input has the right fields
+ * @param {user} data
+ */
 const isValidCreateUserInput = (data: user): boolean => {
-  const requiredFields: (keyof user)[] = [
-    "system_user_id",
-    "system_name",
-  ];
+  const requiredFields: (keyof user)[] = ["system_user_id", "system_name"];
   const allowedFields: (keyof user)[] = [
     "system_user_id",
     "system_name",
@@ -121,5 +122,5 @@ export {
   getUserBySystemId,
   updateUser,
   deleteUser,
-  isValidCreateUserInput
+  isValidCreateUserInput,
 };
