@@ -1,8 +1,9 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getAllCritters } from "./critter.service";
+import { getAllCritters, getCritterById, updateCritter } from "./critter.service";
 import { apiError } from "../../utils/types";
+import { prisma } from "../../utils/constants";
 
 export const critterRouter = express.Router();
 
@@ -35,10 +36,9 @@ critterRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       const critter_id = req.params.critter_id;
-      //Check if critter exists before running next routes.
-      //Temp for testing
-      if (!["1", "2", "3"].includes(critter_id)) {
-        throw apiError.notFound("Critter ID not found");
+      const critter = await getCritterById(critter_id);
+      if(!critter) {
+        return res.status(404);
       }
       next();
     })
@@ -46,12 +46,14 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      return res.status(200).json({ hello: "world" });
+      const critter = await getCritterById(id);
+      return res.status(200).json(critter);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
+      const critter = await updateCritter(id, req.body);
       res.status(200).json(`Update critter ${id}`);
     })
   )
