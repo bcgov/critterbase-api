@@ -6,6 +6,7 @@ import {
   getUser,
   getUserBySystemId,
   getUsers,
+  isValidCreateUserInput,
   updateUser,
   upsertUser,
 } from "./user.service";
@@ -31,6 +32,9 @@ userRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const userData = req.body;
+    if (!isValidCreateUserInput(userData)) {
+      throw apiError.syntaxIssue("Invalid request body");
+    }
     const newUser = await upsertUser(userData);
     return res.status(201).json(newUser);
   })

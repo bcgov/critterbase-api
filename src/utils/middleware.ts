@@ -1,3 +1,4 @@
+import { user } from "@prisma/client";
 import type { Request, Response, NextFunction } from "express";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";

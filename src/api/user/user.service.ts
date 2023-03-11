@@ -1,6 +1,6 @@
 import { prisma } from "../../utils/constants";
 import type { user, Prisma } from "@prisma/client";
-
+import { isValidObject } from "../../utils/helper_functions";
 
 /**
  * Adds a user to the database
@@ -96,6 +96,23 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
+const isValidCreateUserInput = (data: user): boolean => {
+  const requiredFields: (keyof user)[] = [
+    "system_user_id",
+    "system_name",
+  ];
+  const allowedFields: (keyof user)[] = [
+    "system_user_id",
+    "system_name",
+    "keycloak_uuid",
+    "create_user",
+    "update_user",
+    "create_timestamp",
+    "update_timestamp",
+  ];
+  return isValidObject(data, requiredFields, allowedFields);
+};
+
 export {
   createUser,
   upsertUser,
@@ -104,4 +121,5 @@ export {
   getUserBySystemId,
   updateUser,
   deleteUser,
+  isValidCreateUserInput
 };
