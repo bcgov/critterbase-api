@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import supertest from "supertest";
 import { app } from "../server";
 import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
 import { apiError } from "./types";
