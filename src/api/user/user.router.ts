@@ -73,7 +73,7 @@ userRouter
       const { user_id, system_user_id } = req.body;
       if (system_user_id) {
         // requesting id change
-        const currentSUI = (await getUser(id))?.system_user_id;
+        const currentSUI = res.locals.system_user_id;
         if (
           system_user_id !== currentSUI && // new id is different
           !!(await getUserBySystemId(system_user_id)) // id exists already
