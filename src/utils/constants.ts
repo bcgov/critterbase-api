@@ -18,6 +18,7 @@ const request = supertest(app);
  */
 const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalPrisma.prisma || new PrismaClient();
+
 if (IS_PROD) globalPrisma.prisma = prisma;
 
 export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request };

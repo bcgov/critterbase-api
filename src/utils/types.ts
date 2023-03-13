@@ -5,7 +5,8 @@ type ErrorType =
   | "requiredProperty"
   | "syntaxIssue"
   | "serverIssue"
-  | "notFound";
+  | "notFound"
+  | "conflict";
 
 class apiError extends Error {
   status: number;
@@ -48,6 +49,13 @@ class apiError extends Error {
    */
   static serverIssue() {
     return new apiError(`Internal Server Error`, 500, "serverIssue");
+  }
+
+  /**
+   ** Internal server issue or problem occurs
+   */
+   static conflictIssue(message: string) {
+    return new apiError(message, 409, "conflict");
   }
 
   toString(): string {

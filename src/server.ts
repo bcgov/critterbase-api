@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { critterRouter } from "./api/critter/critter.router";
+import { userRouter } from "./api/user/user.router";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
 import { startServer } from "./utils/helper_functions";
 import {
@@ -21,6 +22,7 @@ app.use(excludeAuditFields);
 
 app.get("/api/", home);
 app.use("/api/critters", critterRouter);
+app.use("/api/users", userRouter);
 
 app.use(errorLogger);
 app.use(errorHandler);
