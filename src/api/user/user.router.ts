@@ -49,8 +49,8 @@ userRouter
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate user id and confirm that user exists
       const id = validateUuidParam(req);
-      const user = await getUser(id);
-      if (!user) {
+      res.locals.userData = await getUser(id);
+      if (!res.locals.userData) {
         throw apiError.notFound(`User ID "${id}" not found`);
       }
       next();
@@ -58,9 +58,8 @@ userRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const user = await getUser(id);
-      return res.status(200).json(user);
+      // using stored data from validation to avoid duplicate query
+      return res.status(200).json(res.locals.userData); 
     })
   )
   .put(
