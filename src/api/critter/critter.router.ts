@@ -34,8 +34,8 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const critter = await getCritterByWlhId(req.params.wlh_id); 
-      if(!critter) {
-        return res.send(404);
+      if(!critter?.length) {
+        throw apiError.notFound('Could not find any animals with the requested WLH ID');
       }
       return res.status(200).json(critter);
     })    
@@ -51,7 +51,7 @@ critterRouter
       const critter_id = req.params.critter_id;
       const critter = await getCritterById(critter_id);
       if(critter == null) {
-        throw Error('The requested critter id was not found.');
+        throw apiError.notFound('The requested critter id was not found.');
       }
       next();
     })

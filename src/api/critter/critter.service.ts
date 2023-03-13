@@ -1,5 +1,6 @@
 import { prisma } from "../../utils/constants";
 import type { critter, Prisma } from "@prisma/client";
+import { apiError } from "../../utils/types";
 
 const getAllCritters = async (): Promise<critter[]> => {
   return await prisma.critter.findMany();
@@ -35,7 +36,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<critter[] | null> => {
 
 const updateCritter = async (critter_id: string, critter_data: Prisma.critterUpdateInput): Promise<critter> => {
   if(!critter_id) {
-    throw Error('Updating critter requires a valid critter_id')
+    throw apiError.requiredProperty('Updating critter requires a valid critter_id')
   }
 
   //Don't think you should be allowed to overwrite an existing critter_id with a different one. 
@@ -50,6 +51,15 @@ const updateCritter = async (critter_id: string, critter_data: Prisma.critterUpd
 }
 
 const createCritter = async (critter_data: Prisma.critterUncheckedCreateInput): Promise<critter> => {
+  if(critter_data.critter_id) {
+    const existing = await prisma.critter.findUnique({
+      where: { critter_id: critter_data.critter_id}
+    });
+    if(existing) {
+      throw apiError.conflictIssue('Creation of duplicate critter ID is not allowed');
+    }
+  }
+  
   const critter = await prisma.critter.create({
     data: critter_data
   })

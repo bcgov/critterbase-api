@@ -98,10 +98,10 @@ describe("API: Critter", () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBeGreaterThanOrEqual(1);
       });
-      it("should return status 500", async () => {
+      it("should return status 404 if searching bad wlh id", async () => {
         const res = await request.get("/api/critters/wlh/WHAT");
         expect.assertions(1);
-        expect(res.status).toBe(500);
+        expect(res.status).toBe(404);
       });
     })
     describe("GET /api/critters/:id", () => {
@@ -123,7 +123,7 @@ describe("API: Critter", () => {
       it("should return status 404 when critter id is not found", async () => {
         const res = await request.get("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
         expect.assertions(1);
-        expect(res.status).toBe(500);
+        expect(res.status).toBe(404);
       });
     })
     describe("PUT /api/critters/:id",  () => {
@@ -138,6 +138,11 @@ describe("API: Critter", () => {
         expect.assertions(1);
         expect(res.status).toBe(500);
       })
+      it("should return status 404 when critter id is not found", async () => {
+        const res = await request.delete("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
     })
     describe("DELETE /api/critters/:id",  () => {
       it("should return status 200 and delete the critter", async () => {
@@ -145,7 +150,12 @@ describe("API: Critter", () => {
         expect.assertions(2);
         expect(res.status).toBe(200);
         expect(res.body.wlh_id).toBe('TEST');
-      })
+      });
+      it("should return status 404 when critter id is not found", async () => {
+        const res = await request.delete("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
     })
   });
 });
