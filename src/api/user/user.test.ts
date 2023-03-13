@@ -314,6 +314,15 @@ describe("API: User", () => {
         expect.assertions(1);
         expect(res.status).toBe(409);
       });
+      
+      it("returns status 400 when data contains invalid fields", async () => {
+        const user = newUser();
+        const res = await request
+          .post("/api/users/create")
+          .send({ ...user, invalidField: "qwerty123" });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
     });
 
     describe("DELETE /api/users/:id", () => {

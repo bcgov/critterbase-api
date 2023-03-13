@@ -98,6 +98,7 @@ const deleteUser = async (user_id: string): Promise<user> => {
 
 /**
  * * Ensures that a create user input has the right fields
+ * TODO: Decide which fields should be allowed or required
  * @param {user} data
  */
 const isValidCreateUserInput = (data: user): boolean => {
@@ -114,6 +115,22 @@ const isValidCreateUserInput = (data: user): boolean => {
   return isValidObject(data, requiredFields, allowedFields);
 };
 
+/**
+ * * Ensures that a create user input has the right fields
+ * TODO: Decide which fields should be allowed or required
+ * @param {user} data
+ */
+const isValidUpdateUserInput = (data: user): boolean => {
+  const requiredFields: (keyof user)[] = [];
+  const allowedFields: (keyof user)[] = [
+    "system_user_id",
+    "system_name",
+    "keycloak_uuid",
+    "update_user"
+  ];
+  return isValidObject(data, requiredFields, allowedFields);
+};
+
 export {
   createUser,
   upsertUser,
@@ -123,4 +140,5 @@ export {
   updateUser,
   deleteUser,
   isValidCreateUserInput,
+  isValidUpdateUserInput
 };

@@ -7,6 +7,7 @@ import {
   getUserBySystemId,
   getUsers,
   isValidCreateUserInput,
+  isValidUpdateUserInput,
   updateUser,
   upsertUser,
 } from "./user.service";
@@ -65,7 +66,9 @@ userRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-
+      if (!isValidUpdateUserInput(req.body)) {
+        throw apiError.syntaxIssue("Invalid request body");
+      }
       // check if any unique columns are being updated
       const { user_id, system_user_id } = req.body;
       if (system_user_id) {
