@@ -1,4 +1,4 @@
-import { request } from "../../utils/constants";
+import { request, uuidRegex } from "../../utils/constants";
 import {
   createUser,
   deleteUser,
@@ -9,12 +9,14 @@ import {
   upsertUser,
 } from "./user.service";
 import type { Prisma, user } from "@prisma/client";
-import { uuidRegex } from "../../utils/middleware";
 import { randomInt, randomUUID } from "crypto";
-import { Console } from "console";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
+/**
+ * * Checks if an object matches the format for a user.
+ * @param {*} user
+ */
 function isUser(user: any): user is user {
   const isUserId =
     typeof user.user_id === "string" && uuidRegex.test(user.user_id);
@@ -45,6 +47,9 @@ function isUser(user: any): user is user {
   );
 }
 
+/**
+ * * Returns a randomly generated user that can be insterted to the database
+ */
 function newUser(): Prisma.userCreateInput {
   const num = randomInt(99999999);
   return {
@@ -54,6 +59,9 @@ function newUser(): Prisma.userCreateInput {
   };
 }
 
+/**
+ * * Removes all test generated users from the database
+ */
 async function cleanup() {
   const users = await getUsers();
   const testUserIds = users
@@ -305,6 +313,15 @@ describe("API: User", () => {
           .send({ system_user_id: user1.system_user_id });
         expect.assertions(1);
         expect(res.status).toBe(409);
+      });
+      
+      it("returns status 400 when data contains invalid fields", async () => {
+        const user = newUser();
+        const res = await request
+          .post("/api/users/create")
+          .send({ ...user, invalidField: "qwerty123" });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
       });
     });
 

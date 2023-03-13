@@ -21,4 +21,7 @@ const prisma = globalPrisma.prisma || new PrismaClient();
 
 if (IS_PROD) globalPrisma.prisma = prisma;
 
-export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request };
+const uuidRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, uuidRegex };

@@ -1,7 +1,8 @@
+import { user } from "@prisma/client";
 import type { Request, Response, NextFunction } from "express";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
-import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
+import { IS_DEV, IS_PROD, IS_TEST, PORT, uuidRegex } from "./constants";
 import { exclude } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -85,9 +86,10 @@ const excludeAuditFields = (
   next();
 };
 
-const uuidRegex =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
+/**
+ * * Returns a uuid validated against a regex or throws an error
+ * @param {Request} req - Express request
+ */
 const validateUuidParam = (req: Request): string => {
   if (!("id" in req.params)) {
     throw apiError.requiredProperty("user_id");
@@ -105,6 +107,5 @@ export {
   catchErrors,
   home,
   excludeAuditFields,
-  validateUuidParam,
-  uuidRegex,
+  validateUuidParam
 };

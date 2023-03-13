@@ -52,7 +52,7 @@ class apiError extends Error {
   }
 
   /**
-   ** Internal server issue or problem occurs
+   ** Request conflicts with current state of the target resource
    */
    static conflictIssue(message: string) {
     return new apiError(message, 409, "conflict");
