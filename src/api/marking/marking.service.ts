@@ -1,5 +1,5 @@
 import { prisma } from "../../utils/constants";
-import type { marking, Prisma } from "@prisma/client";
+import { marking, Prisma } from "@prisma/client";
 
 const getAllMarkings = async (): Promise<marking[]> => {
   return await prisma.marking.findMany();

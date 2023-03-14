@@ -102,7 +102,7 @@ describe("API: Marking", () => {
           data: await newMarking(),
         });
         const newData = {
-          identifier: `UPDATED_MARKING_${randomInt(99999999)}`,
+          identifier: `TEST_MARKING_UPDATED${randomInt(99999999)}`,
           comment: "NEW COMMENT",
         };
         const updatedMarking = await updateMarking(marking.marking_id, newData);
@@ -157,6 +157,45 @@ describe("API: Marking", () => {
             expect(marking).toHaveProperty(key);
           }
         }
+      });
+    });
+
+    describe("POST /api/markings/create", () => {
+      it("returns status 201", async () => {
+        const marking = await newMarking();
+        const res = await request.post("/api/markings/create").send(marking);
+        expect.assertions(1);
+        expect(res.status).toBe(201);
+      });
+
+      it("returns a marking", async () => {
+        const marking = await newMarking();
+        const res = await request.post("/api/markings/create").send(marking);
+        const returnedMarking = res.body;
+        expect.assertions(dummyMarkingKeys.length);
+        for (const key of dummyMarkingKeys) {
+          expect(returnedMarking).toHaveProperty(key);
+        }
+      });
+
+      it("returns status 400 when data contains invalid fields", async () => {
+        const marking = await newMarking();
+        const res = await request
+          .post("/api/markings/create")
+          .send({ ...marking, invalidField: "qwerty123" });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const marking = await newMarking();
+        const res = await request.post("/api/marking/create").send({
+            // left out required marking location information
+            critter: { connect: { critter_id: marking.critter.connect?.critter_id } },
+            identifier: marking.identifier
+        });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
       });
     });
   });
