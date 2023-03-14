@@ -38,3 +38,11 @@ const deleteMarking = async (marking_id: string): Promise<marking> => {
     },
   });
 };
+
+export {
+  getAllMarkings,
+  getMarkingById,
+  updateMarking,
+  createMarking,
+  deleteMarking,
+};
