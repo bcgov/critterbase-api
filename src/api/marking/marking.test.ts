@@ -133,6 +133,34 @@ describe("API: Marking", () => {
       });
     });
   });
+
+  describe("ROUTERS", () => {
+    describe("GET /api/markings", () => {
+      it("returns status 200", async () => {
+        expect.assertions(1);
+        const res = await request.get("/api/markings");
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        expect.assertions(1);
+        const res = await request.get("/api/markings");
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns users with correct properties", async () => {
+        const res = await request.get("/api/markings");
+        const markings = res.body;
+        const markingKeys = Object.keys(dummyMarking);
+        expect.assertions(markings.length * markingKeys.length);
+        for (const marking of markings) {
+          for (const key of markingKeys) {
+            expect(marking).toHaveProperty(key);
+          }
+        }
+      });
+    });
+  });
 });
 
 afterAll(async () => {
