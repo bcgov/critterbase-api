@@ -7,7 +7,7 @@ import {
   updateMarking,
 } from "./marking.service";
 import type { Prisma, marking } from "@prisma/client";
-import { randomInt } from "crypto";
+import { randomInt, randomUUID } from "crypto";
 
 let dummyMarking: marking;
 let dummyMarkingInput: Prisma.markingCreateInput;
@@ -190,12 +190,104 @@ describe("API: Marking", () => {
       it("returns status 400 when data is missing required fields", async () => {
         const marking = await newMarking();
         const res = await request.post("/api/marking/create").send({
-            // left out required marking location information
-            critter: { connect: { critter_id: marking.critter.connect?.critter_id } },
-            identifier: marking.identifier
+          // left out required marking location information
+          critter: {
+            connect: { critter_id: marking.critter.connect?.critter_id },
+          },
+          identifier: marking.identifier,
         });
         expect.assertions(1);
         expect(res.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/markings/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.get(`/api/markings/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a marking", async () => {
+        const res = await request.get(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
+        expect.assertions(dummyMarkingKeys.length);
+        for (const key of dummyMarkingKeys) {
+          expect(res.body).toHaveProperty(key);
+        }
+      });
+    });
+
+    describe("PUT /api/markings/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.put(`/api/markings/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.put(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a marking", async () => {
+        const res = await request.put(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
+        expect.assertions(dummyMarkingKeys.length);
+        for (const key of dummyMarkingKeys) {
+          expect(res.body).toHaveProperty(key);
+        }
+      });
+
+      it("returns status 400 when data contains invalid fields", async () => {
+        const res = await request
+          .put(`/api/markings/${dummyMarking.marking_id}`)
+          .send({ invalidField: "qwerty123" });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+    });
+
+    describe("DELETE /api/markings/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.delete(`/api/markings/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const marking = await prisma.marking.create({
+          data: await newMarking(),
+        });
+        const res = await request.delete(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns marking deleted message", async () => {
+        const marking = await prisma.marking.create({
+          data: await newMarking(),
+        });
+        const res = await request.delete(`/api/markings/${marking.marking_id}`);
+        expect.assertions(1);
+        expect(res.body).toStrictEqual(
+          `Marking ${marking.marking_id} has been deleted`
+        );
       });
     });
   });
