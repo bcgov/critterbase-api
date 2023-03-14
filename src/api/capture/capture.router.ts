@@ -1,18 +1,18 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getAllCritters } from "./critter.service";
+import { getAllCaptures } from "./capture.service";
 import { apiError } from "../../utils/types";
 
-export const captureRouter = express.Router();
+export const critterRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
-captureRouter.get(
+critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const allCritters = getAllCritters();
+    const allCritters = getAllCaptures();
     return res.status(200).json(allCritters);
   })
 );
@@ -20,7 +20,7 @@ captureRouter.get(
 /**
  ** Create new critter
  */
-captureRouter.post(
+critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     return res.status(201).json(`Post new critter`);
@@ -30,7 +30,7 @@ captureRouter.post(
 /**
  * * All critter_id related routes
  */
-captureRouter
+critterRouter
   .route("/:critter_id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
