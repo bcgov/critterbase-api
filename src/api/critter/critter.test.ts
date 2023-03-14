@@ -1,7 +1,10 @@
 import { critter, Prisma } from "@prisma/client";
 import { queryRandomUUID } from "../../../prisma/prisma_utils";
 import { prisma, request } from "../../utils/constants";
-import { createCritter, deleteCritter, getAllCritters, getCritterById, getCritterByWlhId, updateCritter } from "./critter.service";
+import { isValidObject } from "../../utils/helper_functions";
+import { apiError } from "../../utils/types";
+import { createCritter, deleteCritter, formatCritterInput, getAllCritters, getCritterById, getCritterByWlhId, updateCritter } from "./critter.service";
+import { formattedCritterInclude } from "./critter.types";
 
 
 let dummyCritter: Prisma.critterUncheckedCreateInput;
@@ -25,6 +28,27 @@ beforeAll(async () => {
 
 describe("API: Critter", () => {
   describe("SERVICES", () => {
+    describe("critter transformation", () => {
+      it("should remove extraneous taxon/region props and format markings and measure", async () => {
+        const critter = await prisma.critter.findFirst({
+          ...formattedCritterInclude,
+          where: {
+            wlh_id: '17-10779'
+          }
+        });
+        if(critter == undefined) {
+          throw Error('Missing critter for this test.');
+        }
+        const formatted = formatCritterInput(critter);
+        expect.assertions(2);
+        expect(isValidObject(formatted, 
+          ['taxon_name_latin', 'responsible_region_nr_name', 'measurement_qualitative', 'measurement_quantitative']
+          )).toBeTruthy();
+        expect(formatted.measurement_qualitative.map(r => 
+          Object.values(r).every(v => v instanceof String || v instanceof Number)))
+          .toBeTruthy();
+      })
+    })
     describe("making critters", () => {
       it("creates a critter", async() => {
         const critter = await createCritter(dummyCritter);
@@ -32,6 +56,9 @@ describe("API: Critter", () => {
         expect(critter.wlh_id).toBe('TEST');
         expect(critter.sex).toBe('Male');
         expect(critter.taxon_id).toBe(dummyTaxon);
+      })
+      it("fails to create a critter", async () => {
+        await expect( async () => await createCritter({} as any)).rejects.toBeInstanceOf(apiError);
       })
     })
     describe("getting critters", () => {
@@ -89,7 +116,17 @@ describe("API: Critter", () => {
         expect.assertions(2);
         expect(res.status).toBe(201);
         expect(res.body.wlh_id).toBe('TEST');
-      })
+      });
+      it("should return 409 when critter with id already exists", async () => {
+        const res = await request.post("/api/critters/create").send(dummyCritter);
+        expect.assertions(1);
+        expect(res.status).toBe(409);
+      });
+      it("should return 500 if trying to create with bad value type", async () => {
+        const res = await request.post("/api/critters/create").send({taxon_id: dummyTaxon, sex: 123});
+        expect.assertions(1);
+        expect(res.status).toBe(500);
+      });
     })
     describe("GET /api/critters/wlh/:wlh_id", () => {
       it("should return status 200 and a valid critter", async () => {
