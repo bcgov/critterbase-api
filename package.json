@@ -7,7 +7,7 @@
   "description": "Critterbase API",
   "main": "./src/server.ts",
   "scripts": {
-    "start": "npx pm2 --no-daemon start dist/server.js",
+    "start": "npx prisma migrate deploy && npx pm2 --no-daemon start dist/server.js",
     "build": "rimraf ./dist && tsc",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
