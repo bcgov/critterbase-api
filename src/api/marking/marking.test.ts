@@ -11,8 +11,7 @@ import { randomInt } from "crypto";
 
 let dummyMarking: marking;
 let dummyMarkingInput: Prisma.markingCreateInput;
-let dummyCritterId: string | undefined;
-let dummyTaxonMarkingId: string | undefined;
+let dummyMarkingKeys: string[];
 
 /**
  * * Creates a new marking object that references an existing critter and marking location
@@ -49,11 +48,8 @@ async function newMarking(): Promise<Prisma.markingCreateInput> {
 beforeAll(async () => {
   // Sets a global dummy marking to reduce complexity on similar tests
   dummyMarkingInput = await newMarking();
-  dummyCritterId = dummyMarkingInput.critter.connect?.critter_id;
-  dummyTaxonMarkingId =
-    dummyMarkingInput.xref_taxon_marking_body_location.connect
-      ?.taxon_marking_body_location_id;
   dummyMarking = await prisma.marking.create({ data: dummyMarkingInput });
+  dummyMarkingKeys = Object.keys(dummyMarking);
 });
 
 describe("API: Marking", () => {
@@ -81,11 +77,15 @@ describe("API: Marking", () => {
         expect(markings.length).toBeGreaterThan(0);
       });
       // TODO: validate returned objects
-      //   it("returns markings with correct properties", async () => {
-      //     const markings = await getAllMarkings();
-      //     expect.assertions(markings.length);
-      //     for
-      //   });
+      it("returns markings with correct properties", async () => {
+        const markings = await getAllMarkings();
+        expect.assertions(markings.length * dummyMarkingKeys.length);
+        for (const marking of markings) {
+          for (const key of dummyMarkingKeys) {
+            expect(marking).toHaveProperty(key);
+          }
+        }
+      });
     });
 
     describe("getMarkingById()", () => {
@@ -148,13 +148,12 @@ describe("API: Marking", () => {
         expect(res.body).toBeInstanceOf(Array);
       });
 
-      it("returns users with correct properties", async () => {
+      it("returns markings with correct properties", async () => {
         const res = await request.get("/api/markings");
         const markings = res.body;
-        const markingKeys = Object.keys(dummyMarking);
-        expect.assertions(markings.length * markingKeys.length);
+        expect.assertions(markings.length * dummyMarkingKeys.length);
         for (const marking of markings) {
-          for (const key of markingKeys) {
+          for (const key of dummyMarkingKeys) {
             expect(marking).toHaveProperty(key);
           }
         }
