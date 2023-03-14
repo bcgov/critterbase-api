@@ -60,9 +60,71 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     }
   })
 
+  const captureSelectSubset = Prisma.validator<Prisma.captureArgs>()({
+    select: {
+      capture_id: true,
+      location_capture_capture_location_idTolocation: {
+        select: {
+          latitude: true,
+          longitude: true,
+          lk_region_env: {
+            select: {
+              region_env_name: true
+            }
+          },
+          lk_region_nr: {
+            select: {
+              region_nr_name: true
+            }
+          },
+          lk_wildlife_management_unit: {
+            select: {
+              wmu_name: true
+            }
+          }
+        }
+      },
+      capture_timestamp: true,
+      release_timestamp: true,
+      capture_comment: true,
+      release_comment: true
+    }
+  })
+
+  const mortalitySelectSubset = Prisma.validator<Prisma.mortalityArgs>()({
+    select: {
+      mortality_id: true,
+      location: {
+        select: {
+          latitude: true,
+          longitude: true,
+          lk_region_env: {
+            select: {
+              region_env_name: true
+            }
+          },
+          lk_region_nr: {
+            select: {
+              region_nr_name: true
+            }
+          },
+          lk_wildlife_management_unit: {
+            select: {
+              wmu_name: true
+            }
+          }
+        }
+      },
+      mortality_timestamp: true,
+      mortality_comment: true
+    }
+  })
+
   type MeasurementQuantiativeSubsetType = Prisma.measurement_quantitativeGetPayload<typeof measurementQuantitativeIncludeSubset>;
   type MeasurementQualitatitveSubsetType = Prisma.measurement_qualitativeGetPayload<typeof measurementQualitativeIncludeSubset>
   type MarkingSubsetType = Prisma.markingGetPayload<typeof markingIncludeSubset>
+  type CaptureSubsetType = Prisma.captureGetPayload<typeof captureSelectSubset>
+  type MortalitySubsetType = Prisma.mortalityGetPayload<typeof mortalitySelectSubset>
 
   const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     include: {
@@ -72,6 +134,8 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
         lk_region_nr: {
           select: { region_nr_name: true }
         },
+        capture: captureSelectSubset,
+        mortality: mortalitySelectSubset,
         marking: markingIncludeSubset, 
         measurement_qualitative: measurementQualitativeIncludeSubset,
         measurement_quantitative: measurementQuantitativeIncludeSubset
@@ -88,8 +152,10 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     taxon_name_latin: string, 
     responsible_region_nr_name: string | undefined,
     lk_taxon?: any,
-    lk_region_nr?: any
+    lk_region_nr?: any,
+    capture: Array<Record<string, any>>,
+    mortality: Array<Record<string, any>>
   }
 
-  export type {FormattedCritter, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MarkingSubsetType, CritterIncludeResult}
-  export {measurementQualitativeIncludeSubset, measurementQuantitativeIncludeSubset, markingIncludeSubset, formattedCritterInclude}
+  export type {FormattedCritter, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MarkingSubsetType, CritterIncludeResult, CaptureSubsetType, MortalitySubsetType}
+  export {measurementQualitativeIncludeSubset, measurementQuantitativeIncludeSubset, markingIncludeSubset, formattedCritterInclude, captureSelectSubset, mortalitySelectSubset}

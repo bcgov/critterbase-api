@@ -2,7 +2,41 @@ import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import { isValidObject } from "../../utils/helper_functions";
-import { CritterIncludeResult, FormattedCritter, formattedCritterInclude, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType } from "./critter.types";
+import { CaptureSubsetType, CritterIncludeResult, FormattedCritter, formattedCritterInclude, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
+
+const formatCritterCapture = (events: CaptureSubsetType[]) => {
+  return events.map(e => {
+    const obj = {
+      ...e,
+      ...e.location_capture_capture_location_idTolocation,
+      ...e.location_capture_capture_location_idTolocation?.lk_region_env,
+      ...e.location_capture_capture_location_idTolocation?.lk_region_nr,
+      ...e.location_capture_capture_location_idTolocation?.lk_wildlife_management_unit
+    };
+    delete (obj as any).location_capture_capture_location_idTolocation;
+    delete (obj as any).lk_region_env;
+    delete (obj as any).lk_region_nr;
+    delete (obj as any).lk_wildlife_management_unit;
+    return obj;
+  })
+}
+// Could probably merge these two functions to one if generated type had same names for location field
+const formatCritterMortality = (events: MortalitySubsetType[]) => {
+  return events.map(e => {
+    const obj = {
+      ...e,
+      ...e.location,
+      ...e.location?.lk_region_env,
+      ...e.location?.lk_region_nr,
+      ...e.location?.lk_wildlife_management_unit
+    };
+    delete (obj as any).location;
+    delete (obj as any).lk_region_env;
+    delete (obj as any).lk_region_nr;
+    delete (obj as any).lk_wildlife_management_unit;
+    return obj;
+  })
+}
 
 const formatCritterMeasurementQuantitative = (measure: MeasurementQuantiativeSubsetType[]) => {
   return measure.map(a => {
@@ -46,7 +80,9 @@ const formatCritterInput = (critter: CritterIncludeResult) => {
     responsible_region_nr_name: critter?.lk_region_nr?.region_nr_name,
     measurement_qualitative: formatCritterMeasurementQualitative(critter?.measurement_qualitative),
     measurement_quantitative: formatCritterMeasurementQuantitative(critter?.measurement_quantitative),
-    marking: formatCritterMarkings(critter?.marking)
+    marking: formatCritterMarkings(critter?.marking),
+    capture: formatCritterCapture(critter?.capture),
+    mortality: formatCritterMortality(critter?.mortality)
   };
 
   delete formattedCritter.lk_taxon;

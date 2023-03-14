@@ -40,12 +40,28 @@ describe("API: Critter", () => {
           throw Error('Missing critter for this test.');
         }
         const formatted = formatCritterInput(critter);
-        expect.assertions(2);
+        expect.assertions(6);
         expect(isValidObject(formatted, 
-          ['taxon_name_latin', 'responsible_region_nr_name', 'measurement_qualitative', 'measurement_quantitative']
+          ['taxon_name_latin', 'responsible_region_nr_name', 'measurement_qualitative', 'measurement_quantitative', 'capture', 'mortality']
           )).toBeTruthy();
-        expect(formatted.measurement_qualitative.map(r => 
-          Object.values(r).every(v => v instanceof String || v instanceof Number)))
+        //At least verify that the formatting has unnested the sub selects
+
+        const checkFormat = (v) => {return typeof v === 'string' || typeof v === 'number' || v == undefined || v instanceof Date}
+
+        expect(formatted.measurement_qualitative.every(r => 
+          Object.values(r).every(checkFormat)))
+          .toBeTruthy();
+        expect(formatted.measurement_quantitative.every(r => 
+          Object.values(r).every(checkFormat)))
+          .toBeTruthy();
+        expect(formatted.marking.every(r => 
+          Object.values(r).every(checkFormat)))
+          .toBeTruthy();
+        expect(formatted.mortality.every(r => 
+          Object.values(r).every(checkFormat)))
+          .toBeTruthy();
+        expect(formatted.capture.every(r => 
+          Object.values(r).every(checkFormat)))
           .toBeTruthy();
       })
     })
