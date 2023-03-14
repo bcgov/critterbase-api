@@ -1,6 +1,7 @@
 import { prisma, request } from "../../utils/constants";
 import {
   createMarking,
+  deleteMarking,
   getAllMarkings,
   getMarkingById,
   updateMarking,
@@ -111,7 +112,24 @@ describe("API: Marking", () => {
           ...newData,
           update_timestamp: updatedMarking.update_timestamp, // Ignore this field as it will be different
         });
-        expect(updatedMarking.update_timestamp === marking.update_timestamp).toBeFalsy();
+        expect(
+          updatedMarking.update_timestamp === marking.update_timestamp
+        ).toBeFalsy();
+      });
+    });
+
+    describe("deleteMarking()", () => {
+      it("deletes a marking", async () => {
+        const marking = await prisma.marking.create({
+          data: await newMarking(),
+        });
+        const deletedMarking = await deleteMarking(marking.marking_id);
+        const markingCheck = await prisma.marking.findUnique({
+          where: { marking_id: marking.marking_id },
+        });
+        expect.assertions(2);
+        expect(deletedMarking).toStrictEqual(marking);
+        expect(markingCheck).toBeNull();
       });
     });
   });
