@@ -3,6 +3,7 @@ import {
   createMarking,
   getAllMarkings,
   getMarkingById,
+  updateMarking,
 } from "./marking.service";
 import type { Prisma, marking } from "@prisma/client";
 import { randomInt } from "crypto";
@@ -45,6 +46,7 @@ async function newMarking(): Promise<Prisma.markingCreateInput> {
 }
 
 beforeAll(async () => {
+  // Sets a global dummy marking to reduce complexity on similar tests
   dummyMarkingInput = await newMarking();
   dummyCritterId = dummyMarkingInput.critter.connect?.critter_id;
   dummyTaxonMarkingId =
@@ -83,18 +85,40 @@ describe("API: Marking", () => {
       //     expect.assertions(markings.length);
       //     for
       //   });
+    });
 
-      describe("getMarkingsById()", () => {
-        it("returns the expected marking", async () => {
-          const marking = await getMarkingById(dummyMarking.marking_id);
-          expect.assertions(1);
-          expect(marking).toStrictEqual(dummyMarking);
+    describe("getMarkingById()", () => {
+      it("returns the expected marking", async () => {
+        const marking = await getMarkingById(dummyMarking.marking_id);
+        expect.assertions(1);
+        expect(marking).toStrictEqual(dummyMarking);
+      });
+    });
+
+    describe("updateMarking()", () => {
+      it("updates a marking", async () => {
+        const marking = await prisma.marking.create({
+          data: await newMarking(),
         });
+        const newData = {
+          identifier: `UPDATED_MARKING_${randomInt(99999999)}`,
+          comment: "NEW COMMENT",
+        };
+        const updatedMarking = await updateMarking(marking.marking_id, newData);
+        expect.assertions(2);
+        expect(updatedMarking).toStrictEqual({
+          ...marking,
+          ...newData,
+          update_timestamp: updatedMarking.update_timestamp, // Ignore this field as it will be different
+        });
+        expect(updatedMarking.update_timestamp === marking.update_timestamp).toBeFalsy();
       });
     });
   });
 });
 
 afterAll(async () => {
-    await prisma.marking.deleteMany({where: {identifier: {startsWith: 'TEST_MARKING_'}}});
+  await prisma.marking.deleteMany({
+    where: { identifier: { startsWith: "TEST_MARKING_" } },
+  });
 });
