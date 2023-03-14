@@ -10,14 +10,14 @@ import type { Prisma, marking } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 
 let dummyMarking: marking;
-let dummyMarkingInput: Prisma.markingCreateInput;
+let dummyMarkingInput: Prisma.markingUncheckedCreateInput;
 let dummyMarkingKeys: string[];
 
 /**
  * * Creates a new marking object that references an existing critter and marking location
  * @return {*}  {Promise<Prisma.markingCreateInput>}
  */
-async function newMarking(): Promise<Prisma.markingCreateInput> {
+async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
   const dummyCritterId: string | undefined = (
     await prisma.marking.findFirst({
       select: {
@@ -35,11 +35,9 @@ async function newMarking(): Promise<Prisma.markingCreateInput> {
   )?.xref_taxon_marking_body_location.taxon_marking_body_location_id;
   if (!dummyTaxonMarkingId)
     throw Error("Could not get taxon_marking_body_location_id for dummy.");
-  const dummyMarking: Prisma.markingCreateInput = {
-    critter: { connect: { critter_id: dummyCritterId } },
-    xref_taxon_marking_body_location: {
-      connect: { taxon_marking_body_location_id: dummyTaxonMarkingId },
-    },
+  const dummyMarking: Prisma.markingUncheckedCreateInput = {
+    critter_id: dummyCritterId,
+    taxon_marking_body_location_id: dummyTaxonMarkingId,
     identifier: `TEST_MARKING_${randomInt(99999999)}`,
   };
   return dummyMarking;
@@ -57,14 +55,12 @@ describe("API: Marking", () => {
     describe("createMarking()", () => {
       it("creates a new marking", async () => {
         const newMarkingInput = await newMarking();
-        const critterId = newMarkingInput.critter.connect?.critter_id;
-        const taxonMarkingId =
-          newMarkingInput.xref_taxon_marking_body_location.connect
-            ?.taxon_marking_body_location_id;
         const marking = await createMarking(newMarkingInput);
         expect.assertions(3);
-        expect(marking.critter_id).toBe(critterId);
-        expect(marking.taxon_marking_body_location_id).toBe(taxonMarkingId);
+        expect(marking.critter_id).toBe(newMarkingInput.critter_id);
+        expect(marking.taxon_marking_body_location_id).toBe(
+          newMarkingInput.taxon_marking_body_location_id
+        );
         expect(marking.identifier).toBe(newMarkingInput.identifier);
       });
     });
@@ -76,7 +72,7 @@ describe("API: Marking", () => {
         expect(markings).toBeInstanceOf(Array);
         expect(markings.length).toBeGreaterThan(0);
       });
-      // TODO: validate returned objects
+
       it("returns markings with correct properties", async () => {
         const markings = await getAllMarkings();
         expect.assertions(markings.length * dummyMarkingKeys.length);
@@ -189,11 +185,9 @@ describe("API: Marking", () => {
 
       it("returns status 400 when data is missing required fields", async () => {
         const marking = await newMarking();
-        const res = await request.post("/api/marking/create").send({
-          // left out required marking location information
-          critter: {
-            connect: { critter_id: marking.critter.connect?.critter_id },
-          },
+        const res = await request.post("/api/markings/create").send({
+          // left out required marking taxon information
+          critter_id: marking.critter_id,
           identifier: marking.identifier,
         });
         expect.assertions(1);
