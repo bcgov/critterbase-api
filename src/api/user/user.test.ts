@@ -71,12 +71,10 @@ async function cleanup() {
 }
 
 describe("API: User", () => {
-  let dummyUserInput: Prisma.userCreateInput;
   let dummyUser: user;
 
   beforeAll(async () => {
-    dummyUserInput = newUser();
-    dummyUser = await prisma.user.create({ data: dummyUserInput });
+    dummyUser = await prisma.user.create({ data: newUser() });
   });
 
   describe("SERVICES", () => {
