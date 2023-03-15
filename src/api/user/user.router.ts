@@ -66,6 +66,7 @@ userRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
+      console.log('PUT TEST: ', req.body)
       if (!isValidUpdateUserInput(req.body)) {
         throw apiError.syntaxIssue("Invalid request body");
       }

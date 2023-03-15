@@ -232,7 +232,6 @@ describe("API: User", () => {
           .post("/api/users/create")
           .send({ ...newUser(), system_user_id: user.system_user_id });
         const user2 = res2.body;
-        console.log(user, user2);
         expect.assertions(5);
         expect(user.system_user_id).toStrictEqual(user2.system_user_id);
         expect(user.user_id).toStrictEqual(user2.user_id);
@@ -316,10 +315,8 @@ describe("API: User", () => {
       });
       
       it("returns status 400 when data contains invalid fields", async () => {
-        const user = newUser();
-        const res = await request
-          .post("/api/users/create")
-          .send({ ...user, invalidField: "qwerty123" });
+        const user = await createUser(newUser());
+        const res = await request.put(`/api/users/${user.user_id}`).send({  invalidField: "qwerty123" });
         expect.assertions(1);
         expect(res.status).toBe(400);
       });

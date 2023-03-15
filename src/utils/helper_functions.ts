@@ -41,7 +41,6 @@ function isValidObject<T extends Record<string, any>>(
   requiredFields?: (keyof T)[],
   allowedFields?: (keyof T)[]
 ): boolean {
-  console.log(object, requiredFields, allowedFields)
   const fields = Object.keys(object);
   const hasRequiredFields =
     !requiredFields ||

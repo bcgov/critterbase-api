@@ -104,8 +104,7 @@ const deleteUser = async (user_id: string): Promise<user> => {
 const isValidCreateUserInput = (data: user): boolean => {
   const requiredFields: (keyof user)[] = ["system_user_id", "system_name"];
   const allowedFields: (keyof user)[] = [
-    "system_user_id",
-    "system_name",
+    ...requiredFields,
     "keycloak_uuid",
     "create_user",
     "update_user",
