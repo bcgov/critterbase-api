@@ -2,10 +2,18 @@ import { prisma } from "../../utils/constants";
 import { marking, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
 
+/**
+ * * Returns all existing markings from the database
+ */
 const getAllMarkings = async (): Promise<marking[]> => {
   return await prisma.marking.findMany();
 };
 
+/**
+ * * Gets a marking by the marking_id
+ * * Returns null if non-existent
+ * @param {string} marking_id
+ */
 const getMarkingById = async (marking_id: string): Promise<marking | null> => {
   return await prisma.marking.findUnique({
     where: {
@@ -14,6 +22,11 @@ const getMarkingById = async (marking_id: string): Promise<marking | null> => {
   });
 };
 
+/**
+ * * Updates a marking in the database
+ * @param {string} marking_id
+ * @param {Prisma.markingUncheckedUpdateInput} marking_data
+ */
 const updateMarking = async (
   marking_id: string,
   marking_data: Prisma.markingUncheckedUpdateInput
@@ -26,12 +39,21 @@ const updateMarking = async (
   });
 };
 
+/**
+ * * Creates a new marking in the database
+ * * Valid reference to existing critter_id and taxon_marking_body_location_id UUIDs must be provided
+ * @param {Prisma.markingUncheckedCreateInput} newMarkingData
+ */
 const createMarking = async (
   newMarkingData: Prisma.markingUncheckedCreateInput
 ): Promise<marking> => {
   return await prisma.marking.create({ data: newMarkingData });
 };
 
+/**
+ * * Removes a marking from the database
+ * @param {string} marking_id
+ */
 const deleteMarking = async (marking_id: string): Promise<marking> => {
   return await prisma.marking.delete({
     where: {
@@ -42,7 +64,7 @@ const deleteMarking = async (marking_id: string): Promise<marking> => {
 
 /**
  * * Ensures that a create marking input has the right fields
- * TODO: Decide which fields should be allowed or required
+ * TODO: Finalize which fields should be allowed or required
  * @param {marking} data
  */
 const isValidCreateMarkingInput = (
@@ -77,7 +99,7 @@ const isValidCreateMarkingInput = (
 
 /**
  * * Ensures that a update marking input has the right fields
- * TODO: Decide which fields should be allowed or required
+ * TODO: Finalize which fields should be allowed or required
  * @param {marking} data
  */
 const isValidUpdateMarkingInput = (
