@@ -92,11 +92,11 @@ const excludeAuditFields = (
  */
 const validateUuidParam = (req: Request): string => {
   if (!("id" in req.params)) {
-    throw apiError.requiredProperty("user_id");
+    throw apiError.requiredProperty("Missing required ID parameter");
   }
   const id = req.params.id;
   if (!uuidRegex.test(id)) {
-    throw apiError.syntaxIssue("Invalid ID Parameter");
+    throw apiError.syntaxIssue("Invalid UUID Syntax");
   }
   return id;
 };

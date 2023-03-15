@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
-import { catchErrors } from "../../utils/middleware";
+import { catchErrors, validateUuidParam } from "../../utils/middleware";
 import {
   createMarking,
   deleteMarking,
@@ -49,7 +49,7 @@ markingRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate marking id and confirm that marking exists
-      const { id } = req.params; //validateUuidParam(req);
+      const id = validateUuidParam(req);
       res.locals.markingData = await getMarkingById(id);
       if (!res.locals.markingData) {
         throw apiError.notFound(`Marking ID "${id}" not found`);
