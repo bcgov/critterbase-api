@@ -72,7 +72,6 @@ const isValidCreateMarkingInput = (
     "create_user",
     "update_user",
   ];
-  console.log(data);
   return isValidObject(data, requiredFields, allowedFields);
 };
 
@@ -103,7 +102,6 @@ const isValidUpdateMarkingInput = (
     "removed_timestamp",
     "update_user",
   ];
-  console.log(data);
   return isValidObject(data, [], allowedFields);
 };
 
