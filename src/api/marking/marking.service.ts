@@ -1,6 +1,7 @@
 import { prisma } from "../../utils/constants";
 import { marking, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
+import { StdioNull } from "child_process";
 
 /**
  * * Returns all existing markings from the database

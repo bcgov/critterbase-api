@@ -6,6 +6,7 @@ import {
   deleteMarking,
   getAllMarkings,
   getMarkingById,
+  getMarkingsByCritterId,
   isValidCreateMarkingInput,
   isValidUpdateMarkingInput,
   updateMarking,
@@ -32,11 +33,23 @@ markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const markingData = req.body;
-      if (!isValidCreateMarkingInput(markingData)) {
-        throw apiError.syntaxIssue("Invalid request body");
-      }
+    if (!isValidCreateMarkingInput(markingData)) {
+      throw apiError.syntaxIssue("Invalid request body");
+    }
     const newMarking = await createMarking(markingData);
     return res.status(201).json(newMarking);
+  })
+);
+
+markingRouter.route("/critter/:id").get(
+  catchErrors(async (req: Request, res: Response) => {
+    // validate marking id and confirm that marking exists
+    const id = validateUuidParam(req);
+    const markings = await getMarkingsByCritterId(id);
+    if (!markings.length) {
+      throw apiError.notFound(`Critter ID "${id}" has no associated markings`);
+    }
+    return res.status(200).json(markings);
   })
 );
 

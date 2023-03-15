@@ -299,6 +299,44 @@ describe("API: Marking", () => {
         );
       });
     });
+
+    describe("GET /api/markings/critter/:id", () => {
+      it("returns status 404 if no markings found", async () => {
+        const res = await request.get(`/api/markings/critter/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(
+          `/api/markings/critter/${dummyMarking.critter_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        expect.assertions(1);
+        const res = await request.get(
+          `/api/markings/critter/${dummyMarking.critter_id}`
+        );
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns markings with correct properties", async () => {
+        const res = await request.get(
+          `/api/markings/critter/${dummyMarking.critter_id}`
+        );
+        const markings = res.body;
+        expect.assertions(markings.length * (dummyMarkingKeys.length + 1));
+        for (const marking of markings) {
+          expect(marking.critter_id).toBe(dummyMarking.critter_id);
+          for (const key of dummyMarkingKeys) {
+            expect(marking).toHaveProperty(key);
+          }
+        }
+      });  
+    });
   });
 });
 
