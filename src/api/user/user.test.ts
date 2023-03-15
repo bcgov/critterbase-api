@@ -190,14 +190,14 @@ describe("API: User", () => {
   describe("ROUTERS", () => {
     describe("GET /api/users", () => {
       it("returns status 200", async () => {
-        expect.assertions(1);
         const res = await request.get("/api/users");
+        expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns an array", async () => {
-        expect.assertions(1);
         const res = await request.get("/api/users");
+        expect.assertions(1);
         expect(res.body).toBeInstanceOf(Array);
       });
 
@@ -213,8 +213,8 @@ describe("API: User", () => {
 
     describe("POST /api/users/create", () => {
       it("returns status 201", async () => {
-        expect.assertions(1);
         const res = await request.post("/api/users/create").send(newUser());
+        expect.assertions(1);
         expect(res.status).toBe(201);
       });
 
@@ -226,25 +226,27 @@ describe("API: User", () => {
       });
 
       it("updates an existing user if the system_user_id already present", async () => {
-        const res = await request.post("/api/users/create").send(newUser());
-        const user = res.body;
-        const res2 = await request
+        const user = await prisma.user.create({ data: newUser() });
+        const res = await request
           .post("/api/users/create")
           .send({ ...newUser(), system_user_id: user.system_user_id });
-        const user2 = res2.body;
+        const user2 = res.body;
         expect.assertions(5);
         expect(user.system_user_id).toStrictEqual(user2.system_user_id);
         expect(user.user_id).toStrictEqual(user2.user_id);
         expect(user.system_name === user2.system_name).toBeFalsy(); //name was updated
-        expect(user.create_timestamp).toStrictEqual(user2.create_timestamp);
-        expect(user.update_timestamp === user2.update_timestamp).toBeFalsy(); //timestamp updated
+        expect(user.create_timestamp.toISOString()).toStrictEqual(
+          user2.create_timestamp
+        );
+        expect(
+          user.update_timestamp.toISOString() === user2.update_timestamp
+        ).toBeFalsy(); //timestamp updated
       });
 
       it("returns status 400 when data contains invalid fields", async () => {
-        const user = newUser();
         const res = await request
           .post("/api/users/create")
-          .send({ ...user, invalidField: "qwerty123" });
+          .send({ ...newUser(), invalidField: "qwerty123" });
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
@@ -269,15 +271,13 @@ describe("API: User", () => {
       });
 
       it("returns status 200", async () => {
-        const user = await createUser(newUser());
-        const res = await request.get(`/api/users/${user.user_id}`);
+        const res = await request.get(`/api/users/${dummyUser.user_id}`);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns a user", async () => {
-        const user = await createUser(newUser());
-        const res = await request.get(`/api/users/${user.user_id}`);
+        const res = await request.get(`/api/users/${dummyUser.user_id}`);
         expect.assertions(1);
         expect(isUser(res.body)).toBe(true);
       });
@@ -291,31 +291,30 @@ describe("API: User", () => {
       });
 
       it("returns status 200", async () => {
-        const user = await createUser(newUser());
+        const user = await prisma.user.create({ data: newUser() });
         const res = await request.put(`/api/users/${user.user_id}`);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns a user", async () => {
-        const user = await createUser(newUser());
+        const user = await prisma.user.create({ data: newUser() });
         const res = await request.put(`/api/users/${user.user_id}`);
         expect.assertions(1);
         expect(isUser(res.body)).toBe(true);
       });
 
       it("returns status 409 when system_user_id already taken", async () => {
-        const user1 = await createUser(newUser());
-        const user2 = await createUser(newUser());
+        const user = await prisma.user.create({ data: newUser() });
         const res = await request
-          .put(`/api/users/${user2.user_id}`)
-          .send({ system_user_id: user1.system_user_id });
+          .put(`/api/users/${user.user_id}`)
+          .send({ system_user_id: dummyUser.system_user_id });
         expect.assertions(1);
         expect(res.status).toBe(409);
       });
 
       it("returns status 400 when data contains invalid fields", async () => {
-        const user = await createUser(newUser());
+        const user = await prisma.user.create({ data: newUser() });
         const res = await request
           .put(`/api/users/${user.user_id}`)
           .send({ invalidField: "qwerty123" });
@@ -332,14 +331,14 @@ describe("API: User", () => {
       });
 
       it("returns status 200", async () => {
-        const user = await createUser(newUser());
+        const user = await prisma.user.create({ data: newUser() });
         const res = await request.delete(`/api/users/${user.user_id}`);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns user deleted message", async () => {
-        const user = await createUser(newUser());
+        const user = await prisma.user.create({ data: newUser() });
         const res = await request.delete(`/api/users/${user.user_id}`);
         expect.assertions(1);
         expect(res.body).toStrictEqual(`User ${user.user_id} has been deleted`);
