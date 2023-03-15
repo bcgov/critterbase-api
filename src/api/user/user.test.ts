@@ -1,4 +1,4 @@
-import { request, uuidRegex } from "../../utils/constants";
+import { prisma, request, uuidRegex } from "../../utils/constants";
 import {
   createUser,
   deleteUser,
@@ -71,11 +71,18 @@ async function cleanup() {
 }
 
 describe("API: User", () => {
+  let dummyUserInput: Prisma.userCreateInput;
+  let dummyUser: user;
+
+  beforeAll(async () => {
+    dummyUserInput = newUser();
+    dummyUser = await prisma.user.create({ data: dummyUserInput });
+  });
+
   describe("SERVICES", () => {
     describe("createUser()", () => {
       it("returns a user", async () => {
-        const mockUser = newUser();
-        const returnedUser = await createUser(mockUser);
+        const returnedUser = await createUser(newUser());
         expect.assertions(1);
         expect(isUser(returnedUser)).toBe(true);
       });
@@ -89,8 +96,7 @@ describe("API: User", () => {
     });
     describe("upsertUser()", () => {
       it("returns a user", async () => {
-        const mockUser = newUser();
-        const returnedUser = await upsertUser(mockUser);
+        const returnedUser = await upsertUser(newUser());
         expect.assertions(1);
         expect(isUser(returnedUser)).toBe(true);
       });
@@ -120,12 +126,10 @@ describe("API: User", () => {
     });
     describe("getUser()", () => {
       it("returns a user when given a valid user ID", async () => {
-        const mockUser = newUser();
-        const createdUser = await createUser(mockUser);
-        const returnedUser = await getUser(createdUser.user_id);
+        const returnedUser = await getUser(dummyUser.user_id);
         expect.assertions(2);
         expect(isUser(returnedUser)).toBe(true);
-        expect(returnedUser).toMatchObject(createdUser);
+        expect(returnedUser).toMatchObject(dummyUser);
       });
 
       it("returns null when given an invalid system user ID", async () => {
@@ -137,14 +141,10 @@ describe("API: User", () => {
 
     describe("getUserBySystemId()", () => {
       it("returns a user when given a valid system user ID", async () => {
-        const mockUser = newUser();
-        const createdUser = await createUser(mockUser);
-        const returnedUser = await getUserBySystemId(
-          createdUser.system_user_id
-        );
+        const returnedUser = await getUserBySystemId(dummyUser.system_user_id);
         expect.assertions(2);
         expect(isUser(returnedUser)).toBe(true);
-        expect(returnedUser).toMatchObject(createdUser);
+        expect(returnedUser).toMatchObject(dummyUser);
       });
 
       it("returns null when given an invalid system user ID", async () => {
@@ -156,10 +156,9 @@ describe("API: User", () => {
 
     describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
-        const mockUser = newUser();
-        const createdUser = await createUser(mockUser);
+        const createdUser = await prisma.user.create({ data: newUser() });
         const updateData: Prisma.userUpdateInput = {
-          system_name: mockUser.system_name + "_UPDATED",
+          system_name: createdUser.system_name + "_UPDATED",
         };
         const updatedUser = await updateUser(createdUser.user_id, updateData);
         expect.assertions(2);
@@ -175,13 +174,14 @@ describe("API: User", () => {
 
     describe("deleteUser()", () => {
       it("returns deleted user and removes user from database", async () => {
-        const mockUser = newUser();
-        const createdUser = await createUser(mockUser);
+        const createdUser = await prisma.user.create({ data: newUser() });
         const deletedUser = await deleteUser(createdUser.user_id);
         expect.assertions(3);
         expect(isUser(deletedUser)).toBe(true);
         expect(deletedUser).toMatchObject(createdUser);
-        const returnedUser = await getUser(createdUser.user_id);
+        const returnedUser = await prisma.user.findUnique({
+          where: { user_id: createdUser.user_id },
+        });
         expect(returnedUser).toBeNull();
       });
     });
@@ -313,10 +313,12 @@ describe("API: User", () => {
         expect.assertions(1);
         expect(res.status).toBe(409);
       });
-      
+
       it("returns status 400 when data contains invalid fields", async () => {
         const user = await createUser(newUser());
-        const res = await request.put(`/api/users/${user.user_id}`).send({  invalidField: "qwerty123" });
+        const res = await request
+          .put(`/api/users/${user.user_id}`)
+          .send({ invalidField: "qwerty123" });
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
