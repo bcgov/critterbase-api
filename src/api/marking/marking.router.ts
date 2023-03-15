@@ -7,6 +7,7 @@ import {
   getAllMarkings,
   getMarkingById,
   isValidCreateMarkingInput,
+  isValidUpdateMarkingInput,
   updateMarking,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
@@ -65,9 +66,9 @@ markingRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      // if (!isValidUpdateMarkingInput(req.body)) {
-      //   throw apiError.syntaxIssue("Invalid request body");
-      // }
+      if (!isValidUpdateMarkingInput(req.body)) {
+        throw apiError.syntaxIssue("Invalid request body");
+      }
       const marking = await updateMarking(id, req.body);
       return res.status(200).json(marking);
     })
