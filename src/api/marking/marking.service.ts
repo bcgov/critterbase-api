@@ -23,6 +23,18 @@ const getMarkingById = async (marking_id: string): Promise<marking | null> => {
 };
 
 /**
+ * * Gets all markings that reference a critter_id
+ * @param {string} marking_id
+ */
+const getMarkingsByCritterId = async (critter_id: string): Promise<marking[]> => {
+  return await prisma.marking.findMany({
+    where: {
+      critter_id: critter_id,
+    },
+  });
+};
+
+/**
  * * Updates a marking in the database
  * @param {string} marking_id
  * @param {Prisma.markingUncheckedUpdateInput} marking_data
@@ -130,6 +142,7 @@ const isValidUpdateMarkingInput = (
 export {
   getAllMarkings,
   getMarkingById,
+  getMarkingsByCritterId,
   updateMarking,
   createMarking,
   deleteMarking,

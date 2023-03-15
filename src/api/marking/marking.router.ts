@@ -32,7 +32,6 @@ markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const markingData = req.body;
-    console.log(markingData)
       if (!isValidCreateMarkingInput(markingData)) {
         throw apiError.syntaxIssue("Invalid request body");
       }

@@ -4,6 +4,7 @@ import {
   deleteMarking,
   getAllMarkings,
   getMarkingById,
+  getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
 import type { Prisma, marking } from "@prisma/client";
@@ -89,6 +90,20 @@ describe("API: Marking", () => {
         const marking = await getMarkingById(dummyMarking.marking_id);
         expect.assertions(1);
         expect(marking).toStrictEqual(dummyMarking);
+      });
+    });
+
+    describe("getMarkingsByCritterId", () => {
+      it("returns an array of markings with the expected critter ID", async () => {
+        // create another record with the same critter_id
+        const markingInput = await newMarking();
+        await prisma.marking.create({data:{...markingInput, critter_id: dummyMarking.critter_id}});
+        const returnedMarkings = await getMarkingsByCritterId(dummyMarking.critter_id);
+        expect.assertions(1 + returnedMarkings.length);
+        expect(returnedMarkings.length).toBeGreaterThanOrEqual(2); // At least two markings tied to this critter
+        for (const marking of returnedMarkings) {
+          expect(marking.critter_id).toBe(dummyMarking.critter_id);
+        }
       });
     });
 
