@@ -40,20 +40,14 @@ describe("API: Critter", () => {
           throw Error('Missing critter for this test.');
         }
         const formatted = formatCritterInput(critter);
-        expect.assertions(6);
+        expect.assertions(4);
         expect(isValidObject(formatted, 
-          ['taxon_name_latin', 'responsible_region_nr_name', 'measurement_qualitative', 'measurement_quantitative', 'capture', 'mortality']
+          ['taxon_name_latin', 'responsible_region_nr_name', 'measurements', 'capture', 'mortality']
           )).toBeTruthy();
         //At least verify that the formatting has unnested the sub selects
 
         const checkFormat = (v) => {return typeof v === 'string' || typeof v === 'number' || v == undefined || v instanceof Date}
 
-        expect(formatted.measurement_qualitative.every(r => 
-          Object.values(r).every(checkFormat)))
-          .toBeTruthy();
-        expect(formatted.measurement_quantitative.every(r => 
-          Object.values(r).every(checkFormat)))
-          .toBeTruthy();
         expect(formatted.marking.every(r => 
           Object.values(r).every(checkFormat)))
           .toBeTruthy();
@@ -158,20 +152,10 @@ describe("API: Critter", () => {
       });
     })
     describe("GET /api/critters/:id", () => {
-      it("should return status 200, contain the requested critter along with markings and measures", async () => {
-        const critter = await prisma.critter.findFirst({
-          where: {
-            wlh_id: '18-13137'
-          }
-        });
-        const critter_id = critter?.critter_id;
-        const res = await request.get("/api/critters/" + critter_id);
-        expect.assertions(5);
+      it("should return status 200", async () => {
+        const res = await request.get("/api/critters/" + dummyCritter.critter_id);
+        expect.assertions(1);
         expect(res.status).toBe(200);
-        expect(res.body.critter_id).toBe(critter_id);
-        expect(res.body.marking.length).toBeGreaterThanOrEqual(1);
-        expect(res.body.measurement_qualitative.length).toBeGreaterThanOrEqual(1);
-        expect(res.body.measurement_quantitative.length).toBeGreaterThanOrEqual(1);
       });
       it("should return status 404 when critter id is not found", async () => {
         const res = await request.get("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");

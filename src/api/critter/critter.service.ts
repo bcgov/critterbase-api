@@ -2,9 +2,9 @@ import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import { isValidObject } from "../../utils/helper_functions";
-import { CaptureSubsetType, CritterIncludeResult, FormattedCritter, formattedCritterInclude, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
+import { CaptureSubsetType, CritterIncludeResult, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
 
-const formatCritterCapture = (events: CaptureSubsetType[]) => {
+const formatCritterCapture = (events: CaptureSubsetType[]): FormattedCapture[] => {
   return events.map(e => {
     const obj = {
       ...e,
@@ -17,11 +17,12 @@ const formatCritterCapture = (events: CaptureSubsetType[]) => {
     delete (obj as any).lk_region_env;
     delete (obj as any).lk_region_nr;
     delete (obj as any).lk_wildlife_management_unit;
+
     return obj;
   })
 }
 // Could probably merge these two functions to one if generated type had same names for location field
-const formatCritterMortality = (events: MortalitySubsetType[]) => {
+const formatCritterMortality = (events: MortalitySubsetType[]): FormattedMortality[] => {
   return events.map(e => {
     const obj = {
       ...e,
@@ -38,28 +39,37 @@ const formatCritterMortality = (events: MortalitySubsetType[]) => {
   })
 }
 
-const formatCritterMeasurementQuantitative = (measure: MeasurementQuantiativeSubsetType[]) => {
+const formatCritterMeasurementQuantitative = (measure: MeasurementQuantiativeSubsetType[]): FormattedQuantitativeMeasurement[] => {
   return measure.map(a => {
-    return {[a.xref_taxon_measurement_quantitative.measurement_name]: a.value}
+    return {
+      measurement_name: a.xref_taxon_measurement_quantitative.measurement_name,
+      value: a.value,
+      unit: a.xref_taxon_measurement_quantitative.unit,
+      measured_timestamp: a.measured_timestamp
+    }
   });
 }
 
-const formatCritterMeasurementQualitative = (measure: MeasurementQualitatitveSubsetType[]) => {
+const formatCritterMeasurementQualitative = (measure: MeasurementQualitatitveSubsetType[]): FormattedQualitativeMeasurement[] => {
   return measure.map(a => {
     const m = a.xref_taxon_measurement_qualitative_option;
-    return {[m.xref_taxon_measurement_qualitative.measurement_name]:m.option_label}
+    return {
+      measurement_name: m.xref_taxon_measurement_qualitative.measurement_name,
+      value: m.option_label,
+      measured_timestamp: a.measured_timestamp
+    }
   })
 }
 
-const formatCritterMarkings = (marking: MarkingSubsetType[]) => {
+const formatCritterMarkings = (marking: MarkingSubsetType[]): FormattedMarking[] => {
   return marking.map(a => {
     return {
-      primary_colour: a.lk_colour_marking_primary_colour_idTolk_colour?.colour,
-      secondary_colour: a.lk_colour_marking_secondary_colour_idTolk_colour?.colour,
-      marking_type: a.lk_marking_type?.name ,
-      marking_material: a.lk_marking_material?.material,
-      body_location: a.xref_taxon_marking_body_location?.body_location,
-      identifier: a.identifier,
+      primary_colour: a.lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
+      secondary_colour: a.lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
+      marking_type: a.lk_marking_type?.name ?? null,
+      marking_material: a.lk_marking_material?.material ?? null,
+      body_location: a.xref_taxon_marking_body_location?.body_location ?? null,
+      identifier: a.identifier ?? null,
       frequency: a.frequency,
       frequency_unit: a.frequency_unit,
       order: a.order
@@ -78,13 +88,17 @@ const formatCritterInput = (critter: CritterIncludeResult) => {
     ...critter,
     taxon_name_latin: critter?.lk_taxon.taxon_name_latin,
     responsible_region_nr_name: critter?.lk_region_nr?.region_nr_name,
-    measurement_qualitative: formatCritterMeasurementQualitative(critter?.measurement_qualitative),
-    measurement_quantitative: formatCritterMeasurementQuantitative(critter?.measurement_quantitative),
+    measurements: {
+      qualitative: formatCritterMeasurementQualitative(critter?.measurement_qualitative),
+      quantitative: formatCritterMeasurementQuantitative(critter?.measurement_quantitative),
+    },
     marking: formatCritterMarkings(critter?.marking),
     capture: formatCritterCapture(critter?.capture),
     mortality: formatCritterMortality(critter?.mortality)
   };
 
+  delete (formattedCritter as any).measurement_qualitative;
+  delete (formattedCritter as any).measurement_quantitative;
   delete formattedCritter.lk_taxon;
   delete formattedCritter.lk_region_nr;
 
