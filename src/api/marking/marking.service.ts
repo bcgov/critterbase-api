@@ -1,7 +1,6 @@
 import { prisma } from "../../utils/constants";
 import { marking, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
-import { StdioNull } from "child_process";
 
 /**
  * * Returns all existing markings from the database
@@ -27,7 +26,9 @@ const getMarkingById = async (marking_id: string): Promise<marking | null> => {
  * * Gets all markings that reference a critter_id
  * @param {string} marking_id
  */
-const getMarkingsByCritterId = async (critter_id: string): Promise<marking[]> => {
+const getMarkingsByCritterId = async (
+  critter_id: string
+): Promise<marking[]> => {
   return await prisma.marking.findMany({
     where: {
       critter_id: critter_id,
@@ -88,10 +89,9 @@ const isValidCreateMarkingInput = (
     "taxon_marking_body_location_id",
   ];
   const allowedFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    "critter_id",
+    ...requiredFields,
     "capture_id",
     "mortality_id",
-    "taxon_marking_body_location_id",
     "marking_type_id",
     "marking_material_id",
     "primary_colour_id",
