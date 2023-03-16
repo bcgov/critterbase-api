@@ -1,7 +1,8 @@
+import { user } from "@prisma/client";
 import type { Request, Response, NextFunction } from "express";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { app } from "../server";
-import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
+import { IS_DEV, IS_PROD, IS_TEST, PORT, uuidRegex } from "./constants";
 import { exclude } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -85,4 +86,19 @@ const home = (req: Request, res: Response, next: NextFunction) => {
 //   next();
 // };
 
-export { errorLogger, errorHandler, catchErrors, home };
+/**
+ * * Returns a uuid validated against a regex or throws an error
+ * @param {Request} req - Express request
+ */
+const validateUuidParam = (req: Request): string => {
+  if (!("id" in req.params)) {
+    throw apiError.requiredProperty("Missing required ID parameter");
+  }
+  const id = req.params.id;
+  if (!uuidRegex.test(id)) {
+    throw apiError.syntaxIssue("Invalid UUID Syntax");
+  }
+  return id;
+};
+
+export { errorLogger, errorHandler, catchErrors, home, validateUuidParam };
