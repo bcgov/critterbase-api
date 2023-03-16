@@ -6,6 +6,8 @@ import {
   getAllLocations,
   getLocation,
   deleteLocation,
+  LocationSchema,
+  createLocation,
 } from "./location.service";
 
 export const locationRouter = express.Router();
@@ -30,7 +32,9 @@ locationRouter.get(
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(201).json(`Post new location`);
+    LocationSchema.parse(req.body);
+    const location = await createLocation(req.body);
+    return res.status(201).json(location);
   })
 );
 
