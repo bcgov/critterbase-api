@@ -56,12 +56,12 @@ const updateMarking = async (
 /**
  * * Creates a new marking in the database
  * * Valid reference to existing critter_id and taxon_marking_body_location_id UUIDs must be provided
- * @param {Prisma.markingUncheckedCreateInput} newMarkingData
+ * @param {Prisma.markingUncheckedCreateInput} marking_data
  */
 const createMarking = async (
-  newMarkingData: Prisma.markingUncheckedCreateInput
+  marking_data: Prisma.markingUncheckedCreateInput
 ): Promise<marking> => {
-  return await prisma.marking.create({ data: newMarkingData });
+  return await prisma.marking.create({ data: marking_data });
 };
 
 /**
