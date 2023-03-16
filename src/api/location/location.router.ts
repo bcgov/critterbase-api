@@ -25,12 +25,12 @@ locationRouter.get(
 );
 
 /**
- ** Create new critter
+ ** Create new location
  */
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(201).json(`Post new critter`);
+    return res.status(201).json(`Post new location`);
   })
 );
 
@@ -61,13 +61,13 @@ locationRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      res.status(200).json(`Update critter ${id}`);
+      res.status(200).json(`Update location ${id}`);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       deleteLocation(id);
-      res.status(200).json(`Delete critter ${id}`);
+      res.status(200).json(`Delete location ${id}`);
     })
   );

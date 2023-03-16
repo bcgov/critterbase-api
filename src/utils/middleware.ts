@@ -65,24 +65,24 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   ]);
 };
 
-const excludeAuditFields = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if ("audit" in req.query) {
-    console.log("keeping audit cols");
-    next();
-  }
+// const excludeAuditFields = (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   if ("audit" in req.query) {
+//     console.log("keeping audit cols");
+//     next();
+//   }
 
-  const oldSend = res.send;
-  res.send = function (data) {
-    console.log("excluding audit cols");
-    exclude(data);
-    res.send = oldSend;
-    return res.send(data);
-  };
-  next();
-};
+//   const oldSend = res.send;
+//   res.send = function (data) {
+//     console.log("excluding audit cols");
+//     exclude(data);
+//     res.send = oldSend;
+//     return res.send(data);
+//   };
+//   next();
+// };
 
-export { errorLogger, errorHandler, catchErrors, home, excludeAuditFields };
+export { errorLogger, errorHandler, catchErrors, home };
