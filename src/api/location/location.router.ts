@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { STR } from "../../utils/constants";
+import { strings } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
 import {
@@ -18,7 +18,7 @@ locationRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const locations = await getAllLocations();
     if (!locations || !locations?.length) {
-      throw apiError.notFound(STR.location.notFoundMulti);
+      throw apiError.notFound(strings.location.notFoundMulti);
     }
     return res.status(200).json(locations);
   })
@@ -43,11 +43,11 @@ locationRouter
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       const id = req.params.id;
       if (!id) {
-        throw apiError.syntaxIssue(STR.location.noID);
+        throw apiError.syntaxIssue(strings.location.noID);
       }
       const location = await getLocation(id);
       if (!location) {
-        throw apiError.notFound(STR.location.notFound);
+        throw apiError.notFound(strings.location.notFound);
       }
       res.locals.location = location;
       next();
@@ -61,13 +61,13 @@ locationRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      res.status(200).json(`Update location ${id}`);
+      res.status(200).json(strings.location.updated(id));
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      deleteLocation(id);
-      res.status(200).json(`Delete location ${id}`);
+      await deleteLocation(id);
+      res.status(200).json(strings.location.deleted(id));
     })
   );

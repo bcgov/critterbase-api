@@ -13,7 +13,7 @@ type LocationExcludes =
   | "lk_region_nr"
   | "lk_wildlife_management_unit";
 
-const ex: LocationExcludes[] = [
+const excludes: LocationExcludes[] = [
   "wmu_id",
   "region_nr_id",
   "region_env_id",
@@ -49,11 +49,12 @@ const getLocation = async (id: string) => {
     },
     ...subSelects,
   });
-  return location && exclude(location, ex);
+  return location && exclude(location, excludes);
 };
 
 const getAllLocations = async () => {
-  return await prisma.location.findMany();
+  const locations = await prisma.location.findMany({ ...subSelects });
+  return locations?.length && locations.map((l) => exclude(l, excludes));
 };
 
 const deleteLocation = async (id: string): Promise<location> => {

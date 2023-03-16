@@ -20,12 +20,14 @@ const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalPrisma.prisma || new PrismaClient();
 if (IS_PROD) globalPrisma.prisma = prisma;
 
-const STR = {
+const strings = {
   location: {
     notFoundMulti: "no locations found",
     notFound: "location not found",
     noID: "id was not provided in params",
+    deleted: (id: string): string => `Deleted location ${id}`,
+    updated: (id: string): string => `Updated location ${id}`,
   },
 };
 
-export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, STR };
+export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, strings };
