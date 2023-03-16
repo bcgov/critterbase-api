@@ -7,27 +7,40 @@ import { AuditColumns } from "./types";
  * @param properties array of additional properties to be deleted. ie: 'description'
  * @deleteAudit boolean
  */
-const exclude = <T extends AuditColumns>(
-  record: T | T[],
-  deleteAudit: boolean = true,
-  properties?: Array<keyof T>
-): Partial<T> | Partial<T>[] => {
-  const del = (rec: Partial<T>): Partial<T> => {
-    if (deleteAudit) {
-      delete rec["create_user"];
-      delete rec["update_user"];
-      delete rec["created_at"];
-      delete rec["updated_at"];
-    }
-    if (properties) {
-      properties.forEach((prop) => delete rec[prop]);
-    }
-    return rec;
-  };
-  Array.isArray(record) ? record.forEach((r) => del(r)) : del(record);
 
-  return record;
-};
+function exclude<T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> {
+  for (let key of keys) {
+    if (obj) {
+      if (typeof obj[key] === "object") {
+        const temp = obj[key];
+        Object.assign(obj, temp);
+      }
+      delete obj[key];
+    }
+  }
+  return obj;
+}
+// const exclude = <T extends AuditColumns>(
+//   record: T | T[],
+//   deleteAudit: boolean = true,
+//   properties?: Array<keyof T>
+// ): Partial<T> | Partial<T>[] => {
+//   const del = (rec: Partial<T>): Partial<T> => {
+//     if (deleteAudit) {
+//       delete rec["create_user"];
+//       delete rec["update_user"];
+//       delete rec["created_at"];
+//       delete rec["updated_at"];
+//     }
+//     if (properties) {
+//       properties.forEach((prop) => delete rec[prop]);
+//     }
+//     return rec;
+//   };
+//   Array.isArray(record) ? record.forEach((r) => del(r)) : del(record);
+//   // console.log(record);
+//   return record;
+// };
 
 /**
  * * Validates the structure of an object

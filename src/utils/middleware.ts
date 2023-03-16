@@ -66,25 +66,25 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   ]);
 };
 
-const excludeAuditFields = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if ("audit" in req.query) {
-    console.log("keeping audit cols");
-    next();
-  }
+// const excludeAuditFields = (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   if ("audit" in req.query) {
+//     console.log("keeping audit cols");
+//     next();
+//   }
 
-  const oldSend = res.send;
-  res.send = function (data) {
-    console.log("excluding audit cols");
-    exclude(data);
-    res.send = oldSend;
-    return res.send(data);
-  };
-  next();
-};
+//   const oldSend = res.send;
+//   res.send = function (data) {
+//     console.log("excluding audit cols");
+//     exclude(data);
+//     res.send = oldSend;
+//     return res.send(data);
+//   };
+//   next();
+// };
 
 /**
  * * Returns a uuid validated against a regex or throws an error
@@ -101,11 +101,4 @@ const validateUuidParam = (req: Request): string => {
   return id;
 };
 
-export {
-  errorLogger,
-  errorHandler,
-  catchErrors,
-  home,
-  excludeAuditFields,
-  validateUuidParam
-};
+export { errorLogger, errorHandler, catchErrors, home, validateUuidParam };
