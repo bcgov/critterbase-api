@@ -28,7 +28,7 @@ const getCollectionUnitById = async (
  * * Gets an array of critter collection units by the critter_id (one critter can belong to many)
  * @param {string} critter_collection_unit_id
  */
-const getCollectionUnitByCritterId = async (
+const getCollectionUnitsByCritterId = async (
   critter_id: string
 ): Promise<critter_collection_unit[]> => {
   return await prisma.critter_collection_unit.findMany({
@@ -41,11 +41,11 @@ const getCollectionUnitByCritterId = async (
 /**
  * * Updates an existing critter collection unit in the database
  * @param {string} critter_collection_unit_id
- * @param {Prisma.critter_collection_unitUpdateInput} critter_collection_unit_data
+ * @param {Prisma.critter_collection_unitUncheckedUpdateInput} critter_collection_unit_data
  */
 const updateCollectionUnit = async (
   critter_collection_unit_id: string,
-  critter_collection_unit_data: Prisma.critter_collection_unitUpdateInput
+  critter_collection_unit_data: Prisma.critter_collection_unitUncheckedUpdateInput
 ): Promise<critter_collection_unit> => {
   return await prisma.critter_collection_unit.update({
     where: {
@@ -58,10 +58,10 @@ const updateCollectionUnit = async (
 /**
  * * Creates a new critter_collection_unit in the database
  * * Valid reference to existing critter_id and collection_unit_id UUIDs must be provided
- * @param {Prisma.critter_collection_unitCreateInput} critter_collection_unit_data
+ * @param {Prisma.critter_collection_unitUncheckedCreateInput} critter_collection_unit_data
  */
 const createCollectionUnit = async (
-  critter_collection_unit_data: Prisma.critter_collection_unitCreateInput
+  critter_collection_unit_data: Prisma.critter_collection_unitUncheckedCreateInput
 ): Promise<critter_collection_unit> => {
   return await prisma.critter_collection_unit.create({
     data: critter_collection_unit_data,
@@ -85,7 +85,7 @@ const deleteCollectionUnit = async (
 export {
   getAllCollectionUnits,
   getCollectionUnitById,
-  getCollectionUnitByCritterId,
+  getCollectionUnitsByCritterId,
   updateCollectionUnit,
   createCollectionUnit,
   deleteCollectionUnit,
