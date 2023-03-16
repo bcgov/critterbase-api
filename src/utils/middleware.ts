@@ -5,6 +5,8 @@ import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT, uuidRegex } from "./constants";
 import { exclude } from "./helper_functions";
 import { apiError } from "./types";
+import { ZodError, z } from "zod";
+import { resourceLimits } from "worker_threads";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -44,15 +46,15 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  if (err instanceof ZodError) {
+    //Removed formErrors from object
+    const formattedError = err.flatten().fieldErrors;
+    return res.status(400).json({ errors: formattedError });
+  }
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
   }
   next(err);
-  // else {
-  //   return res
-  //     .status(400)
-  //     .json({ error: err.message || "Unknown error occurred" });
-  // }
 };
 
 /**
@@ -66,25 +68,25 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   ]);
 };
 
-const excludeAuditFields = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if ("audit" in req.query) {
-    console.log("keeping audit cols");
-    next();
-  }
+// const excludeAuditFields = (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   if ("audit" in req.query) {
+//     console.log("keeping audit cols");
+//     next();
+//   }
 
-  const oldSend = res.send;
-  res.send = function (data) {
-    console.log("excluding audit cols");
-    exclude(data);
-    res.send = oldSend;
-    return res.send(data);
-  };
-  next();
-};
+//   const oldSend = res.send;
+//   res.send = function (data) {
+//     console.log("excluding audit cols");
+//     exclude(data);
+//     res.send = oldSend;
+//     return res.send(data);
+//   };
+//   next();
+// };
 
 /**
  * * Returns a uuid validated against a regex or throws an error
@@ -92,20 +94,13 @@ const excludeAuditFields = (
  */
 const validateUuidParam = (req: Request): string => {
   if (!("id" in req.params)) {
-    throw apiError.requiredProperty("user_id");
+    throw apiError.requiredProperty("Missing required ID parameter");
   }
   const id = req.params.id;
   if (!uuidRegex.test(id)) {
-    throw apiError.syntaxIssue("Invalid ID Parameter");
+    throw apiError.syntaxIssue("Invalid UUID Syntax");
   }
   return id;
 };
 
-export {
-  errorLogger,
-  errorHandler,
-  catchErrors,
-  home,
-  excludeAuditFields,
-  validateUuidParam
-};
+export { errorLogger, errorHandler, catchErrors, home, validateUuidParam };

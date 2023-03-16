@@ -3,7 +3,7 @@ import type { user, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
 
 /**
- * Adds a user to the database
+ * * Adds a user to the database
  * * Will fail if user system_user_id already present
  * @param {Prisma.userCreateInput} newUserData - The newly created user
  */

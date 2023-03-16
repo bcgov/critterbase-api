@@ -21,7 +21,17 @@ const prisma = globalPrisma.prisma || new PrismaClient();
 
 if (IS_PROD) globalPrisma.prisma = prisma;
 
+const strings = {
+  location: {
+    notFoundMulti: "no locations found",
+    notFound: "location not found",
+    noID: "id was not provided in params",
+    deleted: (id: string): string => `Deleted location ${id}`,
+    updated: (id: string): string => `Updated location ${id}`,
+  },
+};
+
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, uuidRegex };
+export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, uuidRegex, strings };
