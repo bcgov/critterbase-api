@@ -24,9 +24,7 @@ describe("API: Location", () => {
     describe("GET /api/locations", () => {
       it("should return status 200", async () => {
         expect.assertions(1);
-        const res = await request.get(
-          "/api/locations/723327f7-6667-43a2-964b-71fa2639b748"
-        );
+        const res = await request.get("/api/locations");
         expect(res.status).toBe(200);
         console.log(res.body);
       });

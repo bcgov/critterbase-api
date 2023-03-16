@@ -5,6 +5,8 @@ import { app } from "../server";
 import { IS_DEV, IS_PROD, IS_TEST, PORT, uuidRegex } from "./constants";
 import { exclude } from "./helper_functions";
 import { apiError } from "./types";
+import { ZodError, z } from "zod";
+import { resourceLimits } from "worker_threads";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -44,15 +46,15 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  if (err instanceof ZodError) {
+    //Removed formErrors from object
+    const formattedError = err.flatten().fieldErrors;
+    return res.status(400).json({ errors: formattedError });
+  }
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
   }
   next(err);
-  // else {
-  //   return res
-  //     .status(400)
-  //     .json({ error: err.message || "Unknown error occurred" });
-  // }
 };
 
 /**

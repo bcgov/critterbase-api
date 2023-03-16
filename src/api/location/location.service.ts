@@ -4,6 +4,8 @@ import {
   lk_wildlife_management_unit,
   location,
 } from "@prisma/client";
+
+import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
 
@@ -13,7 +15,7 @@ type LocationExcludes =
   | "lk_region_nr"
   | "lk_wildlife_management_unit";
 
-const ex: LocationExcludes[] = [
+const excludes: LocationExcludes[] = [
   "wmu_id",
   "region_nr_id",
   "region_env_id",
@@ -21,6 +23,33 @@ const ex: LocationExcludes[] = [
   "lk_region_nr",
   "lk_region_env",
 ];
+// location_id: string
+// latitude: number | null
+// longitude: number | null
+// coordinate_uncertainty: number | null
+// coordinate_uncertainty_unit: coordinate_uncertainty_unit | null
+// wmu_id: string | null
+// region_nr_id: string | null
+// region_env_id: string | null
+// elevation: number | null
+// temperature: number | null
+// location_comment: string | null
+// create_user: string
+// update_user: string
+// create_timestamp: Date
+// update_timestamp: Date
+const LocationSchema = z.object({
+  latitude: z.number().min(-90).max(90).nullable(),
+  longitude: z.number().min(-180).max(-180).nullable(),
+  coordinate_uncertainty: z.number().nullable(),
+  wmu_id: z.string().uuid().nullable(),
+  region_nr_id: z.string().uuid().nullable(),
+  region_env_id: z.string().uuid().nullable(),
+  elevation: z.number().min(0).nullable(),
+  temperature: z.number().min(-100).max(100).nullable(),
+  location_comment: z.string().max(100).nullable(),
+  //then placeholder for audit
+});
 
 const subSelects = {
   include: {
@@ -49,11 +78,12 @@ const getLocation = async (id: string) => {
     },
     ...subSelects,
   });
-  return location && exclude(location, ex);
+  return location && exclude(location, excludes);
 };
 
 const getAllLocations = async () => {
-  return await prisma.location.findMany();
+  const locations = await prisma.location.findMany({ ...subSelects });
+  return locations?.length && locations.map((l) => exclude(l, excludes));
 };
 
 const deleteLocation = async (id: string): Promise<location> => {
@@ -63,4 +93,18 @@ const deleteLocation = async (id: string): Promise<location> => {
     },
   });
 };
-export { getAllLocations, getLocation, deleteLocation };
+
+const createLocation = async (body: location): Promise<location> => {
+  return await prisma.location.create({
+    data: {
+      ...body,
+    },
+  });
+};
+export {
+  LocationSchema,
+  getAllLocations,
+  getLocation,
+  deleteLocation,
+  createLocation,
+};
