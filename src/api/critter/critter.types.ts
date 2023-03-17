@@ -1,4 +1,5 @@
-import { capture, critter, frequency_unit, measurement_qualitative, measurement_quantitative, Prisma, xref_taxon_measurement_qualitative, xref_taxon_measurement_qualitative_option, xref_taxon_measurement_quantitative } from "@prisma/client";
+import { capture, critter, frequency_unit, measurement_qualitative, measurement_quantitative, Prisma, sex, xref_taxon_measurement_qualitative, xref_taxon_measurement_qualitative_option, xref_taxon_measurement_quantitative } from "@prisma/client";
+import { z } from 'zod'
 
 const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement_quantitativeArgs>()({
     select: {
@@ -182,8 +183,6 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
   }
 
   type FormattedCritter = critter & {
-    //measurement_quantitative: Array<Record<string, any>>,
-   // measurement_qualitative: Array<Record<string, any>>,
     measurements: JoinedMeasurements,
     marking: Array<FormattedMarking>,
     taxon_name_latin: string, 
@@ -193,6 +192,24 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     capture: Array<FormattedCapture>,
     mortality: Array<FormattedMortality>
   }
+
+  const CritterUpdateBodySchema = z.object({
+    taxon_id: z.string().uuid().optional(),
+    wlh_id: z.string().optional().nullable(),
+    animal_id: z.string().optional().nullable(),
+    sex: z.nativeEnum(sex).optional(),
+    responsible_region_nr_id: z.string().uuid().optional().nullable(),
+    critter_comment: z.string().optional().nullable()
+  })
+
+  const CritterCreateBodySchema = CritterUpdateBodySchema.extend({
+    critter_id: z.string().uuid().optional(),
+    taxon_id: z.string().uuid(),
+    sex: z.nativeEnum(sex)
+  })
+
+  type CritterCreate = z.infer<typeof CritterCreateBodySchema>
+  type CritterUpdate = z.infer<typeof CritterUpdateBodySchema>
 
   export type {
     FormattedCritter, 
@@ -206,7 +223,9 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     FormattedMortality,
     FormattedMarking,
     FormattedQuantitativeMeasurement,
-    FormattedQualitativeMeasurement
+    FormattedQualitativeMeasurement,
+    CritterUpdate,
+    CritterCreate
     }
   export {
     measurementQualitativeIncludeSubset, 
@@ -214,5 +233,7 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     markingIncludeSubset, 
     formattedCritterInclude, 
     captureSelectSubset, 
-    mortalitySelectSubset
+    mortalitySelectSubset,
+    CritterCreateBodySchema,
+    CritterUpdateBodySchema
   }

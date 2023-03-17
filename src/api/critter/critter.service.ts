@@ -2,7 +2,7 @@ import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import { isValidObject } from "../../utils/helper_functions";
-import { CaptureSubsetType, CritterIncludeResult, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
+import { CaptureSubsetType, CritterCreate, CritterIncludeResult, CritterUpdate, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
 
 const formatCritterCapture = (events: CaptureSubsetType[]): FormattedCapture[] => {
   return events.map(e => {
@@ -163,11 +163,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[] | n
   return formattedResults;
 }
 
-const updateCritter = async (critter_id: string, critter_data: Prisma.critterUpdateInput): Promise<critter> => {
-
-  //Don't think you should be allowed to overwrite an existing critter_id with a different one. 
-  delete critter_data.critter_id;
-
+const updateCritter = async (critter_id: string, critter_data: CritterUpdate): Promise<critter> => {
   return prisma.critter.update({
     where: {
       critter_id: critter_id
@@ -176,7 +172,7 @@ const updateCritter = async (critter_id: string, critter_data: Prisma.critterUpd
   })
 }
 
-const createCritter = async (critter_data: Prisma.critterUncheckedCreateInput): Promise<critter> => {
+const createCritter = async (critter_data: CritterCreate): Promise<critter> => {
   if(critter_data.critter_id) {
     const existing = await prisma.critter.findUnique({
       where: { critter_id: critter_data.critter_id}

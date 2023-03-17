@@ -4,6 +4,7 @@ import { catchErrors } from "../../utils/middleware";
 import { createCritter, deleteCritter, getAllCritters, getCritterById, getCritterByIdWithDetails, getCritterByWlhId, updateCritter } from "./critter.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
+import { CritterCreateBodySchema, CritterUpdateBodySchema } from "./critter.types";
 
 export const critterRouter = express.Router();
 
@@ -24,7 +25,8 @@ critterRouter.get(
 critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const created = await createCritter(req.body);
+    const parsed = CritterCreateBodySchema.parse(req.body);
+    const created = await createCritter(parsed);
     return res.status(201).send(created);
   })
 );
@@ -66,7 +68,8 @@ critterRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.critter_id;
-      const critter = await updateCritter(id, req.body);
+      const parsed = CritterUpdateBodySchema.parse(req.body);
+      const critter = await updateCritter(id, parsed);
       res.status(200).json(critter);
     })
   )

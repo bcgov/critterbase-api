@@ -132,10 +132,10 @@ describe("API: Critter", () => {
         expect.assertions(1);
         expect(res.status).toBe(409);
       });
-      it("should return 500 if trying to create with bad value type", async () => {
+      it("should return 400 if trying to create with bad value type", async () => {
         const res = await request.post("/api/critters/create").send({taxon_id: dummyTaxon, sex: 123});
         expect.assertions(1);
-        expect(res.status).toBe(500);
+        expect(res.status).toBe(400);
       });
     })
     describe("GET /api/critters/wlh/:wlh_id", () => {
@@ -170,10 +170,10 @@ describe("API: Critter", () => {
         expect(res.status).toBe(200);
         expect(res.body.animal_id).toBe('Banana');
       })
-      it("should return status 500 if you try to modify with a bad value type", async () => {
+      it("should return status 400 if you try to modify with a bad value type", async () => {
         const res = await request.put("/api/critters/" + dummyCritter.critter_id).send({sex: 1234});
         expect.assertions(1);
-        expect(res.status).toBe(500);
+        expect(res.status).toBe(400);
       })
       it("should return status 404 when critter id is not found", async () => {
         const res = await request.delete("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
