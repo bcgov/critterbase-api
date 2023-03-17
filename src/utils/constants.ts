@@ -24,7 +24,7 @@ if (IS_PROD) globalPrisma.prisma = prisma;
 
 const strings = {
   app: {
-    invalidUUID: (id: string) => `id: "${id}" is not a valid UUID`,
+    invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
     idRequired: `id is required`,
   },
   location: {

@@ -25,7 +25,9 @@ const isUUID = (id?: string): string => {
   if (!id) {
     throw apiError.requiredProperty(strings.app.idRequired);
   }
-  if (!z.string().uuid().safeParse(id)) {
+  console.log(z.string().uuid().safeParse(id));
+  if (!z.string().uuid().safeParse(id).success) {
+    console.log("inside");
     throw apiError.syntaxIssue(strings.app.invalidUUID(id));
   }
   return id;

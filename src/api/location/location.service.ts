@@ -24,7 +24,7 @@ const excludes: LocationExcludes[] = [
   "lk_region_env",
 ];
 
-const LocationSchema = z.object({
+const LocationCreateBodySchema = z.object({
   latitude: z.number().min(-90).max(90).nullable(),
   longitude: z.number().min(-180).max(180).nullable(),
   coordinate_uncertainty: z.number().nullable(),
@@ -37,9 +37,9 @@ const LocationSchema = z.object({
   location_comment: z.string().max(100).nullable(),
 });
 
-const UpdateLocationSchema = LocationSchema.extend({
+const LocationUpdateBodySchema = LocationCreateBodySchema.extend({
   location_id: z.string().uuid(),
-}).required({ location_id: true });
+});
 
 const subSelects = {
   include: {
@@ -92,8 +92,8 @@ const updateLocation = async (data: location): Promise<location> => {
   return await prisma.location.create({ data });
 };
 export {
-  LocationSchema,
-  UpdateLocationSchema,
+  LocationCreateBodySchema,
+  LocationUpdateBodySchema,
   getAllLocations,
   getLocation,
   deleteLocation,
