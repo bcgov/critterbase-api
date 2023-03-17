@@ -1,6 +1,7 @@
 import { prisma } from "../../utils/constants";
 import type { user, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
+import { z } from "zod";
 
 /**
  * * Adds a user to the database
@@ -96,6 +97,20 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
+const CreateUserSchema = z
+  .object({
+    system_user_id: z.string(),
+    system_name: z.string(),
+    keycloak_uuid: z.string().uuid().nullable(),
+  })
+  .required({ system_user_id: true, system_name: true });
+
+const UpdateUserSchema = CreateUserSchema.partial()
+  .extend({
+    user_id: z.string().uuid(),
+  })
+  .required({ user_id: true });
+
 /**
  * * Ensures that a create user input has the right fields
  * TODO: Decide which fields should be allowed or required
@@ -125,7 +140,7 @@ const isValidUpdateUserInput = (data: user): boolean => {
     "system_user_id",
     "system_name",
     "keycloak_uuid",
-    "update_user"
+    "update_user",
   ];
   return isValidObject(data, requiredFields, allowedFields);
 };
@@ -139,5 +154,5 @@ export {
   updateUser,
   deleteUser,
   isValidCreateUserInput,
-  isValidUpdateUserInput
+  isValidUpdateUserInput,
 };
