@@ -3,6 +3,7 @@ import { strings } from "../../utils/constants";
 import { isUUID } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
+import { uuidParamsSchema } from "../../utils/zod_schemas";
 import {
   createLocation,
   deleteLocation,
@@ -48,8 +49,8 @@ locationRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const id = isUUID(req.params.id);
-      const location = await getLocation(id);
+      uuidParamsSchema.parse(req.params);
+      const location = await getLocation(req.params.id);
       if (!location) {
         throw apiError.notFound(strings.location.notFound);
       }
