@@ -1,13 +1,17 @@
 import express, { NextFunction, Request, Response } from "express";
 import { strings } from "../../utils/constants";
+import { isUUID } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
+import { uuidParamsSchema } from "../../utils/zod_schemas";
 import {
+  createLocation,
+  deleteLocation,
   getAllLocations,
   getLocation,
-  deleteLocation,
-  LocationSchema,
-  createLocation,
+  LocationCreateBodySchema,
+  LocationUpdateBodySchema,
+  updateLocation,
 } from "./location.service";
 
 export const locationRouter = express.Router();
@@ -32,7 +36,7 @@ locationRouter.get(
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    LocationSchema.parse(req.body);
+    LocationCreateBodySchema.parse(req.body);
     const location = await createLocation(req.body);
     return res.status(201).json(location);
   })
@@ -45,11 +49,8 @@ locationRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const id = req.params.id;
-      if (!id) {
-        throw apiError.syntaxIssue(strings.location.noID);
-      }
-      const location = await getLocation(id);
+      uuidParamsSchema.parse(req.params);
+      const location = await getLocation(req.params.id);
       if (!location) {
         throw apiError.notFound(strings.location.notFound);
       }
@@ -62,10 +63,11 @@ locationRouter
       return res.status(200).json(res.locals.location);
     })
   )
-  .put(
+  .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(strings.location.updated(id));
+      LocationUpdateBodySchema.parse(req.body);
+      const location = await updateLocation(req.body);
+      res.status(200).json(location);
     })
   )
   .delete(

@@ -1,12 +1,7 @@
-import { user } from "@prisma/client";
-import type { Request, Response, NextFunction } from "express";
-import { IncomingMessage, Server, ServerResponse } from "http";
-import { app } from "../server";
-import { IS_DEV, IS_PROD, IS_TEST, PORT, uuidRegex } from "./constants";
-import { exclude } from "./helper_functions";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import type { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
 import { apiError } from "./types";
-import { ZodError, z } from "zod";
-import { resourceLimits } from "worker_threads";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -41,18 +36,25 @@ const errorLogger = (
  * @params All four express params.
  */
 const errorHandler = (
-  err: apiError,
+  err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   if (err instanceof ZodError) {
     //Removed formErrors from object
-    const formattedError = err.flatten().fieldErrors;
-    return res.status(400).json({ errors: formattedError });
+    const fieldErrors = err.flatten().fieldErrors;
+    const formErrors = err.flatten().formErrors;
+    return res.status(400).json({ errors: fieldErrors });
   }
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
+  }
+  if (err instanceof PrismaClientKnownRequestError) {
+    return res.status(400).json(err?.message);
+  }
+  if (err instanceof Error) {
+    return res.status(400).json(err?.message ?? "unknown error");
   }
   next(err);
 };
@@ -68,39 +70,4 @@ const home = (req: Request, res: Response, next: NextFunction) => {
   ]);
 };
 
-// const excludeAuditFields = (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   if ("audit" in req.query) {
-//     console.log("keeping audit cols");
-//     next();
-//   }
-
-//   const oldSend = res.send;
-//   res.send = function (data) {
-//     console.log("excluding audit cols");
-//     exclude(data);
-//     res.send = oldSend;
-//     return res.send(data);
-//   };
-//   next();
-// };
-
-/**
- * * Returns a uuid validated against a regex or throws an error
- * @param {Request} req - Express request
- */
-const validateUuidParam = (req: Request): string => {
-  if (!("id" in req.params)) {
-    throw apiError.requiredProperty("Missing required ID parameter");
-  }
-  const id = req.params.id;
-  if (!uuidRegex.test(id)) {
-    throw apiError.syntaxIssue("Invalid UUID Syntax");
-  }
-  return id;
-};
-
-export { errorLogger, errorHandler, catchErrors, home, validateUuidParam };
+export { errorLogger, errorHandler, catchErrors, home };
