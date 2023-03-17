@@ -26,8 +26,8 @@ export const captureRouter = express.Router();
  captureRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    CaptureCreateBodySchema.parse(req.body);
-    const result = await createCapture(req.body);
+    const parsed = CaptureCreateBodySchema.parse(req.body);
+    const result = await createCapture(parsed);
     return res.status(201).json(result);
   })
 );
@@ -71,9 +71,8 @@ captureRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.capture_id;
-      const data = req.body;
-      CaptureUpdateBodySchema.parse(data);
-      const result = await updateCapture(id, data);
+      const parsed = CaptureUpdateBodySchema.parse(req.body);
+      const result = await updateCapture(id, parsed);
       res.status(200).json(result);
     })
   )
