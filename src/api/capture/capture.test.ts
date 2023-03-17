@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { prisma, request } from "../../utils/constants";
 import { createCapture, deleteCapture, getAllCaptures, getCaptureByCritter, getCaptureById, updateCapture } from "./capture.service";
 
-let dummyCapture : Prisma.captureUncheckedCreateInput;
+let dummyCapture;
 let captureUUID;
 let critterUUID;
 beforeAll(async () => {

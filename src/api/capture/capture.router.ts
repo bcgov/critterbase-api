@@ -4,6 +4,8 @@ import { catchErrors } from "../../utils/middleware";
 import { createCapture, deleteCapture, getAllCaptures, getCaptureByCritter, getCaptureById, updateCapture } from "./capture.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
+import { LocationCreateBodySchema, LocationUpdateBodySchema } from "../location/location.service";
+import { CaptureCreateBodySchema, CaptureUpdateBodySchema } from "./capture.types";
 
 export const captureRouter = express.Router();
 
@@ -24,6 +26,7 @@ export const captureRouter = express.Router();
  captureRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
+    CaptureCreateBodySchema.parse(req.body);
     const result = await createCapture(req.body);
     return res.status(201).json(result);
   })
@@ -69,6 +72,7 @@ captureRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.capture_id;
       const data = req.body;
+      CaptureUpdateBodySchema.parse(data);
       const result = await updateCapture(id, data);
       res.status(200).json(result);
     })

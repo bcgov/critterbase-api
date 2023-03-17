@@ -1,7 +1,7 @@
 import { prisma } from "../../utils/constants";
 import { capture, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
-import { captureInclude, CaptureIncludeType, FormattedCapture } from "./capture.types";
+import { CaptureCreate, captureInclude, CaptureIncludeType, CaptureUpdate, FormattedCapture } from "./capture.types";
 import { exclude } from "../../utils/helper_functions";
 import { FormattedLocation } from "../location/location.types";
 
@@ -69,7 +69,7 @@ const getCaptureByCritter = async (critter_id: string): Promise<FormattedCapture
   return captures.map(c => formatCapture(c));
 }
 
-const createCapture = async (capture_data: any): Promise<capture | null> => {
+const createCapture = async (capture_data: CaptureCreate): Promise<capture | null> => {
   if(capture_data.capture_id) {
     const exists = await prisma.capture.findUnique({
       where: {
@@ -86,7 +86,7 @@ const createCapture = async (capture_data: any): Promise<capture | null> => {
   })
 }
 
-const updateCapture = async (capture_id: string, capture_data: any): Promise<capture | null> => {
+const updateCapture = async (capture_id: string, capture_data: CaptureUpdate): Promise<capture | null> => {
   return await prisma.capture.update({
     data: capture_data,
     where: {
