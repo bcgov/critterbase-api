@@ -9,6 +9,7 @@ import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
 
+// Types
 type LocationExcludes =
   | keyof location
   | "lk_region_env"
@@ -24,7 +25,12 @@ const excludes: LocationExcludes[] = [
   "lk_region_env",
 ];
 
-const LocationSchema = z.object({
+type LocationCreate = z.infer<typeof LocationCreateBodySchema>;
+
+type LocationUpdate = z.infer<typeof LocationUpdateBodySchema>;
+
+// Zod Schemas
+const LocationCreateBodySchema = z.object({
   latitude: z.number().min(-90).max(90).nullable(),
   longitude: z.number().min(-180).max(180).nullable(),
   coordinate_uncertainty: z.number().nullable(),
@@ -37,10 +43,11 @@ const LocationSchema = z.object({
   location_comment: z.string().max(100).nullable(),
 });
 
-const UpdateLocationSchema = LocationSchema.extend({
+const LocationUpdateBodySchema = LocationCreateBodySchema.extend({
   location_id: z.string().uuid(),
-}).required({ location_id: true });
+});
 
+// Prisma objects
 const subSelects = {
   include: {
     lk_wildlife_management_unit: {
@@ -84,16 +91,16 @@ const deleteLocation = async (id: string): Promise<location> => {
   });
 };
 
-const createLocation = async (data: location): Promise<location> => {
+const createLocation = async (data: LocationCreate): Promise<location> => {
   return await prisma.location.create({ data });
 };
 
-const updateLocation = async (data: location): Promise<location> => {
+const updateLocation = async (data: LocationUpdate): Promise<location> => {
   return await prisma.location.create({ data });
 };
 export {
-  LocationSchema,
-  UpdateLocationSchema,
+  LocationCreateBodySchema,
+  LocationUpdateBodySchema,
   getAllLocations,
   getLocation,
   deleteLocation,
