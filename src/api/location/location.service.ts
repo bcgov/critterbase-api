@@ -31,16 +31,16 @@ type LocationUpdate = z.infer<typeof LocationUpdateBodySchema>;
 
 // Zod Schemas
 const LocationCreateBodySchema = z.object({
-  latitude: z.number().min(-90).max(90).nullable(),
-  longitude: z.number().min(-180).max(180).nullable(),
-  coordinate_uncertainty: z.number().nullable(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  coordinate_uncertainty: z.number().optional(),
   coordinate_uncertainty_unit: z.enum(["m"]).default("m"),
-  wmu_id: z.string().uuid().nullable(),
-  region_nr_id: z.string().uuid().nullable(),
-  region_env_id: z.string().uuid().nullable(),
-  elevation: z.number().min(0).nullable(),
-  temperature: z.number().min(-100).max(100).nullable(),
-  location_comment: z.string().max(100).nullable(),
+  wmu_id: z.string().uuid().optional(),
+  region_nr_id: z.string().uuid().optional(),
+  region_env_id: z.string().uuid().optional(),
+  elevation: z.number().min(0).optional(),
+  temperature: z.number().min(-100).max(100).optional(),
+  location_comment: z.string().max(100).optional(),
 });
 
 const LocationUpdateBodySchema = LocationCreateBodySchema.extend({
