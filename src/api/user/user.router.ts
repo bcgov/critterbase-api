@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
-import { catchErrors, validateUuidParam } from "../../utils/middleware";
+import { catchErrors } from "../../utils/middleware";
 import {
   deleteUser,
   getUser,
@@ -12,6 +12,7 @@ import {
   upsertUser,
 } from "./user.service";
 import { apiError } from "../../utils/types";
+import { isUUID } from "../../utils/helper_functions";
 
 export const userRouter = express.Router();
 
@@ -49,7 +50,7 @@ userRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate user id and confirm that user exists
-      const id = validateUuidParam(req);
+      const id = isUUID(req.params.id);
       res.locals.userData = await getUser(id);
       if (!res.locals.userData) {
         throw apiError.notFound(`User ID "${id}" not found`);
@@ -60,7 +61,7 @@ userRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.userData); 
+      return res.status(200).json(res.locals.userData);
     })
   )
   .put(
