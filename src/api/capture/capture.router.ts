@@ -1,7 +1,7 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getAllCaptures } from "./capture.service";
+import { createCapture, deleteCapture, getAllCaptures, getCaptureByCritter, getCaptureById, updateCapture } from "./capture.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
 
@@ -13,7 +13,7 @@ export const captureRouter = express.Router();
  captureRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const allCritters = getAllCaptures();
+    const allCritters = await getAllCaptures();
     return res.status(200).json(allCritters);
   })
 );
@@ -24,7 +24,8 @@ export const captureRouter = express.Router();
  captureRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(201).json(`Post new critter`);
+    const result = await createCapture(req.body);
+    return res.status(201).json(result);
   })
 );
 
@@ -32,11 +33,7 @@ captureRouter.get(
   "/critter/:critter_id",
   catchErrors(async (req: Request, res: Response) => {
     const id = req.params.critter_id;
-    const result = prisma.capture.findMany({
-      where: {
-        critter_id: id
-      }
-    })
+    const result = await getCaptureByCritter(id);
     res.status(200).send(result);
   })
 )
@@ -49,12 +46,12 @@ captureRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       const id = req.params.capture_id;
-      const result = prisma.capture.findFirst({
+      const result = await prisma.capture.findUnique({
         where: {
           capture_id: id
         }
       })
-      if(!result) {
+      if(result == null) {
         throw apiError.notFound('Could not find the requested capture')
       }
       next();
@@ -63,23 +60,23 @@ captureRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.capture_id;
-      const result = prisma.capture.findUnique({
-        where: {
-          capture_id: id
-        }
-      })
+      const result = await getCaptureById(id);
+      console.log(result);
       return res.status(200).json(result);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(`Update critter ${id}`);
+      const id = req.params.capture_id;
+      const data = req.body;
+      const result = await updateCapture(id, data);
+      res.status(200).json(result);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(`Delete critter ${id}`);
+      const id = req.params.capture_id;
+      const result = await deleteCapture(id);
+      res.status(200).json(result);
     })
   );

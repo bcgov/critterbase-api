@@ -1,27 +1,33 @@
 import { prisma } from "../../utils/constants";
-import type { capture } from "@prisma/client";
+import { capture, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
 
+const captureInclude = Prisma.validator<Prisma.captureArgs>()({
+  include: {
+    location_capture_capture_location_idTolocation: {
+      select: {
+        latitude: true,
+        longitude: true,
+      }
+    },
+    location_capture_release_location_idTolocation: {
+      select: {
+        latitude: true,
+        longitude: true
+      }
+    }
+  }
+})
+
 const getAllCaptures = async (): Promise<capture[]> => {
-  return await prisma.capture.findMany();
+  return await prisma.capture.findMany({
+    ...captureInclude
+  });
 };
 
 const getCaptureById = async (capture_id: string): Promise<capture | null> => {
   return await prisma.capture.findUnique({
-    include: {
-      location_capture_capture_location_idTolocation: {
-        select: {
-          latitude: true,
-          longitude: true,
-        }
-      },
-      location_capture_release_location_idTolocation: {
-        select: {
-          latitude: true,
-          longitude: true
-        }
-      }
-    },
+    ...captureInclude,
     where: {
       capture_id: capture_id
     }
@@ -30,6 +36,7 @@ const getCaptureById = async (capture_id: string): Promise<capture | null> => {
 
 const getCaptureByCritter = async (critter_id: string): Promise<capture[] | null> => {
   return await prisma.capture.findMany({
+    ...captureInclude,
     where: {
       critter_id: critter_id
     }
@@ -70,4 +77,4 @@ const deleteCapture = async (capture_id: string): Promise<capture | null> => {
   })
 }
 
-export { getAllCaptures, getCaptureById, getCaptureByCritter, updateCapture };
+export { getAllCaptures, getCaptureById, getCaptureByCritter, updateCapture, createCapture, deleteCapture };
