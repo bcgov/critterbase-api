@@ -1,4 +1,4 @@
-import { prisma } from "../../utils/constants";
+import { prisma, strings } from "../../utils/constants";
 import type { user, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
 import { AnyZodObject, z, ZodObject, ZodRawShape, ZodType, ZodTypeAny } from "zod";
@@ -98,16 +98,15 @@ const deleteUser = async (user_id: string): Promise<user> => {
 };
 
 const CreateUserSchema = z.object({
-  body: z.object({
-    system_user_id: z.string(),
-    system_name: z.string(),
-    keycloak_uuid: z.string().uuid().nullable().optional(),
-  }),
-});
+  system_user_id: z.string().refine(async (system_user_id) => {
+    // check for uniqueness
+    return !(await getUserBySystemId(system_user_id)) 
+  }, strings.user.sytemUserIdExists),
+  system_name: z.string(),
+  keycloak_uuid: z.string().uuid().nullable().optional(),
+}).strip();
 
-const UpdateUserSchema = CreateUserSchema.deepPartial().extend({
-  params: z.object({ id: z.string().uuid() }),
-});
+const UpdateUserSchema = CreateUserSchema.partial();
 
 /**
  * * Ensures that a create user input has the right fields

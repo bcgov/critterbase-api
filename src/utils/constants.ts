@@ -34,6 +34,10 @@ const strings = {
     deleted: (id: string): string => `Deleted location ${id}`,
     // updated: (id: string): string => `Updated location ${id}`,
   },
+  user: {
+    notFound: "user not found",
+    sytemUserIdExists: "system_user_id already exists",
+  },
 };
 
 export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, strings };
