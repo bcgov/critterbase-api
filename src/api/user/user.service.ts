@@ -2,6 +2,7 @@ import { prisma, strings } from "../../utils/constants";
 import type { user, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
 import { AnyZodObject, z, ZodObject, ZodRawShape, ZodType, ZodTypeAny } from "zod";
+import { nonEmpty } from "../../utils/zod_schemas";
 
 /**
  * * Adds a user to the database
@@ -97,6 +98,7 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
+// Zod schema to validate create user data
 const CreateUserSchema = z.object({
   system_user_id: z.string().refine(async (system_user_id) => {
     // check for uniqueness
@@ -106,41 +108,15 @@ const CreateUserSchema = z.object({
   keycloak_uuid: z.string().uuid().nullable().optional(),
 }).strip();
 
-const UpdateUserSchema = CreateUserSchema.partial();
+// Zod schema to validate update user data
+const UpdateUserSchema = CreateUserSchema.partial().refine(nonEmpty, strings.user.noData);
 
-/**
- * * Ensures that a create user input has the right fields
- * TODO: Decide which fields should be allowed or required
- * @param {user} data
- */
-const isValidCreateUserInput = (data: user): boolean => {
-  const requiredFields: (keyof user)[] = ["system_user_id", "system_name"];
-  const allowedFields: (keyof user)[] = [
-    ...requiredFields,
-    "keycloak_uuid",
-    "create_user",
-    "update_user",
-    "create_timestamp",
-    "update_timestamp",
-  ];
-  return isValidObject(data, requiredFields, allowedFields);
-};
-
-/**
- * * Ensures that a create user input has the right fields
- * TODO: Decide which fields should be allowed or required
- * @param {user} data
- */
-const isValidUpdateUserInput = (data: user): boolean => {
-  const requiredFields: (keyof user)[] = [];
-  const allowedFields: (keyof user)[] = [
-    "system_user_id",
-    "system_name",
-    "keycloak_uuid",
-    "update_user",
-  ];
-  return isValidObject(data, requiredFields, allowedFields);
-};
+//(data) => {
+//  // Check if at least one field is populated
+//   return Object.values(data).some((value) => value !== undefined && value !== null);
+// }, {
+//   message: "At least one field must be populated",
+// }
 
 export {
   createUser,
@@ -150,8 +126,6 @@ export {
   getUserBySystemId,
   updateUser,
   deleteUser,
-  isValidCreateUserInput,
-  isValidUpdateUserInput,
   CreateUserSchema,
   UpdateUserSchema,
 };
