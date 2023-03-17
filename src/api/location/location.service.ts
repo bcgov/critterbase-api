@@ -23,33 +23,23 @@ const excludes: LocationExcludes[] = [
   "lk_region_nr",
   "lk_region_env",
 ];
-// location_id: string
-// latitude: number | null
-// longitude: number | null
-// coordinate_uncertainty: number | null
-// coordinate_uncertainty_unit: coordinate_uncertainty_unit | null
-// wmu_id: string | null
-// region_nr_id: string | null
-// region_env_id: string | null
-// elevation: number | null
-// temperature: number | null
-// location_comment: string | null
-// create_user: string
-// update_user: string
-// create_timestamp: Date
-// update_timestamp: Date
+
 const LocationSchema = z.object({
   latitude: z.number().min(-90).max(90).nullable(),
-  longitude: z.number().min(-180).max(-180).nullable(),
+  longitude: z.number().min(-180).max(180).nullable(),
   coordinate_uncertainty: z.number().nullable(),
+  coordinate_uncertainty_unit: z.enum(["m"]).default("m"),
   wmu_id: z.string().uuid().nullable(),
   region_nr_id: z.string().uuid().nullable(),
   region_env_id: z.string().uuid().nullable(),
   elevation: z.number().min(0).nullable(),
   temperature: z.number().min(-100).max(100).nullable(),
   location_comment: z.string().max(100).nullable(),
-  //then placeholder for audit
 });
+
+const UpdateLocationSchema = LocationSchema.extend({
+  location_id: z.string().uuid(),
+}).required({ location_id: true });
 
 const subSelects = {
   include: {
@@ -94,17 +84,19 @@ const deleteLocation = async (id: string): Promise<location> => {
   });
 };
 
-const createLocation = async (body: location): Promise<location> => {
-  return await prisma.location.create({
-    data: {
-      ...body,
-    },
-  });
+const createLocation = async (data: location): Promise<location> => {
+  return await prisma.location.create({ data });
+};
+
+const updateLocation = async (data: location): Promise<location> => {
+  return await prisma.location.create({ data });
 };
 export {
   LocationSchema,
+  UpdateLocationSchema,
   getAllLocations,
   getLocation,
   deleteLocation,
   createLocation,
+  updateLocation,
 };

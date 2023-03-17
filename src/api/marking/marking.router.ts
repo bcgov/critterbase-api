@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
-import { catchErrors, validateUuidParam } from "../../utils/middleware";
+import { catchErrors } from "../../utils/middleware";
 import {
   createMarking,
   deleteMarking,
@@ -12,6 +12,7 @@ import {
   updateMarking,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
+import { isUUID } from "../../utils/helper_functions";
 
 export const markingRouter = express.Router();
 
@@ -44,7 +45,7 @@ markingRouter.post(
 markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
     // validate marking id and confirm that marking exists
-    const id = validateUuidParam(req);
+    const id = isUUID(req.params.id);
     const markings = await getMarkingsByCritterId(id);
     if (!markings.length) {
       throw apiError.notFound(`Critter ID "${id}" has no associated markings`);
@@ -61,7 +62,7 @@ markingRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate marking id and confirm that marking exists
-      const id = validateUuidParam(req);
+      const id = isUUID(req.params.id);
       res.locals.markingData = await getMarkingById(id);
       if (!res.locals.markingData) {
         throw apiError.notFound(`Marking ID "${id}" not found`);

@@ -8,7 +8,10 @@ import {
   deleteLocation,
   LocationSchema,
   createLocation,
+  UpdateLocationSchema,
+  updateLocation,
 } from "./location.service";
+import { isUUID } from "../../utils/helper_functions";
 
 export const locationRouter = express.Router();
 
@@ -45,10 +48,7 @@ locationRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const id = req.params.id;
-      if (!id) {
-        throw apiError.syntaxIssue(strings.location.noID);
-      }
+      const id = isUUID(req.params.id);
       const location = await getLocation(id);
       if (!location) {
         throw apiError.notFound(strings.location.notFound);
@@ -62,10 +62,11 @@ locationRouter
       return res.status(200).json(res.locals.location);
     })
   )
-  .put(
+  .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(strings.location.updated(id));
+      UpdateLocationSchema.parse(req.body);
+      const location = await updateLocation(req.body);
+      res.status(200).json(location);
     })
   )
   .delete(
