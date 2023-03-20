@@ -190,6 +190,74 @@ describe("API: Collection Unit", () => {
       });
     });
   });
+
+  describe("ROUTERS", () => {
+    describe("GET /api/collection_unit", () => {
+      it("returns status 200", async () => {
+        const res = await request.get("/api/collection_units");
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        const res = await request.get("/api/collection_units");
+        expect.assertions(1);
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns collection_units with correct properties", async () => {
+        const res = await request.get("/api/collection_units");
+        const critter_collection_units = res.body;
+        expect.assertions(
+          critter_collection_units.length * dummyCollectionUnitKeys.length
+        );
+        for (const critter_collection_unit of critter_collection_units) {
+          for (const key of dummyCollectionUnitKeys) {
+            expect(critter_collection_unit).toHaveProperty(key);
+          }
+        }
+      });
+    });
+
+    describe("POST /api/collection_unit/create", () => {
+      it("returns status 201", async () => {
+        const collectionUnit = await newCollectionUnit();
+        const res = await request.post("/api/collection_units/create").send(collectionUnit);
+        expect.assertions(1);
+        expect(res.status).toBe(201);
+      });
+
+      it("returns a collection unit", async () => {
+        const collectionUnit = await newCollectionUnit();
+        const res = await request.post("/api/collection_units/create").send(collectionUnit);
+        const returnedCollectionUnits = res.body;
+        expect.assertions(dummyCollectionUnitKeys.length);
+        for (const key of dummyCollectionUnitKeys) {
+          expect(returnedCollectionUnits).toHaveProperty(key);
+        }
+      });
+
+      it("strips invalid fields from data", async () => {
+        const collectionUnit = await newCollectionUnit();
+        const res = await request
+          .post("/api/collection_units/create")
+          .send({ ...collectionUnit, invalidField: "qwerty123" });
+        expect.assertions(2);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const collectionUnit = await newCollectionUnit();
+        const res = await request.post("/api/collection_units/create").send({
+          // left out required collection_unit_id field
+          critter_id: collectionUnit.critter_id
+        });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+    });
+  });
 });
 
 afterAll(async () => {
