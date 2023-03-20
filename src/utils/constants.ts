@@ -37,7 +37,7 @@ const strings = {
   user: {
     notFound: "user not found",
     noData: "no new data was provided or the format was invalid",
-    sytemUserIdExists: "system_user_id already exists",
+    systemUserIdExists: "system_user_id already exists",
   },
 };
 

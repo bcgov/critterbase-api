@@ -1,4 +1,4 @@
-import { prisma, request, uuidRegex } from "../../utils/constants";
+import { prisma, request } from "../../utils/constants";
 import {
   createUser,
   deleteUser,
@@ -12,6 +12,8 @@ import type { Prisma, user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const uuidRegex =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 
 /**
  * * Checks if an object matches the format for a user.
@@ -241,12 +243,13 @@ describe("API: User", () => {
         ).toBeFalsy(); //timestamp updated
       });
 
-      it("returns status 400 when data contains invalid fields", async () => {
+      it("strips invalid fields from data", async () => {
         const res = await request
           .post("/api/users/create")
           .send({ ...newUser(), invalidField: "qwerty123" });
-        expect.assertions(1);
-        expect(res.status).toBe(400);
+        expect.assertions(2);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
       });
 
       it("returns status 400 when data is missing required fields", async () => {
@@ -281,40 +284,51 @@ describe("API: User", () => {
       });
     });
 
-    describe("PUT /api/users/:id", () => {
+    describe("PATCH /api/users/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.put(`/api/users/${randomUUID()}`);
+        const res = await request.patch(`/api/users/${randomUUID()}`);
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
 
+      it("returns status 400 when no data provided", async () => {
+        const user = await prisma.user.create({ data: newUser() });
+        const res = await request.patch(`/api/users/${user.user_id}`);
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+
       it("returns status 200", async () => {
         const user = await prisma.user.create({ data: newUser() });
-        const res = await request.put(`/api/users/${user.user_id}`);
+        const res = await request
+          .patch(`/api/users/${user.user_id}`)
+          .send({ system_name: `${randomInt(99999999)}` });
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns a user", async () => {
         const user = await prisma.user.create({ data: newUser() });
-        const res = await request.put(`/api/users/${user.user_id}`);
+        const res = await request
+          .patch(`/api/users/${user.user_id}`)
+          .send({ system_name: `${randomInt(99999999)}` });
         expect.assertions(1);
         expect(isUser(res.body)).toBe(true);
       });
 
-      it("returns status 409 when system_user_id already taken", async () => {
+      it("returns status 400 when system_user_id already taken", async () => {
         const user = await prisma.user.create({ data: newUser() });
         const res = await request
-          .put(`/api/users/${user.user_id}`)
+          .patch(`/api/users/${user.user_id}`)
           .send({ system_user_id: dummyUser.system_user_id });
         expect.assertions(1);
-        expect(res.status).toBe(409);
+        expect(res.status).toBe(400);
       });
 
       it("returns status 400 when data contains invalid fields", async () => {
         const user = await prisma.user.create({ data: newUser() });
         const res = await request
-          .put(`/api/users/${user.user_id}`)
+          .patch(`/api/users/${user.user_id}`)
           .send({ invalidField: "qwerty123" });
         expect.assertions(1);
         expect(res.status).toBe(400);

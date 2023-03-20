@@ -1,7 +1,6 @@
 import { prisma, strings } from "../../utils/constants";
 import type { user, Prisma } from "@prisma/client";
-import { isValidObject } from "../../utils/helper_functions";
-import { AnyZodObject, z, ZodObject, ZodRawShape, ZodType, ZodTypeAny } from "zod";
+import { z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
 
 /**
@@ -100,23 +99,22 @@ const deleteUser = async (user_id: string): Promise<user> => {
 
 // Zod schema to validate create user data
 const CreateUserSchema = z.object({
-  system_user_id: z.string().refine(async (system_user_id) => {
-    // check for uniqueness
-    return !(await getUserBySystemId(system_user_id)) 
-  }, strings.user.sytemUserIdExists),
+  system_user_id: z.string(),
   system_name: z.string(),
   keycloak_uuid: z.string().uuid().nullable().optional(),
-}).strip();
+});
 
 // Zod schema to validate update user data
-const UpdateUserSchema = CreateUserSchema.partial().refine(nonEmpty, strings.user.noData);
-
-//(data) => {
-//  // Check if at least one field is populated
-//   return Object.values(data).some((value) => value !== undefined && value !== null);
-// }, {
-//   message: "At least one field must be populated",
-// }
+const UpdateUserSchema = CreateUserSchema.partial()
+  .merge(
+    z.object({
+      system_user_id: z.string().refine(async (system_user_id) => {
+        // check for uniqueness
+        return !(await getUserBySystemId(system_user_id));
+      }, "system_user_id already exists").optional(),
+    })
+  )
+  .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export {
   createUser,
