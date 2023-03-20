@@ -12,7 +12,6 @@ import {
   UpdateMarkingSchema,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
-import { isUUID } from "../../utils/helper_functions";
 import { uuidParamsSchema } from "../../utils/zod_schemas";
 import { strings } from "../../utils/constants";
 
@@ -44,7 +43,7 @@ markingRouter.post(
 markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
     // validate marking id and confirm that marking exists
-    const id = isUUID(req.params.id);
+    const { id } = uuidParamsSchema.parse(req.params);
     const markings = await getMarkingsByCritterId(id);
     if (!markings.length) {
       throw apiError.notFound(`Critter ID "${id}" has no associated markings`);
