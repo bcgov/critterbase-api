@@ -8,8 +8,6 @@ import {
   getAllMarkings,
   getMarkingById,
   getMarkingsByCritterId,
-  isValidCreateMarkingInput,
-  isValidUpdateMarkingInput,
   updateMarking,
   UpdateMarkingSchema,
 } from "./marking.service";

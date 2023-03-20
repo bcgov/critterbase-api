@@ -111,70 +111,6 @@ const UpdateMarkingSchema = CreateMarkingSchema.partial().refine(
   "no new data was provided or the format was invalid"
 );
 
-/**
- * * Ensures that a create marking input has the right fields
- * TODO: Finalize which fields should be allowed or required
- * @param {marking} data
- */
-const isValidCreateMarkingInput = (
-  data: Prisma.markingUncheckedCreateInput
-): boolean => {
-  const requiredFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    "critter_id",
-    "taxon_marking_body_location_id",
-  ];
-  const allowedFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    ...requiredFields,
-    "capture_id",
-    "mortality_id",
-    "marking_type_id",
-    "marking_material_id",
-    "primary_colour_id",
-    "secondary_colour_id",
-    "text_colour_id",
-    "identifier",
-    "frequency",
-    "frequency_unit",
-    "order",
-    "comment",
-    "attached_timestamp",
-    "removed_timestamp",
-    "create_user",
-    "update_user",
-  ];
-  return isValidObject(data, requiredFields, allowedFields);
-};
-
-/**
- * * Ensures that a update marking input has the right fields
- * TODO: Finalize which fields should be allowed or required
- * @param {marking} data
- */
-const isValidUpdateMarkingInput = (
-  data: Prisma.markingUncheckedUpdateInput
-): boolean => {
-  const allowedFields: (keyof Prisma.markingUncheckedUpdateInput)[] = [
-    "critter_id",
-    "capture_id",
-    "mortality_id",
-    "taxon_marking_body_location_id",
-    "marking_type_id",
-    "marking_material_id",
-    "primary_colour_id",
-    "secondary_colour_id",
-    "text_colour_id",
-    "identifier",
-    "frequency",
-    "frequency_unit",
-    "order",
-    "comment",
-    "attached_timestamp",
-    "removed_timestamp",
-    "update_user",
-  ];
-  return isValidObject(data, [], allowedFields);
-};
-
 export {
   getAllMarkings,
   getMarkingById,
@@ -183,7 +119,5 @@ export {
   createMarking,
   deleteMarking,
   CreateMarkingSchema,
-  UpdateMarkingSchema,
-  isValidCreateMarkingInput,
-  isValidUpdateMarkingInput,
+  UpdateMarkingSchema
 };

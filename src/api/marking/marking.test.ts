@@ -40,6 +40,9 @@ async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
     critter_id: dummyCritterId,
     taxon_marking_body_location_id: dummyTaxonMarkingId,
     identifier: `TEST_MARKING_${randomInt(99999999)}`,
+    frequency: randomInt(99999999),
+    frequency_unit: 'KHz',
+    attached_timestamp: new Date(randomInt(999999)),
   };
   return dummyMarking;
 }
