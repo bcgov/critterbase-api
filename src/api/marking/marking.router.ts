@@ -11,9 +11,12 @@ import {
   isValidCreateMarkingInput,
   isValidUpdateMarkingInput,
   updateMarking,
+  UpdateMarkingSchema,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
 import { isUUID } from "../../utils/helper_functions";
+import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { strings } from "../../utils/constants";
 
 export const markingRouter = express.Router();
 
@@ -60,10 +63,10 @@ markingRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate marking id and confirm that marking exists
-      const id = isUUID(req.params.id);
+      const {id} = uuidParamsSchema.parse(req.params);
       res.locals.markingData = await getMarkingById(id);
       if (!res.locals.markingData) {
-        throw apiError.notFound(`Marking ID "${id}" not found`);
+        throw apiError.notFound(strings.marking.notFound);
       }
       next();
     })
@@ -74,13 +77,10 @@ markingRouter
       return res.status(200).json(res.locals.markingData);
     })
   )
-  .put(
+  .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      if (!isValidUpdateMarkingInput(req.body)) {
-        throw apiError.syntaxIssue("Invalid request body");
-      }
-      const marking = await updateMarking(id, req.body);
+      const markingData = UpdateMarkingSchema.parse(req.body);
+      const marking = await updateMarking(req.params.id, markingData);
       return res.status(200).json(marking);
     })
   )
