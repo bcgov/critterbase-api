@@ -7,14 +7,14 @@ import {
   createCollectionUnit,
   deleteCollectionUnit,
 } from "./collectionUnit.service";
-import type { Prisma, critter_collection_unit, user } from "@prisma/client";
+import type { Prisma, critter_collection_unit, critter } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 
 function get_random(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-let dummyUser: user;
+let dummyCritter: critter;
 let dummyCollectionUnit: critter_collection_unit;
 let dummyCollectionUnitInput: Prisma.critter_collection_unitUncheckedCreateInput;
 let dummyCollectionUnitKeys: string[];
@@ -44,24 +44,27 @@ async function newCollectionUnit(): Promise<Prisma.critter_collection_unitUnchec
     );
   const dummyCollectionUnit: Prisma.critter_collection_unitUncheckedCreateInput =
     {
-      critter_id: dummyCritterId,
-      collection_unit_id: dummyCollectionUnitId,
-      create_user: dummyUser.user_id,
+      critter_id: dummyCritter.critter_id,
+      collection_unit_id: dummyCollectionUnitId
     };
-    console.log(dummyCollectionUnit)
   return dummyCollectionUnit;
 }
 
 beforeAll(async () => {
   // Sets a global dummy critter_collection_unit to reduce complexity on similar tests
   // dummyUser is needed to keep track of other dummy entries created for these tests
-  dummyUser = await prisma.user.create({
-    data: {
-      system_user_id: randomInt(99999999).toString(),
-      system_name: `COLLECTION_UNIT_USER_${randomInt(99999999).toString()}`,
-    },
-  });
-  console.log(dummyUser)
+  const dummyTaxon = (
+    await prisma.critter.findFirst({ select: { taxon_id: true } })
+  )?.taxon_id;
+  if (dummyTaxon) {
+    dummyCritter = await prisma.critter.create({
+      data: {
+        taxon_id: dummyTaxon,
+        sex: "Unknown",
+        animal_id: `TEST_CRITTER_${randomInt(99999999)}`
+      },
+    });
+  }
   dummyCollectionUnitInput = await newCollectionUnit();
   dummyCollectionUnit = await prisma.critter_collection_unit.create({
     data: dummyCollectionUnitInput,
@@ -191,9 +194,9 @@ describe("API: Collection Unit", () => {
 
 afterAll(async () => {
   await prisma.critter_collection_unit.deleteMany({
-    where: { create_user: dummyUser.user_id },
+    where: { critter_id: dummyCritter.critter_id },
   });
-  await prisma.user.delete({
-    where: { user_id: dummyUser.user_id },
+  await prisma.critter.delete({
+    where: { critter_id: dummyCritter.critter_id },
   });
 });
