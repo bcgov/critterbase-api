@@ -1,6 +1,7 @@
 import { prisma } from "../../utils/constants";
 import type { critter_collection_unit, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
+import { z } from "zod";
 
 /**
  * * Returns all existing critter collection units from the database
@@ -82,6 +83,15 @@ const deleteCollectionUnit = async (
   });
 };
 
+// Zod schema to validate create user data
+const CreateCollectionUnitSchema = z.object({
+  critter_id: z.string().uuid(),
+  collection_unit_id: z.string().uuid(),
+});
+
+// Zod schema to validate update user data
+const UpdateCollectionUnitSchema = CreateCollectionUnitSchema.partial()
+
 export {
   getAllCollectionUnits,
   getCollectionUnitById,
@@ -89,4 +99,6 @@ export {
   updateCollectionUnit,
   createCollectionUnit,
   deleteCollectionUnit,
+  CreateCollectionUnitSchema,
+  UpdateCollectionUnitSchema
 };
