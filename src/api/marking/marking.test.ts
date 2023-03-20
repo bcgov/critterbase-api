@@ -198,9 +198,9 @@ describe("API: Marking", () => {
         const res = await request
           .post("/api/markings/create")
           .send({ ...marking, invalidField: "qwerty123" });
-          expect.assertions(2);
-          expect(res.status).toBe(201);
-          expect(res.body).not.toHaveProperty("invalidField");
+        expect.assertions(2);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
       });
 
       it("returns status 400 when data is missing required fields", async () => {
@@ -241,37 +241,49 @@ describe("API: Marking", () => {
       });
     });
 
-    describe("PUT /api/markings/:id", () => {
+    describe("PATCH /api/markings/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.put(`/api/markings/${randomUUID()}`);
+        const res = await request.patch(`/api/markings/${randomUUID()}`);
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
 
       it("returns status 200", async () => {
-        const res = await request.put(
-          `/api/markings/${dummyMarking.marking_id}`
-        );
+        const res = await request
+          .patch(`/api/markings/${dummyMarking.marking_id}`)
+          .send({ identifier: dummyMarking.identifier });
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns a marking", async () => {
-        const res = await request.put(
-          `/api/markings/${dummyMarking.marking_id}`
-        );
+        const res = await request
+          .patch(`/api/markings/${dummyMarking.marking_id}`)
+          .send({ identifier: dummyMarking.identifier });
         expect.assertions(dummyMarkingKeys.length);
         for (const key of dummyMarkingKeys) {
           expect(res.body).toHaveProperty(key);
         }
       });
 
-      it("returns status 400 when data contains invalid fields", async () => {
-        const res = await request
-          .put(`/api/markings/${dummyMarking.marking_id}`)
-          .send({ invalidField: "qwerty123" });
+      it("returns status 400 when data is empty", async () => {
+        const res = await request.patch(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
         expect.assertions(1);
         expect(res.status).toBe(400);
+      });
+
+      it("strips invalid fields from data", async () => {
+        const res = await request
+          .patch(`/api/markings/${dummyMarking.marking_id}`)
+          .send({
+            identifier: dummyMarking.identifier,
+            invalidField: "qwerty123",
+          });
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body).not.toHaveProperty("invalidField");
       });
     });
 
