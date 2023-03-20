@@ -193,13 +193,14 @@ describe("API: Marking", () => {
         }
       });
 
-      it("returns status 400 when data contains invalid fields", async () => {
+      it("strips invalid fields from data", async () => {
         const marking = await newMarking();
         const res = await request
           .post("/api/markings/create")
           .send({ ...marking, invalidField: "qwerty123" });
-        expect.assertions(1);
-        expect(res.status).toBe(400);
+          expect.assertions(2);
+          expect(res.status).toBe(201);
+          expect(res.body).not.toHaveProperty("invalidField");
       });
 
       it("returns status 400 when data is missing required fields", async () => {
