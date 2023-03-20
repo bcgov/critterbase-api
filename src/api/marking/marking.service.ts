@@ -1,6 +1,8 @@
 import { prisma } from "../../utils/constants";
-import { marking, Prisma } from "@prisma/client";
+import { marking, frequency_unit, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
+import { date, number, string, z } from "zod";
+import { nonEmpty } from "../../utils/zod_schemas";
 
 /**
  * * Returns all existing markings from the database
@@ -76,69 +78,38 @@ const deleteMarking = async (marking_id: string): Promise<marking> => {
   });
 };
 
-/**
- * * Ensures that a create marking input has the right fields
- * TODO: Finalize which fields should be allowed or required
- * @param {marking} data
- */
-const isValidCreateMarkingInput = (
-  data: Prisma.markingUncheckedCreateInput
-): boolean => {
-  const requiredFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    "critter_id",
-    "taxon_marking_body_location_id",
-  ];
-  const allowedFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    ...requiredFields,
-    "capture_id",
-    "mortality_id",
-    "marking_type_id",
-    "marking_material_id",
-    "primary_colour_id",
-    "secondary_colour_id",
-    "text_colour_id",
-    "identifier",
-    "frequency",
-    "frequency_unit",
-    "order",
-    "comment",
-    "attached_timestamp",
-    "removed_timestamp",
-    "create_user",
-    "update_user",
-  ];
-  return isValidObject(data, requiredFields, allowedFields);
-};
+// Zod schema to validate create user data
+const CreateMarkingSchema = z.object({
+  critter_id: string().uuid(),
+  capture_id: string().uuid().optional(),
+  mortality_id: string().uuid().optional(),
+  taxon_marking_body_location_id: string().uuid(),
+  marking_type_id: string().uuid().optional(),
+  marking_material_id: string().uuid().optional(),
+  primary_colour_id: string().uuid().optional(),
+  secondary_colour_id: string().uuid().optional(),
+  text_colour_id: string().uuid().optional(),
+  identifier: string().optional(),
+  frequency: number().optional(),
+  frequency_unit: z
+    .union([
+      // Inline Zod schema for frequency_unit
+      z.literal(frequency_unit.Hz),
+      z.literal(frequency_unit.KHz),
+      z.literal(frequency_unit.MHz),
+    ])
+    .optional(),
+  order: number().optional(),
+  comment: string().optional(),
+  attached_timestamp: z.coerce.date().optional(),
+  removed_timestamp: z.coerce.date().optional(),
+});
 
-/**
- * * Ensures that a update marking input has the right fields
- * TODO: Finalize which fields should be allowed or required
- * @param {marking} data
- */
-const isValidUpdateMarkingInput = (
-  data: Prisma.markingUncheckedUpdateInput
-): boolean => {
-  const allowedFields: (keyof Prisma.markingUncheckedUpdateInput)[] = [
-    "critter_id",
-    "capture_id",
-    "mortality_id",
-    "taxon_marking_body_location_id",
-    "marking_type_id",
-    "marking_material_id",
-    "primary_colour_id",
-    "secondary_colour_id",
-    "text_colour_id",
-    "identifier",
-    "frequency",
-    "frequency_unit",
-    "order",
-    "comment",
-    "attached_timestamp",
-    "removed_timestamp",
-    "update_user",
-  ];
-  return isValidObject(data, [], allowedFields);
-};
+// Zod schema to validate update user data
+const UpdateMarkingSchema = CreateMarkingSchema.partial().refine(
+  nonEmpty,
+  "no new data was provided or the format was invalid"
+);
 
 export {
   getAllMarkings,
@@ -147,6 +118,6 @@ export {
   updateMarking,
   createMarking,
   deleteMarking,
-  isValidCreateMarkingInput,
-  isValidUpdateMarkingInput,
+  CreateMarkingSchema,
+  UpdateMarkingSchema
 };
