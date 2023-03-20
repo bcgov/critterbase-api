@@ -1,5 +1,5 @@
 import { prisma } from "../../utils/constants";
-import { marking, Prisma } from "@prisma/client";
+import { marking, frequency_unit, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
 import { date, number, string, z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
@@ -91,11 +91,18 @@ const CreateMarkingSchema = z.object({
   text_colour_id: string().uuid().optional(),
   identifier: string().optional(),
   frequency: number().optional(),
-  frequency_unit: string().optional(),
+  frequency_unit: z
+    .union([
+      // Inline Zod schema for frequency_unit
+      z.literal(frequency_unit.Hz),
+      z.literal(frequency_unit.KHz),
+      z.literal(frequency_unit.MHz),
+    ])
+    .optional(),
   order: number().optional(),
   comment: string().optional(),
-  attached_timestamp: date().optional(),
-  removed_timestamp: date().optional(),
+  attached_timestamp: z.coerce.date().optional(),
+  removed_timestamp: z.coerce.date().optional(),
 });
 
 // Zod schema to validate update user data
@@ -175,6 +182,8 @@ export {
   updateMarking,
   createMarking,
   deleteMarking,
+  CreateMarkingSchema,
+  UpdateMarkingSchema,
   isValidCreateMarkingInput,
   isValidUpdateMarkingInput,
 };

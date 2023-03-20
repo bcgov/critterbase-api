@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
   createMarking,
+  CreateMarkingSchema,
   deleteMarking,
   getAllMarkings,
   getMarkingById,
@@ -33,10 +34,7 @@ markingRouter.get(
 markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const markingData = req.body;
-    if (!isValidCreateMarkingInput(markingData)) {
-      throw apiError.syntaxIssue("Invalid request body");
-    }
+    const markingData = CreateMarkingSchema.parse(req.body);
     const newMarking = await createMarking(markingData);
     return res.status(201).json(newMarking);
   })
