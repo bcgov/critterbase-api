@@ -1,8 +1,28 @@
 import { prisma } from "../../utils/constants";
 import { marking, frequency_unit, Prisma } from "@prisma/client";
-import { isValidObject } from "../../utils/helper_functions";
+import { exclude, isValidObject } from "../../utils/helper_functions";
 import { date, number, string, z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
+
+// Types
+type MarkingExcludes = keyof marking | "critter";
+
+const excludes: MarkingExcludes[] = [];
+
+// Prisma objects
+const subSelects = {
+  include: {
+    critter: {
+      select: {
+        wlh_id: true,
+        animal_id: true,
+        lk_taxon: {
+          select: { taxon_name_common: true },
+        },
+      },
+    },
+  },
+};
 
 /**
  * * Returns all existing markings from the database
@@ -14,14 +34,17 @@ const getAllMarkings = async (): Promise<marking[]> => {
 /**
  * * Gets a marking by the marking_id
  * * Returns null if non-existent
+ * TODO: Add type for marking with included subselects
  * @param {string} marking_id
  */
-const getMarkingById = async (marking_id: string): Promise<marking | null> => {
-  return await prisma.marking.findUnique({
+const getMarkingById = async (marking_id: string): Promise<any | null> => {
+  const marking = await prisma.marking.findUnique({
     where: {
       marking_id: marking_id,
     },
+    ...subSelects,
   });
+  return marking && exclude(marking, excludes);
 };
 
 /**
@@ -119,5 +142,5 @@ export {
   createMarking,
   deleteMarking,
   CreateMarkingSchema,
-  UpdateMarkingSchema
+  UpdateMarkingSchema,
 };
