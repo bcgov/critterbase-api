@@ -2,6 +2,7 @@ import { prisma } from "../../utils/constants";
 import type { critter_collection_unit, Prisma } from "@prisma/client";
 import { isValidObject } from "../../utils/helper_functions";
 import { z } from "zod";
+import { nonEmpty } from "../../utils/zod_schemas";
 
 /**
  * * Returns all existing critter collection units from the database
@@ -90,7 +91,10 @@ const CreateCollectionUnitSchema = z.object({
 });
 
 // Zod schema to validate update collection unit data
-const UpdateCollectionUnitSchema = CreateCollectionUnitSchema.partial();
+const UpdateCollectionUnitSchema = CreateCollectionUnitSchema.partial().refine(
+  nonEmpty,
+  "no new data was provided or the format was invalid"
+);
 
 export {
   getAllCollectionUnits,

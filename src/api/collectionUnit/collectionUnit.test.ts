@@ -287,6 +287,60 @@ describe("API: Collection Unit", () => {
         }
       });
     });
+
+    describe("PATCH /api/collection_units/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.patch(
+          `/api/collection_units/${randomUUID()}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request
+          .patch(
+            `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+          )
+          .send({ critter_id: dummyCollectionUnit.critter_id });
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a collection unit", async () => {
+        const res = await request
+          .patch(
+            `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+          )
+          .send({ critter_id: dummyCollectionUnit.critter_id });
+        expect.assertions(dummyCollectionUnitKeys.length);
+        for (const key of dummyCollectionUnitKeys) {
+          expect(res.body).toHaveProperty(key);
+        }
+      });
+
+      it("returns status 400 when data is empty", async () => {
+        const res = await request.patch(
+          `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+
+      it("strips invalid fields from data", async () => {
+        const res = await request
+          .patch(
+            `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+          )
+          .send({
+            critter_id: dummyCollectionUnit.critter_id,
+            invalidField: "qwerty123",
+          });
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body).not.toHaveProperty("invalidField");
+      });
+    });
   });
 });
 
