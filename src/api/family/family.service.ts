@@ -1,5 +1,6 @@
 import { prisma } from "../../utils/constants";
 import type { critter, family, family_child, family_parent } from "@prisma/client";
+import { ImmediateFamily, ImmediateFamilyCritter } from "./family.types";
 
 const getAllFamilies = async (): Promise<family[]> => {
   return await prisma.family.findMany();
@@ -168,16 +169,6 @@ const removeParentOfFamily = async(family_id: string, parent_critter_id: string)
   return result;
 }
 
-type ImmediateFamily = {
-  children: critter[],
-  parents: critter[]
-}
-
-type ImmediateFamilyCritter = {
-  children: critter[],
-  siblings: critter[]
-  parents: critter[]
-}
 
 const getImmediateFamily = async (family_id: string): Promise<ImmediateFamily> => {
   const parents = await prisma.family_parent.findMany({

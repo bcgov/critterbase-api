@@ -4,11 +4,12 @@ import { catchErrors } from "../../utils/middleware";
 import { createNewFamily, deleteFamily, getAllChildren, getAllFamilies, getAllParents, getFamilyById, getFamilyByLabel, getImmediateFamily, getImmediateFamilyOfCritter, getParentsOfCritterId, makeChildOfFamily, makeParentOfFamily, removeChildOfFamily, removeParentOfFamily, updateFamily } from "./family.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
+import { FamilyChildCreateBodySchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyUpdateBodySchema } from "./family.types";
 
 export const familyRouter = express.Router();
 
 /**
- ** Critter Router Home
+ ** Family Router Home
  */
  familyRouter.get(
   "/",
@@ -19,13 +20,13 @@ export const familyRouter = express.Router();
 );
 
 /**
- ** Create new critter
+ ** Create new family
  */
  familyRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const label = req.body.family_label;
-    const result = await createNewFamily(label);
+    const parsed = FamilyCreateBodySchema.parse(req.body);
+    const result = await createNewFamily(parsed.family_label);
     return res.status(201).json(result);
   })
 );
@@ -48,7 +49,7 @@ familyRouter
 
 familyRouter.get(
   '/parents/:critter_id',
-  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+  catchErrors(async (req: Request, res: Response) => {
     const id = req.params.critter_id;
     const c_exists = await prisma.critter.findUnique({
       where: {
@@ -65,7 +66,7 @@ familyRouter.get(
 
 familyRouter.get(
   '/children/:critter_id',
-  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+  catchErrors(async (req: Request, res: Response) => {
     const id = req.params.critter_id;
     const c_exists = await prisma.critter.findUnique({
       where: {
@@ -104,16 +105,18 @@ familyRouter.route("/parents")
     )
   .post(
   catchErrors(async (req: Request, res: Response) => {
-    const parent_id = req.body.parent_critter_id;
-    const family_id = req.body.family_id;
+    const parsed = FamilyParentCreateBodySchema.parse(req.body);
+    const parent_id = parsed.parent_critter_id;
+    const family_id = parsed.family_id;
     const result = await makeParentOfFamily(family_id, parent_id);
     return res.status(201).json(result);
   })
 ).delete(
   catchErrors(async (req: Request, res: Response) => {
-    const parent_critter_id = req.body.parent_critter_id;
-    const family_id = req.body.family_id;
-    const result = await removeParentOfFamily(family_id, parent_critter_id);
+    const parsed = FamilyParentCreateBodySchema.parse(req.body);
+    const parent_id = parsed.parent_critter_id;
+    const family_id = parsed.family_id;
+    const result = await removeParentOfFamily(family_id, parent_id);
     return res.status(200).json(result);
   })
 )
@@ -144,17 +147,19 @@ familyRouter.route("/children")
     )
   .post(
   catchErrors(async (req: Request, res: Response) => {
-    const child_id = req.body.child_critter_id;
-    const family_id = req.body.family_id;
+    const parsed = FamilyChildCreateBodySchema.parse(req.body);
+    const child_id = parsed.child_critter_id;
+    const family_id = parsed.family_id;
     const result = await makeChildOfFamily(family_id, child_id);
     return res.status(201).json(result);
   })
 )
 .delete(
   catchErrors(async (req: Request, res: Response) => {
-    const child_critter_id = req.body.child_critter_id;
-    const family_id = req.body.family_id;
-    const result = await removeChildOfFamily(family_id, child_critter_id);
+    const parsed = FamilyChildCreateBodySchema.parse(req.body);
+    const child_id = parsed.child_critter_id;
+    const family_id = parsed.family_id;
+    const result = await removeChildOfFamily(family_id, child_id);
     return res.status(200).json(result);
   })
 )
@@ -201,8 +206,8 @@ familyRouter.route("/:family_id")
     .put(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.family_id;
-        const data = req.body;
-        const family = await updateFamily(id, data);
+        const parsed = FamilyUpdateBodySchema.parse(req.body);
+        const family = await updateFamily(id, parsed);
         return res.status(200).json(family);
       })
     )
