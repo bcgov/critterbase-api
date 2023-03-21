@@ -27,7 +27,7 @@ const getCollectionUnitById = async (
 
 /**
  * * Gets an array of critter collection units by the critter_id (one critter can belong to many)
- * @param {string} critter_collection_unit_id
+ * @param {string} critter_id
  */
 const getCollectionUnitsByCritterId = async (
   critter_id: string
@@ -83,14 +83,14 @@ const deleteCollectionUnit = async (
   });
 };
 
-// Zod schema to validate create user data
+// Zod schema to validate create collection unit data
 const CreateCollectionUnitSchema = z.object({
   critter_id: z.string().uuid(),
   collection_unit_id: z.string().uuid(),
 });
 
-// Zod schema to validate update user data
-const UpdateCollectionUnitSchema = CreateCollectionUnitSchema.partial()
+// Zod schema to validate update collection unit data
+const UpdateCollectionUnitSchema = CreateCollectionUnitSchema.partial();
 
 export {
   getAllCollectionUnits,
@@ -100,5 +100,5 @@ export {
   createCollectionUnit,
   deleteCollectionUnit,
   CreateCollectionUnitSchema,
-  UpdateCollectionUnitSchema
+  UpdateCollectionUnitSchema,
 };
