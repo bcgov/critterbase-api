@@ -69,9 +69,10 @@ const getMarkingById = async (marking_id: string): Promise<any | null> => {
     where: {
       marking_id: marking_id,
     },
-    ...subSelects,
+    // ...subSelects,
   });
-  return marking && exclude(marking, excludes);
+  // return marking && exclude(marking, excludes);
+  return marking;
 };
 
 /**
