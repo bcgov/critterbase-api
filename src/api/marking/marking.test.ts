@@ -301,7 +301,7 @@ describe("API: Marking", () => {
           data: await newMarking(),
         });
         const res = await request.delete(
-          `/api/markings/${dummyMarking.marking_id}`
+          `/api/markings/${marking.marking_id}`
         );
         expect.assertions(1);
         expect(res.status).toBe(200);
