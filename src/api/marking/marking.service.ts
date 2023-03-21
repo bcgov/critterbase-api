@@ -5,9 +5,18 @@ import { date, number, string, z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
 
 // Types
-type MarkingExcludes = keyof marking | "critter";
+type MarkingExcludes =
+  | keyof marking
+  | "critter"
+  | "xref_taxon_marking_body_location"
+  | "lk_marking_type"
+  | "lk_marking_material";
 
-const excludes: MarkingExcludes[] = [];
+const excludes: MarkingExcludes[] = [
+  "xref_taxon_marking_body_location",
+  "lk_marking_material",
+  "lk_marking_type",
+];
 
 // Prisma objects
 const subSelects = {
@@ -20,6 +29,24 @@ const subSelects = {
           select: { taxon_name_common: true },
         },
       },
+    },
+    xref_taxon_marking_body_location: {
+      select: { body_location: true },
+    },
+    lk_marking_type: {
+      select: { name: true },
+    },
+    lk_marking_material: {
+      select: { material: true },
+    },
+    lk_colour_marking_primary_colour_idTolk_colour: {
+      select: { colour: true },
+    },
+    lk_colour_marking_secondary_colour_idTolk_colour: {
+      select: { colour: true },
+    },
+    lk_colour_marking_text_colour_idTolk_colour: {
+      select: { colour: true },
     },
   },
 };
