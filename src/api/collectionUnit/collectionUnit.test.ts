@@ -341,6 +341,40 @@ describe("API: Collection Unit", () => {
         expect(res.body).not.toHaveProperty("invalidField");
       });
     });
+
+    describe("DELETE /api/collection_units/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.delete(
+          `/api/collection_units/${randomUUID()}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const collection_unit = await prisma.critter_collection_unit.create({
+          data: await newCollectionUnit(),
+        });
+        const res = await request.delete(
+          `/api/collection_units/${collection_unit.critter_collection_unit_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns collection unit deleted message", async () => {
+        const collection_unit = await prisma.critter_collection_unit.create({
+          data: await newCollectionUnit(),
+        });
+        const res = await request.delete(
+          `/api/collection_units/${collection_unit.critter_collection_unit_id}`
+        );
+        expect.assertions(1);
+        expect(res.body).toStrictEqual(
+          `CollectionUnit ${collection_unit.critter_collection_unit_id} has been deleted`
+        );
+      });
+    });
   });
 });
 
