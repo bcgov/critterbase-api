@@ -45,7 +45,7 @@ async function newCollectionUnit(): Promise<Prisma.critter_collection_unitUnchec
   const dummyCollectionUnit: Prisma.critter_collection_unitUncheckedCreateInput =
     {
       critter_id: dummyCritter.critter_id,
-      collection_unit_id: dummyCollectionUnitId
+      collection_unit_id: dummyCollectionUnitId,
     };
   return dummyCollectionUnit;
 }
@@ -61,7 +61,7 @@ beforeAll(async () => {
       data: {
         taxon_id: dummyTaxon,
         sex: "Unknown",
-        animal_id: `TEST_CRITTER_${randomInt(99999999)}`
+        animal_id: `TEST_CRITTER_${randomInt(99999999)}`,
       },
     });
   }
@@ -222,14 +222,18 @@ describe("API: Collection Unit", () => {
     describe("POST /api/collection_unit/create", () => {
       it("returns status 201", async () => {
         const collectionUnit = await newCollectionUnit();
-        const res = await request.post("/api/collection_units/create").send(collectionUnit);
+        const res = await request
+          .post("/api/collection_units/create")
+          .send(collectionUnit);
         expect.assertions(1);
         expect(res.status).toBe(201);
       });
 
       it("returns a collection unit", async () => {
         const collectionUnit = await newCollectionUnit();
-        const res = await request.post("/api/collection_units/create").send(collectionUnit);
+        const res = await request
+          .post("/api/collection_units/create")
+          .send(collectionUnit);
         const returnedCollectionUnits = res.body;
         expect.assertions(dummyCollectionUnitKeys.length);
         for (const key of dummyCollectionUnitKeys) {
@@ -251,10 +255,36 @@ describe("API: Collection Unit", () => {
         const collectionUnit = await newCollectionUnit();
         const res = await request.post("/api/collection_units/create").send({
           // left out required collection_unit_id field
-          critter_id: collectionUnit.critter_id
+          critter_id: collectionUnit.critter_id,
         });
         expect.assertions(1);
         expect(res.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/collection_units/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.get(`/api/collection_units/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(
+          `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a marking", async () => {
+        const res = await request.get(
+          `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+        );
+        expect.assertions(dummyCollectionUnitKeys.length);
+        for (const key of dummyCollectionUnitKeys) {
+          expect(res.body).toHaveProperty(key);
+        }
       });
     });
   });
