@@ -375,6 +375,50 @@ describe("API: Collection Unit", () => {
         );
       });
     });
+
+    describe("GET /api/collection_units/critter/:id", () => {
+      it("returns status 404 if no collection_units found", async () => {
+        const res = await request.get(
+          `/api/collection_units/critter/${randomUUID()}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(
+          `/api/collection_units/critter/${dummyCollectionUnit.critter_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        expect.assertions(1);
+        const res = await request.get(
+          `/api/collection_units/critter/${dummyCollectionUnit.critter_id}`
+        );
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns collection_units with correct properties", async () => {
+        const res = await request.get(
+          `/api/collection_units/critter/${dummyCollectionUnit.critter_id}`
+        );
+        const collection_units = res.body;
+        expect.assertions(
+          collection_units.length * (dummyCollectionUnitKeys.length + 1)
+        );
+        for (const collection_unit of collection_units) {
+          expect(collection_unit.critter_id).toBe(
+            dummyCollectionUnit.critter_id
+          );
+          for (const key of dummyCollectionUnitKeys) {
+            expect(collection_unit).toHaveProperty(key);
+          }
+        }
+      });
+    });
   });
 });
 
