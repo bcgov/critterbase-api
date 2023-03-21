@@ -1,8 +1,9 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getAllChildren, getAllFamilies, getAllParents } from "./familyservice";
+import { createNewFamily, deleteFamily, getAllChildren, getAllFamilies, getAllParents, getFamilyById, getFamilyByLabel, getImmediateFamily, getImmediateFamilyOfCritter, getParentsOfCritterId, makeChildOfFamily, makeParentOfFamily, removeChildOfFamily, removeParentOfFamily, updateFamily } from "./family.service";
 import { apiError } from "../../utils/types";
+import { prisma } from "../../utils/constants";
 
 export const familyRouter = express.Router();
 
@@ -12,7 +13,7 @@ export const familyRouter = express.Router();
  familyRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const families = getAllFamilies();
+    const families = await getAllFamilies();
     return res.status(200).json(families);
   })
 );
@@ -23,62 +24,201 @@ export const familyRouter = express.Router();
  familyRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(201).json(`Post new critter`);
+    const label = req.body.family_label;
+    const result = await createNewFamily(label);
+    return res.status(201).json(result);
   })
 );
 
 familyRouter
-  .get("/family")
-  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-    const families = await getAllFamilies();
-    return res.status(200).send(families);
-  });
-
-familyRouter
-  .get("/child")
-  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+  .get("/children",
+  catchErrors(async (req: Request, res: Response) => {
     const children = await getAllChildren();
-    return res.status(200).send(children);
-  });
+    return res.status(200).json(children);
+  })
+);
 
 familyRouter
-  .get("/parents")
-  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+  .get("/parents",
+  catchErrors(async (req: Request, res: Response) => {
     const parents = await getAllParents();
-    return res.status(200).send(parents);
-  });
+    return res.status(200).json(parents);
+  })
+);
+
+familyRouter.get(
+  '/parents/:critter_id',
+  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.critter_id;
+    const c_exists = await prisma.critter.findUnique({
+      where: {
+        critter_id: id
+      }
+    })
+    if(!c_exists) {
+      throw apiError.notFound('No critter matching this id was found.')
+    }
+    const parents = await getParentsOfCritterId(id);
+    return res.status(200).json(parents);
+  })
+);
+
+familyRouter.get(
+  '/children/:critter_id',
+  catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.critter_id;
+    const c_exists = await prisma.critter.findUnique({
+      where: {
+        critter_id: id
+      }
+    })
+    if(!c_exists) {
+      throw apiError.notFound('No critter matching this id was found.')
+    }
+    const parents = await getParentsOfCritterId(id);
+    return res.status(200).json(parents);
+  })
+);
+
+familyRouter.route("/parents")
+    .all(
+      catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+        const f_exists = await prisma.family.findUnique({
+          where: {
+            family_id: req.body.family_id
+          }
+        });
+        const c_exists = await prisma.critter.findUnique({
+          where: {
+            critter_id: req.body.parent_critter_id
+          }
+        })
+        if(!c_exists) {
+          throw apiError.notFound('No critter matching this id was found.')
+        }
+        if(!f_exists) {
+          throw apiError.notFound('No family matching this id was found.')
+        }
+        next();
+      })
+    )
+  .post(
+  catchErrors(async (req: Request, res: Response) => {
+    const parent_id = req.body.parent_critter_id;
+    const family_id = req.body.family_id;
+    const result = await makeParentOfFamily(family_id, parent_id);
+    return res.status(201).json(result);
+  })
+).delete(
+  catchErrors(async (req: Request, res: Response) => {
+    const parent_critter_id = req.body.parent_critter_id;
+    const family_id = req.body.family_id;
+    const result = await removeParentOfFamily(family_id, parent_critter_id);
+    return res.status(200).json(result);
+  })
+)
+
+familyRouter.route("/children")
+    .all(
+      catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+        if(req.method != 'GET') {
+          const f_exists = await prisma.family.findUnique({
+            where: {
+              family_id: req.body.family_id
+            }
+          });
+          const c_exists = await prisma.critter.findUnique({
+            where: {
+              critter_id: req.body.child_critter_id
+            }
+          })
+          if(!c_exists) {
+            throw apiError.notFound('No critter matching this id was found.')
+          }
+          if(!f_exists) {
+            throw apiError.notFound('No family matching this id was found.')
+          }
+        }
+        next();
+      })
+    )
+  .post(
+  catchErrors(async (req: Request, res: Response) => {
+    const child_id = req.body.child_critter_id;
+    const family_id = req.body.family_id;
+    const result = await makeChildOfFamily(family_id, child_id);
+    return res.status(201).json(result);
+  })
+)
+.delete(
+  catchErrors(async (req: Request, res: Response) => {
+    const child_critter_id = req.body.child_critter_id;
+    const family_id = req.body.family_id;
+    const result = await removeChildOfFamily(family_id, child_critter_id);
+    return res.status(200).json(result);
+  })
+)
 
 /**
  * * All critter_id related routes
  */
 familyRouter
-  .route("/:critter_id")
-  .all(
-    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const critter_id = req.params.critter_id;
-      //Check if critter exists before running next routes.
-      //Temp for testing
-      if (!["1", "2", "3"].includes(critter_id)) {
-        throw apiError.notFound("Critter ID not found");
-      }
-      next();
+  .get('/immediate/:critter_id',
+  catchErrors(async (req: Request, res: Response) => {
+    const critter_id = req.params.critter_id;
+    const exists = await prisma.critter.findUnique({
+      where: { critter_id: critter_id}
     })
-  )
-  .get(
-    catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      return res.status(200).json({ hello: "world" });
-    })
-  )
-  .put(
-    catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(`Update critter ${id}`);
-    })
-  )
-  .delete(
-    catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(`Delete critter ${id}`);
-    })
-  );
+    if(!exists) {
+      throw apiError.notFound('No critter found for that critter id');
+    }
+    const result = await getImmediateFamilyOfCritter(critter_id);
+    return res.status(200).json(result);
+  })
+);
+
+familyRouter.route("/:family_id")
+    .all(
+      catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+        const exists = await prisma.family.findUnique({
+          where: {
+            family_id: req.params.family_id
+          }
+        })
+        if(!exists) {
+          throw apiError.notFound('No family id found.')
+        }
+        next();
+      })
+    )
+    .get(
+      catchErrors(async (req: Request, res: Response) => {
+        const id = req.params.family_id;
+        const family = await getImmediateFamily(id);
+        return res.status(200).json(family);
+      })
+    )
+    .put(
+      catchErrors(async (req: Request, res: Response) => {
+        const id = req.params.family_id;
+        const data = req.body;
+        const family = await updateFamily(id, data);
+        return res.status(200).json(family);
+      })
+    )
+    .delete(
+      catchErrors(async (req: Request, res: Response) => {
+        const id = req.params.family_id;
+        const family = await deleteFamily(id);
+        return res.status(200).json(family);
+      })
+    )
+
+familyRouter
+  .get("/label/:label",
+  catchErrors(async (req: Request, res: Response) => {
+    const label = req.params.label;
+    const result = await getFamilyByLabel(label);
+    res.status(200).json(result);
+  })
+)
