@@ -2,18 +2,16 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
-  CreateUserSchema,
   deleteUser,
   getUser,
-  getUserBySystemId,
   getUsers,
   updateUser,
-  UpdateUserSchema,
   upsertUser,
 } from "./user.service";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_schemas";
 import { strings } from "../../utils/constants";
+import { CreateUserSchema, UpdateUserSchema } from "./user.types";
 
 export const userRouter = express.Router();
 
