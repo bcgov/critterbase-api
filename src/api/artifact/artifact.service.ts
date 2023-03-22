@@ -32,4 +32,52 @@ const getArtifactsByCritterId = async (
   });
 };
 
-export { getArtifactById, getArtifactsByCritterId };
+/**
+ * * Updates an existing artifact in the database
+ * @param {string} artifact_id
+ * @param {Prisma.artifactUncheckedUpdateInput} artifact_data
+ */
+const updateArtifact = async (
+  artifact_id: string,
+  artifact_data: Prisma.artifactUncheckedUpdateInput
+): Promise<artifact> => {
+  return await prisma.artifact.update({
+    where: {
+      artifact_id: artifact_id,
+    },
+    data: artifact_data,
+  });
+};
+
+/**
+ * * Creates a new artifact in the database
+ * * Valid reference to existing critter_id and artifact_url must be provided
+ * @param {Prisma.artifactUncheckedCreateInput} artifact_data
+ */
+const createArtifact = async (
+  artifact_data: Prisma.artifactUncheckedCreateInput
+): Promise<artifact> => {
+  return await prisma.artifact.create({
+    data: artifact_data,
+  });
+};
+
+/**
+ * * Removes an artifact from the database
+ * @param {string} artifact_id
+ */
+const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
+  return await prisma.artifact.delete({
+    where: {
+      artifact_id: artifact_id,
+    },
+  });
+};
+
+export {
+  getArtifactById,
+  getArtifactsByCritterId,
+  updateArtifact,
+  createArtifact,
+  deleteArtifact,
+};
