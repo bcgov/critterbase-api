@@ -11,7 +11,7 @@ const ArtifactCreateBodySchema = z.object({
       return !(await prisma.artifact.findUnique({
         where: { artifact_url: artifact_url },
       }));
-    }, "system_user_id already exists"),
+    }, "artifact_url already exists"),
   artifact_comment: string().optional(),
   capture_id: string().uuid().optional(),
   mortality_id: string().uuid().optional(),
