@@ -9,8 +9,7 @@ import {
   deleteLocation,
   getAllLocations,
   getLocation,
-  LocationCreateBodySchema,
-  LocationUpdateBodySchema,
+  LocationBodySchema,
   updateLocation,
 } from "./location.service";
 
@@ -36,7 +35,7 @@ locationRouter.get(
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    LocationCreateBodySchema.parse(req.body);
+    LocationBodySchema.parse(req.body);
     const location = await createLocation(req.body);
     return res.status(201).json(location);
   })
@@ -65,8 +64,9 @@ locationRouter
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      LocationUpdateBodySchema.parse(req.body);
-      const location = await updateLocation(req.body);
+      const id = req.params.id;
+      LocationBodySchema.parse(req.body);
+      const location = await updateLocation(req.body, id);
       res.status(200).json(location);
     })
   )

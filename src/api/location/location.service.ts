@@ -25,26 +25,20 @@ const excludes: LocationExcludes[] = [
   "lk_region_env",
 ];
 
-type LocationCreate = z.infer<typeof LocationCreateBodySchema>;
-
-type LocationUpdate = z.infer<typeof LocationUpdateBodySchema>;
+type LocationBody = z.infer<typeof LocationBodySchema>;
 
 // Zod Schemas
-const LocationCreateBodySchema = z.object({
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
-  coordinate_uncertainty: z.number().optional(),
-  coordinate_uncertainty_unit: z.enum(["m"]).default("m"),
-  wmu_id: z.string().uuid().optional(),
-  region_nr_id: z.string().uuid().optional(),
-  region_env_id: z.string().uuid().optional(),
-  elevation: z.number().min(0).optional(),
-  temperature: z.number().min(-100).max(100).optional(),
-  location_comment: z.string().max(100).optional(),
-});
-
-const LocationUpdateBodySchema = LocationCreateBodySchema.extend({
-  location_id: z.string().uuid(),
+const LocationBodySchema = z.object({
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
+  coordinate_uncertainty: z.number().nullable().optional(),
+  coordinate_uncertainty_unit: z.enum(["m"]).default("m").nullable().optional(),
+  wmu_id: z.string().uuid().nullable().optional(),
+  region_nr_id: z.string().uuid().nullable().optional(),
+  region_env_id: z.string().uuid().nullable().optional(),
+  elevation: z.number().min(0).nullable().optional(),
+  temperature: z.number().min(-100).max(100).nullable().optional(),
+  location_comment: z.string().max(100).nullable().optional(),
 });
 
 // Prisma objects
@@ -75,12 +69,12 @@ const getLocation = async (id: string) => {
     },
     ...subSelects,
   });
-  return location && exclude(location, excludes);
+  return location ? exclude(location, excludes) : null;
 };
 
 const getAllLocations = async () => {
   const locations = await prisma.location.findMany({ ...subSelects });
-  return locations?.length && locations.map((l) => exclude(l, excludes));
+  return locations?.length ? locations.map((l) => exclude(l, excludes)) : [];
 };
 
 const deleteLocation = async (id: string): Promise<location> => {
@@ -91,16 +85,23 @@ const deleteLocation = async (id: string): Promise<location> => {
   });
 };
 
-const createLocation = async (data: LocationCreate): Promise<location> => {
+const createLocation = async (data: LocationBody): Promise<location> => {
   return await prisma.location.create({ data });
 };
 
-const updateLocation = async (data: LocationUpdate): Promise<location> => {
-  return await prisma.location.create({ data });
+const updateLocation = async (
+  data: LocationBody,
+  id: string
+): Promise<location> => {
+  return await prisma.location.update({
+    where: {
+      location_id: id,
+    },
+    data,
+  });
 };
 export {
-  LocationCreateBodySchema,
-  LocationUpdateBodySchema,
+  LocationBodySchema,
   getAllLocations,
   getLocation,
   deleteLocation,
