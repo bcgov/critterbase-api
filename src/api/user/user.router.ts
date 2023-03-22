@@ -32,7 +32,7 @@ userRouter.get(
 userRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const userData = await CreateUserSchema.parseAsync(req.body);
+    const userData = await CreateUserSchema.parse(req.body);
     const newUser = await upsertUser(userData);
     return res.status(201).json(newUser);
   })
@@ -62,7 +62,7 @@ userRouter
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const userData = await UpdateUserSchema.parseAsync(req.body);
+      const userData = await UpdateUserSchema.parse(req.body);
       const user = await updateUser(req.params.id, userData);
       return res.status(200).json(user);
     })

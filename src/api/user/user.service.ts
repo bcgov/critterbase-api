@@ -1,13 +1,14 @@
 import { prisma, strings } from "../../utils/constants";
 import type { user, Prisma } from "@prisma/client";
+import { UserCreateInput, UserUpdateInput } from "./user.types";
 
 /**
  * * Adds a user to the database
  * * Will fail if user system_user_id already present
- * @param {Prisma.userCreateInput} newUserData - The newly created user
+ * @param {UserCreateInput} newUserData - The newly created user
  */
 const createUser = async (
-  newUserData: Prisma.userCreateInput
+  newUserData: UserCreateInput
 ): Promise<user> => {
   const newUser = await prisma.user.create({ data: newUserData });
   return newUser;
@@ -15,10 +16,10 @@ const createUser = async (
 
 /**
  * Adds or updates a user in the database
- * @param {Prisma.userCreateInput} newUserData - The user data to be upserted
+ * @param {UserCreateInput} newUserData - The user data to be upserted
  */
 const upsertUser = async (
-  newUserData: Prisma.userCreateInput
+  newUserData: UserCreateInput
 ): Promise<user> => {
   const newUser = await prisma.user.upsert({
     where: { system_user_id: newUserData.system_user_id },
@@ -67,11 +68,11 @@ const getUserBySystemId = async (
 /**
  * Updates a user in the database
  * @param {string} user_id - The uuid / primary key for the user
- * @param {Prisma.userUpdateInput} data - The new data that the record should be updated
+ * @param {UserUpdateInput} data - The new data that the record should be updated
  */
 const updateUser = async (
   user_id: string,
-  data: Prisma.userUpdateInput
+  data: UserUpdateInput
 ): Promise<user> => {
   const updatedUser = await prisma.user.update({
     where: {

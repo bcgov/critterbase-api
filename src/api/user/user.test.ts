@@ -10,6 +10,7 @@ import {
 } from "./user.service";
 import type { Prisma, user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
+import { UserCreateInput, UserUpdateInput } from "./user.types";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const uuidRegex =
@@ -52,7 +53,7 @@ function isUser(user: any): user is user {
 /**
  * * Returns a randomly generated user that can be insterted to the database
  */
-function newUser(): Prisma.userCreateInput {
+function newUser(): UserCreateInput {
   const num = randomInt(99999999);
   return {
     system_user_id: num.toString(),
@@ -157,7 +158,7 @@ describe("API: User", () => {
     describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
         const createdUser = await prisma.user.create({ data: newUser() });
-        const updateData: Prisma.userUpdateInput = {
+        const updateData: UserUpdateInput = {
           system_name: createdUser.system_name + "_UPDATED",
         };
         const updatedUser = await updateUser(createdUser.user_id, updateData);
