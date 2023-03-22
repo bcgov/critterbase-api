@@ -20,6 +20,15 @@ const exclude = <T, Key extends keyof T>(
   return obj;
 };
 
+const unpackObject = <T, Key extends keyof T>(obj: T, key: Key) => {
+  if (!obj) return;
+  if (typeof obj[key] === "object") {
+    Object.assign(obj, obj[key]);
+    delete obj[key];
+  }
+  return obj;
+};
+
 /**
  * * Checks if a provided string value is a uuid
  * @param id string | undefined

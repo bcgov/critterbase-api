@@ -104,6 +104,8 @@ describe("API: Location", () => {
     });
 
     describe(`POST ${ROUTE}/create`, () => {
+      it.todo("returns status 400 when nothing provided in body");
+
       it("returns status 201 with valid body in req", async () => {
         const res = await request.post(`${ROUTE}/create`).send(data);
         createdLocation = res.body;
