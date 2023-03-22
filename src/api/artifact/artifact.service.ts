@@ -2,6 +2,7 @@ import { prisma } from "../../utils/constants";
 import { artifact, Prisma } from "@prisma/client";
 import { number, string, z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
+import { ArtifactCreate, ArtifactUpdate } from "./artifact.types";
 
 /**
  * * Gets an artifact by the artifact_id
@@ -35,11 +36,11 @@ const getArtifactsByCritterId = async (
 /**
  * * Updates an existing artifact in the database
  * @param {string} artifact_id
- * @param {Prisma.artifactUncheckedUpdateInput} artifact_data
+ * @param {ArtifactUpdate} artifact_data
  */
 const updateArtifact = async (
   artifact_id: string,
-  artifact_data: Prisma.artifactUncheckedUpdateInput
+  artifact_data: ArtifactUpdate
 ): Promise<artifact> => {
   return await prisma.artifact.update({
     where: {
@@ -52,10 +53,10 @@ const updateArtifact = async (
 /**
  * * Creates a new artifact in the database
  * * Valid reference to existing critter_id and artifact_url must be provided
- * @param {Prisma.artifactUncheckedCreateInput} artifact_data
+ * @param {ArtifactCreate} artifact_data
  */
 const createArtifact = async (
-  artifact_data: Prisma.artifactUncheckedCreateInput
+  artifact_data: ArtifactCreate
 ): Promise<artifact> => {
   return await prisma.artifact.create({
     data: artifact_data,
