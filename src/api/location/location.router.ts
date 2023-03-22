@@ -67,7 +67,7 @@ locationRouter
       const id = req.params.id;
       LocationBodySchema.parse(req.body);
       const location = await updateLocation(req.body, id);
-      res.status(200).json(location);
+      res.status(201).json(location);
     })
   )
   .delete(

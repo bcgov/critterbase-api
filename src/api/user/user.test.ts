@@ -1,4 +1,4 @@
-import { request, uuidRegex } from "../../utils/constants";
+import { request } from "../../utils/constants";
 import {
   createUser,
   deleteUser,
@@ -314,7 +314,7 @@ describe("API: User", () => {
         expect.assertions(1);
         expect(res.status).toBe(409);
       });
-      
+
       it("returns status 400 when data contains invalid fields", async () => {
         const user = newUser();
         const res = await request

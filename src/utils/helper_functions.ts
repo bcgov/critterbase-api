@@ -3,7 +3,7 @@ import { IS_DEV, IS_PROD, PORT, strings } from "./constants";
 import { apiError, AuditColumns } from "./types";
 import { z } from "zod";
 
-function exclude<T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> {
+const exclude = <T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> => {
   for (let key of keys) {
     if (obj) {
       if (typeof obj[key] === "object") {
@@ -14,7 +14,7 @@ function exclude<T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> {
     }
   }
   return obj;
-}
+};
 
 /**
  * * Checks if a provided string value is a uuid

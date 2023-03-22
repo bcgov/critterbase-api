@@ -126,7 +126,7 @@ const isValidUpdateUserInput = (data: user): boolean => {
     "system_user_id",
     "system_name",
     "keycloak_uuid",
-    "update_user"
+    "update_user",
   ];
   return isValidObject(data, requiredFields, allowedFields);
 };
@@ -140,5 +140,5 @@ export {
   updateUser,
   deleteUser,
   isValidCreateUserInput,
-  isValidUpdateUserInput
+  isValidUpdateUserInput,
 };
