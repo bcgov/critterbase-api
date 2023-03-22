@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import { artifactRouter } from "./api/artifact/artifact.router";
 import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { critterRouter } from "./api/critter/critter.router";
 import { locationRouter } from "./api/location/location.router";
@@ -21,6 +22,7 @@ app.use("/api/locations", locationRouter);
 app.use("/api/markings", markingRouter);
 app.use("/api/users", userRouter);
 app.use("/api/collection_units", collectionUnitRouter);
+app.use("/api/artifacts", artifactRouter);
 
 app.use(errorLogger);
 app.use(errorHandler);

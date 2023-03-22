@@ -1,6 +1,6 @@
 import { artifact } from "@prisma/client";
-import { randomInt } from "crypto";
-import { prisma } from "../../utils/constants";
+import { randomInt, randomUUID } from "crypto";
+import { prisma, request } from "../../utils/constants";
 import { ArtifactCreate, ArtifactUpdate } from "./artifact.types";
 import {
   createArtifact,
@@ -127,6 +127,211 @@ describe("API: Artifact", () => {
         expect.assertions(2);
         expect(deletedArtifact).toStrictEqual(artifact);
         expect(artifactCheck).toBeNull();
+      });
+    });
+  });
+
+  describe("ROUTERS", () => {
+    describe("GET /api/artifacts", () => {
+      it("returns status 200", async () => {
+        expect.assertions(1);
+        const res = await request.get("/api/artifacts");
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        expect.assertions(1);
+        const res = await request.get("/api/artifacts");
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns artifacts with correct properties", async () => {
+        const res = await request.get("/api/artifacts");
+        const artifacts = res.body;
+        expect.assertions(artifacts.length * dummyArtifactKeys.length);
+        for (const artifact of artifacts) {
+          for (const key of dummyArtifactKeys) {
+            expect(artifact).toHaveProperty(key);
+          }
+        }
+      });
+    });
+
+    describe("POST /api/artifacts/create", () => {
+      it("returns status 201", async () => {
+        const artifact = await newArtifact();
+        const res = await request.post("/api/artifacts/create").send(artifact);
+        expect.assertions(1);
+        expect(res.status).toBe(201);
+      });
+
+      it("returns a artifact", async () => {
+        const artifact = await newArtifact();
+        const res = await request.post("/api/artifacts/create").send(artifact);
+        const returnedArtifact = res.body;
+        expect.assertions(dummyArtifactKeys.length);
+        for (const key of dummyArtifactKeys) {
+          expect(returnedArtifact).toHaveProperty(key);
+        }
+      });
+
+      it("strips invalid fields from data", async () => {
+        const artifact = await newArtifact();
+        const res = await request
+          .post("/api/artifacts/create")
+          .send({ ...artifact, invalidField: "qwerty123" });
+        expect.assertions(2);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const artifact = await newArtifact();
+        const res = await request.post("/api/artifacts/create").send({
+          // left out required artifact_url
+          critter_id: artifact.critter_id,
+          artifact_comment: artifact.artifact_comment,
+        });
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/artifacts/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.get(`/api/artifacts/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(
+          `/api/artifacts/${dummyArtifact.artifact_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a artifact", async () => {
+        const res = await request.get(
+          `/api/artifacts/${dummyArtifact.artifact_id}`
+        );
+        expect.assertions(dummyArtifactKeys.length);
+        for (const key of dummyArtifactKeys) {
+          expect(res.body).toHaveProperty(key);
+        }
+      });
+    });
+
+    describe("PATCH /api/artifacts/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.patch(`/api/artifacts/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request
+          .patch(`/api/artifacts/${dummyArtifact.artifact_id}`)
+          .send({ artifact_comment: dummyArtifact.artifact_comment });
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a artifact", async () => {
+        const res = await request
+          .patch(`/api/artifacts/${dummyArtifact.artifact_id}`)
+          .send({ artifact_comment: dummyArtifact.artifact_comment });
+        expect.assertions(dummyArtifactKeys.length);
+        for (const key of dummyArtifactKeys) {
+          expect(res.body).toHaveProperty(key);
+        }
+      });
+
+      it("returns status 400 when data is empty", async () => {
+        const res = await request.patch(
+          `/api/artifacts/${dummyArtifact.artifact_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(400);
+      });
+
+      it("strips invalid fields from data", async () => {
+        const res = await request
+          .patch(`/api/artifacts/${dummyArtifact.artifact_id}`)
+          .send({
+            artifact_comment: dummyArtifact.artifact_comment,
+            invalidField: "qwerty123",
+          });
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body).not.toHaveProperty("invalidField");
+      });
+    });
+
+    describe("DELETE /api/artifacts/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        const res = await request.delete(`/api/artifacts/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const artifact = await prisma.artifact.create({
+          data: await newArtifact(),
+        });
+        const res = await request.delete(`/api/artifacts/${artifact.artifact_id}`);
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns artifact deleted message", async () => {
+        const artifact = await prisma.artifact.create({
+          data: await newArtifact(),
+        });
+        const res = await request.delete(`/api/artifacts/${artifact.artifact_id}`);
+        expect.assertions(1);
+        expect(res.body).toStrictEqual(
+          `Artifact ${artifact.artifact_id} has been deleted`
+        );
+      });
+    });
+
+    describe("GET /api/artifacts/critter/:id", () => {
+      it("returns status 404 if no artifacts found", async () => {
+        const res = await request.get(`/api/artifacts/critter/${randomUUID()}`);
+        expect.assertions(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(
+          `/api/artifacts/critter/${dummyArtifact.critter_id}`
+        );
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        expect.assertions(1);
+        const res = await request.get(
+          `/api/artifacts/critter/${dummyArtifact.critter_id}`
+        );
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns artifacts with correct properties", async () => {
+        const res = await request.get(
+          `/api/artifacts/critter/${dummyArtifact.critter_id}`
+        );
+        const artifacts = res.body;
+        expect.assertions(artifacts.length * (dummyArtifactKeys.length + 1));
+        for (const artifact of artifacts) {
+          expect(artifact.critter_id).toBe(dummyArtifact.critter_id);
+          for (const key of dummyArtifactKeys) {
+            expect(artifact).toHaveProperty(key);
+          }
+        }
       });
     });
   });

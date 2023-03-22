@@ -42,6 +42,9 @@ artifactRouter.post(
   })
 );
 
+/**
+ ** Get artifacts with a critter_id
+ */
 artifactRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
     // validate critter id and confirm that markings exists
