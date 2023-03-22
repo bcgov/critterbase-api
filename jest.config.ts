@@ -30,7 +30,7 @@ export default {
     "/node_modules/",
     "/src/server.ts",
     "/src/utils/constants.ts",
-    "/src/utils/zod_schema.ts",
+    "/src/utils/types.ts",
   ],
 
   // Indicates which provider should be used to instrument code for coverage

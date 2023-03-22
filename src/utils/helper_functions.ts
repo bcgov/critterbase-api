@@ -3,7 +3,11 @@ import { IS_DEV, IS_PROD, PORT, strings } from "./constants";
 import { apiError, AuditColumns } from "./types";
 import { z } from "zod";
 
-const exclude = <T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> => {
+const exclude = <T, Key extends keyof T>(
+  obj: T | null,
+  keys: Key[]
+): Omit<T, Key> | null => {
+  if (!obj) return null;
   for (let key of keys) {
     if (obj) {
       if (typeof obj[key] === "object") {

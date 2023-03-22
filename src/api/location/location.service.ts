@@ -69,12 +69,12 @@ const getLocation = async (id: string) => {
     },
     ...subSelects,
   });
-  return location ? exclude(location, excludes) : null;
+  return exclude(location, excludes);
 };
 
 const getAllLocations = async () => {
   const locations = await prisma.location.findMany({ ...subSelects });
-  return locations?.length ? locations.map((l) => exclude(l, excludes)) : [];
+  return locations.map((l) => exclude(l, excludes));
 };
 
 const deleteLocation = async (id: string): Promise<location> => {
