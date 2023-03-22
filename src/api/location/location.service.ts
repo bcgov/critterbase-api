@@ -3,6 +3,7 @@ import {
   lk_region_nr,
   lk_wildlife_management_unit,
   location,
+  Prisma,
 } from "@prisma/client";
 
 import { z } from "zod";
@@ -24,6 +25,21 @@ const excludes: LocationExcludes[] = [
   "lk_region_nr",
   "lk_region_env",
 ];
+
+type FormattedLocation = Omit<
+  location & {
+    lk_region_env: {
+      region_env_name: string;
+    } | null;
+    lk_region_nr: {
+      region_nr_name: string;
+    } | null;
+    lk_wildlife_management_unit: {
+      wmu_name: string;
+    } | null;
+  },
+  LocationExcludes
+> | null;
 
 type LocationBody = z.infer<typeof LocationBodySchema>;
 
@@ -66,7 +82,7 @@ const subSelects = {
  * @param id string -> critter_id
  * @returns {location}
  */
-const getLocation = async (id: string) => {
+const getLocation = async (id: string): Promise<FormattedLocation> => {
   const location = await prisma.location.findUnique({
     where: {
       location_id: id,
@@ -79,7 +95,7 @@ const getLocation = async (id: string) => {
  ** gets all locations
  * @returns {locations}
  */
-const getAllLocations = async () => {
+const getAllLocations = async (): Promise<FormattedLocation[]> => {
   const locations = await prisma.location.findMany({ ...subSelects });
   return locations.map((l) => exclude(l, excludes));
 };
