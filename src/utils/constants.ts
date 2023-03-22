@@ -18,7 +18,8 @@ const request = supertest(app);
  * Prevents multiple unwated instances of PrismaClient when hot reloading
  */
 const globalPrisma = global as unknown as { prisma: PrismaClient };
-const prisma = globalPrisma.prisma || new PrismaClient();
+const prisma =
+  globalPrisma.prisma || new PrismaClient({ errorFormat: "minimal" });
 
 if (IS_PROD) globalPrisma.prisma = prisma;
 

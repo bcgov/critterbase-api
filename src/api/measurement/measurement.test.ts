@@ -1,5 +1,6 @@
 import { prisma } from "../../utils/constants";
 import {
+  createQualMeasurement,
   getAllQualMeasurements,
   getQualMeasurement,
 } from "./qualitative.service";
@@ -8,7 +9,7 @@ let numMeasurements = 0;
 let measurements: any;
 let measurement: any;
 beforeAll(async () => {
-  //measurement = await getQualMeasurement();
+  //createdMeasurement = await createQualMeasurement();
   measurements = await getAllQualMeasurements();
   numMeasurements = await prisma.measurement_qualitative.count();
 });

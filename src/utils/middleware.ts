@@ -55,9 +55,11 @@ const errorHandler = (
     return res.status(err.status).json({ error: err.message });
   }
   if (err instanceof PrismaClientKnownRequestError) {
-    return res.status(400).json({
-      error: err?.meta?.cause ?? "unknown prisma error occurred",
-    });
+    const { code, meta } = err;
+    let error = `unsupported prisma error: "${code}"`;
+    if (code === "P2025") error = "record to update not found";
+
+    return res.status(400).json({ error });
   }
   if (err instanceof Error) {
     return res.status(400).json(err?.message ?? "unknown error");

@@ -2,6 +2,7 @@ import { measurement_qualitative } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
+import { QualitativeBody } from "./measurement.types";
 
 const getAllQualMeasurements = async (): Promise<measurement_qualitative[]> => {
   const qualMeasurements = await prisma.measurement_qualitative.findMany();
@@ -18,9 +19,14 @@ const getQualMeasurement = async (
   });
   return qualMeasurement;
 };
+
+const createQualMeasurement = async (
+  data: QualitativeBody
+): Promise<measurement_qualitative> => {
+  return await prisma.measurement_qualitative.create({ data });
+};
 // const getQualMeasurementByCritterId = () => {};
-// const createQualMeasurement = () => {};
 // const updateQualMeasurement = () => {};
 // const deleteQualMeasurement = () => {};
 
-export { getAllQualMeasurements, getQualMeasurement };
+export { getAllQualMeasurements, getQualMeasurement, createQualMeasurement };

@@ -46,17 +46,18 @@ locationRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
-      const location = await getLocation(req.params.id);
-      if (!location) {
-        throw apiError.notFound(strings.location.notFound);
-      }
-      res.locals.location = location;
+      // const location = await getLocation(req.params.id);
+      // if (!location) {
+      //   throw apiError.notFound(strings.location.notFound);
+      // }
+      // res.locals.location = location;
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      return res.status(200).json(res.locals.location);
+      const location = await getLocation(req.params.id);
+      return res.status(200).json(location);
     })
   )
   .patch(
