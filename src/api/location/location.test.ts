@@ -14,6 +14,7 @@ let createdLocation: any;
 let updatedLocation: any;
 
 const ID = "42cfb108-99a5-4631-8385-1b43248ac502";
+const BAD_ID = "52cfb108-99a5-4631-8385-1b43248ac502";
 const COMMENT = "insert";
 const UPDATE = "update";
 const ROUTE = "/api/locations";
@@ -131,6 +132,11 @@ describe("API: Location", () => {
         expect(res.body).toBeDefined();
         expect(res.status).toBe(200);
       });
+      it("with non existant id, should return status 404 and have error in body", async () => {
+        const res = await request.get(`${ROUTE}/${BAD_ID}`);
+        expect(res.status).toBe(404);
+        expect(res.body.error).toBeDefined();
+      });
     });
 
     describe(`PATCH ${ROUTE}/:id`, () => {
@@ -153,6 +159,21 @@ describe("API: Location", () => {
           .patch(`${ROUTE}/${createdLocation.location_id}`)
           .send({ latitude: "1" });
         expect(res.status).toBe(400);
+      });
+    });
+
+    describe(`DELETE ${ROUTE}/:id`, () => {
+      it("should return status 200", async () => {
+        const res = await request.delete(
+          `${ROUTE}/${createdLocation.location_id}`
+        );
+        expect(res.body).toBeDefined();
+        expect(res.status).toBe(200);
+      });
+      it("with non existant id, should return status 404 and have error in body", async () => {
+        const res = await request.delete(`${ROUTE}/${BAD_ID}`);
+        expect(res.status).toBe(404);
+        expect(res.body.error).toBeDefined();
       });
     });
   });

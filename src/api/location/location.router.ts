@@ -22,9 +22,6 @@ locationRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const locations = await getAllLocations();
-    if (!locations || !locations?.length) {
-      throw apiError.notFound(strings.location.notFoundMulti);
-    }
     return res.status(200).json(locations);
   })
 );
