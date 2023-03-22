@@ -34,6 +34,14 @@ const getArtifactsByCritterId = async (
 };
 
 /**
+ * Gets all artifacts from the database
+ */
+const getAllArtifacts = async (): Promise<artifact[]> => {
+  const allArtifacts = await prisma.artifact.findMany();
+  return allArtifacts;
+};
+
+/**
  * * Updates an existing artifact in the database
  * @param {string} artifact_id
  * @param {ArtifactUpdate} artifact_data
@@ -78,6 +86,7 @@ const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
 export {
   getArtifactById,
   getArtifactsByCritterId,
+  getAllArtifacts,
   updateArtifact,
   createArtifact,
   deleteArtifact,

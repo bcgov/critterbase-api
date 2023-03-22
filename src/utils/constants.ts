@@ -42,6 +42,9 @@ const strings = {
   marking: {
     notFound: "marking not found",
   },
+  artifact: {
+    notFound: "artifact not found",
+  },
 };
 
 export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, strings };
