@@ -61,7 +61,11 @@ const subSelects = {
     },
   },
 };
-
+/**
+ ** gets a single location by id
+ * @param id critter_id
+ * returns location
+ */
 const getLocation = async (id: string) => {
   const location = await prisma.location.findUnique({
     where: {
@@ -71,12 +75,20 @@ const getLocation = async (id: string) => {
   });
   return exclude(location, excludes);
 };
-
+/**
+ ** gets all locations
+ * returns list of locations or null
+ */
 const getAllLocations = async () => {
   const locations = await prisma.location.findMany({ ...subSelects });
   return locations.map((l) => exclude(l, excludes));
 };
 
+/**
+ ** deletes a location by id
+ * @param id critter_id
+ * returns location
+ */
 const deleteLocation = async (id: string): Promise<location> => {
   return await prisma.location.delete({
     where: {
@@ -85,10 +97,21 @@ const deleteLocation = async (id: string): Promise<location> => {
   });
 };
 
+/**
+ ** creates new location
+ * @param data Validated LocationBody
+ * returns location
+ */
 const createLocation = async (data: LocationBody): Promise<location> => {
   return await prisma.location.create({ data });
 };
 
+/**
+ ** updates existing location by id
+ * @data validated LocationBody
+ * @param id critter_id
+ * returns location
+ */
 const updateLocation = async (
   data: LocationBody,
   id: string
