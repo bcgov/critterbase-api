@@ -2,18 +2,16 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
-  CreateUserSchema,
   deleteUser,
   getUser,
-  getUserBySystemId,
   getUsers,
   updateUser,
-  UpdateUserSchema,
   upsertUser,
 } from "./user.service";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_schemas";
 import { strings } from "../../utils/constants";
+import { CreateUserSchema, UpdateUserSchema } from "./user.types";
 
 export const userRouter = express.Router();
 
@@ -34,7 +32,7 @@ userRouter.get(
 userRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const userData = await CreateUserSchema.parseAsync(req.body);
+    const userData = await CreateUserSchema.parse(req.body);
     const newUser = await upsertUser(userData);
     return res.status(201).json(newUser);
   })
@@ -48,23 +46,22 @@ userRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate user id and confirm that user exists
-      const { id } = uuidParamsSchema.parse(req.params);
-      res.locals.userData = await getUser(id);
-      if (!res.locals.userData) {
-        throw apiError.notFound(strings.user.notFound);
-      }
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.userData);
+      const user = await getUser(req.params.id);
+      if (!user) {
+        throw apiError.notFound(strings.user.noData);
+      }
+      return res.status(200).json(user);
     })
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const userData = await UpdateUserSchema.parseAsync(req.body);
+      const userData = await UpdateUserSchema.parse(req.body);
       const user = await updateUser(req.params.id, userData);
       return res.status(200).json(user);
     })
