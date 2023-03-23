@@ -45,13 +45,14 @@ const subSelects = {
     },
   },
 };
+
 /**
  ** gets a single location by id
  * @param id string -> critter_id
  * @returns {location}
  */
 const getLocation = async (id: string): Promise<FormattedLocation> => {
-  const location = await prisma.location.findUnique({
+  const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
     },

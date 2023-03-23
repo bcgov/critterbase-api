@@ -26,11 +26,7 @@ const errorLogger = (
   next: NextFunction
 ) => {
   if (!IS_TEST) {
-    console.error(
-      `🛑 ${req.method}${" " + err?.status} ${
-        req.originalUrl
-      } -> ${err.toString()}`
-    );
+    console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
   }
 
   next(err);
@@ -57,7 +53,8 @@ const errorHandler = (
   }
   if (err instanceof PrismaClientKnownRequestError) {
     const { code, meta } = err;
-    return res.status(400).json({ error: prismaErrorMsg(code, meta) });
+    const { status, error } = prismaErrorMsg(code, meta);
+    return res.status(status).json({ error });
   }
   if (err instanceof Error) {
     return res.status(400).json(err?.message ?? "unknown error");

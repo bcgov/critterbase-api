@@ -82,14 +82,23 @@ const startServer = () => {
  * Note: as unsupported error messages occur, add support using this function
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
-const prismaErrorMsg = (code: string, meta?: Record<string, unknown>) => {
+const prismaErrorMsg = (
+  code: string,
+  meta?: Record<string, unknown>
+): { error: string; status: number } => {
   switch (code) {
     case "P2025":
-      return `an operation failed because it depends on one or more records that were required but not found. ${meta?.cause}`;
+      return {
+        error: `${meta?.cause}`,
+        status: 404,
+      };
     case "P2002":
-      return `unique constraint failed on the fields: ${meta?.target}`;
+      return {
+        error: `unique constraint failed on the fields: ${meta?.target}`,
+        status: 400,
+      };
   }
-  return `unsupported prisma error: "${code}"`;
+  return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
 export { isUUID, exclude, isValidObject, startServer, prismaErrorMsg };

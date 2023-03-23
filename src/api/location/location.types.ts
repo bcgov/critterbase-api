@@ -17,29 +17,29 @@ const LocationBodySchema = z.object({
 type LocationBody = z.infer<typeof LocationBodySchema>;
 
 type LocationExcludes =
-  | keyof location
-  | "lk_region_env"
+  | "lk_wildlife_management_unit"
   | "lk_region_nr"
-  | "lk_wildlife_management_unit";
+  | "lk_region_env"
+  | keyof Pick<location, "wmu_id" | "region_nr_id" | "region_env_id">;
 
 type FormattedLocation = Omit<
   location & {
-    lk_region_env: {
-      region_env_name: string;
+    lk_wildlife_management_unit: {
+      wmu_name: string;
     } | null;
     lk_region_nr: {
       region_nr_name: string;
     } | null;
-    lk_wildlife_management_unit: {
-      wmu_name: string;
+    lk_region_env: {
+      region_env_name: string;
     } | null;
   },
   LocationExcludes
 > | null;
 
 export {
-  LocationExcludes,
-  FormattedLocation,
   LocationBody,
   LocationBodySchema,
+  LocationExcludes,
+  FormattedLocation,
 };

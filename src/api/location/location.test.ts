@@ -136,6 +136,7 @@ describe("API: Location", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         const res = await request.get(`${ROUTE}/${BAD_ID}`);
+        console.log(res.body);
         expect(res.status).toBe(404);
         expect(res.body.error).toBeDefined();
       });

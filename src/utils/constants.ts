@@ -2,6 +2,7 @@ import { app } from "../server";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import supertest from "supertest";
+import { apiError } from "./types";
 
 const PORT = process.env.PORT;
 
@@ -19,7 +20,10 @@ const request = supertest(app);
  */
 const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma =
-  globalPrisma.prisma || new PrismaClient({ errorFormat: "minimal" });
+  globalPrisma.prisma ||
+  new PrismaClient({
+    errorFormat: "minimal",
+  });
 
 if (IS_PROD) globalPrisma.prisma = prisma;
 

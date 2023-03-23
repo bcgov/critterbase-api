@@ -1,3 +1,4 @@
+import { measurement_qualitative } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import {
   createQualMeasurement,
@@ -8,10 +9,20 @@ import {
 let numMeasurements = 0;
 let measurements: any;
 let measurement: any;
+let createdMeasurement: any;
+
+let createData = {
+  critter_id: "2",
+  taxon_measurement_id: "string",
+  qualitative_option_id: "string",
+  measured_timestamp: "2",
+};
 beforeAll(async () => {
-  //createdMeasurement = await createQualMeasurement();
-  measurements = await getAllQualMeasurements();
-  numMeasurements = await prisma.measurement_qualitative.count();
+  // const [measurements, measurement, numMeasurements] = await Promise.all([
+  //   getAllQualMeasurements(),
+  //   getQualMeasurement(measurements[0].measurement_qualitative_id),
+  //   prisma.measurement_qualitative.count(),
+  // ]);
 });
 
 describe("API: Location", () => {
@@ -32,6 +43,11 @@ describe("API: Location", () => {
         });
       });
       describe("getQualMeasurement()", () => {
+        it("returns qualitative_measurement", () => {
+          expect(measurement).not.toBeNull();
+          console.log(measurement);
+          expect(measurement).toHaveProperty("measurement_qualitative_id");
+        });
         // it("returns object with qualitative_measurement_id or null", async () => {
         //   if (measurement) {
         //     expect(measurement).toHaveProperty("measurement_qualitative_id");

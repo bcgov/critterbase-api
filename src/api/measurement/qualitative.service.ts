@@ -25,6 +25,7 @@ const createQualMeasurement = async (
 ): Promise<measurement_qualitative> => {
   return await prisma.measurement_qualitative.create({ data });
 };
+
 // const getQualMeasurementByCritterId = () => {};
 // const updateQualMeasurement = () => {};
 // const deleteQualMeasurement = () => {};
