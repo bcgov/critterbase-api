@@ -48,14 +48,12 @@ const getFamilyByLabel = async (family_label: string): Promise<family | null> =>
 }
 
 const getParentsOfCritterId = async (critter_id: string): Promise<critter[]> => {
-  const child = await prisma.family_child.findFirst({
+  const child = await prisma.family_child.findFirstOrThrow({
     where: {
       child_critter_id: critter_id
     }
   });
-  if(!child) {
-    return [];
-  }
+
   const family = child.family_id;
   const parents = await prisma.family_parent.findMany({
     where: {
@@ -71,14 +69,12 @@ const getParentsOfCritterId = async (critter_id: string): Promise<critter[]> => 
 }
 
 const getSiblingsOfCritterId = async (critter_id: string): Promise<critter[]> => {
-  const family = await prisma.family_child.findFirst({
+  const family = await prisma.family_child.findFirstOrThrow({
     where: {
       child_critter_id: critter_id
     }
   });
-  if(!family) {
-    return [];
-  }
+
   const siblings = await prisma.family_child.findMany({
     where: {
       family_id: family.family_id
@@ -94,14 +90,12 @@ const getSiblingsOfCritterId = async (critter_id: string): Promise<critter[]> =>
 }
 
 const getChildrenOfCritterId = async (critter_id: string): Promise<critter[]> => {
-  const parent = await prisma.family_parent.findFirst({
+  const parent = await prisma.family_parent.findFirstOrThrow({
     where: {
       parent_critter_id: critter_id
     }
   });
-  if(!parent) {
-    return [];
-  }
+
   const family = parent.family_id;
   const children = await prisma.family_child.findMany({
     where: {
