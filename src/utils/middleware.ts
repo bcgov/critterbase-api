@@ -58,7 +58,6 @@ const errorHandler = (
     return res.status(err.status).json({ error: err.message });
   }
   if (err instanceof PrismaClientKnownRequestError) {
-    console.log(err)
     if (err.code === 'P2002') {
       return res.status(400).json({error: `Unique constraint failed on the fields: ${err?.meta?.target}`})
     }

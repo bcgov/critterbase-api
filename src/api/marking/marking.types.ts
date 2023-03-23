@@ -3,12 +3,46 @@ import { z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
 
 // Types
+type MarkingLks = Pick<
+  marking,
+  | "taxon_marking_body_location_id"
+  | "marking_material_id"
+  | "marking_type_id"
+  | "primary_colour_id"
+  | "secondary_colour_id"
+  | "text_colour_id"
+>;
 type MarkingExcludes =
-  | keyof marking
+  | keyof MarkingLks
   | "xref_taxon_marking_body_location"
   | "lk_marking_type"
   | "lk_marking_material";
 
+type MarkingResponseBody = Omit<
+  marking & {
+    lk_marking_material: {
+      material: string | null;
+    } | null;
+    lk_marking_type: {
+      name: string;
+    } | null;
+    xref_taxon_marking_body_location: {
+      body_location: string;
+    };
+    lk_colour_marking_primary_colour_idTolk_colour: {
+      colour: string;
+    } | null;
+    lk_colour_marking_secondary_colour_idTolk_colour: {
+      colour: string;
+    } | null;
+    lk_colour_marking_text_colour_idTolk_colour: {
+      colour: string;
+    } | null;
+  },
+  MarkingExcludes
+> | null;
+
+// Keys to be excluded from reponse body
 const markingExcludes: MarkingExcludes[] = [
   "xref_taxon_marking_body_location",
   "taxon_marking_body_location_id",
@@ -16,10 +50,13 @@ const markingExcludes: MarkingExcludes[] = [
   "marking_material_id",
   "lk_marking_type",
   "marking_type_id",
+  "primary_colour_id",
+  "secondary_colour_id",
+  "text_colour_id",
 ];
 
-// Prisma objects
-const markingInclude = {
+// Included Data from foreign keys
+const markingIncludes = {
   include: {
     // critter: {
     //   select: {
@@ -90,7 +127,12 @@ type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
-  markingInclude,
+  markingIncludes,
   markingExcludes,
 };
-export type { MarkingCreateInput, MarkingUpdateInput, MarkingExcludes };
+export type {
+  MarkingCreateInput,
+  MarkingUpdateInput,
+  MarkingExcludes,
+  MarkingResponseBody,
+};

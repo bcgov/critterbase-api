@@ -3,17 +3,19 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
   createMarking,
-  CreateMarkingSchema,
   deleteMarking,
   getAllMarkings,
   getMarkingById,
   getMarkingsByCritterId,
   updateMarking,
-  UpdateMarkingSchema,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_schemas";
 import { strings } from "../../utils/constants";
+import {
+  MarkingCreateBodySchema,
+  MarkingUpdateBodySchema,
+} from "./marking.types";
 
 export const markingRouter = express.Router();
 
@@ -34,7 +36,7 @@ markingRouter.get(
 markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const markingData = CreateMarkingSchema.parse(req.body);
+    const markingData = MarkingCreateBodySchema.parse(req.body);
     const newMarking = await createMarking(markingData);
     return res.status(201).json(newMarking);
   })
@@ -60,7 +62,7 @@ markingRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate marking id and confirm that marking exists
-      const {id} = uuidParamsSchema.parse(req.params);
+      const { id } = uuidParamsSchema.parse(req.params);
       res.locals.markingData = await getMarkingById(id);
       if (!res.locals.markingData) {
         throw apiError.notFound(strings.marking.notFound);
@@ -76,7 +78,7 @@ markingRouter
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const markingData = UpdateMarkingSchema.parse(req.body);
+      const markingData = MarkingUpdateBodySchema.parse(req.body);
       const marking = await updateMarking(req.params.id, markingData);
       return res.status(200).json(marking);
     })
