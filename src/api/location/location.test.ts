@@ -26,13 +26,14 @@ const data = {
 };
 
 beforeAll(async () => {
-  createdLocation = await createLocation(data);
-  locations = await getAllLocations();
-  location = await getLocation(createdLocation.location_id);
-  updatedLocation = await updateLocation(
-    { location_comment: UPDATE },
-    createdLocation.location_id
-  );
+  [createdLocation, locations] = await Promise.all([
+    createLocation(data),
+    getAllLocations(),
+  ]);
+  [location, updatedLocation] = await Promise.all([
+    getLocation(createdLocation.location_id),
+    updateLocation({ location_comment: UPDATE }, createdLocation.location_id),
+  ]);
 });
 afterAll(async () => {
   await prisma.location.deleteMany({
@@ -57,11 +58,12 @@ describe("API: Location", () => {
       it("location has location_id", async () => {
         expect(locations[0]).toHaveProperty("location_id");
       });
-      it("non existing location_id returns null", async () => {
-        const notFound = await getLocation(
-          "52cfb108-99a5-4631-8385-1b43248ac502"
-        );
-        expect(notFound).toBeNull();
+      it("non existing location_id throws error", async () => {
+        try {
+          await getLocation(BAD_ID);
+        } catch (err) {
+          expect(err).toBeDefined();
+        }
       });
     });
     describe("createLocation()", () => {
