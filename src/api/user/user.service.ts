@@ -1,5 +1,5 @@
-import { prisma, strings } from "../../utils/constants";
-import type { user, Prisma } from "@prisma/client";
+import { prisma } from "../../utils/constants";
+import type { user } from "@prisma/client";
 import { UserCreateInput, UserUpdateInput } from "./user.types";
 
 /**
@@ -7,9 +7,7 @@ import { UserCreateInput, UserUpdateInput } from "./user.types";
  * * Will fail if user system_user_id already present
  * @param {UserCreateInput} newUserData - The newly created user
  */
-const createUser = async (
-  newUserData: UserCreateInput
-): Promise<user> => {
+const createUser = async (newUserData: UserCreateInput): Promise<user> => {
   const newUser = await prisma.user.create({ data: newUserData });
   return newUser;
 };
@@ -18,9 +16,7 @@ const createUser = async (
  * Adds or updates a user in the database
  * @param {UserCreateInput} newUserData - The user data to be upserted
  */
-const upsertUser = async (
-  newUserData: UserCreateInput
-): Promise<user> => {
+const upsertUser = async (newUserData: UserCreateInput): Promise<user> => {
   const newUser = await prisma.user.upsert({
     where: { system_user_id: newUserData.system_user_id },
     update: newUserData,

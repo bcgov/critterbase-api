@@ -13,16 +13,6 @@ const UpdateUserSchema = CreateUserSchema.partial().refine(
   nonEmpty,
   "no new data was provided or the format was invalid"
 );
-//   const UpdateUserSchema = CreateUserSchema.merge(
-//     z.object({
-//       system_user_id: z.string().refine(async (system_user_id) => {
-//         // check for uniqueness
-//         return !(await getUserBySystemId(system_user_id));
-//       }, "system_user_id already exists"),
-//     })
-//   )
-//     .partial()
-//     .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 type UserCreateInput = z.infer<typeof CreateUserSchema>;
 type UserUpdateInput = z.infer<typeof UpdateUserSchema>;
