@@ -18,11 +18,13 @@ let createData = {
   measured_timestamp: "2",
 };
 beforeAll(async () => {
-  // const [measurements, measurement, numMeasurements] = await Promise.all([
-  //   getAllQualMeasurements(),
-  //   getQualMeasurement(measurements[0].measurement_qualitative_id),
-  //   prisma.measurement_qualitative.count(),
-  // ]);
+  [measurements, numMeasurements] = await Promise.all([
+    getAllQualMeasurements(),
+    prisma.measurement_qualitative.count(),
+  ]);
+  measurement = await getQualMeasurement(
+    measurements[0].measurement_qualitative_id
+  );
 });
 
 describe("API: Location", () => {

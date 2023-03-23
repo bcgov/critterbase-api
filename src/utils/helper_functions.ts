@@ -2,6 +2,7 @@ import { app } from "../server";
 import { IS_DEV, IS_PROD, PORT, strings } from "./constants";
 import { apiError, AuditColumns } from "./types";
 import { z } from "zod";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const exclude = <T, Key extends keyof T>(
   obj: T | null,
@@ -83,13 +84,14 @@ const startServer = () => {
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
 const prismaErrorMsg = (
+  err: Error | PrismaClientKnownRequestError,
   code: string,
   meta?: Record<string, unknown>
 ): { error: string; status: number } => {
   switch (code) {
     case "P2025":
       return {
-        error: `${meta?.cause}`,
+        error: `${meta?.cause ?? err.message}`,
         status: 404,
       };
     case "P2002":
