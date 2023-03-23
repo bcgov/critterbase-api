@@ -74,4 +74,22 @@ const startServer = () => {
   }
 };
 
-export { isUUID, exclude, isValidObject, startServer };
+/**
+ ** Formats a prisma error messsage based on the prisma error code
+ * @param code string
+ * @param meta Record<string, unknown> | undefined -> unknown object shape
+ * @returns string -> formatted error message
+ * Note: as unsupported error messages occur, add support using this function
+ * https://www.prisma.io/docs/reference/api-reference/error-reference
+ */
+const prismaErrorMsg = (code: string, meta?: Record<string, unknown>) => {
+  switch (code) {
+    case "P2025":
+      return `an operation failed because it depends on one or more records that were required but not found. ${meta?.cause}`;
+    case "P2002":
+      return `unique constraint failed on the fields: ${meta?.target}`;
+  }
+  return `unsupported prisma error: "${code}"`;
+};
+
+export { isUUID, exclude, isValidObject, startServer, prismaErrorMsg };

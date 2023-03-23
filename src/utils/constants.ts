@@ -28,6 +28,9 @@ const strings = {
     invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
     idRequired: `id is required`,
   },
+  prisma: {
+    P2025: () => "record to update not found",
+  },
   location: {
     notFoundMulti: "no locations found",
     notFound: "location not found",

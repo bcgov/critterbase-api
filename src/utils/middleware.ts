@@ -2,6 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { IS_TEST } from "./constants";
+import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
 /**
@@ -56,10 +57,7 @@ const errorHandler = (
   }
   if (err instanceof PrismaClientKnownRequestError) {
     const { code, meta } = err;
-    let error = `unsupported prisma error: "${code}"`;
-    if (code === "P2025") error = "record to update not found";
-
-    return res.status(400).json({ error });
+    return res.status(400).json({ error: prismaErrorMsg(code, meta) });
   }
   if (err instanceof Error) {
     return res.status(400).json(err?.message ?? "unknown error");
