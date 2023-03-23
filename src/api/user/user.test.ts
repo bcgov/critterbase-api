@@ -287,7 +287,9 @@ describe("API: User", () => {
 
     describe("PATCH /api/users/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.patch(`/api/users/${randomUUID()}`);
+        const res = await request
+          .patch(`/api/users/${randomUUID()}`)
+          .send({ system_name: `${randomInt(99999999)}` });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });

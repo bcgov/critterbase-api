@@ -46,18 +46,17 @@ userRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate user id and confirm that user exists
-      const { id } = uuidParamsSchema.parse(req.params);
-      res.locals.userData = await getUser(id);
-      if (!res.locals.userData) {
-        throw apiError.notFound(strings.user.notFound);
-      }
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.userData);
+      const user = await getUser(req.params.id);
+      if (!user) {
+        throw apiError.notFound(strings.user.noData);
+      }
+      return res.status(200).json(user);
     })
   )
   .patch(
