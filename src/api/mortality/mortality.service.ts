@@ -59,15 +59,6 @@ const getMortalityByCritter = async (critter_id: string): Promise<mortality[]> =
 }
 
 const createMortality = async (mortality_data: MortalityCreate): Promise<mortality> => {
-  if(mortality_data.mortality_id) {
-    const exists = await prisma.mortality.findUnique({
-      where: { mortality_id: mortality_data.mortality_id}
-    })
-    if(exists) {
-      throw apiError.conflictIssue('There is already a mortality event matching this id.')
-    }
-  }
- 
   return await prisma.mortality.create({
     data: mortality_data
   })

@@ -1,3 +1,4 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { randomUUID } from "node:crypto";
 import { after } from "node:test";
 import { prisma, request } from "../../utils/constants";
@@ -68,7 +69,7 @@ describe("API: Critter", () => {
         if(!critter || !cod) throw apiError.serverIssue();
         const obj = {mortality_id: testMort.mortality_id, critter_id: critter.critter_id, proximate_cause_of_death_id: cod.cod_id, mortality_timestamp: new Date()};
         expect.assertions(1);
-        await expect(async () => await createMortality(obj)).rejects.toBeInstanceOf(apiError);
+        await expect(async () => await createMortality(obj)).rejects.toBeInstanceOf(PrismaClientKnownRequestError);
   
       })
     });

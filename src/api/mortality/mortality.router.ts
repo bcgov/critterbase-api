@@ -5,11 +5,12 @@ import { createMortality, deleteMortality, getAllMortalities, getMortalityByCrit
 import { apiError } from "../../utils/types";
 import { MortalityCreateBodySchema, MortalityUpdateBodySchema } from "./mortality.types";
 import { prisma } from "../../utils/constants";
+import { uuidParamsSchema } from "../../utils/zod_schemas";
 
 export const mortalityRouter = express.Router();
 
 /**
- ** Critter Router Home
+ ** Mortality Router Home
  */
  mortalityRouter.get(
   "/",
@@ -20,7 +21,7 @@ export const mortalityRouter = express.Router();
 );
 
 /**
- ** Create new critter
+ ** Create new mortality
  */
  mortalityRouter.post(
   "/create",
@@ -34,6 +35,8 @@ export const mortalityRouter = express.Router();
 mortalityRouter.get("/critter/:critter_id",
   catchErrors(async (req: Request, res: Response) => {
     const id = req.params.critter_id;
+    //Leaving in this one since it succeeds otherwise, but I think the user should know 
+    //that the array they get is empty because the critter isn't real
     const exists = await prisma.critter.findUnique({
       where: {
         critter_id: id
@@ -51,31 +54,23 @@ mortalityRouter.get("/critter/:critter_id",
  * * All mortality_id related routes
  */
 mortalityRouter
-  .route("/:mortality_id")
+  .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const mortality_id = req.params.mortality_id;
-      const result = await prisma.mortality.findUnique({
-        where: {
-          mortality_id: mortality_id
-        }
-      });
-      if(result == null) {
-        throw apiError.notFound('Could not find the requested mortality.')
-      }
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.mortality_id;
+      const id = req.params.id;
       const mort = await getMortalityById(id);
       return res.status(200).json(mort);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.mortality_id;
+      const id = req.params.id;
       const parsed = MortalityUpdateBodySchema.parse(req.body);
       const mort = await updateMortality(id, parsed);
       res.status(200).json(mort);
@@ -83,7 +78,7 @@ mortalityRouter
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.mortality_id;
+      const id = req.params.id;
       const mort = await deleteMortality(id);
       res.status(200).json(mort);
     })
