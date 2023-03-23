@@ -1,63 +1,90 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { getAllCritters } from "./mortality.service";
+import { createMortality, deleteMortality, getAllMortalities, getMortalityByCritter, getMortalityById, updateMortality } from "./mortality.service";
 import { apiError } from "../../utils/types";
+import { MortalityCreateBodySchema, MortalityUpdateBodySchema } from "./mortality.types";
+import { prisma } from "../../utils/constants";
 
-export const critterRouter = express.Router();
+export const mortalityRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
-critterRouter.get(
+ mortalityRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const allCritters = getAllCritters();
-    return res.status(200).json(allCritters);
+    const mort = await  getAllMortalities();
+    return res.status(200).json(mort);
   })
 );
 
 /**
  ** Create new critter
  */
-critterRouter.post(
+ mortalityRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(201).json(`Post new critter`);
+    const parsed = MortalityCreateBodySchema.parse(req.body);
+    const mort = await createMortality(parsed);
+    return res.status(201).json(mort);
+  })
+);
+
+mortalityRouter.get("/critter/:critter_id",
+  catchErrors(async (req: Request, res: Response) => {
+    const id = req.params.critter_id;
+    const exists = await prisma.critter.findUnique({
+      where: {
+        critter_id: id
+      }
+    });
+    if(!exists) {
+      throw apiError.notFound('No critter id found.')
+    }
+    const mort = await getMortalityByCritter(id);
+    return res.status(200).json(mort);
   })
 );
 
 /**
- * * All critter_id related routes
+ * * All mortality_id related routes
  */
-critterRouter
-  .route("/:critter_id")
+mortalityRouter
+  .route("/:mortality_id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const critter_id = req.params.critter_id;
-      //Check if critter exists before running next routes.
-      //Temp for testing
-      if (!["1", "2", "3"].includes(critter_id)) {
-        throw apiError.notFound("Critter ID not found");
+      const mortality_id = req.params.mortality_id;
+      const result = await prisma.mortality.findUnique({
+        where: {
+          mortality_id: mortality_id
+        }
+      });
+      if(result == null) {
+        throw apiError.notFound('Could not find the requested mortality.')
       }
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      return res.status(200).json({ hello: "world" });
+      const id = req.params.mortality_id;
+      const mort = await getMortalityById(id);
+      return res.status(200).json(mort);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(`Update critter ${id}`);
+      const id = req.params.mortality_id;
+      const parsed = MortalityUpdateBodySchema.parse(req.body);
+      const mort = await updateMortality(id, parsed);
+      res.status(200).json(mort);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      res.status(200).json(`Delete critter ${id}`);
+      const id = req.params.mortality_id;
+      const mort = await deleteMortality(id);
+      res.status(200).json(mort);
     })
   );
