@@ -1,4 +1,4 @@
-import { frequency_unit, marking } from "@prisma/client";
+import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
 
@@ -58,15 +58,6 @@ const markingExcludes: MarkingExcludes[] = [
 // Included Data from foreign keys
 const markingIncludes = {
   include: {
-    // critter: {
-    //   select: {
-    //     wlh_id: true,
-    //     animal_id: true,
-    //     lk_taxon: {
-    //       select: { taxon_name_common: true },
-    //     },
-    //   },
-    // },
     xref_taxon_marking_body_location: {
       select: { body_location: true },
     },
@@ -87,6 +78,8 @@ const markingIncludes = {
     },
   },
 };
+
+type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>
 
 // Zod schema to validate create user data
 const MarkingCreateBodySchema = z.object({
@@ -135,4 +128,5 @@ export type {
   MarkingUpdateInput,
   MarkingExcludes,
   MarkingResponseBody,
+  MarkingIncludes,
 };

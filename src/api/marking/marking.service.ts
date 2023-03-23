@@ -4,10 +4,15 @@ import { exclude } from "../../utils/helper_functions";
 import {
   MarkingCreateInput,
   markingExcludes,
+  MarkingIncludes,
   markingIncludes,
   MarkingResponseBody,
   MarkingUpdateInput,
 } from "./marking.types";
+
+const formatMarking = (marking: MarkingIncludes) => {
+  let obj;
+};
 
 /**
  * * Returns all existing markings from the database
@@ -61,7 +66,7 @@ const updateMarking = async (
   marking_id: string,
   marking_data: MarkingUpdateInput
 ): Promise<MarkingResponseBody> => {
-  const marking =  await prisma.marking.update({
+  const marking = await prisma.marking.update({
     where: {
       marking_id: marking_id,
     },
@@ -79,7 +84,7 @@ const updateMarking = async (
 const createMarking = async (
   newMarkingData: MarkingCreateInput
 ): Promise<MarkingResponseBody> => {
-  const marking =  await prisma.marking.create({
+  const marking = await prisma.marking.create({
     data: newMarkingData,
     ...markingIncludes,
   });
@@ -90,7 +95,9 @@ const createMarking = async (
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string): Promise<MarkingResponseBody> => {
+const deleteMarking = async (
+  marking_id: string
+): Promise<MarkingResponseBody> => {
   const marking = await prisma.marking.delete({
     where: {
       marking_id: marking_id,
