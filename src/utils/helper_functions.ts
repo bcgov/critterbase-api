@@ -84,14 +84,13 @@ const startServer = () => {
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
 const prismaErrorMsg = (
-  err: Error | PrismaClientKnownRequestError,
-  code: string,
-  meta?: Record<string, unknown>
+  err: PrismaClientKnownRequestError
 ): { error: string; status: number } => {
+  const { meta, message, code } = err;
   switch (code) {
     case "P2025":
       return {
-        error: `${meta?.cause ?? err.message}`,
+        error: `${meta?.cause ?? message}`,
         status: 404,
       };
     case "P2002":

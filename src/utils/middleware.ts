@@ -55,8 +55,7 @@ const errorHandler = (
     return res.status(err.status).json({ error: err.message });
   }
   if (err instanceof PrismaClientKnownRequestError) {
-    const { code, meta } = err;
-    const { status, error } = prismaErrorMsg(err, code, meta);
+    const { status, error } = prismaErrorMsg(err);
     return res.status(status).json({ error });
   }
   if (err instanceof Error) {
