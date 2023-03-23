@@ -1,7 +1,6 @@
 import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
-import { isValidObject } from "../../utils/helper_functions";
 import { CaptureSubsetType, CritterCreate, CritterIncludeResult, CritterUpdate, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
 
 const formatCritterCapture = (events: CaptureSubsetType[]): FormattedCapture[] => {
@@ -105,20 +104,14 @@ const formatCritterInput = (critter: CritterIncludeResult) => {
   return formattedCritter;
 }
 
-const isValidCreateCritter = (data: any): boolean => {
-  return isValidObject(data, ['sex', 'taxon_id']);
-}
-
 const getAllCritters = async (): Promise<critter[]> => {
   return await prisma.critter.findMany();
 };
 
 const getCritterById = async (critter_id: string): Promise<critter | null> => {
-
   return await prisma.critter.findUnique({
     where: { critter_id: critter_id}
   });
-
 }
 
 const getCritterByIdWithDetails = async (critter_id: string): Promise<FormattedCritter | null> => {
@@ -128,19 +121,16 @@ const getCritterByIdWithDetails = async (critter_id: string): Promise<FormattedC
       critter_id: critter_id
     }
   });
-
-  if(result == undefined || 
-    result?.measurement_quantitative == undefined || 
-    result?.measurement_qualitative == undefined || 
-    result?.marking == undefined) {
-    throw apiError.serverIssue();
+  
+  if(!result) {
+    return null;
   }
 
   const formatted = formatCritterInput(result);
   return formatted;
 }
 
-const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[] | null> => {
+const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[]> => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results =  await prisma.critter.findMany({
@@ -149,15 +139,6 @@ const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[] | n
     wlh_id: wlh_id
    }
   })
-
-  if(!results || results.some(result => {
-    result == undefined || 
-    result?.measurement_quantitative == undefined || 
-    result?.measurement_qualitative == undefined || 
-    result?.marking == undefined
-  })) {
-    throw apiError.serverIssue();
-  }
 
   const formattedResults = results.map(r => formatCritterInput(r));
   return formattedResults;
@@ -173,19 +154,6 @@ const updateCritter = async (critter_id: string, critter_data: CritterUpdate): P
 }
 
 const createCritter = async (critter_data: CritterCreate): Promise<critter> => {
-  if(critter_data.critter_id) {
-    const existing = await prisma.critter.findUnique({
-      where: { critter_id: critter_data.critter_id}
-    });
-    if(existing) {
-      throw apiError.conflictIssue('Creation of duplicate critter ID is not allowed');
-    }
-  }
-
-  if(!isValidCreateCritter(critter_data)) {
-    throw apiError.serverIssue();
-  }
-  
   const critter = await prisma.critter.create({
     data: critter_data
   })

@@ -1,4 +1,5 @@
 import { critter, Prisma } from "@prisma/client";
+import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { queryRandomUUID } from "../../../prisma/prisma_utils";
 import { prisma, request } from "../../utils/constants";
 import { isValidObject } from "../../utils/helper_functions";
@@ -68,7 +69,7 @@ describe("API: Critter", () => {
         expect(critter.taxon_id).toBe(dummyTaxon);
       })
       it("fails to create a critter", async () => {
-        await expect( async () => await createCritter({} as any)).rejects.toBeInstanceOf(apiError);
+        await expect( async () => await createCritter({} as any)).rejects.toBeInstanceOf(PrismaClientValidationError);
       })
     })
     describe("getting critters", () => {
