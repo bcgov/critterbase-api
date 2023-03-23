@@ -1,7 +1,11 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {
+  NotFoundError,
+  PrismaClientKnownRequestError,
+} from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { IS_TEST } from "./constants";
+import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
 /**
@@ -25,11 +29,7 @@ const errorLogger = (
   next: NextFunction
 ) => {
   if (!IS_TEST) {
-    console.error(
-      `🛑 ${req.method}${" " + err?.status} ${
-        req.originalUrl
-      } -> ${err.toString()}`
-    );
+    console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
   }
 
   next(err);
@@ -58,16 +58,9 @@ const errorHandler = (
     return res.status(err.status).json({ error: err.message });
   }
   if (err instanceof PrismaClientKnownRequestError) {
-    console.log(err)
-    if (err.code === 'P2002') {
-      return res.status(400).json({error: `Unique constraint failed on the fields: ${err?.meta?.target}`})
-    }
-    if (err.code === 'P2025') {
-      return res.status(404).json({error: err?.meta?.cause})
-    }
-    return res.status(400).json({
-      error: err?.meta?.cause ?? "unknown prisma error occurred",
-    });
+    const { code, meta } = err;
+    const { status, error } = prismaErrorMsg(err, code, meta);
+    return res.status(status).json({ error });
   }
   if (err instanceof Error) {
     return res.status(400).json(err?.message ?? "unknown error");
