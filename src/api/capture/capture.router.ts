@@ -6,6 +6,7 @@ import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
 import { LocationCreateBodySchema, LocationUpdateBodySchema } from "../location/location.service";
 import { CaptureCreateBodySchema, CaptureUpdateBodySchema } from "./capture.types";
+import { uuidParamsSchema } from "../../utils/zod_schemas";
 
 export const captureRouter = express.Router();
 
@@ -33,10 +34,10 @@ export const captureRouter = express.Router();
 );
 
 captureRouter.get(
-  "/critter/:critter_id",
+  "/critter/:id",
   catchErrors(async (req: Request, res: Response) => {
-    const id = req.params.critter_id;
-    const result = await getCaptureByCritter(id);
+    const parsed = uuidParamsSchema.parse(req.params);
+    const result = await getCaptureByCritter(parsed.id);
     res.status(200).send(result);
   })
 )
@@ -45,32 +46,23 @@ captureRouter.get(
  * * All critter_id related routes
  */
 captureRouter
-  .route("/:capture_id")
+  .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      const id = req.params.capture_id;
-      const result = await prisma.capture.findUnique({
-        where: {
-          capture_id: id
-        }
-      })
-      if(result == null) {
-        throw apiError.notFound('Could not find the requested capture')
-      }
+      uuidParamsSchema.parse(req.params)
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.capture_id;
+      const id = req.params.id;
       const result = await getCaptureById(id);
-      console.log(result);
       return res.status(200).json(result);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.capture_id;
+      const id = req.params.id;
       const parsed = CaptureUpdateBodySchema.parse(req.body);
       const result = await updateCapture(id, parsed);
       res.status(200).json(result);
@@ -78,7 +70,7 @@ captureRouter
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.capture_id;
+      const id = req.params.id;
       const result = await deleteCapture(id);
       res.status(200).json(result);
     })

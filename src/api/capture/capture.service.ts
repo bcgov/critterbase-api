@@ -70,17 +70,6 @@ const getCaptureByCritter = async (critter_id: string): Promise<FormattedCapture
 }
 
 const createCapture = async (capture_data: CaptureCreate): Promise<capture | null> => {
-  if(capture_data.capture_id) {
-    const exists = await prisma.capture.findUnique({
-      where: {
-        capture_id: capture_data.capture_id
-      }
-    })
-    if(exists) {
-      throw apiError.conflictIssue('Capture with this UUID exists.');
-    }
-  }
-
   return await prisma.capture.create({
     data: capture_data
   })
