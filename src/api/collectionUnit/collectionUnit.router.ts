@@ -8,12 +8,13 @@ import {
   updateCollectionUnit,
   createCollectionUnit,
   deleteCollectionUnit,
-  CreateCollectionUnitSchema,
-  UpdateCollectionUnitSchema,
 } from "./collectionUnit.service";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_schemas";
-import { strings } from "../../utils/constants";
+import {
+  CollectionUnitCreateBodySchema,
+  CollectionUnitUpdateBodySchema,
+} from "./collectionUnit.types";
 
 export const collectionUnitRouter = express.Router();
 
@@ -33,7 +34,7 @@ collectionUnitRouter.get(
 collectionUnitRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const collectionUnitData = CreateCollectionUnitSchema.parse(req.body);
+    const collectionUnitData = CollectionUnitCreateBodySchema.parse(req.body);
     const newCollectionUnit = await createCollectionUnit(collectionUnitData);
     return res.status(201).json(newCollectionUnit);
   })
@@ -45,7 +46,9 @@ collectionUnitRouter.route("/critter/:id").get(
     const { id } = uuidParamsSchema.parse(req.params);
     const collectionUnits = await getCollectionUnitsByCritterId(id);
     if (!collectionUnits.length) {
-      throw apiError.notFound(`Critter ID "${id}" has no associated collectionUnits`);
+      throw apiError.notFound(
+        `Critter ID "${id}" has no associated collectionUnits`
+      );
     }
     return res.status(200).json(collectionUnits);
   })
@@ -70,8 +73,11 @@ collectionUnitRouter
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const collectionUnitData = UpdateCollectionUnitSchema.parse(req.body);
-      const collectionUnit = await updateCollectionUnit(req.params.id, collectionUnitData);
+      const collectionUnitData = CollectionUnitUpdateBodySchema.parse(req.body);
+      const collectionUnit = await updateCollectionUnit(
+        req.params.id,
+        collectionUnitData
+      );
       return res.status(200).json(collectionUnit);
     })
   )

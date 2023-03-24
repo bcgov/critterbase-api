@@ -1,9 +1,6 @@
 import { prisma } from "../../utils/constants";
 import type { critter_collection_unit, Prisma } from "@prisma/client";
-import { isValidObject } from "../../utils/helper_functions";
-import { z } from "zod";
-import { nonEmpty } from "../../utils/zod_schemas";
-
+import { CollectionUnitCreateInput, CollectionUnitUpdateInput } from "./collectionUnit.types";
 /**
  * * Returns all existing critter collection units from the database
  */
@@ -43,11 +40,11 @@ const getCollectionUnitsByCritterId = async (
 /**
  * * Updates an existing critter collection unit in the database
  * @param {string} critter_collection_unit_id
- * @param {Prisma.critter_collection_unitUncheckedUpdateInput} critter_collection_unit_data
+ * @param {CollectionUnitUpdateInput} critter_collection_unit_data
  */
 const updateCollectionUnit = async (
   critter_collection_unit_id: string,
-  critter_collection_unit_data: Prisma.critter_collection_unitUncheckedUpdateInput
+  critter_collection_unit_data: CollectionUnitUpdateInput
 ): Promise<critter_collection_unit> => {
   return await prisma.critter_collection_unit.update({
     where: {
@@ -60,10 +57,10 @@ const updateCollectionUnit = async (
 /**
  * * Creates a new critter_collection_unit in the database
  * * Valid reference to existing critter_id and collection_unit_id UUIDs must be provided
- * @param {Prisma.critter_collection_unitUncheckedCreateInput} critter_collection_unit_data
+ * @param {CollectionUnitCreateInput} critter_collection_unit_data
  */
 const createCollectionUnit = async (
-  critter_collection_unit_data: Prisma.critter_collection_unitUncheckedCreateInput
+  critter_collection_unit_data: CollectionUnitCreateInput
 ): Promise<critter_collection_unit> => {
   return await prisma.critter_collection_unit.create({
     data: critter_collection_unit_data,
@@ -84,18 +81,6 @@ const deleteCollectionUnit = async (
   });
 };
 
-// Zod schema to validate create collection unit data
-const CreateCollectionUnitSchema = z.object({
-  critter_id: z.string().uuid(),
-  collection_unit_id: z.string().uuid(),
-});
-
-// Zod schema to validate update collection unit data
-const UpdateCollectionUnitSchema = CreateCollectionUnitSchema.partial().refine(
-  nonEmpty,
-  "no new data was provided or the format was invalid"
-);
-
 export {
   getAllCollectionUnits,
   getCollectionUnitById,
@@ -103,6 +88,4 @@ export {
   updateCollectionUnit,
   createCollectionUnit,
   deleteCollectionUnit,
-  CreateCollectionUnitSchema,
-  UpdateCollectionUnitSchema,
 };
