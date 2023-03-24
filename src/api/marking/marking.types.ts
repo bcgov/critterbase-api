@@ -3,59 +3,32 @@ import { z } from "zod";
 import { nonEmpty } from "../../utils/zod_schemas";
 
 // Types
-type MarkingLks = Pick<
-  marking,
-  | "taxon_marking_body_location_id"
-  | "marking_material_id"
-  | "marking_type_id"
-  | "primary_colour_id"
-  | "secondary_colour_id"
-  | "text_colour_id"
->;
-type MarkingExcludes =
-  | keyof MarkingLks
-  | "xref_taxon_marking_body_location"
-  | "lk_marking_type"
-  | "lk_marking_material";
+type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
-type MarkingResponseBody = Omit<
-  marking & {
-    lk_marking_material: {
-      material: string | null;
-    } | null;
-    lk_marking_type: {
-      name: string;
-    } | null;
-    xref_taxon_marking_body_location: {
-      body_location: string;
-    };
-    lk_colour_marking_primary_colour_idTolk_colour: {
-      colour: string;
-    } | null;
-    lk_colour_marking_secondary_colour_idTolk_colour: {
-      colour: string;
-    } | null;
-    lk_colour_marking_text_colour_idTolk_colour: {
-      colour: string;
-    } | null;
-  },
-  MarkingExcludes
-> | null;
+type FormattedMarking = {
+  marking_id: string;
+  critter_id: string;
+  capture_id: string | null;
+  mortality_id: string | null;
+  primary_colour: string | null;
+  secondary_colour: string | null;
+  text_colour: string | null;
+  marking_type: string | null;
+  marking_material: string | null;
+  body_location: string | null;
+  identifier: string | null;
+  frequency: number | null;
+  frequency_unit: frequency_unit | null;
+  order: number | null;
+  comment: string | null;
+  attached_timestamp: Date;
+  removed_timestamp: Date | null;
+};
 
-// Keys to be excluded from reponse body
-const markingExcludes: MarkingExcludes[] = [
-  "xref_taxon_marking_body_location",
-  "taxon_marking_body_location_id",
-  "lk_marking_material",
-  "marking_material_id",
-  "lk_marking_type",
-  "marking_type_id",
-  "primary_colour_id",
-  "secondary_colour_id",
-  "text_colour_id",
-];
+type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
+type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
-// Included Data from foreign keys
+// Constants
 const markingIncludes = {
   include: {
     xref_taxon_marking_body_location: {
@@ -79,9 +52,7 @@ const markingIncludes = {
   },
 };
 
-type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>
-
-// Zod schema to validate create user data
+// Validate incoming request body for create marking
 const MarkingCreateBodySchema = z.object({
   critter_id: z.string().uuid(),
   capture_id: z.string().uuid().optional(),
@@ -108,25 +79,52 @@ const MarkingCreateBodySchema = z.object({
   removed_timestamp: z.coerce.date().optional(),
 });
 
-// Zod schema to validate update user data
+// Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
   nonEmpty,
   "no new data was provided or the format was invalid"
 );
 
-type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
-type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
+// Utility Functions
+
+/**
+ * * Deconstructs values from lookup tables into main body
+ * * Leaves out lk foreign keys and audit columns
+ * @param {MarkingIncludes} marking
+ */
+const formatMarking = (marking: MarkingIncludes): FormattedMarking => ({
+  marking_id: marking.marking_id,
+  critter_id: marking.critter_id,
+  capture_id: marking.capture_id,
+  mortality_id: marking.mortality_id,
+  primary_colour:
+    marking.lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
+  secondary_colour:
+    marking.lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
+  text_colour:
+    marking.lk_colour_marking_text_colour_idTolk_colour?.colour ?? null,
+  marking_type: marking.lk_marking_type?.name ?? null,
+  marking_material: marking.lk_marking_material?.material ?? null,
+  body_location:
+    marking.xref_taxon_marking_body_location?.body_location ?? null,
+  identifier: marking.identifier,
+  frequency: marking.frequency,
+  frequency_unit: marking.frequency_unit,
+  order: marking.order,
+  comment: marking.comment,
+  attached_timestamp: marking.attached_timestamp,
+  removed_timestamp: marking.removed_timestamp,
+});
 
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
   markingIncludes,
-  markingExcludes,
+  formatMarking,
 };
 export type {
   MarkingCreateInput,
   MarkingUpdateInput,
-  MarkingExcludes,
-  MarkingResponseBody,
   MarkingIncludes,
+  FormattedMarking,
 };
