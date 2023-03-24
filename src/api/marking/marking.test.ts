@@ -122,9 +122,10 @@ describe("API: Marking", () => {
 
     describe("updateMarking()", () => {
       it("updates a marking", async () => {
-        const marking = await prisma.marking.create({
+        const marking = formatMarking(await prisma.marking.create({
           data: await newMarking(),
-        });
+          ...markingIncludes
+        }));
         const newData = {
           identifier: `TEST_MARKING_UPDATED${randomInt(99999999)}`,
           comment: "NEW COMMENT",
@@ -144,9 +145,10 @@ describe("API: Marking", () => {
 
     describe("deleteMarking()", () => {
       it("deletes a marking", async () => {
-        const marking = await prisma.marking.create({
+        const marking = formatMarking(await prisma.marking.create({
           data: await newMarking(),
-        });
+          ...markingIncludes
+        }));
         const deletedMarking = await deleteMarking(marking.marking_id);
         const markingCheck = await prisma.marking.findUnique({
           where: { marking_id: marking.marking_id },
