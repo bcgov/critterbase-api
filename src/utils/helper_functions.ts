@@ -91,14 +91,13 @@ const startServer = () => {
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
 const prismaErrorMsg = (
-  err: Error | PrismaClientKnownRequestError,
-  code: string,
-  meta?: Record<string, unknown>
+  err: PrismaClientKnownRequestError
 ): { error: string; status: number } => {
+  const { meta, message, code } = err;
   switch (code) {
     case "P2025":
       return {
-        error: `${meta?.cause ?? err.message}`,
+        error: `${meta?.cause ?? message}`,
         status: 404,
       };
     case "P2002":
@@ -106,7 +105,13 @@ const prismaErrorMsg = (
         error: `unique constraint failed on the fields: ${meta?.target}`,
         status: 400,
       };
+    case "P2003":
+      return {
+        error: `foreign key constraint failed on the field: ${meta?.field_name}`,
+        status: 404,
+      };
   }
+  console.log(`NEW PRISMA ERROR: ${err}`);
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 

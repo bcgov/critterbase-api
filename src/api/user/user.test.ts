@@ -133,11 +133,10 @@ describe("API: User", () => {
         expect(returnedUser).toMatchObject(dummyUser);
       });
 
-      it("returns null when given an invalid system user ID", async () => {
-        const returnedUser = await getUser(randomUUID());
+      it("throws error when given an invalid user ID", async () => {
         expect.assertions(1);
-        expect(returnedUser).toBeNull();
-      });
+        await expect(getUser(randomUUID())).rejects.toThrow();
+      });      
     });
 
     describe("getUserBySystemId()", () => {
@@ -148,11 +147,10 @@ describe("API: User", () => {
         expect(returnedUser).toMatchObject(dummyUser);
       });
 
-      it("returns null when given an invalid system user ID", async () => {
-        const returnedUser = await getUserBySystemId("invalid_system_user_id");
+      it("throws error when given an invalid system user ID", async () => {
         expect.assertions(1);
-        expect(returnedUser).toBeNull();
-      });
+        await expect(getUserBySystemId(randomUUID())).rejects.toThrow();
+      }); 
     });
 
     describe("updateUser()", () => {

@@ -9,14 +9,15 @@ const getAllQualMeasurements = async (): Promise<measurement_qualitative[]> => {
   return qualMeasurements;
 };
 
-const getQualMeasurement = async (
+const getQualMeasurementOrThrow = async (
   id: string
-): Promise<measurement_qualitative | null> => {
-  const qualMeasurement = await prisma.measurement_qualitative.findUnique({
-    where: {
-      measurement_qualitative_id: id,
-    },
-  });
+): Promise<measurement_qualitative> => {
+  const qualMeasurement =
+    await prisma.measurement_qualitative.findUniqueOrThrow({
+      where: {
+        measurement_qualitative_id: id,
+      },
+    });
   return qualMeasurement;
 };
 
@@ -26,8 +27,26 @@ const createQualMeasurement = async (
   return await prisma.measurement_qualitative.create({ data });
 };
 
-// const getQualMeasurementByCritterId = () => {};
+const getQualMeasurementsByCritterId = async (critter_id: string) => {
+  await prisma.critter.findUniqueOrThrow({ where: { critter_id } });
+  return await prisma.measurement_qualitative.findMany({
+    where: {
+      critter_id,
+    },
+  });
+};
 // const updateQualMeasurement = () => {};
-// const deleteQualMeasurement = () => {};
+const deleteQualMeasurement = async (id: string) => {
+  await prisma.measurement_qualitative.delete({
+    where: {
+      measurement_qualitative_id: id,
+    },
+  });
+};
 
-export { getAllQualMeasurements, getQualMeasurement, createQualMeasurement };
+export {
+  getAllQualMeasurements,
+  getQualMeasurementOrThrow,
+  createQualMeasurement,
+  getQualMeasurementsByCritterId,
+};
