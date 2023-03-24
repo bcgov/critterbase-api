@@ -1,15 +1,18 @@
 import { measurement_qualitative } from "@prisma/client";
 import { prisma } from "../../utils/constants";
+import { QualitativeBodySchema } from "./measurement.types";
 import {
   createQualMeasurement,
   getAllQualMeasurements,
-  getQualMeasurement,
+  getQualMeasurementOrThrow,
+  getQualMeasurementsByCritterId,
 } from "./qualitative.service";
 
 let numMeasurements = 0;
 let measurements: any;
 let measurement: any;
 let createdMeasurement: any;
+let measurementByCritter: any;
 
 let createData = {
   critter_id: "2",
@@ -17,14 +20,17 @@ let createData = {
   qualitative_option_id: "string",
   measured_timestamp: "2",
 };
+const badID = "deadbeef-dead-dead-dead-deaddeafbeef";
+
 beforeAll(async () => {
   [measurements, numMeasurements] = await Promise.all([
     getAllQualMeasurements(),
     prisma.measurement_qualitative.count(),
   ]);
-  measurement = await getQualMeasurement(
-    measurements[0].measurement_qualitative_id
-  );
+  [measurement, measurementByCritter] = await Promise.all([
+    getQualMeasurementOrThrow(measurements[0].measurement_qualitative_id),
+    getQualMeasurementsByCritterId(measurements[0].critter_id),
+  ]);
 });
 
 describe("API: Location", () => {
@@ -44,67 +50,48 @@ describe("API: Location", () => {
           }
         });
       });
-      describe("getQualMeasurement()", () => {
-        it("returns qualitative_measurement", () => {
+      describe("getQualMeasurementOrThrow()", () => {
+        it("returns qualitative_measurement with valid id", () => {
           expect(measurement).not.toBeNull();
-          console.log(measurement);
           expect(measurement).toHaveProperty("measurement_qualitative_id");
         });
-        // it("returns object with qualitative_measurement_id or null", async () => {
-        //   if (measurement) {
-        //     expect(measurement).toHaveProperty("measurement_qualitative_id");
-        //   } else {
-        //     expect(measurements).toBe([]);
-        //   }
-        // });
+        it("throws error with an id that does not exist", async () => {
+          getQualMeasurementOrThrow(badID).catch((err) =>
+            expect(err).toBeDefined()
+          );
+        });
+        it("measurement passes validation", async () => {
+          expect(QualitativeBodySchema.safeParse(measurement).success);
+        });
+      });
+      describe("getQualMeasurementsByCritterId()", () => {
+        it("returns array of qualitative_measurements or empty array", () => {
+          expect(measurementByCritter).not.toBeNull();
+          expect(measurements).toBeInstanceOf(Array);
+          if (measurementByCritter?.length) {
+            expect(measurementByCritter[0]).toHaveProperty(
+              "measurement_qualitative_id"
+            );
+          } else {
+            expect(measurementByCritter).toBe([]);
+          }
+        });
+        it("throws error with critter_id that does not exist", async () => {
+          getQualMeasurementsByCritterId(badID).catch((err) =>
+            expect(err).toBeDefined()
+          );
+        });
+      });
+      describe("createQualMeasurement()", async () => {
+        const { critter_id, taxon_measurement_id, qualitative_option_id } =
+          measurement;
+        const created = await createQualMeasurement({
+          critter_id,
+          taxon_measurement_id,
+          qualitative_option_id,
+        });
       });
     });
-
-    // describe("getAllLocations()", () => {
-    //   it("returns array of locations", async () => {
-    //     expect(locations.length).toBeGreaterThan(0);
-    //   });
-    //   it("location has location_id", async () => {
-    //     expect(locations[0]).toHaveProperty("location_id");
-    //   });
-    // });
-    // describe("getLocation()", () => {
-    //   it("returns location", async () => {
-    //     expect(location).not.toBeNull();
-    //   });
-    //   it("location has location_id", async () => {
-    //     expect(locations[0]).toHaveProperty("location_id");
-    //   });
-    //   it("non existing location_id returns null", async () => {
-    //     const notFound = await getLocation(
-    //       "52cfb108-99a5-4631-8385-1b43248ac502"
-    //     );
-    //     expect(notFound).toBeNull();
-    //   });
-    // });
-    // describe("createLocation()", () => {
-    //   it("creates location and returns new location", async () => {
-    //     expect(createdLocation).not.toBeNull();
-    //   });
-    //   it("created location has location_id and new comment", async () => {
-    //     expect(createdLocation).toHaveProperty("location_id");
-    //     expect(createdLocation.location_comment).toBe(COMMENT);
-    //   });
-    // });
-    // describe("updateLocation()", () => {
-    //   it("updates an existing location data and returns new location", async () => {
-    //     expect(updatedLocation).not.toBeNull();
-    //     expect(updatedLocation.location_comment).toBe(UPDATE);
-    //   });
-    //   describe("deleteLocation()", () => {
-    //     it("deletes location", async () => {
-    //       const deletedLocation = await deleteLocation(
-    //         createdLocation.location_id
-    //       );
-    //       expect(deletedLocation.location_id).toBe(createdLocation.location_id);
-    //       expect(deletedLocation).not.toBeNull();
-    //     });
-    //   });
   });
   describe("CLEANUP", () => {
     it("same number of initial measurements", async () => {
