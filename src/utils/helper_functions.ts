@@ -98,7 +98,13 @@ const prismaErrorMsg = (
         error: `unique constraint failed on the fields: ${meta?.target}`,
         status: 400,
       };
+    case "P2003":
+      return {
+        error: `foreign key constraint failed on the field: ${meta?.field_name}`,
+        status: 404,
+      };
   }
+  console.log(`NEW PRISMA ERROR ${err}`);
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 

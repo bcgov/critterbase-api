@@ -28,6 +28,8 @@ const errorLogger = (
   res: Response,
   next: NextFunction
 ) => {
+  console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
+
   if (!IS_TEST) {
     console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
   }
@@ -50,7 +52,7 @@ const errorHandler = (
     const fieldErrors = err.flatten().fieldErrors;
     const formErrors = err.flatten().formErrors;
     if (!Object.keys(fieldErrors).length) {
-      return res.status(400).json({ error: err.format()._errors.join(', ') })
+      return res.status(400).json({ error: err.format()._errors.join(", ") });
     }
     return res.status(400).json({ errors: fieldErrors });
   }
@@ -58,6 +60,7 @@ const errorHandler = (
     return res.status(err.status).json({ error: err.message });
   }
   if (err instanceof PrismaClientKnownRequestError) {
+    console.log(err);
     const { status, error } = prismaErrorMsg(err);
     return res.status(status).json({ error });
   }
