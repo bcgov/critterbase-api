@@ -122,10 +122,12 @@ describe("API: Marking", () => {
 
     describe("updateMarking()", () => {
       it("updates a marking", async () => {
-        const marking = formatMarking(await prisma.marking.create({
-          data: await newMarking(),
-          ...markingIncludes
-        }));
+        const marking = formatMarking(
+          await prisma.marking.create({
+            data: await newMarking(),
+            ...markingIncludes,
+          })
+        );
         const newData = {
           identifier: `TEST_MARKING_UPDATED${randomInt(99999999)}`,
           comment: "NEW COMMENT",
@@ -145,10 +147,12 @@ describe("API: Marking", () => {
 
     describe("deleteMarking()", () => {
       it("deletes a marking", async () => {
-        const marking = formatMarking(await prisma.marking.create({
-          data: await newMarking(),
-          ...markingIncludes
-        }));
+        const marking = formatMarking(
+          await prisma.marking.create({
+            data: await newMarking(),
+            ...markingIncludes,
+          })
+        );
         const deletedMarking = await deleteMarking(marking.marking_id);
         const markingCheck = await prisma.marking.findUnique({
           where: { marking_id: marking.marking_id },
@@ -254,7 +258,9 @@ describe("API: Marking", () => {
 
     describe("PATCH /api/markings/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.patch(`/api/markings/${randomUUID()}`);
+        const res = await request
+          .patch(`/api/markings/${randomUUID()}`)
+          .send({ identifier: dummyMarking.identifier });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });

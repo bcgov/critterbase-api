@@ -25,8 +25,7 @@ export const markingRouter = express.Router();
 markingRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const markings = await getAllMarkings();
-    return res.status(200).json(markings);
+    return res.status(200).json(await getAllMarkings());
   })
 );
 
@@ -61,19 +60,14 @@ markingRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      // validate marking id and confirm that marking exists
-      const { id } = uuidParamsSchema.parse(req.params);
-      res.locals.markingData = await getMarkingById(id);
-      if (!res.locals.markingData) {
-        throw apiError.notFound(strings.marking.notFound);
-      }
+      // validate uuid
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.markingData);
+      return res.status(200).json(await getMarkingById(req.params.id));
     })
   )
   .patch(
