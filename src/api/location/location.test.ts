@@ -4,7 +4,8 @@ import {
   createLocation,
   deleteLocation,
   getAllLocations,
-  getLocation,
+  getLocationOrThrow,
+  LocationBodySchema,
   updateLocation,
 } from "./location.service";
 
@@ -31,7 +32,7 @@ beforeAll(async () => {
     getAllLocations(),
   ]);
   [location, updatedLocation] = await Promise.all([
-    getLocation(createdLocation.location_id),
+    getLocationOrThrow(createdLocation.location_id),
     updateLocation({ location_comment: UPDATE }, createdLocation.location_id),
   ]);
 });
@@ -51,16 +52,19 @@ describe("API: Location", () => {
         expect(locations[0]).toHaveProperty("location_id");
       });
     });
-    describe("getLocation()", () => {
+    describe("getLocationOrThrow()", () => {
       it("returns location", async () => {
         expect(location).not.toBeNull();
       });
       it("location has location_id", async () => {
-        expect(locations[0]).toHaveProperty("location_id");
+        expect(location).toHaveProperty("location_id");
+      });
+      it("location passes validation", async () => {
+        expect(LocationBodySchema.safeParse(location).success);
       });
       it("non existing location_id throws error", async () => {
         try {
-          await getLocation(BAD_ID);
+          await getLocationOrThrow(BAD_ID);
         } catch (err) {
           expect(err).toBeDefined();
         }

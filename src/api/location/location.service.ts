@@ -10,69 +10,43 @@ import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
 import {
-  FormattedLocation,
   LocationBody,
   LocationBodySchema,
-  LocationExcludes,
+  locationExcludeKeys,
+  locationIncludes,
 } from "./location.types";
-
-const excludes: LocationExcludes[] = [
-  "wmu_id",
-  "region_nr_id",
-  "region_env_id",
-  "lk_wildlife_management_unit",
-  "lk_region_nr",
-  "lk_region_env",
-];
-
-// Prisma objects
-const subSelects = {
-  include: {
-    lk_wildlife_management_unit: {
-      select: {
-        wmu_name: true,
-      },
-    },
-    lk_region_nr: {
-      select: {
-        region_nr_name: true,
-      },
-    },
-    lk_region_env: {
-      select: {
-        region_env_name: true,
-      },
-    },
-  },
-};
 
 /**
  ** gets a single location by id
  * @param id string -> critter_id
- * @returns {location}
+ * @returns {Promise<FormattedLocation>}
+ * Note: inferring return type
  */
-const getLocation = async (id: string) => {
+const getLocationOrThrow = async <R>(id: string): Promise<R> => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
     },
-    ...subSelects,
+    include: locationIncludes,
   });
-  return exclude(location, excludes);
+  return exclude(location, locationExcludeKeys) as R;
 };
 /**
  ** gets all locations
- * @returns {locations}
+ * @returns {Promise<FormattedLocation[]>}
+ * Note: inferring return type
  */
-const getAllLocations = async () => {
-  const locations = await prisma.location.findMany({ ...subSelects });
-  return locations.map((l) => exclude(l, excludes));
+const getAllLocations = async <R>(): Promise<R> => {
+  const locations = await prisma.location.findMany({
+    include: locationIncludes,
+  });
+  return locations.map((l) => exclude(l, locationExcludeKeys)) as R;
 };
 
 /**
  ** deletes a location by id
  * @param id string -> critter_id
- * @returns {location}
+ * @returns {Promise<location>}
  */
 const deleteLocation = async (id: string): Promise<location> => {
   return await prisma.location.delete({
@@ -85,7 +59,7 @@ const deleteLocation = async (id: string): Promise<location> => {
 /**
  ** creates new location
  * @param data LocationBody
- * @returns {location}
+ * @returns {Promise<location>}
  */
 const createLocation = async (data: LocationBody): Promise<location> => {
   return await prisma.location.create({ data });
@@ -108,10 +82,11 @@ const updateLocation = async (
     data,
   });
 };
+
 export {
   LocationBodySchema,
   getAllLocations,
-  getLocation,
+  getLocationOrThrow,
   deleteLocation,
   createLocation,
   updateLocation,

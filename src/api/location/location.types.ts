@@ -1,6 +1,6 @@
-import { location } from "@prisma/client";
+import { location, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
+import { getLocationOrThrow } from "./location.service";
 // Zod Schemas
 const LocationBodySchema = z.object({
   latitude: z.number().min(-90).max(90).nullable().optional(),
@@ -13,30 +13,36 @@ const LocationBodySchema = z.object({
   elevation: z.number().min(0).nullable().optional(),
   temperature: z.number().min(-100).max(100).nullable().optional(),
   location_comment: z.string().max(100).nullable().optional(),
-});
+}) satisfies z.ZodType<Prisma.locationCreateInput>;
+
+// Types
+type LocationSubsetType = Prisma.locationGetPayload<
+  typeof commonLocationSelect
+>;
+
+type FormattedLocation = Omit<
+  LocationSubsetType,
+  "lk_region_env" | "lk_region_nr" | "lk_wildlife_management_unit"
+> & {
+  region_env_name: string;
+  lk_region_nr: string;
+  lk_wildlife_management_unit: string;
+};
+//type FormattedLocation = Prisma.PromiseReturnType<typeof getLocationOrThrow>;
 
 type LocationBody = z.infer<typeof LocationBodySchema>;
 
-type LocationExcludes =
-  | "lk_wildlife_management_unit"
-  | "lk_region_nr"
-  | "lk_region_env"
-  | keyof Pick<location, "wmu_id" | "region_nr_id" | "region_env_id">;
+type LocationExclude = (keyof location | keyof Prisma.locationInclude)[];
 
-// type FormattedLocation = Omit<
-//   location & {
-//     lk_wildlife_management_unit: {
-//       wmu_name: string;
-//     } | null;
-//     lk_region_nr: {
-//       region_nr_name: string;
-//     } | null;
-//     lk_region_env: {
-//       region_env_name: string;
-//     } | null;
-//   },
-//   LocationExcludes
-// > | null;
+// Constants
+const locationExcludeKeys: LocationExclude = [
+  "wmu_id",
+  "region_nr_id",
+  "region_env_id",
+  "lk_wildlife_management_unit",
+  "lk_region_nr",
+  "lk_region_env",
+];
 
 const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
   select: {
@@ -60,16 +66,22 @@ const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
   },
 });
 
-type LocationSubsetType = Prisma.locationGetPayload<
-  typeof commonLocationSelect
->;
-type FormattedLocation = Omit<
-  LocationSubsetType,
-  "lk_region_env" | "lk_region_nr" | "lk_wildlife_management_unit"
-> & {
-  region_env_name: string;
-  lk_region_nr: string;
-  lk_wildlife_management_unit: string;
+const locationIncludes: Prisma.locationInclude = {
+  lk_wildlife_management_unit: {
+    select: {
+      wmu_name: true,
+    },
+  },
+  lk_region_nr: {
+    select: {
+      region_nr_name: true,
+    },
+  },
+  lk_region_env: {
+    select: {
+      region_env_name: true,
+    },
+  },
 };
 
 export type { LocationSubsetType, FormattedLocation };
@@ -77,5 +89,6 @@ export {
   commonLocationSelect,
   LocationBody,
   LocationBodySchema,
-  LocationExcludes,
+  locationIncludes,
+  locationExcludeKeys,
 };
