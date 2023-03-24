@@ -23,8 +23,7 @@ export const collectionUnitRouter = express.Router();
 collectionUnitRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const collectionUnits = await getAllCollectionUnits();
-    return res.status(200).json(collectionUnits);
+    return res.status(200).json(await getAllCollectionUnits());
   })
 );
 
@@ -42,7 +41,7 @@ collectionUnitRouter.post(
 
 collectionUnitRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
-    // validate collectionUnit id and confirm that collectionUnit exists
+    // validate uuid
     const { id } = uuidParamsSchema.parse(req.params);
     const collectionUnits = await getCollectionUnitsByCritterId(id);
     if (!collectionUnits.length) {
@@ -59,19 +58,14 @@ collectionUnitRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      // validate collectionUnit id and confirm that collectionUnit exists
-      const { id } = uuidParamsSchema.parse(req.params);
-      res.locals.collectionUnitData = await getCollectionUnitById(id);
-      if (!res.locals.collectionUnitData) {
-        throw apiError.notFound(strings.marking.notFound);
-      }
+      // validate uuid
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.collectionUnitData);
+      return res.status(200).json(await getCollectionUnitById(req.params.id));
     })
   )
   .patch(

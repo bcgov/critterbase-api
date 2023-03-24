@@ -18,8 +18,8 @@ const getAllCollectionUnits = async (): Promise<critter_collection_unit[]> => {
  */
 const getCollectionUnitById = async (
   critter_collection_unit_id: string
-): Promise<critter_collection_unit | null> => {
-  return await prisma.critter_collection_unit.findUnique({
+): Promise<critter_collection_unit> => {
+  return await prisma.critter_collection_unit.findUniqueOrThrow({
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },

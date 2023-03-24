@@ -292,7 +292,7 @@ describe("API: Collection Unit", () => {
       it("returns status 404 when id does not exist", async () => {
         const res = await request.patch(
           `/api/collection_units/${randomUUID()}`
-        );
+        ).send({ critter_id: dummyCritter.critter_id });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
