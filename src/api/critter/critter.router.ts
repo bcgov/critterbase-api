@@ -12,7 +12,7 @@ export const critterRouter = express.Router();
 /**
  ** Critter Router Home
  */
-critterRouter.get(
+ critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const allCritters = await getAllCritters();
@@ -23,7 +23,7 @@ critterRouter.get(
 /**
  ** Create new critter
  */
-critterRouter.post(
+ critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterCreateBodySchema.parse(req.body);
