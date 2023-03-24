@@ -49,6 +49,9 @@ const errorHandler = (
     //Removed formErrors from object
     const fieldErrors = err.flatten().fieldErrors;
     const formErrors = err.flatten().formErrors;
+    if (!Object.keys(fieldErrors).length) {
+      return res.status(400).json({ error: err.format()._errors.join(', ') })
+    }
     return res.status(400).json({ errors: fieldErrors });
   }
   if (err instanceof apiError) {
