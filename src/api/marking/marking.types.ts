@@ -1,18 +1,15 @@
 import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z } from "zod";
+import { getAuditColumns } from "../../utils/helper_functions";
+import { AuditColumns } from "../../utils/types";
 import { nonEmpty } from "../../utils/zod_schemas";
 
 // Types
 type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
-type FormattedMarking = {
-  marking_id: string;
-  critter_id: string;
-  capture_id: string | null;
-  mortality_id: string | null;
+type SimpleFormattedMarking = {
   primary_colour: string | null;
   secondary_colour: string | null;
-  text_colour: string | null;
   marking_type: string | null;
   marking_material: string | null;
   body_location: string | null;
@@ -20,10 +17,18 @@ type FormattedMarking = {
   frequency: number | null;
   frequency_unit: frequency_unit | null;
   order: number | null;
+};
+
+interface FormattedMarking extends SimpleFormattedMarking, AuditColumns {
+  marking_id: string;
+  critter_id: string;
+  capture_id: string | null;
+  mortality_id: string | null;
+  text_colour: string | null;
   comment: string | null;
   attached_timestamp: Date;
   removed_timestamp: Date | null;
-};
+}
 
 type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
@@ -114,6 +119,7 @@ const formatMarking = (marking: MarkingIncludes): FormattedMarking => ({
   comment: marking.comment,
   attached_timestamp: marking.attached_timestamp,
   removed_timestamp: marking.removed_timestamp,
+  ...getAuditColumns(marking),
 });
 
 export {

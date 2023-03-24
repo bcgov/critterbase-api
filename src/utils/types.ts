@@ -64,8 +64,8 @@ class apiError extends Error {
 }
 
 type DateAuditColumns = {
-  created_at: Date;
-  updated_at: Date;
+  create_timestamp: Date;
+  update_timestamp: Date;
 };
 
 type UserAuditColumns = {

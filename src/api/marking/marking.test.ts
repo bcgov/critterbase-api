@@ -9,16 +9,23 @@ import {
 } from "./marking.service";
 import type { Prisma, marking } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
+import {
+  formatMarking,
+  FormattedMarking,
+  MarkingCreateInput,
+  markingIncludes,
+  MarkingIncludes,
+} from "./marking.types";
 
-let dummyMarking: marking;
-let dummyMarkingInput: Prisma.markingUncheckedCreateInput;
+let dummyMarking: FormattedMarking;
+let dummyMarkingInput: MarkingCreateInput;
 let dummyMarkingKeys: string[];
 
 /**
  * * Creates a new marking object that references an existing critter and marking location
  * @return {*}  {Promise<Prisma.markingCreateInput>}
  */
-async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
+async function newMarking(): Promise<MarkingCreateInput> {
   const dummyCritterId: string | undefined = (
     await prisma.marking.findFirst({
       select: {
@@ -36,12 +43,12 @@ async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
   )?.xref_taxon_marking_body_location.taxon_marking_body_location_id;
   if (!dummyTaxonMarkingId)
     throw Error("Could not get taxon_marking_body_location_id for dummy.");
-  const dummyMarking: Prisma.markingUncheckedCreateInput = {
+  const dummyMarking: MarkingCreateInput = {
     critter_id: dummyCritterId,
     taxon_marking_body_location_id: dummyTaxonMarkingId,
     identifier: `TEST_MARKING_${randomInt(99999999)}`,
     frequency: randomInt(99999999),
-    frequency_unit: 'KHz',
+    frequency_unit: "KHz",
     attached_timestamp: new Date(randomInt(999999)),
   };
   return dummyMarking;
@@ -50,7 +57,9 @@ async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
 beforeAll(async () => {
   // Sets a global dummy marking to reduce complexity on similar tests
   dummyMarkingInput = await newMarking();
-  dummyMarking = await prisma.marking.create({ data: dummyMarkingInput });
+  dummyMarking = formatMarking(
+    await prisma.marking.create({ data: dummyMarkingInput, ...markingIncludes })
+  );
   dummyMarkingKeys = Object.keys(dummyMarking);
 });
 
@@ -60,11 +69,8 @@ describe("API: Marking", () => {
       it("creates a new marking", async () => {
         const newMarkingInput = await newMarking();
         const marking = await createMarking(newMarkingInput);
-        expect.assertions(3);
+        expect.assertions(2);
         expect(marking.critter_id).toBe(newMarkingInput.critter_id);
-        expect(marking.taxon_marking_body_location_id).toBe(
-          newMarkingInput.taxon_marking_body_location_id
-        );
         expect(marking.identifier).toBe(newMarkingInput.identifier);
       });
     });
@@ -301,9 +307,7 @@ describe("API: Marking", () => {
         const marking = await prisma.marking.create({
           data: await newMarking(),
         });
-        const res = await request.delete(
-          `/api/markings/${marking.marking_id}`
-        );
+        const res = await request.delete(`/api/markings/${marking.marking_id}`);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
