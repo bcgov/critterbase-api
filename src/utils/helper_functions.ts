@@ -2,8 +2,13 @@ import { app } from "../server";
 import { IS_DEV, IS_PROD, PORT, strings } from "./constants";
 import { apiError, AuditColumns } from "./types";
 import { z } from "zod";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
-function exclude<T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> {
+const exclude = <T, Key extends keyof T>(
+  obj: T | null,
+  keys: Key[]
+): Omit<T, Key> | null => {
+  if (!obj) return null;
   for (let key of keys) {
     if (obj) {
       if (typeof obj[key] === "object") {
@@ -14,7 +19,16 @@ function exclude<T, Key extends keyof T>(obj: T, keys: Key[]): Omit<T, Key> {
     }
   }
   return obj;
-}
+};
+
+const unpackObject = <T, Key extends keyof T>(obj: T, key: Key) => {
+  if (!obj) return;
+  if (typeof obj[key] === "object") {
+    Object.assign(obj, obj[key]);
+    delete obj[key];
+  }
+  return obj;
+};
 
 /**
  * * Checks if a provided string value is a uuid
@@ -61,4 +75,31 @@ const startServer = () => {
   }
 };
 
-export { isUUID, exclude, isValidObject, startServer };
+/**
+ ** Formats a prisma error messsage based on the prisma error code
+ * @param code string
+ * @param meta Record<string, unknown> | undefined -> unknown object shape
+ * @returns string -> formatted error message
+ * Note: as unsupported error messages occur, add support using this function
+ * https://www.prisma.io/docs/reference/api-reference/error-reference
+ */
+const prismaErrorMsg = (
+  err: PrismaClientKnownRequestError
+): { error: string; status: number } => {
+  const { meta, message, code } = err;
+  switch (code) {
+    case "P2025":
+      return {
+        error: `${meta?.cause ?? message}`,
+        status: 404,
+      };
+    case "P2002":
+      return {
+        error: `unique constraint failed on the fields: ${meta?.target}`,
+        status: 400,
+      };
+  }
+  return { error: `unsupported prisma error: "${code}"`, status: 400 };
+};
+
+export { isUUID, exclude, isValidObject, startServer, prismaErrorMsg };

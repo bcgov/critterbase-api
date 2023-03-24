@@ -3,18 +3,18 @@ import {
   lk_region_nr,
   lk_wildlife_management_unit,
   location,
+  Prisma,
 } from "@prisma/client";
 
 import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
-
-// Types
-type LocationExcludes =
-  | keyof location
-  | "lk_region_env"
-  | "lk_region_nr"
-  | "lk_wildlife_management_unit";
+import {
+  FormattedLocation,
+  LocationBody,
+  LocationBodySchema,
+  LocationExcludes,
+} from "./location.types";
 
 const excludes: LocationExcludes[] = [
   "wmu_id",
@@ -24,28 +24,6 @@ const excludes: LocationExcludes[] = [
   "lk_region_nr",
   "lk_region_env",
 ];
-
-type LocationCreate = z.infer<typeof LocationCreateBodySchema>;
-
-type LocationUpdate = z.infer<typeof LocationUpdateBodySchema>;
-
-// Zod Schemas
-const LocationCreateBodySchema = z.object({
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
-  coordinate_uncertainty: z.number().optional(),
-  coordinate_uncertainty_unit: z.enum(["m"]).default("m"),
-  wmu_id: z.string().uuid().optional(),
-  region_nr_id: z.string().uuid().optional(),
-  region_env_id: z.string().uuid().optional(),
-  elevation: z.number().min(0).optional(),
-  temperature: z.number().min(-100).max(100).optional(),
-  location_comment: z.string().max(100).optional(),
-});
-
-const LocationUpdateBodySchema = LocationCreateBodySchema.extend({
-  location_id: z.string().uuid(),
-});
 
 // Prisma objects
 const subSelects = {
@@ -68,21 +46,34 @@ const subSelects = {
   },
 };
 
+/**
+ ** gets a single location by id
+ * @param id string -> critter_id
+ * @returns {location}
+ */
 const getLocation = async (id: string) => {
-  const location = await prisma.location.findUnique({
+  const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
     },
     ...subSelects,
   });
-  return location && exclude(location, excludes);
+  return exclude(location, excludes);
 };
-
+/**
+ ** gets all locations
+ * @returns {locations}
+ */
 const getAllLocations = async () => {
   const locations = await prisma.location.findMany({ ...subSelects });
-  return locations?.length && locations.map((l) => exclude(l, excludes));
+  return locations.map((l) => exclude(l, excludes));
 };
 
+/**
+ ** deletes a location by id
+ * @param id string -> critter_id
+ * @returns {location}
+ */
 const deleteLocation = async (id: string): Promise<location> => {
   return await prisma.location.delete({
     where: {
@@ -91,16 +82,34 @@ const deleteLocation = async (id: string): Promise<location> => {
   });
 };
 
-const createLocation = async (data: LocationCreate): Promise<location> => {
+/**
+ ** creates new location
+ * @param data LocationBody
+ * @returns {location}
+ */
+const createLocation = async (data: LocationBody): Promise<location> => {
   return await prisma.location.create({ data });
 };
 
-const updateLocation = async (data: LocationUpdate): Promise<location> => {
-  return await prisma.location.create({ data });
+/**
+ ** updates existing location by id
+ * @param data LocationBody
+ * @param id string -> critter_id
+ * @returns {Promise<Location>}
+ */
+const updateLocation = async (
+  data: LocationBody,
+  id: string
+): Promise<location> => {
+  return await prisma.location.update({
+    where: {
+      location_id: id,
+    },
+    data,
+  });
 };
 export {
-  LocationCreateBodySchema,
-  LocationUpdateBodySchema,
+  LocationBodySchema,
   getAllLocations,
   getLocation,
   deleteLocation,

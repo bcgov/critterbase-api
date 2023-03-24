@@ -1,6 +1,11 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {
+  NotFoundError,
+  PrismaClientKnownRequestError,
+} from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { IS_TEST } from "./constants";
+import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
 /**
@@ -23,11 +28,10 @@ const errorLogger = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(
-    `🛑 ${req.method}${" " + err?.status} ${
-      req.originalUrl
-    } -> ${err.toString()}`
-  );
+  if (!IS_TEST) {
+    console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
+  }
+
   next(err);
 };
 
@@ -54,7 +58,8 @@ const errorHandler = (
     return res.status(err.status).json({ error: err.message });
   }
   if (err instanceof PrismaClientKnownRequestError) {
-    return res.status(400).json(err?.message);
+    const { status, error } = prismaErrorMsg(err);
+    return res.status(status).json({ error });
   }
   if (err instanceof Error) {
     return res.status(400).json(err?.message ?? "unknown error");

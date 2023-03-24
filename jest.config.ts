@@ -5,7 +5,7 @@
 
 export default {
   // All imported modules in your tests should be mocked automatically
-  // automock: false,
+  //automock: false,
 
   // Stop running tests after `n` failures
   // bail: 0,
@@ -26,7 +26,12 @@ export default {
   coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ["/node_modules/", "/src/server.ts"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/src/server.ts",
+    "/src/utils/constants.ts",
+    "/src/utils/types.ts",
+  ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
@@ -128,7 +133,7 @@ export default {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  //setupFiles: ["<rootDir>/jest.setup.ts"],
+  //setupFiles: ["<rootDir>/utils/constants.ts"],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   //setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
@@ -173,7 +178,7 @@ export default {
   // ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
-  // unmockedModulePathPatterns: undefined,
+  //unmockedModulePathPatterns: "utils/constants",
 
   // Indicates whether each individual test should be reported during the run
   verbose: true,

@@ -10,6 +10,7 @@ import {
 } from "./user.service";
 import type { Prisma, user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
+import { UserCreateInput, UserUpdateInput } from "./user.types";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const uuidRegex =
@@ -52,7 +53,7 @@ function isUser(user: any): user is user {
 /**
  * * Returns a randomly generated user that can be insterted to the database
  */
-function newUser(): Prisma.userCreateInput {
+function newUser(): UserCreateInput {
   const num = randomInt(99999999);
   return {
     system_user_id: num.toString(),
@@ -132,11 +133,10 @@ describe("API: User", () => {
         expect(returnedUser).toMatchObject(dummyUser);
       });
 
-      it("returns null when given an invalid system user ID", async () => {
-        const returnedUser = await getUser(randomUUID());
+      it("throws error when given an invalid user ID", async () => {
         expect.assertions(1);
-        expect(returnedUser).toBeNull();
-      });
+        await expect(getUser(randomUUID())).rejects.toThrow();
+      });      
     });
 
     describe("getUserBySystemId()", () => {
@@ -147,17 +147,16 @@ describe("API: User", () => {
         expect(returnedUser).toMatchObject(dummyUser);
       });
 
-      it("returns null when given an invalid system user ID", async () => {
-        const returnedUser = await getUserBySystemId("invalid_system_user_id");
+      it("throws error when given an invalid system user ID", async () => {
         expect.assertions(1);
-        expect(returnedUser).toBeNull();
-      });
+        await expect(getUserBySystemId(randomUUID())).rejects.toThrow();
+      }); 
     });
 
     describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
         const createdUser = await prisma.user.create({ data: newUser() });
-        const updateData: Prisma.userUpdateInput = {
+        const updateData: UserUpdateInput = {
           system_name: createdUser.system_name + "_UPDATED",
         };
         const updatedUser = await updateUser(createdUser.user_id, updateData);
@@ -286,7 +285,9 @@ describe("API: User", () => {
 
     describe("PATCH /api/users/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.patch(`/api/users/${randomUUID()}`);
+        const res = await request
+          .patch(`/api/users/${randomUUID()}`)
+          .send({ system_name: `${randomInt(99999999)}` });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
