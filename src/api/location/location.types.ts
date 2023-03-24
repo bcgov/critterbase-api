@@ -18,29 +18,10 @@ const LocationBodySchema = z.object({
 // Types
 type LocationBody = z.infer<typeof LocationBodySchema>;
 
-type LocationExcludes =
-  | "lk_wildlife_management_unit"
-  | "lk_region_nr"
-  | "lk_region_env"
-  | keyof Pick<location, "wmu_id" | "region_nr_id" | "region_env_id">;
-
-type FormattedLocation = Omit<
-  location & {
-    lk_wildlife_management_unit: {
-      wmu_name: string;
-    } | null;
-    lk_region_nr: {
-      region_nr_name: string;
-    } | null;
-    lk_region_env: {
-      region_env_name: string;
-    } | null;
-  },
-  LocationExcludes
-> | null;
+type LocationExclude = (keyof location | keyof Prisma.locationInclude)[];
 
 // Constants
-const locationExcludeKeys: LocationExcludes[] = [
+const locationExcludeKeys: LocationExclude = [
   "wmu_id",
   "region_nr_id",
   "region_env_id",
@@ -49,30 +30,27 @@ const locationExcludeKeys: LocationExcludes[] = [
   "lk_region_env",
 ];
 
-const locationIncludes = {
-  include: {
-    lk_wildlife_management_unit: {
-      select: {
-        wmu_name: true,
-      },
+const locationIncludes: Prisma.locationInclude = {
+  lk_wildlife_management_unit: {
+    select: {
+      wmu_name: true,
     },
-    lk_region_nr: {
-      select: {
-        region_nr_name: true,
-      },
+  },
+  lk_region_nr: {
+    select: {
+      region_nr_name: true,
     },
-    lk_region_env: {
-      select: {
-        region_env_name: true,
-      },
+  },
+  lk_region_env: {
+    select: {
+      region_env_name: true,
     },
   },
 };
+
 export {
   LocationBody,
   LocationBodySchema,
-  LocationExcludes,
-  FormattedLocation,
   locationIncludes,
   locationExcludeKeys,
 };

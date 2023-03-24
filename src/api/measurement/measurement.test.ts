@@ -82,6 +82,15 @@ describe("API: Location", () => {
           );
         });
       });
+      describe("createQualMeasurement()", async () => {
+        const { critter_id, taxon_measurement_id, qualitative_option_id } =
+          measurement;
+        const created = await createQualMeasurement({
+          critter_id,
+          taxon_measurement_id,
+          qualitative_option_id,
+        });
+      });
     });
   });
   describe("CLEANUP", () => {

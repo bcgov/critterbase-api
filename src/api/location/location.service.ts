@@ -10,11 +10,9 @@ import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
 import {
-  FormattedLocation,
   LocationBody,
   LocationBodySchema,
   locationExcludeKeys,
-  LocationExcludes,
   locationIncludes,
 } from "./location.types";
 
@@ -22,23 +20,27 @@ import {
  ** gets a single location by id
  * @param id string -> critter_id
  * @returns {Promise<FormattedLocation>}
+ * Note: inferring return type
  */
-const getLocationOrThrow = async (id: string): Promise<FormattedLocation> => {
+const getLocationOrThrow = async <R>(id: string): Promise<R> => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
     },
-    ...locationIncludes,
+    include: locationIncludes,
   });
-  return exclude(location, locationExcludeKeys);
+  return exclude(location, locationExcludeKeys) as R;
 };
 /**
  ** gets all locations
  * @returns {Promise<FormattedLocation[]>}
+ * Note: inferring return type
  */
-const getAllLocations = async (): Promise<FormattedLocation[]> => {
-  const locations = await prisma.location.findMany({ ...locationIncludes });
-  return locations.map((l) => exclude(l, locationExcludeKeys));
+const getAllLocations = async <R>(): Promise<R> => {
+  const locations = await prisma.location.findMany({
+    include: locationIncludes,
+  });
+  return locations.map((l) => exclude(l, locationExcludeKeys)) as R;
 };
 
 /**
