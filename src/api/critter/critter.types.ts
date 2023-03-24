@@ -1,5 +1,6 @@
 import { capture, critter, frequency_unit, measurement_qualitative, measurement_quantitative, Prisma, sex, xref_taxon_measurement_qualitative, xref_taxon_measurement_qualitative_option, xref_taxon_measurement_quantitative } from "@prisma/client";
 import { z } from 'zod'
+import { commonLocationSelect, FormattedLocation } from "../location/location.types";
 
 const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement_quantitativeArgs>()({
     select: {
@@ -68,25 +69,10 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     select: {
       capture_id: true,
       location_capture_capture_location_idTolocation: {
-        select: {
-          latitude: true,
-          longitude: true,
-          lk_region_env: {
-            select: {
-              region_env_name: true
-            }
-          },
-          lk_region_nr: {
-            select: {
-              region_nr_name: true
-            }
-          },
-          lk_wildlife_management_unit: {
-            select: {
-              wmu_name: true
-            }
-          }
-        }
+        ...commonLocationSelect
+      },
+      location_capture_release_location_idTolocation: {
+        ...commonLocationSelect
       },
       capture_timestamp: true,
       release_timestamp: true,
@@ -99,25 +85,7 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     select: {
       mortality_id: true,
       location: {
-        select: {
-          latitude: true,
-          longitude: true,
-          lk_region_env: {
-            select: {
-              region_env_name: true
-            }
-          },
-          lk_region_nr: {
-            select: {
-              region_nr_name: true
-            }
-          },
-          lk_wildlife_management_unit: {
-            select: {
-              wmu_name: true
-            }
-          }
-        }
+        ...commonLocationSelect
       },
       mortality_timestamp: true,
       mortality_comment: true
@@ -154,12 +122,12 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
   }
 
   type FormattedCapture = 
-    Omit<CaptureSubsetType, 'location_capture_caputre_location_idTolocation' | 'lk_region_env' | 'lk_region_nr' | 'lk_wildlife_management_unit'> 
-      & {region_env_name?: string | undefined, region_nr_name?: string | undefined, wmu_name?: string | undefined}
+    Omit<CaptureSubsetType, 'location_capture_capture_location_idTolocation' | 'location_capture_release_location_idTolocation' | 'lk_region_env' | 'lk_region_nr' | 'lk_wildlife_management_unit'> 
+      & {capture_location?: FormattedLocation, release_location?: FormattedLocation}
 
   type FormattedMortality = 
     Omit<MortalitySubsetType, 'location' | 'lk_region_env' | 'lk_region_nr' | 'lk_wildlife_management_unit'>
-      & {region_env_name?: string | undefined, region_nr_name?: string | undefined, wmu_name?: string | undefined}
+      & {mortality_location?: FormattedLocation}
   
   type FormattedQuantitativeMeasurement = 
     Pick<measurement_quantitative, 'measured_timestamp' | 'value'> 
