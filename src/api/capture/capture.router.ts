@@ -1,11 +1,20 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { createCapture, deleteCapture, getAllCaptures, getCaptureByCritter, getCaptureById, updateCapture } from "./capture.service";
+import {
+  createCapture,
+  deleteCapture,
+  getAllCaptures,
+  getCaptureByCritter,
+  getCaptureById,
+  updateCapture,
+} from "./capture.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
-import { LocationCreateBodySchema, LocationUpdateBodySchema } from "../location/location.service";
-import { CaptureCreateBodySchema, CaptureUpdateBodySchema } from "./capture.types";
+import {
+  CaptureCreateBodySchema,
+  CaptureUpdateBodySchema,
+} from "./capture.types";
 import { uuidParamsSchema } from "../../utils/zod_schemas";
 
 export const captureRouter = express.Router();
@@ -13,7 +22,7 @@ export const captureRouter = express.Router();
 /**
  ** Critter Router Home
  */
- captureRouter.get(
+captureRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const allCritters = await getAllCaptures();
@@ -24,7 +33,7 @@ export const captureRouter = express.Router();
 /**
  ** Create new critter
  */
- captureRouter.post(
+captureRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CaptureCreateBodySchema.parse(req.body);
@@ -40,7 +49,7 @@ captureRouter.get(
     const result = await getCaptureByCritter(parsed.id);
     res.status(200).send(result);
   })
-)
+);
 
 /**
  * * All critter_id related routes
@@ -49,7 +58,7 @@ captureRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      uuidParamsSchema.parse(req.params)
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )

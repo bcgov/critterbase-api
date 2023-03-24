@@ -51,7 +51,7 @@ const subSelects = {
  * @param id string -> critter_id
  * @returns {location}
  */
-const getLocation = async (id: string): Promise<FormattedLocation> => {
+const getLocation = async (id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
@@ -64,7 +64,7 @@ const getLocation = async (id: string): Promise<FormattedLocation> => {
  ** gets all locations
  * @returns {locations}
  */
-const getAllLocations = async (): Promise<FormattedLocation[]> => {
+const getAllLocations = async () => {
   const locations = await prisma.location.findMany({ ...subSelects });
   return locations.map((l) => exclude(l, excludes));
 };
