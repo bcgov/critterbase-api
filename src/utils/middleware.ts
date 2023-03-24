@@ -28,8 +28,6 @@ const errorLogger = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
-
   if (!IS_TEST) {
     console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
   }
