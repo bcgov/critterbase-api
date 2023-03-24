@@ -8,7 +8,7 @@ import {
   createLocation,
   deleteLocation,
   getAllLocations,
-  getLocation,
+  getLocationOrThrow,
   LocationBodySchema,
   updateLocation,
 } from "./location.service";
@@ -51,10 +51,7 @@ locationRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const location = await getLocation(req.params.id);
-      if (!location) {
-        throw apiError.notFound(strings.location.notFound);
-      }
+      const location = await getLocationOrThrow(req.params.id);
       return res.status(200).json(location);
     })
   )

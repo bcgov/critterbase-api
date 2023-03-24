@@ -51,7 +51,7 @@ const subSelects = {
  * @param id string -> critter_id
  * @returns {location}
  */
-const getLocation = async (id: string): Promise<FormattedLocation> => {
+const getLocationOrThrow = async (id: string): Promise<FormattedLocation> => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
@@ -111,7 +111,7 @@ const updateLocation = async (
 export {
   LocationBodySchema,
   getAllLocations,
-  getLocation,
+  getLocationOrThrow,
   deleteLocation,
   createLocation,
   updateLocation,
