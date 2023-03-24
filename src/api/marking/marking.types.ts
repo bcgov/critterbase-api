@@ -49,7 +49,7 @@ const markingIncludes = {
     lk_colour_marking_text_colour_idTolk_colour: {
       select: { colour: true },
     },
-  },
+  } satisfies Prisma.markingInclude,
 };
 
 // Validate incoming request body for create marking
@@ -77,13 +77,13 @@ const MarkingCreateBodySchema = z.object({
   comment: z.string().optional(),
   attached_timestamp: z.coerce.date().optional(),
   removed_timestamp: z.coerce.date().optional(),
-});
+}) satisfies z.ZodType<Prisma.markingUncheckedCreateInput>;
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
   nonEmpty,
   "no new data was provided or the format was invalid"
-);
+) satisfies z.ZodType<Prisma.markingUpdateInput>;
 
 // Utility Functions
 
