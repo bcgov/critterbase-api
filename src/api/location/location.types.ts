@@ -1,5 +1,6 @@
-import { location } from "@prisma/client";
+import { location, Prisma } from "@prisma/client";
 import { z } from "zod";
+
 // Zod Schemas
 const LocationBodySchema = z.object({
   latitude: z.number().min(-90).max(90).nullable().optional(),
@@ -12,8 +13,9 @@ const LocationBodySchema = z.object({
   elevation: z.number().min(0).nullable().optional(),
   temperature: z.number().min(-100).max(100).nullable().optional(),
   location_comment: z.string().max(100).nullable().optional(),
-});
+}) satisfies z.ZodType<Prisma.locationCreateInput>;
 
+// Types
 type LocationBody = z.infer<typeof LocationBodySchema>;
 
 type LocationExcludes =
@@ -37,9 +39,40 @@ type FormattedLocation = Omit<
   LocationExcludes
 > | null;
 
+// Constants
+const locationExcludeKeys: LocationExcludes[] = [
+  "wmu_id",
+  "region_nr_id",
+  "region_env_id",
+  "lk_wildlife_management_unit",
+  "lk_region_nr",
+  "lk_region_env",
+];
+
+const locationIncludes = {
+  include: {
+    lk_wildlife_management_unit: {
+      select: {
+        wmu_name: true,
+      },
+    },
+    lk_region_nr: {
+      select: {
+        region_nr_name: true,
+      },
+    },
+    lk_region_env: {
+      select: {
+        region_env_name: true,
+      },
+    },
+  },
+};
 export {
   LocationBody,
   LocationBodySchema,
   LocationExcludes,
   FormattedLocation,
+  locationIncludes,
+  locationExcludeKeys,
 };

@@ -1,5 +1,6 @@
 import { measurement_qualitative } from "@prisma/client";
 import { prisma } from "../../utils/constants";
+import { QualitativeBodySchema } from "./measurement.types";
 import {
   createQualMeasurement,
   getAllQualMeasurements,
@@ -58,6 +59,9 @@ describe("API: Location", () => {
           getQualMeasurementOrThrow(badID).catch((err) =>
             expect(err).toBeDefined()
           );
+        });
+        it("measurement passes validation", async () => {
+          expect(QualitativeBodySchema.safeParse(measurement).success);
         });
       });
       describe("getQualMeasurementsByCritterId()", () => {

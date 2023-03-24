@@ -58,8 +58,8 @@ locationRouter
   .patch(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      LocationBodySchema.parse(req.body);
-      const location = await updateLocation(req.body, id);
+      const updateBody = LocationBodySchema.parse(req.body);
+      const location = await updateLocation(updateBody, id);
       res.status(201).json(location);
     })
   )
