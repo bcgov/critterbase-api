@@ -37,8 +37,8 @@ const getUsers = async (): Promise<user[]> => {
  * Gets a user by their user_id
  * @param {string} user_id - The uuid / primary key for the user
  */
-const getUser = async (user_id: string): Promise<user | null> => {
-  const user = await prisma.user.findUnique({
+const getUser = async (user_id: string): Promise<user> => {
+  const user = await prisma.user.findUniqueOrThrow({
     where: {
       user_id: user_id,
     },
@@ -52,8 +52,8 @@ const getUser = async (user_id: string): Promise<user | null> => {
  */
 const getUserBySystemId = async (
   system_user_id: string
-): Promise<user | null> => {
-  const user = await prisma.user.findUnique({
+): Promise<user> => {
+  const user = await prisma.user.findUniqueOrThrow({
     where: {
       system_user_id: system_user_id,
     },
