@@ -6,6 +6,15 @@ import { nonEmpty } from "../../utils/zod_schemas";
 type CollectionUnitCreateInput = z.infer<typeof CollectionUnitCreateBodySchema>;
 type CollectionUnitUpdateInput = z.infer<typeof CollectionUnitUpdateBodySchema>;
 
+// Constants
+const collectionUnitIncludes = {
+  include: {
+    xref_collection_unit: {
+      select: { unit_name: true, description: true },
+    },
+  },
+};
+
 // Zod schema to validate create collection unit data
 const CollectionUnitCreateBodySchema = z.object({
   critter_id: z.string().uuid(),
@@ -19,5 +28,5 @@ const CollectionUnitUpdateBodySchema =
     "no new data was provided or the format was invalid"
   ) satisfies z.ZodType<Prisma.critter_collection_unitUncheckedUpdateInput>;
 
-export { CollectionUnitCreateBodySchema, CollectionUnitUpdateBodySchema };
+export { collectionUnitIncludes, CollectionUnitCreateBodySchema, CollectionUnitUpdateBodySchema };
 export type { CollectionUnitCreateInput, CollectionUnitUpdateInput };

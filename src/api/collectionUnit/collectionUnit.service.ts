@@ -1,6 +1,10 @@
 import { prisma } from "../../utils/constants";
 import type { critter_collection_unit, Prisma } from "@prisma/client";
-import { CollectionUnitCreateInput, CollectionUnitUpdateInput } from "./collectionUnit.types";
+import {
+  CollectionUnitCreateInput,
+  collectionUnitIncludes,
+  CollectionUnitUpdateInput,
+} from "./collectionUnit.types";
 /**
  * * Returns all existing critter collection units from the database
  */
@@ -20,6 +24,7 @@ const getCollectionUnitById = async (
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },
+    ...collectionUnitIncludes,
   });
 };
 
