@@ -45,6 +45,7 @@ const getCollectionUnitsByCritterId = async (
     where: {
       critter_id: critter_id,
     },
+    ...collectionUnitIncludes,
   });
   return array(collectionUnitResponseSchema).parse(res);
 };
