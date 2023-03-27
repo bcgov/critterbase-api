@@ -1,31 +1,37 @@
 import { prisma } from "../../utils/constants";
-import type { critter_collection_unit, Prisma } from "@prisma/client";
 import {
   CollectionUnitCreateInput,
   collectionUnitIncludes,
+  CollectionUnitResponse,
+  collectionUnitResponseSchema,
   CollectionUnitUpdateInput,
 } from "./collectionUnit.types";
+import { array } from "zod";
 /**
  * * Returns all existing critter collection units from the database
  */
-const getAllCollectionUnits = async (): Promise<critter_collection_unit[]> => {
-  return await prisma.critter_collection_unit.findMany();
+const getAllCollectionUnits = async (): Promise<CollectionUnitResponse[]> => {
+  const res = await prisma.critter_collection_unit.findMany(
+    collectionUnitIncludes
+  );
+  return array(collectionUnitResponseSchema).parse(res);
 };
 
 /**
  * * Gets a critter collection unit by the critter_collection_unit_id
- * * Returns null if non-existent
+ * * Throws 404 error if non-existent
  * @param {string} critter_collection_unit_id
  */
 const getCollectionUnitById = async (
   critter_collection_unit_id: string
-): Promise<critter_collection_unit> => {
-  return await prisma.critter_collection_unit.findUniqueOrThrow({
+): Promise<CollectionUnitResponse> => {
+  const res = await prisma.critter_collection_unit.findUniqueOrThrow({
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },
     ...collectionUnitIncludes,
   });
+  return collectionUnitResponseSchema.parse(res);
 };
 
 /**
@@ -34,12 +40,13 @@ const getCollectionUnitById = async (
  */
 const getCollectionUnitsByCritterId = async (
   critter_id: string
-): Promise<critter_collection_unit[]> => {
-  return await prisma.critter_collection_unit.findMany({
+): Promise<CollectionUnitResponse[]> => {
+  const res = await prisma.critter_collection_unit.findMany({
     where: {
       critter_id: critter_id,
     },
   });
+  return array(collectionUnitResponseSchema).parse(res);
 };
 
 /**
@@ -50,13 +57,14 @@ const getCollectionUnitsByCritterId = async (
 const updateCollectionUnit = async (
   critter_collection_unit_id: string,
   critter_collection_unit_data: CollectionUnitUpdateInput
-): Promise<critter_collection_unit> => {
-  return await prisma.critter_collection_unit.update({
+): Promise<CollectionUnitResponse> => {
+  const res = await prisma.critter_collection_unit.update({
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },
     data: critter_collection_unit_data,
   });
+  return collectionUnitResponseSchema.parse(res);
 };
 
 /**
@@ -66,10 +74,11 @@ const updateCollectionUnit = async (
  */
 const createCollectionUnit = async (
   critter_collection_unit_data: CollectionUnitCreateInput
-): Promise<critter_collection_unit> => {
-  return await prisma.critter_collection_unit.create({
+): Promise<CollectionUnitResponse> => {
+  const res = await prisma.critter_collection_unit.create({
     data: critter_collection_unit_data,
   });
+  return collectionUnitResponseSchema.parse(res);
 };
 
 /**
@@ -78,12 +87,13 @@ const createCollectionUnit = async (
  */
 const deleteCollectionUnit = async (
   critter_collection_unit_id: string
-): Promise<critter_collection_unit> => {
-  return await prisma.critter_collection_unit.delete({
+): Promise<CollectionUnitResponse> => {
+  const res = await prisma.critter_collection_unit.delete({
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },
   });
+  return collectionUnitResponseSchema.parse(res);
 };
 
 export {
