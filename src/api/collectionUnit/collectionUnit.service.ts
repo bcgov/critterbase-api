@@ -63,6 +63,7 @@ const updateCollectionUnit = async (
       critter_collection_unit_id: critter_collection_unit_id,
     },
     data: critter_collection_unit_data,
+    ...collectionUnitIncludes,
   });
   return collectionUnitResponseSchema.parse(res);
 };
@@ -77,6 +78,7 @@ const createCollectionUnit = async (
 ): Promise<CollectionUnitResponse> => {
   const res = await prisma.critter_collection_unit.create({
     data: critter_collection_unit_data,
+    ...collectionUnitIncludes,
   });
   return collectionUnitResponseSchema.parse(res);
 };
@@ -92,6 +94,7 @@ const deleteCollectionUnit = async (
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },
+    ...collectionUnitIncludes,
   });
   return collectionUnitResponseSchema.parse(res);
 };
