@@ -18,16 +18,18 @@ const collectionUnitIncludes = {
     xref_collection_unit: {
       select: { unit_name: true, description: true },
     },
-  },
+  } satisfies Prisma.critter_collection_unitInclude,
 };
 
 const collectionUnitResponseSchema = critter_collection_unitSchema
-  .extend({
-    xref_collection_unit: xref_collection_unitSchema.pick({
-      unit_name: true,
-      description: true,
-    }),
-  })
+  .and(
+    z.object({
+      xref_collection_unit: xref_collection_unitSchema.pick({
+        unit_name: true,
+        description: true,
+      }),
+    })
+  )
   .transform((arg) => {
     return {
       critter_collection_unit_id: arg.critter_collection_unit_id,
