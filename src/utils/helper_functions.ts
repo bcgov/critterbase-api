@@ -104,7 +104,7 @@ const prismaErrorMsg = (
         status: 404,
       };
   }
-  console.log(`NEW PRISMA ERROR ${err}`);
+  console.log(`NEW PRISMA ERROR: ${err}`);
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
