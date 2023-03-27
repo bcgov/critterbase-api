@@ -1,6 +1,6 @@
 import { measurement_qualitative } from "@prisma/client";
 import { prisma } from "../../utils/constants";
-import { QualitativeBodySchema } from "./measurement.types";
+import { QualitativeBodySchema } from "./measurement.utils";
 import {
   createQualMeasurement,
   deleteQualMeasurement,

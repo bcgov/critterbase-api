@@ -5,7 +5,7 @@ import {
 import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
-import { QualitativeBody } from "./measurement.types";
+import { QualitativeBody } from "./measurement.utils";
 
 const getAllQuantMeasurements = async (): Promise<
   measurement_quantitative[]
