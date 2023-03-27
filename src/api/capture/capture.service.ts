@@ -4,23 +4,20 @@ import { apiError } from "../../utils/types";
 import { CaptureCreate, captureInclude, CaptureIncludeType, CaptureUpdate, FormattedCapture } from "./capture.types";
 import { exclude } from "../../utils/helper_functions";
 import { FormattedLocation } from "../location/location.types";
+import { formatLocation } from "../location/location.service";
 
 const formatCapture = (capture: CaptureIncludeType) => {
   let obj: FormattedCapture = {...capture};
   if(capture.location_capture_capture_location_idTolocation) {
     obj = {
       ...capture, 
-      capture_location: {
-        ...exclude(capture.location_capture_capture_location_idTolocation, ['lk_region_env', 'lk_region_nr', 'lk_wildlife_management_unit']) as FormattedLocation
-      }
+      capture_location: formatLocation(capture.location_capture_capture_location_idTolocation)
     }
   }
   if(capture.location_capture_release_location_idTolocation) {
     obj = {
       ...obj,
-      release_location: {
-        ...(exclude(capture.location_capture_release_location_idTolocation, ['lk_region_env', 'lk_region_nr', 'lk_wildlife_management_unit']) as FormattedLocation)
-      }
+      release_location: formatLocation(capture.location_capture_release_location_idTolocation)
     }
   }
   delete (obj as any).location_capture_capture_location_idTolocation;

@@ -2,20 +2,19 @@ import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import { CaptureSubsetType, CritterCreate, CritterIncludeResult, CritterUpdate, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
+import { formatLocation } from "../location/location.service";
 
 const formatCritterCapture = (events: CaptureSubsetType[]): FormattedCapture[] => {
   return events.map(e => {
-    const obj = {
-      ...e,
-      ...e.location_capture_capture_location_idTolocation,
-      ...e.location_capture_capture_location_idTolocation?.lk_region_env,
-      ...e.location_capture_capture_location_idTolocation?.lk_region_nr,
-      ...e.location_capture_capture_location_idTolocation?.lk_wildlife_management_unit
-    };
+    const obj: FormattedCapture = {...e};
+    if(e.location_capture_capture_location_idTolocation){
+      obj.capture_location = formatLocation(e.location_capture_capture_location_idTolocation);
+    }
+    if(e.location_capture_release_location_idTolocation) {
+      obj.release_location = formatLocation(e.location_capture_release_location_idTolocation);
+    }
     delete (obj as any).location_capture_capture_location_idTolocation;
-    delete (obj as any).lk_region_env;
-    delete (obj as any).lk_region_nr;
-    delete (obj as any).lk_wildlife_management_unit;
+    delete (obj as any).location_capture_release_location_idTolocation;
 
     return obj;
   })
@@ -23,17 +22,11 @@ const formatCritterCapture = (events: CaptureSubsetType[]): FormattedCapture[] =
 // Could probably merge these two functions to one if generated type had same names for location field
 const formatCritterMortality = (events: MortalitySubsetType[]): FormattedMortality[] => {
   return events.map(e => {
-    const obj = {
-      ...e,
-      ...e.location,
-      ...e.location?.lk_region_env,
-      ...e.location?.lk_region_nr,
-      ...e.location?.lk_wildlife_management_unit
-    };
+    const obj: FormattedMortality = {...e};
+    if(e.location) {
+      obj.mortality_location = formatLocation(e.location);
+    }
     delete (obj as any).location;
-    delete (obj as any).lk_region_env;
-    delete (obj as any).lk_region_nr;
-    delete (obj as any).lk_wildlife_management_unit;
     return obj;
   })
 }
@@ -100,7 +93,7 @@ const formatCritterInput = (critter: CritterIncludeResult) => {
   delete (formattedCritter as any).measurement_quantitative;
   delete formattedCritter.lk_taxon;
   delete formattedCritter.lk_region_nr;
-
+  console.log(JSON.stringify(formattedCritter, null, 2));
   return formattedCritter;
 }
 
