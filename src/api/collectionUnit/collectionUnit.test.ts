@@ -9,13 +9,18 @@ import {
 } from "./collectionUnit.service";
 import type { Prisma, critter_collection_unit, critter } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
+import {
+  collectionUnitIncludes,
+  CollectionUnitResponse,
+  collectionUnitResponseSchema,
+} from "./collectionUnit.types";
 
 function get_random(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
 let dummyCritter: critter;
-let dummyCollectionUnit: critter_collection_unit;
+let dummyCollectionUnit: CollectionUnitResponse;
 let dummyCollectionUnitInput: Prisma.critter_collection_unitUncheckedCreateInput;
 let dummyCollectionUnitKeys: string[];
 
@@ -66,9 +71,12 @@ beforeAll(async () => {
     });
   }
   dummyCollectionUnitInput = await newCollectionUnit();
-  dummyCollectionUnit = await prisma.critter_collection_unit.create({
-    data: dummyCollectionUnitInput,
-  });
+  dummyCollectionUnit = collectionUnitResponseSchema.parse(
+    await prisma.critter_collection_unit.create({
+      data: dummyCollectionUnitInput,
+      ...collectionUnitIncludes,
+    })
+  );
   dummyCollectionUnitKeys = Object.keys(dummyCollectionUnit);
 });
 
@@ -80,12 +88,9 @@ describe("API: Collection Unit", () => {
         const critter_collection_unit = await createCollectionUnit(
           newCollectionUnitInput
         );
-        expect.assertions(2);
+        expect.assertions(1);
         expect(critter_collection_unit.critter_id).toBe(
           newCollectionUnitInput.critter_id
-        );
-        expect(critter_collection_unit.collection_unit_id).toBe(
-          newCollectionUnitInput.collection_unit_id
         );
       });
     });
@@ -146,19 +151,17 @@ describe("API: Collection Unit", () => {
 
     describe("updateCollectionUnit()", () => {
       it("updates a critter_collection_unit", async () => {
-        const critter_collection_unit =
-          await prisma.critter_collection_unit.create({
-            data: await newCollectionUnit(),
-          });
-        const newData = (await newCollectionUnit())?.collection_unit_id;
+        const critter_collection_unit = await createCollectionUnit(
+          await newCollectionUnit()
+        );
         const updatedCollectionUnit = await updateCollectionUnit(
           critter_collection_unit.critter_collection_unit_id,
-          { collection_unit_id: newData }
+          { collection_unit_id: dummyCollectionUnitInput.collection_unit_id }
         );
         expect.assertions(2);
         expect(updatedCollectionUnit).toStrictEqual({
           ...critter_collection_unit,
-          ...{ collection_unit_id: newData },
+          ...{ unit_name: dummyCollectionUnit.unit_name },
           update_timestamp: updatedCollectionUnit.update_timestamp, // Ignore this field as it will be different
         });
         expect(
@@ -170,10 +173,9 @@ describe("API: Collection Unit", () => {
 
     describe("deleteCollectionUnit()", () => {
       it("deletes a critter_collection_unit", async () => {
-        const critter_collection_unit =
-          await prisma.critter_collection_unit.create({
-            data: await newCollectionUnit(),
-          });
+        const critter_collection_unit = await createCollectionUnit(
+          await newCollectionUnit()
+        );
         const deletedCollectionUnit = await deleteCollectionUnit(
           critter_collection_unit.critter_collection_unit_id
         );
@@ -290,9 +292,9 @@ describe("API: Collection Unit", () => {
 
     describe("PATCH /api/collection_units/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.patch(
-          `/api/collection_units/${randomUUID()}`
-        ).send({ critter_id: dummyCritter.critter_id });
+        const res = await request
+          .patch(`/api/collection_units/${randomUUID()}`)
+          .send({ critter_id: dummyCritter.critter_id });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
