@@ -1,0 +1,124 @@
+import * as z from "zod"
+import { Completeartifact, RelatedartifactSchema, Completeaudit_log, Relatedaudit_logSchema, Completecapture, RelatedcaptureSchema, Completecritter, RelatedcritterSchema, Completecritter_collection_unit, Relatedcritter_collection_unitSchema, Completelk_cause_of_death, Relatedlk_cause_of_deathSchema, Completelk_collection_category, Relatedlk_collection_categorySchema, Completelk_colour, Relatedlk_colourSchema, Completelk_marking_material, Relatedlk_marking_materialSchema, Completelk_marking_type, Relatedlk_marking_typeSchema, Completelk_region_env, Relatedlk_region_envSchema, Completelk_region_nr, Relatedlk_region_nrSchema, Completelk_taxon, Relatedlk_taxonSchema, Completelk_wildlife_management_unit, Relatedlk_wildlife_management_unitSchema, Completelocation, RelatedlocationSchema, Completemarking, RelatedmarkingSchema, Completemeasurement_qualitative, Relatedmeasurement_qualitativeSchema, Completemortality, RelatedmortalitySchema, Completexref_collection_unit, Relatedxref_collection_unitSchema, Completexref_taxon_marking_body_location, Relatedxref_taxon_marking_body_locationSchema, Completexref_taxon_measurement_qualitative, Relatedxref_taxon_measurement_qualitativeSchema, Completexref_taxon_measurement_qualitative_option, Relatedxref_taxon_measurement_qualitative_optionSchema, Completexref_taxon_measurement_quantitative, Relatedxref_taxon_measurement_quantitativeSchema } from "./index"
+
+export const userSchema = z.object({
+  user_id: z.string().uuid(),
+  system_user_id: z.string(),
+  system_name: z.string(),
+  keycloak_uuid: z.string().uuid().nullish(),
+  create_user: z.string().uuid().nullish(),
+  update_user: z.string().uuid().nullish(),
+  create_timestamp: z.date().nullish(),
+  update_timestamp: z.date().nullish(),
+})
+
+export interface Completeuser extends z.infer<typeof userSchema> {
+  artifact_artifact_create_userTouser: Completeartifact[]
+  artifact_artifact_update_userTouser: Completeartifact[]
+  audit_log_audit_log_create_userTouser: Completeaudit_log[]
+  audit_log_audit_log_update_userTouser: Completeaudit_log[]
+  capture_capture_create_userTouser: Completecapture[]
+  capture_capture_update_userTouser: Completecapture[]
+  critter_critter_create_userTouser: Completecritter[]
+  critter_critter_update_userTouser: Completecritter[]
+  critter_collection_unit_critter_collection_unit_create_userTouser: Completecritter_collection_unit[]
+  critter_collection_unit_critter_collection_unit_update_userTouser: Completecritter_collection_unit[]
+  lk_cause_of_death_lk_cause_of_death_create_userTouser: Completelk_cause_of_death[]
+  lk_cause_of_death_lk_cause_of_death_update_userTouser: Completelk_cause_of_death[]
+  lk_collection_category_lk_collection_category_create_userTouser: Completelk_collection_category[]
+  lk_collection_category_lk_collection_category_update_userTouser: Completelk_collection_category[]
+  lk_colour_lk_colour_create_userTouser: Completelk_colour[]
+  lk_colour_lk_colour_update_userTouser: Completelk_colour[]
+  lk_marking_material_lk_marking_material_create_userTouser: Completelk_marking_material[]
+  lk_marking_material_lk_marking_material_update_userTouser: Completelk_marking_material[]
+  lk_marking_type_lk_marking_type_create_userTouser: Completelk_marking_type[]
+  lk_marking_type_lk_marking_type_update_userTouser: Completelk_marking_type[]
+  lk_region_env_lk_region_env_create_userTouser: Completelk_region_env[]
+  lk_region_env_lk_region_env_update_userTouser: Completelk_region_env[]
+  lk_region_nr_lk_region_nr_create_userTouser: Completelk_region_nr[]
+  lk_region_nr_lk_region_nr_update_userTouser: Completelk_region_nr[]
+  lk_taxon_lk_taxon_create_userTouser: Completelk_taxon[]
+  lk_taxon_lk_taxon_update_userTouser: Completelk_taxon[]
+  lk_wildlife_management_unit_lk_wildlife_management_unit_create_userTouser: Completelk_wildlife_management_unit[]
+  lk_wildlife_management_unit_lk_wildlife_management_unit_update_userTouser: Completelk_wildlife_management_unit[]
+  location_location_create_userTouser: Completelocation[]
+  location_location_update_userTouser: Completelocation[]
+  marking_marking_create_userTouser: Completemarking[]
+  marking_marking_update_userTouser: Completemarking[]
+  measurement_qualitative_measurement_qualitative_create_userTouser: Completemeasurement_qualitative[]
+  measurement_qualitative_measurement_qualitative_update_userTouser: Completemeasurement_qualitative[]
+  mortality_mortality_create_userTouser: Completemortality[]
+  mortality_mortality_update_userTouser: Completemortality[]
+  user_user_create_userTouser: Completeuser
+  other_user_user_create_userTouser: Completeuser[]
+  user_user_update_userTouser: Completeuser
+  other_user_user_update_userTouser: Completeuser[]
+  xref_collection_unit_xref_collection_unit_create_userTouser: Completexref_collection_unit[]
+  xref_collection_unit_xref_collection_unit_update_userTouser: Completexref_collection_unit[]
+  xref_taxon_marking_body_location_xref_taxon_marking_body_location_create_userTouser: Completexref_taxon_marking_body_location[]
+  xref_taxon_marking_body_location_xref_taxon_marking_body_location_update_userTouser: Completexref_taxon_marking_body_location[]
+  xref_taxon_measurement_qualitative_xref_taxon_measurement_qualitative_create_userTouser: Completexref_taxon_measurement_qualitative[]
+  xref_taxon_measurement_qualitative_xref_taxon_measurement_qualitative_update_userTouser: Completexref_taxon_measurement_qualitative[]
+  xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_create_userTouser: Completexref_taxon_measurement_qualitative_option[]
+  xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser: Completexref_taxon_measurement_qualitative_option[]
+  xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser: Completexref_taxon_measurement_quantitative[]
+  xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser: Completexref_taxon_measurement_quantitative[]
+}
+
+/**
+ * RelateduserSchema contains all relations on your model in addition to the scalars
+ *
+ * NOTE: Lazy required in case of potential circular dependencies within schema
+ */
+export const RelateduserSchema: z.ZodSchema<Completeuser> = z.lazy(() => userSchema.extend({
+  artifact_artifact_create_userTouser: RelatedartifactSchema.array(),
+  artifact_artifact_update_userTouser: RelatedartifactSchema.array(),
+  audit_log_audit_log_create_userTouser: Relatedaudit_logSchema.array(),
+  audit_log_audit_log_update_userTouser: Relatedaudit_logSchema.array(),
+  capture_capture_create_userTouser: RelatedcaptureSchema.array(),
+  capture_capture_update_userTouser: RelatedcaptureSchema.array(),
+  critter_critter_create_userTouser: RelatedcritterSchema.array(),
+  critter_critter_update_userTouser: RelatedcritterSchema.array(),
+  critter_collection_unit_critter_collection_unit_create_userTouser: Relatedcritter_collection_unitSchema.array(),
+  critter_collection_unit_critter_collection_unit_update_userTouser: Relatedcritter_collection_unitSchema.array(),
+  lk_cause_of_death_lk_cause_of_death_create_userTouser: Relatedlk_cause_of_deathSchema.array(),
+  lk_cause_of_death_lk_cause_of_death_update_userTouser: Relatedlk_cause_of_deathSchema.array(),
+  lk_collection_category_lk_collection_category_create_userTouser: Relatedlk_collection_categorySchema.array(),
+  lk_collection_category_lk_collection_category_update_userTouser: Relatedlk_collection_categorySchema.array(),
+  lk_colour_lk_colour_create_userTouser: Relatedlk_colourSchema.array(),
+  lk_colour_lk_colour_update_userTouser: Relatedlk_colourSchema.array(),
+  lk_marking_material_lk_marking_material_create_userTouser: Relatedlk_marking_materialSchema.array(),
+  lk_marking_material_lk_marking_material_update_userTouser: Relatedlk_marking_materialSchema.array(),
+  lk_marking_type_lk_marking_type_create_userTouser: Relatedlk_marking_typeSchema.array(),
+  lk_marking_type_lk_marking_type_update_userTouser: Relatedlk_marking_typeSchema.array(),
+  lk_region_env_lk_region_env_create_userTouser: Relatedlk_region_envSchema.array(),
+  lk_region_env_lk_region_env_update_userTouser: Relatedlk_region_envSchema.array(),
+  lk_region_nr_lk_region_nr_create_userTouser: Relatedlk_region_nrSchema.array(),
+  lk_region_nr_lk_region_nr_update_userTouser: Relatedlk_region_nrSchema.array(),
+  lk_taxon_lk_taxon_create_userTouser: Relatedlk_taxonSchema.array(),
+  lk_taxon_lk_taxon_update_userTouser: Relatedlk_taxonSchema.array(),
+  lk_wildlife_management_unit_lk_wildlife_management_unit_create_userTouser: Relatedlk_wildlife_management_unitSchema.array(),
+  lk_wildlife_management_unit_lk_wildlife_management_unit_update_userTouser: Relatedlk_wildlife_management_unitSchema.array(),
+  location_location_create_userTouser: RelatedlocationSchema.array(),
+  location_location_update_userTouser: RelatedlocationSchema.array(),
+  marking_marking_create_userTouser: RelatedmarkingSchema.array(),
+  marking_marking_update_userTouser: RelatedmarkingSchema.array(),
+  measurement_qualitative_measurement_qualitative_create_userTouser: Relatedmeasurement_qualitativeSchema.array(),
+  measurement_qualitative_measurement_qualitative_update_userTouser: Relatedmeasurement_qualitativeSchema.array(),
+  mortality_mortality_create_userTouser: RelatedmortalitySchema.array(),
+  mortality_mortality_update_userTouser: RelatedmortalitySchema.array(),
+  user_user_create_userTouser: RelateduserSchema,
+  other_user_user_create_userTouser: RelateduserSchema.array(),
+  user_user_update_userTouser: RelateduserSchema,
+  other_user_user_update_userTouser: RelateduserSchema.array(),
+  xref_collection_unit_xref_collection_unit_create_userTouser: Relatedxref_collection_unitSchema.array(),
+  xref_collection_unit_xref_collection_unit_update_userTouser: Relatedxref_collection_unitSchema.array(),
+  xref_taxon_marking_body_location_xref_taxon_marking_body_location_create_userTouser: Relatedxref_taxon_marking_body_locationSchema.array(),
+  xref_taxon_marking_body_location_xref_taxon_marking_body_location_update_userTouser: Relatedxref_taxon_marking_body_locationSchema.array(),
+  xref_taxon_measurement_qualitative_xref_taxon_measurement_qualitative_create_userTouser: Relatedxref_taxon_measurement_qualitativeSchema.array(),
+  xref_taxon_measurement_qualitative_xref_taxon_measurement_qualitative_update_userTouser: Relatedxref_taxon_measurement_qualitativeSchema.array(),
+  xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_create_userTouser: Relatedxref_taxon_measurement_qualitative_optionSchema.array(),
+  xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser: Relatedxref_taxon_measurement_qualitative_optionSchema.array(),
+  xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser: Relatedxref_taxon_measurement_quantitativeSchema.array(),
+  xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser: Relatedxref_taxon_measurement_quantitativeSchema.array(),
+}))
