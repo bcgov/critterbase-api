@@ -3,15 +3,15 @@ import { strings } from "../../utils/constants";
 import { isUUID } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   createLocation,
   deleteLocation,
   getAllLocations,
   getLocationOrThrow,
-  LocationBodySchema,
   updateLocation,
 } from "./location.service";
+import { LocationCreateSchema } from "./location.types";
 
 export const locationRouter = express.Router();
 
@@ -32,7 +32,7 @@ locationRouter.get(
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    LocationBodySchema.parse(req.body);
+    LocationCreateSchema.parse(req.body);
     const location = await createLocation(req.body);
     return res.status(201).json(location);
   })
@@ -58,7 +58,7 @@ locationRouter
   .patch(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const updateBody = LocationBodySchema.parse(req.body);
+      const updateBody = LocationCreateSchema.parse(req.body);
       const location = await updateLocation(updateBody, id);
       res.status(201).json(location);
     })

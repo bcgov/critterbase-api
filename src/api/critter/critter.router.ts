@@ -1,18 +1,29 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { createCritter, deleteCritter, getAllCritters, getCritterById, getCritterByIdWithDetails, getCritterByWlhId, updateCritter } from "./critter.service";
+import {
+  createCritter,
+  deleteCritter,
+  getAllCritters,
+  getCritterById,
+  getCritterByIdWithDetails,
+  getCritterByWlhId,
+  updateCritter,
+} from "./critter.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
-import { CritterCreateBodySchema, CritterUpdateBodySchema } from "./critter.types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import {
+  CritterCreateBodySchema,
+  CritterUpdateBodySchema,
+} from "./critter.types";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 export const critterRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
- critterRouter.get(
+critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const allCritters = await getAllCritters();
@@ -23,7 +34,7 @@ export const critterRouter = express.Router();
 /**
  ** Create new critter
  */
- critterRouter.post(
+critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterCreateBodySchema.parse(req.body);
@@ -32,17 +43,17 @@ export const critterRouter = express.Router();
   })
 );
 
-critterRouter
-  .route("/wlh/:wlh_id")
-  .get(
-    catchErrors(async (req: Request, res: Response) => {
-      const critter = await getCritterByWlhId(req.params.wlh_id); 
-      if(!critter.length) {
-        throw apiError.notFound('Could not find any animals with the requested WLH ID');
-      }
-      return res.status(200).json(critter);
-    })    
-  )
+critterRouter.route("/wlh/:wlh_id").get(
+  catchErrors(async (req: Request, res: Response) => {
+    const critter = await getCritterByWlhId(req.params.wlh_id);
+    if (!critter.length) {
+      throw apiError.notFound(
+        "Could not find any animals with the requested WLH ID"
+      );
+    }
+    return res.status(200).json(critter);
+  })
+);
 
 /**
  * * All critter_id related routes
