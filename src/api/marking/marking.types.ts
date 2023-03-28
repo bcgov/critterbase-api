@@ -1,37 +1,46 @@
 import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { getAuditColumns } from "../../utils/helper_functions";
-import { AuditColumns } from "../../utils/types";
 import { nonEmpty } from "../../utils/zod_schemas";
+import {
+  Completemarking,
+  lk_colourSchema,
+  lk_marking_materialSchema,
+  lk_marking_typeSchema,
+  markingSchema,
+  xref_taxon_marking_body_locationSchema,
+} from "../../../prisma/zod_schemas";
+
+type Implements<Model> = {
+  [key in keyof Model]-?: undefined extends Model[key]
+    ? null extends Model[key]
+      ? z.ZodNullableType<z.ZodOptionalType<z.ZodType<Model[key]>>>
+      : z.ZodOptionalType<z.ZodType<Model[key]>>
+    : null extends Model[key]
+    ? z.ZodNullableType<z.ZodType<Model[key]>>
+    : z.ZodType<Model[key]>;
+};
+
+export function implement<Model = never>() {
+  return {
+    with: <
+      Schema extends Implements<Model> & {
+        [unknownKey in Exclude<keyof Schema, keyof Model>]: never;
+      }
+    >(
+      schema: Schema
+    ) => z.object(schema),
+  };
+}
 
 // Types
 type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
-type SimpleFormattedMarking = {
-  primary_colour: string | null;
-  secondary_colour: string | null;
-  marking_type: string | null;
-  marking_material: string | null;
-  body_location: string | null;
-  identifier: string | null;
-  frequency: number | null;
-  frequency_unit: frequency_unit | null;
-  order: number | null;
-};
-
-interface FormattedMarking extends SimpleFormattedMarking, AuditColumns {
-  marking_id: string;
-  critter_id: string;
-  capture_id: string | null;
-  mortality_id: string | null;
-  text_colour: string | null;
-  comment: string | null;
-  attached_timestamp: Date;
-  removed_timestamp: Date | null;
-}
-
 type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
+
 type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
+
+type MarkingResponseSchema = z.TypeOf<typeof markingResponseSchema>;
 
 // Constants
 const markingIncludes = {
@@ -57,80 +66,130 @@ const markingIncludes = {
   } satisfies Prisma.markingInclude,
 };
 
+const markingIncludesSchema = z.object({
+  lk_colour_marking_primary_colour_idTolk_colour: lk_colourSchema.pick({
+    colour: true,
+  }),
+  lk_colour_marking_secondary_colour_idTolk_colour: lk_colourSchema.pick({
+    colour: true,
+  }),
+  lk_colour_marking_text_colour_idTolk_colour: lk_colourSchema.pick({
+    colour: true,
+  }),
+  lk_marking_type: lk_marking_typeSchema.pick({
+    name: true,
+  }),
+  lk_marking_material: lk_marking_materialSchema.pick({
+    material: true,
+  }),
+  xref_taxon_marking_body_location: xref_taxon_marking_body_locationSchema.pick(
+    {
+      body_location: true,
+    }
+  ),
+});
+
+const markingResponseSchema = markingSchema
+  .and(markingIncludesSchema)
+  .transform((arg) => {
+    return {
+      marking_id: arg.marking_id,
+      critter_id: arg.critter_id,
+      capture_id: arg.capture_id,
+      mortality_id: arg.mortality_id,
+      primary_colour:
+        arg.lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
+      secondary_colour:
+        arg.lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
+      text_colour:
+        arg.lk_colour_marking_text_colour_idTolk_colour?.colour ?? null,
+      marking_type: arg.lk_marking_type?.name ?? null,
+      marking_material: arg.lk_marking_material?.material ?? null,
+      body_location:
+        arg.xref_taxon_marking_body_location?.body_location ?? null,
+      identifier: arg.identifier,
+      frequency: arg.frequency,
+      frequency_unit: arg.frequency_unit,
+      order: arg.order,
+      comment: arg.comment,
+      attached_timestamp: arg.attached_timestamp,
+      removed_timestamp: arg.removed_timestamp,
+      ...getAuditColumns(arg),
+    };
+  });
+
 // Validate incoming request body for create marking
-const MarkingCreateBodySchema = z.object({
+const MarkingCreateBodySchema = implement<
+  Omit<
+    Prisma.markingUncheckedCreateInput,
+    | "marking_id"
+    | "create_user"
+    | "update_user"
+    | "create_timestamp"
+    | "update_timestamp"
+  >
+>().with({
   critter_id: z.string().uuid(),
-  capture_id: z.string().uuid().optional(),
-  mortality_id: z.string().uuid().optional(),
+  capture_id: z.string().uuid().optional().nullable(),
+  mortality_id: z.string().uuid().optional().nullable(),
   taxon_marking_body_location_id: z.string().uuid(),
-  marking_type_id: z.string().uuid().optional(),
-  marking_material_id: z.string().uuid().optional(),
-  primary_colour_id: z.string().uuid().optional(),
-  secondary_colour_id: z.string().uuid().optional(),
-  text_colour_id: z.string().uuid().optional(),
-  identifier: z.string().optional(),
-  frequency: z.number().optional(),
-  frequency_unit: z
-    .union([
-      // Inline Zod schema for frequency_unit
-      z.literal(frequency_unit.Hz),
-      z.literal(frequency_unit.KHz),
-      z.literal(frequency_unit.MHz),
-    ])
-    .optional(),
-  order: z.number().optional(),
-  comment: z.string().optional(),
+  marking_type_id: z.string().uuid().optional().nullable(),
+  marking_material_id: z.string().uuid().optional().nullable(),
+  primary_colour_id: z.string().uuid().optional().nullable(),
+  secondary_colour_id: z.string().uuid().optional().nullable(),
+  text_colour_id: z.string().uuid().optional().nullable(),
+  identifier: z.string().optional().nullable(),
+  frequency: z.number().optional().nullable(),
+  frequency_unit: z.nativeEnum(frequency_unit).optional().nullable(),
+  order: z.number().optional().nullable(),
+  comment: z.string().optional().nullable(),
   attached_timestamp: z.coerce.date().optional(),
-  removed_timestamp: z.coerce.date().optional(),
-}) satisfies z.ZodType<Prisma.markingUncheckedCreateInput>;
+  removed_timestamp: z.coerce.date().optional().nullable(),
+});
+
+const MarkingCreateBodySchema2: z.ZodType<
+  Omit<
+    Prisma.markingUncheckedCreateInput,
+    | "marking_id"
+    | "create_user"
+    | "update_user"
+    | "create_timestamp"
+    | "update_timestamp"
+  >
+> = z.object({
+  critter_id: z.string().uuid(),
+  capture_id: z.string().uuid().nullish(),
+  mortality_id: z.string().uuid().nullish(),
+  taxon_marking_body_location_id: z.string().uuid(),
+  marking_type_id: z.string().uuid().nullish(),
+  marking_material_id: z.string().uuid().nullish(),
+  primary_colour_id: z.string().uuid().nullish(),
+  secondary_colour_id: z.string().uuid().nullish(),
+  text_colour_id: z.string().uuid().nullish(),
+  identifier: z.string().nullish(),
+  frequency: z.number().nullish(),
+  frequency_unit: z.nativeEnum(frequency_unit).nullish(),
+  order: z.number().nullish(),
+  comment: z.string().nullish(),
+  attached_timestamp: z.coerce.date().optional(),
+  removed_timestamp: z.coerce.date().nullish(),
+});
 
 // Validate incoming request body for update marking
-const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
+const MarkingUpdateBodySchema = z.optional(MarkingCreateBodySchema2).unwrap().refine(
   nonEmpty,
   "no new data was provided or the format was invalid"
-) satisfies z.ZodType<Prisma.markingUpdateInput>;
-
-// Utility Functions
-
-/**
- * * Deconstructs values from lookup tables into main body
- * * Leaves out lk foreign keys and audit columns
- * @param {MarkingIncludes} marking
- */
-const formatMarking = (marking: MarkingIncludes): FormattedMarking => ({
-  marking_id: marking.marking_id,
-  critter_id: marking.critter_id,
-  capture_id: marking.capture_id,
-  mortality_id: marking.mortality_id,
-  primary_colour:
-    marking.lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
-  secondary_colour:
-    marking.lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
-  text_colour:
-    marking.lk_colour_marking_text_colour_idTolk_colour?.colour ?? null,
-  marking_type: marking.lk_marking_type?.name ?? null,
-  marking_material: marking.lk_marking_material?.material ?? null,
-  body_location:
-    marking.xref_taxon_marking_body_location?.body_location ?? null,
-  identifier: marking.identifier,
-  frequency: marking.frequency,
-  frequency_unit: marking.frequency_unit,
-  order: marking.order,
-  comment: marking.comment,
-  attached_timestamp: marking.attached_timestamp,
-  removed_timestamp: marking.removed_timestamp,
-  ...getAuditColumns(marking),
-});
+);
 
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
+  markingResponseSchema,
   markingIncludes,
-  formatMarking,
 };
 export type {
   MarkingCreateInput,
   MarkingUpdateInput,
   MarkingIncludes,
-  FormattedMarking,
+  MarkingResponseSchema,
 };
