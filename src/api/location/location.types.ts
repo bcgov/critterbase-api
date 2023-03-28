@@ -95,6 +95,22 @@ const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
   },
 });
 
+type CommonLocationType = Prisma.locationGetPayload<typeof commonLocationSelect>
+
+const CommonLocationSchema = implement<CommonLocationType>().with({
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  lk_region_env: z.object({
+    region_env_name: z.string()
+  }).nullable(),
+  lk_region_nr: z.object({
+    region_nr_name: z.string()
+  }).nullable(),
+  lk_wildlife_management_unit: z.object({
+    wmu_name: z.string()
+  }).nullable()
+})
+
 const locationIncludes: Prisma.locationInclude = {
   lk_wildlife_management_unit: {
     select: {
@@ -113,10 +129,10 @@ const locationIncludes: Prisma.locationInclude = {
   },
 };
 
-export type { LocationSubsetType, FormattedLocation };
+export type { LocationSubsetType, FormattedLocation};
 export {
   commonLocationSelect,
-  LocationBody,
+  CommonLocationSchema,
   LocationCreateSchema,
   locationIncludes,
   locationExcludeKeys,

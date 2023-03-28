@@ -1,7 +1,7 @@
 import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
-import { CaptureSubsetType, CritterCreate, CritterIncludeResult, CritterUpdate, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
+import { CaptureSubsetType, CritterCreate, CritterIncludeResult, FormattedCapture, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedMortality, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType, MortalitySubsetType } from "./critter.types";
 import { formatLocation } from "../location/location.service";
 
 const formatCritterCapture = (events: CaptureSubsetType[]): FormattedCapture[] => {
@@ -137,7 +137,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[]> =>
   return formattedResults;
 }
 
-const updateCritter = async (critter_id: string, critter_data: CritterUpdate): Promise<critter> => {
+const updateCritter = async (critter_id: string, critter_data: CritterCreate): Promise<critter> => {
   return prisma.critter.update({
     where: {
       critter_id: critter_id

@@ -1,12 +1,12 @@
 import { prisma } from "../../utils/constants";
 import { capture, Prisma } from "@prisma/client";
 import { apiError } from "../../utils/types";
-import { CaptureCreate, captureInclude, CaptureIncludeType, CaptureUpdate, FormattedCapture } from "./capture.types";
+import { CaptureCreate, captureInclude, CaptureIncludeType, CaptureResponseSchema, FormattedCapture } from "./capture.types";
 import { exclude } from "../../utils/helper_functions";
 import { FormattedLocation } from "../location/location.types";
 import { formatLocation } from "../location/location.service";
 
-const formatCapture = (capture: CaptureIncludeType) => {
+/*const formatCapture = (capture: CaptureIncludeType) => {
   let obj: FormattedCapture = {...capture};
   if(capture.location_capture_capture_location_idTolocation) {
     obj = {
@@ -24,7 +24,7 @@ const formatCapture = (capture: CaptureIncludeType) => {
   delete (obj as any).location_capture_release_location_idTolocation;
 
   return obj;
-}
+}*/
 
 const getAllCaptures = async (): Promise<capture[]> => {
   return await prisma.capture.findMany({
@@ -42,7 +42,7 @@ const getCaptureById = async (capture_id: string): Promise<FormattedCapture | nu
   if(capture == null) {
     return null;
   }
-  return formatCapture(capture);
+  return CaptureResponseSchema.parse(capture);
 }
 
 const getCaptureByCritter = async (critter_id: string): Promise<FormattedCapture[] | null> => {
@@ -63,7 +63,7 @@ const getCaptureByCritter = async (critter_id: string): Promise<FormattedCapture
   if(captures == null) {
     return null;
   }
-  return captures.map(c => formatCapture(c));
+  return captures.map(c => CaptureResponseSchema.parse(c));
 }
 
 const createCapture = async (capture_data: CaptureCreate): Promise<capture | null> => {
@@ -72,7 +72,7 @@ const createCapture = async (capture_data: CaptureCreate): Promise<capture | nul
   })
 }
 
-const updateCapture = async (capture_id: string, capture_data: CaptureUpdate): Promise<capture | null> => {
+const updateCapture = async (capture_id: string, capture_data: CaptureCreate): Promise<capture | null> => {
   return await prisma.capture.update({
     data: capture_data,
     where: {

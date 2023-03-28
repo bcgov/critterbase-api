@@ -1,5 +1,6 @@
 import { capture, critter, frequency_unit, measurement_qualitative, measurement_quantitative, Prisma, sex, xref_taxon_measurement_qualitative, xref_taxon_measurement_qualitative_option, xref_taxon_measurement_quantitative } from "@prisma/client";
 import { z } from 'zod'
+import { implement, noAudit, zodID } from "../../utils/zod_helpers";
 import { commonLocationSelect, FormattedLocation } from "../location/location.types";
 
 const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement_quantitativeArgs>()({
@@ -161,23 +162,69 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     mortality: Array<FormattedMortality>
   }
 
-  const CritterUpdateBodySchema = z.object({
-    taxon_id: z.string().uuid().optional(),
-    wlh_id: z.string().optional().nullable(),
-    animal_id: z.string().optional().nullable(),
-    sex: z.nativeEnum(sex).optional(),
-    responsible_region_nr_id: z.string().uuid().optional().nullable(),
-    critter_comment: z.string().optional().nullable()
+  const CritterSchema = implement<critter>().with({
+    critter_id: zodID,
+    taxon_id: zodID,
+    wlh_id: z.string().nullable(),
+    animal_id: z.string().nullable(),
+    sex: z.nativeEnum(sex),
+    responsible_region_nr_id: zodID.nullable(),
+    critter_comment: z.string().nullable(),
+    create_user: zodID,
+    update_user: zodID,
+    create_timestamp: z.coerce.date(),
+    update_timestamp: z.coerce.date()
   })
 
-  const CritterCreateBodySchema = CritterUpdateBodySchema.extend({
-    critter_id: z.string().uuid().optional(),
-    taxon_id: z.string().uuid(),
-    sex: z.nativeEnum(sex)
-  })
+  const CritterCreateSchema = CritterSchema.omit({
+    critter_id: true,
+    ...noAudit,
+  }).partial().required({
+    sex: true,
+    taxon_id: true
+  });
 
-  type CritterCreate = z.infer<typeof CritterCreateBodySchema>
-  type CritterUpdate = z.infer<typeof CritterUpdateBodySchema>
+  /*const CritterResponseSchema = implement<CritterIncludeResult>().with({
+    critter_id: zodID,
+    taxon_id: zodID,
+    wlh_id: z.string().nullable(),
+    animal_id: z.string().nullable(),
+    sex: z.nativeEnum(sex),
+    responsible_region_nr_id: zodID.nullable(),
+    critter_comment: z.string().nullable(),
+    create_user: zodID,
+    update_user: zodID,
+    create_timestamp: z.coerce.date(),
+    update_timestamp: z.coerce.date(),
+    lk_region_nr: z.object({ region_nr_name: z.string() }).nullable(),
+    mortality: z.array(z.object({
+      mortality_id: zodID, 
+      location: z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        lk_region_env: z.object({
+          region_env_name: z.string()
+        }),
+        lk_region_nr: z.object({
+          region_nr_name: z.string()
+        }),
+        lk_wildlife_management_unit: z.object({
+          wmu_name: z.string()
+        }),
+      }),
+      mortality_timestamp: z.coerce.date(),
+      mortality_comment: z.string()
+    })),
+    lk_taxon: z.object({ taxon_name_latin: z.string() }),
+    marking: z.array(z.object({
+      lk_colour_marking_primary_colour_idTolk_colour: {
+
+      }
+    }))
+
+  });*/
+
+  type CritterCreate = z.infer<typeof CritterCreateSchema>
 
   export type {
     FormattedCritter, 
@@ -192,7 +239,6 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     FormattedMarking,
     FormattedQuantitativeMeasurement,
     FormattedQualitativeMeasurement,
-    CritterUpdate,
     CritterCreate
     }
   export {
@@ -202,6 +248,4 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     formattedCritterInclude, 
     captureSelectSubset, 
     mortalitySelectSubset,
-    CritterCreateBodySchema,
-    CritterUpdateBodySchema
   }
