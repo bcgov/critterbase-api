@@ -7,7 +7,7 @@ import {
   getLocationOrThrow,
   updateLocation,
 } from "./location.service";
-import { LocationSchema } from "./location.types";
+import { LocationSchema } from "./location.utils";
 
 let locations: any;
 let location: any;

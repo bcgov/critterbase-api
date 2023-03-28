@@ -19,7 +19,7 @@ import {
   locationIncludes,
   LocationSubsetType,
   LocationResponse,
-} from "./location.types";
+} from "./location.utils";
 
 const formatLocation = (location: LocationSubsetType) => {
   return exclude(location, [

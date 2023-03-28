@@ -11,7 +11,7 @@ import {
   getLocationOrThrow,
   updateLocation,
 } from "./location.service";
-import { LocationCreateSchema } from "./location.types";
+import { LocationCreateSchema } from "./location.utils";
 
 export const locationRouter = express.Router();
 
