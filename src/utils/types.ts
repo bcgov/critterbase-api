@@ -1,3 +1,7 @@
+import { critter } from ".prisma/client";
+import { z } from "zod";
+import { CritterCreate } from "../api/critter/critter.types";
+
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
  */
@@ -54,7 +58,7 @@ class apiError extends Error {
   /**
    ** Request conflicts with current state of the target resource
    */
-   static conflictIssue(message: string) {
+  static conflictIssue(message: string) {
     return new apiError(message, 409, "conflict");
   }
 
@@ -63,16 +67,20 @@ class apiError extends Error {
   }
 }
 
-type DateAuditColumns = {
-  created_at: Date;
-  updated_at: Date;
-};
+type DateAuditColumns = Pick<critter, "create_timestamp" | "update_timestamp">;
 
-type UserAuditColumns = {
-  create_user: string;
-  update_user: string;
-};
+type UserAuditColumns = Pick<critter, "update_user" | "create_user">;
 
 type AuditColumns = DateAuditColumns & UserAuditColumns;
 
-export { apiError, AuditColumns };
+type Implements<Model> = {
+  [key in keyof Model]-?: undefined extends Model[key]
+    ? null extends Model[key]
+      ? z.ZodNullableType<z.ZodOptionalType<z.ZodType<Model[key]>>>
+      : z.ZodOptionalType<z.ZodType<Model[key]>>
+    : null extends Model[key]
+    ? z.ZodNullableType<z.ZodType<Model[key]>>
+    : z.ZodType<Model[key]>;
+};
+
+export { apiError, AuditColumns, Implements };

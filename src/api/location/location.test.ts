@@ -5,9 +5,9 @@ import {
   deleteLocation,
   getAllLocations,
   getLocationOrThrow,
-  LocationBodySchema,
   updateLocation,
 } from "./location.service";
+import { LocationSchema } from "./location.types";
 
 let locations: any;
 let location: any;
@@ -60,7 +60,7 @@ describe("API: Location", () => {
         expect(location).toHaveProperty("location_id");
       });
       it("location passes validation", async () => {
-        expect(LocationBodySchema.safeParse(location).success);
+        expect(LocationSchema.safeParse(location).success);
       });
       it("non existing location_id throws error", async () => {
         try {

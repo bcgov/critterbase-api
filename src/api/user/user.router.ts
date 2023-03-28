@@ -8,7 +8,7 @@ import {
   updateUser,
   upsertUser,
 } from "./user.service";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { CreateUserSchema, UpdateUserSchema } from "./user.types";
 
 export const userRouter = express.Router();
