@@ -1,7 +1,13 @@
 import { coordinate_uncertainty_unit, location, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { AuditColumns } from "../../utils/types";
-import { implement, noAudit, zodID } from "../../utils/zod_helpers";
+import {
+  implement,
+  LookupRegionEnvSchema,
+  LookupRegionNrSchema,
+  LookupWmuSchema,
+  noAudit,
+  zodID,
+} from "../../utils/zod_helpers";
 
 // Zod Schemas
 const LocationSchema = implement<location>().with({
@@ -27,24 +33,35 @@ const LocationSchema = implement<location>().with({
 const LocationCreateSchema = LocationSchema.omit({
   location_id: true,
   ...noAudit,
-}).partial();
+})
+  .partial()
+  .strict();
 
 const LocationResponseSchema = LocationSchema.extend({
-  wmu_name: z.string().nullish(),
-  region_env_name: z.string().nullish(),
-  region_nr_name: z.string().nullish(),
-  lk_wildlife_management_unit: z.any(),
-  lk_region_nr: z.any(),
-  lk_region_env: z.any(),
-})
-  .omit({
-    wmu_id: true,
-    region_nr_id: true,
-    region_env_id: true,
-  })
-  .transform((val) => val);
+  lk_wildlife_management_unit: LookupWmuSchema.nullish(),
+  lk_region_nr: LookupRegionNrSchema.nullish(),
+  lk_region_env: LookupRegionEnvSchema.nullish(),
+}).transform((val) => {
+  const {
+    lk_wildlife_management_unit,
+    lk_region_nr,
+    lk_region_env,
+    wmu_id,
+    region_nr_id,
+    region_env_id,
+    ...rest
+  } = val;
+  return {
+    ...rest,
+    wmu_name: lk_wildlife_management_unit?.wmu_name,
+    lk_region_nr: lk_region_nr?.region_nr_name,
+    lk_region_env: lk_region_env?.region_env_name,
+  };
+});
 
 // Types
+type LocationResponse = z.infer<typeof LocationResponseSchema>;
+
 type LocationSubsetType = Prisma.locationGetPayload<
   typeof commonLocationSelect
 >;
@@ -60,18 +77,6 @@ type FormattedLocation = Omit<
 //type FormattedLocation = Prisma.PromiseReturnType<typeof getLocationOrThrow>;
 
 type LocationBody = z.infer<typeof LocationCreateSchema>;
-
-type LocationExclude = (keyof location | keyof Prisma.locationInclude)[];
-
-// Constants
-const locationExcludeKeys: LocationExclude = [
-  "wmu_id",
-  "region_nr_id",
-  "region_env_id",
-  "lk_wildlife_management_unit",
-  "lk_region_nr",
-  "lk_region_env",
-];
 
 const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
   select: {
@@ -96,30 +101,17 @@ const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
 });
 
 const locationIncludes: Prisma.locationInclude = {
-  lk_wildlife_management_unit: {
-    select: {
-      wmu_name: true,
-    },
-  },
-  lk_region_nr: {
-    select: {
-      region_nr_name: true,
-    },
-  },
-  lk_region_env: {
-    select: {
-      region_env_name: true,
-    },
-  },
+  lk_wildlife_management_unit: true,
+  lk_region_nr: true,
+  lk_region_env: true,
 };
 
-export type { LocationSubsetType, FormattedLocation };
+export type { LocationSubsetType, FormattedLocation, LocationResponse };
 export {
   commonLocationSelect,
   LocationBody,
   LocationCreateSchema,
   locationIncludes,
-  locationExcludeKeys,
   LocationResponseSchema,
   LocationSchema,
 };
