@@ -14,7 +14,6 @@ import { CaptureIncludeType } from "../capture/capture.types";
 import { CaptureSubsetType } from "../critter/critter.types";
 import {
   FormattedLocation,
-  LocationBody,
   locationExcludeKeys,
   LocationResponseSchema,
   locationIncludes,
@@ -35,7 +34,7 @@ const formatLocation = (location: LocationSubsetType) => {
  * @returns {Promise<FormattedLocation>}
  * Note: inferring return type
  */
-const getLocationOrThrow = async <R>(id: string) => {
+const getLocationOrThrow = async (id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
@@ -50,11 +49,12 @@ const getLocationOrThrow = async <R>(id: string) => {
  * @returns {Promise<FormattedLocation[]>}
  * Note: inferring return type
  */
-const getAllLocations = async <R>(): Promise<R> => {
+const getAllLocations = async (): Promise<FormattedLocation[]> => {
   const locations = await prisma.location.findMany({
     include: locationIncludes,
   });
-  return locations.map((l) => exclude(l, locationExcludeKeys)) as R;
+  const res =  locations.map((l) => LocationResponseSchema.parse(l));
+  return res;
 };
 
 /**
