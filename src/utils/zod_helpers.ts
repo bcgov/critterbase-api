@@ -1,8 +1,15 @@
-import { critter } from ".prisma/client";
+import { critter, lk_colour, lk_marking_material, lk_marking_type } from ".prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements } from "./types";
 
 const zodID = z.string().uuid();
+
+const zodAudit = {
+  create_user: z.string().uuid(),
+  update_user: z.string().uuid(),
+  create_timestamp: z.date(),
+  update_timestamp: z.date(),
+};
 
 const uuidParamsSchema = z.object({
   id: z.string().uuid("query param is an invalid UUID"),
@@ -30,4 +37,47 @@ export function implement<Model = never>() {
   };
 }
 
-export { uuidParamsSchema, nonEmpty, noAudit, zodID };
+const LookUpColourSchema = implement<lk_colour>().with({
+  colour_id: z.string().uuid(),
+  colour: z.string(),
+  hex_code: z.string().nullable(),
+  description: z.string().nullable(),
+  ...zodAudit,
+});
+
+const LookUpMarkingTypeSchema = implement<lk_marking_type>().with({
+  marking_type_id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit
+})
+
+const LookUpMaterialSchema = implement<lk_marking_material>().with({
+  marking_material_id: z.string().uuid(),
+  material: z.string().nullable(),
+  description: z.string().nullable(),
+  ...zodAudit,
+});
+
+const XrefTaxonMarkingBodyLocationSchema = z.object({
+  taxon_marking_body_location_id: z.string().uuid(),
+  taxon_id: z.string().uuid(),
+  body_location: z.string(),
+  description: z.string().nullish(),
+  create_user: z.string().uuid().nullish(),
+  update_user: z.string().uuid().nullish(),
+  create_timestamp: z.date().nullish(),
+  update_timestamp: z.date().nullish(),
+})
+
+export {
+  uuidParamsSchema,
+  nonEmpty,
+  noAudit,
+  zodID,
+  zodAudit,
+  LookUpColourSchema,
+  LookUpMarkingTypeSchema,
+  LookUpMaterialSchema,
+  XrefTaxonMarkingBodyLocationSchema,
+};

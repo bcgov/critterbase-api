@@ -10,7 +10,7 @@ import {
   updateMarking,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { strings } from "../../utils/constants";
 import {
   MarkingCreateBodySchema,
