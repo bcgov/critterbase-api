@@ -39,30 +39,27 @@ const LocationCreateSchema = implement<
   .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape)
   .strict();
 
-const LocationResponseSchema = LocationSchema.omit({
-  wmu_id: true,
-  region_nr_id: true,
-  region_env_id: true,
-})
-  .extend({
-    lk_wildlife_management_unit: LookupWmuSchema.nullish(),
-    lk_region_nr: LookupRegionNrSchema.nullish(),
-    lk_region_env: LookupRegionEnvSchema.nullish(),
-  })
-  .transform((val) => {
-    const {
-      lk_wildlife_management_unit,
-      lk_region_nr,
-      lk_region_env,
-      ...rest
-    } = val;
-    return {
-      ...rest,
-      wmu_name: lk_wildlife_management_unit?.wmu_name,
-      region_nr_name: lk_region_nr?.region_nr_name,
-      region_env_name: lk_region_env?.region_env_name,
-    };
-  });
+const LocationResponseSchema = LocationSchema.extend({
+  lk_wildlife_management_unit: LookupWmuSchema.nullish(),
+  lk_region_nr: LookupRegionNrSchema.nullish(),
+  lk_region_env: LookupRegionEnvSchema.nullish(),
+}).transform((val) => {
+  const {
+    lk_wildlife_management_unit,
+    lk_region_nr,
+    lk_region_env,
+    wmu_id,
+    region_env_id,
+    region_nr_id,
+    ...rest
+  } = val;
+  return {
+    ...rest,
+    wmu_name: lk_wildlife_management_unit?.wmu_name ?? null,
+    region_nr_name: lk_region_nr?.region_nr_name ?? null,
+    region_env_name: lk_region_env?.region_env_name ?? null,
+  };
+});
 
 // Types
 type LocationResponse = z.infer<typeof LocationResponseSchema>;

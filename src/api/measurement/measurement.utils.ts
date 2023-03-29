@@ -9,6 +9,9 @@ import { implement, noAudit, zodAudit, zodID } from "../../utils/zod_helpers";
 // Zod Schemas
 
 // Qualitatitive
+/**
+ ** Base measurement_qualitatitive schema
+ */
 const QualitativeSchema = implement<measurement_qualitative>().with({
   measurement_qualitative_id: zodID,
   critter_id: zodID,
@@ -42,6 +45,9 @@ const QualitativeCreateSchema = implement<
   .strict();
 
 // Quantitative
+/**
+ ** Base measurement_quantitative schema
+ */
 const QuantitativeSchema = implement<measurement_quantitative>().with({
   measurement_quantitative_id: zodID,
   critter_id: zodID,
