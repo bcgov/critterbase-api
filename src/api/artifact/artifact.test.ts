@@ -225,7 +225,9 @@ describe("API: Artifact", () => {
 
     describe("PATCH /api/artifacts/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.patch(`/api/artifacts/${randomUUID()}`);
+        const res = await request
+          .patch(`/api/artifacts/${randomUUID()}`)
+          .send({ artifact_comment: dummyArtifact.artifact_comment });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
@@ -280,7 +282,9 @@ describe("API: Artifact", () => {
         const artifact = await prisma.artifact.create({
           data: await newArtifact(),
         });
-        const res = await request.delete(`/api/artifacts/${artifact.artifact_id}`);
+        const res = await request.delete(
+          `/api/artifacts/${artifact.artifact_id}`
+        );
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
@@ -289,7 +293,9 @@ describe("API: Artifact", () => {
         const artifact = await prisma.artifact.create({
           data: await newArtifact(),
         });
-        const res = await request.delete(`/api/artifacts/${artifact.artifact_id}`);
+        const res = await request.delete(
+          `/api/artifacts/${artifact.artifact_id}`
+        );
         expect.assertions(1);
         expect(res.body).toStrictEqual(
           `Artifact ${artifact.artifact_id} has been deleted`

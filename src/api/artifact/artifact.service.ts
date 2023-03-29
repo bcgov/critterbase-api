@@ -10,7 +10,7 @@ import { ArtifactCreate, ArtifactUpdate } from "./artifact.types";
 const getArtifactById = async (
   artifact_id: string
 ): Promise<artifact | null> => {
-  return await prisma.artifact.findUnique({
+  return await prisma.artifact.findUniqueOrThrow({
     where: {
       artifact_id: artifact_id,
     },

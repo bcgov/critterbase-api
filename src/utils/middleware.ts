@@ -45,6 +45,7 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(err)
   if (err instanceof ZodError) {
     //Removed formErrors from object
     const fieldErrors = err.flatten().fieldErrors;
