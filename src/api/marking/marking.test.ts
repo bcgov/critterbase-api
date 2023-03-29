@@ -10,14 +10,14 @@ import {
 import type { Prisma, marking } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import {
-  formatMarking,
-  FormattedMarking,
+  markingResponseSchema,
+  MarkingResponseSchema,
   MarkingCreateInput,
   markingIncludes,
   MarkingIncludes,
 } from "./marking.types";
 
-let dummyMarking: FormattedMarking;
+let dummyMarking: MarkingResponseSchema;
 let dummyMarkingInput: MarkingCreateInput;
 let dummyMarkingKeys: string[];
 
@@ -57,7 +57,7 @@ async function newMarking(): Promise<MarkingCreateInput> {
 beforeAll(async () => {
   // Sets a global dummy marking to reduce complexity on similar tests
   dummyMarkingInput = await newMarking();
-  dummyMarking = formatMarking(
+  dummyMarking = markingResponseSchema.parse(
     await prisma.marking.create({ data: dummyMarkingInput, ...markingIncludes })
   );
   dummyMarkingKeys = Object.keys(dummyMarking);
@@ -122,7 +122,7 @@ describe("API: Marking", () => {
 
     describe("updateMarking()", () => {
       it("updates a marking", async () => {
-        const marking = formatMarking(
+        const marking = markingResponseSchema.parse(
           await prisma.marking.create({
             data: await newMarking(),
             ...markingIncludes,
@@ -147,7 +147,7 @@ describe("API: Marking", () => {
 
     describe("deleteMarking()", () => {
       it("deletes a marking", async () => {
-        const marking = formatMarking(
+        const marking = markingResponseSchema.parse(
           await prisma.marking.create({
             data: await newMarking(),
             ...markingIncludes,
