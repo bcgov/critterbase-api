@@ -5,7 +5,8 @@ import {
   lk_wildlife_management_unit, 
   lk_colour, 
   lk_marking_material, 
-  lk_marking_type
+  lk_marking_type,
+  xref_taxon_marking_body_location
 } from ".prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements } from "./types";
@@ -88,15 +89,12 @@ const LookUpMaterialSchema = implement<lk_marking_material>().with({
   ...zodAudit,
 });
 
-const XrefTaxonMarkingBodyLocationSchema = z.object({
+const XrefTaxonMarkingBodyLocationSchema = implement<xref_taxon_marking_body_location>().with({
   taxon_marking_body_location_id: z.string().uuid(),
   taxon_id: z.string().uuid(),
   body_location: z.string(),
-  description: z.string().nullish(),
-  create_user: z.string().uuid().nullish(),
-  update_user: z.string().uuid().nullish(),
-  create_timestamp: z.date().nullish(),
-  update_timestamp: z.date().nullish(),
+  description: z.string().nullable(),
+  ...zodAudit,
 })
 
 export {

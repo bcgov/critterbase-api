@@ -130,7 +130,7 @@ const markingResponseSchema = markingIncludesSchema
 
 // Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
-  Omit<Prisma.markingUncheckedCreateInput, "marking_id" | keyof AuditColumns>
+  Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
 >().with(
   markingSchema
     .omit({ ...noAudit, marking_id: true })
@@ -140,7 +140,7 @@ const MarkingCreateBodySchema = implement<
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = implement<
-  Omit<Prisma.markingUncheckedUpdateInput, "marking_id" | keyof AuditColumns>
+  Omit<Prisma.markingUncheckedUpdateManyInput, "marking_id" | keyof AuditColumns>
 >()
   .with(MarkingCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
