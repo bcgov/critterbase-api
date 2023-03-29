@@ -25,7 +25,6 @@ let dummyMarkingIncludesKeys: string[];
 
 /**
  * * Creates a new marking object that references an existing critter and marking location
- * @return {*}  {Promise<Prisma.markingCreateInput>}
  */
 async function newMarking(): Promise<MarkingCreateInput> {
   const dummyCritterId: string | undefined = (

@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { captureRouter } from "./api/capture/capture.router";
 import { critterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
@@ -21,6 +22,7 @@ app.use("/api/critters", critterRouter);
 app.use("/api/locations", locationRouter);
 app.use("/api/markings", markingRouter);
 app.use("/api/users", userRouter);
+app.use("/api/collection_units", collectionUnitRouter);
 app.use("/api/family", familyRouter);
 app.use("/api/captures/", captureRouter);
 
