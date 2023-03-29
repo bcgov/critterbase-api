@@ -12,11 +12,8 @@ import {
 } from "./critter.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
-import {
-  CritterCreateBodySchema,
-  CritterUpdateBodySchema,
-} from "./critter.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { CritterCreateSchema, CritterUpdateSchema } from "./critter.types";
 
 export const critterRouter = express.Router();
 
@@ -37,7 +34,7 @@ critterRouter.get(
 critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const parsed = CritterCreateBodySchema.parse(req.body);
+    const parsed = CritterCreateSchema.parse(req.body);
     const created = await createCritter(parsed);
     return res.status(201).send(created);
   })
@@ -76,7 +73,7 @@ critterRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = CritterUpdateBodySchema.parse(req.body);
+      const parsed = CritterUpdateSchema.parse(req.body);
       const critter = await updateCritter(id, parsed);
       res.status(200).json(critter);
     })

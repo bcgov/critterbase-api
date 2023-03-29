@@ -3,9 +3,9 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { createMortality, deleteMortality, getAllMortalities, getMortalityByCritter, getMortalityById, updateMortality } from "./mortality.service";
 import { apiError } from "../../utils/types";
-import { MortalityCreateBodySchema, MortalityUpdateBodySchema } from "./mortality.types";
+import { MortalityCreateSchema } from "./mortality.types";
 import { prisma } from "../../utils/constants";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 export const mortalityRouter = express.Router();
 
@@ -26,7 +26,7 @@ export const mortalityRouter = express.Router();
  mortalityRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const parsed = MortalityCreateBodySchema.parse(req.body);
+    const parsed = MortalityCreateSchema.parse(req.body);
     const mort = await createMortality(parsed);
     return res.status(201).json(mort);
   })
@@ -71,7 +71,7 @@ mortalityRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = MortalityUpdateBodySchema.parse(req.body);
+      const parsed = MortalityCreateSchema.parse(req.body);
       const mort = await updateMortality(id, parsed);
       res.status(200).json(mort);
     })

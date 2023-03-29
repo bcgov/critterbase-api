@@ -75,7 +75,7 @@ const MortalityResponseSchema = implement<MortalityIncludeType>().with({
     ultimate_cause_of_death_id: zodID.nullable(),
     ultimate_cause_of_death_confidence:  z.nativeEnum(cod_confidence).nullable(),
     ultimate_predated_by_taxon_id: zodID.nullable(),
-    mortality_comment: zodID.nullable(),
+    mortality_comment: z.string().nullable(),
     create_user: zodID,
     update_user: zodID,
     create_timestamp: z.coerce.date(),
@@ -97,7 +97,10 @@ const MortalityResponseSchema = implement<MortalityIncludeType>().with({
         taxon_id: zodID,
         taxon_name_latin: z.string()
     }).nullable()
-}).transform(val => {
+});
+
+const MortalityResponseFormattedSchema = MortalityResponseSchema
+.transform(val => {
     const {
         lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death,
         lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death,
@@ -114,7 +117,7 @@ const MortalityResponseSchema = implement<MortalityIncludeType>().with({
     }
 })
 
-type FormattedMortality = z.infer<typeof MortalityResponseSchema>;
+type FormattedMortality = z.infer<typeof MortalityResponseFormattedSchema>;
 
-export { mortalityInclude, MortalityCreateSchema, MortalityResponseSchema }
+export { mortalityInclude, MortalityCreateSchema, MortalityResponseSchema, MortalityResponseFormattedSchema }
 export type { MortalityIncludeType, FormattedMortality, MortalityCreate }

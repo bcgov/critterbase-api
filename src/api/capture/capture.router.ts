@@ -12,8 +12,7 @@ import {
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
 import {
-  CaptureCreateBodySchema,
-  CaptureUpdateBodySchema,
+  CaptureCreateBodySchema
 } from "./capture.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
@@ -72,7 +71,7 @@ captureRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = CaptureUpdateBodySchema.parse(req.body);
+      const parsed = CaptureCreateBodySchema.parse(req.body);
       const result = await updateCapture(id, parsed);
       res.status(200).json(result);
     })

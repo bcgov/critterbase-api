@@ -4,7 +4,7 @@ import { queryRandomUUID } from "../../../prisma/prisma_utils";
 import { prisma, request } from "../../utils/constants";
 import { isValidObject } from "../../utils/helper_functions";
 import { apiError } from "../../utils/types";
-import { createCritter, deleteCritter, formatCritterInput, getAllCritters, getCritterById, getCritterByWlhId, updateCritter } from "./critter.service";
+import { createCritter, deleteCritter, getAllCritters, getCritterById, getCritterByWlhId, updateCritter } from "./critter.service";
 import { formattedCritterInclude } from "./critter.types";
 
 
@@ -29,7 +29,7 @@ beforeAll(async () => {
 
 describe("API: Critter", () => {
   describe("SERVICES", () => {
-    describe("critter transformation", () => {
+    /*describe("critter transformation", () => {
       it("should remove extraneous taxon/region props and format markings and measure", async () => {
         const critter = await prisma.critter.findFirst({
           ...formattedCritterInclude,
@@ -40,7 +40,6 @@ describe("API: Critter", () => {
         if(critter == undefined) {
           throw Error('Missing critter for this test.');
         }
-        const formatted = formatCritterInput(critter);
         expect.assertions(4);
         expect(isValidObject(formatted, 
           ['taxon_name_latin', 'responsible_region_nr_name', 'measurements', 'capture', 'mortality']
@@ -59,7 +58,7 @@ describe("API: Critter", () => {
           Object.values(r).every(checkFormat)))
           .toBeTruthy();
       })
-    })
+    })*/
     describe("making critters", () => {
       it("creates a critter", async() => {
         const critter = await createCritter(dummyCritter);

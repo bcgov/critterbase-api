@@ -56,7 +56,10 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
     update_timestamp: z.coerce.date(),
     location_capture_capture_location_idTolocation: CommonLocationSchema.nullable(),
     location_capture_release_location_idTolocation: CommonLocationSchema.nullable()
-  }).transform(val => {
+  });
+  
+  const CaptureResponseFormattedSchema = CaptureResponseSchema
+  .transform(val => {
     const {
       location_capture_capture_location_idTolocation,
       location_capture_release_location_idTolocation,
@@ -69,4 +72,4 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
 
 
   export type {CaptureIncludeType, FormattedCapture, CaptureCreate}
-  export {captureInclude, CaptureCreateBodySchema, CaptureResponseSchema}
+  export {captureInclude, CaptureCreateBodySchema, CaptureResponseSchema, CaptureResponseFormattedSchema}
