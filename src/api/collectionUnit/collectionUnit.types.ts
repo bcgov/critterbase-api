@@ -1,24 +1,29 @@
-import { Prisma } from "@prisma/client";
+import { critter_collection_unit, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { nonEmpty, xref_collection_unitSchema } from "../../utils/zod_helpers";
+import { AuditColumns } from "../../utils/types";
+import {
+  implement,
+  noAudit,
+  nonEmpty,
+  XrefCollectionUnitSchema,
+  zodAudit,
+  zodID,
+} from "../../utils/zod_helpers";
 
 // Types
+type CollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
+  typeof collectionUnitIncludes
+>;
+
 type CollectionUnitCreateInput = z.infer<typeof CollectionUnitCreateBodySchema>;
+
 type CollectionUnitUpdateInput = z.infer<typeof CollectionUnitUpdateBodySchema>;
 
 type CollectionUnitResponse = z.TypeOf<typeof collectionUnitResponseSchema>;
 
 // Constants
-const critter_collection_unitSchema = z.object({
-  critter_collection_unit_id: z.string().uuid(),
-  critter_id: z.string().uuid(),
-  collection_unit_id: z.string().uuid(),
-  create_user: z.string().uuid(),
-  update_user: z.string().uuid(),
-  create_timestamp: z.date(),
-  update_timestamp: z.date(),
-})
 
+// Included related data from lk and xref tables
 const collectionUnitIncludes = {
   include: {
     xref_collection_unit: {
@@ -27,41 +32,62 @@ const collectionUnitIncludes = {
   } satisfies Prisma.critter_collection_unitInclude,
 };
 
-const collectionUnitResponseSchema = critter_collection_unitSchema
-  .and(
-    z.object({
-      xref_collection_unit: xref_collection_unitSchema.pick({
-        unit_name: true,
-        description: true,
-      }),
-    })
-  )
-  .transform((arg) => {
+// Schemas
+
+// Base schema for all critter collection unit related data
+const critter_collection_unitSchema = implement<critter_collection_unit>().with(
+  {
+    critter_collection_unit_id: zodID,
+    critter_id: zodID,
+    collection_unit_id: zodID,
+    ...zodAudit,
+  }
+);
+
+// Extended schema which has both base schema and included fields
+const critter_collection_unitIncludesSchema =
+  implement<CollectionUnitIncludes>().with({
+    ...critter_collection_unitSchema.shape,
+    xref_collection_unit: XrefCollectionUnitSchema.pick({
+      unit_name: true,
+      description: true,
+    }),
+  });
+
+// Formatted API reponse schema which omits fields and unpacks nested data
+const collectionUnitResponseSchema =
+  critter_collection_unitIncludesSchema.transform((val) => {
     return {
-      critter_collection_unit_id: arg.critter_collection_unit_id,
-      critter_id: arg.critter_id,
-      unit_name: arg.xref_collection_unit.unit_name,
-      unit_description: arg.xref_collection_unit.description,
-      create_user: arg.create_user,
-      update_user: arg.update_user,
-      create_timestamp: arg.create_timestamp,
-      update_timestamp: arg.update_timestamp,
+      critter_collection_unit_id: val.critter_collection_unit_id,
+      critter_id: val.critter_id,
+      unit_name: val.xref_collection_unit.unit_name,
+      unit_description: val.xref_collection_unit.description,
+      create_user: val.create_user,
+      update_user: val.update_user,
+      create_timestamp: val.create_timestamp,
+      update_timestamp: val.update_timestamp,
     };
   });
 
+// Validate incoming request body for create critter collection unit
+const CollectionUnitCreateBodySchema = implement<
+  Omit<
+    Prisma.critter_collection_unitCreateManyInput,
+    "critter_collection_unit_id" | keyof AuditColumns
+  >
+>().with(
+  critter_collection_unitSchema
+    .omit({ ...noAudit, critter_collection_unit_id: true })
+    .partial()
+    .required({ critter_id: true, collection_unit_id: true }).shape
+);
 
-// Validate request body for create collection unit
-const CollectionUnitCreateBodySchema = z.object({
-  critter_id: z.string().uuid(),
-  collection_unit_id: z.string().uuid(),
-}) satisfies z.ZodType<Prisma.critter_collection_unitUncheckedCreateInput>;
-
-// Validate request body for update collection unit
-const CollectionUnitUpdateBodySchema =
-  CollectionUnitCreateBodySchema.partial().refine(
-    nonEmpty,
-    "no new data was provided or the format was invalid"
-  ) satisfies z.ZodType<Prisma.critter_collection_unitUncheckedUpdateInput>;
+// Validate incoming request body for update critter collection unit
+const CollectionUnitUpdateBodySchema = implement<
+  Omit<Prisma.critter_collection_unitUncheckedUpdateManyInput, "critter_collection_unit_id" | keyof AuditColumns>
+>()
+  .with(CollectionUnitCreateBodySchema.partial().shape)
+  .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export {
   collectionUnitResponseSchema,
@@ -70,6 +96,7 @@ export {
   CollectionUnitUpdateBodySchema,
 };
 export type {
+  CollectionUnitIncludes,
   CollectionUnitCreateInput,
   CollectionUnitUpdateInput,
   CollectionUnitResponse,

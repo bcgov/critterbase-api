@@ -6,7 +6,8 @@ import {
   lk_colour, 
   lk_marking_material, 
   lk_marking_type,
-  xref_taxon_marking_body_location
+  xref_taxon_marking_body_location,
+  xref_collection_unit
 } from ".prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements } from "./types";
@@ -95,6 +96,14 @@ const XrefTaxonMarkingBodyLocationSchema = implement<xref_taxon_marking_body_loc
   body_location: z.string(),
   description: z.string().nullable(),
   ...zodAudit,
+});
+
+const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
+  collection_unit_id: z.string().uuid(),
+  collection_category_id: z.string().uuid(),
+  unit_name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit
 })
 
 export {
@@ -107,6 +116,7 @@ export {
   LookUpMarkingTypeSchema,
   LookUpMaterialSchema,
   XrefTaxonMarkingBodyLocationSchema,
+  XrefCollectionUnitSchema,
   LookupWmuSchema,
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
