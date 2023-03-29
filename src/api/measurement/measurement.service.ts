@@ -5,7 +5,7 @@ import {
 import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
-import { QualitativeBody } from "./measurement.utils";
+import { QualitativeBody, QuantitativeBody } from "./measurement.utils";
 
 const getAllQuantMeasurements = async (): Promise<
   measurement_quantitative[]
@@ -43,11 +43,11 @@ const getQualMeasurementOrThrow = async (
   return qualMeasurement;
 };
 
-// const createQuantMeasurement = async (
-//   data: QualitativeBody
-// ): Promise<measurement_qualitative> => {
-//   return await prisma.measurement_qualitative.create({ data });
-// };
+const createQuantMeasurement = async (
+  data: QuantitativeBody
+): Promise<measurement_quantitative> => {
+  return await prisma.measurement_quantitative.create({ data });
+};
 
 const createQualMeasurement = async (
   data: QualitativeBody
@@ -92,7 +92,9 @@ export {
   getQualMeasurementOrThrow,
   getQuantMeasurementOrThrow,
   createQualMeasurement,
+  createQuantMeasurement,
   getQualMeasurementsByCritterId,
+  getQuantMeasurementsByCritterId,
   deleteQualMeasurement,
   getAllQuantMeasurements,
 };

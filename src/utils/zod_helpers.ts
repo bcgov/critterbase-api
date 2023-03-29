@@ -71,4 +71,5 @@ export {
   LookupWmuSchema,
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
+  zodAudit,
 };

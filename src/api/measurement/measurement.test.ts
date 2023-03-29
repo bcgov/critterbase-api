@@ -1,6 +1,6 @@
 import { measurement_qualitative } from "@prisma/client";
 import { prisma } from "../../utils/constants";
-import { QualitativeBodySchema } from "./measurement.utils";
+import { QuantitativeSchema, QualitativeSchema } from "./measurement.utils";
 import {
   createQualMeasurement,
   deleteQualMeasurement,
@@ -9,6 +9,7 @@ import {
   getQualMeasurementOrThrow,
   getQualMeasurementsByCritterId,
   getQuantMeasurementOrThrow,
+  getQuantMeasurementsByCritterId,
 } from "./measurement.service";
 
 let numMeasurements = 0;
@@ -30,7 +31,7 @@ let createData = {
   measured_timestamp: "2",
 };
 const badID = "deadbeef-dead-dead-dead-deaddeafbeef";
-const comment = "TEST CREATED";
+const comment = "_TEST_CREATED_";
 
 beforeAll(async () => {
   measurements = await getAllQualMeasurements();
@@ -48,7 +49,7 @@ beforeAll(async () => {
     getQualMeasurementsByCritterId(measurements[0].critter_id),
     prisma.measurement_quantitative.count(),
     getQuantMeasurementOrThrow(Qmeasurements[0].measurement_quantitative_id),
-    getQualMeasurementsByCritterId(Qmeasurements[0].critter_id),
+    getQuantMeasurementsByCritterId(Qmeasurements[0].critter_id),
   ]);
   const { critter_id, taxon_measurement_id, qualitative_option_id } =
     measurement;
@@ -104,9 +105,25 @@ describe("API: Location", () => {
           );
         });
         it("measurement passes validation", async () => {
-          expect(QualitativeBodySchema.safeParse(measurement).success);
+          expect(QualitativeSchema.safeParse(measurement).success);
         });
       });
+
+      describe("getQuantMeasurementOrThrow()", () => {
+        it("returns quantitative_measurement with valid id", () => {
+          expect(Qmeasurement).not.toBeNull();
+          expect(Qmeasurement).toHaveProperty("measurement_quantitative_id");
+        });
+        it("throws error with an id that does not exist", async () => {
+          getQuantMeasurementOrThrow(badID).catch((err) =>
+            expect(err).toBeDefined()
+          );
+        });
+        it("measurement passes validation", async () => {
+          expect(QuantitativeSchema.safeParse(Qmeasurement).success);
+        });
+      });
+
       describe("getQualMeasurementsByCritterId()", () => {
         it("returns array of qualitative_measurements or empty array", () => {
           expect(measurementByCritter).not.toBeNull();
@@ -125,6 +142,26 @@ describe("API: Location", () => {
           );
         });
       });
+
+      describe("getQuantMeasurementsByCritterId()", () => {
+        it("returns array of quantitative_measurements or empty array", () => {
+          expect(QmeasurementByCritter).not.toBeNull();
+          expect(Qmeasurements).toBeInstanceOf(Array);
+          if (QmeasurementByCritter?.length) {
+            expect(QmeasurementByCritter[0]).toHaveProperty(
+              "measurement_quantitative_id"
+            );
+          } else {
+            expect(QmeasurementByCritter).toBe([]);
+          }
+        });
+        it("throws error with critter_id that does not exist", async () => {
+          getQuantMeasurementsByCritterId(badID).catch((err) =>
+            expect(err).toBeDefined()
+          );
+        });
+      });
+
       describe("createQualMeasurement()", () => {
         it("should create measurement with supplied comment", () => {
           expect(createdMeasurement).toBeDefined();
