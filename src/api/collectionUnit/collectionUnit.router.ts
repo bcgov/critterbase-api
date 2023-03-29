@@ -10,7 +10,7 @@ import {
   deleteCollectionUnit,
 } from "./collectionUnit.service";
 import { apiError } from "../../utils/types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,

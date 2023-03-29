@@ -1,10 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { nonEmpty } from "../../utils/zod_schemas";
-import {
-  critter_collection_unitSchema,
-  xref_collection_unitSchema,
-} from "../../../prisma/zod_schemas";
+import { nonEmpty, xref_collection_unitSchema } from "../../utils/zod_helpers";
 
 // Types
 type CollectionUnitCreateInput = z.infer<typeof CollectionUnitCreateBodySchema>;
@@ -13,6 +9,16 @@ type CollectionUnitUpdateInput = z.infer<typeof CollectionUnitUpdateBodySchema>;
 type CollectionUnitResponse = z.TypeOf<typeof collectionUnitResponseSchema>;
 
 // Constants
+const critter_collection_unitSchema = z.object({
+  critter_collection_unit_id: z.string().uuid(),
+  critter_id: z.string().uuid(),
+  collection_unit_id: z.string().uuid(),
+  create_user: z.string().uuid(),
+  update_user: z.string().uuid(),
+  create_timestamp: z.date(),
+  update_timestamp: z.date(),
+})
+
 const collectionUnitIncludes = {
   include: {
     xref_collection_unit: {

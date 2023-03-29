@@ -97,6 +97,14 @@ const XrefTaxonMarkingBodyLocationSchema = z.object({
   update_user: z.string().uuid().nullish(),
   create_timestamp: z.date().nullish(),
   update_timestamp: z.date().nullish(),
+});
+
+export const xref_collection_unitSchema = z.object({
+  collection_unit_id: z.string().uuid(),
+  collection_category_id: z.string().uuid(),
+  unit_name: z.string(),
+  description: z.string().nullish(),
+  ...zodAudit
 })
 
 export {
