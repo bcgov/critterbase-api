@@ -3,17 +3,18 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
   createMarking,
-  CreateMarkingSchema,
   deleteMarking,
   getAllMarkings,
   getMarkingById,
   getMarkingsByCritterId,
   updateMarking,
-  UpdateMarkingSchema,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
-import { strings } from "../../utils/constants";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
+import {
+  MarkingCreateBodySchema,
+  MarkingUpdateBodySchema,
+} from "./marking.types";
 
 export const markingRouter = express.Router();
 
@@ -23,8 +24,7 @@ export const markingRouter = express.Router();
 markingRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const markings = await getAllMarkings();
-    return res.status(200).json(markings);
+    return res.status(200).json(await getAllMarkings());
   })
 );
 
@@ -34,7 +34,7 @@ markingRouter.get(
 markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const markingData = CreateMarkingSchema.parse(req.body);
+    const markingData = MarkingCreateBodySchema.parse(req.body);
     const newMarking = await createMarking(markingData);
     return res.status(201).json(newMarking);
   })
@@ -59,24 +59,19 @@ markingRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      // validate marking id and confirm that marking exists
-      const {id} = uuidParamsSchema.parse(req.params);
-      res.locals.markingData = await getMarkingById(id);
-      if (!res.locals.markingData) {
-        throw apiError.notFound(strings.marking.notFound);
-      }
+      // validate uuid
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.markingData);
+      return res.status(200).json(await getMarkingById(req.params.id));
     })
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const markingData = UpdateMarkingSchema.parse(req.body);
+      const markingData = MarkingUpdateBodySchema.parse(req.body);
       const marking = await updateMarking(req.params.id, markingData);
       return res.status(200).json(marking);
     })
