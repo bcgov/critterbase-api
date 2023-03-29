@@ -9,16 +9,23 @@ import {
 } from "./marking.service";
 import type { Prisma, marking } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
+import {
+  markingResponseSchema,
+  MarkingResponseSchema,
+  MarkingCreateInput,
+  markingIncludes,
+  MarkingIncludes,
+} from "./marking.types";
 
-let dummyMarking: marking;
-let dummyMarkingInput: Prisma.markingUncheckedCreateInput;
+let dummyMarking: MarkingResponseSchema;
+let dummyMarkingInput: MarkingCreateInput;
 let dummyMarkingKeys: string[];
 
 /**
  * * Creates a new marking object that references an existing critter and marking location
  * @return {*}  {Promise<Prisma.markingCreateInput>}
  */
-async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
+async function newMarking(): Promise<MarkingCreateInput> {
   const dummyCritterId: string | undefined = (
     await prisma.marking.findFirst({
       select: {
@@ -36,10 +43,13 @@ async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
   )?.xref_taxon_marking_body_location.taxon_marking_body_location_id;
   if (!dummyTaxonMarkingId)
     throw Error("Could not get taxon_marking_body_location_id for dummy.");
-  const dummyMarking: Prisma.markingUncheckedCreateInput = {
+  const dummyMarking: MarkingCreateInput = {
     critter_id: dummyCritterId,
     taxon_marking_body_location_id: dummyTaxonMarkingId,
     identifier: `TEST_MARKING_${randomInt(99999999)}`,
+    frequency: randomInt(99999999),
+    frequency_unit: "KHz",
+    attached_timestamp: new Date(randomInt(999999)),
   };
   return dummyMarking;
 }
@@ -47,7 +57,9 @@ async function newMarking(): Promise<Prisma.markingUncheckedCreateInput> {
 beforeAll(async () => {
   // Sets a global dummy marking to reduce complexity on similar tests
   dummyMarkingInput = await newMarking();
-  dummyMarking = await prisma.marking.create({ data: dummyMarkingInput });
+  dummyMarking = markingResponseSchema.parse(
+    await prisma.marking.create({ data: dummyMarkingInput, ...markingIncludes })
+  );
   dummyMarkingKeys = Object.keys(dummyMarking);
 });
 
@@ -57,11 +69,8 @@ describe("API: Marking", () => {
       it("creates a new marking", async () => {
         const newMarkingInput = await newMarking();
         const marking = await createMarking(newMarkingInput);
-        expect.assertions(3);
+        expect.assertions(2);
         expect(marking.critter_id).toBe(newMarkingInput.critter_id);
-        expect(marking.taxon_marking_body_location_id).toBe(
-          newMarkingInput.taxon_marking_body_location_id
-        );
         expect(marking.identifier).toBe(newMarkingInput.identifier);
       });
     });
@@ -113,9 +122,12 @@ describe("API: Marking", () => {
 
     describe("updateMarking()", () => {
       it("updates a marking", async () => {
-        const marking = await prisma.marking.create({
-          data: await newMarking(),
-        });
+        const marking = markingResponseSchema.parse(
+          await prisma.marking.create({
+            data: await newMarking(),
+            ...markingIncludes,
+          })
+        );
         const newData = {
           identifier: `TEST_MARKING_UPDATED${randomInt(99999999)}`,
           comment: "NEW COMMENT",
@@ -135,9 +147,12 @@ describe("API: Marking", () => {
 
     describe("deleteMarking()", () => {
       it("deletes a marking", async () => {
-        const marking = await prisma.marking.create({
-          data: await newMarking(),
-        });
+        const marking = markingResponseSchema.parse(
+          await prisma.marking.create({
+            data: await newMarking(),
+            ...markingIncludes,
+          })
+        );
         const deletedMarking = await deleteMarking(marking.marking_id);
         const markingCheck = await prisma.marking.findUnique({
           where: { marking_id: marking.marking_id },
@@ -193,13 +208,14 @@ describe("API: Marking", () => {
         }
       });
 
-      it("returns status 400 when data contains invalid fields", async () => {
+      it("strips invalid fields from data", async () => {
         const marking = await newMarking();
         const res = await request
           .post("/api/markings/create")
           .send({ ...marking, invalidField: "qwerty123" });
-        expect.assertions(1);
-        expect(res.status).toBe(400);
+        expect.assertions(2);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
       });
 
       it("returns status 400 when data is missing required fields", async () => {
@@ -240,37 +256,51 @@ describe("API: Marking", () => {
       });
     });
 
-    describe("PUT /api/markings/:id", () => {
+    describe("PATCH /api/markings/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.put(`/api/markings/${randomUUID()}`);
+        const res = await request
+          .patch(`/api/markings/${randomUUID()}`)
+          .send({ identifier: dummyMarking.identifier });
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
 
       it("returns status 200", async () => {
-        const res = await request.put(
-          `/api/markings/${dummyMarking.marking_id}`
-        );
+        const res = await request
+          .patch(`/api/markings/${dummyMarking.marking_id}`)
+          .send({ identifier: dummyMarking.identifier });
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns a marking", async () => {
-        const res = await request.put(
-          `/api/markings/${dummyMarking.marking_id}`
-        );
+        const res = await request
+          .patch(`/api/markings/${dummyMarking.marking_id}`)
+          .send({ identifier: dummyMarking.identifier });
         expect.assertions(dummyMarkingKeys.length);
         for (const key of dummyMarkingKeys) {
           expect(res.body).toHaveProperty(key);
         }
       });
 
-      it("returns status 400 when data contains invalid fields", async () => {
-        const res = await request
-          .put(`/api/markings/${dummyMarking.marking_id}`)
-          .send({ invalidField: "qwerty123" });
+      it("returns status 400 when data is empty", async () => {
+        const res = await request.patch(
+          `/api/markings/${dummyMarking.marking_id}`
+        );
         expect.assertions(1);
         expect(res.status).toBe(400);
+      });
+
+      it("strips invalid fields from data", async () => {
+        const res = await request
+          .patch(`/api/markings/${dummyMarking.marking_id}`)
+          .send({
+            identifier: dummyMarking.identifier,
+            invalidField: "qwerty123",
+          });
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body).not.toHaveProperty("invalidField");
       });
     });
 
@@ -285,9 +315,7 @@ describe("API: Marking", () => {
         const marking = await prisma.marking.create({
           data: await newMarking(),
         });
-        const res = await request.delete(
-          `/api/markings/${dummyMarking.marking_id}`
-        );
+        const res = await request.delete(`/api/markings/${marking.marking_id}`);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });

@@ -7,12 +7,14 @@ import {
   getAllMarkings,
   getMarkingById,
   getMarkingsByCritterId,
-  isValidCreateMarkingInput,
-  isValidUpdateMarkingInput,
   updateMarking,
 } from "./marking.service";
 import { apiError } from "../../utils/types";
-import { isUUID } from "../../utils/helper_functions";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
+import {
+  MarkingCreateBodySchema,
+  MarkingUpdateBodySchema,
+} from "./marking.types";
 
 export const markingRouter = express.Router();
 
@@ -22,8 +24,7 @@ export const markingRouter = express.Router();
 markingRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const markings = await getAllMarkings();
-    return res.status(200).json(markings);
+    return res.status(200).json(await getAllMarkings());
   })
 );
 
@@ -33,10 +34,7 @@ markingRouter.get(
 markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const markingData = req.body;
-    if (!isValidCreateMarkingInput(markingData)) {
-      throw apiError.syntaxIssue("Invalid request body");
-    }
+    const markingData = MarkingCreateBodySchema.parse(req.body);
     const newMarking = await createMarking(markingData);
     return res.status(201).json(newMarking);
   })
@@ -45,7 +43,7 @@ markingRouter.post(
 markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
     // validate marking id and confirm that marking exists
-    const id = isUUID(req.params.id);
+    const { id } = uuidParamsSchema.parse(req.params);
     const markings = await getMarkingsByCritterId(id);
     if (!markings.length) {
       throw apiError.notFound(`Critter ID "${id}" has no associated markings`);
@@ -61,28 +59,20 @@ markingRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      // validate marking id and confirm that marking exists
-      const id = isUUID(req.params.id);
-      res.locals.markingData = await getMarkingById(id);
-      if (!res.locals.markingData) {
-        throw apiError.notFound(`Marking ID "${id}" not found`);
-      }
+      // validate uuid
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.markingData);
+      return res.status(200).json(await getMarkingById(req.params.id));
     })
   )
-  .put(
+  .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      if (!isValidUpdateMarkingInput(req.body)) {
-        throw apiError.syntaxIssue("Invalid request body");
-      }
-      const marking = await updateMarking(id, req.body);
+      const markingData = MarkingUpdateBodySchema.parse(req.body);
+      const marking = await updateMarking(req.params.id, markingData);
       return res.status(200).json(marking);
     })
   )
