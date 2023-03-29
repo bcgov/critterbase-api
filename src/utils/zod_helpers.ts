@@ -1,7 +1,15 @@
-import { critter, lk_colour, lk_marking_material, lk_marking_type } from ".prisma/client";
+import {
+  critter,
+  lk_region_env,
+  lk_region_nr,
+  lk_wildlife_management_unit, 
+  lk_colour, 
+  lk_marking_material, 
+  lk_marking_type
+} from ".prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements } from "./types";
-
+// Schemas
 const zodID = z.string().uuid();
 
 const zodAudit = {
@@ -13,6 +21,27 @@ const zodAudit = {
 
 const uuidParamsSchema = z.object({
   id: z.string().uuid("query param is an invalid UUID"),
+});
+
+const LookupWmuSchema = implement<lk_wildlife_management_unit>().with({
+  wmu_id: zodID,
+  wmu_name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit,
+});
+
+const LookupRegionNrSchema = implement<lk_region_nr>().with({
+  region_nr_id: zodID,
+  region_nr_name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit,
+});
+
+const LookupRegionEnvSchema = implement<lk_region_env>().with({
+  region_env_id: zodID,
+  region_env_name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit,
 });
 
 const nonEmpty = (obj: Record<string | number | symbol, unknown>) =>
@@ -80,4 +109,7 @@ export {
   LookUpMarkingTypeSchema,
   LookUpMaterialSchema,
   XrefTaxonMarkingBodyLocationSchema,
+  LookupWmuSchema,
+  LookupRegionEnvSchema,
+  LookupRegionNrSchema,
 };
