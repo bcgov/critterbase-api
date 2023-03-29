@@ -1,17 +1,9 @@
 import { string, z } from "zod";
-import { prisma } from "../../utils/constants";
-import { nonEmpty } from "../../utils/zod_schemas";
+import { nonEmpty } from "../../utils/zod_helpers";
 
 const ArtifactCreateBodySchema = z.object({
   critter_id: string().uuid(),
-  artifact_url: string()
-    .url()
-    .refine(async (artifact_url) => {
-      // check for uniqueness
-      return !(await prisma.artifact.findUnique({
-        where: { artifact_url: artifact_url },
-      }));
-    }, "artifact_url already exists"),
+  artifact_url: string().url(),
   artifact_comment: string().optional(),
   capture_id: string().uuid().optional(),
   mortality_id: string().uuid().optional(),

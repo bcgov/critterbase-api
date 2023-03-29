@@ -1,7 +1,5 @@
 import { prisma } from "../../utils/constants";
-import { artifact, Prisma } from "@prisma/client";
-import { number, string, z } from "zod";
-import { nonEmpty } from "../../utils/zod_schemas";
+import { artifact } from "@prisma/client";
 import { ArtifactCreate, ArtifactUpdate } from "./artifact.types";
 
 /**

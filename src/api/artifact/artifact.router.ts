@@ -13,7 +13,7 @@ import {
   ArtifactCreateBodySchema,
   ArtifactUpdateBodySchema,
 } from "./artifact.types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { apiError } from "../../utils/types";
 import { strings } from "../../utils/constants";
 
@@ -25,8 +25,7 @@ export const artifactRouter = express.Router();
 artifactRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const artifacts = await getAllArtifacts();
-    return res.status(200).json(artifacts);
+    return res.status(200).json(await getAllArtifacts());
   })
 );
 
@@ -36,7 +35,7 @@ artifactRouter.get(
 artifactRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const artifactData = await ArtifactCreateBodySchema.parseAsync(req.body);
+    const artifactData = await ArtifactCreateBodySchema.parse(req.body);
     const newArtifact = await createArtifact(artifactData);
     return res.status(201).json(newArtifact);
   })
@@ -64,19 +63,14 @@ artifactRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      // validate artifact id and confirm that artifact exists
-      const { id } = uuidParamsSchema.parse(req.params);
-      res.locals.artifactData = await getArtifactById(id);
-      if (!res.locals.artifactData) {
-        throw apiError.notFound(strings.artifact.notFound);
-      }
+      // validate uuid
+      uuidParamsSchema.parse(req.params);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      // using stored data from validation to avoid duplicate query
-      return res.status(200).json(res.locals.artifactData);
+      return res.status(200).json(await getArtifactById(req.params.id));
     })
   )
   .patch(
