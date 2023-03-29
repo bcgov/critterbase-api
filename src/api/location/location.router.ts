@@ -3,15 +3,15 @@ import { strings } from "../../utils/constants";
 import { isUUID } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
-import { uuidParamsSchema } from "../../utils/zod_schemas";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   createLocation,
   deleteLocation,
   getAllLocations,
-  getLocation,
-  LocationBodySchema,
+  getLocationOrThrow,
   updateLocation,
 } from "./location.service";
+import { LocationCreateSchema } from "./location.types";
 
 export const locationRouter = express.Router();
 
@@ -32,7 +32,7 @@ locationRouter.get(
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    LocationBodySchema.parse(req.body);
+    LocationCreateSchema.parse(req.body);
     const location = await createLocation(req.body);
     return res.status(201).json(location);
   })
@@ -46,24 +46,20 @@ locationRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
-      const location = await getLocation(req.params.id);
-      if (!location) {
-        throw apiError.notFound(strings.location.notFound);
-      }
-      res.locals.location = location;
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      return res.status(200).json(res.locals.location);
+      const location = await getLocationOrThrow(req.params.id);
+      return res.status(200).json(location);
     })
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      LocationBodySchema.parse(req.body);
-      const location = await updateLocation(req.body, id);
+      const updateBody = LocationCreateSchema.parse(req.body);
+      const location = await updateLocation(updateBody, id);
       res.status(201).json(location);
     })
   )

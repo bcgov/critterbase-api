@@ -2,6 +2,7 @@ import { app } from "../server";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import supertest from "supertest";
+import { apiError } from "./types";
 
 const PORT = process.env.PORT;
 
@@ -18,7 +19,11 @@ const request = supertest(app);
  * Prevents multiple unwated instances of PrismaClient when hot reloading
  */
 const globalPrisma = global as unknown as { prisma: PrismaClient };
-const prisma = globalPrisma.prisma || new PrismaClient();
+const prisma =
+  globalPrisma.prisma ||
+  new PrismaClient({
+    errorFormat: "minimal",
+  });
 
 if (IS_PROD) globalPrisma.prisma = prisma;
 
@@ -26,6 +31,9 @@ const strings = {
   app: {
     invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
     idRequired: `id is required`,
+  },
+  prisma: {
+    P2025: () => "record to update not found",
   },
   location: {
     notFoundMulti: "no locations found",

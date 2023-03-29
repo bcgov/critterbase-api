@@ -2,31 +2,30 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
-  createCritter,
-  deleteCritter,
-  getAllCritters,
-  getCritterById,
-  getCritterByIdWithDetails,
-  getCritterByWlhId,
-  updateCritter,
-} from "./critter.service";
+  createCapture,
+  deleteCapture,
+  getAllCaptures,
+  getCaptureByCritter,
+  getCaptureById,
+  updateCapture,
+} from "./capture.service";
 import { apiError } from "../../utils/types";
 import { prisma } from "../../utils/constants";
 import {
-  CritterCreateBodySchema,
-  CritterUpdateBodySchema,
-} from "./critter.types";
+  CaptureCreateBodySchema,
+  CaptureUpdateBodySchema,
+} from "./capture.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
-export const critterRouter = express.Router();
+export const captureRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
-critterRouter.get(
+captureRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const allCritters = await getAllCritters();
+    const allCritters = await getAllCaptures();
     return res.status(200).json(allCritters);
   })
 );
@@ -34,31 +33,28 @@ critterRouter.get(
 /**
  ** Create new critter
  */
-critterRouter.post(
+captureRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const parsed = CritterCreateBodySchema.parse(req.body);
-    const created = await createCritter(parsed);
-    return res.status(201).send(created);
+    const parsed = CaptureCreateBodySchema.parse(req.body);
+    const result = await createCapture(parsed);
+    return res.status(201).json(result);
   })
 );
 
-critterRouter.route("/wlh/:wlh_id").get(
+captureRouter.get(
+  "/critter/:id",
   catchErrors(async (req: Request, res: Response) => {
-    const critter = await getCritterByWlhId(req.params.wlh_id);
-    if (!critter.length) {
-      throw apiError.notFound(
-        "Could not find any animals with the requested WLH ID"
-      );
-    }
-    return res.status(200).json(critter);
+    const parsed = uuidParamsSchema.parse(req.params);
+    const result = await getCaptureByCritter(parsed.id);
+    res.status(200).send(result);
   })
 );
 
 /**
  * * All critter_id related routes
  */
-critterRouter
+captureRouter
   .route("/:id")
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
@@ -69,22 +65,22 @@ critterRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = await getCritterByIdWithDetails(id);
-      return res.status(200).json(critter);
+      const result = await getCaptureById(id);
+      return res.status(200).json(result);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = CritterUpdateBodySchema.parse(req.body);
-      const critter = await updateCritter(id, parsed);
-      res.status(200).json(critter);
+      const parsed = CaptureUpdateBodySchema.parse(req.body);
+      const result = await updateCapture(id, parsed);
+      res.status(200).json(result);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = await deleteCritter(id);
-      res.status(200).json(critter);
+      const result = await deleteCapture(id);
+      res.status(200).json(result);
     })
   );

@@ -1,9 +1,39 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
 import { app } from "../server";
+import { prismaErrorMsg } from "./helper_functions";
 import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
 import { apiError } from "./types";
 
 describe("Utils", () => {
+  describe("File: helper_functions.ts", () => {
+    describe("prismaErrorMsg()", () => {
+      const badCode = "PPPP";
+      const defaultMsg = `unsupported prisma error: "${badCode}"`;
+      const supportedErrorCodes = ["P2025", "P2002"];
+      it("should return default error message on unsupported code", () => {
+        const { error, status } = prismaErrorMsg(
+          new PrismaClientKnownRequestError("test 1", {
+            code: badCode,
+            clientVersion: "1",
+          })
+        );
+        expect(error).toBe(defaultMsg);
+        expect(status).toBe(400);
+      });
+      it("should create new error message for supported codes", () => {
+        supportedErrorCodes.forEach((code) => {
+          const { error, status } = prismaErrorMsg(
+            new PrismaClientKnownRequestError("test 1", {
+              code: code,
+              clientVersion: "1",
+            })
+          );
+          expect(error).not.toBe(defaultMsg);
+        });
+      });
+    });
+  });
   describe("File: middleware.ts", () => {
     let mockError = {} as apiError;
     let mockRequest = {} as Request;
@@ -33,10 +63,19 @@ describe("Utils", () => {
     });
 
     describe("errorLogger()", () => {
-      it("next() and console.error() called once", async () => {
+      it("next() called once", async () => {
         errorLogger(mockError, mockRequest, mockResponse, mockNext);
         expect(mockNext).toBeCalledTimes(1);
-        expect(console.error).toBeCalledTimes(1);
+      });
+      it("console.error not called when NODE_ENV == test", async () => {
+        errorLogger(mockError, mockRequest, mockResponse, mockNext);
+        expect(console.error).toBeCalledTimes(0);
+      });
+      it("console.error called once when NODE_ENV != test", async () => {
+        process.env.NODE_ENV = "development";
+        errorLogger(mockError, mockRequest, mockResponse, mockNext);
+        expect(console.error).toBeCalledTimes(0);
+        process.env.NODE_ENV = "test";
       });
     });
 
