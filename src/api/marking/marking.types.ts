@@ -1,14 +1,16 @@
 import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { getAuditColumns } from "../../utils/helper_functions";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
   LookUpMaterialSchema,
+  noAudit,
   nonEmpty,
   XrefTaxonMarkingBodyLocationSchema,
+  zodAudit,
+  zodID,
 } from "../../utils/zod_helpers";
 
 // Types
@@ -39,10 +41,7 @@ const markingSchema = implement<marking>().with({
   comment: z.string().nullable(),
   attached_timestamp: z.date(),
   removed_timestamp: z.date().nullable(),
-  create_user: z.string().uuid(),
-  update_user: z.string().uuid(),
-  create_timestamp: z.date(),
-  update_timestamp: z.date(),
+  ...zodAudit,
 });
 
 const markingIncludes = {
@@ -124,35 +123,19 @@ const markingResponseSchema = markingIncludesSchema
 
 // Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
-  Omit<
-    Prisma.markingUncheckedCreateInput,
-    | "marking_id"
-    | keyof AuditColumns
-  >
+  Omit<Prisma.markingUncheckedCreateInput, "marking_id" | keyof AuditColumns>
 >().with({
-  critter_id: z.string().uuid(),
-  capture_id: z.string().uuid().optional().nullable(),
-  mortality_id: z.string().uuid().optional().nullable(),
-  taxon_marking_body_location_id: z.string().uuid(),
-  marking_type_id: z.string().uuid().optional().nullable(),
-  marking_material_id: z.string().uuid().optional().nullable(),
-  primary_colour_id: z.string().uuid().optional().nullable(),
-  secondary_colour_id: z.string().uuid().optional().nullable(),
-  text_colour_id: z.string().uuid().optional().nullable(),
-  identifier: z.string().optional().nullable(),
-  frequency: z.number().optional().nullable(),
-  frequency_unit: z.nativeEnum(frequency_unit).optional().nullable(),
-  order: z.number().optional().nullable(),
-  comment: z.string().optional().nullable(),
-  attached_timestamp: z.coerce.date().optional(),
-  removed_timestamp: z.coerce.date().optional().nullable(),
+  ...markingSchema.omit({ ...noAudit, marking_id: true }).partial().shape,
+  critter_id: zodID,
+  taxon_marking_body_location_id: zodID,
 });
 
 // Validate incoming request body for update marking
-const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
-  nonEmpty,
-  "no new data was provided or the format was invalid"
-);
+const MarkingUpdateBodySchema = implement<
+  Omit<Prisma.markingUncheckedUpdateInput, "marking_id" | keyof AuditColumns>
+>()
+  .with({ ...MarkingCreateBodySchema.partial().shape })
+  .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export {
   MarkingCreateBodySchema,

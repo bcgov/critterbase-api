@@ -90,7 +90,9 @@ const createMarking = async (
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string): Promise<MarkingResponseSchema> => {
+const deleteMarking = async (
+  marking_id: string
+): Promise<MarkingResponseSchema> => {
   const marking: MarkingIncludes = await prisma.marking.delete({
     where: {
       marking_id: marking_id,
