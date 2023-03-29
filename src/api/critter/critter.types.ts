@@ -1,5 +1,6 @@
 import { capture, critter, frequency_unit, measurement_qualitative, measurement_quantitative, measurement_unit, Prisma, sex, xref_taxon_measurement_qualitative, xref_taxon_measurement_qualitative_option, xref_taxon_measurement_quantitative } from "@prisma/client";
 import { z, ZodAny } from 'zod'
+import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
 import { captureInclude, CaptureResponseFormattedSchema, CaptureResponseSchema } from "../capture/capture.types";
 import { commonLocationSelect, FormattedLocation } from "../location/location.types";
@@ -126,15 +127,19 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     update_timestamp: z.coerce.date()
   })
 
-  const CritterUpdateSchema = CritterSchema.omit({
+  const CritterUpdateSchema = implement<
+   Omit<Prisma.critterUncheckedUpdateManyInput, "critter_id" | keyof AuditColumns>
+  >().with(CritterSchema.omit({
     critter_id: true,
     ...noAudit,
-  }).partial();
+  }).partial().shape);
 
-  const CritterCreateSchema = CritterUpdateSchema.required({
+  const CritterCreateSchema = implement<
+   Omit<Prisma.critterCreateManyInput, "critter_id" | keyof AuditColumns>>()
+  .with(CritterUpdateSchema.required({
     taxon_id: true,
     sex: true
-  })
+  }).shape);
 
   const CritterResponseSchema = implement<CritterIncludeResult>().with({
     critter_id: zodID,

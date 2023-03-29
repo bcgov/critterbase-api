@@ -1,6 +1,7 @@
 import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { implement, zodID } from "../../utils/zod_helpers";
+import { AuditColumns } from "../../utils/types";
+import { implement, noAudit, zodID } from "../../utils/zod_helpers";
 import { CommonLocationSchema, commonLocationSelect, FormattedLocation } from "../location/location.types";
 
 const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
@@ -53,12 +54,23 @@ const MortalityBodySchema = implement<mortality>().with({
     update_timestamp: z.coerce.date()
 });
 
-const MortalityCreateSchema = MortalityBodySchema.extend({
-    mortality_id: z.string().uuid().optional(),
-    critter_id: z.string().uuid(),
-    mortality_timestamp: z.coerce.date(),
-    proximate_cause_of_death_id: z.string().uuid()
-});
+const MortalityUpdateSchema = implement<
+ Omit<Prisma.mortalityUncheckedUpdateManyInput, "mortality_id" | keyof AuditColumns>
+ >().with(MortalityBodySchema.omit({
+    mortality_id: true,
+    ...noAudit
+ }).partial().shape
+ );
+
+const MortalityCreateSchema = implement<
+ Omit<Prisma.mortalityCreateManyInput, "mortality_id" | keyof AuditColumns>
+ >().with(
+    MortalityUpdateSchema.required({
+        critter_id: true,
+        mortality_timestamp: true,
+        proximate_cause_of_death_id: true
+    }).shape
+ )
 
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
 

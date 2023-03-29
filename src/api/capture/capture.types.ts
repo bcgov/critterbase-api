@@ -2,6 +2,7 @@ import { capture, Prisma } from "@prisma/client";
 import { CommonLocationSchema, commonLocationSelect, FormattedLocation, LocationSubsetType } from "../location/location.types";
 import { z } from 'zod';
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
+import { AuditColumns } from "../../utils/types";
 
 const captureInclude = Prisma.validator<Prisma.captureArgs>()({
     include: {
@@ -31,15 +32,22 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
     update_timestamp: z.coerce.date()
   });
 
-  const CaptureCreateBodySchema = CaptureBodySchema.omit({
-    capture_id: true,
-    ...noAudit
-  }).partial().required({
-    critter_id: true,
-    capture_timestamp: true,
-  })
+  const CaptureUpdateSchema = implement<
+    Omit<Prisma.captureUncheckedUpdateManyInput, "capture_id" | keyof AuditColumns>>().with(CaptureBodySchema.omit({
+      capture_id: true,
+      ...noAudit
+    }).partial().shape
+    )
 
-  type CaptureCreate = z.infer<typeof CaptureCreateBodySchema>
+  const CaptureCreateSchema = implement<Omit<Prisma.captureCreateManyInput,  "capture_id" | keyof AuditColumns>>().with(
+    CaptureUpdateSchema.required({
+      critter_id: true,
+      capture_timestamp: true
+    }).shape
+  )
+
+  type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
+  type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
   const CaptureResponseSchema = implement<CaptureIncludeType>().with({
     capture_id: zodID,
@@ -71,5 +79,5 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
   type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
 
-  export type {CaptureIncludeType, FormattedCapture, CaptureCreate}
-  export {captureInclude, CaptureCreateBodySchema, CaptureResponseSchema, CaptureResponseFormattedSchema}
+  export type {CaptureIncludeType, FormattedCapture, CaptureCreate, CaptureUpdate}
+  export {captureInclude, CaptureCreateSchema, CaptureUpdateSchema, CaptureResponseSchema, CaptureResponseFormattedSchema}
