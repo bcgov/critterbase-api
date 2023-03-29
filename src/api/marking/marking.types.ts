@@ -24,23 +24,23 @@ type MarkingResponseSchema = z.TypeOf<typeof markingResponseSchema>;
 
 // Constants
 const markingSchema = implement<marking>().with({
-  marking_id: z.string().uuid(),
-  critter_id: z.string().uuid(),
-  capture_id: z.string().uuid().nullable(),
-  mortality_id: z.string().uuid().nullable(),
-  taxon_marking_body_location_id: z.string().uuid(),
-  marking_type_id: z.string().uuid().nullable(),
-  marking_material_id: z.string().uuid().nullable(),
-  primary_colour_id: z.string().uuid().nullable(),
-  secondary_colour_id: z.string().uuid().nullable(),
-  text_colour_id: z.string().uuid().nullable(),
+  marking_id: zodID,
+  critter_id: zodID,
+  capture_id: zodID.nullable(),
+  mortality_id: zodID.nullable(),
+  taxon_marking_body_location_id: zodID,
+  marking_type_id: zodID.nullable(),
+  marking_material_id: zodID.nullable(),
+  primary_colour_id: zodID.nullable(),
+  secondary_colour_id: zodID.nullable(),
+  text_colour_id: zodID.nullable(),
   identifier: z.string().nullable(),
   frequency: z.number().nullable(),
   frequency_unit: z.nativeEnum(frequency_unit).nullable(),
   order: z.number().int().nullable(),
   comment: z.string().nullable(),
-  attached_timestamp: z.date(),
-  removed_timestamp: z.date().nullable(),
+  attached_timestamp: z.coerce.date(),
+  removed_timestamp: z.coerce.date().nullable(),
   ...zodAudit,
 });
 
@@ -124,11 +124,12 @@ const markingResponseSchema = markingIncludesSchema
 // Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
   Omit<Prisma.markingUncheckedCreateInput, "marking_id" | keyof AuditColumns>
->().with({
-  ...markingSchema.omit({ ...noAudit, marking_id: true }).partial().shape,
-  critter_id: zodID,
-  taxon_marking_body_location_id: zodID,
-});
+>().with(
+  markingSchema
+    .omit({ ...noAudit, marking_id: true })
+    .partial()
+    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
+);
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = implement<
