@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { nonEmpty } from "../../utils/zod_schemas";
+import { nonEmpty } from "../../utils/zod_helpers";
 
 // Zod schema to validate create user data
 const CreateUserSchema = z.object({

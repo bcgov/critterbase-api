@@ -4,7 +4,7 @@ import {
   lk_wildlife_management_unit,
   location,
   Prisma,
-  capture
+  capture,
 } from "@prisma/client";
 
 import { z } from "zod";
@@ -15,15 +15,19 @@ import { CaptureSubsetType } from "../critter/critter.types";
 import {
   FormattedLocation,
   LocationBody,
-  LocationBodySchema,
   locationExcludeKeys,
+  LocationResponseSchema,
   locationIncludes,
   LocationSubsetType,
 } from "./location.types";
 
 const formatLocation = (location: LocationSubsetType) => {
-  return exclude(location, ['lk_region_env', 'lk_region_nr', 'lk_wildlife_management_unit']) as FormattedLocation;
-}
+  return exclude(location, [
+    "lk_region_env",
+    "lk_region_nr",
+    "lk_wildlife_management_unit",
+  ]) as FormattedLocation;
+};
 
 /**
  ** gets a single location by id
@@ -31,14 +35,15 @@ const formatLocation = (location: LocationSubsetType) => {
  * @returns {Promise<FormattedLocation>}
  * Note: inferring return type
  */
-const getLocationOrThrow = async <R>(id: string): Promise<R> => {
+const getLocationOrThrow = async <R>(id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
     },
     include: locationIncludes,
   });
-  return exclude(location, locationExcludeKeys) as R;
+  return LocationResponseSchema.parse(location);
+  //return exclude(location, locationExcludeKeys) as R;
 };
 /**
  ** gets all locations
@@ -93,11 +98,10 @@ const updateLocation = async (
 };
 
 export {
-  LocationBodySchema,
   getAllLocations,
   getLocationOrThrow,
   deleteLocation,
   createLocation,
   updateLocation,
-  formatLocation
+  formatLocation,
 };

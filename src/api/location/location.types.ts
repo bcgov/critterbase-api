@@ -1,19 +1,48 @@
-import { location, Prisma } from "@prisma/client";
+import { coordinate_uncertainty_unit, location, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { getLocationOrThrow } from "./location.service";
+import { AuditColumns } from "../../utils/types";
+import { implement, noAudit, zodID } from "../../utils/zod_helpers";
+
 // Zod Schemas
-const LocationBodySchema = z.object({
-  latitude: z.number().min(-90).max(90).nullable().optional(),
-  longitude: z.number().min(-180).max(180).nullable().optional(),
-  coordinate_uncertainty: z.number().nullable().optional(),
-  coordinate_uncertainty_unit: z.enum(["m"]).default("m").nullable().optional(),
-  wmu_id: z.string().uuid().nullable().optional(),
-  region_nr_id: z.string().uuid().nullable().optional(),
-  region_env_id: z.string().uuid().nullable().optional(),
-  elevation: z.number().min(0).nullable().optional(),
-  temperature: z.number().min(-100).max(100).nullable().optional(),
-  location_comment: z.string().max(100).nullable().optional(),
-}) satisfies z.ZodType<Prisma.locationCreateInput>;
+const LocationSchema = implement<location>().with({
+  location_id: zodID,
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  coordinate_uncertainty: z.number().nullable(),
+  coordinate_uncertainty_unit: z
+    .nativeEnum(coordinate_uncertainty_unit)
+    .nullable(),
+  wmu_id: zodID.nullable(),
+  region_nr_id: zodID.nullable(),
+  region_env_id: zodID.nullable(),
+  elevation: z.number().nullable(),
+  temperature: z.number().nullable(),
+  location_comment: z.string().nullable(),
+  create_user: zodID,
+  update_user: zodID,
+  create_timestamp: z.date(),
+  update_timestamp: z.date(),
+});
+
+const LocationCreateSchema = LocationSchema.omit({
+  location_id: true,
+  ...noAudit,
+}).partial();
+
+const LocationResponseSchema = LocationSchema.extend({
+  wmu_name: z.string().nullish(),
+  region_env_name: z.string().nullish(),
+  region_nr_name: z.string().nullish(),
+  lk_wildlife_management_unit: z.any(),
+  lk_region_nr: z.any(),
+  lk_region_env: z.any(),
+})
+  .omit({
+    wmu_id: true,
+    region_nr_id: true,
+    region_env_id: true,
+  })
+  .transform((val) => val);
 
 // Types
 type LocationSubsetType = Prisma.locationGetPayload<
@@ -30,7 +59,7 @@ type FormattedLocation = Omit<
 };
 //type FormattedLocation = Prisma.PromiseReturnType<typeof getLocationOrThrow>;
 
-type LocationBody = z.infer<typeof LocationBodySchema>;
+type LocationBody = z.infer<typeof LocationCreateSchema>;
 
 type LocationExclude = (keyof location | keyof Prisma.locationInclude)[];
 
@@ -88,7 +117,9 @@ export type { LocationSubsetType, FormattedLocation };
 export {
   commonLocationSelect,
   LocationBody,
-  LocationBodySchema,
+  LocationCreateSchema,
   locationIncludes,
   locationExcludeKeys,
+  LocationResponseSchema,
+  LocationSchema,
 };
