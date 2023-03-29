@@ -30,13 +30,6 @@ const unpackObject = <T, Key extends keyof T>(obj: T, key: Key) => {
   return obj;
 };
 
-const getAuditColumns = <T extends AuditColumns>(obj: T): AuditColumns => ({
-  create_user: obj.create_user,
-  update_user: obj.update_user,
-  create_timestamp: obj.create_timestamp,
-  update_timestamp: obj.update_timestamp,
-});
-
 /**
  * * Checks if a provided string value is a uuid
  * @param id string | undefined
@@ -115,11 +108,4 @@ const prismaErrorMsg = (
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
-export {
-  isUUID,
-  exclude,
-  isValidObject,
-  startServer,
-  prismaErrorMsg,
-  getAuditColumns,
-};
+export { isUUID, exclude, isValidObject, startServer, prismaErrorMsg };
