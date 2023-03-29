@@ -23,27 +23,8 @@ type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 type MarkingResponseSchema = z.TypeOf<typeof markingResponseSchema>;
 
 // Constants
-const markingSchema = implement<marking>().with({
-  marking_id: zodID,
-  critter_id: zodID,
-  capture_id: zodID.nullable(),
-  mortality_id: zodID.nullable(),
-  taxon_marking_body_location_id: zodID,
-  marking_type_id: zodID.nullable(),
-  marking_material_id: zodID.nullable(),
-  primary_colour_id: zodID.nullable(),
-  secondary_colour_id: zodID.nullable(),
-  text_colour_id: zodID.nullable(),
-  identifier: z.string().nullable(),
-  frequency: z.number().nullable(),
-  frequency_unit: z.nativeEnum(frequency_unit).nullable(),
-  order: z.number().int().nullable(),
-  comment: z.string().nullable(),
-  attached_timestamp: z.coerce.date(),
-  removed_timestamp: z.coerce.date().nullable(),
-  ...zodAudit,
-});
 
+// Included related data from lk and xref tables
 const markingIncludes = {
   include: {
     xref_taxon_marking_body_location: {
@@ -67,6 +48,31 @@ const markingIncludes = {
   } satisfies Prisma.markingInclude,
 };
 
+// Schemas
+
+// Base schema for all marking related data
+const markingSchema = implement<marking>().with({
+  marking_id: zodID,
+  critter_id: zodID,
+  capture_id: zodID.nullable(),
+  mortality_id: zodID.nullable(),
+  taxon_marking_body_location_id: zodID,
+  marking_type_id: zodID.nullable(),
+  marking_material_id: zodID.nullable(),
+  primary_colour_id: zodID.nullable(),
+  secondary_colour_id: zodID.nullable(),
+  text_colour_id: zodID.nullable(),
+  identifier: z.string().nullable(),
+  frequency: z.number().nullable(),
+  frequency_unit: z.nativeEnum(frequency_unit).nullable(),
+  order: z.number().int().nullable(),
+  comment: z.string().nullable(),
+  attached_timestamp: z.coerce.date(),
+  removed_timestamp: z.coerce.date().nullable(),
+  ...zodAudit,
+});
+
+// Extended schema which has both base schema and included fields
 const markingIncludesSchema = implement<MarkingIncludes>().with({
   ...markingSchema.shape,
   lk_colour_marking_primary_colour_idTolk_colour: LookUpColourSchema.pick({
@@ -89,6 +95,7 @@ const markingIncludesSchema = implement<MarkingIncludes>().with({
   }),
 });
 
+// Formatted API reponse schema which omits fields and unpacks nested data
 const markingResponseSchema = markingIncludesSchema
   .omit({
     primary_colour_id: true,
@@ -135,7 +142,7 @@ const MarkingCreateBodySchema = implement<
 const MarkingUpdateBodySchema = implement<
   Omit<Prisma.markingUncheckedUpdateInput, "marking_id" | keyof AuditColumns>
 >()
-  .with({ ...MarkingCreateBodySchema.partial().shape })
+  .with(MarkingCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export {
