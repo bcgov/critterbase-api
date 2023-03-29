@@ -87,6 +87,15 @@ const deleteQualMeasurement = async (
   });
 };
 
+const deleteQuantMeasurement = async (
+  id: string
+): Promise<measurement_quantitative> => {
+  return await prisma.measurement_quantitative.delete({
+    where: {
+      measurement_quantitative_id: id,
+    },
+  });
+};
 export {
   getAllQualMeasurements,
   getQualMeasurementOrThrow,
@@ -96,5 +105,6 @@ export {
   getQualMeasurementsByCritterId,
   getQuantMeasurementsByCritterId,
   deleteQualMeasurement,
+  deleteQuantMeasurement,
   getAllQuantMeasurements,
 };

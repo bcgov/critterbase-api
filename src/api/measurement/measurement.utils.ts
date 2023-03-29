@@ -7,6 +7,7 @@ import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodAudit, zodID } from "../../utils/zod_helpers";
 // Zod Schemas
+
 // Qualitatitive
 const QualitativeSchema = implement<measurement_qualitative>().with({
   measurement_qualitative_id: zodID,

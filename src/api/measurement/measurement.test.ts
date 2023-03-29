@@ -3,7 +3,9 @@ import { prisma } from "../../utils/constants";
 import { QuantitativeSchema, QualitativeSchema } from "./measurement.utils";
 import {
   createQualMeasurement,
+  createQuantMeasurement,
   deleteQualMeasurement,
+  deleteQuantMeasurement,
   getAllQualMeasurements,
   getAllQuantMeasurements,
   getQualMeasurementOrThrow,
@@ -57,6 +59,13 @@ beforeAll(async () => {
     critter_id,
     taxon_measurement_id,
     qualitative_option_id,
+    measurement_comment: comment,
+  });
+
+  QcreatedMeasurement = await createQuantMeasurement({
+    critter_id: Qmeasurement.critter_id,
+    value: 2,
+    taxon_measurement_id: Qmeasurement.taxon_measurement_id,
     measurement_comment: comment,
   });
 });
@@ -163,15 +172,32 @@ describe("API: Location", () => {
       });
 
       describe("createQualMeasurement()", () => {
-        it("should create measurement with supplied comment", () => {
+        it("should create qualitative measurement with supplied comment", () => {
           expect(createdMeasurement).toBeDefined();
           expect(createdMeasurement.measurement_comment).toBe(comment);
         });
       });
+
+      describe("createQuantMeasurement()", () => {
+        it("should create quantitative measurement with supplied comment", () => {
+          expect(QcreatedMeasurement).toBeDefined();
+          expect(QcreatedMeasurement.measurement_comment).toBe(comment);
+        });
+      });
+
       describe("deleteQualMeasurement()", () => {
-        it("should delete measurement", async () => {
+        it("should delete qualitative measurement", async () => {
           const deleted = await deleteQualMeasurement(
             createdMeasurement.measurement_qualitative_id
+          );
+          expect(deleted).toBeDefined();
+        });
+      });
+
+      describe("deleteQuantMeasurement()", () => {
+        it("should delete quantitative measurement", async () => {
+          const deleted = await deleteQuantMeasurement(
+            QcreatedMeasurement.measurement_quantitative_id
           );
           expect(deleted).toBeDefined();
         });
