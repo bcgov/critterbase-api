@@ -14,7 +14,7 @@ import {
 // Zod Schemas
 /**
  ** Base location schema
- * Note: implements prisma type to stay in sync with DB.
+ * Note: implements the prisma type to stay in sync with DB.
  */
 const LocationSchema = implement<location>().with({
   location_id: zodID,
@@ -34,9 +34,9 @@ const LocationSchema = implement<location>().with({
 });
 
 const LocationCreateSchema = implement<
-  Omit<location, "location_id" | keyof AuditColumns>
+  Omit<Prisma.locationCreateManyInput, "location_id" | keyof AuditColumns>
 >()
-  .with(LocationSchema.omit({ location_id: true, ...noAudit }).shape)
+  .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape)
   .strict();
 
 const LocationResponseSchema = LocationSchema.omit({

@@ -1,8 +1,10 @@
 import {
   measurement_qualitative,
   measurement_quantitative,
+  Prisma,
 } from "@prisma/client";
 import { z } from "zod";
+import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodAudit, zodID } from "../../utils/zod_helpers";
 // Zod Schemas
 // Qualitatitive
@@ -18,16 +20,24 @@ const QualitativeSchema = implement<measurement_qualitative>().with({
   ...zodAudit,
 });
 
-const QualitativeCreateSchema = QualitativeSchema.omit({
-  measurement_qualitative_id: true,
-  ...noAudit,
-})
-  .partial({
-    capture_id: true,
-    mortality_id: true,
-    measurement_comment: true,
-    measured_timestamp: true,
-  })
+const QualitativeCreateSchema = implement<
+  Omit<
+    Prisma.measurement_qualitativeCreateManyInput,
+    "measurement_qualitative_id" | keyof AuditColumns
+  >
+>()
+  .with(
+    QualitativeSchema.omit({
+      measurement_qualitative_id: true,
+      ...noAudit,
+    })
+      .partial()
+      .required({
+        critter_id: true,
+        taxon_measurement_id: true,
+        qualitative_option_id: true,
+      }).shape
+  )
   .strict();
 
 // Quantitative
@@ -43,15 +53,22 @@ const QuantitativeSchema = implement<measurement_quantitative>().with({
   ...zodAudit,
 });
 
-const QuantitativeCreateSchema = QuantitativeSchema.omit({
-  measurement_quantitative_id: true,
-  ...noAudit,
-}).partial({
-  capture_id: true,
-  mortality_id: true,
-  measurement_comment: true,
-  measured_timestamp: true,
-});
+const QuantitativeCreateSchema = implement<
+  Omit<
+    Prisma.measurement_quantitativeCreateManyInput,
+    "measurement_quantitative_id" | keyof AuditColumns
+  >
+>()
+  .with(
+    QuantitativeSchema.omit({ measurement_quantitative_id: true, ...noAudit })
+      .partial()
+      .required({
+        critter_id: true,
+        taxon_measurement_id: true,
+        value: true,
+      }).shape
+  )
+  .strict();
 
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
 type QuantitativeBody = z.infer<typeof QuantitativeCreateSchema>;
