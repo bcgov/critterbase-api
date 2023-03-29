@@ -74,13 +74,17 @@ type UserAuditColumns = Pick<critter, "update_user" | "create_user">;
 type AuditColumns = DateAuditColumns & UserAuditColumns;
 
 type Implements<Model> = {
-  [key in keyof Model]-?: undefined extends Model[key]
-    ? null extends Model[key]
+  [key in keyof Model]-?: z.ZodType<Model[key]> extends infer T
+    ? T extends z.ZodNullableType<z.ZodOptionalType<any>>
       ? z.ZodNullableType<z.ZodOptionalType<z.ZodType<Model[key]>>>
-      : z.ZodOptionalType<z.ZodType<Model[key]>>
-    : null extends Model[key]
-    ? z.ZodNullableType<z.ZodType<Model[key]>>
-    : z.ZodType<Model[key]>;
+      : T extends z.ZodOptionalType<z.ZodNullableType<any>>
+      ? z.ZodOptionalType<z.ZodNullableType<z.ZodType<Model[key]>>>
+      : T extends z.ZodNullableType<any>
+      ? z.ZodNullableType<z.ZodType<Model[key]>>
+      : T extends z.ZodOptionalType<any>
+      ? z.ZodOptionalType<z.ZodType<Model[key]>>
+      : z.ZodType<Model[key]>
+    : never;
 };
 
 export { apiError, AuditColumns, Implements };
