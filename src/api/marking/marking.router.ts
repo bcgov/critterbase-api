@@ -9,12 +9,14 @@ import {
   getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
-import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
+  markingResponseSchema,
   MarkingUpdateBodySchema,
 } from "./marking.types";
+import { array } from "zod";
+import { getCritterById } from "../critter/critter.service";
 
 export const markingRouter = express.Router();
 
@@ -24,7 +26,9 @@ export const markingRouter = express.Router();
 markingRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(200).json(await getAllMarkings());
+    return res
+      .status(200)
+      .json(array(markingResponseSchema).parse(await getAllMarkings()));
   })
 );
 
@@ -35,20 +39,20 @@ markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const markingData = MarkingCreateBodySchema.parse(req.body);
-    const newMarking = await createMarking(markingData);
+    const newMarking = markingResponseSchema.parse(
+      await createMarking(markingData)
+    );
     return res.status(201).json(newMarking);
   })
 );
 
 markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
-    // validate marking id and confirm that marking exists
+    // validate critter id and confirm that marking exists
     const { id } = uuidParamsSchema.parse(req.params);
+    await getCritterById(id);
     const markings = await getMarkingsByCritterId(id);
-    if (!markings.length) {
-      throw apiError.notFound(`Critter ID "${id}" has no associated markings`);
-    }
-    return res.status(200).json(markings);
+    return res.status(200).json(array(markingResponseSchema).parse(markings));
   })
 );
 
@@ -66,14 +70,18 @@ markingRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      return res.status(200).json(await getMarkingById(req.params.id));
+      return res
+        .status(200)
+        .json(markingResponseSchema.parse(await getMarkingById(req.params.id)));
     })
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
       const markingData = MarkingUpdateBodySchema.parse(req.body);
-      const marking = await updateMarking(req.params.id, markingData);
-      return res.status(200).json(marking);
+      const updatedMarking = markingResponseSchema.parse(
+        await updateMarking(req.params.id, markingData)
+      );
+      return res.status(200).json(updatedMarking);
     })
   )
   .delete(
