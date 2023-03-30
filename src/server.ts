@@ -8,6 +8,7 @@ import { critterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
 import { markingRouter } from "./api/marking/marking.router";
+import { measurementRouter } from "./api/measurement/measurement.router";
 import { userRouter } from "./api/user/user.router";
 import { startServer } from "./utils/helper_functions";
 import { errorHandler, errorLogger, home } from "./utils/middleware";
@@ -27,6 +28,7 @@ app.use("/api/collection_units", collectionUnitRouter);
 app.use("/api/artifacts", artifactRouter);
 app.use("/api/family", familyRouter);
 app.use("/api/captures/", captureRouter);
+app.use("/api/measurements", measurementRouter);
 
 app.use(errorLogger);
 app.use(errorHandler);

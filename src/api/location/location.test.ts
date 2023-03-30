@@ -1,3 +1,4 @@
+import { array } from "zod";
 import { prisma, request } from "../../utils/constants";
 
 import {
@@ -7,7 +8,7 @@ import {
   getLocationOrThrow,
   updateLocation,
 } from "./location.service";
-import { LocationSchema } from "./location.types";
+import { LocationResponseSchema, LocationSchema } from "./location.utils";
 
 let locations: any;
 let location: any;
@@ -48,8 +49,8 @@ describe("API: Location", () => {
       it("returns array of locations", async () => {
         expect(locations.length).toBeGreaterThan(0);
       });
-      it("location has location_id", async () => {
-        expect(locations[0]).toHaveProperty("location_id");
+      it("locations pass validation schema", async () => {
+        expect(array(LocationSchema).safeParse(location).success);
       });
     });
     describe("getLocationOrThrow()", () => {
@@ -133,12 +134,13 @@ describe("API: Location", () => {
     });
 
     describe(`GET ${ROUTE}/:id`, () => {
-      it("should return status 200 and location", async () => {
+      it("should return status 200 and a formatted location", async () => {
         const res = await request.get(
           `${ROUTE}/${createdLocation.location_id}`
         );
         expect(res.body).toBeDefined();
         expect(res.status).toBe(200);
+        expect(LocationResponseSchema.safeParse(location).success);
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         const res = await request.get(`${ROUTE}/${BAD_ID}`);
