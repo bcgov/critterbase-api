@@ -18,13 +18,10 @@ import {
   removeParentOfFamily,
   updateFamily,
 } from "./family.service";
-import { apiError } from "../../utils/types";
-import { prisma } from "../../utils/constants";
 import {
   FamilyChildCreateBodySchema,
   FamilyCreateBodySchema,
-  FamilyParentCreateBodySchema,
-  FamilyUpdateBodySchema,
+  FamilyParentCreateBodySchema
 } from "./family.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
@@ -159,7 +156,7 @@ familyRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = FamilyUpdateBodySchema.parse(req.body);
+      const parsed = FamilyCreateBodySchema.parse(req.body);
       const family = await updateFamily(id, parsed);
       return res.status(200).json(family);
     })

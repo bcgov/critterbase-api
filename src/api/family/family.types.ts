@@ -1,5 +1,7 @@
-import { critter } from "@prisma/client"
+import { Prisma, critter } from "@prisma/client"
 import { z } from "zod"
+import { implement, zodAudit, zodID } from "../../utils/zod_helpers"
+import { AuditColumns } from "../../utils/types"
 
 type ImmediateFamily = {
     children: critter[],
@@ -12,29 +14,27 @@ type ImmediateFamilyCritter = {
     parents: critter[]
 }
 
-const FamilyUpdateBodySchema = z.object({
+const FamilyCreateBodySchema = implement<
+    Omit<Prisma.familyCreateManyInput, "family_id" | keyof AuditColumns>>().with({
     family_label: z.string()
 });
 
-const FamilyCreateBodySchema = z.object({
-    family_id: z.string().uuid().optional(),
-    family_label: z.string()
-});
-
-const FamilyParentCreateBodySchema = z.object({
-    family_id: z.string().uuid(),
-    parent_critter_id: z.string().uuid()
+const FamilyParentCreateBodySchema = implement<
+    Omit<Prisma.family_parentCreateManyInput,  keyof AuditColumns >>().with({
+    family_id: zodID,
+    parent_critter_id: zodID
 })
 
-const FamilyChildCreateBodySchema = z.object({
-    family_id: z.string().uuid(),
-    child_critter_id: z.string().uuid()
+const FamilyChildCreateBodySchema = implement<
+Omit<Prisma.family_childCreateManyInput, keyof AuditColumns >>().with({
+    family_id: zodID,
+    child_critter_id: zodID
 })
 
-type FamilyUpdate = z.infer<typeof FamilyUpdateBodySchema>
+type FamilyUpdate = z.infer<typeof FamilyCreateBodySchema>
 type FamilyCreate = z.infer<typeof FamilyCreateBodySchema>
 type FamilyParentCreate = z.infer<typeof FamilyParentCreateBodySchema>
 type FamilyChildCreate = z.infer<typeof FamilyChildCreateBodySchema>
 
-export {FamilyUpdateBodySchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyChildCreateBodySchema}
+export {FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyChildCreateBodySchema}
 export type {ImmediateFamily, ImmediateFamilyCritter, FamilyUpdate, FamilyCreate, FamilyChildCreate, FamilyParentCreate}
