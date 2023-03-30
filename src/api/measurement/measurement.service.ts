@@ -85,7 +85,7 @@ const getMeasurementsByCritterId = async (
     getQuantMeasurementsByCritterId(critter_id),
     getQualMeasurementsByCritterId(critter_id),
   ]);
-  return { measurements: { quantitative, qualitative } };
+  return { quantitative, qualitative };
 };
 
 // const updateQualMeasurement = (id: string, data: ) => {
@@ -123,4 +123,5 @@ export {
   deleteQualMeasurement,
   deleteQuantMeasurement,
   getAllQuantMeasurements,
+  getMeasurementsByCritterId,
 };

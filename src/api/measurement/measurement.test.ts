@@ -1,5 +1,6 @@
 import { array } from "zod";
 import { prisma, request } from "../../utils/constants";
+import { ResponseSchema } from "../../utils/zod_helpers";
 import {
   createQualMeasurement,
   createQuantMeasurement,
@@ -7,6 +8,7 @@ import {
   deleteQuantMeasurement,
   getAllQualMeasurements,
   getAllQuantMeasurements,
+  getMeasurementsByCritterId,
   getQualMeasurementOrThrow,
   getQualMeasurementsByCritterId,
   getQuantMeasurementOrThrow,
@@ -85,6 +87,25 @@ beforeAll(async () => {
 
 describe("API: Measurement", () => {
   describe("SERVICES", () => {
+    // it("testing undefined properties", () => {
+    //   const TestSchema = ResponseSchema.transform((val) => {
+    //     const { a, ...rest } = val as {
+    //       a: { testing: number };
+    //       b: number;
+    //     };
+    //     return {
+    //       temp: a.testing ?? null,
+    //       ...rest,
+    //     };
+    //   });
+    //   expect(TestSchema.safeParse({ a: { testing: 1 } }).success);
+    //   expect(TestSchema.safeParse({ a: {} }).success);
+
+    //   const parsed = TestSchema.parse({ a: {}, b: 1, c: 2 });
+    //   expect(parsed.b).toBe(1);
+    //   expect(parsed.temp).toBeNull();
+    //   console.log(parsed);
+    // });
     describe("measurement.service.ts", () => {
       describe(getAllQualMeasurements.name, () => {
         it("returns array of qualitative measurements", async () => {
@@ -184,24 +205,33 @@ describe("API: Measurement", () => {
         });
       });
 
-      // describe("getMeasurementsByCritterId()", () => {
-      //   it("returns array of quantitative_measurements or empty array", () => {
-      //     expect(QmeasurementByCritter).not.toBeNull();
-      //     expect(Qmeasurements).toBeInstanceOf(Array);
-      //     if (QmeasurementByCritter?.length) {
-      //       expect(QmeasurementByCritter[0]).toHaveProperty(
-      //         "measurement_quantitative_id"
-      //       );
-      //     } else {
-      //       expect(QmeasurementByCritter).toBe([]);
-      //     }
-      //   });
-      //   it("throws error with critter_id that does not exist", async () => {
-      //     getQuantMeasurementsByCritterId(badID).catch((err) =>
-      //       expect(err).toBeDefined()
-      //     );
-      //   });
-      // });
+      describe(getMeasurementsByCritterId.name, () => {
+        it("returns array of Measurements ", async () => {
+          const measurements = await getMeasurementsByCritterId(
+            Qmeasurement.critter_id
+          );
+          const { quantitative, qualitative } = measurements;
+          expect(quantitative).toBeInstanceOf(Array);
+          expect(qualitative).toBeInstanceOf(Array);
+          if (quantitative.length) {
+            expect(quantitative[0]).toHaveProperty(
+              "measurement_quantitative_id"
+            );
+          } else {
+            expect(quantitative).toBe([]);
+          }
+          if (qualitative.length) {
+            expect(qualitative[0]).toHaveProperty("measurement_qualitative_id");
+          } else {
+            expect(qualitative).toBe([]);
+          }
+        });
+        it("throws error with critter_id that does not exist", async () => {
+          getQuantMeasurementsByCritterId(badID).catch((err) =>
+            expect(err).toBeDefined()
+          );
+        });
+      });
 
       describe(createQualMeasurement.name, () => {
         it("should create qualitative measurement with supplied comment", () => {
