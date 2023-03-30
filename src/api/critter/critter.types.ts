@@ -1,10 +1,11 @@
 import { critter, Prisma, sex } from "@prisma/client";
-import { z } from 'zod'
+import { string, z } from 'zod'
 import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
 import { captureInclude, CaptureResponseSchema } from "../capture/capture.types";
 import { markingIncludes, markingResponseSchema } from "../marking/marking.types";
 import { mortalityInclude, MortalityResponseSchema } from "../mortality/mortality.types";
+import { measurementQualitativeInclude, measurementQuantitativeInclude, QualitativeResponseSchema, QuantitativeResponseSchema } from "../measurement/measurement.utils";
 
 const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement_quantitativeArgs>()({
     select: {
@@ -46,8 +47,8 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
         capture: captureInclude,
         mortality: mortalityInclude,
         marking: markingIncludes, 
-        measurement_qualitative: measurementQualitativeIncludeSubset,
-        measurement_quantitative: measurementQuantitativeIncludeSubset
+        measurement_qualitative: measurementQualitativeInclude,
+        measurement_quantitative: measurementQuantitativeInclude
       }
   })
   
@@ -136,31 +137,24 @@ const CritterResponseSchema = z.object({}).passthrough()
       capture: capture.map(a => stripCritterId(CaptureResponseSchema.parse(a))),
       marking: marking.map(a => stripCritterId(markingResponseSchema.parse(a)) ),
       measurement: {
-        qualitative: measurement_qualitative.map(a => {
-          return {
-            measured_timestamp: a.measured_timestamp,
-            option_label: a.xref_taxon_measurement_qualitative_option.option_label,
-            measurement_name: a.xref_taxon_measurement_qualitative_option.xref_taxon_measurement_qualitative.measurement_name
-          }
-        }),
-        quantitative: measurement_quantitative.map(a => {
-          return {
-            measured_timestamp: a.measured_timestamp,
-            value: a.value,
-            ...a.xref_taxon_measurement_quantitative
-          }
-        })
+        qualitative: measurement_qualitative.map(a => stripCritterId(QualitativeResponseSchema.parse(a))),
+        quantitative: measurement_quantitative.map(a => stripCritterId(QuantitativeResponseSchema.parse(a)))
       }
     }
   });
 
   interface critterInterface {
-    critter_id?: string
+    critter_id?: string,
+    create_user?: string
+    update_user?: string,
+    create_timestamp?: Date,
+    update_timestamp?: Date
   }
   
-  const stripCritterId = <T extends critterInterface>(obj: T): Omit<T, "critter_id"> => {
-    delete obj.critter_id;
-    return obj;
+  const stripCritterId = <T extends critterInterface>(obj: T): 
+      Omit<T, "critter_id" | keyof AuditColumns > => {
+    const { critter_id, create_user, update_user, create_timestamp, update_timestamp, ...rest} = obj;
+    return rest;
   }
 
   type CritterCreate = z.infer<typeof CritterCreateSchema>

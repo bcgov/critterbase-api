@@ -1,12 +1,9 @@
 import {
-  critter,
   measurement_qualitative,
   measurement_quantitative,
 } from "@prisma/client";
-import { z } from "zod";
 import { prisma } from "../../utils/constants";
-import { exclude } from "../../utils/helper_functions";
-import { QualitativeBody, QuantitativeBody } from "./measurement.utils";
+import { QualitativeBody, QuantitativeBody, measurementQualitativeInclude, measurementQuantitativeInclude } from "./measurement.utils";
 
 const getAllQuantMeasurements = async (): Promise<
   measurement_quantitative[]
@@ -26,9 +23,7 @@ const getQuantMeasurementOrThrow = async (id: string) => {
       where: {
         measurement_quantitative_id: id,
       },
-      include: {
-        xref_taxon_measurement_quantitative: true,
-      },
+      ...measurementQuantitativeInclude
     });
   return quantMeasurement;
 };
@@ -39,10 +34,7 @@ const getQualMeasurementOrThrow = async (id: string) => {
       where: {
         measurement_qualitative_id: id,
       },
-      include: {
-        xref_taxon_measurement_qualitative: true,
-        xref_taxon_measurement_qualitative_option: true,
-      },
+      ...measurementQualitativeInclude,
     });
   return qualMeasurement;
 };

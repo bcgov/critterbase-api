@@ -2,7 +2,7 @@ import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
-import { CommonFormattedLocationSchema, CommonLocationSchema, commonLocationSelect, FormattedLocation } from "../location/location.types";
+import { CommonFormattedLocationSchema, CommonLocationSchema, commonLocationSelect, FormattedLocation } from "../location/location.utils";
 
 const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
     include: {
