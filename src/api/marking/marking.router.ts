@@ -14,7 +14,7 @@ import {
   MarkingCreateBodySchema,
   markingResponseSchema,
   MarkingUpdateBodySchema,
-} from "./marking.types";
+} from "./marking.utils";
 import { array } from "zod";
 import { getCritterById } from "../critter/critter.service";
 

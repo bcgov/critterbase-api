@@ -13,7 +13,7 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
-} from "./collectionUnit.types";
+} from "./collectionUnit.utils";
 import { getCritterById } from "../critter/critter.service";
 
 export const collectionUnitRouter = express.Router();

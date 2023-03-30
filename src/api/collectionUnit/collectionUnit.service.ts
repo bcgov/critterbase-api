@@ -5,7 +5,7 @@ import {
   CollectionUnitResponse,
   collectionUnitResponseSchema,
   CollectionUnitUpdateInput,
-} from "./collectionUnit.types";
+} from "./collectionUnit.utils";
 import { array } from "zod";
 /**
  * * Returns all existing critter collection units from the database

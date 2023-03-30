@@ -1,6 +1,6 @@
 import { prisma } from "../../utils/constants";
 import { artifact } from "@prisma/client";
-import { ArtifactCreate, ArtifactUpdate } from "./artifact.types";
+import { ArtifactCreate, ArtifactUpdate } from "./artifact.utils";
 
 /**
  * * Gets an artifact by the artifact_id

@@ -1,6 +1,6 @@
 import { prisma } from "../../utils/constants";
 import type { user } from "@prisma/client";
-import { UserCreateInput, UserUpdateInput } from "./user.types";
+import { UserCreateInput, UserUpdateInput } from "./user.utils";
 
 /**
  * * Adds a user to the database

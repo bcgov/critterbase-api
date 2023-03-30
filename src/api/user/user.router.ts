@@ -9,7 +9,7 @@ import {
   upsertUser,
 } from "./user.service";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { UserCreateBodySchema, UserUpdateBodySchema } from "./user.types";
+import { UserCreateBodySchema, UserUpdateBodySchema } from "./user.utils";
 
 export const userRouter = express.Router();
 

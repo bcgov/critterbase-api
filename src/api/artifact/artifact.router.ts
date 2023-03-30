@@ -12,7 +12,7 @@ import {
 import {
   ArtifactCreateBodySchema,
   ArtifactUpdateBodySchema,
-} from "./artifact.types";
+} from "./artifact.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { apiError } from "../../utils/types";
 import { getCritterById } from "../critter/critter.service";

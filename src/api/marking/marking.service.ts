@@ -4,7 +4,7 @@ import {
   MarkingIncludes,
   markingIncludes,
   MarkingUpdateInput,
-} from "./marking.types";
+} from "./marking.utils";
 
 /**
  * * Returns all existing markings from the database
