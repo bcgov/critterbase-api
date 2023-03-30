@@ -38,9 +38,11 @@ let createData = {
   qualitative_option_id: "string",
   measured_timestamp: "2",
 };
-const badID = "deadbeef-dead-dead-dead-deaddeafbeef";
+const badID = "52cfb108-99a5-4631-8385-1b43248ac502";
 const comment = "_TEST_CREATED_";
 const ROUTE = "/api/measurements";
+const QUANT_ROUTE = `${ROUTE}/quantitative`;
+const QUAL_ROUTE = `${ROUTE}/qualitative`;
 
 beforeAll(async () => {
   measurements = await getAllQualMeasurements();
@@ -251,22 +253,24 @@ describe("API: Measurement", () => {
     //     expect(res.status).toBe(400);
     //   });
     // });
-
-    // describe(`GET ${ROUTE}/:id`, () => {
-    //   it("should return status 200 and a formatted location", async () => {
-    //     const res = await request.get(
-    //       `${ROUTE}/${createdLocation.location_id}`
-    //     );
-    //     expect(res.body).toBeDefined();
-    //     expect(res.status).toBe(200);
-    //     expect(LocationResponseSchema.safeParse(location).success);
-    //   });
-    //   it("with non existant id, should return status 404 and have error in body", async () => {
-    //     const res = await request.get(`${ROUTE}/${BAD_ID}`);
-    //     expect(res.status).toBe(404);
-    //     expect(res.body.error).toBeDefined();
-    //   });
-    // });
+    describe("Quantitative", () => {
+      describe(`GET ${QUANT_ROUTE}/:id`, () => {
+        it("should return status 200 and a formatted quant measurement", async () => {
+          const res = await request.get(
+            `${QUANT_ROUTE}/${Qmeasurement.measurement_quantitative_id}`
+          );
+          expect(res.body).toBeDefined();
+          expect(res.status).toBe(200);
+          expect(QuantitativeResponseSchema.safeParse(res.body).success);
+          expect(res.body.measurement_name).toBeDefined();
+        });
+        it("with non existant id, should return status 404 and have error in body", async () => {
+          const res = await request.get(`${QUANT_ROUTE}/${badID}`);
+          expect(res.status).toBe(404);
+          expect(res.body.error).toBeDefined();
+        });
+      });
+    });
 
     // describe(`PATCH ${ROUTE}/:id`, () => {
     //   it("returns status 201 and updates a valid field", async () => {
