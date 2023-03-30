@@ -9,7 +9,7 @@ import {
   upsertUser,
 } from "./user.service";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { CreateUserSchema, UpdateUserSchema } from "./user.types";
+import { UserCreateBodySchema, UserUpdateBodySchema } from "./user.types";
 
 export const userRouter = express.Router();
 
@@ -29,7 +29,7 @@ userRouter.get(
 userRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const userData = CreateUserSchema.parse(req.body);
+    const userData = UserCreateBodySchema.parse(req.body);
     const newUser = await upsertUser(userData);
     return res.status(201).json(newUser);
   })
@@ -54,7 +54,7 @@ userRouter
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const userData = UpdateUserSchema.parse(req.body);
+      const userData = UserUpdateBodySchema.parse(req.body);
       const user = await updateUser(req.params.id, userData);
       return res.status(200).json(user);
     })
