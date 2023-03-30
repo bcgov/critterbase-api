@@ -1,15 +1,23 @@
 import { coordinate_uncertainty_unit, location, Prisma } from "@prisma/client";
 import { z } from "zod";
+import { AuditColumns } from "../../utils/types";
 import {
   implement,
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
   LookupWmuSchema,
   noAudit,
+  ResponseSchema,
+  zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { getLocationOrThrow } from "./location.service";
 
 // Zod Schemas
+/**
+ ** Base location schema
+ * Note: implements the prisma type to stay in sync with DB.
+ */
 const LocationSchema = implement<location>().with({
   location_id: zodID,
   latitude: z.number().nullable(),
@@ -24,38 +32,30 @@ const LocationSchema = implement<location>().with({
   elevation: z.number().nullable(),
   temperature: z.number().nullable(),
   location_comment: z.string().nullable(),
-  create_user: zodID,
-  update_user: zodID,
-  create_timestamp: z.date(),
-  update_timestamp: z.date(),
+  ...zodAudit,
 });
 
-const LocationCreateSchema = LocationSchema.omit({
-  location_id: true,
-  ...noAudit,
-})
-  .partial()
+const LocationCreateSchema = implement<
+  Omit<Prisma.locationCreateManyInput, "location_id" | keyof AuditColumns>
+>()
+  .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape)
   .strict();
 
-const LocationResponseSchema = LocationSchema.extend({
-  lk_wildlife_management_unit: LookupWmuSchema.nullish(),
-  lk_region_nr: LookupRegionNrSchema.nullish(),
-  lk_region_env: LookupRegionEnvSchema.nullish(),
-}).transform((val) => {
+const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
-    lk_wildlife_management_unit,
-    lk_region_nr,
-    lk_region_env,
     wmu_id,
     region_nr_id,
     region_env_id,
+    lk_wildlife_management_unit,
+    lk_region_nr,
+    lk_region_env,
     ...rest
-  } = val;
+  } = val as Prisma.PromiseReturnType<typeof getLocationOrThrow>;
   return {
     ...rest,
-    wmu_name: lk_wildlife_management_unit?.wmu_name,
-    lk_region_nr: lk_region_nr?.region_nr_name,
-    lk_region_env: lk_region_env?.region_env_name,
+    wmu_name: lk_wildlife_management_unit?.wmu_name ?? null,
+    region_nr_name: lk_region_nr?.region_nr_name ?? null,
+    region_env_name: lk_region_env?.region_env_name ?? null,
   };
 });
 

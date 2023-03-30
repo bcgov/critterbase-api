@@ -18,7 +18,7 @@ import {
   locationIncludes,
   LocationSubsetType,
   LocationResponse,
-} from "./location.types";
+} from "./location.utils";
 
 const formatLocation = (location: LocationSubsetType) => {
   return exclude(location, [
@@ -31,28 +31,28 @@ const formatLocation = (location: LocationSubsetType) => {
 /**
  ** gets a single location by id
  * @param id string -> critter_id
- * @returns {Promise<FormattedLocation>}
+ * @returns {Promise<location>}
  * Note: inferring return type
  */
-const getLocationOrThrow = async (id: string): Promise<LocationResponse> => {
+const getLocationOrThrow = async (id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,
     },
     include: locationIncludes,
   });
-  return LocationResponseSchema.parse(location);
+  return location;
 };
 /**
  ** gets all locations
- * @returns {Promise<FormattedLocation[]>}
+ * @returns {Promise<location[]>}
  * Note: inferring return type
  */
-const getAllLocations = async (): Promise<LocationResponse[]> => {
+const getAllLocations = async (): Promise<location[]> => {
   const locations = await prisma.location.findMany({
     include: locationIncludes,
   });
-  return locations.map((l) => LocationResponseSchema.parse(l));
+  return locations;
 };
 
 /**

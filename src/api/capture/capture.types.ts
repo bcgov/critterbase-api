@@ -1,5 +1,5 @@
 import { capture, Prisma } from "@prisma/client";
-import { CommonFormattedLocationSchema, CommonLocationSchema, commonLocationSelect, FormattedLocation, LocationSubsetType } from "../location/location.types";
+import { CommonFormattedLocationSchema, commonLocationSelect } from "../location/location.utils";
 import { z } from 'zod';
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";

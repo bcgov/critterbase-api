@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import { array } from "zod";
 import { strings } from "../../utils/constants";
 import { isUUID } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
@@ -11,7 +12,7 @@ import {
   getLocationOrThrow,
   updateLocation,
 } from "./location.service";
-import { LocationCreateSchema } from "./location.types";
+import { LocationCreateSchema, LocationResponseSchema } from "./location.utils";
 
 export const locationRouter = express.Router();
 
@@ -22,7 +23,8 @@ locationRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const locations = await getAllLocations();
-    return res.status(200).json(locations);
+    const formattedLocations = array(LocationResponseSchema).parse(locations);
+    return res.status(200).json(formattedLocations);
   })
 );
 
@@ -52,21 +54,20 @@ locationRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const location = await getLocationOrThrow(req.params.id);
-      return res.status(200).json(location);
+      const formattedLocation = LocationResponseSchema.parse(location);
+      return res.status(200).json(formattedLocation);
     })
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const updateBody = LocationCreateSchema.parse(req.body);
-      const location = await updateLocation(updateBody, id);
+      const parsedBody = LocationCreateSchema.parse(req.body);
+      const location = await updateLocation(parsedBody, req.params.id);
       res.status(201).json(location);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      await deleteLocation(id);
-      res.status(200).json(strings.location.deleted(id));
+      await deleteLocation(req.params.id);
+      res.status(200).json(strings.location.deleted(req.params.id));
     })
   );
