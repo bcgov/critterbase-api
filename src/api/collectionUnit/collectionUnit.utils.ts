@@ -87,7 +87,10 @@ const CollectionUnitCreateBodySchema = implement<
 
 // Validate incoming request body for update critter collection unit
 const CollectionUnitUpdateBodySchema = implement<
-  Omit<Prisma.critter_collection_unitUncheckedUpdateManyInput, "critter_collection_unit_id" | keyof AuditColumns>
+  Omit<
+    Prisma.critter_collection_unitUncheckedUpdateManyInput,
+    "critter_collection_unit_id" | keyof AuditColumns
+  >
 >()
   .with(CollectionUnitCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");

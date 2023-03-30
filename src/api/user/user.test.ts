@@ -10,7 +10,7 @@ import {
 } from "./user.service";
 import type { Prisma, user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
-import { UserCreateInput, UserUpdateInput } from "./user.types";
+import { UserCreateInput, UserUpdateInput } from "./user.utils";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const uuidRegex =

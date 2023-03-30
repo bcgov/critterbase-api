@@ -13,7 +13,7 @@ import {
   collectionUnitIncludes,
   CollectionUnitResponse,
   collectionUnitResponseSchema,
-} from "./collectionUnit.types";
+} from "./collectionUnit.utils";
 
 function get_random(list) {
   return list[Math.floor(Math.random() * list.length)];

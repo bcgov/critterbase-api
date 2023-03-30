@@ -1,7 +1,13 @@
 import { artifact, Prisma } from ".prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
-import { implement, noAudit, nonEmpty, zodAudit, zodID } from "../../utils/zod_helpers";
+import {
+  implement,
+  noAudit,
+  nonEmpty,
+  zodAudit,
+  zodID,
+} from "../../utils/zod_helpers";
 
 // Types
 type ArtifactCreate = z.infer<typeof ArtifactCreateBodySchema>;
@@ -20,15 +26,12 @@ const artifactSchema = implement<artifact>().with({
   mortality_id: zodID.nullable(),
   measurement_qualitative: zodID.nullable(),
   measurement_quantitative: zodID.nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 // Validate incoming request body for create artifact
 const ArtifactCreateBodySchema = implement<
-  Omit<
-    Prisma.artifactCreateManyInput,
-    "artifact_id" | keyof AuditColumns
-  >
+  Omit<Prisma.artifactCreateManyInput, "artifact_id" | keyof AuditColumns>
 >().with(
   artifactSchema
     .omit({ ...noAudit, artifact_id: true })
@@ -38,7 +41,10 @@ const ArtifactCreateBodySchema = implement<
 
 // Validate incoming request body for update artifact
 const ArtifactUpdateBodySchema = implement<
-  Omit<Prisma.artifactUncheckedUpdateManyInput, "artifact_id" | keyof AuditColumns>
+  Omit<
+    Prisma.artifactUncheckedUpdateManyInput,
+    "artifact_id" | keyof AuditColumns
+  >
 >()
   .with(ArtifactCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");

@@ -15,7 +15,7 @@ import {
   MarkingCreateInput,
   markingIncludes,
   MarkingIncludes,
-} from "./marking.types";
+} from "./marking.utils";
 
 let dummyMarking: MarkingResponseSchema;
 let dummyMarkingIncludes: MarkingIncludes;
