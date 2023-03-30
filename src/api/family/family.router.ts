@@ -24,6 +24,7 @@ import {
   FamilyParentCreateBodySchema
 } from "./family.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { prisma } from "../../utils/constants";
 
 export const familyRouter = express.Router();
 
@@ -143,6 +144,11 @@ familyRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
+      await prisma.family.findUniqueOrThrow({
+        where: {
+          family_id: req.params.id
+        }
+      })
       next();
     })
   )

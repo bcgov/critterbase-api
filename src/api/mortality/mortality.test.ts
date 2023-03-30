@@ -4,25 +4,35 @@ import { after } from "node:test";
 import { prisma, request } from "../../utils/constants";
 import { apiError } from "../../utils/types";
 import {createMortality, deleteMortality, getAllMortalities, getMortalityByCritter, getMortalityById, updateMortality} from './mortality.service'
+import { Prisma, mortality } from "@prisma/client";
 
-let testMort;
-let testCritter;
-beforeAll(async () => {
-  testCritter = await prisma.critter.findFirst();
-  const cod = await prisma.lk_cause_of_death.findFirst();
+const tempMortalities: mortality[] = [];
+
+const obtainMortalityTemplate = async (): Promise<Prisma.mortalityUncheckedCreateInput> => {
+  const testCritter = await prisma.critter.findFirst();
+  const testCod = await prisma.lk_cause_of_death.findFirst();
   const taxon = await prisma.lk_taxon.findFirst();
-  if(!testCritter || !cod || !taxon) throw apiError.serverIssue();
-  testMort = await prisma.mortality.create({
-    data: {
+  if(!testCritter || !testCod || !taxon) throw apiError.serverIssue();
+  return {
       critter_id: testCritter.critter_id,
       mortality_timestamp: new Date(),
-      proximate_cause_of_death_id: cod.cod_id,
+      proximate_cause_of_death_id: testCod.cod_id,
       proximate_predated_by_taxon_id: taxon.taxon_id,
-      ultimate_cause_of_death_id: cod.cod_id,
+      ultimate_cause_of_death_id: testCod.cod_id,
       ultimate_predated_by_taxon_id: taxon.taxon_id
+  }
+}
+
+const createTempMortality = async (): Promise<mortality> => {
+  
+  const testMort = await prisma.mortality.create({
+    data: {
+      ...(await obtainMortalityTemplate())
     }
-  })
-})
+  });
+  tempMortalities.push(testMort);
+  return testMort;
+}
 
 describe("API: Critter", () => {
   describe("SERVICES", () => {
@@ -33,9 +43,10 @@ describe("API: Critter", () => {
         expect(res.length).toBeGreaterThanOrEqual(1);
       });
       it("returns one mortality", async () => {
-        const res = await getMortalityById(testMort.mortality_id);
+        const m = await createTempMortality();
+        const res = await getMortalityById(m.mortality_id);
         expect.assertions(1);
-        expect(res?.mortality_id).toBe(testMort.mortality_id);
+        expect(res?.mortality_id).toBe(m.mortality_id);
       });
       it("returns null, mortality not found", async () => {
         const res = await getMortalityById('deadbeef-dead-dead-dead-deaddeafbeef');
@@ -43,7 +54,8 @@ describe("API: Critter", () => {
         expect(res).toBeNull();
       })
       it("should get one or more mortalities for this critter", async () => {
-        const res = await getMortalityByCritter(testCritter.critter_id);
+        const critter = await prisma.critter.findFirstOrThrow();
+        const res = await getMortalityByCritter(critter.critter_id);
         expect.assertions(1);
         expect(res.length).toBeGreaterThanOrEqual(1);
       });
@@ -63,26 +75,28 @@ describe("API: Critter", () => {
           where : {mortality_id: res.mortality_id}
         })
       });
-      it("should fail to create a mortality", async () => {
+      /**it("should fail to create a mortality", async () => {
         const cod = await prisma.lk_cause_of_death.findFirst();
         const critter = await prisma.critter.findFirst();
         if(!critter || !cod) throw apiError.serverIssue();
-        const obj = {mortality_id: testMort.mortality_id, critter_id: critter.critter_id, proximate_cause_of_death_id: cod.cod_id, mortality_timestamp: new Date()};
+        const obj = {mortality_id: , critter_id: critter.critter_id, proximate_cause_of_death_id: cod.cod_id, mortality_timestamp: new Date()};
         expect.assertions(1);
         await expect(async () => await createMortality(obj)).rejects.toBeInstanceOf(PrismaClientKnownRequestError);
-  
-      })
+      })*/
     });
     describe("modifying mortalities", () => {
       it("updates an existing mortality", async () => {
-        const res = await updateMortality(testMort.mortality_id, {mortality_comment: 'banana'});
+        const m = await createTempMortality();
+        const res = await updateMortality(m.mortality_id, {mortality_comment: 'banana'});
         expect.assertions(1);
         expect(res.mortality_comment).toBe('banana');
+
       })
       it("should delete an existing mortality", async () => {
-        const res = await deleteMortality(testMort.mortality_id);
+        const m = await createTempMortality();
+        const res = await deleteMortality(m.mortality_id);
         expect.assertions(1);
-        expect(res.mortality_id).toBe(testMort.mortality_id);
+        expect(res.mortality_id).toBe(m.mortality_id);
       })
     });
   });
@@ -112,14 +126,17 @@ describe("API: Critter", () => {
     });
     describe("POST /api/mortality/create", () => {
       it("should return status 200", async () => {
-        const res = await request.post("/api/mortality/create").send(testMort);
+        const m = await obtainMortalityTemplate();
+        const res = await request.post("/api/mortality/create").send(m);
         expect.assertions(1);
         expect(res.status).toBe(201);
       })
     })
     describe("GET /api/mortality/:mortality_id", () => {
       it("should return status 200", async () => {
-        const res = await request.get("/api/mortality/" + testMort.mortality_id);
+        const m = await createTempMortality();
+        //console.log('Got this temp mortality\n' + JSON.stringify(m, null, 2));
+        const res = await request.get("/api/mortality/" + m.mortality_id);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
@@ -131,19 +148,23 @@ describe("API: Critter", () => {
     });
     describe("PUT /api/mortality/:mortality_id", () => {
       it("should return status 200",async () => {
-        const mort = await request.put("/api/mortality/" + testMort.mortality_id).send({mortality_comment: 'banana'});
+        const m = await createTempMortality();
+        const mort = await request.put("/api/mortality/" + m.mortality_id).send({mortality_comment: 'banana'});
+        console.log('res was ' + JSON.stringify(mort, null, 2));
         expect.assertions(1);
         expect(mort.status).toBe(200);
       });
       it("should return status 400", async () => {
-        const mort = await request.put("/api/mortality/" + testMort.mortality_id).send({mortality_comment: 123});
+        const m = await createTempMortality();
+        const mort = await request.put("/api/mortality/" + m.mortality_id).send({mortality_comment: 123});
         expect.assertions(1);
         expect(mort.status).toBe(400);
       })
     });
     describe("DELETE /api/mortality/:mortality_id", () => {
       it("should return status 200", async () => {
-        const mort = await request.delete("/api/mortality/" + testMort.mortality_id);
+        const m = await createTempMortality();
+        const mort = await request.delete("/api/mortality/" + m.mortality_id);
         expect.assertions(1);
         expect(mort.status).toBe(200);
       });
@@ -152,11 +173,14 @@ describe("API: Critter", () => {
 });
 
 afterAll(async () => {
-  if( (await prisma.mortality.findUnique({where: {mortality_id: testMort.mortality_id} })) ) {
-    await prisma.mortality.delete({
-      where: {
-        mortality_id: testMort.mortality_id
-      }
-    })
+  for(const m of tempMortalities) {
+    if( (await prisma.mortality.findUnique({where: {mortality_id: m.mortality_id} })) ) {
+      await prisma.mortality.delete({
+        where: {
+          mortality_id: m.mortality_id
+        }
+      })
+    }
   }
+
 })

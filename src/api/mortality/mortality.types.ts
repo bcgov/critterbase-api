@@ -47,7 +47,7 @@ const MortalityBodySchema = implement<mortality>().with({
     ultimate_cause_of_death_id: zodID.nullable(),
     ultimate_cause_of_death_confidence:  z.nativeEnum(cod_confidence).nullable(),
     ultimate_predated_by_taxon_id: zodID.nullable(),
-    mortality_comment: zodID.nullable(),
+    mortality_comment: z.string().nullable(),
     create_user: zodID,
     update_user: zodID,
     create_timestamp: z.coerce.date(),
@@ -73,6 +73,7 @@ const MortalityCreateSchema = implement<
  )
 
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
+type MortalityUpdate = z.infer<typeof MortalityUpdateSchema>;
 
 type MortalityIncludeType = Prisma.mortalityGetPayload<typeof mortalityInclude>;
 
@@ -124,15 +125,15 @@ const MortalityResponseSchema = z.object({}).passthrough()
     } = val as MortalityIncludeType;
     return {
         ...rest,
-        location: CommonFormattedLocationSchema.parse(location),
-        proximate_cause_of_death: lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death,
-        ultimate_cause_of_death: lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death,
-        proximate_cause_of_death_taxon: lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon,
-        ultimate_cause_of_death_taxon: lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon
+        location: location ? CommonFormattedLocationSchema.parse(location) : null,
+        proximate_cause_of_death: lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death ?? null,
+        ultimate_cause_of_death: lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death ?? null,
+        proximate_cause_of_death_taxon: lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon ?? null,
+        ultimate_cause_of_death_taxon: lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon ?? null
     }
 })
 
 type FormattedMortality = z.infer<typeof MortalityResponseSchema>;
 
-export { mortalityInclude, MortalityCreateSchema, MortalityResponseSchema }
-export type { MortalityIncludeType, FormattedMortality, MortalityCreate }
+export { mortalityInclude, MortalityCreateSchema, MortalityUpdateSchema, MortalityResponseSchema }
+export type { MortalityIncludeType, FormattedMortality, MortalityCreate, MortalityUpdate }

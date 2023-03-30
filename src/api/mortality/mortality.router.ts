@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { createMortality, deleteMortality, getAllMortalities, getMortalityByCritter, getMortalityById, updateMortality } from "./mortality.service";
 import { apiError } from "../../utils/types";
-import { MortalityCreateSchema, MortalityResponseSchema } from "./mortality.types";
+import { MortalityCreateSchema, MortalityResponseSchema, MortalityUpdateSchema } from "./mortality.types";
 import { prisma } from "../../utils/constants";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
@@ -70,7 +70,8 @@ mortalityRouter
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = MortalityCreateSchema.parse(req.body);
+      const parsed = MortalityUpdateSchema.parse(req.body);
+      console.log('parsed was  ' + JSON.stringify(parsed, null, 2));
       const mort = await updateMortality(id, parsed);
       res.status(200).json(mort);
     })
