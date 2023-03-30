@@ -4,20 +4,20 @@ generator client {
 }
 
 generator zod {
-  provider                 = "zod-prisma"
-  output                   = "./zod_schemas" // (default) the directory where generated zod schemas will be saved
+  provider = "zod-prisma"
+  output   = "./zod_schemas" // (default) the directory where generated zod schemas will be saved
 
-  relationModel            = true // (default) Create and export both plain and related models.
+  relationModel = true // (default) Create and export both plain and related models.
   // relationModel         = "default" // Do not export model without relations.
   //relationModel         = false // Do not generate related model
 
-  modelCase                = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
+  modelCase = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
   //modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
 
-  modelSuffix              = "Schema" // (default) Suffix to apply to your prisma models when naming Zod schemas
+  modelSuffix = "Schema" // (default) Suffix to apply to your prisma models when naming Zod schemas
 
   // useDecimalJs          = false // (default) represent the prisma Decimal type using as a JS number
-  useDecimalJs             = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
+  useDecimalJs = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
 
   //imports                  = null // (default) will import the referenced file in generated schemas to be used via imports.someExportedVariable
 
@@ -67,54 +67,54 @@ model audit_log {
 }
 
 model capture {
-  capture_id                                     String    @id(map: "capture_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
-  critter_id                                     String    @db.Uuid /// @zod.uuid()
-  capture_location_id                            String?   @db.Uuid /// @zod.uuid()
-  release_location_id                            String?   @db.Uuid /// @zod.uuid()
-  capture_timestamp                              DateTime  @db.Timestamptz(6)
-  release_timestamp                              DateTime? @db.Timestamptz(6)
+  capture_id                                     String                     @id(map: "capture_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  critter_id                                     String                     @db.Uuid /// @zod.uuid()
+  capture_location_id                            String?                    @db.Uuid /// @zod.uuid()
+  release_location_id                            String?                    @db.Uuid /// @zod.uuid()
+  capture_timestamp                              DateTime                   @db.Timestamptz(6)
+  release_timestamp                              DateTime?                  @db.Timestamptz(6)
   capture_comment                                String?
   release_comment                                String?
-  create_user                                    String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  update_user                                    String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  create_timestamp                               DateTime  @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  update_timestamp                               DateTime  @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  location_capture_capture_location_idTolocation location? @relation("capture_capture_location_idTolocation", fields: [capture_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cap_location_fk")
-  user_capture_create_userTouser                 user      @relation("capture_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cu_fk")
-  critter                                        critter   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_fk")
-  location_capture_release_location_idTolocation location? @relation("capture_release_location_idTolocation", fields: [release_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_rel_location_fk")
-  user_capture_update_userTouser                 user      @relation("capture_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_uu_fk")
+  create_user                                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  update_user                                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  create_timestamp                               DateTime                   @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  update_timestamp                               DateTime                   @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  location_capture_capture_location_idTolocation location?                  @relation("capture_capture_location_idTolocation", fields: [capture_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cap_location_fk")
+  user_capture_create_userTouser                 user                       @relation("capture_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cu_fk")
+  critter                                        critter                    @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_fk")
+  location_capture_release_location_idTolocation location?                  @relation("capture_release_location_idTolocation", fields: [release_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_rel_location_fk")
+  user_capture_update_userTouser                 user                       @relation("capture_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_uu_fk")
   marking                                        marking[]
   measurement_qualitative                        measurement_qualitative[]
   measurement_quantitative                       measurement_quantitative[]
 }
 
 model critter {
-  critter_id                                    String                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
-  taxon_id                                      String                     @db.Uuid /// @zod.uuid()
-  wlh_id                                        String?
-  animal_id                                     String?
-  sex                                           sex
-  responsible_region_nr_id                      String?                    @default(dbgenerated("get_nr_region_id('Unknown'::text)")) @db.Uuid /// @zod.uuid()
-  create_user                                   String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  update_user                                   String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  create_timestamp                              DateTime                   @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  update_timestamp                              DateTime                   @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  critter_comment                               String?
-  artifact                                      artifact[]
-  capture                                       capture[]
-  lk_region_nr                                  lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
-  lk_taxon                                      lk_taxon                   @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_taxon_fk")
-  user_critter_create_userTouser                user                       @relation("critter_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_create_user")
-  user_critter_update_userTouser                user                       @relation("critter_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_update_user")
-  critter_collection_unit                       critter_collection_unit[]
-  family_child                                  family_child[]
-  family_parent                                 family_parent[]
-  marking                                       marking[]
-  measurement_qualitative                       measurement_qualitative[]
-  measurement_quantitative                      measurement_quantitative[]
-  mortality                                     mortality[]
- 
+  critter_id                     String                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  taxon_id                       String                     @db.Uuid /// @zod.uuid()
+  wlh_id                         String?
+  animal_id                      String?
+  sex                            sex
+  responsible_region_nr_id       String?                    @default(dbgenerated("get_nr_region_id('Unknown'::text)")) @db.Uuid /// @zod.uuid()
+  create_user                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  update_user                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  create_timestamp               DateTime                   @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  update_timestamp               DateTime                   @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  critter_comment                String?
+  artifact                       artifact[]
+  capture                        capture[]
+  lk_region_nr                   lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
+  lk_taxon                       lk_taxon                   @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_taxon_fk")
+  user_critter_create_userTouser user                       @relation("critter_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_create_user")
+  user_critter_update_userTouser user                       @relation("critter_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_update_user")
+  critter_collection_unit        critter_collection_unit[]
+  family_child                   family_child[]
+  family_parent                  family_parent[]
+  marking                        marking[]
+  measurement_qualitative        measurement_qualitative[]
+  measurement_quantitative       measurement_quantitative[]
+  mortality                      mortality[]
+
   @@unique([critter_id, taxon_id], map: "critter_un")
 }
 
@@ -240,42 +240,45 @@ model lk_marking_type {
 }
 
 model lk_population_unit_temp {
-  population_unit_id String                   @id(map: "newtable_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  population_unit_id String                                       @id(map: "newtable_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
   unit_name          String?
   unit_geom          Unsupported("geometry(multipolygon, 4326)")?
+
   //Index required for post_gis unsupported types
   //https://freddydumont.com/blog/prisma-postgis
   @@index([unit_geom], name: "unit_geom_idx", type: Gist)
 }
 
 model lk_region_env {
-  region_env_id                        String                   @id(map: "lk_region_env_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  region_env_id                        String                                       @id(map: "lk_region_env_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
   region_env_name                      String
   description                          String?
   region_geom                          Unsupported("geometry(multipolygon, 4326)")?
-  create_user                          String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  update_user                          String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  create_timestamp                     DateTime                 @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  update_timestamp                     DateTime                 @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  user_lk_region_env_create_userTouser user                     @relation("lk_region_env_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_create_user")
-  user_lk_region_env_update_userTouser user                     @relation("lk_region_env_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_update_user")
+  create_user                          String                                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  update_user                          String                                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  create_timestamp                     DateTime                                     @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  update_timestamp                     DateTime                                     @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  user_lk_region_env_create_userTouser user                                         @relation("lk_region_env_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_create_user")
+  user_lk_region_env_update_userTouser user                                         @relation("lk_region_env_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_update_user")
   location                             location[]
+
   @@index([region_geom], name: "region_env_geom_idx", type: Gist)
 }
 
 model lk_region_nr {
-  region_nr_id                        String                   @id(map: "lk_region_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  region_nr_id                        String                                  @id(map: "lk_region_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
   region_nr_name                      String
   description                         String?
   region_geom                         Unsupported("geometry(polygon, 4326)")?
-  create_user                         String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  update_user                         String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  create_timestamp                    DateTime                 @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  update_timestamp                    DateTime                 @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  create_user                         String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  update_user                         String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  create_timestamp                    DateTime                                @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  update_timestamp                    DateTime                                @default(now()) @db.Timestamptz(6) /// @zod.nullish()
   critter                             critter[]
-  user_lk_region_nr_create_userTouser user                     @relation("lk_region_nr_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_create_user")
-  user_lk_region_nr_update_userTouser user                     @relation("lk_region_nr_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_update_user")
+  user_lk_region_nr_create_userTouser user                                    @relation("lk_region_nr_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_create_user")
+  user_lk_region_nr_update_userTouser user                                    @relation("lk_region_nr_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_update_user")
   location                            location[]
+
   @@index([region_geom], name: "region_nr_geom_idx", type: Gist)
 }
 
@@ -325,17 +328,18 @@ model lk_taxon {
 }
 
 model lk_wildlife_management_unit {
-  wmu_id                                             String                   @id(map: "pk_lk_wildlife_management_unit") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
-  wmu_name                                           String                   @unique(map: "lk_wildlife_management_unit_un")
+  wmu_id                                             String                                  @id(map: "pk_lk_wildlife_management_unit") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  wmu_name                                           String                                  @unique(map: "lk_wildlife_management_unit_un")
   description                                        String?
   wmu_geom                                           Unsupported("geometry(polygon, 4326)")?
-  create_user                                        String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  update_user                                        String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
-  create_timestamp                                   DateTime                 @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  update_timestamp                                   DateTime                 @default(now()) @db.Timestamptz(6) /// @zod.nullish()
-  user_lk_wildlife_management_unit_create_userTouser user                     @relation("lk_wildlife_management_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_create_user")
-  user_lk_wildlife_management_unit_update_userTouser user                     @relation("lk_wildlife_management_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_update_user")
+  create_user                                        String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  update_user                                        String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid /// @zod.uuid().nullish()
+  create_timestamp                                   DateTime                                @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  update_timestamp                                   DateTime                                @default(now()) @db.Timestamptz(6) /// @zod.nullish()
+  user_lk_wildlife_management_unit_create_userTouser user                                    @relation("lk_wildlife_management_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_create_user")
+  user_lk_wildlife_management_unit_update_userTouser user                                    @relation("lk_wildlife_management_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_update_user")
   location                                           location[]
+
   @@index([wmu_geom], name: "wmu_geom_idx", type: Gist)
 }
 
