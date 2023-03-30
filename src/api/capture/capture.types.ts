@@ -1,5 +1,5 @@
 import { capture, Prisma } from "@prisma/client";
-import { CommonLocationSchema, commonLocationSelect, FormattedLocation, LocationSubsetType } from "../location/location.types";
+import { CommonFormattedLocationSchema, CommonLocationSchema, commonLocationSelect, FormattedLocation, LocationSubsetType } from "../location/location.types";
 import { z } from 'zod';
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
@@ -49,7 +49,7 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
   type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
   type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
-  const CaptureResponseSchema = implement<CaptureIncludeType>().with({
+  /*const CaptureResponseSchema = implement<CaptureIncludeType>().with({
     capture_id: zodID,
     critter_id: zodID,
     capture_location_id: zodID.nullable(),
@@ -64,20 +64,25 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
     update_timestamp: z.coerce.date(),
     location_capture_capture_location_idTolocation: CommonLocationSchema.nullable(),
     location_capture_release_location_idTolocation: CommonLocationSchema.nullable()
-  });
+  });*/
   
-  const CaptureResponseFormattedSchema = CaptureResponseSchema
-  .transform(val => {
+  //const CaptureResponseFormattedSchema = 
+  const CaptureResponseSchema = z.object({}).passthrough()
+  .transform((val) => {
     const {
       location_capture_capture_location_idTolocation,
       location_capture_release_location_idTolocation,
       ...rest
-    } = val;
-    return {...rest, capture_location: location_capture_capture_location_idTolocation, release_location: location_capture_release_location_idTolocation}
+    } = val as CaptureIncludeType;
+    return {
+      ...rest, 
+      capture_location: CommonFormattedLocationSchema.parse(location_capture_capture_location_idTolocation), 
+      release_location: CommonFormattedLocationSchema.parse(location_capture_release_location_idTolocation)
+    }
   });
 
   type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
 
   export type {CaptureIncludeType, FormattedCapture, CaptureCreate, CaptureUpdate}
-  export {captureInclude, CaptureCreateSchema, CaptureUpdateSchema, CaptureResponseSchema, CaptureResponseFormattedSchema}
+  export { captureInclude, CaptureCreateSchema, CaptureUpdateSchema, CaptureResponseSchema }

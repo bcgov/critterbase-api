@@ -1,10 +1,10 @@
-import { capture, critter, frequency_unit, measurement_qualitative, measurement_quantitative, measurement_unit, Prisma, sex, xref_taxon_measurement_qualitative, xref_taxon_measurement_qualitative_option, xref_taxon_measurement_quantitative } from "@prisma/client";
-import { z, ZodAny } from 'zod'
+import { critter, Prisma, sex } from "@prisma/client";
+import { z } from 'zod'
 import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
-import { captureInclude, CaptureResponseFormattedSchema, CaptureResponseSchema } from "../capture/capture.types";
-import { commonLocationSelect, FormattedLocation } from "../location/location.types";
-import { mortalityInclude, MortalityResponseFormattedSchema, MortalityResponseSchema } from "../mortality/mortality.types";
+import { captureInclude, CaptureResponseSchema } from "../capture/capture.types";
+import { markingIncludes, markingResponseSchema } from "../marking/marking.types";
+import { mortalityInclude, MortalityResponseSchema } from "../mortality/mortality.types";
 
 const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement_quantitativeArgs>()({
     select: {
@@ -35,44 +35,6 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     }
   }) 
   
-  const markingIncludeSubset = Prisma.validator<Prisma.markingArgs>()({
-    select: {
-      lk_colour_marking_primary_colour_idTolk_colour: {
-        select: {
-          colour: true
-        }
-      },
-      lk_colour_marking_secondary_colour_idTolk_colour: {
-        select: {
-          colour: true
-        }
-      },
-      lk_marking_type: {
-        select: {
-          name: true
-        }
-      },
-      lk_marking_material: {
-        select: {
-          material: true
-        }
-      },
-      xref_taxon_marking_body_location: {
-        select: {
-          body_location: true
-        }
-      },
-      identifier: true,
-      frequency: true, 
-      frequency_unit: true,
-      order: true
-    }
-  })
-
-  type MeasurementQuantiativeSubsetType = Prisma.measurement_quantitativeGetPayload<typeof measurementQuantitativeIncludeSubset>;
-  type MeasurementQualitatitveSubsetType = Prisma.measurement_qualitativeGetPayload<typeof measurementQualitativeIncludeSubset>
-  type MarkingSubsetType = Prisma.markingGetPayload<typeof markingIncludeSubset>
-
   const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     include: {
         lk_taxon: {
@@ -83,7 +45,7 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
         },
         capture: captureInclude,
         mortality: mortalityInclude,
-        marking: markingIncludeSubset, 
+        marking: markingIncludes, 
         measurement_qualitative: measurementQualitativeIncludeSubset,
         measurement_quantitative: measurementQuantitativeIncludeSubset
       }
@@ -91,27 +53,7 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
   
  
   type CritterIncludeResult = Prisma.critterGetPayload<typeof formattedCritterInclude>
-  
-  type FormattedQuantitativeMeasurement = 
-    Pick<measurement_quantitative, 'measured_timestamp' | 'value'> 
-    & Pick<xref_taxon_measurement_quantitative, 'measurement_name' | 'unit'>
 
-  type FormattedQualitativeMeasurement = 
-    Pick<measurement_qualitative, 'measured_timestamp'> 
-    & Pick<xref_taxon_measurement_qualitative, 'measurement_name'> 
-    & { value: string | null}
-
-  type FormattedMarking = {
-    primary_colour: string | null,
-    secondary_colour: string | null,
-    marking_type: string | null,
-    marking_material: string | null, 
-    body_location: string | null, 
-    identifier: string | null,
-    frequency: number | null,
-    frequency_unit: frequency_unit | null,
-    order: number | null
-  }
 
   const CritterSchema = implement<critter>().with({
     critter_id: zodID,
@@ -141,7 +83,7 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
     sex: true
   }).shape);
 
-  const CritterResponseSchema = implement<CritterIncludeResult>().with({
+  /*const CritterResponseSchema = implement<CritterIncludeResult>().with({
     critter_id: zodID,
     taxon_id: zodID,
     wlh_id: z.string().nullable(),
@@ -174,43 +116,66 @@ const measurementQuantitativeIncludeSubset = Prisma.validator<Prisma.measurement
         })
       })
     })),
-    marking: z.any()
-  }).transform((val) => {
+    marking: markingIncludesSchema.array()*/
+const CritterResponseSchema = z.object({}).passthrough()
+.transform((val) => {
     const {
       mortality,
       capture,
       lk_region_nr,
       lk_taxon,
-      ...rest} = val;
+      marking,
+      measurement_qualitative,
+      measurement_quantitative,
+      ...rest} = val as CritterIncludeResult;
     return {
       ...rest,
       taxon_name_latin: lk_taxon.taxon_name_latin,
       responsible_region_name: lk_region_nr?.region_nr_name,
-      mortality: mortality.map(a => MortalityResponseFormattedSchema.parse(a)),
-      capture: capture.map(a => CaptureResponseFormattedSchema.parse(a))
+      mortality: mortality.map(a => stripCritterId(MortalityResponseSchema.parse(a))),
+      capture: capture.map(a => stripCritterId(CaptureResponseSchema.parse(a))),
+      marking: marking.map(a => stripCritterId(markingResponseSchema.parse(a)) ),
+      measurement: {
+        qualitative: measurement_qualitative.map(a => {
+          return {
+            measured_timestamp: a.measured_timestamp,
+            option_label: a.xref_taxon_measurement_qualitative_option.option_label,
+            measurement_name: a.xref_taxon_measurement_qualitative_option.xref_taxon_measurement_qualitative.measurement_name
+          }
+        }),
+        quantitative: measurement_quantitative.map(a => {
+          return {
+            measured_timestamp: a.measured_timestamp,
+            value: a.value,
+            ...a.xref_taxon_measurement_quantitative
+          }
+        })
+      }
     }
-  })
+  });
+
+  interface critterInterface {
+    critter_id?: string
+  }
+  
+  const stripCritterId = <T extends critterInterface>(obj: T): Omit<T, "critter_id"> => {
+    delete obj.critter_id;
+    return obj;
+  }
 
   type CritterCreate = z.infer<typeof CritterCreateSchema>
   type CritterUpdate = z.infer<typeof CritterUpdateSchema>
   type FormattedCritter = z.infer<typeof CritterResponseSchema>
 
   export type {
-    FormattedCritter, 
-    MeasurementQualitatitveSubsetType,
-    MeasurementQuantiativeSubsetType, 
-    MarkingSubsetType, 
-    CritterIncludeResult, 
-    FormattedMarking,
-    FormattedQuantitativeMeasurement,
-    FormattedQualitativeMeasurement,
+    FormattedCritter,  
+    CritterIncludeResult,
     CritterCreate,
     CritterUpdate
     }
   export {
     measurementQualitativeIncludeSubset, 
     measurementQuantitativeIncludeSubset, 
-    markingIncludeSubset, 
     formattedCritterInclude, 
     CritterResponseSchema,
     CritterUpdateSchema,

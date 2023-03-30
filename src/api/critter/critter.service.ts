@@ -1,8 +1,6 @@
 import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
-import { apiError } from "../../utils/types";
-import {  CritterCreate, CritterIncludeResult, CritterResponseSchema, CritterUpdate, FormattedCritter, formattedCritterInclude, FormattedMarking, FormattedQualitativeMeasurement, FormattedQuantitativeMeasurement, MarkingSubsetType, MeasurementQualitatitveSubsetType, MeasurementQuantiativeSubsetType } from "./critter.types";
-import { formatLocation } from "../location/location.service";
+import {  CritterCreate, CritterResponseSchema, CritterUpdate, FormattedCritter, formattedCritterInclude } from "./critter.types";
 
 
 const getAllCritters = async (): Promise<critter[]> => {
@@ -15,7 +13,7 @@ const getCritterById = async (critter_id: string): Promise<critter | null> => {
   });
 }
 
-const getCritterByIdWithDetails = async (critter_id: string): Promise<FormattedCritter | null> => {
+const getCritterByIdWithDetails = async (critter_id: string): Promise<critter | null> => {
   const result = await prisma.critter.findUnique({
     ...formattedCritterInclude,
     where: {
@@ -23,15 +21,10 @@ const getCritterByIdWithDetails = async (critter_id: string): Promise<FormattedC
     }
   });
   
-  if(!result) {
-    return null;
-  }
-
-  const formatted = CritterResponseSchema.parse(result);
-  return formatted;
+  return result;
 }
 
-const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[]> => {
+const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results =  await prisma.critter.findMany({
@@ -41,8 +34,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<FormattedCritter[]> =>
    }
   })
 
-  const formattedResults = results.map(r => CritterResponseSchema.parse(r));
-  return formattedResults;
+  return results;
 }
 
 const updateCritter = async (critter_id: string, critter_data: CritterUpdate): Promise<critter> => {

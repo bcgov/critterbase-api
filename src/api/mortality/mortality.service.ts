@@ -1,32 +1,30 @@
 import { prisma } from "../../utils/constants";
 import type { mortality } from "@prisma/client";
-import { FormattedMortality, MortalityCreate, mortalityInclude, MortalityIncludeType, MortalityResponseFormattedSchema, MortalityResponseSchema } from "./mortality.types";
+import { FormattedMortality, MortalityCreate, mortalityInclude, MortalityIncludeType, MortalityResponseSchema } from "./mortality.types";
 
 const getAllMortalities = async (): Promise<mortality[]> => {
   return await prisma.mortality.findMany();
 };
 
-const getMortalityById = async (mortality_id: string): Promise<FormattedMortality | null> => {
+const getMortalityById = async (mortality_id: string): Promise<mortality | null> => {
   const mort = await prisma.mortality.findUnique({
     ...mortalityInclude,
     where: {
       mortality_id: mortality_id
     }
   });
-  if(mort == null) {
-    return null;
-  }
-  return MortalityResponseFormattedSchema.parse(mort);
+  
+  return mort;
 }
 
-const getMortalityByCritter = async (critter_id: string): Promise<FormattedMortality[]> => {
+const getMortalityByCritter = async (critter_id: string): Promise<mortality[]> => {
   const mortalities = await prisma.mortality.findMany({
     ...mortalityInclude,
     where: {
       critter_id: critter_id
     }
   });
-  return mortalities.map(m => MortalityResponseFormattedSchema.parse(m));
+  return mortalities;
 }
 
 const createMortality = async (mortality_data: MortalityCreate): Promise<mortality> => {

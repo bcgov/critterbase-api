@@ -11,9 +11,8 @@ import {
   updateCritter,
 } from "./critter.service";
 import { apiError } from "../../utils/types";
-import { prisma } from "../../utils/constants";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { CritterCreateSchema, CritterUpdateSchema } from "./critter.types";
+import { CritterCreateSchema, CritterResponseSchema, CritterUpdateSchema } from "./critter.types";
 
 export const critterRouter = express.Router();
 
@@ -48,7 +47,8 @@ critterRouter.route("/wlh/:wlh_id").get(
         "Could not find any animals with the requested WLH ID"
       );
     }
-    return res.status(200).json(critter);
+    const format = CritterResponseSchema.parse(critter);
+    return res.status(200).json(format);
   })
 );
 
@@ -67,7 +67,8 @@ critterRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const critter = await getCritterByIdWithDetails(id);
-      return res.status(200).json(critter);
+      const format = CritterResponseSchema.parse(critter);
+      return res.status(200).json(format);
     })
   )
   .put(

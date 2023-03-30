@@ -9,10 +9,11 @@ import {
   getCaptureById,
   updateCapture,
 } from "./capture.service";
-import { apiError } from "../../utils/types";
-import { prisma } from "../../utils/constants";
+
 import {
-  CaptureCreateBodySchema
+  CaptureCreateSchema,
+  CaptureResponseSchema,
+  CaptureUpdateSchema
 } from "./capture.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
@@ -35,7 +36,7 @@ captureRouter.get(
 captureRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const parsed = CaptureCreateBodySchema.parse(req.body);
+    const parsed = CaptureCreateSchema.parse(req.body);
     const result = await createCapture(parsed);
     return res.status(201).json(result);
   })
@@ -46,7 +47,8 @@ captureRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const parsed = uuidParamsSchema.parse(req.params);
     const result = await getCaptureByCritter(parsed.id);
-    res.status(200).send(result);
+    const format = CaptureResponseSchema.parse(result);
+    res.status(200).json(format);
   })
 );
 
@@ -65,13 +67,14 @@ captureRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const result = await getCaptureById(id);
-      return res.status(200).json(result);
+      const format = CaptureResponseSchema.parse(result);
+      return res.status(200).json(format);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = CaptureCreateBodySchema.parse(req.body);
+      const parsed = CaptureUpdateSchema.parse(req.body);
       const result = await updateCapture(id, parsed);
       res.status(200).json(result);
     })

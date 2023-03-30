@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { createMortality, deleteMortality, getAllMortalities, getMortalityByCritter, getMortalityById, updateMortality } from "./mortality.service";
 import { apiError } from "../../utils/types";
-import { MortalityCreateSchema } from "./mortality.types";
+import { MortalityCreateSchema, MortalityResponseSchema } from "./mortality.types";
 import { prisma } from "../../utils/constants";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
@@ -37,16 +37,14 @@ mortalityRouter.get("/critter/:critter_id",
     const id = req.params.critter_id;
     //Leaving in this one since it succeeds otherwise, but I think the user should know 
     //that the array they get is empty because the critter isn't real
-    const exists = await prisma.critter.findUnique({
+    await prisma.critter.findUniqueOrThrow({
       where: {
         critter_id: id
       }
     });
-    if(!exists) {
-      throw apiError.notFound('No critter id found.')
-    }
     const mort = await getMortalityByCritter(id);
-    return res.status(200).json(mort);
+    const parsed = mort.map( a => MortalityResponseSchema.parse(a) );
+    return res.status(200).json(parsed);
   })
 );
 
@@ -65,7 +63,8 @@ mortalityRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const mort = await getMortalityById(id);
-      return res.status(200).json(mort);
+      const parsed = MortalityResponseSchema.parse(mort);
+      return res.status(200).json(parsed);
     })
   )
   .put(

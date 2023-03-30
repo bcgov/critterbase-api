@@ -2,7 +2,7 @@ import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, zodID } from "../../utils/zod_helpers";
-import { CommonLocationSchema, commonLocationSelect, FormattedLocation } from "../location/location.types";
+import { CommonFormattedLocationSchema, CommonLocationSchema, commonLocationSelect, FormattedLocation } from "../location/location.types";
 
 const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
     include: {
@@ -76,6 +76,7 @@ type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
 
 type MortalityIncludeType = Prisma.mortalityGetPayload<typeof mortalityInclude>;
 
+/*
 const MortalityResponseSchema = implement<MortalityIncludeType>().with({
     mortality_id: zodID,
     critter_id: zodID,
@@ -109,19 +110,21 @@ const MortalityResponseSchema = implement<MortalityIncludeType>().with({
         taxon_id: zodID,
         taxon_name_latin: z.string()
     }).nullable()
-});
+});*/
 
-const MortalityResponseFormattedSchema = MortalityResponseSchema
+const MortalityResponseSchema = z.object({}).passthrough()
 .transform(val => {
     const {
+        location,
         lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death,
         lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death,
         lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon,
         lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon,
         ...rest
-    } = val;
+    } = val as MortalityIncludeType;
     return {
         ...rest,
+        location: CommonFormattedLocationSchema.parse(location),
         proximate_cause_of_death: lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death,
         ultimate_cause_of_death: lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death,
         proximate_cause_of_death_taxon: lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon,
@@ -129,7 +132,7 @@ const MortalityResponseFormattedSchema = MortalityResponseSchema
     }
 })
 
-type FormattedMortality = z.infer<typeof MortalityResponseFormattedSchema>;
+type FormattedMortality = z.infer<typeof MortalityResponseSchema>;
 
-export { mortalityInclude, MortalityCreateSchema, MortalityResponseSchema, MortalityResponseFormattedSchema }
+export { mortalityInclude, MortalityCreateSchema, MortalityResponseSchema }
 export type { MortalityIncludeType, FormattedMortality, MortalityCreate }

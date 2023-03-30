@@ -116,6 +116,16 @@ const CommonLocationSchema = implement<CommonLocationType>().with({
   }).nullable()
 })
 
+const CommonFormattedLocationSchema = CommonLocationSchema.transform(val => {
+  const {lk_region_env, lk_region_nr, lk_wildlife_management_unit, ...rest} = val;
+  return {
+    ...rest, 
+    region_env_name: lk_region_env?.region_env_name,
+    region_nr_name: lk_region_nr?.region_nr_name,
+    wmu_name: lk_wildlife_management_unit?.wmu_name
+   }
+})
+
 const locationIncludes: Prisma.locationInclude = {
   lk_wildlife_management_unit: true,
   lk_region_nr: true,
@@ -130,4 +140,5 @@ export {
   locationIncludes,
   LocationResponseSchema,
   LocationSchema,
+  CommonFormattedLocationSchema
 };
