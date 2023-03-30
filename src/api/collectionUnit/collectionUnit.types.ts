@@ -5,6 +5,7 @@ import {
   implement,
   noAudit,
   nonEmpty,
+  ResponseSchema,
   XrefCollectionUnitSchema,
   zodAudit,
   zodID,
@@ -54,20 +55,22 @@ const critter_collection_unitIncludesSchema =
     }),
   });
 
-// Formatted API reponse schema which omits fields and unpacks nested data
-const collectionUnitResponseSchema =
-  critter_collection_unitIncludesSchema.transform((val) => {
-    return {
-      critter_collection_unit_id: val.critter_collection_unit_id,
-      critter_id: val.critter_id,
-      unit_name: val.xref_collection_unit.unit_name,
-      unit_description: val.xref_collection_unit.description,
-      create_user: val.create_user,
-      update_user: val.update_user,
-      create_timestamp: val.create_timestamp,
-      update_timestamp: val.update_timestamp,
-    };
-  });
+// Formatted API response schema which omits fields and unpacks nested data
+const collectionUnitResponseSchema = ResponseSchema.transform((obj) => {
+  const {
+    // omit
+    collection_unit_id,
+    // include
+    xref_collection_unit,
+    ...rest
+  } = obj as CollectionUnitIncludes;
+
+  return {
+    ...rest,
+    unit_name: xref_collection_unit?.unit_name ?? null,
+    unit_description: xref_collection_unit?.description ?? null,
+  };
+});
 
 // Validate incoming request body for create critter collection unit
 const CollectionUnitCreateBodySchema = implement<
