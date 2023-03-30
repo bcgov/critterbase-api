@@ -45,6 +45,7 @@ const getQualMeasurementOrThrow = async (
       },
       include: {
         xref_taxon_measurement_qualitative: true,
+        xref_taxon_measurement_qualitative_option: true,
       },
     });
   return qualMeasurement;

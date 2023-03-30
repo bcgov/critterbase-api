@@ -9,7 +9,10 @@ import {
   getQuantMeasurementOrThrow,
   getQuantMeasurementsByCritterId,
 } from "./measurement.service";
-import { QuantitativeResponseSchema } from "./measurement.utils";
+import {
+  QualitativeResponseSchema,
+  QuantitativeResponseSchema,
+} from "./measurement.utils";
 
 export const measurementRouter = express.Router();
 
@@ -58,8 +61,8 @@ measurementRouter
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const qual = await getQualMeasurementOrThrow(req.params.id);
-      //const formattedQual = QualitativeResponseSchema.parse(qual);
-      return res.status(200).json(qual);
+      const formattedQual = QualitativeResponseSchema.parse(qual);
+      return res.status(200).json(formattedQual);
     })
   );
 /**

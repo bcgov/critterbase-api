@@ -5,6 +5,7 @@ import {
   lk_wildlife_management_unit,
   measurement_unit,
   xref_taxon_measurement_qualitative,
+  xref_taxon_measurement_qualitative_option,
   xref_taxon_measurement_quantitative,
 } from ".prisma/client";
 import { z } from "zod";
@@ -70,6 +71,16 @@ const XrefTaxonMeasurementQualitativeSchema =
     ...zodAudit,
   });
 
+const XrefTaxonMeasurementQualitativeOptionSchema =
+  implement<xref_taxon_measurement_qualitative_option>().with({
+    qualitative_option_id: z.string(),
+    taxon_measurement_id: zodID,
+    option_label: z.string(),
+    option_value: z.number(),
+    option_desc: z.string().nullable(),
+    ...zodAudit,
+  });
+
 const nonEmpty = (obj: Record<string | number | symbol, unknown>) =>
   Object.values(obj).some((v) => v !== undefined);
 
@@ -104,4 +115,5 @@ export {
   zodAudit,
   XrefTaxonMeasurementQuantitativeSchema,
   XrefTaxonMeasurementQualitativeSchema,
+  XrefTaxonMeasurementQualitativeOptionSchema,
 };

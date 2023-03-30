@@ -9,6 +9,7 @@ import { AuditColumns } from "../../utils/types";
 import {
   implement,
   noAudit,
+  XrefTaxonMeasurementQualitativeOptionSchema,
   XrefTaxonMeasurementQualitativeSchema,
   XrefTaxonMeasurementQuantitativeSchema,
   zodAudit,
@@ -55,13 +56,20 @@ const QualitativeCreateSchema = implement<
 const QualitativeResponseSchema = QualitativeSchema.extend({
   xref_taxon_measurement_qualitative:
     XrefTaxonMeasurementQualitativeSchema.nullish(),
+  xref_taxon_measurement_qualitative_option:
+    XrefTaxonMeasurementQualitativeOptionSchema.nullish(),
 }).transform((val) => {
   const {
-    taxon_measurement_id,
     xref_taxon_measurement_qualitative: x,
+    xref_taxon_measurement_qualitative_option: y,
     ...rest
   } = val;
-  return { ...rest, measurement_name: x?.measurement_name ?? null };
+  return {
+    ...rest,
+    measurement_name: x?.measurement_name ?? null,
+    option_label: y?.option_label ?? null,
+    option_value: y?.option_value ?? null,
+  };
 });
 
 // Quantitative
@@ -101,11 +109,7 @@ const QuantitativeResponseSchema = QuantitativeSchema.extend({
   xref_taxon_measurement_quantitative:
     XrefTaxonMeasurementQuantitativeSchema.nullish(),
 }).transform((val) => {
-  const {
-    taxon_measurement_id,
-    xref_taxon_measurement_quantitative: x,
-    ...rest
-  } = val;
+  const { xref_taxon_measurement_quantitative: x, ...rest } = val;
   return { ...rest, measurement_name: x?.measurement_name ?? null };
 });
 
@@ -118,4 +122,5 @@ export {
   QualitativeBody,
   QuantitativeBody,
   QuantitativeResponseSchema,
+  QualitativeResponseSchema,
 };
