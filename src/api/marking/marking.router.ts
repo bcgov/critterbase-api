@@ -48,7 +48,7 @@ markingRouter.post(
 
 markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
-    // validate critter id and confirm that marking exists
+    // validate uuid and confirm that critter_id exists
     const { id } = uuidParamsSchema.parse(req.params);
     await getCritterById(id);
     const markings = await getMarkingsByCritterId(id);

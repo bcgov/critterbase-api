@@ -9,12 +9,12 @@ import {
   createCollectionUnit,
   deleteCollectionUnit,
 } from "./collectionUnit.service";
-import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
 } from "./collectionUnit.types";
+import { getCritterById } from "../critter/critter.service";
 
 export const collectionUnitRouter = express.Router();
 
@@ -42,14 +42,10 @@ collectionUnitRouter.post(
 
 collectionUnitRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
-    // validate uuid
+    // validate uuid and confirm that critter_id exists
     const { id } = uuidParamsSchema.parse(req.params);
+    await getCritterById(id);
     const collectionUnits = await getCollectionUnitsByCritterId(id);
-    if (!collectionUnits.length) {
-      throw apiError.notFound(
-        `Critter ID "${id}" has no associated collectionUnits`
-      );
-    }
     return res.status(200).json(collectionUnits);
   })
 );

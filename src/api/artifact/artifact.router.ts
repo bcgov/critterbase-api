@@ -15,7 +15,7 @@ import {
 } from "./artifact.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { apiError } from "../../utils/types";
-import { strings } from "../../utils/constants";
+import { getCritterById } from "../critter/critter.service";
 
 export const artifactRouter = express.Router();
 
@@ -46,8 +46,9 @@ artifactRouter.post(
  */
 artifactRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
-    // validate critter id and confirm that markings exists
+    // validate uuid and confirm that critter_id exists
     const { id } = uuidParamsSchema.parse(req.params);
+    await getCritterById(id);
     const artifacts = await getArtifactsByCritterId(id);
     if (!artifacts.length) {
       throw apiError.notFound(`Critter ID "${id}" has no associated artifacts`);
