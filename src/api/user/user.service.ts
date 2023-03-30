@@ -50,9 +50,7 @@ const getUser = async (user_id: string): Promise<user> => {
  * Gets a user by their system_user_id
  * @param {string} system_user_id - The unique system_user_id for a user
  */
-const getUserBySystemId = async (
-  system_user_id: string
-): Promise<user> => {
+const getUserBySystemId = async (system_user_id: string): Promise<user> => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       system_user_id: system_user_id,

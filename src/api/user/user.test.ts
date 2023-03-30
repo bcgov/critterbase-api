@@ -136,7 +136,7 @@ describe("API: User", () => {
       it("throws error when given an invalid user ID", async () => {
         expect.assertions(1);
         await expect(getUser(randomUUID())).rejects.toThrow();
-      });      
+      });
     });
 
     describe("getUserBySystemId()", () => {
@@ -150,7 +150,7 @@ describe("API: User", () => {
       it("throws error when given an invalid system user ID", async () => {
         expect.assertions(1);
         await expect(getUserBySystemId(randomUUID())).rejects.toThrow();
-      }); 
+      });
     });
 
     describe("updateUser()", () => {
