@@ -1,11 +1,5 @@
-import { measurement_qualitative } from "@prisma/client";
+import { array } from "zod";
 import { prisma, request } from "../../utils/constants";
-import {
-  QuantitativeSchema,
-  QualitativeSchema,
-  QuantitativeResponseSchema,
-  QualitativeResponseSchema,
-} from "./measurement.utils";
 import {
   createQualMeasurement,
   createQuantMeasurement,
@@ -18,7 +12,12 @@ import {
   getQuantMeasurementOrThrow,
   getQuantMeasurementsByCritterId,
 } from "./measurement.service";
-import { array } from "zod";
+import {
+  QualitativeResponseSchema,
+  QualitativeSchema,
+  QuantitativeResponseSchema,
+  QuantitativeSchema,
+} from "./measurement.utils";
 
 let numMeasurements = 0;
 let measurements: any;
@@ -44,6 +43,9 @@ const ROUTE = "/api/measurements";
 const QUANT_ROUTE = `${ROUTE}/quantitative`;
 const QUAL_ROUTE = `${ROUTE}/qualitative`;
 
+let quantData: any;
+let qualData: any;
+
 beforeAll(async () => {
   measurements = await getAllQualMeasurements();
   Qmeasurements = await getAllQuantMeasurements();
@@ -64,25 +66,27 @@ beforeAll(async () => {
   ]);
   const { critter_id, taxon_measurement_id, qualitative_option_id } =
     measurement;
-  createdMeasurement = await createQualMeasurement({
+  qualData = {
     critter_id,
     taxon_measurement_id,
     qualitative_option_id,
     measurement_comment: comment,
-  });
-
-  QcreatedMeasurement = await createQuantMeasurement({
+  };
+  quantData = {
     critter_id: Qmeasurement.critter_id,
     value: 2,
     taxon_measurement_id: Qmeasurement.taxon_measurement_id,
     measurement_comment: comment,
-  });
+  };
+  createdMeasurement = await createQualMeasurement(qualData);
+
+  QcreatedMeasurement = await createQuantMeasurement(quantData);
 });
 
 describe("API: Measurement", () => {
   describe("SERVICES", () => {
     describe("measurement.service.ts", () => {
-      describe("getAllQualMeasurements()", () => {
+      describe(getAllQualMeasurements.name, () => {
         it("returns array of qualitative measurements", async () => {
           expect(measurements).toBeInstanceOf(Array);
         });
@@ -97,7 +101,7 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("getAllQuantMeasurements()", () => {
+      describe(getAllQuantMeasurements.name, () => {
         it("returns array of quantitative measurements", async () => {
           expect(Qmeasurements).toBeInstanceOf(Array);
         });
@@ -112,7 +116,7 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("getQualMeasurementOrThrow()", () => {
+      describe(getQualMeasurementOrThrow.name, () => {
         it("returns qualitative_measurement with valid id", () => {
           expect(measurement).not.toBeNull();
           expect(measurement).toHaveProperty("measurement_qualitative_id");
@@ -127,7 +131,7 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("getQuantMeasurementOrThrow()", () => {
+      describe(getQuantMeasurementOrThrow.name, () => {
         it("returns quantitative_measurement with valid id", () => {
           expect(Qmeasurement).not.toBeNull();
           expect(Qmeasurement).toHaveProperty("measurement_quantitative_id");
@@ -142,7 +146,7 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("getQualMeasurementsByCritterId()", () => {
+      describe(getQualMeasurementsByCritterId.name, () => {
         it("returns array of qualitative_measurements or empty array", () => {
           expect(measurementByCritter).not.toBeNull();
           expect(measurements).toBeInstanceOf(Array);
@@ -161,7 +165,7 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("getQuantMeasurementsByCritterId()", () => {
+      describe(getQuantMeasurementsByCritterId.name, () => {
         it("returns array of quantitative_measurements or empty array", () => {
           expect(QmeasurementByCritter).not.toBeNull();
           expect(Qmeasurements).toBeInstanceOf(Array);
@@ -180,21 +184,40 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("createQualMeasurement()", () => {
+      // describe("getMeasurementsByCritterId()", () => {
+      //   it("returns array of quantitative_measurements or empty array", () => {
+      //     expect(QmeasurementByCritter).not.toBeNull();
+      //     expect(Qmeasurements).toBeInstanceOf(Array);
+      //     if (QmeasurementByCritter?.length) {
+      //       expect(QmeasurementByCritter[0]).toHaveProperty(
+      //         "measurement_quantitative_id"
+      //       );
+      //     } else {
+      //       expect(QmeasurementByCritter).toBe([]);
+      //     }
+      //   });
+      //   it("throws error with critter_id that does not exist", async () => {
+      //     getQuantMeasurementsByCritterId(badID).catch((err) =>
+      //       expect(err).toBeDefined()
+      //     );
+      //   });
+      // });
+
+      describe(createQualMeasurement.name, () => {
         it("should create qualitative measurement with supplied comment", () => {
           expect(createdMeasurement).toBeDefined();
           expect(createdMeasurement.measurement_comment).toBe(comment);
         });
       });
 
-      describe("createQuantMeasurement()", () => {
+      describe(createQuantMeasurement.name, () => {
         it("should create quantitative measurement with supplied comment", () => {
           expect(QcreatedMeasurement).toBeDefined();
           expect(QcreatedMeasurement.measurement_comment).toBe(comment);
         });
       });
 
-      describe("deleteQualMeasurement()", () => {
+      describe(deleteQualMeasurement.name, () => {
         it("should delete qualitative measurement", async () => {
           const deleted = await deleteQualMeasurement(
             createdMeasurement.measurement_qualitative_id
@@ -203,7 +226,7 @@ describe("API: Measurement", () => {
         });
       });
 
-      describe("deleteQuantMeasurement()", () => {
+      describe(deleteQuantMeasurement.name, () => {
         it("should delete quantitative measurement", async () => {
           const deleted = await deleteQuantMeasurement(
             QcreatedMeasurement.measurement_quantitative_id
@@ -231,44 +254,85 @@ describe("API: Measurement", () => {
       });
     });
 
-    // describe(`POST ${ROUTE}/create`, () => {
-    //   it.todo("returns status 400 when nothing provided in body");
+    describe(`POST ${QUANT_ROUTE}/create`, () => {
+      it.todo("returns status 400 when nothing provided in body");
 
-    //   it("returns status 201 with valid body in req", async () => {
-    //     const res = await request.post(`${ROUTE}/create`).send(data);
-    //     createdLocation = res.body;
-    //     expect(res.status).toBe(201);
-    //     expect(res.body.location_comment).toBe(COMMENT);
-    //   });
-    //   it("returns status 400 with property that does not pass validation", async () => {
-    //     const res = await request
-    //       .post(`${ROUTE}/create`)
-    //       .send({ latitude: "1", location_comment: COMMENT });
-    //     expect(res.status).toBe(400);
-    //   });
-    //   it("returns status 400 with extra property", async () => {
-    //     const res = await request
-    //       .post(`${ROUTE}/create`)
-    //       .send({ extra_property: "extra" });
-    //     expect(res.status).toBe(400);
-    //   });
-    // });
-    describe("Quantitative", () => {
-      describe(`GET ${QUANT_ROUTE}/:id`, () => {
-        it("should return status 200 and a formatted quant measurement", async () => {
-          const res = await request.get(
-            `${QUANT_ROUTE}/${Qmeasurement.measurement_quantitative_id}`
-          );
-          expect(res.body).toBeDefined();
-          expect(res.status).toBe(200);
-          expect(QuantitativeResponseSchema.safeParse(res.body).success);
-          expect(res.body.measurement_name).toBeDefined();
-        });
-        it("with non existant id, should return status 404 and have error in body", async () => {
-          const res = await request.get(`${QUANT_ROUTE}/${badID}`);
-          expect(res.status).toBe(404);
-          expect(res.body.error).toBeDefined();
-        });
+      it("returns status 201 with valid body in req", async () => {
+        const res = await request.post(`${QUANT_ROUTE}/create`).send(quantData);
+        expect(res.status).toBe(201);
+        expect(res.body.measurement_comment).toBe(comment);
+        Qmeasurement = res.body;
+      });
+      it("returns status 400 with property that does not pass validation", async () => {
+        const res = await request
+          .post(`${QUANT_ROUTE}/create`)
+          .send({ ...quantData, value: "3" });
+        expect(res.status).toBe(400);
+        expect(res.body.errors).toBeDefined();
+      });
+      it("returns status 400 with extra property", async () => {
+        const res = await request
+          .post(`${QUANT_ROUTE}/create`)
+          .send({ extra_property: "extra" });
+        expect(res.status).toBe(400);
+      });
+    });
+
+    describe(`POST ${QUAL_ROUTE}/create`, () => {
+      it.todo("returns status 400 when nothing provided in body");
+
+      it("returns status 201 with valid body in req", async () => {
+        const res = await request.post(`${QUAL_ROUTE}/create`).send(qualData);
+        expect(res.status).toBe(201);
+        expect(res.body.measurement_comment).toBe(comment);
+        measurement = res.body;
+      });
+      it("returns status 400 with property that does not pass validation", async () => {
+        const res = await request
+          .post(`${QUAL_ROUTE}/create`)
+          .send({ ...qualData, critter_id: 1 });
+        expect(res.status).toBe(400);
+        expect(res.body.errors).toBeDefined();
+      });
+      it("returns status 400 with extra property", async () => {
+        const res = await request
+          .post(`${QUAL_ROUTE}/create`)
+          .send({ extra_property: "extra" });
+        expect(res.status).toBe(400);
+      });
+    });
+
+    describe(`GET ${QUANT_ROUTE}/:id`, () => {
+      it("should return status 200 and a formatted quant measurement", async () => {
+        const res = await request.get(
+          `${QUANT_ROUTE}/${Qmeasurement.measurement_quantitative_id}`
+        );
+        expect(res.body).toBeDefined();
+        expect(res.status).toBe(200);
+        expect(QuantitativeResponseSchema.safeParse(res.body).success);
+        expect(res.body.measurement_name).toBeDefined();
+      });
+      it("with non existant id, should return status 404 and have error in body", async () => {
+        const res = await request.get(`${QUANT_ROUTE}/${badID}`);
+        expect(res.status).toBe(404);
+        expect(res.body.error).toBeDefined();
+      });
+    });
+
+    describe(`GET ${QUAL_ROUTE}/:id`, () => {
+      it("should return status 200 and a formatted qual measurement", async () => {
+        const res = await request.get(
+          `${QUAL_ROUTE}/${measurement.measurement_qualitative_id}`
+        );
+        expect(res.body).toBeDefined();
+        expect(res.status).toBe(200);
+        expect(QualitativeResponseSchema.safeParse(res.body).success);
+        expect(res.body.option_value).toBeDefined();
+      });
+      it("with non existant id, should return status 404 and have error in body", async () => {
+        const res = await request.get(`${QUAL_ROUTE}/${badID}`);
+        expect(res.status).toBe(404);
+        expect(res.body.error).toBeDefined();
       });
     });
 
@@ -295,20 +359,34 @@ describe("API: Measurement", () => {
     //   });
     // });
 
-    // describe(`DELETE ${ROUTE}/:id`, () => {
-    //   it("should return status 200", async () => {
-    //     const res = await request.delete(
-    //       `${ROUTE}/${createdLocation.location_id}`
-    //     );
-    //     expect(res.body).toBeDefined();
-    //     expect(res.status).toBe(200);
-    //   });
-    //   it("with non existant id, should return status 404 and have error in body", async () => {
-    //     const res = await request.delete(`${ROUTE}/${BAD_ID}`);
-    //     expect(res.status).toBe(404);
-    //     expect(res.body.error).toBeDefined();
-    //   });
-    // });
+    describe(`DELETE ${QUANT_ROUTE}/:id`, () => {
+      it("should return status 200", async () => {
+        const res = await request.delete(
+          `${QUANT_ROUTE}/${Qmeasurement.measurement_quantitative_id}`
+        );
+        expect(res.body).toBeDefined();
+        expect(res.status).toBe(200);
+      });
+      it("with non existant id, should return status 404 and have error in body", async () => {
+        const res = await request.delete(`${QUANT_ROUTE}/${badID}`);
+        expect(res.status).toBe(404);
+        expect(res.body.error).toBeDefined();
+      });
+    });
+    describe(`DELETE ${QUAL_ROUTE}/:id`, () => {
+      it("should return status 200", async () => {
+        const res = await request.delete(
+          `${QUAL_ROUTE}/${measurement.measurement_qualitative_id}`
+        );
+        expect(res.body).toBeDefined();
+        expect(res.status).toBe(200);
+      });
+      it("with non existant id, should return status 404 and have error in body", async () => {
+        const res = await request.delete(`${QUAL_ROUTE}/${badID}`);
+        expect(res.status).toBe(404);
+        expect(res.body.error).toBeDefined();
+      });
+    });
   });
 
   describe("CLEANUP", () => {
@@ -318,9 +396,17 @@ describe("API: Measurement", () => {
           measurement_comment: comment,
         },
       });
+      await prisma.measurement_quantitative.deleteMany({
+        where: {
+          measurement_comment: comment,
+        },
+      });
       const afterTestsNumMeasurements =
         await prisma.measurement_qualitative.count();
+      const afterTestsNumQMeasurements =
+        await prisma.measurement_quantitative.count();
       expect(numMeasurements).toBe(afterTestsNumMeasurements);
+      expect(QnumMeasurements).toBe(afterTestsNumQMeasurements);
     });
   });
 });

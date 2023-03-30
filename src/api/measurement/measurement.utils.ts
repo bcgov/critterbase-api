@@ -115,6 +115,13 @@ const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
 type QuantitativeBody = z.infer<typeof QuantitativeCreateSchema>;
 
+type Measurements = {
+  measurements: {
+    quantitative: measurement_quantitative[];
+    qualitative: measurement_qualitative[];
+  };
+};
+export type { Measurements };
 export {
   QualitativeSchema,
   QuantitativeSchema,
@@ -122,4 +129,6 @@ export {
   QuantitativeBody,
   QuantitativeResponseSchema,
   QualitativeResponseSchema,
+  QualitativeCreateSchema,
+  QuantitativeCreateSchema,
 };

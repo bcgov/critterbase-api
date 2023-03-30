@@ -45,7 +45,7 @@ afterAll(async () => {
 });
 describe("API: Location", () => {
   describe("SERVICES", () => {
-    describe("getAllLocations()", () => {
+    describe(getAllLocations.name, () => {
       it("returns array of locations", async () => {
         expect(locations.length).toBeGreaterThan(0);
       });
@@ -53,7 +53,7 @@ describe("API: Location", () => {
         expect(array(LocationSchema).safeParse(location).success);
       });
     });
-    describe("getLocationOrThrow()", () => {
+    describe(getLocationOrThrow.name, () => {
       it("returns location", async () => {
         expect(location).not.toBeNull();
       });
@@ -71,7 +71,7 @@ describe("API: Location", () => {
         }
       });
     });
-    describe("createLocation()", () => {
+    describe(createLocation.name, () => {
       it("creates location and returns new location", async () => {
         expect(createdLocation).not.toBeNull();
       });
@@ -80,12 +80,12 @@ describe("API: Location", () => {
         expect(createdLocation.location_comment).toBe(COMMENT);
       });
     });
-    describe("updateLocation()", () => {
+    describe(updateLocation.name, () => {
       it("updates an existing location data and returns new location", async () => {
         expect(updatedLocation).not.toBeNull();
         expect(updatedLocation.location_comment).toBe(UPDATE);
       });
-      describe("deleteLocation()", () => {
+      describe(deleteLocation.name, () => {
         it("deletes location", async () => {
           const deletedLocation = await deleteLocation(
             createdLocation.location_id
