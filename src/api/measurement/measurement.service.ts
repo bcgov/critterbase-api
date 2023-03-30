@@ -20,9 +20,7 @@ const getAllQualMeasurements = async (): Promise<measurement_qualitative[]> => {
   return qualMeasurements;
 };
 
-const getQuantMeasurementOrThrow = async (
-  id: string
-): Promise<measurement_quantitative> => {
+const getQuantMeasurementOrThrow = async (id: string) => {
   const quantMeasurement =
     await prisma.measurement_quantitative.findUniqueOrThrow({
       where: {
@@ -35,9 +33,7 @@ const getQuantMeasurementOrThrow = async (
   return quantMeasurement;
 };
 
-const getQualMeasurementOrThrow = async (
-  id: string
-): Promise<measurement_qualitative> => {
+const getQualMeasurementOrThrow = async (id: string) => {
   const qualMeasurement =
     await prisma.measurement_qualitative.findUniqueOrThrow({
       where: {

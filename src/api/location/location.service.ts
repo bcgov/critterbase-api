@@ -35,7 +35,7 @@ const formatLocation = (location: LocationSubsetType) => {
  * @returns {Promise<location>}
  * Note: inferring return type
  */
-const getLocationOrThrow = async (id: string): Promise<location> => {
+const getLocationOrThrow = async (id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
       location_id: id,

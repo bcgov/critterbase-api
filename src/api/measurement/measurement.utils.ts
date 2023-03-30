@@ -3,18 +3,24 @@ import {
   measurement_qualitative,
   measurement_quantitative,
   Prisma,
+  xref_taxon_measurement_quantitative,
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
   noAudit,
+  ResponseSchema,
   XrefTaxonMeasurementQualitativeOptionSchema,
   XrefTaxonMeasurementQualitativeSchema,
   XrefTaxonMeasurementQuantitativeSchema,
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import {
+  getQualMeasurementOrThrow,
+  getQuantMeasurementOrThrow,
+} from "./measurement.service";
 // Zod Schemas
 
 // Qualitatitive
@@ -29,7 +35,7 @@ const QualitativeSchema = implement<measurement_qualitative>().with({
   mortality_id: zodID.nullable(),
   qualitative_option_id: zodID,
   measurement_comment: z.string().nullable(),
-  measured_timestamp: z.date().nullable(),
+  measured_timestamp: z.coerce.date().nullable(),
   ...zodAudit,
 });
 
@@ -53,17 +59,12 @@ const QualitativeCreateSchema = implement<
   )
   .strict();
 
-const QualitativeResponseSchema = QualitativeSchema.extend({
-  xref_taxon_measurement_qualitative:
-    XrefTaxonMeasurementQualitativeSchema.nullish(),
-  xref_taxon_measurement_qualitative_option:
-    XrefTaxonMeasurementQualitativeOptionSchema.nullish(),
-}).transform((val) => {
+const QualitativeResponseSchema = ResponseSchema.transform((val) => {
   const {
     xref_taxon_measurement_qualitative: x,
     xref_taxon_measurement_qualitative_option: y,
     ...rest
-  } = val;
+  } = val as Prisma.PromiseReturnType<typeof getQualMeasurementOrThrow>;
   return {
     ...rest,
     measurement_name: x?.measurement_name ?? null,
@@ -84,7 +85,7 @@ const QuantitativeSchema = implement<measurement_quantitative>().with({
   mortality_id: zodID.nullable(),
   value: z.number(),
   measurement_comment: z.string().nullable(),
-  measured_timestamp: z.date().nullable(),
+  measured_timestamp: z.coerce.date().nullable(),
   ...zodAudit,
 });
 
@@ -105,11 +106,9 @@ const QuantitativeCreateSchema = implement<
   )
   .strict();
 
-const QuantitativeResponseSchema = QuantitativeSchema.extend({
-  xref_taxon_measurement_quantitative:
-    XrefTaxonMeasurementQuantitativeSchema.nullish(),
-}).transform((val) => {
-  const { xref_taxon_measurement_quantitative: x, ...rest } = val;
+const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
+  const { xref_taxon_measurement_quantitative: x, ...rest } =
+    val as Prisma.PromiseReturnType<typeof getQuantMeasurementOrThrow>;
   return { ...rest, measurement_name: x?.measurement_name ?? null };
 });
 

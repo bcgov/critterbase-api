@@ -1,6 +1,11 @@
 import { measurement_qualitative } from "@prisma/client";
-import { prisma } from "../../utils/constants";
-import { QuantitativeSchema, QualitativeSchema } from "./measurement.utils";
+import { prisma, request } from "../../utils/constants";
+import {
+  QuantitativeSchema,
+  QualitativeSchema,
+  QuantitativeResponseSchema,
+  QualitativeResponseSchema,
+} from "./measurement.utils";
 import {
   createQualMeasurement,
   createQuantMeasurement,
@@ -13,6 +18,7 @@ import {
   getQuantMeasurementOrThrow,
   getQuantMeasurementsByCritterId,
 } from "./measurement.service";
+import { array } from "zod";
 
 let numMeasurements = 0;
 let measurements: any;
@@ -34,6 +40,7 @@ let createData = {
 };
 const badID = "deadbeef-dead-dead-dead-deaddeafbeef";
 const comment = "_TEST_CREATED_";
+const ROUTE = "/api/measurements";
 
 beforeAll(async () => {
   measurements = await getAllQualMeasurements();
@@ -70,7 +77,7 @@ beforeAll(async () => {
   });
 });
 
-describe("API: Location", () => {
+describe("API: Measurement", () => {
   describe("SERVICES", () => {
     describe("measurement.service.ts", () => {
       describe("getAllQualMeasurements()", () => {
@@ -204,6 +211,102 @@ describe("API: Location", () => {
       });
     });
   });
+
+  describe("ROUTERS", () => {
+    describe(`GET ${ROUTE}`, () => {
+      it("should return status 200 ", async () => {
+        const res = await request.get(ROUTE);
+        expect(res.status).toBe(200);
+        expect(res.body).toBeInstanceOf(Object);
+      });
+      it("should return object with an array of qual / quant measurements ", async () => {
+        const res = await request.get(ROUTE);
+        const { quantitative, qualitative } = res.body.measurements;
+        expect(quantitative).toBeInstanceOf(Array);
+        expect(qualitative).toBeInstanceOf(Array);
+        expect(array(QuantitativeResponseSchema).parse(quantitative));
+        expect(array(QualitativeResponseSchema).parse(qualitative));
+      });
+    });
+
+    // describe(`POST ${ROUTE}/create`, () => {
+    //   it.todo("returns status 400 when nothing provided in body");
+
+    //   it("returns status 201 with valid body in req", async () => {
+    //     const res = await request.post(`${ROUTE}/create`).send(data);
+    //     createdLocation = res.body;
+    //     expect(res.status).toBe(201);
+    //     expect(res.body.location_comment).toBe(COMMENT);
+    //   });
+    //   it("returns status 400 with property that does not pass validation", async () => {
+    //     const res = await request
+    //       .post(`${ROUTE}/create`)
+    //       .send({ latitude: "1", location_comment: COMMENT });
+    //     expect(res.status).toBe(400);
+    //   });
+    //   it("returns status 400 with extra property", async () => {
+    //     const res = await request
+    //       .post(`${ROUTE}/create`)
+    //       .send({ extra_property: "extra" });
+    //     expect(res.status).toBe(400);
+    //   });
+    // });
+
+    // describe(`GET ${ROUTE}/:id`, () => {
+    //   it("should return status 200 and a formatted location", async () => {
+    //     const res = await request.get(
+    //       `${ROUTE}/${createdLocation.location_id}`
+    //     );
+    //     expect(res.body).toBeDefined();
+    //     expect(res.status).toBe(200);
+    //     expect(LocationResponseSchema.safeParse(location).success);
+    //   });
+    //   it("with non existant id, should return status 404 and have error in body", async () => {
+    //     const res = await request.get(`${ROUTE}/${BAD_ID}`);
+    //     expect(res.status).toBe(404);
+    //     expect(res.body.error).toBeDefined();
+    //   });
+    // });
+
+    // describe(`PATCH ${ROUTE}/:id`, () => {
+    //   it("returns status 201 and updates a valid field", async () => {
+    //     const res = await request
+    //       .patch(`${ROUTE}/${createdLocation.location_id}`)
+    //       .send({ location_comment: UPDATE });
+    //     createdLocation = res.body;
+    //     expect(res.status).toBe(201);
+    //     expect(res.body.location_comment).toBe(UPDATE);
+    //   });
+    //   it("returns status 400 with extra property", async () => {
+    //     const res = await request
+    //       .patch(`${ROUTE}/${createdLocation.location_id}`)
+    //       .send({ extra_property: "false" });
+    //     expect(res.status).toBe(400);
+    //   });
+    //   it("returns status 400 with property that does not pass validation", async () => {
+    //     const res = await request
+    //       .patch(`${ROUTE}/${createdLocation.location_id}`)
+    //       .send({ latitude: "1" });
+    //     expect(res.status).toBe(400);
+    //   });
+    // });
+
+    // describe(`DELETE ${ROUTE}/:id`, () => {
+    //   it("should return status 200", async () => {
+    //     const res = await request.delete(
+    //       `${ROUTE}/${createdLocation.location_id}`
+    //     );
+    //     expect(res.body).toBeDefined();
+    //     expect(res.status).toBe(200);
+    //   });
+    //   it("with non existant id, should return status 404 and have error in body", async () => {
+    //     const res = await request.delete(`${ROUTE}/${BAD_ID}`);
+    //     expect(res.status).toBe(404);
+    //     expect(res.body.error).toBeDefined();
+    //   });
+    // });
+  });
+
   describe("CLEANUP", () => {
     it("same number of initial measurements", async () => {
       await prisma.measurement_qualitative.deleteMany({

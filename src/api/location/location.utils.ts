@@ -7,9 +7,11 @@ import {
   LookupRegionNrSchema,
   LookupWmuSchema,
   noAudit,
+  ResponseSchema,
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { getLocationOrThrow } from "./location.service";
 
 // Zod Schemas
 /**
@@ -39,20 +41,16 @@ const LocationCreateSchema = implement<
   .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape)
   .strict();
 
-const LocationResponseSchema = LocationSchema.extend({
-  lk_wildlife_management_unit: LookupWmuSchema.nullish(),
-  lk_region_nr: LookupRegionNrSchema.nullish(),
-  lk_region_env: LookupRegionEnvSchema.nullish(),
-}).transform((val) => {
+const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
+    wmu_id,
+    region_nr_id,
+    region_env_id,
     lk_wildlife_management_unit,
     lk_region_nr,
     lk_region_env,
-    wmu_id,
-    region_env_id,
-    region_nr_id,
     ...rest
-  } = val;
+  } = val as Prisma.PromiseReturnType<typeof getLocationOrThrow>;
   return {
     ...rest,
     wmu_name: lk_wildlife_management_unit?.wmu_name ?? null,

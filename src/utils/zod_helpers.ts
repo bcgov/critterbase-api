@@ -17,9 +17,11 @@ const zodID = z.string().uuid();
 const zodAudit = {
   create_user: z.string(),
   update_user: z.string(),
-  create_timestamp: z.date(),
-  update_timestamp: z.date(),
+  create_timestamp: z.coerce.date(),
+  update_timestamp: z.coerce.date(),
 };
+
+const ResponseSchema = z.object({}).passthrough();
 
 const uuidParamsSchema = z.object({
   id: z.string().uuid("query param is an invalid UUID"),
@@ -116,4 +118,5 @@ export {
   XrefTaxonMeasurementQuantitativeSchema,
   XrefTaxonMeasurementQualitativeSchema,
   XrefTaxonMeasurementQualitativeOptionSchema,
+  ResponseSchema,
 };
