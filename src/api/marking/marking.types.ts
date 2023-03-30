@@ -8,6 +8,7 @@ import {
   LookUpMaterialSchema,
   noAudit,
   nonEmpty,
+  ResponseSchema,
   XrefTaxonMarkingBodyLocationSchema,
   zodAudit,
   zodID,
@@ -96,37 +97,36 @@ const markingIncludesSchema = implement<MarkingIncludes>().with({
 });
 
 // Formatted API reponse schema which omits fields and unpacks nested data
-const markingResponseSchema = markingIncludesSchema
-  .omit({
-    primary_colour_id: true,
-    secondary_colour_id: true,
-    text_colour_id: true,
-    marking_type_id: true,
-    marking_material_id: true,
-    taxon_marking_body_location_id: true,
-  })
-  .transform((val) => {
-    const {
-      lk_colour_marking_primary_colour_idTolk_colour,
-      lk_colour_marking_secondary_colour_idTolk_colour,
-      lk_colour_marking_text_colour_idTolk_colour,
-      lk_marking_material,
-      lk_marking_type,
-      xref_taxon_marking_body_location,
-      ...rest
-    } = val;
-    return {
-      primary_colour:
-        lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
-      secondary_colour:
-        lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
-      text_colour: lk_colour_marking_text_colour_idTolk_colour?.colour ?? null,
-      marking_type: lk_marking_type?.name ?? null,
-      marking_material: lk_marking_material?.material ?? null,
-      body_location: xref_taxon_marking_body_location?.body_location ?? null,
-      ...rest,
-    };
-  });
+const markingResponseSchema = ResponseSchema.transform((obj) => {
+  const {
+    //omit
+    primary_colour_id,
+    secondary_colour_id,
+    text_colour_id,
+    marking_type_id,
+    marking_material_id,
+    taxon_marking_body_location_id,
+    //include
+    xref_taxon_marking_body_location,
+    lk_marking_type,
+    lk_marking_material,
+    lk_colour_marking_primary_colour_idTolk_colour,
+    lk_colour_marking_secondary_colour_idTolk_colour,
+    lk_colour_marking_text_colour_idTolk_colour,
+    ...rest
+  } = obj as MarkingIncludes;
+  return {
+    body_location: xref_taxon_marking_body_location?.body_location ?? null,
+    marking_type: lk_marking_type?.name ?? null,
+    marking_material: lk_marking_material?.material ?? null,
+    primary_colour:
+      lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
+    secondary_colour:
+      lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
+    text_colour: lk_colour_marking_text_colour_idTolk_colour?.colour ?? null,
+    ...rest,
+  };
+});
 
 // Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
@@ -140,7 +140,10 @@ const MarkingCreateBodySchema = implement<
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = implement<
-  Omit<Prisma.markingUncheckedUpdateManyInput, "marking_id" | keyof AuditColumns>
+  Omit<
+    Prisma.markingUncheckedUpdateManyInput,
+    "marking_id" | keyof AuditColumns
+  >
 >()
   .with(MarkingCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
