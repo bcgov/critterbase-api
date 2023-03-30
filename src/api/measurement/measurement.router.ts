@@ -5,7 +5,11 @@ import {
   getAllQualMeasurements,
   getAllQuantMeasurements,
   getQualMeasurementOrThrow,
+  getQualMeasurementsByCritterId,
+  getQuantMeasurementOrThrow,
+  getQuantMeasurementsByCritterId,
 } from "./measurement.service";
+import { QuantitativeResponseSchema } from "./measurement.utils";
 
 export const measurementRouter = express.Router();
 
@@ -53,27 +57,29 @@ measurementRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      const qualitative = await getQualMeasurementOrThrow(req.params.id);
-      return res.status(200).json(qualitative);
+      const qual = await getQualMeasurementOrThrow(req.params.id);
+      //const formattedQual = QualitativeResponseSchema.parse(qual);
+      return res.status(200).json(qual);
     })
   );
 /**
  * * All quantitative measurement related routes
  */
-// measurementRouter
-//   .route("/quantitative/:id")
-//   .all(
-//     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-//       uuidParamsSchema.parse(req.params);
-//       next();
-//     })
-//   )
-//   .get(
-//     catchErrors(async (req: Request, res: Response) => {
-//       const quantitative = await getQuantMeasurementOrThrow(req.params.id);
-//       return res.status(200).json(quantitative);
-//     })
-//   );
+measurementRouter
+  .route("/quantitative/:id")
+  .all(
+    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+      uuidParamsSchema.parse(req.params);
+      next();
+    })
+  )
+  .get(
+    catchErrors(async (req: Request, res: Response) => {
+      const quant = await getQuantMeasurementOrThrow(req.params.id);
+      const formattedQuant = QuantitativeResponseSchema.parse(quant);
+      return res.status(200).json(formattedQuant);
+    })
+  );
 //   .patch(
 //     catchErrors(async (req: Request, res: Response) => {
 //       const id = req.params.id;

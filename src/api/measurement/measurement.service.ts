@@ -1,4 +1,5 @@
 import {
+  critter,
   measurement_qualitative,
   measurement_quantitative,
 } from "@prisma/client";
@@ -27,6 +28,9 @@ const getQuantMeasurementOrThrow = async (
       where: {
         measurement_quantitative_id: id,
       },
+      include: {
+        xref_taxon_measurement_quantitative: true,
+      },
     });
   return quantMeasurement;
 };
@@ -38,6 +42,9 @@ const getQualMeasurementOrThrow = async (
     await prisma.measurement_qualitative.findUniqueOrThrow({
       where: {
         measurement_qualitative_id: id,
+      },
+      include: {
+        xref_taxon_measurement_qualitative: true,
       },
     });
   return qualMeasurement;

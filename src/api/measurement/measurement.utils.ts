@@ -1,11 +1,19 @@
 import {
+  critter,
   measurement_qualitative,
   measurement_quantitative,
   Prisma,
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
-import { implement, noAudit, zodAudit, zodID } from "../../utils/zod_helpers";
+import {
+  implement,
+  noAudit,
+  XrefTaxonMeasurementQualitativeSchema,
+  XrefTaxonMeasurementQuantitativeSchema,
+  zodAudit,
+  zodID,
+} from "../../utils/zod_helpers";
 // Zod Schemas
 
 // Qualitatitive
@@ -44,6 +52,18 @@ const QualitativeCreateSchema = implement<
   )
   .strict();
 
+const QualitativeResponseSchema = QualitativeSchema.extend({
+  xref_taxon_measurement_qualitative:
+    XrefTaxonMeasurementQualitativeSchema.nullish(),
+}).transform((val) => {
+  const {
+    taxon_measurement_id,
+    xref_taxon_measurement_qualitative: x,
+    ...rest
+  } = val;
+  return { ...rest, measurement_name: x?.measurement_name ?? null };
+});
+
 // Quantitative
 /**
  ** Base measurement_quantitative schema
@@ -77,6 +97,18 @@ const QuantitativeCreateSchema = implement<
   )
   .strict();
 
+const QuantitativeResponseSchema = QuantitativeSchema.extend({
+  xref_taxon_measurement_quantitative:
+    XrefTaxonMeasurementQuantitativeSchema.nullish(),
+}).transform((val) => {
+  const {
+    taxon_measurement_id,
+    xref_taxon_measurement_quantitative: x,
+    ...rest
+  } = val;
+  return { ...rest, measurement_name: x?.measurement_name ?? null };
+});
+
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
 type QuantitativeBody = z.infer<typeof QuantitativeCreateSchema>;
 
@@ -85,4 +117,5 @@ export {
   QuantitativeSchema,
   QualitativeBody,
   QuantitativeBody,
+  QuantitativeResponseSchema,
 };
