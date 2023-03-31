@@ -11,8 +11,8 @@ import { markingRouter } from "./api/marking/marking.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { userRouter } from "./api/user/user.router";
-import { startServer } from "./utils/helper_functions";
 import { errorHandler, errorLogger, home } from "./utils/middleware";
+import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
 
 const app = express();
 
@@ -35,6 +35,10 @@ app.use("/api/measurements", measurementRouter);
 app.use(errorLogger);
 app.use(errorHandler);
 
-startServer();
+if (IS_DEV || IS_PROD) {
+  app.listen(PORT, () => {
+    console.log(`listening on ${PORT}`);
+  });
+}
 
 export { app };

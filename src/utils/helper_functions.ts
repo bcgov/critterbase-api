@@ -1,15 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { app } from "../server";
-import { IS_DEV, IS_PROD, PORT } from "./constants";
-
-const startServer = () => {
-  if (IS_DEV || IS_PROD) {
-    app.listen(PORT, () => {
-      console.log(`listening on ${PORT}`);
-    });
-  }
-};
-
+import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -43,4 +34,4 @@ const prismaErrorMsg = (
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
-export { startServer, prismaErrorMsg };
+export { prismaErrorMsg };
