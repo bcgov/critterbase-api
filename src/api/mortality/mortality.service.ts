@@ -7,7 +7,7 @@ const getAllMortalities = async (): Promise<mortality[]> => {
 };
 
 const getMortalityById = async (mortality_id: string): Promise<mortality | null> => {
-  const mort = await prisma.mortality.findUnique({
+  const mort = await prisma.mortality.findUniqueOrThrow({
     ...mortalityInclude,
     where: {
       mortality_id: mortality_id

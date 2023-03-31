@@ -41,13 +41,13 @@ critterRouter.post(
 
 critterRouter.route("/wlh/:wlh_id").get(
   catchErrors(async (req: Request, res: Response) => {
-    const critter = await getCritterByWlhId(req.params.wlh_id);
-    if (!critter.length) {
+    const critters = await getCritterByWlhId(req.params.wlh_id);
+    if (!critters.length) {
       throw apiError.notFound(
         "Could not find any animals with the requested WLH ID"
       );
     }
-    const format = CritterResponseSchema.parse(critter);
+    const format = critters.map( c => CritterResponseSchema.parse(c) );
     return res.status(200).json(format);
   })
 );

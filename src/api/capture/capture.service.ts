@@ -9,7 +9,7 @@ const getAllCaptures = async (): Promise<capture[]> => {
 };
 
 const getCaptureById = async (capture_id: string): Promise<capture | null> => {
-  const capture =  await prisma.capture.findUnique({
+  const capture =  await prisma.capture.findUniqueOrThrow({
     ...captureInclude,
     where: {
       capture_id: capture_id,

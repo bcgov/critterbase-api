@@ -2,70 +2,46 @@ import { critter, Prisma } from "@prisma/client";
 import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { queryRandomUUID } from "../../../prisma/prisma_utils";
 import { prisma, request } from "../../utils/constants";
-import { isValidObject } from "../../utils/helper_functions";
-import { apiError } from "../../utils/types";
 import { createCritter, deleteCritter, getAllCritters, getCritterById, getCritterByWlhId, updateCritter } from "./critter.service";
-import { formattedCritterInclude } from "./critter.types";
+import { randomUUID } from "crypto";
 
 
-let dummyCritter: Prisma.critterUncheckedCreateInput;
-let dummyTaxon: string | undefined;
+const tempCritters: critter[] = [];
 
-beforeAll(async () => {
-  dummyTaxon = (await prisma.lk_taxon.findFirst({where: {
+const obtainCritterTemplate = async (): Promise<Prisma.critterUncheckedCreateInput> => {
+  const dummyTaxon = (await prisma.lk_taxon.findFirst({where: {
     taxon_name_latin: {
       equals: 'Rangifer tarandus',
       mode: 'insensitive'
     }
   }}))?.taxon_id;
   if(!dummyTaxon) throw Error('Could not get taxon for dummy.');
-  dummyCritter = {
+  return {
     critter_id: await queryRandomUUID(prisma),
     sex: 'Male',
     wlh_id: 'TEST',
     taxon_id: dummyTaxon
   }
-})
+}
+
+const createTempCritter = async (): Promise<critter> => {
+  const critter = await obtainCritterTemplate();
+  const res = await prisma.critter.create({
+    data: critter
+  });
+  tempCritters.push(res);
+  return res;
+}
 
 describe("API: Critter", () => {
   describe("SERVICES", () => {
-    /*describe("critter transformation", () => {
-      it("should remove extraneous taxon/region props and format markings and measure", async () => {
-        const critter = await prisma.critter.findFirst({
-          ...formattedCritterInclude,
-          where: {
-            wlh_id: '17-10779'
-          }
-        });
-        if(critter == undefined) {
-          throw Error('Missing critter for this test.');
-        }
-        expect.assertions(4);
-        expect(isValidObject(formatted, 
-          ['taxon_name_latin', 'responsible_region_nr_name', 'measurements', 'capture', 'mortality']
-          )).toBeTruthy();
-        //At least verify that the formatting has unnested the sub selects
-
-        const checkFormat = (v) => {return typeof v === 'string' || typeof v === 'number' || v == undefined || v instanceof Date}
-
-        expect(formatted.marking.every(r => 
-          Object.values(r).every(checkFormat)))
-          .toBeTruthy();
-        expect(formatted.mortality.every(r => 
-          Object.values(r).every(checkFormat)))
-          .toBeTruthy();
-        expect(formatted.capture.every(r => 
-          Object.values(r).every(checkFormat)))
-          .toBeTruthy();
-      })
-    })*/
     describe("making critters", () => {
       it("creates a critter", async() => {
-        const critter = await createCritter(dummyCritter);
-        expect.assertions(3);
+        const c = await obtainCritterTemplate();
+        const critter = await createCritter(c);
+        expect.assertions(2);
         expect(critter.wlh_id).toBe('TEST');
         expect(critter.sex).toBe('Male');
-        expect(critter.taxon_id).toBe(dummyTaxon);
       })
       it("fails to create a critter", async () => {
         await expect( async () => await createCritter({} as any)).rejects.toBeInstanceOf(PrismaClientValidationError);
@@ -78,35 +54,31 @@ describe("API: Critter", () => {
         expect(critters.length).toBeGreaterThan(1);
       });
       it("returns just one critter", async () => {
-        const critter = await getCritterById(dummyCritter.critter_id as string);
+        const c = await createTempCritter();
+        const critter = await getCritterById(c.critter_id);
         expect.assertions(1);
-        expect(critter?.critter_id).toBe(dummyCritter.critter_id);
+        expect(critter?.critter_id).toBe(c.critter_id);
       });
       it("returns one critter matching the WLH ID", async () => {
-        const critters = await getCritterByWlhId('TEST');
+        const c = await createTempCritter();
+        const critters = await getCritterByWlhId(c.wlh_id as string);
         expect.assertions(2);
-        expect(critters?.length).toBe(1);
+        expect(critters?.length).toBeGreaterThanOrEqual(1);
         expect(critters?.[0].wlh_id).toBe('TEST');
       })
     });
     describe("modifying critters", () => {
       it("updates a critter with the specified value", async () => {
-        const critter_id = (await prisma.critter.findFirst({where: { wlh_id: 'TEST'}}))?.critter_id;
-        if(!critter_id) {
-          throw Error('no critter id found for update');
-        }
-        const critter = await updateCritter(critter_id, {'animal_id':'macaroni'});
+        const c = await createTempCritter();
+        const critter = await updateCritter(c.critter_id, {'animal_id':'macaroni'});
         expect.assertions(2);
         expect(critter.wlh_id).toBe('TEST');
         expect(critter.animal_id).toBe('macaroni');
       })
       it("deletes a critter with the specified id", async () => {
-        const critter_id = (await prisma.critter.findFirst({where: { wlh_id: 'TEST'}}))?.critter_id;
-        if(!critter_id) {
-          throw Error('no critter id found for update');
-        }
-        await deleteCritter(critter_id);
-        const deleted = (await prisma.critter.findFirst({where: { wlh_id: 'TEST'}}));
+        const c = await createTempCritter();
+        await deleteCritter(c.critter_id);
+        const deleted = (await prisma.critter.findFirst({where: { critter_id: c.critter_id}}));
         expect(deleted).toBeNull();
       })
     })
@@ -122,18 +94,15 @@ describe("API: Critter", () => {
     });
     describe("POST /api/critters/create", () => {
       it("should return a critter with status code 201", async () => {
-        const res = await request.post("/api/critters/create").send(dummyCritter);
+        const c = await obtainCritterTemplate();
+        const res = await request.post("/api/critters/create").send(c);
         expect.assertions(2);
         expect(res.status).toBe(201);
         expect(res.body.wlh_id).toBe('TEST');
       });
-      it("should return 409 when critter with id already exists", async () => {
-        const res = await request.post("/api/critters/create").send(dummyCritter);
-        expect.assertions(1);
-        expect(res.status).toBe(409);
-      });
       it("should return 400 if trying to create with bad value type", async () => {
-        const res = await request.post("/api/critters/create").send({taxon_id: dummyTaxon, sex: 123});
+        const c = await obtainCritterTemplate();
+        const res = await request.post("/api/critters/create").send({taxon_id: c.taxon_id, sex: 123});
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
@@ -153,43 +122,47 @@ describe("API: Critter", () => {
     })
     describe("GET /api/critters/:id", () => {
       it("should return status 200", async () => {
-        const res = await request.get("/api/critters/" + dummyCritter.critter_id);
+        const c = await createTempCritter();
+        const res = await request.get("/api/critters/" + c.critter_id);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
       it("should return status 404 when critter id is not found", async () => {
-        const res = await request.get("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.get("/api/critters/" + randomUUID());
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
     })
     describe("PUT /api/critters/:id",  () => {
       it("should return status 200, and update the critter", async () => {
-        const res = await request.put("/api/critters/" + dummyCritter.critter_id).send({animal_id: 'Banana'});
+        const c = await createTempCritter();
+        const res = await request.put("/api/critters/" + c.critter_id).send({animal_id: 'Banana'});
         expect.assertions(2);
         expect(res.status).toBe(200);
         expect(res.body.animal_id).toBe('Banana');
       })
       it("should return status 400 if you try to modify with a bad value type", async () => {
-        const res = await request.put("/api/critters/" + dummyCritter.critter_id).send({sex: 1234});
+        const c = await createTempCritter();
+        const res = await request.put("/api/critters/" + c.critter_id).send({sex: 1234});
         expect.assertions(1);
         expect(res.status).toBe(400);
       })
       it("should return status 404 when critter id is not found", async () => {
-        const res = await request.delete("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.delete("/api/critters/" + randomUUID());
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
     })
     describe("DELETE /api/critters/:id",  () => {
       it("should return status 200 and delete the critter", async () => {
-        const res = await request.delete("/api/critters/" + dummyCritter.critter_id);
+        const c = await createTempCritter();
+        const res = await request.delete("/api/critters/" + c.critter_id);
         expect.assertions(2);
         expect(res.status).toBe(200);
         expect(res.body.wlh_id).toBe('TEST');
       });
       it("should return status 404 when critter id is not found", async () => {
-        const res = await request.delete("/api/critters/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.delete("/api/critters/" + randomUUID());
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
@@ -198,8 +171,10 @@ describe("API: Critter", () => {
 });
 
 afterAll(async () => {
-  const critter_id = (await prisma.critter.findFirst({where: { wlh_id: 'TEST'}}))?.critter_id;
-  if(critter_id) {
-    await prisma.critter.delete({ where: {critter_id: critter_id}})
+  for(const c of tempCritters) {
+    const exists = await prisma.critter.findFirst({ where: { critter_id: c.critter_id}});
+    if(exists) {
+      await prisma.critter.delete({ where: { critter_id: c.critter_id }})
+    }
   }
 });

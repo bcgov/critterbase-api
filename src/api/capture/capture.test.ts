@@ -86,11 +86,6 @@ describe("API: Critter", () => {
         });
         expect(res.status).toBe(201);
       });
-      /*it("should 409 if the capture exists", async () => {
-        expect.assertions(1);
-        const res = await request.post("/api/captures/create").send(dummyCapture);
-        expect(res.status).toBe(409);
-      });*/
     })
     describe("GET /api/critters", () => {
       it("should return status 200", async () => {
@@ -108,7 +103,7 @@ describe("API: Critter", () => {
       })
       it("should 404", async () => {
         expect.assertions(1);
-        const res = await request.get("/api/captures/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.get("/api/captures/" + randomUUID());
         expect(res.status).toBe(404); 
       })
     });
@@ -123,7 +118,7 @@ describe("API: Critter", () => {
       });
       it("should 404 when trying to get a bad critter", async () => {
         expect.assertions(1);
-        const res = await request.get("/api/captures/critter/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.get("/api/captures/critter/" + randomUUID());
         expect(res.status).toBe(404); 
       })
     });
@@ -136,7 +131,7 @@ describe("API: Critter", () => {
       });
       it("should 404 if the capture is not found", async () => {
         expect.assertions(1);
-        const res = await request.put("/api/captures/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.put("/api/captures/" + randomUUID());
         expect(res.status).toBe(404); 
       })
     });
@@ -149,7 +144,7 @@ describe("API: Critter", () => {
       });
       it("should 404 if there is no capture to delete", async () => {
         expect.assertions(1);
-        const res = await request.delete("/api/captures/deadbeef-dead-dead-dead-deaddeafbeef");
+        const res = await request.delete("/api/captures/" + randomUUID());
         expect(res.status).toBe(404); 
       });
     })

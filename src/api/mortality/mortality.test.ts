@@ -48,11 +48,6 @@ describe("API: Critter", () => {
         expect.assertions(1);
         expect(res?.mortality_id).toBe(m.mortality_id);
       });
-      it("returns null, mortality not found", async () => {
-        const res = await getMortalityById('deadbeef-dead-dead-dead-deaddeafbeef');
-        expect.assertions(1);
-        expect(res).toBeNull();
-      })
       it("should get one or more mortalities for this critter", async () => {
         const critter = await prisma.critter.findFirstOrThrow();
         const res = await getMortalityByCritter(critter.critter_id);
@@ -75,14 +70,6 @@ describe("API: Critter", () => {
           where : {mortality_id: res.mortality_id}
         })
       });
-      /**it("should fail to create a mortality", async () => {
-        const cod = await prisma.lk_cause_of_death.findFirst();
-        const critter = await prisma.critter.findFirst();
-        if(!critter || !cod) throw apiError.serverIssue();
-        const obj = {mortality_id: , critter_id: critter.critter_id, proximate_cause_of_death_id: cod.cod_id, mortality_timestamp: new Date()};
-        expect.assertions(1);
-        await expect(async () => await createMortality(obj)).rejects.toBeInstanceOf(PrismaClientKnownRequestError);
-      })*/
     });
     describe("modifying mortalities", () => {
       it("updates an existing mortality", async () => {
@@ -119,7 +106,7 @@ describe("API: Critter", () => {
         expect(res.body.length).toBeGreaterThanOrEqual(1);
       })
       it("should return status 404", async () => {
-        const res = await request.get("/api/mortality/critter/deadbeef-dead-dead-dead-deaddeafbeef" );
+        const res = await request.get("/api/mortality/critter/" + randomUUID());
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
@@ -141,7 +128,7 @@ describe("API: Critter", () => {
         expect(res.status).toBe(200);
       });
       it("should return status 404", async () => {
-        const res = await request.get("/api/mortality/deadbeef-dead-dead-dead-deaddeafbeef")
+        const res = await request.get("/api/mortality/" + randomUUID())
         expect.assertions(1);
         expect(res.status).toBe(404);
       })
