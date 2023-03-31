@@ -1,13 +1,14 @@
-import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
+import express, { NextFunction } from "express";
+import { prisma } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   createNewFamily,
   deleteFamily,
   getAllChildren,
   getAllFamilies,
   getAllParents,
-  getFamilyById,
   getFamilyByLabel,
   getImmediateFamily,
   getImmediateFamilyOfCritter,
@@ -21,10 +22,8 @@ import {
 import {
   FamilyChildCreateBodySchema,
   FamilyCreateBodySchema,
-  FamilyParentCreateBodySchema
+  FamilyParentCreateBodySchema,
 } from "./family.utils";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { prisma } from "../../utils/constants";
 
 export const familyRouter = express.Router();
 
@@ -146,9 +145,9 @@ familyRouter
       uuidParamsSchema.parse(req.params);
       await prisma.family.findUniqueOrThrow({
         where: {
-          family_id: req.params.id
-        }
-      })
+          family_id: req.params.id,
+        },
+      });
       next();
     })
   )
