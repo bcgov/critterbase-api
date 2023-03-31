@@ -5,7 +5,11 @@ import type {
   family_child,
   family_parent,
 } from "@prisma/client";
-import { ImmediateFamily, ImmediateFamilyCritter } from "./family.utils";
+import {
+  FamilyUpdate,
+  ImmediateFamily,
+  ImmediateFamilyCritter,
+} from "./family.utils";
 
 const getAllFamilies = async (): Promise<family[]> => {
   return await prisma.family.findMany();
@@ -29,7 +33,7 @@ const getFamilyById = async (family_id: string): Promise<family | null> => {
 
 const updateFamily = async (
   family_id: string,
-  family_data: any
+  family_data: FamilyUpdate
 ): Promise<family> => {
   return await prisma.family.update({
     data: family_data,
