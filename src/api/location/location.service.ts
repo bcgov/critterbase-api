@@ -1,32 +1,7 @@
-import {
-  lk_region_env,
-  lk_region_nr,
-  lk_wildlife_management_unit,
-  location,
-  Prisma,
-  capture,
-} from "@prisma/client";
+import { location } from "@prisma/client";
 
-import { z } from "zod";
 import { prisma } from "../../utils/constants";
-import { exclude } from "../../utils/helper_functions";
-import { CaptureIncludeType } from "../capture/capture.utils";
-import {
-  FormattedLocation,
-  LocationBody,
-  LocationResponseSchema,
-  locationIncludes,
-  LocationSubsetType,
-  LocationResponse,
-} from "./location.utils";
-
-const formatLocation = (location: LocationSubsetType) => {
-  return exclude(location, [
-    "lk_region_env",
-    "lk_region_nr",
-    "lk_wildlife_management_unit",
-  ]) as FormattedLocation;
-};
+import { LocationBody, locationIncludes } from "./location.utils";
 
 /**
  ** gets a single location by id
@@ -101,5 +76,4 @@ export {
   deleteLocation,
   createLocation,
   updateLocation,
-  formatLocation,
 };
