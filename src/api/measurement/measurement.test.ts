@@ -13,6 +13,8 @@ import {
   getQualMeasurementsByCritterId,
   getQuantMeasurementOrThrow,
   getQuantMeasurementsByCritterId,
+  updateQualMeasurement,
+  updateQuantMeasurement,
 } from "./measurement.service";
 import {
   QualitativeResponseSchema,
@@ -41,6 +43,7 @@ let createData = {
 };
 const badID = "52cfb108-99a5-4631-8385-1b43248ac502";
 const comment = "_TEST_CREATED_";
+const updateComment = "UPDATE_COMMENT";
 const ROUTE = "/api/measurements";
 const QUANT_ROUTE = `${ROUTE}/quantitative`;
 const QUAL_ROUTE = `${ROUTE}/qualitative`;
@@ -218,12 +221,12 @@ describe("API: Measurement", () => {
               "measurement_quantitative_id"
             );
           } else {
-            expect(quantitative).toBe([]);
+            expect(quantitative.length).toBe(0);
           }
           if (qualitative.length) {
             expect(qualitative[0]).toHaveProperty("measurement_qualitative_id");
           } else {
-            expect(qualitative).toBe([]);
+            expect(qualitative.length).toBe(0);
           }
         });
         it("throws error with critter_id that does not exist", async () => {
@@ -237,6 +240,28 @@ describe("API: Measurement", () => {
         it("should create qualitative measurement with supplied comment", () => {
           expect(createdMeasurement).toBeDefined();
           expect(createdMeasurement.measurement_comment).toBe(comment);
+        });
+      });
+
+      describe(updateQualMeasurement.name, () => {
+        it("should update qualitative measurement with the new supplied comment", async () => {
+          const updated = await updateQualMeasurement(
+            createdMeasurement.measurement_qualitative_id,
+            { measurement_comment: updateComment }
+          );
+          expect(updated.measurement_comment).toBe(updateComment);
+          expect(updated).toBeDefined();
+        });
+      });
+
+      describe(updateQuantMeasurement.name, () => {
+        it("should update quantitative measurement with the new supplied comment", async () => {
+          const updated = await updateQuantMeasurement(
+            QcreatedMeasurement.measurement_quantitative_id,
+            { measurement_comment: updateComment }
+          );
+          expect(updated.measurement_comment).toBe(updateComment);
+          expect(updated).toBeDefined();
         });
       });
 
@@ -332,6 +357,66 @@ describe("API: Measurement", () => {
       });
     });
 
+    describe(`PATCH ${QUAL_ROUTE}/:id`, () => {
+      it("returns status 400 when nothing provided in body", async () => {
+        const res = await request
+          .patch(`${QUAL_ROUTE}/${measurement.measurement_qualitative_id}`)
+          .send({});
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 201 with valid body in req", async () => {
+        const res = await request
+          .patch(`${QUAL_ROUTE}/${measurement.measurement_qualitative_id}`)
+          .send({ measurement_comment: updateComment });
+        expect(res.status).toBe(201);
+        expect(res.body.measurement_comment).toBe(updateComment);
+      });
+      it("returns status 400 with property that does not pass validation", async () => {
+        const res = await request
+          .post(`${QUAL_ROUTE}/create`)
+          .send({ ...qualData, critter_id: 1 });
+        expect(res.status).toBe(400);
+        expect(res.body.errors).toBeDefined();
+      });
+      it("returns status 400 with extra property", async () => {
+        const res = await request
+          .post(`${QUAL_ROUTE}/create`)
+          .send({ extra_property: "extra" });
+        expect(res.status).toBe(400);
+      });
+    });
+
+    describe(`PATCH ${QUANT_ROUTE}/:id`, () => {
+      it("returns status 400 when nothing provided in body", async () => {
+        const res = await request
+          .patch(`${QUANT_ROUTE}/${Qmeasurement.measurement_qualitative_id}`)
+          .send({});
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 201 with valid body in req", async () => {
+        const res = await request
+          .patch(`${QUANT_ROUTE}/${Qmeasurement.measurement_quantitative_id}`)
+          .send({ measurement_comment: updateComment });
+        expect(res.status).toBe(201);
+        expect(res.body.measurement_comment).toBe(updateComment);
+      });
+      it("returns status 400 with property that does not pass validation", async () => {
+        const res = await request
+          .post(`${QUANT_ROUTE}/create`)
+          .send({ ...qualData, critter_id: 1 });
+        expect(res.status).toBe(400);
+        expect(res.body.errors).toBeDefined();
+      });
+      it("returns status 400 with extra property", async () => {
+        const res = await request
+          .post(`${QUANT_ROUTE}/create`)
+          .send({ extra_property: "extra" });
+        expect(res.status).toBe(400);
+      });
+    });
+
     describe(`GET ${QUANT_ROUTE}/:id`, () => {
       it("should return status 200 and a formatted quant measurement", async () => {
         const res = await request.get(
@@ -365,29 +450,6 @@ describe("API: Measurement", () => {
         expect(res.body.error).toBeDefined();
       });
     });
-
-    // describe(`PATCH ${ROUTE}/:id`, () => {
-    //   it("returns status 201 and updates a valid field", async () => {
-    //     const res = await request
-    //       .patch(`${ROUTE}/${createdLocation.location_id}`)
-    //       .send({ location_comment: UPDATE });
-    //     createdLocation = res.body;
-    //     expect(res.status).toBe(201);
-    //     expect(res.body.location_comment).toBe(UPDATE);
-    //   });
-    //   it("returns status 400 with extra property", async () => {
-    //     const res = await request
-    //       .patch(`${ROUTE}/${createdLocation.location_id}`)
-    //       .send({ extra_property: "false" });
-    //     expect(res.status).toBe(400);
-    //   });
-    //   it("returns status 400 with property that does not pass validation", async () => {
-    //     const res = await request
-    //       .patch(`${ROUTE}/${createdLocation.location_id}`)
-    //       .send({ latitude: "1" });
-    //     expect(res.status).toBe(400);
-    //   });
-    // });
 
     describe(`DELETE ${QUANT_ROUTE}/:id`, () => {
       it("should return status 200", async () => {
@@ -423,12 +485,26 @@ describe("API: Measurement", () => {
     it("same number of initial measurements", async () => {
       await prisma.measurement_qualitative.deleteMany({
         where: {
-          measurement_comment: comment,
+          OR: [
+            {
+              measurement_comment: comment,
+            },
+            {
+              measurement_comment: updateComment,
+            },
+          ],
         },
       });
       await prisma.measurement_quantitative.deleteMany({
         where: {
-          measurement_comment: comment,
+          OR: [
+            {
+              measurement_comment: comment,
+            },
+            {
+              measurement_comment: updateComment,
+            },
+          ],
         },
       });
       const afterTestsNumMeasurements =

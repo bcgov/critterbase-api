@@ -10,12 +10,16 @@ import {
   getAllQuantMeasurements,
   getQualMeasurementOrThrow,
   getQuantMeasurementOrThrow,
+  updateQualMeasurement,
+  updateQuantMeasurement,
 } from "./measurement.service";
 import {
   QualitativeCreateSchema,
   QualitativeResponseSchema,
+  QualitativeUpdateSchema,
   QuantitativeCreateSchema,
   QuantitativeResponseSchema,
+  QuantitativeUpdateSchema,
 } from "./measurement.utils";
 
 export const measurementRouter = express.Router();
@@ -89,6 +93,16 @@ measurementRouter
       const deleted = await deleteQualMeasurement(id);
       res.status(200).json(deleted);
     })
+  )
+  .patch(
+    catchErrors(async (req: Request, res: Response) => {
+      const updateBody = QualitativeUpdateSchema.parse(req.body);
+      const measurement = await updateQualMeasurement(
+        req.params.id,
+        updateBody
+      );
+      res.status(201).json(measurement);
+    })
   );
 /**
  * * All quantitative measurement id related routes
@@ -110,16 +124,17 @@ measurementRouter
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const deleted = await deleteQuantMeasurement(id);
+      const deleted = await deleteQuantMeasurement(req.params.id);
       res.status(200).json(deleted);
     })
+  )
+  .patch(
+    catchErrors(async (req: Request, res: Response) => {
+      const updateBody = QuantitativeUpdateSchema.parse(req.body);
+      const measurement = await updateQuantMeasurement(
+        req.params.id,
+        updateBody
+      );
+      res.status(201).json(measurement);
+    })
   );
-//   .patch(
-//     catchErrors(async (req: Request, res: Response) => {
-//       const id = req.params.id;
-//       const updateBody = measurementBodySchema.parse(req.body);
-//       const measurement = await updatemeasurement(updateBody, id);
-//       res.status(201).json(measurement);
-//     })
-//   )
