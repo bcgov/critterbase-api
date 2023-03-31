@@ -45,6 +45,12 @@ const strings = {
     noData: "no new data was provided or the format was invalid",
     systemUserIdExists: "system_user_id already exists",
   },
+  marking: {
+    notFound: "marking not found",
+  },
+  artifact: {
+    notFound: "artifact not found",
+  },
 };
 
 export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, strings };

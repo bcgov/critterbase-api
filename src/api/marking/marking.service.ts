@@ -1,12 +1,19 @@
 import { prisma } from "../../utils/constants";
-import { marking, Prisma } from "@prisma/client";
-import { isValidObject } from "../../utils/helper_functions";
+import {
+  MarkingCreateInput,
+  MarkingIncludes,
+  markingIncludes,
+  MarkingUpdateInput,
+} from "./marking.utils";
 
 /**
  * * Returns all existing markings from the database
  */
-const getAllMarkings = async (): Promise<marking[]> => {
-  return await prisma.marking.findMany();
+const getAllMarkings = async (): Promise<MarkingIncludes[]> => {
+  const markings: MarkingIncludes[] = await prisma.marking.findMany({
+    ...markingIncludes,
+  });
+  return markings;
 };
 
 /**
@@ -14,12 +21,14 @@ const getAllMarkings = async (): Promise<marking[]> => {
  * * Returns null if non-existent
  * @param {string} marking_id
  */
-const getMarkingById = async (marking_id: string): Promise<marking | null> => {
-  return await prisma.marking.findUnique({
+const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
+  const marking: MarkingIncludes = await prisma.marking.findUniqueOrThrow({
     where: {
       marking_id: marking_id,
     },
+    ...markingIncludes,
   });
+  return marking;
 };
 
 /**
@@ -28,116 +37,62 @@ const getMarkingById = async (marking_id: string): Promise<marking | null> => {
  */
 const getMarkingsByCritterId = async (
   critter_id: string
-): Promise<marking[]> => {
-  return await prisma.marking.findMany({
+): Promise<MarkingIncludes[]> => {
+  const markings: MarkingIncludes[] = await prisma.marking.findMany({
     where: {
       critter_id: critter_id,
     },
+    ...markingIncludes,
   });
+  return markings;
 };
 
 /**
  * * Updates a marking in the database
  * @param {string} marking_id
- * @param {Prisma.markingUncheckedUpdateInput} marking_data
+ * @param {MarkingUpdateInput} marking_data
  */
 const updateMarking = async (
   marking_id: string,
-  marking_data: Prisma.markingUncheckedUpdateInput
-): Promise<marking> => {
-  return await prisma.marking.update({
+  marking_data: MarkingUpdateInput
+): Promise<MarkingIncludes> => {
+  const marking: MarkingIncludes = await prisma.marking.update({
     where: {
       marking_id: marking_id,
     },
     data: marking_data,
+    ...markingIncludes,
   });
+  return marking;
 };
 
 /**
  * * Creates a new marking in the database
  * * Valid reference to existing critter_id and taxon_marking_body_location_id UUIDs must be provided
- * @param {Prisma.markingUncheckedCreateInput} newMarkingData
+ * @param {MarkingCreateInput} newMarkingData
  */
 const createMarking = async (
-  newMarkingData: Prisma.markingUncheckedCreateInput
-): Promise<marking> => {
-  return await prisma.marking.create({ data: newMarkingData });
+  newMarkingData: MarkingCreateInput
+): Promise<MarkingIncludes> => {
+  const marking: MarkingIncludes = await prisma.marking.create({
+    data: newMarkingData,
+    ...markingIncludes,
+  });
+  return marking;
 };
 
 /**
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string): Promise<marking> => {
-  return await prisma.marking.delete({
+const deleteMarking = async (marking_id: string): Promise<MarkingIncludes> => {
+  const marking: MarkingIncludes = await prisma.marking.delete({
     where: {
       marking_id: marking_id,
     },
+    ...markingIncludes,
   });
-};
-
-/**
- * * Ensures that a create marking input has the right fields
- * TODO: Finalize which fields should be allowed or required
- * @param {marking} data
- */
-const isValidCreateMarkingInput = (
-  data: Prisma.markingUncheckedCreateInput
-): boolean => {
-  const requiredFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    "critter_id",
-    "taxon_marking_body_location_id",
-  ];
-  const allowedFields: (keyof Prisma.markingUncheckedCreateInput)[] = [
-    ...requiredFields,
-    "capture_id",
-    "mortality_id",
-    "marking_type_id",
-    "marking_material_id",
-    "primary_colour_id",
-    "secondary_colour_id",
-    "text_colour_id",
-    "identifier",
-    "frequency",
-    "frequency_unit",
-    "order",
-    "comment",
-    "attached_timestamp",
-    "removed_timestamp",
-    "create_user",
-    "update_user",
-  ];
-  return isValidObject(data, requiredFields, allowedFields);
-};
-
-/**
- * * Ensures that a update marking input has the right fields
- * TODO: Finalize which fields should be allowed or required
- * @param {marking} data
- */
-const isValidUpdateMarkingInput = (
-  data: Prisma.markingUncheckedUpdateInput
-): boolean => {
-  const allowedFields: (keyof Prisma.markingUncheckedUpdateInput)[] = [
-    "critter_id",
-    "capture_id",
-    "mortality_id",
-    "taxon_marking_body_location_id",
-    "marking_type_id",
-    "marking_material_id",
-    "primary_colour_id",
-    "secondary_colour_id",
-    "text_colour_id",
-    "identifier",
-    "frequency",
-    "frequency_unit",
-    "order",
-    "comment",
-    "attached_timestamp",
-    "removed_timestamp",
-    "update_user",
-  ];
-  return isValidObject(data, [], allowedFields);
+  return marking;
 };
 
 export {
@@ -147,6 +102,4 @@ export {
   updateMarking,
   createMarking,
   deleteMarking,
-  isValidCreateMarkingInput,
-  isValidUpdateMarkingInput,
 };
