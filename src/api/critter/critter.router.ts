@@ -12,7 +12,7 @@ import {
 } from "./critter.service";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { CritterCreateSchema, CritterResponseSchema, CritterUpdateSchema } from "./critter.types";
+import { CritterCreateSchema, CritterResponseSchema, CritterUpdateSchema } from "./critter.utils";
 
 export const critterRouter = express.Router();
 

@@ -3,9 +3,10 @@ import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { createMortality, deleteMortality, getAllMortalities, getMortalityByCritter, getMortalityById, updateMortality } from "./mortality.service";
 import { apiError } from "../../utils/types";
-import { MortalityCreateSchema, MortalityResponseSchema, MortalityUpdateSchema } from "./mortality.types";
+import { MortalityCreateSchema, MortalityResponseSchema, MortalityUpdateSchema } from "./mortality.utils";
 import { prisma } from "../../utils/constants";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { getCritterById } from "../critter/critter.service";
 
 export const mortalityRouter = express.Router();
 
@@ -37,11 +38,7 @@ mortalityRouter.get("/critter/:critter_id",
     const id = req.params.critter_id;
     //Leaving in this one since it succeeds otherwise, but I think the user should know 
     //that the array they get is empty because the critter isn't real
-    await prisma.critter.findUniqueOrThrow({
-      where: {
-        critter_id: id
-      }
-    });
+    await getCritterById(id);
     const mort = await getMortalityByCritter(id);
     const parsed = mort.map( a => MortalityResponseSchema.parse(a) );
     return res.status(200).json(parsed);

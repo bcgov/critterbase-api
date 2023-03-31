@@ -14,7 +14,7 @@ import {
   CaptureCreateSchema,
   CaptureResponseSchema,
   CaptureUpdateSchema
-} from "./capture.types";
+} from "./capture.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 export const captureRouter = express.Router();

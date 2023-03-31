@@ -1,6 +1,6 @@
 import { prisma } from "../../utils/constants";
 import type { mortality } from "@prisma/client";
-import { MortalityCreate, mortalityInclude, MortalityUpdate } from "./mortality.types";
+import { MortalityCreate, mortalityInclude, MortalityUpdate } from "./mortality.utils";
 
 const getAllMortalities = async (): Promise<mortality[]> => {
   return await prisma.mortality.findMany();

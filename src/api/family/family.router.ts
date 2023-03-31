@@ -22,7 +22,7 @@ import {
   FamilyChildCreateBodySchema,
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema
-} from "./family.types";
+} from "./family.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { prisma } from "../../utils/constants";
 

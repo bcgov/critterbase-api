@@ -1,7 +1,7 @@
 import { capture, Prisma } from "@prisma/client";
 import { CommonFormattedLocationSchema, commonLocationSelect } from "../location/location.utils";
 import { z } from 'zod';
-import { implement, noAudit, zodID } from "../../utils/zod_helpers";
+import { implement, noAudit, ResponseSchema, zodID } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
 
 const captureInclude = Prisma.validator<Prisma.captureArgs>()({
@@ -49,25 +49,7 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
   type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
   type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
-  /*const CaptureResponseSchema = implement<CaptureIncludeType>().with({
-    capture_id: zodID,
-    critter_id: zodID,
-    capture_location_id: zodID.nullable(),
-    release_location_id: zodID.nullable(),
-    capture_timestamp: z.coerce.date(),
-    release_timestamp: z.coerce.date().nullable(),
-    capture_comment:z.string().nullable(),
-    release_comment: z.string().nullable(),
-    create_user: zodID,
-    update_user: zodID,
-    create_timestamp: z.coerce.date(),
-    update_timestamp: z.coerce.date(),
-    location_capture_capture_location_idTolocation: CommonLocationSchema.nullable(),
-    location_capture_release_location_idTolocation: CommonLocationSchema.nullable()
-  });*/
-  
-  //const CaptureResponseFormattedSchema = 
-  const CaptureResponseSchema = z.object({}).passthrough()
+  const CaptureResponseSchema = ResponseSchema
   .transform((val) => {
     const {
       location_capture_capture_location_idTolocation: c_location,

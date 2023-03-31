@@ -5,7 +5,7 @@ import type {
   family_child,
   family_parent,
 } from "@prisma/client";
-import { ImmediateFamily, ImmediateFamilyCritter } from "./family.types";
+import { ImmediateFamily, ImmediateFamilyCritter } from "./family.utils";
 
 const getAllFamilies = async (): Promise<family[]> => {
   return await prisma.family.findMany();

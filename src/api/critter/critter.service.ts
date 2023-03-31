@@ -1,6 +1,6 @@
 import { prisma } from "../../utils/constants";
 import { critter, Prisma } from "@prisma/client";
-import {  CritterCreate, CritterResponseSchema, CritterUpdate, FormattedCritter, formattedCritterInclude } from "./critter.types";
+import {  CritterCreate, CritterUpdate, formattedCritterInclude } from "./critter.utils";
 
 
 const getAllCritters = async (): Promise<critter[]> => {

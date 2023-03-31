@@ -1,6 +1,6 @@
 import { prisma } from "../../utils/constants";
 import { capture } from "@prisma/client";
-import { CaptureCreate, captureInclude, CaptureUpdate, FormattedCapture } from "./capture.types";
+import { CaptureCreate, captureInclude, CaptureUpdate, FormattedCapture } from "./capture.utils";
 
 const getAllCaptures = async (): Promise<capture[]> => {
   return await prisma.capture.findMany({
