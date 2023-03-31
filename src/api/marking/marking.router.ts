@@ -16,7 +16,7 @@ import {
   MarkingUpdateBodySchema,
 } from "./marking.utils";
 import { array } from "zod";
-import { getCritterById } from "../critter/critter.service";
+import { prisma } from "../../utils/constants";
 
 export const markingRouter = express.Router();
 
@@ -50,7 +50,9 @@ markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
     // validate uuid and confirm that critter_id exists
     const { id } = uuidParamsSchema.parse(req.params);
-    await getCritterById(id);
+    await prisma.critter.findUniqueOrThrow({
+      where: { critter_id: id },
+    });
     const markings = await getMarkingsByCritterId(id);
     const formattedMarkings = array(markingResponseSchema).parse(markings);
     return res.status(200).json(formattedMarkings);

@@ -102,7 +102,7 @@ const getAllCritters = async (): Promise<critter[]> => {
 };
 
 const getCritterById = async (critter_id: string): Promise<critter | null> => {
-  return await prisma.critter.findUniqueOrThrow({
+  return await prisma.critter.findUnique({
     where: { critter_id: critter_id}
   });
 }

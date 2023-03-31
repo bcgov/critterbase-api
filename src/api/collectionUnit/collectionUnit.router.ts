@@ -15,8 +15,8 @@ import {
   CollectionUnitUpdateBodySchema,
   collectionUnitResponseSchema,
 } from "./collectionUnit.utils";
-import { getCritterById } from "../critter/critter.service";
 import { array } from "zod";
+import { prisma } from "../../utils/constants";
 
 export const collectionUnitRouter = express.Router();
 
@@ -52,7 +52,9 @@ collectionUnitRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
     // validate uuid and confirm that critter_id exists
     const { id } = uuidParamsSchema.parse(req.params);
-    await getCritterById(id);
+    await prisma.critter.findUniqueOrThrow({
+      where: { critter_id: id },
+    });
     const collectionUnits = await getCollectionUnitsByCritterId(id);
     const formattedCollectionUnit = array(collectionUnitResponseSchema).parse(
       collectionUnits
