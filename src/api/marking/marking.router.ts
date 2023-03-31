@@ -26,9 +26,9 @@ export const markingRouter = express.Router();
 markingRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    return res
-      .status(200)
-      .json(array(markingResponseSchema).parse(await getAllMarkings()));
+    const markings = await getAllMarkings();
+    const formattedMarkings = array(markingResponseSchema).parse(markings);
+    return res.status(200).json(formattedMarkings);
   })
 );
 
@@ -52,7 +52,8 @@ markingRouter.route("/critter/:id").get(
     const { id } = uuidParamsSchema.parse(req.params);
     await getCritterById(id);
     const markings = await getMarkingsByCritterId(id);
-    return res.status(200).json(array(markingResponseSchema).parse(markings));
+    const formattedMarkings = array(markingResponseSchema).parse(markings);
+    return res.status(200).json(formattedMarkings);
   })
 );
 
@@ -70,9 +71,9 @@ markingRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      return res
-        .status(200)
-        .json(markingResponseSchema.parse(await getMarkingById(req.params.id)));
+      const marking = await getMarkingById(req.params.id);
+      const formattedMarking = markingResponseSchema.parse(marking);
+      return res.status(200).json(formattedMarking);
     })
   )
   .patch(

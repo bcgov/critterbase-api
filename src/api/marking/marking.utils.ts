@@ -116,6 +116,7 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
     ...rest
   } = obj as MarkingIncludes;
   return {
+    ...rest,
     body_location: xref_taxon_marking_body_location?.body_location ?? null,
     marking_type: lk_marking_type?.name ?? null,
     marking_material: lk_marking_material?.material ?? null,
@@ -124,7 +125,6 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
     secondary_colour:
       lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
     text_colour: lk_colour_marking_text_colour_idTolk_colour?.colour ?? null,
-    ...rest,
   };
 });
 

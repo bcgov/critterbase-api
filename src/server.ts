@@ -24,7 +24,7 @@ app.use("/api/critters", critterRouter);
 app.use("/api/locations", locationRouter);
 app.use("/api/markings", markingRouter);
 app.use("/api/users", userRouter);
-app.use("/api/collection_units", collectionUnitRouter);
+app.use("/api/collection-units", collectionUnitRouter);
 app.use("/api/artifacts", artifactRouter);
 app.use("/api/family", familyRouter);
 app.use("/api/captures/", captureRouter);

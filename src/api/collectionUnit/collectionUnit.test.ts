@@ -194,21 +194,21 @@ describe("API: Collection Unit", () => {
   });
 
   describe("ROUTERS", () => {
-    describe("GET /api/collection_unit", () => {
+    describe("GET /api/collection-units", () => {
       it("returns status 200", async () => {
-        const res = await request.get("/api/collection_units");
+        const res = await request.get("/api/collection-units");
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
 
       it("returns an array", async () => {
-        const res = await request.get("/api/collection_units");
+        const res = await request.get("/api/collection-units");
         expect.assertions(1);
         expect(res.body).toBeInstanceOf(Array);
       });
 
       it("returns collection_units with correct properties", async () => {
-        const res = await request.get("/api/collection_units");
+        const res = await request.get("/api/collection-units");
         const critter_collection_units = res.body;
         expect.assertions(
           critter_collection_units.length * dummyCollectionUnitKeys.length
@@ -225,7 +225,7 @@ describe("API: Collection Unit", () => {
       it("returns status 201", async () => {
         const collectionUnit = await newCollectionUnit();
         const res = await request
-          .post("/api/collection_units/create")
+          .post("/api/collection-units/create")
           .send(collectionUnit);
         expect.assertions(1);
         expect(res.status).toBe(201);
@@ -234,7 +234,7 @@ describe("API: Collection Unit", () => {
       it("returns a collection unit", async () => {
         const collectionUnit = await newCollectionUnit();
         const res = await request
-          .post("/api/collection_units/create")
+          .post("/api/collection-units/create")
           .send(collectionUnit);
         const returnedCollectionUnits = res.body;
         expect.assertions(dummyCollectionUnitKeys.length);
@@ -246,7 +246,7 @@ describe("API: Collection Unit", () => {
       it("strips invalid fields from data", async () => {
         const collectionUnit = await newCollectionUnit();
         const res = await request
-          .post("/api/collection_units/create")
+          .post("/api/collection-units/create")
           .send({ ...collectionUnit, invalidField: "qwerty123" });
         expect.assertions(2);
         expect(res.status).toBe(201);
@@ -255,7 +255,7 @@ describe("API: Collection Unit", () => {
 
       it("returns status 400 when data is missing required fields", async () => {
         const collectionUnit = await newCollectionUnit();
-        const res = await request.post("/api/collection_units/create").send({
+        const res = await request.post("/api/collection-units/create").send({
           // left out required collection_unit_id field
           critter_id: collectionUnit.critter_id,
         });
@@ -264,16 +264,16 @@ describe("API: Collection Unit", () => {
       });
     });
 
-    describe("GET /api/collection_units/:id", () => {
+    describe("GET /api/collection-units/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.get(`/api/collection_units/${randomUUID()}`);
+        const res = await request.get(`/api/collection-units/${randomUUID()}`);
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
 
       it("returns status 200", async () => {
         const res = await request.get(
-          `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+          `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
         );
         expect.assertions(1);
         expect(res.status).toBe(200);
@@ -281,7 +281,7 @@ describe("API: Collection Unit", () => {
 
       it("returns a marking", async () => {
         const res = await request.get(
-          `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+          `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
         );
         expect.assertions(dummyCollectionUnitKeys.length);
         for (const key of dummyCollectionUnitKeys) {
@@ -290,10 +290,10 @@ describe("API: Collection Unit", () => {
       });
     });
 
-    describe("PATCH /api/collection_units/:id", () => {
+    describe("PATCH /api/collection-units/:id", () => {
       it("returns status 404 when id does not exist", async () => {
         const res = await request
-          .patch(`/api/collection_units/${randomUUID()}`)
+          .patch(`/api/collection-units/${randomUUID()}`)
           .send({ critter_id: dummyCritter.critter_id });
         expect.assertions(1);
         expect(res.status).toBe(404);
@@ -302,7 +302,7 @@ describe("API: Collection Unit", () => {
       it("returns status 200", async () => {
         const res = await request
           .patch(
-            `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+            `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
           )
           .send({ critter_id: dummyCollectionUnit.critter_id });
         expect.assertions(1);
@@ -312,7 +312,7 @@ describe("API: Collection Unit", () => {
       it("returns a collection unit", async () => {
         const res = await request
           .patch(
-            `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+            `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
           )
           .send({ critter_id: dummyCollectionUnit.critter_id });
         expect.assertions(dummyCollectionUnitKeys.length);
@@ -323,7 +323,7 @@ describe("API: Collection Unit", () => {
 
       it("returns status 400 when data is empty", async () => {
         const res = await request.patch(
-          `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+          `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
         );
         expect.assertions(1);
         expect(res.status).toBe(400);
@@ -332,7 +332,7 @@ describe("API: Collection Unit", () => {
       it("strips invalid fields from data", async () => {
         const res = await request
           .patch(
-            `/api/collection_units/${dummyCollectionUnit.critter_collection_unit_id}`
+            `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
           )
           .send({
             critter_id: dummyCollectionUnit.critter_id,
@@ -344,10 +344,10 @@ describe("API: Collection Unit", () => {
       });
     });
 
-    describe("DELETE /api/collection_units/:id", () => {
+    describe("DELETE /api/collection-units/:id", () => {
       it("returns status 404 when id does not exist", async () => {
         const res = await request.delete(
-          `/api/collection_units/${randomUUID()}`
+          `/api/collection-units/${randomUUID()}`
         );
         expect.assertions(1);
         expect(res.status).toBe(404);
@@ -358,7 +358,7 @@ describe("API: Collection Unit", () => {
           data: await newCollectionUnit(),
         });
         const res = await request.delete(
-          `/api/collection_units/${collection_unit.critter_collection_unit_id}`
+          `/api/collection-units/${collection_unit.critter_collection_unit_id}`
         );
         expect.assertions(1);
         expect(res.status).toBe(200);
@@ -369,7 +369,7 @@ describe("API: Collection Unit", () => {
           data: await newCollectionUnit(),
         });
         const res = await request.delete(
-          `/api/collection_units/${collection_unit.critter_collection_unit_id}`
+          `/api/collection-units/${collection_unit.critter_collection_unit_id}`
         );
         expect.assertions(1);
         expect(res.body).toStrictEqual(
@@ -378,10 +378,10 @@ describe("API: Collection Unit", () => {
       });
     });
 
-    describe("GET /api/collection_units/critter/:id", () => {
+    describe("GET /api/collection-units/critter/:id", () => {
       it("returns status 404 if no collection_units found", async () => {
         const res = await request.get(
-          `/api/collection_units/critter/${randomUUID()}`
+          `/api/collection-units/critter/${randomUUID()}`
         );
         expect.assertions(1);
         expect(res.status).toBe(404);
@@ -389,7 +389,7 @@ describe("API: Collection Unit", () => {
 
       it("returns status 200", async () => {
         const res = await request.get(
-          `/api/collection_units/critter/${dummyCollectionUnit.critter_id}`
+          `/api/collection-units/critter/${dummyCollectionUnit.critter_id}`
         );
         expect.assertions(1);
         expect(res.status).toBe(200);
@@ -398,14 +398,14 @@ describe("API: Collection Unit", () => {
       it("returns an array", async () => {
         expect.assertions(1);
         const res = await request.get(
-          `/api/collection_units/critter/${dummyCollectionUnit.critter_id}`
+          `/api/collection-units/critter/${dummyCollectionUnit.critter_id}`
         );
         expect(res.body).toBeInstanceOf(Array);
       });
 
-      it("returns collection_units with correct properties", async () => {
+      it("returns collection-units with correct properties", async () => {
         const res = await request.get(
-          `/api/collection_units/critter/${dummyCollectionUnit.critter_id}`
+          `/api/collection-units/critter/${dummyCollectionUnit.critter_id}`
         );
         const collection_units = res.body;
         expect.assertions(
