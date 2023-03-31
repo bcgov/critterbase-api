@@ -10,6 +10,7 @@ import {
 import type { Prisma, critter } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import {
+  CollectionUnitIncludes,
   collectionUnitIncludes,
   CollectionUnitResponse,
   collectionUnitResponseSchema,
@@ -21,8 +22,10 @@ function get_random(list) {
 
 let dummyCritter: critter;
 let dummyCollectionUnit: CollectionUnitResponse;
+let dummyCollectionUnitIncludes: CollectionUnitIncludes;
 let dummyCollectionUnitInput: Prisma.critter_collection_unitUncheckedCreateInput;
 let dummyCollectionUnitKeys: string[];
+let dummyCollectionUnitIncludesKeys: string[];
 
 /**
  * * Creates a new critter_collection_unit object that references an existing critter and critter_collection_unit location
@@ -71,13 +74,15 @@ beforeAll(async () => {
     });
   }
   dummyCollectionUnitInput = await newCollectionUnit();
+  dummyCollectionUnitIncludes = await prisma.critter_collection_unit.create({
+    data: dummyCollectionUnitInput,
+    ...collectionUnitIncludes,
+  });
   dummyCollectionUnit = collectionUnitResponseSchema.parse(
-    await prisma.critter_collection_unit.create({
-      data: dummyCollectionUnitInput,
-      ...collectionUnitIncludes,
-    })
+    dummyCollectionUnitIncludes
   );
   dummyCollectionUnitKeys = Object.keys(dummyCollectionUnit);
+  dummyCollectionUnitIncludesKeys = Object.keys(dummyCollectionUnitIncludes);
 });
 
 describe("API: Collection Unit", () => {
@@ -106,10 +111,10 @@ describe("API: Collection Unit", () => {
       it("returns critter_collection_units with correct properties", async () => {
         const critter_collection_units = await getAllCollectionUnits();
         expect.assertions(
-          critter_collection_units.length * dummyCollectionUnitKeys.length
+          critter_collection_units.length * dummyCollectionUnitIncludesKeys.length
         );
         for (const critter_collection_unit of critter_collection_units) {
-          for (const key of dummyCollectionUnitKeys) {
+          for (const key of dummyCollectionUnitIncludesKeys) {
             expect(critter_collection_unit).toHaveProperty(key);
           }
         }
@@ -119,10 +124,10 @@ describe("API: Collection Unit", () => {
     describe("getCollectionUnitById()", () => {
       it("returns the expected critter_collection_unit", async () => {
         const critter_collection_unit = await getCollectionUnitById(
-          dummyCollectionUnit.critter_collection_unit_id
+          dummyCollectionUnitIncludes.critter_collection_unit_id
         );
         expect.assertions(1);
-        expect(critter_collection_unit).toStrictEqual(dummyCollectionUnit);
+        expect(critter_collection_unit).toStrictEqual(dummyCollectionUnitIncludes);
       });
     });
 
@@ -133,17 +138,17 @@ describe("API: Collection Unit", () => {
         await prisma.critter_collection_unit.create({
           data: {
             ...critter_collection_unitInput,
-            critter_id: dummyCollectionUnit.critter_id,
+            critter_id: dummyCollectionUnitIncludes.critter_id,
           },
         });
         const returnedCollectionUnits = await getCollectionUnitsByCritterId(
-          dummyCollectionUnit.critter_id
+          dummyCollectionUnitIncludes.critter_id
         );
         expect.assertions(1 + returnedCollectionUnits.length);
         expect(returnedCollectionUnits.length).toBeGreaterThanOrEqual(2); // At least two critter_collection_units tied to this critter
         for (const critter_collection_unit of returnedCollectionUnits) {
           expect(critter_collection_unit.critter_id).toBe(
-            dummyCollectionUnit.critter_id
+            dummyCollectionUnitIncludes.critter_id
           );
         }
       });
@@ -161,7 +166,8 @@ describe("API: Collection Unit", () => {
         expect.assertions(2);
         expect(updatedCollectionUnit).toStrictEqual({
           ...critter_collection_unit,
-          ...{ unit_name: dummyCollectionUnit.unit_name },
+          collection_unit_id: dummyCollectionUnitIncludes.collection_unit_id,
+          xref_collection_unit: dummyCollectionUnitIncludes.xref_collection_unit,
           update_timestamp: updatedCollectionUnit.update_timestamp, // Ignore this field as it will be different
         });
         expect(

@@ -13,8 +13,10 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
+  collectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 import { getCritterById } from "../critter/critter.service";
+import { array } from "zod";
 
 export const collectionUnitRouter = express.Router();
 
@@ -24,7 +26,11 @@ export const collectionUnitRouter = express.Router();
 collectionUnitRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    return res.status(200).json(await getAllCollectionUnits());
+    const collectionUnits = await getAllCollectionUnits();
+    const formattedCollectionUnit = array(collectionUnitResponseSchema).parse(
+      collectionUnits
+    );
+    return res.status(200).json(formattedCollectionUnit);
   })
 );
 
@@ -35,8 +41,10 @@ collectionUnitRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const collectionUnitData = CollectionUnitCreateBodySchema.parse(req.body);
-    const newCollectionUnit = await createCollectionUnit(collectionUnitData);
-    return res.status(201).json(newCollectionUnit);
+    const collectionUnit = await createCollectionUnit(collectionUnitData);
+    const formattedCollectionUnit =
+      collectionUnitResponseSchema.parse(collectionUnit);
+    return res.status(201).json(formattedCollectionUnit);
   })
 );
 
@@ -46,7 +54,10 @@ collectionUnitRouter.route("/critter/:id").get(
     const { id } = uuidParamsSchema.parse(req.params);
     await getCritterById(id);
     const collectionUnits = await getCollectionUnitsByCritterId(id);
-    return res.status(200).json(collectionUnits);
+    const formattedCollectionUnit = array(collectionUnitResponseSchema).parse(
+      collectionUnits
+    );
+    return res.status(200).json(formattedCollectionUnit);
   })
 );
 
@@ -64,7 +75,10 @@ collectionUnitRouter
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
-      return res.status(200).json(await getCollectionUnitById(req.params.id));
+      const collectionUnit = await getCollectionUnitById(req.params.id);
+      const formattedCollectionUnit =
+        collectionUnitResponseSchema.parse(collectionUnit);
+      return res.status(200).json(formattedCollectionUnit);
     })
   )
   .patch(
@@ -74,7 +88,9 @@ collectionUnitRouter
         req.params.id,
         collectionUnitData
       );
-      return res.status(200).json(collectionUnit);
+      const formattedCollectionUnit =
+        collectionUnitResponseSchema.parse(collectionUnit);
+      return res.status(200).json(formattedCollectionUnit);
     })
   )
   .delete(
