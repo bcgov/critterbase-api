@@ -1,19 +1,16 @@
 import {
-  critter,
   measurement_qualitative,
   measurement_quantitative,
   Prisma,
-  xref_taxon_measurement_quantitative,
 } from "@prisma/client";
 import { z } from "zod";
+import { strings } from "../../utils/constants";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
   noAudit,
+  nonEmpty,
   ResponseSchema,
-  XrefTaxonMeasurementQualitativeOptionSchema,
-  XrefTaxonMeasurementQualitativeSchema,
-  XrefTaxonMeasurementQuantitativeSchema,
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
@@ -72,6 +69,11 @@ const QualitativeCreateSchema = implement<
   )
   .strict();
 
+const QualitativeUpdateSchema = QualitativeCreateSchema.partial().refine(
+  nonEmpty,
+  "body must include at least one property"
+);
+
 const QualitativeResponseSchema = ResponseSchema.transform((val) => {
   const {
     xref_taxon_measurement_qualitative: x,
@@ -119,6 +121,11 @@ const QuantitativeCreateSchema = implement<
   )
   .strict();
 
+const QuantitativeUpdateSchema = QuantitativeCreateSchema.partial().refine(
+  nonEmpty,
+  "body must include at least one property"
+);
+
 const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
   const { xref_taxon_measurement_quantitative: x, ...rest } =
     val as Prisma.PromiseReturnType<typeof getQuantMeasurementOrThrow>;
@@ -126,15 +133,30 @@ const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
 });
 
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
+type QualitativeUpdateBody = z.infer<typeof QualitativeUpdateSchema>;
+type QuantitativeUpdateBody = z.infer<typeof QuantitativeUpdateSchema>;
 type QuantitativeBody = z.infer<typeof QuantitativeCreateSchema>;
 
+type Measurements = {
+  quantitative: measurement_quantitative[];
+  qualitative: measurement_qualitative[];
+};
+export type {
+  Measurements,
+  QualitativeBody,
+  QualitativeUpdateBody,
+  QuantitativeUpdateBody,
+  QuantitativeBody,
+};
 export {
   QualitativeSchema,
   QuantitativeSchema,
-  QualitativeBody,
-  QuantitativeBody,
   QuantitativeResponseSchema,
   QualitativeResponseSchema,
   measurementQualitativeInclude,
-  measurementQuantitativeInclude
+  measurementQuantitativeInclude,
+  QualitativeCreateSchema,
+  QuantitativeCreateSchema,
+  QualitativeUpdateSchema,
+  QuantitativeUpdateSchema,
 };

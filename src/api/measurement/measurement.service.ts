@@ -1,9 +1,18 @@
 import {
   measurement_qualitative,
   measurement_quantitative,
+  Prisma,
 } from "@prisma/client";
 import { prisma } from "../../utils/constants";
-import { QualitativeBody, QuantitativeBody, measurementQualitativeInclude, measurementQuantitativeInclude } from "./measurement.utils";
+import { 
+  measurementQualitativeInclude, 
+  measurementQuantitativeInclude,
+  Measurements,
+  QualitativeBody,
+  QualitativeUpdateBody,
+  QuantitativeBody,
+  QuantitativeUpdateBody,
+} from "./measurement.utils";
 
 const getAllQuantMeasurements = async (): Promise<
   measurement_quantitative[]
@@ -69,9 +78,39 @@ const getQualMeasurementsByCritterId = async (critter_id: string) => {
   });
 };
 
-// const updateQualMeasurement = (id: string, data: ) => {
+const getMeasurementsByCritterId = async (
+  critter_id: string
+): Promise<Measurements> => {
+  const [quantitative, qualitative] = await Promise.all([
+    getQuantMeasurementsByCritterId(critter_id),
+    getQualMeasurementsByCritterId(critter_id),
+  ]);
+  return { quantitative, qualitative };
+};
 
-// };
+const updateQualMeasurement = async (
+  id: string,
+  data: QualitativeUpdateBody
+) => {
+  return await prisma.measurement_qualitative.update({
+    where: {
+      measurement_qualitative_id: id,
+    },
+    data,
+  });
+};
+
+const updateQuantMeasurement = async (
+  id: string,
+  data: QuantitativeUpdateBody
+) => {
+  return await prisma.measurement_quantitative.update({
+    where: {
+      measurement_quantitative_id: id,
+    },
+    data,
+  });
+};
 
 const deleteQualMeasurement = async (
   id: string
@@ -92,6 +131,7 @@ const deleteQuantMeasurement = async (
     },
   });
 };
+
 export {
   getAllQualMeasurements,
   getQualMeasurementOrThrow,
@@ -103,4 +143,7 @@ export {
   deleteQualMeasurement,
   deleteQuantMeasurement,
   getAllQuantMeasurements,
+  getMeasurementsByCritterId,
+  updateQuantMeasurement,
+  updateQualMeasurement,
 };

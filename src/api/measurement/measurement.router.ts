@@ -2,20 +2,30 @@ import express, { NextFunction, Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
+  createQualMeasurement,
+  createQuantMeasurement,
+  deleteQualMeasurement,
+  deleteQuantMeasurement,
   getAllQualMeasurements,
   getAllQuantMeasurements,
   getQualMeasurementOrThrow,
-  getQualMeasurementsByCritterId,
   getQuantMeasurementOrThrow,
-  getQuantMeasurementsByCritterId,
+  updateQualMeasurement,
+  updateQuantMeasurement,
 } from "./measurement.service";
 import {
+  QualitativeCreateSchema,
   QualitativeResponseSchema,
+  QualitativeUpdateSchema,
+  QuantitativeCreateSchema,
   QuantitativeResponseSchema,
+  QuantitativeUpdateSchema,
 } from "./measurement.utils";
 
 export const measurementRouter = express.Router();
 
+const QUAL_ROUTE = `/qualitative`;
+const QUANT_ROUTE = `/quantitative`;
 /**
  ** Get all measurements
  */
@@ -35,23 +45,35 @@ measurementRouter.get(
   })
 );
 
-// /**
-//  ** Create new measurement
-//  */
-// measurementRouter.post(
-//   "/qualitative/create",
-//   catchErrors(async (req: Request, res: Response) => {
-//     measurementBodySchema.parse(req.body);
-//     const measurement = await createmeasurement(req.body);
-//     return res.status(201).json(measurement);
-//   })
-// );
+/**
+ ** Create new qualitative measurement
+ */
+measurementRouter.post(
+  `${QUAL_ROUTE}/create`,
+  catchErrors(async (req: Request, res: Response) => {
+    QualitativeCreateSchema.parse(req.body);
+    const measurement = await createQualMeasurement(req.body);
+    return res.status(201).json(measurement);
+  })
+);
 
 /**
- * * All qualitative measurement related routes
+ ** Create new quantitative measurement
+ */
+measurementRouter.post(
+  `${QUANT_ROUTE}/create`,
+  catchErrors(async (req: Request, res: Response) => {
+    QuantitativeCreateSchema.parse(req.body);
+    const measurement = await createQuantMeasurement(req.body);
+    return res.status(201).json(measurement);
+  })
+);
+
+/**
+ * * All qualitative measurement id related routes
  */
 measurementRouter
-  .route("/qualitative/:id")
+  .route(`${QUAL_ROUTE}/:id`)
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
@@ -64,12 +86,29 @@ measurementRouter
       const formattedQual = QualitativeResponseSchema.parse(qual);
       return res.status(200).json(formattedQual);
     })
+  )
+  .delete(
+    catchErrors(async (req: Request, res: Response) => {
+      const id = req.params.id;
+      const deleted = await deleteQualMeasurement(id);
+      res.status(200).json(deleted);
+    })
+  )
+  .patch(
+    catchErrors(async (req: Request, res: Response) => {
+      const updateBody = QualitativeUpdateSchema.parse(req.body);
+      const measurement = await updateQualMeasurement(
+        req.params.id,
+        updateBody
+      );
+      res.status(201).json(measurement);
+    })
   );
 /**
- * * All quantitative measurement related routes
+ * * All quantitative measurement id related routes
  */
 measurementRouter
-  .route("/quantitative/:id")
+  .route(`${QUANT_ROUTE}/:id`)
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
@@ -82,19 +121,20 @@ measurementRouter
       const formattedQuant = QuantitativeResponseSchema.parse(quant);
       return res.status(200).json(formattedQuant);
     })
+  )
+  .delete(
+    catchErrors(async (req: Request, res: Response) => {
+      const deleted = await deleteQuantMeasurement(req.params.id);
+      res.status(200).json(deleted);
+    })
+  )
+  .patch(
+    catchErrors(async (req: Request, res: Response) => {
+      const updateBody = QuantitativeUpdateSchema.parse(req.body);
+      const measurement = await updateQuantMeasurement(
+        req.params.id,
+        updateBody
+      );
+      res.status(201).json(measurement);
+    })
   );
-//   .patch(
-//     catchErrors(async (req: Request, res: Response) => {
-//       const id = req.params.id;
-//       const updateBody = measurementBodySchema.parse(req.body);
-//       const measurement = await updatemeasurement(updateBody, id);
-//       res.status(201).json(measurement);
-//     })
-//   )
-//   .delete(
-//     catchErrors(async (req: Request, res: Response) => {
-//       const id = req.params.id;
-//       await deletemeasurement(id);
-//       res.status(200).json(strings.measurement.deleted(id));
-//     })
-//   );

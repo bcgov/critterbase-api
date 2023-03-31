@@ -1,23 +1,22 @@
 import {
-  critter,
   lk_region_env,
   lk_region_nr,
   lk_wildlife_management_unit,
+  xref_collection_unit,
   measurement_unit,
   xref_taxon_measurement_qualitative,
   xref_taxon_measurement_qualitative_option,
   xref_taxon_measurement_quantitative,
-} from ".prisma/client";
-import { lk_colour, lk_marking_material, lk_marking_type, xref_taxon_marking_body_location } from "@prisma/client";
+  lk_colour, lk_marking_material, lk_marking_type, xref_taxon_marking_body_location 
+} from "@prisma/client";
 import { z } from "zod";
-import { IS_DEV } from "./constants";
 import { AuditColumns, Implements } from "./types";
 // Schemas
 const zodID = z.string().uuid();
 
 const zodAudit = {
-  create_user: z.string(),
-  update_user: z.string(),
+  create_user: z.string().uuid(),
+  update_user: z.string().uuid(),
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
 };
@@ -134,6 +133,14 @@ const XrefTaxonMarkingBodyLocationSchema = implement<xref_taxon_marking_body_loc
   body_location: z.string(),
   description: z.string().nullable(),
   ...zodAudit,
+});
+
+const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
+  collection_unit_id: z.string().uuid(),
+  collection_category_id: z.string().uuid(),
+  unit_name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit
 })
 
 export {
@@ -146,12 +153,13 @@ export {
   LookUpMarkingTypeSchema,
   LookUpMaterialSchema,
   XrefTaxonMarkingBodyLocationSchema,
+  XrefCollectionUnitSchema,
   LookupWmuSchema,
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
-  zodAudit,
   XrefTaxonMeasurementQuantitativeSchema,
   XrefTaxonMeasurementQualitativeSchema,
   XrefTaxonMeasurementQualitativeOptionSchema,
   ResponseSchema,
+  zodAudit
 };

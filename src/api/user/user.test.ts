@@ -8,9 +8,9 @@ import {
   updateUser,
   upsertUser,
 } from "./user.service";
-import type { Prisma, user } from "@prisma/client";
+import type { user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
-import { UserCreateInput, UserUpdateInput } from "./user.types";
+import { UserCreateInput, UserUpdateInput } from "./user.utils";
 
 const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const uuidRegex =
@@ -136,7 +136,7 @@ describe("API: User", () => {
       it("throws error when given an invalid user ID", async () => {
         expect.assertions(1);
         await expect(getUser(randomUUID())).rejects.toThrow();
-      });      
+      });
     });
 
     describe("getUserBySystemId()", () => {
@@ -150,7 +150,7 @@ describe("API: User", () => {
       it("throws error when given an invalid system user ID", async () => {
         expect.assertions(1);
         await expect(getUserBySystemId(randomUUID())).rejects.toThrow();
-      }); 
+      });
     });
 
     describe("updateUser()", () => {

@@ -31,9 +31,7 @@ const strings = {
   app: {
     invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
     idRequired: `id is required`,
-  },
-  prisma: {
-    P2025: () => "record to update not found",
+    emptyBody: `body must include at least one property`,
   },
   location: {
     notFoundMulti: "no locations found",
@@ -49,6 +47,9 @@ const strings = {
   },
   marking: {
     notFound: "marking not found",
+  },
+  artifact: {
+    notFound: "artifact not found",
   },
 };
 

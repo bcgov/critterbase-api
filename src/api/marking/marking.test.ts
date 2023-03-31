@@ -7,7 +7,6 @@ import {
   getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
-import type { Prisma, marking } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import {
   markingResponseSchema,
@@ -15,15 +14,16 @@ import {
   MarkingCreateInput,
   markingIncludes,
   MarkingIncludes,
-} from "./marking.types";
+} from "./marking.utils";
 
 let dummyMarking: MarkingResponseSchema;
+let dummyMarkingIncludes: MarkingIncludes;
 let dummyMarkingInput: MarkingCreateInput;
 let dummyMarkingKeys: string[];
+let dummyMarkingIncludesKeys: string[];
 
 /**
  * * Creates a new marking object that references an existing critter and marking location
- * @return {*}  {Promise<Prisma.markingCreateInput>}
  */
 async function newMarking(): Promise<MarkingCreateInput> {
   const dummyCritterId: string | undefined = (
@@ -57,10 +57,13 @@ async function newMarking(): Promise<MarkingCreateInput> {
 beforeAll(async () => {
   // Sets a global dummy marking to reduce complexity on similar tests
   dummyMarkingInput = await newMarking();
-  dummyMarking = markingResponseSchema.parse(
-    await prisma.marking.create({ data: dummyMarkingInput, ...markingIncludes })
-  );
+  dummyMarkingIncludes = await prisma.marking.create({
+    data: dummyMarkingInput,
+    ...markingIncludes,
+  });
+  dummyMarking = markingResponseSchema.parse(dummyMarkingIncludes);
   dummyMarkingKeys = Object.keys(dummyMarking);
+  dummyMarkingIncludesKeys = Object.keys(dummyMarkingIncludes);
 });
 
 describe("API: Marking", () => {
@@ -85,9 +88,9 @@ describe("API: Marking", () => {
 
       it("returns markings with correct properties", async () => {
         const markings = await getAllMarkings();
-        expect.assertions(markings.length * dummyMarkingKeys.length);
+        expect.assertions(markings.length * dummyMarkingIncludesKeys.length);
         for (const marking of markings) {
-          for (const key of dummyMarkingKeys) {
+          for (const key of dummyMarkingIncludesKeys) {
             expect(marking).toHaveProperty(key);
           }
         }
@@ -98,11 +101,11 @@ describe("API: Marking", () => {
       it("returns the expected marking", async () => {
         const marking = await getMarkingById(dummyMarking.marking_id);
         expect.assertions(1);
-        expect(marking).toStrictEqual(dummyMarking);
+        expect(marking).toStrictEqual(dummyMarkingIncludes);
       });
     });
 
-    describe("getMarkingsByCritterId", () => {
+    describe("getMarkingsByCritterId()", () => {
       it("returns an array of markings with the expected critter ID", async () => {
         // create another record with the same critter_id
         const markingInput = await newMarking();
@@ -118,16 +121,20 @@ describe("API: Marking", () => {
           expect(marking.critter_id).toBe(dummyMarking.critter_id);
         }
       });
+      it("returns an empty array if no markings are found", async () => {
+        const markings = await getMarkingsByCritterId(randomUUID());
+        expect.assertions(2);
+        expect(markings).toBeInstanceOf(Array);
+        expect(markings.length).toBe(0);
+      });
     });
 
     describe("updateMarking()", () => {
       it("updates a marking", async () => {
-        const marking = markingResponseSchema.parse(
-          await prisma.marking.create({
-            data: await newMarking(),
-            ...markingIncludes,
-          })
-        );
+        const marking = await prisma.marking.create({
+          data: await newMarking(),
+          ...markingIncludes,
+        });
         const newData = {
           identifier: `TEST_MARKING_UPDATED${randomInt(99999999)}`,
           comment: "NEW COMMENT",
@@ -147,12 +154,10 @@ describe("API: Marking", () => {
 
     describe("deleteMarking()", () => {
       it("deletes a marking", async () => {
-        const marking = markingResponseSchema.parse(
-          await prisma.marking.create({
-            data: await newMarking(),
-            ...markingIncludes,
-          })
-        );
+        const marking = await prisma.marking.create({
+          data: await newMarking(),
+          ...markingIncludes,
+        });
         const deletedMarking = await deleteMarking(marking.marking_id);
         const markingCheck = await prisma.marking.findUnique({
           where: { marking_id: marking.marking_id },
@@ -333,7 +338,7 @@ describe("API: Marking", () => {
     });
 
     describe("GET /api/markings/critter/:id", () => {
-      it("returns status 404 if no markings found", async () => {
+      it("returns status 404 if the critter id does not exist", async () => {
         const res = await request.get(`/api/markings/critter/${randomUUID()}`);
         expect.assertions(1);
         expect(res.status).toBe(404);

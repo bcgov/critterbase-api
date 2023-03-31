@@ -3,7 +3,7 @@ import { string, z } from 'zod'
 import { AuditColumns } from "../../utils/types";
 import { implement, noAudit, ResponseSchema, zodID } from "../../utils/zod_helpers";
 import { captureInclude, CaptureResponseSchema } from "../capture/capture.utils";
-import { markingIncludes, markingResponseSchema } from "../marking/marking.types";
+import { markingIncludes, markingResponseSchema } from "../marking/marking.utils";
 import { mortalityInclude, MortalityResponseSchema } from "../mortality/mortality.utils";
 import { measurementQualitativeInclude, measurementQuantitativeInclude, QualitativeResponseSchema, QuantitativeResponseSchema } from "../measurement/measurement.utils";
 
