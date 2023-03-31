@@ -111,7 +111,8 @@ describe("API: Collection Unit", () => {
       it("returns critter_collection_units with correct properties", async () => {
         const critter_collection_units = await getAllCollectionUnits();
         expect.assertions(
-          critter_collection_units.length * dummyCollectionUnitIncludesKeys.length
+          critter_collection_units.length *
+            dummyCollectionUnitIncludesKeys.length
         );
         for (const critter_collection_unit of critter_collection_units) {
           for (const key of dummyCollectionUnitIncludesKeys) {
@@ -127,7 +128,9 @@ describe("API: Collection Unit", () => {
           dummyCollectionUnitIncludes.critter_collection_unit_id
         );
         expect.assertions(1);
-        expect(critter_collection_unit).toStrictEqual(dummyCollectionUnitIncludes);
+        expect(critter_collection_unit).toStrictEqual(
+          dummyCollectionUnitIncludes
+        );
       });
     });
 
@@ -167,7 +170,8 @@ describe("API: Collection Unit", () => {
         expect(updatedCollectionUnit).toStrictEqual({
           ...critter_collection_unit,
           collection_unit_id: dummyCollectionUnitIncludes.collection_unit_id,
-          xref_collection_unit: dummyCollectionUnitIncludes.xref_collection_unit,
+          xref_collection_unit:
+            dummyCollectionUnitIncludes.xref_collection_unit,
           update_timestamp: updatedCollectionUnit.update_timestamp, // Ignore this field as it will be different
         });
         expect(

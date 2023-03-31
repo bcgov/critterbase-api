@@ -8,7 +8,7 @@ import {
   updateUser,
   upsertUser,
 } from "./user.service";
-import type { Prisma, user } from "@prisma/client";
+import type { user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import { UserCreateInput, UserUpdateInput } from "./user.utils";
 

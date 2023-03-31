@@ -5,7 +5,6 @@ import {
   CollectionUnitIncludes,
   CollectionUnitUpdateInput,
 } from "./collectionUnit.utils";
-import { array } from "zod";
 /**
  * * Returns all existing critter collection units from the database
  */
@@ -24,12 +23,14 @@ const getAllCollectionUnits = async (): Promise<CollectionUnitIncludes[]> => {
 const getCollectionUnitById = async (
   critter_collection_unit_id: string
 ): Promise<CollectionUnitIncludes> => {
-  const collectionUnit = await prisma.critter_collection_unit.findUniqueOrThrow({
-    where: {
-      critter_collection_unit_id: critter_collection_unit_id,
-    },
-    ...collectionUnitIncludes,
-  });
+  const collectionUnit = await prisma.critter_collection_unit.findUniqueOrThrow(
+    {
+      where: {
+        critter_collection_unit_id: critter_collection_unit_id,
+      },
+      ...collectionUnitIncludes,
+    }
+  );
   return collectionUnit;
 };
 

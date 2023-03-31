@@ -1,7 +1,7 @@
 import { artifact } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import { prisma, request } from "../../utils/constants";
-import { ArtifactCreate, ArtifactUpdate } from "./artifact.utils";
+import { ArtifactCreate } from "./artifact.utils";
 import {
   createArtifact,
   deleteArtifact,

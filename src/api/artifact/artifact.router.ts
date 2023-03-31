@@ -14,8 +14,6 @@ import {
   ArtifactUpdateBodySchema,
 } from "./artifact.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { apiError } from "../../utils/types";
-import { getCritterById } from "../critter/critter.service";
 import { prisma } from "../../utils/constants";
 
 export const artifactRouter = express.Router();
