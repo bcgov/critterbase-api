@@ -7,7 +7,7 @@ import {
   createCollectionUnit,
   deleteCollectionUnit,
 } from "./collectionUnit.service";
-import type { Prisma, critter_collection_unit, critter } from "@prisma/client";
+import type { Prisma, critter } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import {
   collectionUnitIncludes,

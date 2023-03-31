@@ -11,6 +11,12 @@ import {
   updateArtifact,
 } from "./artifact.service";
 
+function checkArtifactProperties(artifact, keys) {
+  for (const key of keys) {
+    expect(artifact).toHaveProperty(key);
+  }
+}
+
 /**
  * * Creates a random input for an artifact with reference to a valid critter_id
  */
@@ -58,9 +64,7 @@ describe("API: Artifact", () => {
         const artifacts = await getAllArtifacts();
         expect.assertions(artifacts.length * dummyArtifactKeys.length);
         for (const artifact of artifacts) {
-          for (const key of dummyArtifactKeys) {
-            expect(artifact).toHaveProperty(key);
-          }
+          checkArtifactProperties(artifact, dummyArtifactKeys);
         }
       });
     });
@@ -150,9 +154,7 @@ describe("API: Artifact", () => {
         const artifacts = res.body;
         expect.assertions(artifacts.length * dummyArtifactKeys.length);
         for (const artifact of artifacts) {
-          for (const key of dummyArtifactKeys) {
-            expect(artifact).toHaveProperty(key);
-          }
+          checkArtifactProperties(artifact, dummyArtifactKeys);
         }
       });
     });
@@ -334,9 +336,7 @@ describe("API: Artifact", () => {
         expect.assertions(artifacts.length * (dummyArtifactKeys.length + 1));
         for (const artifact of artifacts) {
           expect(artifact.critter_id).toBe(dummyArtifact.critter_id);
-          for (const key of dummyArtifactKeys) {
-            expect(artifact).toHaveProperty(key);
-          }
+          checkArtifactProperties(artifact, dummyArtifactKeys);
         }
       });
     });

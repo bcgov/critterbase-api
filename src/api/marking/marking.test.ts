@@ -7,7 +7,6 @@ import {
   getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
-import type { Prisma, marking } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
 import {
   markingResponseSchema,
