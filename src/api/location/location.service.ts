@@ -10,8 +10,7 @@ import {
 import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { exclude } from "../../utils/helper_functions";
-import { CaptureIncludeType } from "../capture/capture.types";
-import { CaptureSubsetType } from "../critter/critter.types";
+import { CaptureIncludeType } from "../capture/capture.utils";
 import {
   FormattedLocation,
   LocationBody,

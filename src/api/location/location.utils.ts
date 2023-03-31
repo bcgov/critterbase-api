@@ -100,18 +100,45 @@ const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
   },
 });
 
+type CommonLocationType = Prisma.locationGetPayload<typeof commonLocationSelect>
+
+const CommonLocationSchema = implement<CommonLocationType>().with({
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  lk_region_env: z.object({
+    region_env_name: z.string()
+  }).nullable(),
+  lk_region_nr: z.object({
+    region_nr_name: z.string()
+  }).nullable(),
+  lk_wildlife_management_unit: z.object({
+    wmu_name: z.string()
+  }).nullable()
+})
+
+const CommonFormattedLocationSchema = CommonLocationSchema.transform(val => {
+  const {lk_region_env, lk_region_nr, lk_wildlife_management_unit, ...rest} = val;
+  return {
+    ...rest, 
+    region_env_name: lk_region_env?.region_env_name,
+    region_nr_name: lk_region_nr?.region_nr_name,
+    wmu_name: lk_wildlife_management_unit?.wmu_name
+   }
+})
+
 const locationIncludes: Prisma.locationInclude = {
   lk_wildlife_management_unit: true,
   lk_region_nr: true,
   lk_region_env: true,
 };
 
-export type { LocationSubsetType, FormattedLocation, LocationResponse };
+export type { LocationSubsetType, FormattedLocation, LocationResponse, LocationBody };
 export {
   commonLocationSelect,
-  LocationBody,
+  CommonLocationSchema,
   LocationCreateSchema,
   locationIncludes,
   LocationResponseSchema,
   LocationSchema,
+  CommonFormattedLocationSchema
 };

@@ -11,12 +11,8 @@ import {
   updateCritter,
 } from "./critter.service";
 import { apiError } from "../../utils/types";
-import { prisma } from "../../utils/constants";
-import {
-  CritterCreateBodySchema,
-  CritterUpdateBodySchema,
-} from "./critter.types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { CritterCreateSchema, CritterResponseSchema, CritterUpdateSchema } from "./critter.utils";
 
 export const critterRouter = express.Router();
 
@@ -37,7 +33,7 @@ critterRouter.get(
 critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const parsed = CritterCreateBodySchema.parse(req.body);
+    const parsed = CritterCreateSchema.parse(req.body);
     const created = await createCritter(parsed);
     return res.status(201).send(created);
   })
@@ -45,13 +41,14 @@ critterRouter.post(
 
 critterRouter.route("/wlh/:wlh_id").get(
   catchErrors(async (req: Request, res: Response) => {
-    const critter = await getCritterByWlhId(req.params.wlh_id);
-    if (!critter.length) {
+    const critters = await getCritterByWlhId(req.params.wlh_id);
+    if (!critters.length) {
       throw apiError.notFound(
         "Could not find any animals with the requested WLH ID"
       );
     }
-    return res.status(200).json(critter);
+    const format = critters.map( c => CritterResponseSchema.parse(c) );
+    return res.status(200).json(format);
   })
 );
 
@@ -70,13 +67,14 @@ critterRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const critter = await getCritterByIdWithDetails(id);
-      return res.status(200).json(critter);
+      const format = CritterResponseSchema.parse(critter);
+      return res.status(200).json(format);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const parsed = CritterUpdateBodySchema.parse(req.body);
+      const parsed = CritterUpdateSchema.parse(req.body);
       const critter = await updateCritter(id, parsed);
       res.status(200).json(critter);
     })

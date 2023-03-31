@@ -1,6 +1,6 @@
 import { critter } from ".prisma/client";
 import { z } from "zod";
-import { CritterCreate } from "../api/critter/critter.types";
+import { CritterCreate } from "../api/critter/critter.utils";
 
 /**
  ** Custom Critterbase Error. Includes a status code with the message.

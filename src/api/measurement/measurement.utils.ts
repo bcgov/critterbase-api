@@ -20,6 +20,19 @@ import {
 } from "./measurement.service";
 // Zod Schemas
 
+const measurementQualitativeInclude = Prisma.validator<Prisma.measurement_qualitativeArgs>()({
+  include: {
+    xref_taxon_measurement_qualitative: true,
+    xref_taxon_measurement_qualitative_option: true,
+  }
+});
+
+const measurementQuantitativeInclude = Prisma.validator<Prisma.measurement_quantitativeArgs>() ({
+  include: {
+    xref_taxon_measurement_quantitative: true,
+  }
+})
+
 // Qualitatitive
 /**
  ** Base measurement_qualitatitive schema
@@ -140,6 +153,8 @@ export {
   QuantitativeSchema,
   QuantitativeResponseSchema,
   QualitativeResponseSchema,
+  measurementQualitativeInclude,
+  measurementQuantitativeInclude,
   QualitativeCreateSchema,
   QuantitativeCreateSchema,
   QualitativeUpdateSchema,

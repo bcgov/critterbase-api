@@ -8,6 +8,7 @@ import { critterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
 import { markingRouter } from "./api/marking/marking.router";
+import { mortalityRouter } from "./api/mortality/mortality.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { userRouter } from "./api/user/user.router";
 import { startServer } from "./utils/helper_functions";
@@ -28,6 +29,7 @@ app.use("/api/collection-units", collectionUnitRouter);
 app.use("/api/artifacts", artifactRouter);
 app.use("/api/family", familyRouter);
 app.use("/api/captures/", captureRouter);
+app.use("/api/mortality", mortalityRouter);
 app.use("/api/measurements", measurementRouter);
 
 app.use(errorLogger);
