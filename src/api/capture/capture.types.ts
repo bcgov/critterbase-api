@@ -70,14 +70,14 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
   const CaptureResponseSchema = z.object({}).passthrough()
   .transform((val) => {
     const {
-      location_capture_capture_location_idTolocation,
-      location_capture_release_location_idTolocation,
+      location_capture_capture_location_idTolocation: c_location,
+      location_capture_release_location_idTolocation: r_location,
       ...rest
     } = val as CaptureIncludeType;
     return {
       ...rest, 
-      capture_location: CommonFormattedLocationSchema.parse(location_capture_capture_location_idTolocation), 
-      release_location: CommonFormattedLocationSchema.parse(location_capture_release_location_idTolocation)
+      capture_location: c_location ? CommonFormattedLocationSchema.parse(c_location) : null, 
+      release_location: r_location ? CommonFormattedLocationSchema.parse(r_location) : null
     }
   });
 

@@ -47,7 +47,7 @@ captureRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const parsed = uuidParamsSchema.parse(req.params);
     const result = await getCaptureByCritter(parsed.id);
-    const format = CaptureResponseSchema.parse(result);
+    const format = result?.map(c => CaptureResponseSchema.parse(c));
     res.status(200).json(format);
   })
 );
