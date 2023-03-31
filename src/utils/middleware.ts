@@ -1,7 +1,4 @@
-import {
-  NotFoundError,
-  PrismaClientKnownRequestError,
-} from "@prisma/client/runtime/library";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { IS_TEST } from "./constants";
@@ -48,7 +45,7 @@ const errorHandler = (
   if (err instanceof ZodError) {
     //Removed formErrors from object
     const fieldErrors = err.flatten().fieldErrors;
-    const formErrors = err.flatten().formErrors;
+    // const formErrors = err.flatten().formErrors;
     if (!Object.keys(fieldErrors).length) {
       return res.status(400).json({ error: err.format()._errors.join(", ") });
     }
@@ -71,7 +68,7 @@ const errorHandler = (
  ** Logs basic details about the current supported routes
  * @params All four express params.
  */
-const home = (req: Request, res: Response, next: NextFunction) => {
+const home = (req: Request, res: Response) => {
   return res.json([
     "Welcome to Critterbase API",
     "Temp details before swagger integration",

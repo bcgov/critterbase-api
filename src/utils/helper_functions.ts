@@ -1,6 +1,4 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import { app } from "../server";
-import { IS_DEV, IS_PROD, IS_TEST, PORT } from "./constants";
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -16,21 +14,25 @@ const prismaErrorMsg = (
   switch (code) {
     case "P2025":
       return {
-        error: `${meta?.cause ?? message}`,
+        error: `${JSON.stringify(meta?.cause) || message}`,
         status: 404,
       };
     case "P2002":
       return {
-        error: `unique constraint failed on the fields: ${meta?.target}`,
+        error: `unique constraint failed on the fields: ${JSON.stringify(
+          meta?.target
+        )}`,
         status: 400,
       };
     case "P2003":
       return {
-        error: `foreign key constraint failed on the field: ${meta?.field_name}`,
+        error: `foreign key constraint failed on the field: ${JSON.stringify(
+          meta?.field_name
+        )}`,
         status: 404,
       };
   }
-  console.log(`NEW PRISMA ERROR: ${err}`);
+  console.log(`NEW PRISMA ERROR: ${JSON.stringify(err)}`);
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 

@@ -37,7 +37,7 @@ app.use(errorHandler);
 
 if (IS_DEV || IS_PROD) {
   app.listen(PORT, () => {
-    console.log(`listening on ${PORT}`);
+    console.log(`listening on ${PORT ?? 8000}`);
   });
 }
 

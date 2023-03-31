@@ -34,7 +34,7 @@ artifactRouter.get(
 artifactRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const artifactData = await ArtifactCreateBodySchema.parse(req.body);
+    const artifactData = ArtifactCreateBodySchema.parse(req.body);
     const newArtifact = await createArtifact(artifactData);
     return res.status(201).json(newArtifact);
   })
@@ -61,7 +61,7 @@ artifactRouter.route("/critter/:id").get(
 artifactRouter
   .route("/:id")
   .all(
-    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+    catchErrors((req: Request, res: Response, next: NextFunction) => {
       // validate uuid
       uuidParamsSchema.parse(req.params);
       next();

@@ -1,6 +1,6 @@
-import { prisma } from "../../utils/constants";
 import { capture } from "@prisma/client";
-import { CaptureCreate, captureInclude, CaptureUpdate, FormattedCapture } from "./capture.utils";
+import { prisma } from "../../utils/constants";
+import { CaptureCreate, captureInclude, CaptureUpdate } from "./capture.utils";
 
 const getAllCaptures = async (): Promise<capture[]> => {
   return await prisma.capture.findMany({
@@ -9,21 +9,23 @@ const getAllCaptures = async (): Promise<capture[]> => {
 };
 
 const getCaptureById = async (capture_id: string): Promise<capture | null> => {
-  const capture =  await prisma.capture.findUniqueOrThrow({
+  const capture = await prisma.capture.findUniqueOrThrow({
     ...captureInclude,
     where: {
       capture_id: capture_id,
     },
   });
   return capture;
-}
+};
 
-const getCaptureByCritter = async (critter_id: string): Promise<capture[] | null> => {
+const getCaptureByCritter = async (
+  critter_id: string
+): Promise<capture[] | null> => {
   await prisma.critter.findUniqueOrThrow({
     where: {
-      critter_id: critter_id
-    }
-  })
+      critter_id: critter_id,
+    },
+  });
 
   const captures = await prisma.capture.findMany({
     ...captureInclude,
@@ -33,7 +35,7 @@ const getCaptureByCritter = async (critter_id: string): Promise<capture[] | null
   });
 
   return captures;
-}
+};
 
 const createCapture = async (
   capture_data: CaptureCreate

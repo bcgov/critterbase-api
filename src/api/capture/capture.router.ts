@@ -13,7 +13,7 @@ import {
 import {
   CaptureCreateSchema,
   CaptureResponseSchema,
-  CaptureUpdateSchema
+  CaptureUpdateSchema,
 } from "./capture.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
@@ -47,7 +47,7 @@ captureRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const parsed = uuidParamsSchema.parse(req.params);
     const result = await getCaptureByCritter(parsed.id);
-    const format = result?.map(c => CaptureResponseSchema.parse(c));
+    const format = result?.map((c) => CaptureResponseSchema.parse(c));
     res.status(200).json(format);
   })
 );
@@ -58,7 +58,7 @@ captureRouter.get(
 captureRouter
   .route("/:id")
   .all(
-    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+    catchErrors((req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
       next();
     })

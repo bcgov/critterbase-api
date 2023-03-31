@@ -57,7 +57,7 @@ describe("Utils", () => {
     });
     describe(home.name, () => {
       it("sets a json.res", async () => {
-        home(mockRequest, mockResponse, mockNext);
+        home(mockRequest, mockResponse);
         expect(mockResponse.json);
       });
     });
