@@ -67,6 +67,33 @@ beforeAll(async () => {
 });
 
 describe("API: Marking", () => {
+  describe("ZOD SCHEMA", () => {
+    describe("markingResponseSchema", () => {
+      it("correctly handles null data from includes", () => {
+        const formattedData = markingResponseSchema.parse({
+          ...dummyMarkingIncludes,
+          lk_marking_type: null,
+          lk_colour_marking_text_colour_idTolk_colour: { colour: "red" },
+        });
+        expect(formattedData).toStrictEqual({
+          ...dummyMarking,
+          marking_type: null,
+          text_colour: "red",
+        });
+      });
+
+      it("correctly handles undefined data from includes", () => {
+        const { xref_taxon_marking_body_location, ...rest } =
+          dummyMarkingIncludes;
+        const formattedData = markingResponseSchema.parse(rest);
+        expect(formattedData).toStrictEqual({
+          ...dummyMarking,
+          body_location: null,
+        });
+      });
+    });
+  });
+
   describe("SERVICES", () => {
     describe("createMarking()", () => {
       it("creates a new marking", async () => {

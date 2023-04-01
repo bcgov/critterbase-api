@@ -86,6 +86,31 @@ beforeAll(async () => {
 });
 
 describe("API: Collection Unit", () => {
+  describe("ZOD SCHEMA", () => {
+    describe("collectionUnitResponseSchema", () => {
+      it("correctly handles null data from includes", () => {
+        const formattedData = collectionUnitResponseSchema.parse({
+          ...dummyCollectionUnitIncludes,
+          xref_collection_unit: { unit_name: null },
+        });
+        expect(formattedData).toStrictEqual({
+          ...dummyCollectionUnit,
+          unit_name: null,
+        });
+      });
+    });
+
+    it("correctly handles undefined data from includes", () => {
+      const { xref_collection_unit, ...rest } = dummyCollectionUnitIncludes;
+      const formattedData = collectionUnitResponseSchema.parse(rest);
+      expect(formattedData).toStrictEqual({
+        ...dummyCollectionUnit,
+        unit_name: null,
+        unit_description: null,
+      });
+    });
+  });
+
   describe("SERVICES", () => {
     describe("createCollectionUnit()", () => {
       it("creates a new critter_collection_unit", async () => {
