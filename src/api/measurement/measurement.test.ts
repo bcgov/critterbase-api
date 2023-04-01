@@ -480,7 +480,42 @@ describe("API: Measurement", () => {
       });
     });
   });
-
+  describe("ZOD SCHEMA", () => {
+    describe("QualitativeResponseSchema", () => {
+      it("should correctly format data", () => {
+        const parsed = QualitativeResponseSchema.parse({
+          temp: "hello world",
+          xref_taxon_measurement_qualitative: 1,
+          xref_taxon_measurement_qualitative_option: 2,
+        });
+        const {
+          temp,
+          measurement_name,
+          option_label,
+          option_value,
+          xref_taxon_measurement_qualitative,
+          xref_taxon_measurement_qualitative_option,
+        } = parsed as any;
+        expect(temp).toBeDefined();
+        expect(xref_taxon_measurement_qualitative).not.toBeDefined();
+        expect(xref_taxon_measurement_qualitative_option).not.toBeDefined();
+        expect(measurement_name).toBeNull();
+        expect(option_label).toBeNull();
+        expect(option_label).toBeNull();
+      });
+    });
+    describe("QuantitativeResponseSchema", () => {
+      it("should correctly format data", () => {
+        const parsed = QuantitativeResponseSchema.parse({
+          temp: "hello world",
+        });
+        const { measurement_name, temp, xref_taxon_measurement_quantitative } =
+          parsed as any;
+        expect(measurement_name).toBeNull();
+        expect(temp).toBeDefined();
+      });
+    });
+  });
   describe("CLEANUP", () => {
     it("same number of initial measurements", async () => {
       await prisma.measurement_qualitative.deleteMany({
