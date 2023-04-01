@@ -58,7 +58,8 @@ captureRouter.get(
 captureRouter
   .route("/:id")
   .all(
-    catchErrors((req: Request, res: Response, next: NextFunction) => {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
       next();
     })

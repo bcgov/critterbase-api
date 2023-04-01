@@ -61,7 +61,8 @@ artifactRouter.route("/critter/:id").get(
 artifactRouter
   .route("/:id")
   .all(
-    catchErrors((req: Request, res: Response, next: NextFunction) => {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate uuid
       uuidParamsSchema.parse(req.params);
       next();

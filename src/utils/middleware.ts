@@ -9,9 +9,14 @@ import { apiError } from "./types";
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
  * @param fn function that accepts express params
  */
+type ExpressHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<Response> | Promise<void>;
+
 const catchErrors =
-  (fn: (req: Request, res: Response, next: NextFunction) => any) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (fn: ExpressHandler) => (req: Request, res: Response, next: NextFunction) => {
     fn(req, res, next).catch(next);
   };
 
@@ -59,7 +64,7 @@ const errorHandler = (
     return res.status(status).json({ error });
   }
   if (err instanceof Error) {
-    return res.status(400).json(err?.message ?? "unknown error");
+    return res.status(400).json(err.message || "unknown error");
   }
   next(err);
 };
