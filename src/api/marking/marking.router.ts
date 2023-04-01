@@ -65,6 +65,7 @@ markingRouter.route("/critter/:id").get(
 markingRouter
   .route("/:id")
   .all(
+    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate uuid
       uuidParamsSchema.parse(req.params);
