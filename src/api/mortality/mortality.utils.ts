@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
@@ -9,42 +8,38 @@ import {
   zodID,
 } from "../../utils/zod_helpers";
 import {
-  CommonFormattedLocationSchema,
-  commonLocationSelect,
+  locationIncludes,
+  LocationResponseSchema,
 } from "../location/location.utils";
+import { getMortalityById } from "./mortality.service";
 
-const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
-  include: {
-    location: {
-      ...commonLocationSelect,
-    },
-    lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death:
-      {
-        select: {
-          cod_category: true,
-          cod_reason: true,
-        },
-      },
-    lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: {
-      select: {
-        taxon_id: true,
-        taxon_name_latin: true,
-      },
-    },
-    lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: {
-      select: {
-        cod_category: true,
-        cod_reason: true,
-      },
-    },
-    lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: {
-      select: {
-        taxon_id: true,
-        taxon_name_latin: true,
-      },
+const mortalityInclude: Prisma.mortalityInclude = {
+  location: { include: locationIncludes },
+  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: {
+    select: {
+      cod_category: true,
+      cod_reason: true,
     },
   },
-});
+  lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: {
+    select: {
+      taxon_id: true,
+      taxon_name_latin: true,
+    },
+  },
+  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: {
+    select: {
+      cod_category: true,
+      cod_reason: true,
+    },
+  },
+  lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: {
+    select: {
+      taxon_id: true,
+      taxon_name_latin: true,
+    },
+  },
+};
 
 const MortalityBodySchema = implement<mortality>().with({
   mortality_id: zodID,
@@ -89,7 +84,7 @@ const MortalityCreateSchema = implement<
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
 type MortalityUpdate = z.infer<typeof MortalityUpdateSchema>;
 
-type MortalityIncludeType = Prisma.mortalityGetPayload<typeof mortalityInclude>;
+//type MortalityIncludeType = Prisma.mortalityGetPayload<typeof mortalityInclude>;
 
 const MortalityResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -99,10 +94,10 @@ const MortalityResponseSchema = ResponseSchema.transform((val) => {
     lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon,
     lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon,
     ...rest
-  } = val as MortalityIncludeType;
+  } = val as Prisma.PromiseReturnType<typeof getMortalityById>;
   return {
     ...rest,
-    location: location ? CommonFormattedLocationSchema.parse(location) : null,
+    location: location ? LocationResponseSchema.parse(location) : null,
     proximate_cause_of_death:
       lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death ??
       null,
@@ -124,9 +119,4 @@ export {
   MortalityUpdateSchema,
   MortalityResponseSchema,
 };
-export type {
-  MortalityIncludeType,
-  FormattedMortality,
-  MortalityCreate,
-  MortalityUpdate,
-};
+export type { FormattedMortality, MortalityCreate, MortalityUpdate };

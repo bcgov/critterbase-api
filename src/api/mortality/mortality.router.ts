@@ -70,6 +70,7 @@ mortalityRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const mort = await getMortalityById(id);
+      console.log({ mort });
       const parsed = MortalityResponseSchema.parse(mort);
       return res.status(200).json(parsed);
     })

@@ -40,12 +40,11 @@ const LocationCreateSchema = implement<
 
 const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     wmu_id,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     region_nr_id,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     region_env_id,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     lk_wildlife_management_unit,
     lk_region_nr,
     lk_region_env,
@@ -62,97 +61,31 @@ const LocationResponseSchema = ResponseSchema.transform((val) => {
 // Types
 type LocationResponse = z.infer<typeof LocationResponseSchema>;
 
-type LocationSubsetType = Prisma.locationGetPayload<
-  typeof commonLocationSelect
->;
-
-type FormattedLocation = Omit<
-  LocationSubsetType,
-  "lk_region_env" | "lk_region_nr" | "lk_wildlife_management_unit"
-> & {
-  region_env_name: string;
-  lk_region_nr: string;
-  lk_wildlife_management_unit: string;
-};
-//type FormattedLocation = Prisma.PromiseReturnType<typeof getLocationOrThrow>;
-
 type LocationBody = z.infer<typeof LocationCreateSchema>;
 
-const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
-  select: {
-    latitude: true,
-    longitude: true,
-    lk_region_env: {
-      select: {
-        region_env_name: true,
-      },
-    },
-    lk_region_nr: {
-      select: {
-        region_nr_name: true,
-      },
-    },
-    lk_wildlife_management_unit: {
-      select: {
-        wmu_name: true,
-      },
+// Constants
+const locationIncludes: Prisma.locationInclude = {
+  lk_wildlife_management_unit: {
+    select: {
+      wmu_name: true,
     },
   },
-});
-
-type CommonLocationType = Prisma.locationGetPayload<
-  typeof commonLocationSelect
->;
-
-const CommonLocationSchema = implement<CommonLocationType>().with({
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
-  lk_region_env: z
-    .object({
-      region_env_name: z.string(),
-    })
-    .nullable(),
-  lk_region_nr: z
-    .object({
-      region_nr_name: z.string(),
-    })
-    .nullable(),
-  lk_wildlife_management_unit: z
-    .object({
-      wmu_name: z.string(),
-    })
-    .nullable(),
-});
-
-const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
-  const { lk_region_env, lk_region_nr, lk_wildlife_management_unit, ...rest } =
-    val;
-  return {
-    ...rest,
-    region_env_name: lk_region_env?.region_env_name,
-    region_nr_name: lk_region_nr?.region_nr_name,
-    wmu_name: lk_wildlife_management_unit?.wmu_name,
-  };
-});
-
-const locationIncludes: Prisma.locationInclude = {
-  lk_wildlife_management_unit: true,
-  lk_region_nr: true,
-  lk_region_env: true,
+  lk_region_nr: {
+    select: {
+      region_nr_name: true,
+    },
+  },
+  lk_region_env: {
+    select: {
+      region_env_name: true,
+    },
+  },
 };
 
-export type {
-  LocationSubsetType,
-  FormattedLocation,
-  LocationResponse,
-  LocationBody,
-};
+export type { LocationResponse, LocationBody };
 export {
-  commonLocationSelect,
-  CommonLocationSchema,
   LocationCreateSchema,
   locationIncludes,
   LocationResponseSchema,
   LocationSchema,
-  CommonFormattedLocationSchema,
 };

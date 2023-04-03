@@ -1,7 +1,7 @@
 import { prisma } from "../../utils/constants";
 import {
   MarkingCreateInput,
-  MarkingIncludes,
+  MarkingDetailed,
   markingIncludes,
   MarkingUpdateInput,
 } from "./marking.utils";
@@ -9,9 +9,9 @@ import {
 /**
  * * Returns all existing markings from the database
  */
-const getAllMarkings = async (): Promise<MarkingIncludes[]> => {
-  const markings: MarkingIncludes[] = await prisma.marking.findMany({
-    ...markingIncludes,
+const getAllMarkings = async (): Promise<MarkingDetailed[]> => {
+  const markings = await prisma.marking.findMany({
+    include: markingIncludes,
   });
   return markings;
 };
@@ -21,12 +21,12 @@ const getAllMarkings = async (): Promise<MarkingIncludes[]> => {
  * * Returns null if non-existent
  * @param {string} marking_id
  */
-const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
-  const marking: MarkingIncludes = await prisma.marking.findUniqueOrThrow({
+const getMarkingById = async (marking_id: string) => {
+  const marking = await prisma.marking.findUniqueOrThrow({
     where: {
       marking_id: marking_id,
     },
-    ...markingIncludes,
+    include: markingIncludes,
   });
   return marking;
 };
@@ -37,12 +37,12 @@ const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
  */
 const getMarkingsByCritterId = async (
   critter_id: string
-): Promise<MarkingIncludes[]> => {
-  const markings: MarkingIncludes[] = await prisma.marking.findMany({
+): Promise<MarkingDetailed[]> => {
+  const markings = await prisma.marking.findMany({
     where: {
       critter_id: critter_id,
     },
-    ...markingIncludes,
+    include: markingIncludes,
   });
   return markings;
 };
@@ -55,13 +55,13 @@ const getMarkingsByCritterId = async (
 const updateMarking = async (
   marking_id: string,
   marking_data: MarkingUpdateInput
-): Promise<MarkingIncludes> => {
-  const marking: MarkingIncludes = await prisma.marking.update({
+): Promise<MarkingDetailed> => {
+  const marking = await prisma.marking.update({
     where: {
       marking_id: marking_id,
     },
     data: marking_data,
-    ...markingIncludes,
+    include: markingIncludes,
   });
   return marking;
 };
@@ -73,10 +73,10 @@ const updateMarking = async (
  */
 const createMarking = async (
   newMarkingData: MarkingCreateInput
-): Promise<MarkingIncludes> => {
-  const marking: MarkingIncludes = await prisma.marking.create({
+): Promise<MarkingDetailed> => {
+  const marking = await prisma.marking.create({
     data: newMarkingData,
-    ...markingIncludes,
+    include: markingIncludes,
   });
   return marking;
 };
@@ -85,12 +85,12 @@ const createMarking = async (
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string): Promise<MarkingIncludes> => {
-  const marking: MarkingIncludes = await prisma.marking.delete({
+const deleteMarking = async (marking_id: string): Promise<MarkingDetailed> => {
+  const marking = await prisma.marking.delete({
     where: {
       marking_id: marking_id,
     },
-    ...markingIncludes,
+    include: markingIncludes,
   });
   return marking;
 };

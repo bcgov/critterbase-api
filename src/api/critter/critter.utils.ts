@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { critter, Prisma, sex } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
@@ -26,26 +25,21 @@ import {
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
+import { getCritterByIdWithDetails } from "./critter.service";
 
-const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
-  include: {
-    lk_taxon: {
-      select: { taxon_name_latin: true },
-    },
-    lk_region_nr: {
-      select: { region_nr_name: true },
-    },
-    capture: captureInclude,
-    mortality: mortalityInclude,
-    marking: markingIncludes,
-    measurement_qualitative: measurementQualitativeInclude,
-    measurement_quantitative: measurementQuantitativeInclude,
+const formattedCritterInclude: Prisma.critterInclude = {
+  lk_taxon: {
+    select: { taxon_name_latin: true },
   },
-});
-
-type CritterIncludeResult = Prisma.critterGetPayload<
-  typeof formattedCritterInclude
->;
+  lk_region_nr: {
+    select: { region_nr_name: true },
+  },
+  capture: { include: captureInclude },
+  mortality: { include: mortalityInclude },
+  marking: { include: markingIncludes },
+  measurement_qualitative: { include: measurementQualitativeInclude },
+  measurement_quantitative: { include: measurementQuantitativeInclude },
+};
 
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
@@ -92,25 +86,25 @@ const CritterResponseSchema = ResponseSchema.transform((val) => {
     measurement_qualitative,
     measurement_quantitative,
     ...rest
-  } = val as CritterIncludeResult;
+  } = val as Prisma.PromiseReturnType<typeof getCritterByIdWithDetails>;
   return {
     ...rest,
-    taxon_name_latin: lk_taxon.taxon_name_latin,
-    responsible_region_name: lk_region_nr?.region_nr_name,
-    mortality: mortality.map((a) =>
+    taxon_name_latin: lk_taxon?.taxon_name_latin ?? null,
+    responsible_region_name: lk_region_nr?.region_nr_name ?? null,
+    mortality: mortality?.map((a) =>
       stripExtraFields(MortalityResponseSchema.parse(a))
     ),
-    capture: capture.map((a) =>
+    capture: capture?.map((a) =>
       stripExtraFields(CaptureResponseSchema.parse(a))
     ),
-    marking: marking.map((a) =>
+    marking: marking?.map((a) =>
       stripExtraFields(markingResponseSchema.parse(a))
     ),
     measurement: {
-      qualitative: measurement_qualitative.map((a) =>
+      qualitative: measurement_qualitative?.map((a) =>
         stripExtraFields(QualitativeResponseSchema.parse(a))
       ),
-      quantitative: measurement_quantitative.map((a) =>
+      quantitative: measurement_quantitative?.map((a) =>
         stripExtraFields(QuantitativeResponseSchema.parse(a))
       ),
     },
@@ -129,11 +123,13 @@ const stripExtraFields = <T extends critterInterface>(
   obj: T
 ): Omit<T, "critter_id" | keyof AuditColumns> => {
   const {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     critter_id,
     create_user,
     update_user,
     create_timestamp,
     update_timestamp,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     ...rest
   } = obj;
   return rest;
@@ -145,7 +141,7 @@ type FormattedCritter = z.infer<typeof CritterResponseSchema>;
 
 export type {
   FormattedCritter,
-  CritterIncludeResult,
+  // CritterIncludeResult,
   CritterCreate,
   CritterUpdate,
 };
