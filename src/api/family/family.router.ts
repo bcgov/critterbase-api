@@ -7,6 +7,7 @@ import {
   getAllChildren,
   getAllFamilies,
   getAllParents,
+  getChildrenOfCritterId,
   getFamilyById,
   getFamilyByLabel,
   getImmediateFamily,
@@ -80,7 +81,7 @@ familyRouter.get(
   "/children/:id",
   catchErrors(async (req: Request, res: Response) => {
     const { id } = uuidParamsSchema.parse(req.params);
-    const parents = await getParentsOfCritterId(id);
+    const parents = await getChildrenOfCritterId(id);
     return res.status(200).json(parents);
   })
 );

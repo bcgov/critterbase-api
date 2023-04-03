@@ -2,6 +2,8 @@ import { capture, Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { prisma, request } from "../../utils/constants";
 import { createCapture, deleteCapture, getAllCaptures, getCaptureByCritter, getCaptureById, updateCapture } from "./capture.service";
+import { CaptureResponseSchema } from "./capture.utils";
+import { commonLocationSelect } from "../location/location.utils";
 
 const tempCaptures: capture[] = [];
 
@@ -28,6 +30,31 @@ const createTempCapture = async (): Promise<capture> => {
 }
 
 describe("API: Critter", () => {
+  describe("ZOD SCHEMAS", () => {
+    describe("CaptureResponseSchema", () => {
+      it("should parse the data correctly", async () => {
+        const loc = await prisma.location.findFirst({...commonLocationSelect});
+        const obj = {
+          location_capture_capture_location_idTolocation: loc ,
+          location_capture_release_location_idTolocation: loc ,
+        }
+        const res = CaptureResponseSchema.parse(obj);
+        expect.assertions(2);
+        expect(res.capture_location).not.toBeNull();
+        expect(res.release_location).not.toBeNull();
+      });
+      it("should parse the data correctly", async () => {
+        const obj = {
+          location_capture_capture_location_idTolocation: null ,
+          location_capture_release_location_idTolocation: null ,
+        }
+        const res = CaptureResponseSchema.parse(obj);
+        expect.assertions(2);
+        expect(res.capture_location).toBeNull();
+        expect(res.release_location).toBeNull();
+      });
+    })
+  })
   describe("SERVICES", () => {
     describe("creating captures", () => {
       it("should create one capture", async () => {
