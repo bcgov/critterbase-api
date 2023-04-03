@@ -123,11 +123,13 @@ const stripExtraFields = <T extends critterInterface>(
   obj: T
 ): Omit<T, "critter_id" | keyof AuditColumns> => {
   const {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     critter_id,
     create_user,
     update_user,
     create_timestamp,
     update_timestamp,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     ...rest
   } = obj;
   return rest;
