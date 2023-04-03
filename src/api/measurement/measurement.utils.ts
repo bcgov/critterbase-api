@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import {
   measurement_qualitative,
   measurement_quantitative,
   Prisma,
 } from "@prisma/client";
 import { z } from "zod";
-import { strings } from "../../utils/constants";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
@@ -20,18 +20,20 @@ import {
 } from "./measurement.service";
 // Zod Schemas
 
-const measurementQualitativeInclude = Prisma.validator<Prisma.measurement_qualitativeArgs>()({
-  include: {
-    xref_taxon_measurement_qualitative: true,
-    xref_taxon_measurement_qualitative_option: true,
-  }
-});
+const measurementQualitativeInclude =
+  Prisma.validator<Prisma.measurement_qualitativeArgs>()({
+    include: {
+      xref_taxon_measurement_qualitative: true,
+      xref_taxon_measurement_qualitative_option: true,
+    },
+  });
 
-const measurementQuantitativeInclude = Prisma.validator<Prisma.measurement_quantitativeArgs>() ({
-  include: {
-    xref_taxon_measurement_quantitative: true,
-  }
-})
+const measurementQuantitativeInclude =
+  Prisma.validator<Prisma.measurement_quantitativeArgs>()({
+    include: {
+      xref_taxon_measurement_quantitative: true,
+    },
+  });
 
 // Qualitatitive
 /**
@@ -137,10 +139,11 @@ type QualitativeUpdateBody = z.infer<typeof QualitativeUpdateSchema>;
 type QuantitativeUpdateBody = z.infer<typeof QuantitativeUpdateSchema>;
 type QuantitativeBody = z.infer<typeof QuantitativeCreateSchema>;
 
-type Measurements = {
+interface Measurements {
   quantitative: measurement_quantitative[];
   qualitative: measurement_qualitative[];
-};
+}
+
 export type {
   Measurements,
   QualitativeBody,

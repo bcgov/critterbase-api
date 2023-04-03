@@ -1,11 +1,10 @@
 import {
   measurement_qualitative,
   measurement_quantitative,
-  Prisma,
 } from "@prisma/client";
 import { prisma } from "../../utils/constants";
-import { 
-  measurementQualitativeInclude, 
+import {
+  measurementQualitativeInclude,
   measurementQuantitativeInclude,
   Measurements,
   QualitativeBody,
@@ -32,7 +31,7 @@ const getQuantMeasurementOrThrow = async (id: string) => {
       where: {
         measurement_quantitative_id: id,
       },
-      ...measurementQuantitativeInclude
+      ...measurementQuantitativeInclude,
     });
   return quantMeasurement;
 };

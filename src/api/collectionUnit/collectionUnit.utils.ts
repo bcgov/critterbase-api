@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+// /* eslint-disable @typescript-eslint/no-unused-vars */
 import { critter_collection_unit, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
@@ -6,7 +8,6 @@ import {
   noAudit,
   nonEmpty,
   ResponseSchema,
-  XrefCollectionUnitSchema,
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
@@ -46,19 +47,20 @@ const critter_collection_unitSchema = implement<critter_collection_unit>().with(
 );
 
 // Extended schema which has both base schema and included fields
-const critter_collection_unitIncludesSchema =
-  implement<CollectionUnitIncludes>().with({
-    ...critter_collection_unitSchema.shape,
-    xref_collection_unit: XrefCollectionUnitSchema.pick({
-      unit_name: true,
-      description: true,
-    }),
-  });
+// const critter_collection_unitIncludesSchema =
+//   implement<CollectionUnitIncludes>().with({
+//     ...critter_collection_unitSchema.shape,
+//     xref_collection_unit: XrefCollectionUnitSchema.pick({
+//       unit_name: true,
+//       description: true,
+//     }),
+//   });
 
 // Formatted API response schema which omits fields and unpacks nested data
 const collectionUnitResponseSchema = ResponseSchema.transform((obj) => {
   const {
     // omit
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     collection_unit_id,
     // include
     xref_collection_unit,

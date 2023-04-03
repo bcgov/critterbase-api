@@ -51,8 +51,8 @@ measurementRouter.get(
 measurementRouter.post(
   `${QUAL_ROUTE}/create`,
   catchErrors(async (req: Request, res: Response) => {
-    QualitativeCreateSchema.parse(req.body);
-    const measurement = await createQualMeasurement(req.body);
+    const parsed = QualitativeCreateSchema.parse(req.body);
+    const measurement = await createQualMeasurement(parsed);
     return res.status(201).json(measurement);
   })
 );
@@ -63,8 +63,8 @@ measurementRouter.post(
 measurementRouter.post(
   `${QUANT_ROUTE}/create`,
   catchErrors(async (req: Request, res: Response) => {
-    QuantitativeCreateSchema.parse(req.body);
-    const measurement = await createQuantMeasurement(req.body);
+    const parsed = QuantitativeCreateSchema.parse(req.body);
+    const measurement = await createQuantMeasurement(parsed);
     return res.status(201).json(measurement);
   })
 );
@@ -75,6 +75,7 @@ measurementRouter.post(
 measurementRouter
   .route(`${QUAL_ROUTE}/:id`)
   .all(
+    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
       next();
@@ -110,6 +111,7 @@ measurementRouter
 measurementRouter
   .route(`${QUANT_ROUTE}/:id`)
   .all(
+    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
       next();

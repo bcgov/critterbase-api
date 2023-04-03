@@ -1,18 +1,21 @@
-import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
+import express, { NextFunction } from "express";
 import { catchErrors } from "../../utils/middleware";
+import { apiError } from "../../utils/types";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   createCritter,
   deleteCritter,
   getAllCritters,
-  getCritterById,
   getCritterByIdWithDetails,
   getCritterByWlhId,
   updateCritter,
 } from "./critter.service";
-import { apiError } from "../../utils/types";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { CritterCreateSchema, CritterResponseSchema, CritterUpdateSchema } from "./critter.utils";
+import {
+  CritterCreateSchema,
+  CritterResponseSchema,
+  CritterUpdateSchema,
+} from "./critter.utils";
 
 export const critterRouter = express.Router();
 
@@ -47,7 +50,7 @@ critterRouter.route("/wlh/:wlh_id").get(
         "Could not find any animals with the requested WLH ID"
       );
     }
-    const format = critters.map( c => CritterResponseSchema.parse(c) );
+    const format = critters.map((c) => CritterResponseSchema.parse(c));
     return res.status(200).json(format);
   })
 );
@@ -58,6 +61,7 @@ critterRouter.route("/wlh/:wlh_id").get(
 critterRouter
   .route("/:id")
   .all(
+    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
       next();

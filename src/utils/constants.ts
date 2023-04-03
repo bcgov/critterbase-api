@@ -19,12 +19,13 @@ const request = supertest(app);
 
 const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma =
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   globalPrisma.prisma ||
   new PrismaClient({
     errorFormat: "minimal",
   });
 
-if (IS_PROD) globalPrisma.prisma = prisma;
+if (!IS_PROD) globalPrisma.prisma = prisma;
 
 const strings = {
   app: {

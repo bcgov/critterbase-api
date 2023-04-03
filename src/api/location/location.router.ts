@@ -32,8 +32,8 @@ locationRouter.get(
 locationRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    LocationCreateSchema.parse(req.body);
-    const location = await createLocation(req.body);
+    const parsed = LocationCreateSchema.parse(req.body);
+    const location = await createLocation(parsed);
     return res.status(201).json(location);
   })
 );
@@ -44,6 +44,7 @@ locationRouter.post(
 locationRouter
   .route("/:id")
   .all(
+    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       uuidParamsSchema.parse(req.params);
       next();

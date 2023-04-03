@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
@@ -153,7 +155,7 @@ export {
   MarkingUpdateBodySchema,
   markingResponseSchema,
   markingIncludes,
-  markingIncludesSchema
+  markingIncludesSchema,
 };
 export type {
   MarkingCreateInput,
