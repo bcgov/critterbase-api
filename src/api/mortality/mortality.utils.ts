@@ -97,7 +97,7 @@ const MortalityResponseSchema = ResponseSchema.transform((val) => {
   } = val as Prisma.PromiseReturnType<typeof getMortalityById>;
   return {
     ...rest,
-    location: LocationResponseSchema.parse(location),
+    location: location ? LocationResponseSchema.parse(location) : null,
     proximate_cause_of_death:
       lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death ??
       null,

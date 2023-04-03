@@ -64,8 +64,12 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
   } = val as Prisma.PromiseReturnType<typeof getCaptureById>;
   return {
     ...rest,
-    capture_location: LocationResponseSchema.parse(c_location),
-    release_location: LocationResponseSchema.parse(r_location),
+    capture_location: c_location
+      ? LocationResponseSchema.parse(c_location)
+      : null,
+    release_location: r_location
+      ? LocationResponseSchema.parse(r_location)
+      : null,
   };
 });
 

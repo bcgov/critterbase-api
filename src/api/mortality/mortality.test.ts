@@ -149,7 +149,7 @@ describe("API: Critter", () => {
         const mort = await request
           .put("/api/mortality/" + m.mortality_id)
           .send({ mortality_comment: "banana" });
-        console.log("res was " + JSON.stringify(mort, null, 2));
+        //console.log("res was " + JSON.stringify(mort, null, 2));
         expect.assertions(1);
         expect(mort.status).toBe(200);
       });

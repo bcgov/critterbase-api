@@ -41,10 +41,6 @@ const formattedCritterInclude: Prisma.critterInclude = {
   measurement_quantitative: { include: measurementQuantitativeInclude },
 };
 
-// type CritterIncludeResult = Prisma.critterGetPayload<
-//   typeof formattedCritterInclude
-// >;
-
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
   taxon_id: zodID,
