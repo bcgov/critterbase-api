@@ -40,12 +40,11 @@ const LocationCreateSchema = implement<
 
 const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     wmu_id,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     region_nr_id,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     region_env_id,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     lk_wildlife_management_unit,
     lk_region_nr,
     lk_region_env,
