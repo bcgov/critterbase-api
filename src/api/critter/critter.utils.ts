@@ -34,8 +34,8 @@ const formattedCritterInclude: Prisma.critterInclude = {
   lk_region_nr: {
     select: { region_nr_name: true },
   },
-  capture: captureInclude,
-  mortality: mortalityInclude,
+  capture: { include: captureInclude },
+  mortality: { include: mortalityInclude },
   marking: markingIncludes,
   measurement_qualitative: { include: measurementQualitativeInclude },
   measurement_quantitative: { include: measurementQuantitativeInclude },

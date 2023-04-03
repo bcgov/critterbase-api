@@ -4,16 +4,16 @@ import { CaptureCreate, captureInclude, CaptureUpdate } from "./capture.utils";
 
 const getAllCaptures = async (): Promise<capture[]> => {
   return await prisma.capture.findMany({
-    ...captureInclude,
+    include: captureInclude,
   });
 };
 
-const getCaptureById = async (capture_id: string): Promise<capture | null> => {
+const getCaptureById = async (capture_id: string) => {
   const capture = await prisma.capture.findUniqueOrThrow({
-    ...captureInclude,
     where: {
       capture_id: capture_id,
     },
+    include: captureInclude,
   });
   return capture;
 };
@@ -28,10 +28,10 @@ const getCaptureByCritter = async (
   });
 
   const captures = await prisma.capture.findMany({
-    ...captureInclude,
     where: {
       critter_id: critter_id,
     },
+    include: captureInclude,
   });
 
   return captures;
