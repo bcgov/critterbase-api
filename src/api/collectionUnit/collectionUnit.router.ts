@@ -69,10 +69,9 @@ collectionUnitRouter.route("/critter/:id").get(
 collectionUnitRouter
   .route("/:id")
   .all(
-    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       // validate uuid
-      uuidParamsSchema.parse(req.params);
+      await uuidParamsSchema.parseAsync(req.params);
       next();
     })
   )

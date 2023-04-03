@@ -75,9 +75,8 @@ measurementRouter.post(
 measurementRouter
   .route(`${QUAL_ROUTE}/:id`)
   .all(
-    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      uuidParamsSchema.parse(req.params);
+      await uuidParamsSchema.parseAsync(req.params);
       next();
     })
   )
@@ -111,9 +110,8 @@ measurementRouter
 measurementRouter
   .route(`${QUANT_ROUTE}/:id`)
   .all(
-    // eslint-disable-next-line @typescript-eslint/require-await
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      uuidParamsSchema.parse(req.params);
+      await uuidParamsSchema.parseAsync(req.params);
       next();
     })
   )
