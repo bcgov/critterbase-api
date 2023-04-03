@@ -36,7 +36,7 @@ const formattedCritterInclude: Prisma.critterInclude = {
   },
   capture: { include: captureInclude },
   mortality: { include: mortalityInclude },
-  marking: markingIncludes,
+  marking: { include: markingIncludes },
   measurement_qualitative: { include: measurementQualitativeInclude },
   measurement_quantitative: { include: measurementQuantitativeInclude },
 };

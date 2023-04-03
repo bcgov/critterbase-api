@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";

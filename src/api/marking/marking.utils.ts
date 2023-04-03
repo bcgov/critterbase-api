@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
@@ -10,9 +9,10 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { getMarkingById } from "./marking.service";
 
 // Types
-type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
+//type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
 type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 
@@ -20,30 +20,30 @@ type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
 type MarkingResponseSchema = z.TypeOf<typeof markingResponseSchema>;
 
+type MarkingDetailed = Prisma.PromiseReturnType<typeof getMarkingById>;
+
 // Constants
 
 // Included related data from lk and xref tables
-const markingIncludes = {
-  include: {
-    xref_taxon_marking_body_location: {
-      select: { body_location: true },
-    },
-    lk_marking_type: {
-      select: { name: true },
-    },
-    lk_marking_material: {
-      select: { material: true },
-    },
-    lk_colour_marking_primary_colour_idTolk_colour: {
-      select: { colour: true },
-    },
-    lk_colour_marking_secondary_colour_idTolk_colour: {
-      select: { colour: true },
-    },
-    lk_colour_marking_text_colour_idTolk_colour: {
-      select: { colour: true },
-    },
-  } satisfies Prisma.markingInclude,
+const markingIncludes: Prisma.markingInclude = {
+  xref_taxon_marking_body_location: {
+    select: { body_location: true },
+  },
+  lk_marking_type: {
+    select: { name: true },
+  },
+  lk_marking_material: {
+    select: { material: true },
+  },
+  lk_colour_marking_primary_colour_idTolk_colour: {
+    select: { colour: true },
+  },
+  lk_colour_marking_secondary_colour_idTolk_colour: {
+    select: { colour: true },
+  },
+  lk_colour_marking_text_colour_idTolk_colour: {
+    select: { colour: true },
+  },
 };
 
 // Schemas
@@ -90,7 +90,7 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
     lk_colour_marking_secondary_colour_idTolk_colour,
     lk_colour_marking_text_colour_idTolk_colour,
     ...rest
-  } = obj as MarkingIncludes;
+  } = obj as MarkingDetailed;
   return {
     ...rest,
     body_location: xref_taxon_marking_body_location?.body_location ?? null,
@@ -133,6 +133,6 @@ export {
 export type {
   MarkingCreateInput,
   MarkingUpdateInput,
-  MarkingIncludes,
   MarkingResponseSchema,
+  MarkingDetailed,
 };
