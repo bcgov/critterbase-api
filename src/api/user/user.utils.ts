@@ -42,5 +42,10 @@ const UserUpdateBodySchema = implement<
   .with(UserCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-export { UserCreateBodySchema, UserUpdateBodySchema };
+const AuthLoginSchema = userSchema
+  .pick({ user_id: true, keycloak_uuid: true })
+  .partial()
+  .refine(nonEmpty, "must provide either user_id OR keycloak_uuid");
+
+export { UserCreateBodySchema, UserUpdateBodySchema, AuthLoginSchema };
 export type { UserCreateInput, UserUpdateInput };

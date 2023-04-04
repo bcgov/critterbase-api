@@ -60,6 +60,19 @@ const getUserBySystemId = async (system_user_id: string): Promise<user> => {
 };
 
 /**
+ * Gets a user by their keycloak_uuid
+ * @param {string} keycloak_uuid - The unique keycloak_uuid for a user
+ */
+const getUserByKeycloakId = async (keycloak_uuid: string): Promise<user> => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      keycloak_uuid,
+    },
+  });
+  return user;
+};
+
+/**
  * Updates a user in the database
  * @param {string} user_id - The uuid / primary key for the user
  * @param {UserUpdateInput} data - The new data that the record should be updated
@@ -96,6 +109,7 @@ export {
   getUsers,
   getUser,
   getUserBySystemId,
+  getUserByKeycloakId,
   updateUser,
   deleteUser,
 };

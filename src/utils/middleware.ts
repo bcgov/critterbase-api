@@ -1,11 +1,16 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
-import { ZodError, z } from "zod";
-import { IS_TEST } from "./constants";
+import { ZodError } from "zod";
+import {
+  createUser,
+  getUser,
+  getUserByKeycloakId,
+} from "../api/user/user.service";
+import { AuthLoginSchema, UserCreateBodySchema } from "../api/user/user.utils";
+import { IS_TEST, prisma } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
-import { zodID } from "./zod_helpers";
-import { getUser } from "../api/user/user.service";
+import { user } from "@prisma/client";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -88,8 +93,10 @@ const health = (req: Request, res: Response) => {
   } else {
     req.session.views = 1;
   }
-  res.status(200).json({ healthStatus: "Healthy", session: req.session });
-  res.end();
+  return res
+    .status(200)
+    .json({ healthStatus: "Healthy", session: req.session })
+    .end();
 };
 
 const auth = (req: Request, res: Response, next: NextFunction) => {
@@ -101,13 +108,26 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const login = catchErrors(async (req: Request, res: Response) => {
-  if (req.session.user_id) {
-    return res.status(200).json("Already logged in").end();
+  if (req.session.user_id) return res.status(200).end();
+
+  const { user_id, keycloak_uuid } = AuthLoginSchema.parse(req.body);
+  let userRes: user | null = null;
+  if (user_id) {
+    userRes = await prisma.user.findUnique({ where: { user_id } });
   }
-  const { user_id } = z.object({ user_id: zodID }).strict().parse(req.body);
-  await getUser(user_id);
-  req.session.user_id = user_id;
+  if (!userRes && keycloak_uuid) {
+    userRes = await prisma.user.findUnique({ where: { keycloak_uuid } });
+  }
+  //This might be the step to redirect to the signup
+  if (!userRes) throw apiError.notFound("No user found. Login failed.");
   return res.status(200).json("Logged in to Critterbase API").end();
+});
+
+const signUp = catchErrors(async (req: Request, res: Response) => {
+  const parsedUser = UserCreateBodySchema.parse(req.body);
+  const user = await createUser(parsedUser);
+  req.session.user_id = user.user_id;
+  return res.status(201).json("Signed up for Critterbase API").end();
 });
 
 export { errorLogger, errorHandler, catchErrors, home, health, login, auth };
