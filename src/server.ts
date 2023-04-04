@@ -1,5 +1,5 @@
 import cors from "cors";
-import express, { Request } from "express";
+import express from "express";
 import helmet from "helmet";
 import { artifactRouter } from "./api/artifact/artifact.router";
 import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
@@ -11,28 +11,41 @@ import { markingRouter } from "./api/marking/marking.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { userRouter } from "./api/user/user.router";
-import { errorHandler, errorLogger, health, home } from "./utils/middleware";
+import {
+  auth,
+  errorHandler,
+  errorLogger,
+  health,
+  home,
+  login,
+} from "./utils/middleware";
 import { IS_DEV, IS_PROD, PORT, expressSession } from "./utils/constants";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    // origin: ['https://localhost:']
+  })
+);
 app.use(helmet());
 app.use(express.json());
 app.use(expressSession);
 
 app.get("/api/", home);
 app.get("/api/health", health);
-app.use("/api/critters", critterRouter);
-app.use("/api/locations", locationRouter);
-app.use("/api/markings", markingRouter);
-app.use("/api/users", userRouter);
-app.use("/api/collection-units", collectionUnitRouter);
-app.use("/api/artifacts", artifactRouter);
-app.use("/api/family", familyRouter);
-app.use("/api/captures/", captureRouter);
-app.use("/api/mortality", mortalityRouter);
-app.use("/api/measurements", measurementRouter);
+app.post("/api/login", login);
+
+app.use("/api/critters", auth, critterRouter);
+app.use("/api/locations", auth, locationRouter);
+app.use("/api/markings", auth, markingRouter);
+app.use("/api/users", auth, userRouter);
+app.use("/api/collection-units", auth, collectionUnitRouter);
+app.use("/api/artifacts", auth, artifactRouter);
+app.use("/api/family", auth, familyRouter);
+app.use("/api/captures/", auth, captureRouter);
+app.use("/api/mortality", auth, mortalityRouter);
+app.use("/api/measurements", auth, measurementRouter);
 
 app.use(errorLogger);
 app.use(errorHandler);

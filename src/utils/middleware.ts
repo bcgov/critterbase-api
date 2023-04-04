@@ -1,9 +1,11 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 import { IS_TEST } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
+import { zodID } from "./zod_helpers";
+import { getUser } from "../api/user/user.service";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -90,4 +92,22 @@ const health = (req: Request, res: Response) => {
   res.end();
 };
 
-export { errorLogger, errorHandler, catchErrors, home, health };
+const auth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session.user_id) {
+    next();
+  } else {
+    next(new apiError("Unauthorized Access. Login with valid user_id"));
+  }
+};
+
+const login = catchErrors(async (req: Request, res: Response) => {
+  if (req.session.user_id) {
+    return res.status(200).json("Already logged in").end();
+  }
+  const { user_id } = z.object({ user_id: zodID }).strict().parse(req.body);
+  await getUser(user_id);
+  req.session.user_id = user_id;
+  return res.status(200).json("Logged in to Critterbase API").end();
+});
+
+export { errorLogger, errorHandler, catchErrors, home, health, login, auth };

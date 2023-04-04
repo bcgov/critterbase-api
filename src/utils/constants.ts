@@ -6,7 +6,7 @@ import { sessionHours } from "./helper_functions";
 declare module "express-session" {
   interface SessionData {
     views: number;
-    userID: string;
+    user_id: string; //Critterbase user_id
   }
 }
 
@@ -23,6 +23,8 @@ const request = supertest(app);
 const expressSession = session({
   secret: "temp secret",
   cookie: { maxAge: sessionHours(1) },
+  resave: false,
+  saveUninitialized: true,
 });
 
 /**
