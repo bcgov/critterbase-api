@@ -2,12 +2,30 @@ import { critter } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import {
   CritterCreate,
+  CritterIdsRequest,
   CritterUpdate,
   formattedCritterInclude,
 } from "./critter.utils";
 
 const getAllCritters = async (): Promise<critter[]> => {
   return await prisma.critter.findMany();
+};
+
+/**
+ * Fetch multiple critters by their IDs
+ */
+const getMultipleCrittersByIds = async (
+  critterIds: CritterIdsRequest
+): Promise<critter[]> => {
+  const results = await prisma.critter.findMany({
+    where: {
+      critter_id: {
+        in: critterIds.critter_ids,
+      },
+    },
+  });
+
+  return results;
 };
 
 const getCritterById = async (critter_id: string): Promise<critter | null> => {
@@ -78,4 +96,5 @@ export {
   createCritter,
   deleteCritter,
   getCritterByIdWithDetails,
+  getMultipleCrittersByIds,
 };

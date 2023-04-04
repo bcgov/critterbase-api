@@ -9,10 +9,12 @@ import {
   getAllCritters,
   getCritterByIdWithDetails,
   getCritterByWlhId,
+  getMultipleCrittersByIds,
   updateCritter,
 } from "./critter.service";
 import {
   CritterCreateSchema,
+  CritterIdsRequestSchema,
   CritterResponseSchema,
   CritterUpdateSchema,
 } from "./critter.utils";
@@ -27,6 +29,18 @@ critterRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const allCritters = await getAllCritters();
     return res.status(200).json(allCritters);
+  })
+);
+
+/**
+ ** Fetch multiple critters by their IDs
+ */
+ critterRouter.post(
+  "/",
+  catchErrors(async (req: Request, res: Response) => {
+    const parsed = CritterIdsRequestSchema.parse(req.body);
+    const critters = await getMultipleCrittersByIds(parsed);
+    return res.status(200).json(critters);
   })
 );
 

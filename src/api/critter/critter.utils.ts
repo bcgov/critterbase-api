@@ -82,6 +82,13 @@ const CritterCreateSchema = implement<
   }).shape
 );
 
+/**
+ * Schema for validating a request to fetch multiple critters by their IDs
+ */
+const CritterIdsRequestSchema = z.object({
+  critter_ids: z.array(zodID),
+});
+
 const CritterResponseSchema = ResponseSchema.transform((val) => {
   const {
     mortality,
@@ -142,16 +149,19 @@ const stripExtraFields = <T extends critterInterface>(
 type CritterCreate = z.infer<typeof CritterCreateSchema>;
 type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterResponseSchema>;
+type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
 export type {
   FormattedCritter,
   CritterIncludeResult,
   CritterCreate,
   CritterUpdate,
+  CritterIdsRequest,
 };
 export {
   formattedCritterInclude,
   CritterResponseSchema,
   CritterUpdateSchema,
   CritterCreateSchema,
+  CritterIdsRequestSchema,
 };
