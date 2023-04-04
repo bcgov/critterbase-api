@@ -1,6 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import supertest from "supertest";
 import { app } from "../server";
+import session from "express-session";
+import { sessionHours } from "./helper_functions";
+declare module "express-session" {
+  interface SessionData {
+    views: number;
+    userID: string;
+  }
+}
 
 const PORT = process.env.PORT;
 
@@ -11,6 +19,11 @@ const IS_PROD = process.env.NODE_ENV === "production";
 const IS_TEST = process.env.NODE_ENV === "test";
 
 const request = supertest(app);
+
+const expressSession = session({
+  secret: "temp secret",
+  cookie: { maxAge: sessionHours(1) },
+});
 
 /**
  * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
@@ -53,4 +66,13 @@ const strings = {
   },
 };
 
-export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, strings };
+export {
+  PORT,
+  IS_DEV,
+  IS_PROD,
+  IS_TEST,
+  prisma,
+  request,
+  strings,
+  expressSession,
+};

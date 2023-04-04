@@ -80,4 +80,14 @@ const home = (req: Request, res: Response) => {
   ]);
 };
 
-export { errorLogger, errorHandler, catchErrors, home };
+const health = (req: Request, res: Response) => {
+  if (req.session.views) {
+    req.session.views++;
+  } else {
+    req.session.views = 1;
+  }
+  res.status(200).json({ healthStatus: "Healthy", session: req.session });
+  res.end();
+};
+
+export { errorLogger, errorHandler, catchErrors, home, health };
