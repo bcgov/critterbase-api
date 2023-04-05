@@ -7,7 +7,7 @@ import {
   getUserByKeycloakId,
 } from "../api/user/user.service";
 import { AuthLoginSchema, UserCreateBodySchema } from "../api/user/user.utils";
-import { IS_TEST, prisma } from "./constants";
+import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, prisma } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 import { user } from "@prisma/client";
@@ -103,13 +103,35 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.user_id) {
     next();
   } else {
-    next(new apiError("Unauthorized Access. Login with valid user_id"));
+    next(
+      new apiError(
+        "Unauthorized Access. Login with valid user_id OR keycloak_uuid"
+      )
+    );
   }
 };
 
-const login = catchErrors(async (req: Request, res: Response) => {
-  if (req.session.user_id) return res.status(200).end();
+const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
+  if (IS_TEST) {
+    next();
+    return;
+  }
+  const apiKey = req.get(API_KEY_HEADER);
+  if (!apiKey) {
+    throw new apiError(`Header: 'API-KEY' must be provided`);
+  }
+  if (apiKey !== API_KEY) {
+    throw new apiError(`Header: 'API-KEY' is incorrect`);
+  }
+  next();
+};
 
+const login = catchErrors(async (req: Request, res: Response) => {
+  if (req.session.user_id) {
+    return res.status(200).json({ user_id: req.session.user_id }).end();
+  }
+
+  //Currently support login by critterbase user_id OR keycloak_uuid
   const { user_id, keycloak_uuid } = AuthLoginSchema.parse(req.body);
   let userRes: user | null = null;
   if (user_id) {
@@ -120,14 +142,25 @@ const login = catchErrors(async (req: Request, res: Response) => {
   }
   //This might be the step to redirect to the signup
   if (!userRes) throw apiError.notFound("No user found. Login failed.");
-  return res.status(200).json("Logged in to Critterbase API").end();
+  req.session.user_id = userRes.user_id;
+  return res.status(200).json({ user_id: userRes.user_id }).end();
 });
 
 const signUp = catchErrors(async (req: Request, res: Response) => {
   const parsedUser = UserCreateBodySchema.parse(req.body);
-  const user = await createUser(parsedUser);
-  req.session.user_id = user.user_id;
-  return res.status(201).json("Signed up for Critterbase API").end();
+  const { user_id } = await createUser(parsedUser);
+  req.session.user_id = user_id;
+  return res.status(201).json({ user_id }).end();
 });
 
-export { errorLogger, errorHandler, catchErrors, home, health, login, auth };
+export {
+  errorLogger,
+  errorHandler,
+  catchErrors,
+  home,
+  health,
+  login,
+  auth,
+  signUp,
+  validateApiKey,
+};

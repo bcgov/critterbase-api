@@ -18,23 +18,23 @@ import {
   health,
   home,
   login,
+  signUp,
+  validateApiKey,
 } from "./utils/middleware";
 import { IS_DEV, IS_PROD, PORT, expressSession } from "./utils/constants";
 
 const app = express();
 
-app.use(
-  cors({
-    // origin: ['https://localhost:']
-  })
-);
+app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(expressSession);
+app.use(validateApiKey);
 
 app.get("/api/", home);
 app.get("/api/health", health);
 app.post("/api/login", login);
+app.post("/api/signup", signUp);
 
 app.use("/api/critters", auth, critterRouter);
 app.use("/api/locations", auth, locationRouter);
@@ -52,7 +52,7 @@ app.use(errorHandler);
 
 if (IS_DEV || IS_PROD) {
   app.listen(PORT, () => {
-    console.log(`listening on ${PORT ?? 8000}`);
+    console.log(`listening on ${PORT ?? 8080}`);
   });
 }
 

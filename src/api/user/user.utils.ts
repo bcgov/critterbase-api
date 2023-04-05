@@ -45,7 +45,10 @@ const UserUpdateBodySchema = implement<
 const AuthLoginSchema = userSchema
   .pick({ user_id: true, keycloak_uuid: true })
   .partial()
-  .refine(nonEmpty, "must provide either user_id OR keycloak_uuid");
+  .refine(
+    nonEmpty,
+    "to login you must provide either user_id OR keycloak_uuid"
+  );
 
 export { UserCreateBodySchema, UserUpdateBodySchema, AuthLoginSchema };
 export type { UserCreateInput, UserUpdateInput };

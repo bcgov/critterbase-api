@@ -10,6 +10,10 @@ declare module "express-session" {
   }
 }
 
+const API_KEY = process.env.API_KEY;
+
+const API_KEY_HEADER = "API-KEY";
+
 const PORT = process.env.PORT;
 
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -70,9 +74,11 @@ const strings = {
 
 export {
   PORT,
+  API_KEY_HEADER,
   IS_DEV,
   IS_PROD,
   IS_TEST,
+  API_KEY,
   prisma,
   request,
   strings,
