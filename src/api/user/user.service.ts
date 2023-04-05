@@ -1,5 +1,5 @@
 import { prisma } from "../../utils/constants";
-import type { user } from "@prisma/client";
+import type { system, user } from "@prisma/client";
 import { UserCreateInput, UserUpdateInput } from "./user.utils";
 
 /**
@@ -18,7 +18,12 @@ const createUser = async (newUserData: UserCreateInput): Promise<user> => {
  */
 const upsertUser = async (newUserData: UserCreateInput): Promise<user> => {
   const newUser = await prisma.user.upsert({
-    where: { system_user_id: newUserData.system_user_id },
+    where: {
+      system_and_system_user_id: {
+        system_user_id: newUserData.system_user_id,
+        system_name: newUserData.system_name, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+      },
+    },
     update: newUserData,
     create: newUserData,
   });
@@ -50,10 +55,16 @@ const getUser = async (user_id: string): Promise<user> => {
  * Gets a user by their system_user_id
  * @param {string} system_user_id - The unique system_user_id for a user
  */
-const getUserBySystemId = async (system_user_id: string): Promise<user> => {
+const getUserBySystemId = async (
+  system_user_id: string,
+  system_name: system
+): Promise<user> => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
-      system_user_id: system_user_id,
+      system_and_system_user_id: {
+        system_user_id,
+        system_name,
+      },
     },
   });
   return user;

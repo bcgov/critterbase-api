@@ -8,6 +8,7 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { system } from "@prisma/client";
 
 // Types
 type UserCreateInput = z.infer<typeof UserCreateBodySchema>;
@@ -19,8 +20,8 @@ type UserUpdateInput = z.infer<typeof UserUpdateBodySchema>;
 // Base schema for all user
 const userSchema = implement<user>().with({
   user_id: zodID,
-  system_user_id: z.string(),
-  system_name: z.string(),
+  system_user_id: z.coerce.string(),
+  system_name: z.nativeEnum(system),
   keycloak_uuid: zodID.nullable(),
   ...zodAudit,
 });

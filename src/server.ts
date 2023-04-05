@@ -22,13 +22,22 @@ import {
   validateApiKey,
 } from "./utils/middleware";
 import { IS_DEV, IS_PROD, PORT, expressSession } from "./utils/constants";
+import { sessionHours } from "./utils/helper_functions";
+import session from "express-session";
 
 const app = express();
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(expressSession);
+app.use(
+  session({
+    secret: "temp secret",
+    cookie: { maxAge: sessionHours(1) },
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 app.use(validateApiKey);
 
 app.get("/api/", home);

@@ -39,10 +39,7 @@ const expressSession = session({
 const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma =
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  globalPrisma.prisma ||
-  new PrismaClient({
-    errorFormat: "minimal",
-  });
+  globalPrisma.prisma || new PrismaClient();
 
 if (!IS_PROD) globalPrisma.prisma = prisma;
 
