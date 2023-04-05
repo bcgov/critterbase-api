@@ -7,6 +7,7 @@ import { AuthLoginSchema, UserCreateBodySchema } from "../api/user/user.utils";
 import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, prisma } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
+import session, { MemoryStore } from "express-session";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -148,6 +149,14 @@ const signUp = catchErrors(async (req: Request, res: Response) => {
   req.session.user_id = user_id;
   return res.status(201).json({ user_id }).end();
 });
+
+// prisma.$use(async (params, next) => {
+//   console.log({ params });
+//   console.log(params.args);
+//   const result: unknown = await next(params);
+//   console.log({ result });
+//   return result;
+// });
 
 export {
   errorLogger,

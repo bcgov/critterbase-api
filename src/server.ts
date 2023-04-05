@@ -1,16 +1,19 @@
 import cors from "cors";
 import express from "express";
+import session from "express-session";
 import helmet from "helmet";
 import { artifactRouter } from "./api/artifact/artifact.router";
-import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { captureRouter } from "./api/capture/capture.router";
+import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { critterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
 import { markingRouter } from "./api/marking/marking.router";
-import { mortalityRouter } from "./api/mortality/mortality.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
+import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
+import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
+import { sessionHours } from "./utils/helper_functions";
 import {
   auth,
   errorHandler,
@@ -21,9 +24,6 @@ import {
   signUp,
   validateApiKey,
 } from "./utils/middleware";
-import { IS_DEV, IS_PROD, PORT, expressSession } from "./utils/constants";
-import { sessionHours } from "./utils/helper_functions";
-import session from "express-session";
 
 const app = express();
 
