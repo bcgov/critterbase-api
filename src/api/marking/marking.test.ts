@@ -13,11 +13,11 @@ import {
   MarkingResponseSchema,
   MarkingCreateInput,
   markingIncludes,
-  MarkingIncludes,
+  MarkingDetailed,
 } from "./marking.utils";
 
 let dummyMarking: MarkingResponseSchema;
-let dummyMarkingIncludes: MarkingIncludes;
+let dummyMarkingIncludes: MarkingDetailed;
 let dummyMarkingInput: MarkingCreateInput;
 let dummyMarkingKeys: string[];
 let dummyMarkingIncludesKeys: string[];
@@ -59,7 +59,7 @@ beforeAll(async () => {
   dummyMarkingInput = await newMarking();
   dummyMarkingIncludes = await prisma.marking.create({
     data: dummyMarkingInput,
-    ...markingIncludes,
+    include: markingIncludes,
   });
   dummyMarking = markingResponseSchema.parse(dummyMarkingIncludes);
   dummyMarkingKeys = Object.keys(dummyMarking);
@@ -160,7 +160,7 @@ describe("API: Marking", () => {
       it("updates a marking", async () => {
         const marking = await prisma.marking.create({
           data: await newMarking(),
-          ...markingIncludes,
+          include: markingIncludes,
         });
         const newData = {
           identifier: `TEST_MARKING_UPDATED${randomInt(99999999)}`,
@@ -183,7 +183,7 @@ describe("API: Marking", () => {
       it("deletes a marking", async () => {
         const marking = await prisma.marking.create({
           data: await newMarking(),
-          ...markingIncludes,
+          include: markingIncludes,
         });
         const deletedMarking = await deleteMarking(marking.marking_id);
         const markingCheck = await prisma.marking.findUnique({

@@ -7,7 +7,10 @@ import {
   xref_taxon_measurement_qualitative,
   xref_taxon_measurement_qualitative_option,
   xref_taxon_measurement_quantitative,
-  lk_colour, lk_marking_material, lk_marking_type, xref_taxon_marking_body_location 
+  lk_colour,
+  lk_marking_material,
+  lk_marking_type,
+  xref_taxon_marking_body_location,
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements } from "./types";
@@ -15,8 +18,8 @@ import { AuditColumns, Implements } from "./types";
 const zodID = z.string().uuid();
 
 const zodAudit = {
-  create_user: z.string().uuid(),
-  update_user: z.string().uuid(),
+  create_user: zodID,
+  update_user: zodID,
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
 };
@@ -106,7 +109,7 @@ export function implement<Model = never>() {
 }
 
 const LookUpColourSchema = implement<lk_colour>().with({
-  colour_id: z.string().uuid(),
+  colour_id: zodID,
   colour: z.string(),
   hex_code: z.string().nullable(),
   description: z.string().nullable(),
@@ -114,34 +117,35 @@ const LookUpColourSchema = implement<lk_colour>().with({
 });
 
 const LookUpMarkingTypeSchema = implement<lk_marking_type>().with({
-  marking_type_id: z.string().uuid(),
+  marking_type_id: zodID,
   name: z.string(),
   description: z.string().nullable(),
-  ...zodAudit
-})
+  ...zodAudit,
+});
 
 const LookUpMaterialSchema = implement<lk_marking_material>().with({
-  marking_material_id: z.string().uuid(),
+  marking_material_id: zodID,
   material: z.string().nullable(),
   description: z.string().nullable(),
   ...zodAudit,
 });
 
-const XrefTaxonMarkingBodyLocationSchema = implement<xref_taxon_marking_body_location>().with({
-  taxon_marking_body_location_id: z.string().uuid(),
-  taxon_id: z.string().uuid(),
-  body_location: z.string(),
+const XrefTaxonMarkingBodyLocationSchema =
+  implement<xref_taxon_marking_body_location>().with({
+    taxon_marking_body_location_id: zodID,
+    taxon_id: zodID,
+    body_location: z.string(),
+    description: z.string().nullable(),
+    ...zodAudit,
+  });
+
+const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
+  collection_unit_id: zodID,
+  collection_category_id: zodID,
+  unit_name: z.string(),
   description: z.string().nullable(),
   ...zodAudit,
 });
-
-const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
-  collection_unit_id: z.string().uuid(),
-  collection_category_id: z.string().uuid(),
-  unit_name: z.string(),
-  description: z.string().nullable(),
-  ...zodAudit
-})
 
 export {
   uuidParamsSchema,
@@ -161,5 +165,5 @@ export {
   XrefTaxonMeasurementQualitativeSchema,
   XrefTaxonMeasurementQualitativeOptionSchema,
   ResponseSchema,
-  zodAudit
+  zodAudit,
 };
