@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, user } from "@prisma/client";
 import supertest from "supertest";
 import { app } from "../server";
 declare module "express-session" {
   interface SessionData {
     views: number;
-    user_id: string; //Critterbase user_id
+    user: user;
   }
 }
 

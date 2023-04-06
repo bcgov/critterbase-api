@@ -2,7 +2,7 @@ import { user } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { createUser } from "../api/user/user.service";
+import { createUser, setUserContext } from "../api/user/user.service";
 import { AuthLoginSchema, UserCreateBodySchema } from "../api/user/user.utils";
 import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, prisma } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
@@ -96,7 +96,7 @@ const health = (req: Request, res: Response) => {
 };
 
 const auth = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.user_id) {
+  if (req.session.user || IS_TEST) {
     next();
   } else {
     next(
@@ -123,30 +123,34 @@ const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const login = catchErrors(async (req: Request, res: Response) => {
-  if (req.session.user_id) {
-    return res.status(200).json({ user_id: req.session.user_id }).end();
+  if (req.session.user) {
+    return res.status(200).json({ user_id: req.session.user.user_id }).end();
   }
-
-  //Currently support login by critterbase user_id OR keycloak_uuid
+  // Allows login via critterbase user_id or keycloak_uuid
   const { user_id, keycloak_uuid } = AuthLoginSchema.parse(req.body);
-  let userRes: user | null = null;
-  if (user_id) {
-    userRes = await prisma.user.findUnique({ where: { user_id } });
-  }
-  if (!userRes && keycloak_uuid) {
-    userRes = await prisma.user.findUnique({ where: { keycloak_uuid } });
-  }
-  //This might be the step to redirect to the signup
-  if (!userRes) throw apiError.notFound("No user found. Login failed.");
-  req.session.user_id = userRes.user_id;
-  return res.status(200).json({ user_id: userRes.user_id }).end();
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ user_id, keycloak_uuid }] },
+  });
+  // This might be the step to redirect to the signup
+  if (!user) throw apiError.notFound("No user found. Login failed.");
+  //Sets the context in the DB, populates audit columns with user_id
+  const contextUserId = await setUserContext(
+    user.system_user_id,
+    user.system_name
+  );
+  req.session.user = user;
+  return res.status(200).json({ user_id: contextUserId }).end();
 });
 
 const signUp = catchErrors(async (req: Request, res: Response) => {
   const parsedUser = UserCreateBodySchema.parse(req.body);
-  const { user_id } = await createUser(parsedUser);
-  req.session.user_id = user_id;
-  return res.status(201).json({ user_id }).end();
+  const user = await createUser(parsedUser);
+  const contextUserId = await setUserContext(
+    user.system_user_id,
+    user.system_name
+  );
+  req.session.user = user;
+  return res.status(201).json({ user_id: contextUserId }).end();
 });
 
 export {

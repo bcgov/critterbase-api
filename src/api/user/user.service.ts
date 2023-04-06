@@ -114,11 +114,10 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
-const setUserContext = async (user_id: string, system_name: system) => {
-  const result =
-    await prisma.$queryRaw`SELECT * FROM api_set_context(${user_id}, ${system_name}::system)`;
-  console.log(result);
-  return result;
+const setUserContext = async (system_user_id: string, system_name: system) => {
+  const result: [{ api_set_context: string }] =
+    await prisma.$queryRaw`SELECT * FROM api_set_context(${system_user_id}, ${system_name}::system)`;
+  return result[0].api_set_context;
 };
 
 export {

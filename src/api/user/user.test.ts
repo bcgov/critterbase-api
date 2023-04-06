@@ -189,8 +189,7 @@ describe("API: User", () => {
   describe(setUserContext.name, () => {
     it("sets the user context with provided user_id and system_name", async () => {
       const u = await prisma.user.create({ data: newUser() });
-      console.log(u);
-      const result = await setUserContext(u.user_id, u.system_name);
+      const result = await setUserContext(u.system_user_id, u.system_name);
       expect(true);
       // const createdUser = await prisma.user.create({ data: newUser() });
       // const deletedUser = await deleteUser(createdUser.user_id);

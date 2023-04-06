@@ -1,6 +1,6 @@
 import cors from "cors";
 import express from "express";
-import expressSession from "express-session";
+import session from "express-session";
 import helmet from "helmet";
 import { artifactRouter } from "./api/artifact/artifact.router";
 import { captureRouter } from "./api/capture/capture.router";
@@ -24,19 +24,25 @@ import {
   signUp,
   validateApiKey,
 } from "./utils/middleware";
+import memorystore from "memorystore";
+const SafeMemoryStore = memorystore(session);
+
 const app = express();
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(
-  expressSession({
+  session({
     cookie: {
-      maxAge: sessionHours(1), // ms
+      maxAge: sessionHours(1), //how long until the session expires
     },
     secret: "a santa at nasa",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: new SafeMemoryStore({
+      checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
+    }),
   })
 );
 app.use(validateApiKey);
