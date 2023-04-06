@@ -52,7 +52,12 @@ const session: expressSession.SessionOptions = {
   secret: "a santa at nasa",
   resave: false,
   saveUninitialized: true,
-  store,
+  store: new PrismaSessionStore(prisma as unknown as IPrisma, {
+    sessionModelName: "session",
+    checkPeriod: sessionHours(0.01), //This is the frequency it checks to remove expired sessions
+    dbRecordIdIsSessionId: true,
+    dbRecordIdFunction: undefined,
+  }),
 };
 
 const strings = {
