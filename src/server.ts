@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import session from "express-session";
 import helmet from "helmet";
+import memorystore from "memorystore";
 import { artifactRouter } from "./api/artifact/artifact.router";
 import { captureRouter } from "./api/capture/capture.router";
 import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
@@ -12,7 +13,7 @@ import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
-import { IS_DEV, IS_PROD, PORT, SESSION_SECRET } from "./utils/constants";
+import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
 import { sessionHours } from "./utils/helper_functions";
 import {
   auth,
@@ -24,7 +25,6 @@ import {
   signUp,
   validateApiKey,
 } from "./utils/middleware";
-import memorystore from "memorystore";
 const SafeMemoryStore = memorystore(session);
 
 const app = express();
@@ -37,7 +37,7 @@ app.use(
     cookie: {
       maxAge: sessionHours(24), //how long until the session expires
     },
-    secret: SESSION_SECRET,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: new SafeMemoryStore({

@@ -33,8 +33,6 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 const IS_TEST = process.env.NODE_ENV === "test";
 
-const SESSION_SECRET = process.env.SESSION_SECRET;
-
 const request = supertest(app);
 
 /**
@@ -82,7 +80,6 @@ export {
   IS_PROD,
   IS_TEST,
   API_KEY,
-  SESSION_SECRET,
   prisma,
   request,
   strings,
