@@ -12,7 +12,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface ProcessEnv {
-      PORT: string;
+      PORT?: string;
       NODE_ENV: "development" | "test" | "production";
       SESSION_SECRET: string;
       API_KEY: string;
