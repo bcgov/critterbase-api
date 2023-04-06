@@ -9,13 +9,6 @@ datasource db {
   extensions = [pgcrypto(schema: "crypto"), postgis(schema: "public")]
 }
 
-model session {
-  id        String   @id
-  sid       String   @unique
-  data      String
-  expiresAt DateTime
-}
-
 model artifact {
   artifact_id                                                                          String                    @id(map: "artifact_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   critter_id                                                                           String                    @db.Uuid

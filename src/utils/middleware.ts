@@ -4,17 +4,9 @@ import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { createUser } from "../api/user/user.service";
 import { AuthLoginSchema, UserCreateBodySchema } from "../api/user/user.utils";
-import {
-  API_KEY,
-  API_KEY_HEADER,
-  IS_DEV,
-  IS_TEST,
-  prisma,
-  store,
-} from "./constants";
+import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, prisma } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
-import session, { MemoryStore, Store } from "express-session";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint

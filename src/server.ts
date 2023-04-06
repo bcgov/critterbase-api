@@ -12,7 +12,8 @@ import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
-import { IS_DEV, IS_PROD, PORT, prisma, session } from "./utils/constants";
+import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
+import { sessionHours } from "./utils/helper_functions";
 import {
   auth,
   errorHandler,
@@ -23,7 +24,6 @@ import {
   signUp,
   validateApiKey,
 } from "./utils/middleware";
-import { sessionHours } from "./utils/helper_functions";
 const app = express();
 
 app.use(cors());
