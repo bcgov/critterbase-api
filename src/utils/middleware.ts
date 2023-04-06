@@ -1,4 +1,3 @@
-import { user } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
@@ -114,22 +113,23 @@ const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
   }
   const apiKey = req.get(API_KEY_HEADER);
   if (!apiKey) {
-    throw new apiError(`Header: 'API-KEY' must be provided`);
+    throw new apiError(`Header: '${API_KEY_HEADER}' must be provided`);
   }
   if (apiKey !== API_KEY) {
-    throw new apiError(`Header: 'API-KEY' is incorrect`);
+    throw new apiError(`Header: '${API_KEY_HEADER}' is incorrect`);
   }
   next();
 };
 
 const login = catchErrors(async (req: Request, res: Response) => {
   if (req.session.user) {
+    console.log(req.session.user);
     return res.status(200).json({ user_id: req.session.user.user_id }).end();
   }
   // Allows login via critterbase user_id or keycloak_uuid
   const { user_id, keycloak_uuid } = AuthLoginSchema.parse(req.body);
   const user = await prisma.user.findFirst({
-    where: { OR: [{ user_id, keycloak_uuid }] },
+    where: { OR: [{ user_id }, { keycloak_uuid }] },
   });
   // This might be the step to redirect to the signup
   if (!user) throw apiError.notFound("No user found. Login failed.");

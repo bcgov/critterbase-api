@@ -8,9 +8,22 @@ declare module "express-session" {
   }
 }
 
-const API_KEY = process.env.API_KEY;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface ProcessEnv {
+      PORT: string;
+      NODE_ENV: "development" | "test" | "production";
+      SESSION_SECRET: string;
+      API_KEY: string;
+      DB_URL: string;
+    }
+  }
+}
 
 const API_KEY_HEADER = "API-KEY";
+
+const API_KEY = process.env.API_KEY;
 
 const PORT = process.env.PORT;
 
@@ -19,6 +32,8 @@ const IS_DEV = process.env.NODE_ENV === "development";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const IS_TEST = process.env.NODE_ENV === "test";
+
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 const request = supertest(app);
 
@@ -67,6 +82,7 @@ export {
   IS_PROD,
   IS_TEST,
   API_KEY,
+  SESSION_SECRET,
   prisma,
   request,
   strings,

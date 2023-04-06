@@ -12,7 +12,7 @@ import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
-import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
+import { IS_DEV, IS_PROD, PORT, SESSION_SECRET } from "./utils/constants";
 import { sessionHours } from "./utils/helper_functions";
 import {
   auth,
@@ -35,9 +35,9 @@ app.use(express.json());
 app.use(
   session({
     cookie: {
-      maxAge: sessionHours(1), //how long until the session expires
+      maxAge: sessionHours(24), //how long until the session expires
     },
-    secret: "a santa at nasa",
+    secret: "SESSION_SECRET",
     resave: false,
     saveUninitialized: false,
     store: new SafeMemoryStore({
