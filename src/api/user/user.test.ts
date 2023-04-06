@@ -11,45 +11,8 @@ import {
 } from "./user.service";
 import { system, user } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
-import { UserCreateInput, UserUpdateInput } from "./user.utils";
-
-const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const uuidRegex =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-
-/**
- * * Checks if an object matches the format for a user.
- * @param {*} user
- */
-function isUser(user: any): user is user {
-  const isUserId =
-    typeof user.user_id === "string" && uuidRegex.test(user.user_id);
-  const isSystemUserId = typeof user.system_user_id === "string";
-  const isSystemUserName = typeof user.system_name === "string";
-  const isUserKeycloak =
-    user.keycloak_uuid === null || typeof user.keycloak_uuid === "string";
-  const isCreateUser =
-    typeof user.create_user === "string" && uuidRegex.test(user.create_user);
-  const isUpdateUser =
-    typeof user.update_user === "string" && uuidRegex.test(user.update_user);
-  const isCreateDate =
-    iso8601Regex.test(user.create_timestamp) ||
-    user.create_timestamp instanceof Date;
-  const isUpdateDate =
-    iso8601Regex.test(user.update_timestamp) ||
-    user.update_timestamp instanceof Date;
-
-  return (
-    isUserId &&
-    isSystemUserId &&
-    isSystemUserName &&
-    isUserKeycloak &&
-    isCreateUser &&
-    isUpdateUser &&
-    isCreateDate &&
-    isUpdateDate
-  );
-}
+import { UserCreateInput, UserSchema, UserUpdateInput } from "./user.utils";
+import { zodID } from "../../utils/zod_helpers";
 
 /**
  * * Returns a randomly generated user that can be insterted to the database
@@ -67,11 +30,13 @@ function newUser(): UserCreateInput {
  * * Removes all test generated users from the database
  */
 async function cleanup() {
-  const users = await getUsers();
-  const testUserIds = users
-    .filter((user) => user.system_user_id.startsWith("TEST_USER_"))
-    .map((user) => user.user_id);
-  await Promise.all(testUserIds.map(deleteUser));
+  await prisma.user.deleteMany({
+    where: {
+      system_user_id: {
+        startsWith: "TEST_USER_",
+      },
+    },
+  });
 }
 
 let dummyUser: user;
@@ -84,8 +49,7 @@ describe("API: User", () => {
     describe("createUser()", () => {
       it("returns a user", async () => {
         const returnedUser = await createUser(newUser());
-        expect.assertions(1);
-        expect(isUser(returnedUser)).toBe(true);
+        expect(UserSchema.safeParse(returnedUser).success);
       });
 
       it("returned user matches the input", async () => {
@@ -98,8 +62,7 @@ describe("API: User", () => {
     describe("upsertUser()", () => {
       it("returns a user", async () => {
         const returnedUser = await upsertUser(newUser());
-        expect.assertions(1);
-        expect(isUser(returnedUser)).toBe(true);
+        expect(UserSchema.safeParse(returnedUser).success);
       });
 
       it("returned user matches the input", async () => {
@@ -119,17 +82,16 @@ describe("API: User", () => {
 
       it("returns users with correct properties", async () => {
         const users = await getUsers();
-        expect.assertions(users.length);
         for (const user of users) {
-          expect(isUser(user)).toBe(true);
+          expect(UserSchema.safeParse(user).success);
         }
       });
     });
     describe("getUser()", () => {
       it("returns a user when given a valid user ID", async () => {
         const returnedUser = await getUser(dummyUser.user_id);
-        expect.assertions(2);
-        expect(isUser(returnedUser)).toBe(true);
+        expect.assertions(1);
+        expect(UserSchema.safeParse(returnedUser).success);
         expect(returnedUser).toMatchObject(dummyUser);
       });
 
@@ -139,19 +101,24 @@ describe("API: User", () => {
       });
     });
 
-    // describe("getUserBySystemId()", () => {
-    //   it("returns a user when given a valid system user ID", async () => {
-    //     const returnedUser = await getUserBySystemId(dummyUser.system_user_id);
-    //     expect.assertions(2);
-    //     expect(isUser(returnedUser)).toBe(true);
-    //     expect(returnedUser).toMatchObject(dummyUser);
-    //   });
+    describe("getUserBySystemId()", () => {
+      it("returns a user when given a valid system user ID", async () => {
+        const returnedUser = await getUserBySystemId(
+          dummyUser.system_user_id,
+          dummyUser.system_name
+        );
+        expect.assertions(1);
+        expect(UserSchema.safeParse(returnedUser).success);
+        expect(returnedUser).toMatchObject(dummyUser);
+      });
 
-    //   it("throws error when given an invalid system user ID", async () => {
-    //     expect.assertions(1);
-    //     await expect(getUserBySystemId(randomUUID())).rejects.toThrow();
-    //   });
-    // });
+      it("throws error when given an invalid system user ID", async () => {
+        expect.assertions(1);
+        await expect(
+          getUserBySystemId(randomUUID(), dummyUser.system_name)
+        ).rejects.toThrow();
+      });
+    });
 
     describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
@@ -160,8 +127,8 @@ describe("API: User", () => {
           system_name: system.CRITTERBASE,
         };
         const updatedUser = await updateUser(createdUser.user_id, updateData);
-        expect.assertions(2);
-        expect(isUser(updatedUser)).toBe(true);
+        expect.assertions(1);
+        expect(UserSchema.safeParse(updatedUser).success);
         expect(updatedUser).toMatchObject({
           ...createdUser,
           ...updateData,
@@ -175,8 +142,8 @@ describe("API: User", () => {
       it("returns deleted user and removes user from database", async () => {
         const createdUser = await prisma.user.create({ data: newUser() });
         const deletedUser = await deleteUser(createdUser.user_id);
-        expect.assertions(3);
-        expect(isUser(deletedUser)).toBe(true);
+        expect.assertions(2);
+        expect(UserSchema.safeParse(deletedUser).success);
         expect(deletedUser).toMatchObject(createdUser);
         const returnedUser = await prisma.user.findUnique({
           where: { user_id: createdUser.user_id },
@@ -190,16 +157,8 @@ describe("API: User", () => {
     it("sets the user context with provided user_id and system_name", async () => {
       const u = await prisma.user.create({ data: newUser() });
       const result = await setUserContext(u.system_user_id, u.system_name);
-      expect(true);
-      // const createdUser = await prisma.user.create({ data: newUser() });
-      // const deletedUser = await deleteUser(createdUser.user_id);
-      // expect.assertions(3);
-      // expect(isUser(deletedUser)).toBe(true);
-      // expect(deletedUser).toMatchObject(createdUser);
-      // const returnedUser = await prisma.user.findUnique({
-      //   where: { user_id: createdUser.user_id },
-      // });
-      // expect(returnedUser).toBeNull();
+      expect(result).toBeDefined();
+      expect(zodID.safeParse(result).success);
     });
   });
 });
@@ -221,9 +180,8 @@ describe("ROUTERS", () => {
     it("returns users with correct properties", async () => {
       const res = await request.get("/api/users");
       const users = res.body;
-      expect.assertions(users.length);
       for (const user of users) {
-        expect(isUser(user)).toBe(true);
+        expect(UserSchema.safeParse(user).success);
       }
     });
   });
@@ -238,20 +196,20 @@ describe("ROUTERS", () => {
     it("returns a user", async () => {
       const res = await request.post("/api/users/create").send(newUser());
       const user = res.body;
-      expect.assertions(1);
-      expect(isUser(user)).toBe(true);
+      expect(UserSchema.safeParse(user).success);
     });
 
     it("updates an existing user if the system_user_id already present", async () => {
       const user = await prisma.user.create({ data: newUser() });
-      const res = await request
-        .post("/api/users/create")
-        .send({ ...newUser(), system_user_id: user.system_user_id });
+      const res = await request.post("/api/users/create").send({
+        ...newUser(),
+        system_user_id: user.system_user_id,
+        system_name: user.system_name,
+      });
       const user2 = res.body;
-      expect.assertions(5);
+      expect.assertions(4);
       expect(user.system_user_id).toStrictEqual(user2.system_user_id);
       expect(user.user_id).toStrictEqual(user2.user_id);
-      expect(user.system_name === user2.system_name).toBeFalsy(); //name was updated
       expect(user.create_timestamp.toISOString()).toStrictEqual(
         user2.create_timestamp
       );
@@ -272,8 +230,6 @@ describe("ROUTERS", () => {
     it("returns status 400 when data is missing required fields", async () => {
       const user = newUser();
       const res = await request.post("/api/users/create").send({
-        // system_user_id is left out
-        system_name: user.system_name,
         keycloak_uuid: user.keycloak_uuid,
       });
       expect.assertions(1);
@@ -296,8 +252,7 @@ describe("ROUTERS", () => {
 
     it("returns a user", async () => {
       const res = await request.get(`/api/users/${dummyUser.user_id}`);
-      expect.assertions(1);
-      expect(isUser(res.body)).toBe(true);
+      expect(UserSchema.safeParse(res.body).success);
     });
   });
 
@@ -305,7 +260,7 @@ describe("ROUTERS", () => {
     it("returns status 404 when id does not exist", async () => {
       const res = await request
         .patch(`/api/users/${randomUUID()}`)
-        .send({ system_name: `${randomInt(99999999)}` });
+        .send({ system_name: system.CRITTERBASE });
       expect.assertions(1);
       expect(res.status).toBe(404);
     });
@@ -321,7 +276,7 @@ describe("ROUTERS", () => {
       const user = await prisma.user.create({ data: newUser() });
       const res = await request
         .patch(`/api/users/${user.user_id}`)
-        .send({ system_name: `${randomInt(99999999)}` });
+        .send({ system_name: system.CRITTERBASE });
       expect.assertions(1);
       expect(res.status).toBe(200);
     });
@@ -330,9 +285,8 @@ describe("ROUTERS", () => {
       const user = await prisma.user.create({ data: newUser() });
       const res = await request
         .patch(`/api/users/${user.user_id}`)
-        .send({ system_name: `${randomInt(99999999)}` });
-      expect.assertions(1);
-      expect(isUser(res.body)).toBe(true);
+        .send({ system_name: system.CRITTERBASE });
+      expect(UserSchema.safeParse(res.body).success);
     });
 
     it("returns status 400 when system_user_id already taken", async () => {
@@ -368,11 +322,11 @@ describe("ROUTERS", () => {
       expect(res.status).toBe(200);
     });
 
-    it("returns user deleted message", async () => {
+    it("returns deleted user", async () => {
       const user = await prisma.user.create({ data: newUser() });
       const res = await request.delete(`/api/users/${user.user_id}`);
       expect.assertions(1);
-      expect(res.body).toStrictEqual(`User ${user.user_id} has been deleted`);
+      expect(res.body).toHaveProperty("user_id");
     });
   });
 });

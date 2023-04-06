@@ -18,7 +18,7 @@ type UserUpdateInput = z.infer<typeof UserUpdateBodySchema>;
 // Schemas
 
 // Base schema for all user
-const userSchema = implement<user>().with({
+const UserSchema = implement<user>().with({
   user_id: zodID,
   system_user_id: z.coerce.string(),
   system_name: z.nativeEnum(system),
@@ -30,8 +30,7 @@ const userSchema = implement<user>().with({
 const UserCreateBodySchema = implement<
   Omit<Prisma.userCreateManyInput, "user_id" | keyof AuditColumns>
 >().with(
-  userSchema
-    .omit({ ...noAudit, user_id: true })
+  UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
     .required({ system_name: true, system_user_id: true }).shape
 );
@@ -43,8 +42,7 @@ const UserUpdateBodySchema = implement<
   .with(UserCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-const AuthLoginSchema = userSchema
-  .pick({ user_id: true, keycloak_uuid: true })
+const AuthLoginSchema = UserSchema.pick({ user_id: true, keycloak_uuid: true })
   .partial()
   .strict()
   .refine(
@@ -52,5 +50,10 @@ const AuthLoginSchema = userSchema
     "to login you must provide either user_id OR keycloak_uuid"
   );
 
-export { UserCreateBodySchema, UserUpdateBodySchema, AuthLoginSchema };
+export {
+  UserCreateBodySchema,
+  UserUpdateBodySchema,
+  AuthLoginSchema,
+  UserSchema,
+};
 export type { UserCreateInput, UserUpdateInput };
