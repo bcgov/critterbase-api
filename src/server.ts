@@ -37,7 +37,7 @@ app.use(
     cookie: {
       maxAge: sessionHours(24), //how long until the session expires
     },
-    secret: "SESSION_SECRET",
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: new SafeMemoryStore({
