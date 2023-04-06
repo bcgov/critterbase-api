@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import supertest from "supertest";
 import { app } from "../server";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
+import { sessionHours } from "./helper_functions";
+import { IPrisma } from "@quixo3/prisma-session-store/dist/@types";
+import expressSession from "express-session";
 declare module "express-session" {
   interface SessionData {
     views: number;
@@ -33,6 +37,23 @@ const prisma =
   globalPrisma.prisma || new PrismaClient();
 
 if (!IS_PROD) globalPrisma.prisma = prisma;
+
+const store = new PrismaSessionStore(prisma as unknown as IPrisma, {
+  sessionModelName: "session",
+  checkPeriod: sessionHours(0.01), //This is the frequency it checks to remove expired sessions
+  dbRecordIdIsSessionId: true,
+  dbRecordIdFunction: undefined,
+});
+
+const session: expressSession.SessionOptions = {
+  cookie: {
+    maxAge: sessionHours(1), // ms
+  },
+  secret: "a santa at nasa",
+  resave: false,
+  saveUninitialized: true,
+  store,
+};
 
 const strings = {
   app: {
@@ -70,4 +91,6 @@ export {
   prisma,
   request,
   strings,
+  session,
+  store,
 };

@@ -1,6 +1,6 @@
 import cors from "cors";
 import express from "express";
-import session from "express-session";
+import expressSession from "express-session";
 import helmet from "helmet";
 import { artifactRouter } from "./api/artifact/artifact.router";
 import { captureRouter } from "./api/capture/capture.router";
@@ -12,8 +12,7 @@ import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
-import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
-import { sessionHours } from "./utils/helper_functions";
+import { IS_DEV, IS_PROD, PORT, session } from "./utils/constants";
 import {
   auth,
   errorHandler,
@@ -24,20 +23,12 @@ import {
   signUp,
   validateApiKey,
 } from "./utils/middleware";
-
 const app = express();
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(
-  session({
-    secret: "temp secret",
-    cookie: { maxAge: sessionHours(1) },
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+app.use(expressSession(session));
 app.use(validateApiKey);
 
 app.get("/api/", home);
