@@ -23,6 +23,7 @@ const getMultipleCrittersByIds = async (
         in: critterIds.critter_ids,
       },
     },
+    ...formattedCritterInclude
   });
 
   return results;

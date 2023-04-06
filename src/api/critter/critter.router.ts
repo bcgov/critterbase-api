@@ -18,6 +18,7 @@ import {
   CritterResponseSchema,
   CritterUpdateSchema,
 } from "./critter.utils";
+import { array } from "zod";
 
 export const critterRouter = express.Router();
 
@@ -40,7 +41,7 @@ critterRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterIdsRequestSchema.parse(req.body);
     const critters = await getMultipleCrittersByIds(parsed);
-    return res.status(200).json(critters);
+    return res.status(200).json(array(CritterResponseSchema).parse(critters));
   })
 );
 
