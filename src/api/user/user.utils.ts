@@ -1,4 +1,5 @@
 import { Prisma, user } from ".prisma/client";
+import { system } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
@@ -8,12 +9,13 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
-import { system } from "@prisma/client";
 
 // Types
 type UserCreateInput = z.infer<typeof UserCreateBodySchema>;
 
 type UserUpdateInput = z.infer<typeof UserUpdateBodySchema>;
+
+type LoginCredentials = z.infer<typeof AuthLoginSchema>;
 
 // Schemas
 
@@ -42,8 +44,13 @@ const UserUpdateBodySchema = implement<
   .with(UserCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-const AuthLoginSchema = UserSchema.pick({ user_id: true, keycloak_uuid: true })
-  .partial()
+const AuthLoginSchema = UserSchema.partial()
+  .pick({
+    user_id: true,
+    keycloak_uuid: true,
+    system_name: true,
+    system_user_id: true,
+  })
   .strict()
   .refine(
     nonEmpty,
@@ -56,4 +63,4 @@ export {
   AuthLoginSchema,
   UserSchema,
 };
-export type { UserCreateInput, UserUpdateInput };
+export type { UserCreateInput, UserUpdateInput, LoginCredentials };

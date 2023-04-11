@@ -3,6 +3,7 @@ import express from "express";
 import session from "express-session";
 import helmet from "helmet";
 import memorystore from "memorystore";
+import { accessRouter } from "./api/access/access.router";
 import { artifactRouter } from "./api/artifact/artifact.router";
 import { captureRouter } from "./api/capture/capture.router";
 import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
@@ -19,39 +20,30 @@ import {
   auth,
   errorHandler,
   errorLogger,
-  health,
-  home,
-  login,
-  signUp,
   validateApiKey,
 } from "./utils/middleware";
 const SafeMemoryStore = memorystore(session);
+const options: session.SessionOptions = {
+  cookie: {
+    maxAge: sessionHours(24), //how long until the session expires
+  },
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: new SafeMemoryStore({
+    checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
+  }),
+};
 
 const app = express();
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(
-  session({
-    cookie: {
-      maxAge: sessionHours(24), //how long until the session expires
-    },
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: new SafeMemoryStore({
-      checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
-    }),
-  })
-);
+app.use(session(options));
 app.use(validateApiKey);
 
-app.get("/api/", home);
-app.get("/api/health", health);
-app.post("/api/login", login);
-app.post("/api/signup", signUp);
-
+app.use("/api/", accessRouter);
 app.use("/api/critters", auth, critterRouter);
 app.use("/api/locations", auth, locationRouter);
 app.use("/api/markings", auth, markingRouter);
@@ -59,7 +51,7 @@ app.use("/api/users", auth, userRouter);
 app.use("/api/collection-units", auth, collectionUnitRouter);
 app.use("/api/artifacts", auth, artifactRouter);
 app.use("/api/family", auth, familyRouter);
-app.use("/api/captures/", auth, captureRouter);
+app.use("/api/captures", auth, captureRouter);
 app.use("/api/mortality", auth, mortalityRouter);
 app.use("/api/measurements", auth, measurementRouter);
 
