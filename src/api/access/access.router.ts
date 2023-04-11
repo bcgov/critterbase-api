@@ -13,7 +13,7 @@ export const accessRouter = express.Router();
  * @params All four express params.
  */
 accessRouter.get("/", (req: Request, res: Response) => {
-  return res.json("Welcome to Critterbase API");
+  return res.status(200).json("Welcome to Critterbase API");
 });
 
 accessRouter.post(
