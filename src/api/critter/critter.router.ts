@@ -18,6 +18,7 @@ import {
   CritterResponseSchema,
   CritterUpdateSchema,
 } from "./critter.utils";
+import { prisma } from "../../utils/constants";
 
 export const critterRouter = express.Router();
 
@@ -38,6 +39,20 @@ critterRouter.get(
 critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
+    let taxon = null;
+    if(req.body.taxon_name_common) {
+      taxon = await prisma.lk_taxon.findFirst({
+        where: {taxon_name_common: {equals: req.body.taxon_name_common, mode: 'insensitive' } }
+      })
+    }
+    if(req.body.taxon_name_latin) {
+      taxon = await prisma.lk_taxon.findFirst({
+        where: {taxon_name_latin: {equals: req.body.taxon_name_latin, mode: 'insensitive' } }
+      });
+    }
+    if (taxon) {
+      req.body.taxon_id = taxon.taxon_id;
+    }
     const parsed = CritterCreateSchema.parse(req.body);
     const created = await createCritter(parsed);
     return res.status(201).send(created);
