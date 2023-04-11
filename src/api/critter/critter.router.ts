@@ -9,6 +9,8 @@ import {
   getAllCritters,
   getCritterByIdWithDetails,
   getCritterByWlhId,
+  getSimilarCritters,
+  getTableDataTypes,
   updateCritter,
 } from "./critter.service";
 import {
@@ -41,6 +43,23 @@ critterRouter.post(
     return res.status(201).send(created);
   })
 );
+
+critterRouter.post(
+  '/unique',
+  catchErrors(async (req: Request, res: Response) => {
+    const unique = await getSimilarCritters(req.body);
+    console.log(req.body);
+    console.log(unique);
+    return res.status(200).json(unique);
+  })
+)
+
+critterRouter.get(
+  '/types',
+  catchErrors(async (req: Request, res: Response) => {
+    const types = await getTableDataTypes();
+    return res.status(200).json(types);
+  }))
 
 critterRouter.route("/wlh/:wlh_id").get(
   catchErrors(async (req: Request, res: Response) => {

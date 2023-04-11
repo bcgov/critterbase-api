@@ -10,9 +10,11 @@ import {
 import {
   captureInclude,
   CaptureResponseSchema,
+  FormattedCapture,
 } from "../capture/capture.utils";
 import {
   markingIncludes,
+  MarkingResponseSchema,
   markingResponseSchema,
 } from "../marking/marking.utils";
 import {
@@ -22,6 +24,7 @@ import {
   QuantitativeResponseSchema,
 } from "../measurement/measurement.utils";
 import {
+  FormattedMortality,
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
@@ -139,11 +142,19 @@ type CritterCreate = z.infer<typeof CritterCreateSchema>;
 type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterResponseSchema>;
 
+type UniqueCritterQuery = { 
+    critter?: Partial<critter> & { taxon_name_latin?: string, taxon_name_common?: string},
+    markings?: Partial<MarkingResponseSchema>[]
+    captures?: Partial<FormattedCapture>[],
+    mortality: Partial<FormattedMortality>
+  }
+
 export type {
   FormattedCritter,
   // CritterIncludeResult,
   CritterCreate,
   CritterUpdate,
+  UniqueCritterQuery
 };
 export {
   formattedCritterInclude,

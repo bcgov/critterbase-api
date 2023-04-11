@@ -23,6 +23,12 @@ const prisma =
   globalPrisma.prisma ||
   new PrismaClient({
     errorFormat: "minimal",
+    log: [
+      {
+        emit: "stdout",
+        level: "query"
+      }
+    ]
   });
 
 if (!IS_PROD) globalPrisma.prisma = prisma;

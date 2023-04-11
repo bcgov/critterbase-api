@@ -36,4 +36,9 @@ const prismaErrorMsg = (
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
-export { prismaErrorMsg };
+const intersect = <T>(A: Array<T>, B: Array<T>): Array<T> => {
+  const setB = new Set(B);
+  return Array.from(new Set(A)).filter(x => setB.has(x))
+}
+
+export { prismaErrorMsg, intersect };
