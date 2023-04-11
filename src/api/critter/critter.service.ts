@@ -4,7 +4,8 @@ import {
   CritterCreate,
   CritterIdsRequest,
   CritterUpdate,
-  formattedCritterInclude,
+  detailedCritterInclude,
+  simpleCritterInclude,
 } from "./critter.utils";
 
 const getAllCritters = async (): Promise<critter[]> => {
@@ -13,17 +14,23 @@ const getAllCritters = async (): Promise<critter[]> => {
 
 /**
  * Fetch multiple critters by their IDs
+ * Returns minimal required data for faster response
  */
 const getMultipleCrittersByIds = async (
   critterIds: CritterIdsRequest
-): Promise<critter[]> => {
+): Promise<Pick<critter, 'critter_id' | 'wlh_id' | 'animal_id'>[]> => {
   const results = await prisma.critter.findMany({
+    select: {
+      critter_id: true,
+      wlh_id: true,
+      animal_id: true,
+      ...simpleCritterInclude,
+    },
     where: {
       critter_id: {
         in: critterIds.critter_ids,
       },
     },
-    ...formattedCritterInclude
   });
 
   return results;
@@ -37,7 +44,7 @@ const getCritterById = async (critter_id: string): Promise<critter | null> => {
 
 const getCritterByIdWithDetails = async (critter_id: string) => {
   const result = await prisma.critter.findUniqueOrThrow({
-    include: formattedCritterInclude,
+    include: detailedCritterInclude,
     where: {
       critter_id: critter_id,
     },
@@ -50,7 +57,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results = await prisma.critter.findMany({
-    include: formattedCritterInclude,
+    include: detailedCritterInclude,
     where: {
       wlh_id: wlh_id,
     },
