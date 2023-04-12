@@ -48,18 +48,19 @@ const detailedCritterInclude: Prisma.critterInclude = {
 };
 
 const simpleCritterInclude: Prisma.critterInclude = {
-  lk_taxon: { select: { taxon_name_latin: true } },
+  lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
   critter_collection_unit: {
     select: { xref_collection_unit: { select: { unit_name: true } } },
   },
 };
 
-const SimpleCollectionUnitSchema = ResponseSchema.transform((val: Pick<CollectionUnitDetailed, 'xref_collection_unit'>) => {
-  return {
-    unit_name: val.xref_collection_unit?.unit_name,
-  };
-});
-
+const SimpleCollectionUnitSchema = ResponseSchema.transform(
+  (val: Pick<CollectionUnitDetailed, "xref_collection_unit">) => {
+    return {
+      unit_name: val.xref_collection_unit?.unit_name,
+    };
+  }
+);
 
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
@@ -143,16 +144,16 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
 });
 
 const CritterSimpleResponseSchema = ResponseSchema.transform((val) => {
-  const {
-    critter_collection_unit,
-    lk_taxon,
-    ...rest
-  } = val as Prisma.PromiseReturnType<typeof getCritterByIdWithDetails>;
+  const { critter_collection_unit, lk_taxon, ...rest } =
+    val as Prisma.PromiseReturnType<typeof getCritterByIdWithDetails>;
   return {
     ...rest,
+    taxon_name_common: lk_taxon?.taxon_name_common,
     taxon_name_latin: lk_taxon?.taxon_name_latin,
-    collection_unit: critter_collection_unit?.map((a) => SimpleCollectionUnitSchema.parse(a))
-  }
+    collection_unit: critter_collection_unit?.map((a) =>
+      SimpleCollectionUnitSchema.parse(a)
+    ),
+  };
 });
 
 interface critterInterface {

@@ -19,6 +19,9 @@ const getAllCritters = async (): Promise<critter[]> => {
 const getMultipleCrittersByIds = async (
   critterIds: CritterIdsRequest
 ): Promise<Pick<critter, 'critter_id' | 'wlh_id' | 'animal_id'>[]> => {
+
+  const tim1 = performance.now();
+
   const results = await prisma.critter.findMany({
     select: {
       critter_id: true,
@@ -32,6 +35,8 @@ const getMultipleCrittersByIds = async (
       },
     },
   });
+
+  console.log(`Operation took ${performance.now() - tim1} ms`)
 
   return results;
 };
