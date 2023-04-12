@@ -24,6 +24,12 @@ const zodAudit = {
   update_timestamp: z.coerce.date(),
 };
 
+const NumberToString = z
+  .union([z.string(), z.number()])
+  .transform((val) =>
+    typeof val === "number" ? String(val) : val
+  ) as unknown as z.ZodString;
+
 const ResponseSchema = z.object({}).passthrough();
 
 const uuidParamsSchema = z.object({
@@ -166,4 +172,5 @@ export {
   XrefTaxonMeasurementQualitativeOptionSchema,
   ResponseSchema,
   zodAudit,
+  NumberToString,
 };

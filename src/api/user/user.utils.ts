@@ -3,6 +3,7 @@ import { system } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
+  NumberToString,
   implement,
   noAudit,
   nonEmpty,
@@ -22,7 +23,7 @@ type LoginCredentials = z.infer<typeof AuthLoginSchema>;
 // Base schema for all user
 const UserSchema = implement<user>().with({
   user_id: zodID,
-  system_user_id: z.coerce.string(),
+  system_user_id: NumberToString,
   system_name: z.nativeEnum(system),
   keycloak_uuid: zodID.nullable(),
   ...zodAudit,

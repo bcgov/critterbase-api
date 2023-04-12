@@ -15,7 +15,10 @@ export const accessRouter = express.Router();
 accessRouter.get("/", (req: Request, res: Response) => {
   return res.status(200).json("Welcome to Critterbase API");
 });
-
+/**
+ ** login endpoint
+ * Note: currently accepts, user_id OR keycloak_uuid OR (system_name AND system_user_id)
+ */
 accessRouter.post(
   "/login",
   catchErrors(async (req: Request, res: Response) => {
@@ -26,6 +29,9 @@ accessRouter.post(
   })
 );
 
+/**
+ ** Signup endpoint
+ */
 accessRouter.post(
   "/signup",
   catchErrors(async (req: Request, res: Response) => {

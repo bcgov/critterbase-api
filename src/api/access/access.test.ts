@@ -17,7 +17,7 @@ describe("SERVICES", () => {
     });
   });
   afterAll(async () => {
-    await prisma.user.deleteMany({ where: { system_user_id: "0" } });
+    await prisma.user.deleteMany({ where: { system_name: system.BCTW } });
   });
   describe(loginUser.name, () => {
     it("user_id: login succeeds with valid user_id", async () => {
@@ -102,6 +102,21 @@ describe("SERVICES", () => {
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
+    });
+    describe("/api/signup", () => {
+      it("should return status 200 with valid body", async () => {
+        const res = await request
+          .post("/api/signup")
+          .send({ system_name: system.BCTW, system_user_id: 1 });
+        console.log(res.body);
+        expect.assertions(1);
+        expect(res.status).toBe(201);
+      });
+      // it("should return status 400 with no body", async () => {
+      //   const res = await request.post("/api/login").send({});
+      //   expect.assertions(1);
+      //   expect(res.status).toBe(400);
+      // });
     });
   });
 });
