@@ -70,7 +70,7 @@ const errorHandler = (
 };
 
 const auth = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.user || IS_TEST) {
+  if (req.session.user || IS_TEST || IS_DEV) {
     next();
   } else {
     next(

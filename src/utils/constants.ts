@@ -43,20 +43,7 @@ const request = supertest(app);
 const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma =
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-<<<<<<< HEAD
-  globalPrisma.prisma ||
-  new PrismaClient({
-    errorFormat: "minimal",
-    log: [
-      {
-        emit: "stdout",
-        level: "query"
-      }
-    ]
-  });
-=======
   globalPrisma.prisma || new PrismaClient();
->>>>>>> main
 
 if (!IS_PROD) globalPrisma.prisma = prisma;
 

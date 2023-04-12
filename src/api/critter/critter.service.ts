@@ -131,6 +131,7 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
       markings.push(...markingMatches);
     };
   }
+
   const oneDay = 60 * 60 * 24 * 1000;
   const captures = [];
   if(body.captures) {
@@ -182,7 +183,7 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
   }
 
   const detailedCritters = await prisma.critter.findMany({
-    include: body.detail ? formattedCritterInclude : undefined,
+    ...formattedCritterInclude,
     where: {
       critter_id: { in: overlappingIds }
     }
