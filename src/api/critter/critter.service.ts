@@ -125,7 +125,7 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
           lk_colour_marking_secondary_colour_idTolk_colour: m.secondary_colour ? {
             colour: {contains: m.secondary_colour, mode: "insensitive" } 
           } : undefined,
-          identifier: String(m.identifier)
+          identifier: m.identifier ? String(m.identifier) : undefined
         }
       });
       markings.push(...markingMatches);
