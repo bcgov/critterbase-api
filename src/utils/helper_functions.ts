@@ -41,4 +41,6 @@ const intersect = <T>(A: Array<T>, B: Array<T>): Array<T> => {
   return Array.from(new Set(A)).filter(x => setB.has(x))
 }
 
-export { prismaErrorMsg, intersect };
+const sessionHours = (hours: number) => hours * 3600000;
+
+export { prismaErrorMsg, sessionHours, intersect };

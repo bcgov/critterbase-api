@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+// /* eslint-disable @typescript-eslint/no-unused-vars */
 import { critter_collection_unit, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
@@ -9,12 +11,11 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
-import { getCollectionUnitById } from "./collectionUnit.service";
 
 // Types
-// type CollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
-//   typeof collectionUnitIncludes
-// >;
+type CollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
+  typeof collectionUnitIncludes
+>;
 
 type CollectionUnitCreateInput = z.infer<typeof CollectionUnitCreateBodySchema>;
 
@@ -22,17 +23,15 @@ type CollectionUnitUpdateInput = z.infer<typeof CollectionUnitUpdateBodySchema>;
 
 type CollectionUnitResponse = z.TypeOf<typeof collectionUnitResponseSchema>;
 
-type CollectionUnitDetailed = Prisma.PromiseReturnType<
-  typeof getCollectionUnitById
->;
-
 // Constants
 
 // Included related data from lk and xref tables
-const collectionUnitIncludes: Prisma.critter_collection_unitInclude = {
-  xref_collection_unit: {
-    select: { unit_name: true, description: true },
-  },
+const collectionUnitIncludes = {
+  include: {
+    xref_collection_unit: {
+      select: { unit_name: true, description: true },
+    },
+  } satisfies Prisma.critter_collection_unitInclude,
 };
 
 // Schemas
@@ -66,7 +65,7 @@ const collectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     // include
     xref_collection_unit,
     ...rest
-  } = obj as CollectionUnitDetailed;
+  } = obj as CollectionUnitIncludes;
 
   return {
     ...rest,
@@ -105,7 +104,7 @@ export {
   CollectionUnitUpdateBodySchema,
 };
 export type {
-  CollectionUnitDetailed,
+  CollectionUnitIncludes,
   CollectionUnitCreateInput,
   CollectionUnitUpdateInput,
   CollectionUnitResponse,

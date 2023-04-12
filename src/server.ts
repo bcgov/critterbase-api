@@ -1,43 +1,66 @@
 import cors from "cors";
 import express from "express";
+import session from "express-session";
 import helmet from "helmet";
+import memorystore from "memorystore";
+import { accessRouter } from "./api/access/access.router";
 import { artifactRouter } from "./api/artifact/artifact.router";
-import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { captureRouter } from "./api/capture/capture.router";
+import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { critterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
 import { markingRouter } from "./api/marking/marking.router";
-import { mortalityRouter } from "./api/mortality/mortality.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
+import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
-import { errorHandler, errorLogger, home } from "./utils/middleware";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
+import { sessionHours } from "./utils/helper_functions";
+import {
+  auth,
+  errorHandler,
+  errorLogger,
+  validateApiKey,
+} from "./utils/middleware";
+const SafeMemoryStore = memorystore(session);
+const options: session.SessionOptions = {
+  cookie: {
+    maxAge: sessionHours(24), //how long until the session expires
+  },
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: new SafeMemoryStore({
+    checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
+  }),
+};
 
 const app = express();
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+app.use(session(options));
+app.use(validateApiKey);
 
-app.get("/api/", home);
-app.use("/api/critters", critterRouter);
-app.use("/api/locations", locationRouter);
-app.use("/api/markings", markingRouter);
-app.use("/api/users", userRouter);
-app.use("/api/collection-units", collectionUnitRouter);
-app.use("/api/artifacts", artifactRouter);
-app.use("/api/family", familyRouter);
-app.use("/api/captures/", captureRouter);
-app.use("/api/mortality", mortalityRouter);
-app.use("/api/measurements", measurementRouter);
+app.use("/api/", accessRouter);
+app.use("/api/critters", auth, critterRouter);
+app.use("/api/locations", auth, locationRouter);
+app.use("/api/markings", auth, markingRouter);
+app.use("/api/users", auth, userRouter);
+app.use("/api/collection-units", auth, collectionUnitRouter);
+app.use("/api/artifacts", auth, artifactRouter);
+app.use("/api/family", auth, familyRouter);
+app.use("/api/captures", auth, captureRouter);
+app.use("/api/mortality", auth, mortalityRouter);
+app.use("/api/measurements", auth, measurementRouter);
 
 app.use(errorLogger);
 app.use(errorHandler);
 
 if (IS_DEV || IS_PROD) {
   app.listen(PORT, () => {
-    console.log(`listening on ${PORT ?? 8000}`);
+    console.log(`listening on ${PORT ?? 8080}`);
   });
 }
 

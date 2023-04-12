@@ -18,11 +18,17 @@ import { AuditColumns, Implements } from "./types";
 const zodID = z.string().uuid();
 
 const zodAudit = {
-  create_user: zodID,
-  update_user: zodID,
+  create_user: z.string().uuid(),
+  update_user: z.string().uuid(),
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
 };
+
+const NumberToString = z
+  .union([z.string(), z.number()])
+  .transform((val) =>
+    typeof val === "number" ? String(val) : val
+  ) as unknown as z.ZodString;
 
 const ResponseSchema = z.object({}).passthrough();
 
@@ -109,7 +115,7 @@ export function implement<Model = never>() {
 }
 
 const LookUpColourSchema = implement<lk_colour>().with({
-  colour_id: zodID,
+  colour_id: z.string().uuid(),
   colour: z.string(),
   hex_code: z.string().nullable(),
   description: z.string().nullable(),
@@ -117,14 +123,14 @@ const LookUpColourSchema = implement<lk_colour>().with({
 });
 
 const LookUpMarkingTypeSchema = implement<lk_marking_type>().with({
-  marking_type_id: zodID,
+  marking_type_id: z.string().uuid(),
   name: z.string(),
   description: z.string().nullable(),
   ...zodAudit,
 });
 
 const LookUpMaterialSchema = implement<lk_marking_material>().with({
-  marking_material_id: zodID,
+  marking_material_id: z.string().uuid(),
   material: z.string().nullable(),
   description: z.string().nullable(),
   ...zodAudit,
@@ -132,16 +138,16 @@ const LookUpMaterialSchema = implement<lk_marking_material>().with({
 
 const XrefTaxonMarkingBodyLocationSchema =
   implement<xref_taxon_marking_body_location>().with({
-    taxon_marking_body_location_id: zodID,
-    taxon_id: zodID,
+    taxon_marking_body_location_id: z.string().uuid(),
+    taxon_id: z.string().uuid(),
     body_location: z.string(),
     description: z.string().nullable(),
     ...zodAudit,
   });
 
 const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
-  collection_unit_id: zodID,
-  collection_category_id: zodID,
+  collection_unit_id: z.string().uuid(),
+  collection_category_id: z.string().uuid(),
   unit_name: z.string(),
   description: z.string().nullable(),
   ...zodAudit,
@@ -166,4 +172,5 @@ export {
   XrefTaxonMeasurementQualitativeOptionSchema,
   ResponseSchema,
   zodAudit,
+  NumberToString,
 };

@@ -1,18 +1,23 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z, ZodString } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
+  LookUpColourSchema,
+  LookUpMarkingTypeSchema,
+  LookUpMaterialSchema,
   noAudit,
   nonEmpty,
   ResponseSchema,
+  XrefTaxonMarkingBodyLocationSchema,
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
-import { getMarkingById } from "./marking.service";
 
 // Types
-//type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
+type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
 type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 
@@ -20,30 +25,30 @@ type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
 type MarkingResponseSchema = z.TypeOf<typeof markingResponseSchema>;
 
-type MarkingDetailed = Prisma.PromiseReturnType<typeof getMarkingById>;
-
 // Constants
 
 // Included related data from lk and xref tables
-const markingIncludes: Prisma.markingInclude = {
-  xref_taxon_marking_body_location: {
-    select: { body_location: true },
-  },
-  lk_marking_type: {
-    select: { name: true },
-  },
-  lk_marking_material: {
-    select: { material: true },
-  },
-  lk_colour_marking_primary_colour_idTolk_colour: {
-    select: { colour: true },
-  },
-  lk_colour_marking_secondary_colour_idTolk_colour: {
-    select: { colour: true },
-  },
-  lk_colour_marking_text_colour_idTolk_colour: {
-    select: { colour: true },
-  },
+const markingIncludes = {
+  include: {
+    xref_taxon_marking_body_location: {
+      select: { body_location: true },
+    },
+    lk_marking_type: {
+      select: { name: true },
+    },
+    lk_marking_material: {
+      select: { material: true },
+    },
+    lk_colour_marking_primary_colour_idTolk_colour: {
+      select: { colour: true },
+    },
+    lk_colour_marking_secondary_colour_idTolk_colour: {
+      select: { colour: true },
+    },
+    lk_colour_marking_text_colour_idTolk_colour: {
+      select: { colour: true },
+    },
+  } satisfies Prisma.markingInclude,
 };
 
 // Schemas
@@ -75,18 +80,39 @@ const markingSchema = implement<marking>().with({
   ...zodAudit,
 });
 
+// Extended schema which has both base schema and included fields
+const markingIncludesSchema = implement<MarkingIncludes>().with({
+  ...markingSchema.shape,
+  lk_colour_marking_primary_colour_idTolk_colour: LookUpColourSchema.pick({
+    colour: true,
+  }).nullable(),
+  lk_colour_marking_secondary_colour_idTolk_colour: LookUpColourSchema.pick({
+    colour: true,
+  }).nullable(),
+  lk_colour_marking_text_colour_idTolk_colour: LookUpColourSchema.pick({
+    colour: true,
+  }).nullable(),
+  lk_marking_type: LookUpMarkingTypeSchema.pick({
+    name: true,
+  }).nullable(),
+  lk_marking_material: LookUpMaterialSchema.pick({
+    material: true,
+  }).nullable(),
+  xref_taxon_marking_body_location: XrefTaxonMarkingBodyLocationSchema.pick({
+    body_location: true,
+  }),
+});
+
 // Formatted API reponse schema which omits fields and unpacks nested data
 const markingResponseSchema = ResponseSchema.transform((obj) => {
   const {
     //omit
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     primary_colour_id,
     secondary_colour_id,
     text_colour_id,
     marking_type_id,
     marking_material_id,
     taxon_marking_body_location_id,
-    /* eslint-enable @typescript-eslint/no-unused-vars */
     //include
     xref_taxon_marking_body_location,
     lk_marking_type,
@@ -95,7 +121,7 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
     lk_colour_marking_secondary_colour_idTolk_colour,
     lk_colour_marking_text_colour_idTolk_colour,
     ...rest
-  } = obj as MarkingDetailed;
+  } = obj as MarkingIncludes;
   return {
     ...rest,
     body_location: xref_taxon_marking_body_location?.body_location ?? null,
@@ -134,10 +160,11 @@ export {
   MarkingUpdateBodySchema,
   markingResponseSchema,
   markingIncludes,
+  markingIncludesSchema,
 };
 export type {
   MarkingCreateInput,
   MarkingUpdateInput,
+  MarkingIncludes,
   MarkingResponseSchema,
-  MarkingDetailed,
 };
