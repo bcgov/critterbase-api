@@ -17,6 +17,7 @@ declare global {
       SESSION_SECRET: string;
       API_KEY: string;
       DB_URL: string;
+      AUTHENTICATE: string;
     }
   }
 }
@@ -32,6 +33,8 @@ const IS_DEV = process.env.NODE_ENV === "development";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const IS_TEST = process.env.NODE_ENV === "test";
+
+const NO_AUTH = process.env.AUTHENTICATE === "false";
 
 const request = supertest(app);
 
@@ -80,6 +83,7 @@ export {
   IS_PROD,
   IS_TEST,
   API_KEY,
+  NO_AUTH,
   prisma,
   request,
   strings,

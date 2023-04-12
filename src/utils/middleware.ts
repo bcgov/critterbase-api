@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST } from "./constants";
+import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -70,7 +70,7 @@ const errorHandler = (
 };
 
 const auth = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.user || IS_TEST) {
+  if (req.session.user || IS_TEST || NO_AUTH) {
     next();
   } else {
     next(
