@@ -31,9 +31,7 @@ const getQuantMeasurementOrThrow = async (id: string) => {
       where: {
         measurement_quantitative_id: id,
       },
-      include: {
-        ...measurementQuantitativeInclude,
-      },
+      ...measurementQuantitativeInclude,
     });
   return quantMeasurement;
 };
@@ -44,9 +42,7 @@ const getQualMeasurementOrThrow = async (id: string) => {
       where: {
         measurement_qualitative_id: id,
       },
-      include: {
-        ...measurementQualitativeInclude,
-      },
+      ...measurementQualitativeInclude,
     });
   return qualMeasurement;
 };

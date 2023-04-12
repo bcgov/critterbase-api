@@ -62,7 +62,7 @@ userRouter
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      await deleteUser(id);
-      return res.status(200).json(`User ${id} has been deleted`);
+      const deleted = await deleteUser(id);
+      return res.status(200).json(deleted);
     })
   );

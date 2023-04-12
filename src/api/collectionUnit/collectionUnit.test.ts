@@ -1,18 +1,18 @@
-import type { Prisma, critter } from "@prisma/client";
-import { randomInt, randomUUID } from "crypto";
 import { prisma, request } from "../../utils/constants";
 import {
-  createCollectionUnit,
-  deleteCollectionUnit,
   getAllCollectionUnits,
   getCollectionUnitById,
   getCollectionUnitsByCritterId,
   updateCollectionUnit,
+  createCollectionUnit,
+  deleteCollectionUnit,
 } from "./collectionUnit.service";
+import type { Prisma, critter } from "@prisma/client";
+import { randomInt, randomUUID } from "crypto";
 import {
-  CollectionUnitDetailed,
-  CollectionUnitResponse,
+  CollectionUnitIncludes,
   collectionUnitIncludes,
+  CollectionUnitResponse,
   collectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 
@@ -22,7 +22,7 @@ function get_random(list) {
 
 let dummyCritter: critter;
 let dummyCollectionUnit: CollectionUnitResponse;
-let dummyCollectionUnitIncludes: CollectionUnitDetailed;
+let dummyCollectionUnitIncludes: CollectionUnitIncludes;
 let dummyCollectionUnitInput: Prisma.critter_collection_unitUncheckedCreateInput;
 let dummyCollectionUnitKeys: string[];
 let dummyCollectionUnitIncludesKeys: string[];
@@ -76,7 +76,7 @@ beforeAll(async () => {
   dummyCollectionUnitInput = await newCollectionUnit();
   dummyCollectionUnitIncludes = await prisma.critter_collection_unit.create({
     data: dummyCollectionUnitInput,
-    include: collectionUnitIncludes,
+    ...collectionUnitIncludes,
   });
   dummyCollectionUnit = collectionUnitResponseSchema.parse(
     dummyCollectionUnitIncludes

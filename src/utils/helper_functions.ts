@@ -36,4 +36,6 @@ const prismaErrorMsg = (
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
-export { prismaErrorMsg };
+const sessionHours = (hours: number) => hours * 3600000;
+
+export { prismaErrorMsg, sessionHours };

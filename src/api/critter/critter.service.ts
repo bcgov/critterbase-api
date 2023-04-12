@@ -16,9 +16,11 @@ const getCritterById = async (critter_id: string): Promise<critter | null> => {
   });
 };
 
-const getCritterByIdWithDetails = async (critter_id: string) => {
+const getCritterByIdWithDetails = async (
+  critter_id: string
+): Promise<critter | null> => {
   const result = await prisma.critter.findUniqueOrThrow({
-    include: formattedCritterInclude,
+    ...formattedCritterInclude,
     where: {
       critter_id: critter_id,
     },
@@ -31,7 +33,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results = await prisma.critter.findMany({
-    include: formattedCritterInclude,
+    ...formattedCritterInclude,
     where: {
       wlh_id: wlh_id,
     },
