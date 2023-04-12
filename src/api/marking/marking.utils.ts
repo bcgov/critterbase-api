@@ -1,5 +1,5 @@
 import { frequency_unit, marking, Prisma } from "@prisma/client";
-import { z } from "zod";
+import { z, ZodString } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
@@ -60,7 +60,12 @@ const markingSchema = implement<marking>().with({
   primary_colour_id: zodID.nullable(),
   secondary_colour_id: zodID.nullable(),
   text_colour_id: zodID.nullable(),
-  identifier: z.string().nullable(),
+  identifier: (z
+  .union([z.string(), z.number(), z.null()])
+  .refine((value) => typeof value !== "undefined", {
+    message: "Value is undefined",
+  })
+  .transform((value) => String(value))) as unknown as z.ZodNullable<ZodString>,
   frequency: z.number().nullable(),
   frequency_unit: z.nativeEnum(frequency_unit).nullable(),
   order: z.number().int().nullable(),
