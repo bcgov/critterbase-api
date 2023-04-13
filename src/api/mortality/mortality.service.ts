@@ -10,23 +10,27 @@ const getAllMortalities = async (): Promise<mortality[]> => {
   return await prisma.mortality.findMany();
 };
 
-const getMortalityById = async (mortality_id: string) => {
+const getMortalityById = async (
+  mortality_id: string
+): Promise<mortality | null> => {
   const mort = await prisma.mortality.findUniqueOrThrow({
+    ...mortalityInclude,
     where: {
       mortality_id: mortality_id,
     },
-    include: mortalityInclude,
   });
 
   return mort;
 };
 
-const getMortalityByCritter = async (critter_id: string) => {
+const getMortalityByCritter = async (
+  critter_id: string
+): Promise<mortality[]> => {
   const mortalities = await prisma.mortality.findMany({
+    ...mortalityInclude,
     where: {
       critter_id: critter_id,
     },
-    include: mortalityInclude,
   });
   return mortalities;
 };

@@ -3,6 +3,8 @@ import { prisma } from "../../utils/constants";
 import {
   CritterCreate,
   CritterIdsRequest,
+  CritterIncludeResult,
+  CritterSimpleIncludeResult,
   CritterUpdate,
   detailedCritterInclude,
   simpleCritterInclude,
@@ -18,7 +20,7 @@ const getAllCritters = async (): Promise<critter[]> => {
  */
 const getMultipleCrittersByIds = async (
   critterIds: CritterIdsRequest
-): Promise<Pick<critter, 'critter_id' | 'wlh_id' | 'animal_id'>[]> => {
+): Promise<Pick<CritterSimpleIncludeResult, 'critter_id' | 'wlh_id' | 'animal_id' | 'critter_collection_unit' | 'lk_taxon'>[]> => {
 
   const tim1 = performance.now();
 
@@ -27,7 +29,7 @@ const getMultipleCrittersByIds = async (
       critter_id: true,
       wlh_id: true,
       animal_id: true,
-      ...simpleCritterInclude,
+      ...simpleCritterInclude.include,
     },
     where: {
       critter_id: {
@@ -41,15 +43,17 @@ const getMultipleCrittersByIds = async (
   return results;
 };
 
-const getCritterById = async (critter_id: string): Promise<critter | null> => {
+const getCritterById = async (critter_id: string): Promise<critter> => {
   return await prisma.critter.findUniqueOrThrow({
     where: { critter_id: critter_id },
   });
 };
 
-const getCritterByIdWithDetails = async (critter_id: string) => {
+const getCritterByIdWithDetails = async (
+  critter_id: string
+): Promise<CritterIncludeResult> => {
   const result = await prisma.critter.findUniqueOrThrow({
-    include: detailedCritterInclude,
+    ...detailedCritterInclude,
     where: {
       critter_id: critter_id,
     },
@@ -62,7 +66,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results = await prisma.critter.findMany({
-    include: detailedCritterInclude,
+    ...detailedCritterInclude,
     where: {
       wlh_id: wlh_id,
     },

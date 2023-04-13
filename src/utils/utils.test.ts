@@ -2,7 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { NextFunction, Request, Response } from "express";
 import { app } from "../server";
 import { prismaErrorMsg } from "./helper_functions";
-import { catchErrors, errorHandler, errorLogger, home } from "./middleware";
+import { catchErrors, errorHandler, errorLogger } from "./middleware";
 import { apiError } from "./types";
 
 describe("Utils", () => {
@@ -55,12 +55,12 @@ describe("Utils", () => {
     afterAll((done) => {
       server && server.close(done);
     });
-    describe(home.name, () => {
-      it("sets a json.res", async () => {
-        home(mockRequest, mockResponse);
-        expect(mockResponse.json);
-      });
-    });
+    // describe(home.name, () => {
+    //   it("sets a json.res", async () => {
+    //     home(mockRequest, mockResponse);
+    //     expect(mockResponse.json);
+    //   });
+    // });
 
     describe(errorLogger.name, () => {
       it("next() called once", async () => {

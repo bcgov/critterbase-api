@@ -1,6 +1,30 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, user } from "@prisma/client";
 import supertest from "supertest";
 import { app } from "../server";
+declare module "express-session" {
+  interface SessionData {
+    views: number;
+    user: user;
+  }
+}
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface ProcessEnv {
+      PORT?: string;
+      NODE_ENV: "development" | "test" | "production";
+      SESSION_SECRET: string;
+      API_KEY: string;
+      DB_URL: string;
+      AUTHENTICATE: string;
+    }
+  }
+}
+
+const API_KEY_HEADER = "API-KEY";
+
+const API_KEY = process.env.API_KEY;
 
 const PORT = process.env.PORT;
 
@@ -9,6 +33,8 @@ const IS_DEV = process.env.NODE_ENV === "development";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const IS_TEST = process.env.NODE_ENV === "test";
+
+const NO_AUTH = process.env.AUTHENTICATE === "false";
 
 const request = supertest(app);
 
@@ -20,10 +46,7 @@ const request = supertest(app);
 const globalPrisma = global as unknown as { prisma: PrismaClient };
 const prisma =
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  globalPrisma.prisma ||
-  new PrismaClient({
-    errorFormat: "minimal",
-  });
+  globalPrisma.prisma || new PrismaClient();
 
 if (!IS_PROD) globalPrisma.prisma = prisma;
 
@@ -53,4 +76,15 @@ const strings = {
   },
 };
 
-export { PORT, IS_DEV, IS_PROD, IS_TEST, prisma, request, strings };
+export {
+  PORT,
+  API_KEY_HEADER,
+  IS_DEV,
+  IS_PROD,
+  IS_TEST,
+  API_KEY,
+  NO_AUTH,
+  prisma,
+  request,
+  strings,
+};

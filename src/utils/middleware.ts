@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { IS_TEST } from "./constants";
+import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -69,15 +69,28 @@ const errorHandler = (
   next(err);
 };
 
-/**
- ** Logs basic details about the current supported routes
- * @params All four express params.
- */
-const home = (req: Request, res: Response) => {
-  return res.json([
-    "Welcome to Critterbase API",
-    "Temp details before swagger integration",
-  ]);
+const auth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session.user || IS_TEST || NO_AUTH) {
+    next();
+  } else {
+    next(
+      new apiError("Must be logged in to access this route. POST api/login")
+    );
+  }
 };
 
-export { errorLogger, errorHandler, catchErrors, home };
+const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
+  if (IS_DEV || IS_TEST) {
+    return next();
+  }
+  const apiKey = req.get(API_KEY_HEADER);
+  if (!apiKey) {
+    throw new apiError(`Header: '${API_KEY_HEADER}' must be provided`);
+  }
+  if (apiKey !== API_KEY) {
+    throw new apiError(`Header: '${API_KEY_HEADER}' is incorrect`);
+  }
+  next();
+};
+
+export { errorLogger, errorHandler, catchErrors, auth, validateApiKey };

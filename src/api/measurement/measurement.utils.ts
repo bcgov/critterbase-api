@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import {
   measurement_qualitative,
   measurement_quantitative,
@@ -19,27 +20,20 @@ import {
 } from "./measurement.service";
 // Zod Schemas
 
-const measurementQualitativeInclude: Prisma.measurement_qualitativeInclude = {
-  xref_taxon_measurement_qualitative: {
-    select: {
-      measurement_name: true,
+const measurementQualitativeInclude =
+  Prisma.validator<Prisma.measurement_qualitativeArgs>()({
+    include: {
+      xref_taxon_measurement_qualitative: true,
+      xref_taxon_measurement_qualitative_option: true,
     },
-  },
-  xref_taxon_measurement_qualitative_option: {
-    select: {
-      option_label: true,
-      option_value: true,
-    },
-  },
-};
+  });
 
-const measurementQuantitativeInclude: Prisma.measurement_quantitativeInclude = {
-  xref_taxon_measurement_quantitative: {
-    select: {
-      measurement_name: true,
+const measurementQuantitativeInclude =
+  Prisma.validator<Prisma.measurement_quantitativeArgs>()({
+    include: {
+      xref_taxon_measurement_quantitative: true,
     },
-  },
-};
+  });
 
 // Qualitatitive
 /**
