@@ -9,13 +9,17 @@ import {
   getAllCritters,
   getCritterByIdWithDetails,
   getCritterByWlhId,
+  getMultipleCrittersByIds,
   updateCritter,
 } from "./critter.service";
 import {
   CritterCreateSchema,
-  CritterResponseSchema,
+  CritterIdsRequestSchema,
+  CritterDetailedResponseSchema,
   CritterUpdateSchema,
+  CritterSimpleResponseSchema,
 } from "./critter.utils";
+import { array } from "zod";
 
 export const critterRouter = express.Router();
 
@@ -27,6 +31,18 @@ critterRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const allCritters = await getAllCritters();
     return res.status(200).json(allCritters);
+  })
+);
+
+/**
+ ** Fetch multiple critters by their IDs
+ */
+ critterRouter.post(
+  "/",
+  catchErrors(async (req: Request, res: Response) => {
+    const parsed = CritterIdsRequestSchema.parse(req.body);
+    const critters = await getMultipleCrittersByIds(parsed);
+    return res.status(200).json(array(CritterSimpleResponseSchema).parse(critters));
   })
 );
 
@@ -50,7 +66,7 @@ critterRouter.route("/wlh/:wlh_id").get(
         "Could not find any animals with the requested WLH ID"
       );
     }
-    const format = critters.map((c) => CritterResponseSchema.parse(c));
+    const format = critters.map((c) => CritterDetailedResponseSchema.parse(c));
     return res.status(200).json(format);
   })
 );
@@ -70,7 +86,7 @@ critterRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const critter = await getCritterByIdWithDetails(id);
-      const format = CritterResponseSchema.parse(critter);
+      const format = CritterDetailedResponseSchema.parse(critter);
       return res.status(200).json(format);
     })
   )
