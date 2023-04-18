@@ -29,20 +29,29 @@ export const critterRouter = express.Router();
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const allCritters = await getAllCritters();
-    return res.status(200).json(allCritters);
+    const isMinimal = "minimal" in req.query;
+    const allCritters = await getAllCritters(isMinimal);
+    return res
+      .status(200)
+      .json(
+        isMinimal
+          ? array(CritterSimpleResponseSchema).parse(allCritters)
+          : allCritters
+      );
   })
 );
 
 /**
  ** Fetch multiple critters by their IDs
  */
- critterRouter.post(
+critterRouter.post(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterIdsRequestSchema.parse(req.body);
     const critters = await getMultipleCrittersByIds(parsed);
-    return res.status(200).json(array(CritterSimpleResponseSchema).parse(critters));
+    return res
+      .status(200)
+      .json(array(CritterSimpleResponseSchema).parse(critters));
   })
 );
 

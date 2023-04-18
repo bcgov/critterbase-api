@@ -4,14 +4,21 @@ import {
   CritterCreate,
   CritterIdsRequest,
   CritterIncludeResult,
-  CritterSimpleIncludeResult,
   CritterUpdate,
   detailedCritterInclude,
-  simpleCritterInclude,
+  minimalCritterSelect,
 } from "./critter.utils";
+import { CritterSimpleResponse } from "./critter.utils";
 
-const getAllCritters = async (): Promise<critter[]> => {
-  return await prisma.critter.findMany();
+const getAllCritters = async (
+  minimal?: boolean
+): Promise<critter[] | CritterSimpleResponse[]> => {
+  console.log(minimal);
+  if (minimal) {
+    return await prisma.critter.findMany(minimalCritterSelect);
+  } else {
+    return await prisma.critter.findMany();
+  }
 };
 
 /**
@@ -20,17 +27,11 @@ const getAllCritters = async (): Promise<critter[]> => {
  */
 const getMultipleCrittersByIds = async (
   critterIds: CritterIdsRequest
-): Promise<Pick<CritterSimpleIncludeResult, 'critter_id' | 'wlh_id' | 'animal_id' | 'critter_collection_unit' | 'lk_taxon'>[]> => {
-
+): Promise<CritterSimpleResponse[]> => {
   const tim1 = performance.now();
 
   const results = await prisma.critter.findMany({
-    select: {
-      critter_id: true,
-      wlh_id: true,
-      animal_id: true,
-      ...simpleCritterInclude.include,
-    },
+    ...minimalCritterSelect,
     where: {
       critter_id: {
         in: critterIds.critter_ids,
@@ -38,7 +39,7 @@ const getMultipleCrittersByIds = async (
     },
   });
 
-  console.log(`Operation took ${performance.now() - tim1} ms`)
+  console.log(`Operation took ${performance.now() - tim1} ms`);
 
   return results;
 };
