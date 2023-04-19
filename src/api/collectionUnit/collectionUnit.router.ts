@@ -8,6 +8,7 @@ import {
   updateCollectionUnit,
   createCollectionUnit,
   deleteCollectionUnit,
+  getCollectionUnitsFromCategory,
 } from "./collectionUnit.service";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
@@ -62,6 +63,16 @@ collectionUnitRouter.route("/critter/:id").get(
     return res.status(200).json(formattedCollectionUnit);
   })
 );
+
+collectionUnitRouter.route("/category/").get(
+  catchErrors(async (req: Request, res: Response) => {
+    const taxon_common = req.params.taxon_name_common;
+    const taxon_latin = req.params.taxon_name_latin;
+    const category = req.params.category_name;
+    const response = await getCollectionUnitsFromCategory(category, taxon_common, taxon_latin);
+    return res.status(200).json(response);
+  })
+)
 
 /**
  ** All collectionUnit_id related routes

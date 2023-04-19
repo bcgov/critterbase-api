@@ -7,7 +7,6 @@ import {
   UniqueCritterQuery,
   formattedCritterInclude,
 } from "./critter.utils";
-import { markingIncludes } from "../marking/marking.utils";
 import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";
 
@@ -91,6 +90,24 @@ const formatLocationNameSearch = (obj: Partial<LocationResponse> | null | undefi
   }
 }
 
+const appendEnglishTaxonAsUUID = async (body: any) => {
+  let taxon = null;
+  if(body.taxon_name_common) {
+    taxon = await prisma.lk_taxon.findFirst({
+      where: {taxon_name_common: {equals: body.taxon_name_common, mode: 'insensitive' } }
+    })
+  }
+  if(body.taxon_name_latin) {
+    taxon = await prisma.lk_taxon.findFirst({
+      where: {taxon_name_latin: {equals: body.taxon_name_latin, mode: 'insensitive' } }
+    });
+  }
+  if (taxon) {
+    body.taxon_id = taxon.taxon_id;
+  }
+  return body;
+}
+
 const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}): Promise<critter[]> => {
   let critters: critter[] = [];
   if(body.critter) {
@@ -107,10 +124,6 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
     });
   }
 
-  if (critters.length == 1) {
-    return critters;
-  }
-
   const markings = [];
   if(body.markings) { 
     for(const m of body.markings) {
@@ -124,6 +137,9 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
           } : undefined,
           lk_colour_marking_secondary_colour_idTolk_colour: m.secondary_colour ? {
             colour: {contains: m.secondary_colour, mode: "insensitive" } 
+          } : undefined,
+          lk_marking_type: m.marking_type ? {
+            name: {contains: m.marking_type, mode: 'insensitive' }
           } : undefined,
           identifier: m.identifier ? String(m.identifier) : undefined
         }
@@ -183,12 +199,12 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
   }
 
   const detailedCritters = await prisma.critter.findMany({
-    ...formattedCritterInclude,
+    ...(body.detail && formattedCritterInclude),
     where: {
-      critter_id: { in: overlappingIds }
+      critter_id: { in: (critters.length == 1 ? critters.map(c => c.critter_id) : overlappingIds) }
     }
   });
-  return detailedCritters.map(c => CritterResponseSchema.parse(c));
+  return body.detail ? detailedCritters.map(c => CritterResponseSchema.parse(c)) : detailedCritters;
 }
 
 const getTableDataTypes = async () => {
@@ -205,5 +221,6 @@ export {
   deleteCritter,
   getCritterByIdWithDetails,
   getSimilarCritters,
-  getTableDataTypes
+  getTableDataTypes,
+  appendEnglishTaxonAsUUID
 };

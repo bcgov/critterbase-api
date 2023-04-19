@@ -39,8 +39,8 @@ const captureInclude = Prisma.validator<Prisma.captureArgs>()({
     }).partial().shape
     )
 
-  const CaptureCreateSchema = implement<Omit<Prisma.captureCreateManyInput,  "capture_id" | keyof AuditColumns>>().with(
-    CaptureUpdateSchema.required({
+  const CaptureCreateSchema = implement<Omit<Prisma.captureCreateManyInput, keyof AuditColumns>>().with(
+    CaptureBodySchema.omit({...noAudit}).partial().required({
       critter_id: true,
       capture_timestamp: true
     }).shape

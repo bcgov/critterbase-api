@@ -1,4 +1,5 @@
 import { prisma } from "../../utils/constants";
+import { intersect } from "../../utils/helper_functions";
 import {
   CollectionUnitCreateInput,
   collectionUnitIncludes,
@@ -49,6 +50,22 @@ const getCollectionUnitsByCritterId = async (
   });
   return collectionUnits;
 };
+
+const getCollectionUnitsFromCategory = async (category_name: string, taxon_name_common: string | undefined, taxon_name_latin: string | undefined) => {
+  const taxon_categories = await prisma.xref_taxon_collection_category.findFirstOrThrow({
+    where: {
+      lk_taxon:  { taxon_name_common: taxon_name_common, taxon_name_latin: taxon_name_latin },
+      lk_collection_category: { category_name: {equals: category_name, mode: 'insensitive' } }
+    }
+  });
+  const category_id = taxon_categories?.collection_category_id;
+  const collectionUnits = await prisma.xref_collection_unit.findMany({
+    where: {
+      collection_category_id: category_id
+    }
+  });
+  return collectionUnits;
+}
 
 /**
  * * Updates an existing critter collection unit in the database
@@ -103,6 +120,7 @@ const deleteCollectionUnit = async (
 export {
   getAllCollectionUnits,
   getCollectionUnitById,
+  getCollectionUnitsFromCategory,
   getCollectionUnitsByCritterId,
   updateCollectionUnit,
   createCollectionUnit,

@@ -37,12 +37,6 @@ mortalityRouter.get(
 mortalityRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const cod_res = await prisma.lk_cause_of_death.findFirstOrThrow({
-      where: {cod_category: 'Unknown'}
-    });
-    if(!req.body.proximate_cause_of_death_id) {
-      req.body.proximate_cause_of_death_id = cod_res.cod_id; //This is just a temp solution, ideally they should be forced to provide this.
-    }
     const parsed = MortalityCreateSchema.parse(req.body);
     const mort = await createMortality(parsed);
     return res.status(201).json(mort);

@@ -29,6 +29,7 @@ import {
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
+import { collectionUnitIncludes, collectionUnitResponseSchema } from "../collectionUnit/collectionUnit.utils";
 
 const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
@@ -38,6 +39,7 @@ const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     lk_region_nr: {
       select: { region_nr_name: true },
     },
+    critter_collection_unit: collectionUnitIncludes,
     capture: captureInclude,
     mortality: mortalityInclude,
     marking: markingIncludes,
@@ -77,9 +79,9 @@ const CritterUpdateSchema = implement<
 );
 
 const CritterCreateSchema = implement<
-  Omit<Prisma.critterCreateManyInput, "critter_id" | keyof AuditColumns>
+  Omit<Prisma.critterCreateManyInput, keyof AuditColumns>
 >().with(
-  CritterUpdateSchema.required({
+  CritterSchema.omit({...noAudit}).partial().required({
     taxon_id: true,
     sex: true,
   }).shape
@@ -94,12 +96,16 @@ const CritterResponseSchema = ResponseSchema.transform((val) => {
     marking,
     measurement_qualitative,
     measurement_quantitative,
+    critter_collection_unit,
     ...rest
   } = val as CritterIncludeResult;
   return {
     ...rest,
     taxon_name_latin: lk_taxon.taxon_name_latin,
     responsible_region_name: lk_region_nr?.region_nr_name,
+    collection_unit: critter_collection_unit.map((a) =>
+      stripExtraFields(collectionUnitResponseSchema.parse(a))
+    ),
     mortality: mortality.map((a) =>
       stripExtraFields(MortalityResponseSchema.parse(a))
     ),
