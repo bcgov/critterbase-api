@@ -26,8 +26,17 @@ import {
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
+import {
+  getCritterByIdWithDetails,
+  getMultipleCrittersByIds,
+} from "./critter.service";
+import {
+  collectionUnitIncludes,
+  collectionUnitResponseSchema,
+} from "../collectionUnit/collectionUnit.utils";
+import { CollectionUnitIncludes } from "../collectionUnit/collectionUnit.utils";
 
-const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
+const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: {
       select: { taxon_name_latin: true },
@@ -35,6 +44,7 @@ const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     lk_region_nr: {
       select: { region_nr_name: true },
     },
+    critter_collection_unit: collectionUnitIncludes,
     capture: captureInclude,
     mortality: mortalityInclude,
     marking: markingIncludes,
@@ -44,8 +54,41 @@ const formattedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
 });
 
 type CritterIncludeResult = Prisma.critterGetPayload<
-  typeof formattedCritterInclude
+  typeof detailedCritterInclude
 >;
+
+const simpleCritterInclude = Prisma.validator<Prisma.critterArgs>()({
+  include: {
+    lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
+    critter_collection_unit: {
+      select: {
+        xref_collection_unit: {
+          select: {
+            unit_name: true,
+            lk_collection_category: { select: { category_name: true } },
+          },
+        },
+      },
+    },
+    mortality: {
+      select: {
+        mortality_timestamp: true,
+      },
+    },
+  },
+});
+
+type CritterSimpleIncludeResult = Prisma.critterGetPayload<
+  typeof simpleCritterInclude
+>;
+
+const SimpleCollectionUnitSchema = ResponseSchema.transform(
+  (val: Partial<Pick<CollectionUnitIncludes, "xref_collection_unit">>) => {
+    return {
+      unit_name: val.xref_collection_unit?.unit_name,
+    };
+  }
+);
 
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
@@ -82,7 +125,14 @@ const CritterCreateSchema = implement<
   }).shape
 );
 
-const CritterResponseSchema = ResponseSchema.transform((val) => {
+/**
+ * Schema for validating a request to fetch multiple critters by their IDs
+ */
+const CritterIdsRequestSchema = z.object({
+  critter_ids: z.array(zodID),
+});
+
+const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   const {
     mortality,
     capture,
@@ -91,12 +141,16 @@ const CritterResponseSchema = ResponseSchema.transform((val) => {
     marking,
     measurement_qualitative,
     measurement_quantitative,
+    critter_collection_unit,
     ...rest
   } = val as CritterIncludeResult;
   return {
     ...rest,
     taxon_name_latin: lk_taxon.taxon_name_latin,
     responsible_region_name: lk_region_nr?.region_nr_name,
+    collection_unit: critter_collection_unit.map((a) =>
+      stripExtraFields(collectionUnitResponseSchema.parse(a))
+    ),
     mortality: mortality.map((a) =>
       stripExtraFields(MortalityResponseSchema.parse(a))
     ),
@@ -114,6 +168,20 @@ const CritterResponseSchema = ResponseSchema.transform((val) => {
         stripExtraFields(QuantitativeResponseSchema.parse(a))
       ),
     },
+  };
+});
+
+const CritterSimpleResponseSchema = ResponseSchema.transform((val) => {
+  const { critter_collection_unit, lk_taxon, mortality, ...rest } =
+    val as Prisma.PromiseReturnType<typeof getMultipleCrittersByIds>[0];
+  return {
+    ...rest,
+    taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
+    collection_unit: critter_collection_unit.map((a) => ({
+      [a.xref_collection_unit.lk_collection_category.category_name]:
+        a.xref_collection_unit.unit_name,
+    })),
+    critter_status: mortality.length ? "Mortality" : "Alive",
   };
 });
 
@@ -141,17 +209,23 @@ const stripExtraFields = <T extends critterInterface>(
 
 type CritterCreate = z.infer<typeof CritterCreateSchema>;
 type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
-type FormattedCritter = z.infer<typeof CritterResponseSchema>;
+type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
+type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
 export type {
   FormattedCritter,
   CritterIncludeResult,
+  CritterSimpleIncludeResult,
   CritterCreate,
   CritterUpdate,
+  CritterIdsRequest,
 };
 export {
-  formattedCritterInclude,
-  CritterResponseSchema,
+  detailedCritterInclude,
+  simpleCritterInclude,
+  CritterDetailedResponseSchema,
+  CritterSimpleResponseSchema,
   CritterUpdateSchema,
   CritterCreateSchema,
+  CritterIdsRequestSchema,
 };

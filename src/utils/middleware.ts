@@ -80,7 +80,7 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
-  if (IS_DEV || IS_TEST) {
+  if (IS_DEV || IS_TEST || NO_AUTH) {
     return next();
   }
   const apiKey = req.get(API_KEY_HEADER);
