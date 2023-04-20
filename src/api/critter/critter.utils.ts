@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { critter, Prisma, sex } from "@prisma/client";
-import { z } from "zod";
+import { array, z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
@@ -32,7 +32,9 @@ import {
 } from "./critter.service";
 import {
   collectionUnitIncludes,
-  collectionUnitResponseSchema,
+  CollectionUnitResponseSchema,
+  simpleCollectionUnitIncludes,
+  SimpleCollectionUnitResponseSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import { CollectionUnitIncludes } from "../collectionUnit/collectionUnit.utils";
 
@@ -44,7 +46,7 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     lk_region_nr: {
       select: { region_nr_name: true },
     },
-    critter_collection_unit: collectionUnitIncludes,
+    critter_collection_unit: simpleCollectionUnitIncludes,
     capture: captureInclude,
     mortality: mortalityInclude,
     marking: markingIncludes,
@@ -61,14 +63,7 @@ const simpleCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
     critter_collection_unit: {
-      select: {
-        xref_collection_unit: {
-          select: {
-            unit_name: true,
-            lk_collection_category: { select: { category_name: true } },
-          },
-        },
-      },
+      select: simpleCollectionUnitIncludes.include,
     },
     mortality: {
       select: {
@@ -148,8 +143,8 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
     ...rest,
     taxon_name_latin: lk_taxon.taxon_name_latin,
     responsible_region_name: lk_region_nr?.region_nr_name,
-    collection_unit: critter_collection_unit.map((a) =>
-      stripExtraFields(collectionUnitResponseSchema.parse(a))
+    collection_unit: array(SimpleCollectionUnitResponseSchema).parse(
+      critter_collection_unit
     ),
     mortality: mortality.map((a) =>
       stripExtraFields(MortalityResponseSchema.parse(a))
@@ -177,10 +172,9 @@ const CritterSimpleResponseSchema = ResponseSchema.transform((val) => {
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
-    collection_unit: critter_collection_unit.map((a) => ({
-      [a.xref_collection_unit.lk_collection_category.category_name]:
-        a.xref_collection_unit.unit_name,
-    })),
+    collection_unit: array(SimpleCollectionUnitResponseSchema).parse(
+      critter_collection_unit
+    ),
     critter_status: mortality.length ? "Mortality" : "Alive",
   };
 });
@@ -211,6 +205,8 @@ type CritterCreate = z.infer<typeof CritterCreateSchema>;
 type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
 type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
+
+type CritterResFormat = "default" | "minimal" | "";
 
 export type {
   FormattedCritter,
