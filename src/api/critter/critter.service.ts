@@ -11,9 +11,8 @@ import {
 import { CritterSimpleResponse } from "./critter.utils";
 
 const getAllCritters = async (
-  minimal?: boolean
+  minimal = false
 ): Promise<critter[] | CritterSimpleResponse[]> => {
-  console.log(minimal);
   if (minimal) {
     return await prisma.critter.findMany(minimalCritterSelect);
   } else {
@@ -28,8 +27,6 @@ const getAllCritters = async (
 const getMultipleCrittersByIds = async (
   critterIds: CritterIdsRequest
 ): Promise<CritterSimpleResponse[]> => {
-  const tim1 = performance.now();
-
   const results = await prisma.critter.findMany({
     ...minimalCritterSelect,
     where: {
@@ -38,9 +35,6 @@ const getMultipleCrittersByIds = async (
       },
     },
   });
-
-  console.log(`Operation took ${performance.now() - tim1} ms`);
-
   return results;
 };
 

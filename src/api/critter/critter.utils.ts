@@ -58,7 +58,19 @@ const simpleCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
     critter_collection_unit: {
-      select: { xref_collection_unit: { select: { unit_name: true } } },
+      select: {
+        xref_collection_unit: {
+          select: {
+            unit_name: true,
+            lk_collection_category: { select: { category_name: true } },
+          },
+        },
+      },
+    },
+    mortality: {
+      select: {
+        mortality_timestamp: true,
+      },
     },
   },
 });
@@ -78,7 +90,12 @@ type CritterSimpleIncludeResult = Prisma.critterGetPayload<
 
 type CritterSimpleResponse = Pick<
   CritterSimpleIncludeResult,
-  "critter_id" | "wlh_id" | "animal_id" | "critter_collection_unit" | "lk_taxon"
+  | "critter_id"
+  | "wlh_id"
+  | "animal_id"
+  | "critter_collection_unit"
+  | "lk_taxon"
+  | "mortality"
 >;
 
 const SimpleCollectionUnitSchema = ResponseSchema.transform(
@@ -171,15 +188,16 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
 });
 
 const CritterSimpleResponseSchema = ResponseSchema.transform((val) => {
-  const { critter_collection_unit, lk_taxon, ...rest } =
+  const { critter_collection_unit, lk_taxon, mortality, ...rest } =
     val as Prisma.PromiseReturnType<typeof getMultipleCrittersByIds>[0];
   return {
     ...rest,
-    taxon_name_common: lk_taxon.taxon_name_common,
-    taxon_name_latin: lk_taxon.taxon_name_latin,
-    collection_unit: critter_collection_unit.map((a) =>
-      SimpleCollectionUnitSchema.parse(a)
-    ),
+    taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
+    collection_unit: critter_collection_unit.map((a) => ({
+      [a.xref_collection_unit.lk_collection_category.category_name]:
+        a.xref_collection_unit.unit_name,
+    })),
+    critter_status: mortality.length ? "Mortality" : "Alive",
   };
 });
 
