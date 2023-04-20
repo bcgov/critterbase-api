@@ -206,7 +206,7 @@ type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
 type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
-type CritterResFormat = "default" | "minimal" | "";
+type CritterResFormat = "default" | "minimal" | "full";
 
 export type {
   FormattedCritter,
