@@ -2,10 +2,14 @@ import { Prisma, critter, mortality } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import {
   CritterCreate,
-  CritterResponseSchema,
-  CritterUpdate,
+  CritterDetailedResponseSchema,
   UniqueCritterQuery,
-  formattedCritterInclude,
+  CritterIdsRequest,
+  CritterIncludeResult,
+  CritterSimpleIncludeResult,
+  CritterUpdate,
+  detailedCritterInclude,
+  simpleCritterInclude,
 } from "./critter.utils";
 import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";
@@ -14,7 +18,45 @@ const getAllCritters = async (): Promise<critter[]> => {
   return await prisma.critter.findMany();
 };
 
-const getCritterById = async (critter_id: string): Promise<critter | null> => {
+/**
+ * Fetch multiple critters by their IDs
+ * Returns minimal required data for faster response
+ */
+const getMultipleCrittersByIds = async (
+  critterIds: CritterIdsRequest
+): Promise<
+  Pick<
+    CritterSimpleIncludeResult,
+    | "critter_id"
+    | "wlh_id"
+    | "animal_id"
+    | "critter_collection_unit"
+    | "lk_taxon"
+    | "mortality"
+  >[]
+> => {
+  const tim1 = performance.now();
+
+  const results = await prisma.critter.findMany({
+    select: {
+      critter_id: true,
+      wlh_id: true,
+      animal_id: true,
+      ...simpleCritterInclude.include,
+    },
+    where: {
+      critter_id: {
+        in: critterIds.critter_ids,
+      },
+    },
+  });
+
+  console.log(`Operation took ${performance.now() - tim1} ms`);
+
+  return results;
+};
+
+const getCritterById = async (critter_id: string): Promise<critter> => {
   return await prisma.critter.findUniqueOrThrow({
     where: { critter_id: critter_id },
   });
@@ -22,9 +64,9 @@ const getCritterById = async (critter_id: string): Promise<critter | null> => {
 
 const getCritterByIdWithDetails = async (
   critter_id: string
-): Promise<critter | null> => {
+): Promise<CritterIncludeResult> => {
   const result = await prisma.critter.findUniqueOrThrow({
-    ...formattedCritterInclude,
+    ...detailedCritterInclude,
     where: {
       critter_id: critter_id,
     },
@@ -37,7 +79,7 @@ const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results = await prisma.critter.findMany({
-    ...formattedCritterInclude,
+    ...detailedCritterInclude,
     where: {
       wlh_id: wlh_id,
     },
@@ -199,12 +241,12 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
   }
 
   const detailedCritters = await prisma.critter.findMany({
-    ...(body.detail && formattedCritterInclude),
+    ...(body.detail && detailedCritterInclude),
     where: {
       critter_id: { in: (critters.length == 1 ? critters.map(c => c.critter_id) : overlappingIds) }
     }
   });
-  return body.detail ? detailedCritters.map(c => CritterResponseSchema.parse(c)) : detailedCritters;
+  return body.detail ? detailedCritters.map(c => CritterDetailedResponseSchema.parse(c)) : detailedCritters;
 }
 
 const getTableDataTypes = async () => {
@@ -222,5 +264,6 @@ export {
   getCritterByIdWithDetails,
   getSimilarCritters,
   getTableDataTypes,
-  appendEnglishTaxonAsUUID
+  appendEnglishTaxonAsUUID,
+  getMultipleCrittersByIds,
 };
