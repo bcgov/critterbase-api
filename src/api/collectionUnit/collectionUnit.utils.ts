@@ -17,11 +17,15 @@ type CollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
   typeof collectionUnitIncludes
 >;
 
+type SimpleCollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
+  typeof simpleCollectionUnitIncludes
+>;
+
 type CollectionUnitCreateInput = z.infer<typeof CollectionUnitCreateBodySchema>;
 
 type CollectionUnitUpdateInput = z.infer<typeof CollectionUnitUpdateBodySchema>;
 
-type CollectionUnitResponse = z.TypeOf<typeof collectionUnitResponseSchema>;
+type CollectionUnitResponse = z.TypeOf<typeof CollectionUnitResponseSchema>;
 
 // Constants
 
@@ -34,6 +38,16 @@ const collectionUnitIncludes = {
   } satisfies Prisma.critter_collection_unitInclude,
 };
 
+const simpleCollectionUnitIncludes = {
+  include: {
+    xref_collection_unit: {
+      select: {
+        unit_name: true,
+        lk_collection_category: { select: { category_name: true } },
+      },
+    },
+  } satisfies Prisma.critter_collection_unitInclude,
+};
 // Schemas
 
 // Base schema for all critter collection unit related data
@@ -57,7 +71,7 @@ const critter_collection_unitSchema = implement<critter_collection_unit>().with(
 //   });
 
 // Formatted API response schema which omits fields and unpacks nested data
-const collectionUnitResponseSchema = ResponseSchema.transform((obj) => {
+const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
   const {
     // omit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -71,6 +85,14 @@ const collectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     ...rest,
     unit_name: xref_collection_unit?.unit_name ?? null,
     unit_description: xref_collection_unit?.description ?? null,
+  };
+});
+
+const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
+  const { xref_collection_unit } = obj as SimpleCollectionUnitIncludes;
+  return {
+    [xref_collection_unit.lk_collection_category?.category_name]:
+      xref_collection_unit.unit_name,
   };
 });
 
@@ -98,7 +120,9 @@ const CollectionUnitUpdateBodySchema = implement<
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export {
-  collectionUnitResponseSchema,
+  CollectionUnitResponseSchema,
+  SimpleCollectionUnitResponseSchema,
+  simpleCollectionUnitIncludes,
   collectionUnitIncludes,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
