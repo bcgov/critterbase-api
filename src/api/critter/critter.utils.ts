@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { critter, Prisma, sex } from "@prisma/client";
 import { array, z } from "zod";
-import { AuditColumns } from "../../utils/types";
+import { AuditColumns, CritterParse, FormatParse } from "../../utils/types";
 import {
   implement,
   noAudit,
@@ -26,7 +26,7 @@ import {
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
-import { getMultipleCrittersByIds } from "./critter.service";
+import { getAllCritters, getMultipleCrittersByIds } from "./critter.service";
 import {
   collectionUnitIncludes,
   CollectionUnitResponseSchema,
@@ -184,7 +184,7 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
 
 const CritterSimpleResponseSchema = ResponseSchema.transform((val) => {
   const { critter_collection_unit, lk_taxon, mortality, ...rest } =
-    val as Prisma.PromiseReturnType<typeof getMultipleCrittersByIds>[0];
+    val as CritterSimpleIncludeResult;
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
@@ -222,8 +222,16 @@ type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
 type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
-type CritterResFormat = "default" | "minimal" | "full";
-
+const critterFormatOptions: CritterParse = {
+  simple: {
+    schema: CritterSimpleResponseSchema,
+    prismaIncludes: minimalCritterSelect,
+  },
+  detailed: {
+    schema: CritterDetailedResponseSchema,
+    prismaIncludes: detailedCritterInclude,
+  },
+};
 export type {
   FormattedCritter,
   CritterIncludeResult,
@@ -234,6 +242,7 @@ export type {
   CritterIdsRequest,
 };
 export {
+  critterFormatOptions,
   detailedCritterInclude,
   simpleCritterInclude,
   minimalCritterSelect,

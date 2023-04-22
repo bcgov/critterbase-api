@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { critter } from ".prisma/client";
+import { Prisma, critter } from ".prisma/client";
 import { z } from "zod";
+import {
+  CritterDetailedResponseSchema,
+  CritterSimpleResponseSchema,
+} from "../api/critter/critter.utils";
 
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
@@ -87,4 +91,42 @@ type Implements<Model> = {
     : never;
 };
 
-export { apiError, AuditColumns, Implements };
+enum QueryFormats {
+  default = "default",
+  simple = "simple",
+  detailed = "detailed",
+}
+
+type PrismaIncludes = Prisma.HasInclude | Prisma.HasSelect;
+interface FormatParseBody<T extends z.ZodTypeAny | undefined> {
+  schema: T;
+  prismaIncludes?: PrismaIncludes;
+}
+interface FormatParse<
+  TSimple extends z.ZodTypeAny,
+  TDetailed extends z.ZodTypeAny
+> {
+  [QueryFormats.default]?: undefined; //placeholder, can modify if default needs parsing
+  [QueryFormats.simple]: FormatParseBody<TSimple>;
+  [QueryFormats.detailed]: FormatParseBody<TDetailed>;
+}
+
+type CritterParse = FormatParse<
+  typeof CritterSimpleResponseSchema,
+  typeof CritterDetailedResponseSchema
+>;
+
+type FormatParsers = CritterParse; //Add additional parsers
+
+export {
+  apiError,
+  AuditColumns,
+  Implements,
+  FormatParse,
+  FormatParsers,
+  QueryFormats,
+  CritterParse,
+  // Format,
+  // FormatSchemas,
+  // Formats,
+};
