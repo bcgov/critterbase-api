@@ -207,10 +207,7 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
   return body.detail ? detailedCritters.map(c => CritterResponseSchema.parse(c)) : detailedCritters;
 }
 
-const getTableDataTypes = async () => {
-  const results = await prisma.$queryRaw`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'critter'`;
-  return results;
-}
+
 
 export {
   getAllCritters,
@@ -221,6 +218,5 @@ export {
   deleteCritter,
   getCritterByIdWithDetails,
   getSimilarCritters,
-  getTableDataTypes,
   appendEnglishTaxonAsUUID
 };

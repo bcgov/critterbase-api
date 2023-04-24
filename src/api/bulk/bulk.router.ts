@@ -36,7 +36,14 @@ bulkRouter.post('/',
             return MortalityCreateSchema.parse(m)
         }));
 
-        const results = await bulkCreateData(crittersAppend, collections, markingsAppend, locations, parsedCaptures, parsedMortalities);
+        const results = await bulkCreateData({ 
+            critters: crittersAppend, 
+            collections: collections, 
+            markings: markingsAppend, 
+            locations: locations, 
+            captures: parsedCaptures, 
+            mortalities: parsedMortalities
+        });
         return res.status(201).json(results);
     })
 )

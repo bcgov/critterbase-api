@@ -11,7 +11,6 @@ import {
   getCritterByIdWithDetails,
   getCritterByWlhId,
   getSimilarCritters,
-  getTableDataTypes,
   updateCritter,
 } from "./critter.service";
 import {
@@ -56,12 +55,6 @@ critterRouter.post(
   })
 )
 
-critterRouter.get(
-  '/types',
-  catchErrors(async (req: Request, res: Response) => {
-    const types = await getTableDataTypes();
-    return res.status(200).json(types);
-  }))
 
 critterRouter.route("/wlh/:wlh_id").get(
   catchErrors(async (req: Request, res: Response) => {

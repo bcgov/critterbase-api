@@ -1,4 +1,4 @@
-import { system, user } from "@prisma/client";
+import { Prisma, system, user } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { apiError } from "../../utils/types";
 import { setUserContext } from "../user/user.service";
@@ -34,4 +34,9 @@ const loginUser = async (login: LoginCredentials): Promise<user> => {
   return foundUser;
 };
 
-export { loginUser };
+const getTableDataTypes = async (model: Prisma.ModelName) => {
+  const results = await prisma.$queryRaw`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ${model}`;
+  return results;
+}
+
+export { loginUser, getTableDataTypes };

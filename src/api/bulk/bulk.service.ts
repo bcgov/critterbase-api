@@ -1,14 +1,19 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 
-const bulkCreateData = async (
+interface IBulkCreate {
     critters: Prisma.critterCreateManyInput[], 
     collections: Prisma.critter_collection_unitCreateManyInput[], 
     markings: Prisma.markingCreateManyInput[], 
     locations: Prisma.locationCreateManyInput[], 
     captures: Prisma.captureCreateManyInput[], 
     mortalities: Prisma.mortalityCreateManyInput[]
+}
+
+const bulkCreateData = async (
+        bulkParams: IBulkCreate
     ) => {
+        const { critters, collections, markings, locations, captures, mortalities } = bulkParams;
         const result = await prisma.$transaction(async (prisma) => {
             const critterRes = await prisma.critter.createMany({
                 data: critters
@@ -40,4 +45,4 @@ const bulkCreateData = async (
         return result;
 }
 
-export { bulkCreateData }
+export { bulkCreateData, IBulkCreate }

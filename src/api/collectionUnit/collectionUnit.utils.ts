@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 // /* eslint-disable @typescript-eslint/no-unused-vars */
-import { critter_collection_unit, Prisma } from "@prisma/client";
-import { z } from "zod";
+import { critter_collection_unit, lk_collection_category, lk_taxon, Prisma, xref_taxon_collection_category } from "@prisma/client";
+import { z, ZodString } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,
@@ -97,11 +97,20 @@ const CollectionUnitUpdateBodySchema = implement<
   .with(CollectionUnitCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
+const CollectionUnitCategorySchema = implement<
+  Pick<lk_taxon, 'taxon_name_common' | 'taxon_name_latin'> 
+  & Pick<lk_collection_category, 'category_name'>>().with({
+    category_name: z.string(),
+    taxon_name_latin: z.string(),
+    taxon_name_common: z.string()
+  });
+
 export {
   collectionUnitResponseSchema,
   collectionUnitIncludes,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
+  CollectionUnitCategorySchema
 };
 export type {
   CollectionUnitIncludes,
