@@ -23,16 +23,35 @@ import {
   CritterSimpleResponseSchema,
 } from "./critter.utils";
 import { array } from "zod";
+import { Prisma } from "@prisma/client";
+import { prisma } from "../../utils/constants";
 
 export const critterRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
-critterRouter.get(
-  "/",
+critterRouter.post(
+  "/filter",
   catchErrors(async (req: Request, res: Response) => {
-    const allCritters = await getAllCritters();
+    const {critter_ids, animal_ids, wlh_ids} = req.body;
+    let {taxon_ids, taxon_name_commons} = req.body;
+    if(taxon_name_commons) {
+      const uuids = await prisma.lk_taxon.findMany({
+        where: {
+          taxon_name_common: { in: taxon_name_commons }
+        }
+      });
+      taxon_ids = uuids.map(a => a.taxon_id);
+    }
+    const whereInput: Prisma.critterWhereInput = {
+      critter_id: critter_ids?.length ? { in: critter_ids } : undefined,
+      animal_id: animal_ids?.length ? { in: animal_ids } : undefined,
+      wlh_id: wlh_ids?.length ?  { in: wlh_ids } : undefined,
+      //sex: sex,
+      taxon_id: taxon_ids?.length ? { in: taxon_ids } : undefined
+    }
+    const allCritters = await getAllCritters(whereInput);
     return res.status(200).json(allCritters);
   })
 );
@@ -66,8 +85,6 @@ critterRouter.post(
   '/unique',
   catchErrors(async (req: Request, res: Response) => {
     const unique = await getSimilarCritters(req.body);
-    console.log(req.body);
-    console.log(unique);
     return res.status(200).json(unique);
   })
 )

@@ -14,8 +14,10 @@ import {
 import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";
 
-const getAllCritters = async (): Promise<critter[]> => {
-  return await prisma.critter.findMany();
+const getAllCritters = async (whereInput: Prisma.critterWhereInput): Promise<critter[]> => {
+  return await prisma.critter.findMany({
+    where: whereInput
+  });
 };
 
 /**
@@ -35,7 +37,7 @@ const getMultipleCrittersByIds = async (
     | "mortality"
   >[]
 > => {
-  const tim1 = performance.now();
+  //const tim1 = performance.now();
 
   const results = await prisma.critter.findMany({
     select: {
@@ -51,7 +53,7 @@ const getMultipleCrittersByIds = async (
     },
   });
 
-  console.log(`Operation took ${performance.now() - tim1} ms`);
+  //console.log(`Operation took ${performance.now() - tim1} ms`);
 
   return results;
 };
