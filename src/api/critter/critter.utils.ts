@@ -26,10 +26,7 @@ import {
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
-import {
-  getCritterByIdWithDetails,
-  getMultipleCrittersByIds,
-} from "./critter.service";
+import { getMultipleCrittersByIds } from "./critter.service";
 import {
   collectionUnitIncludes,
   collectionUnitResponseSchema,
@@ -78,8 +75,27 @@ const simpleCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   },
 });
 
+const minimalCritterSelect = Prisma.validator<Prisma.critterArgs>()({
+  select: {
+    critter_id: true,
+    wlh_id: true,
+    animal_id: true,
+    ...simpleCritterInclude.include,
+  },
+});
+
 type CritterSimpleIncludeResult = Prisma.critterGetPayload<
   typeof simpleCritterInclude
+>;
+
+type CritterSimpleResponse = Pick<
+  CritterSimpleIncludeResult,
+  | "critter_id"
+  | "wlh_id"
+  | "animal_id"
+  | "critter_collection_unit"
+  | "lk_taxon"
+  | "mortality"
 >;
 
 const SimpleCollectionUnitSchema = ResponseSchema.transform(
@@ -216,6 +232,7 @@ export type {
   FormattedCritter,
   CritterIncludeResult,
   CritterSimpleIncludeResult,
+  CritterSimpleResponse,
   CritterCreate,
   CritterUpdate,
   CritterIdsRequest,
@@ -223,6 +240,7 @@ export type {
 export {
   detailedCritterInclude,
   simpleCritterInclude,
+  minimalCritterSelect,
   CritterDetailedResponseSchema,
   CritterSimpleResponseSchema,
   CritterUpdateSchema,
