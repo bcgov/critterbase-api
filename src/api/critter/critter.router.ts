@@ -39,17 +39,21 @@ critterRouter.post(
     if(taxon_name_commons) {
       const uuids = await prisma.lk_taxon.findMany({
         where: {
-          taxon_name_common: { in: taxon_name_commons }
+          taxon_name_common: { [taxon_name_commons.negate ? 'notIn' : 'in']: taxon_name_commons.body }
         }
       });
-      taxon_ids = uuids.map(a => a.taxon_id);
+      taxon_ids = { body: uuids.map(a => a.taxon_id), negate: false };
     }
+
     const whereInput: Prisma.critterWhereInput = {
-      critter_id: critter_ids?.length ? { in: critter_ids } : undefined,
-      animal_id: animal_ids?.length ? { in: animal_ids } : undefined,
-      wlh_id: wlh_ids?.length ?  { in: wlh_ids } : undefined,
-      //sex: sex,
-      taxon_id: taxon_ids?.length ? { in: taxon_ids } : undefined
+      critter_id: critter_ids?.body.length ? 
+        { [critter_ids.negate ? 'notIn' : 'in']: critter_ids.body } : undefined,
+      animal_id: animal_ids?.body.length ? 
+        { [animal_ids.negate ? 'notIn' : 'in']: animal_ids.body } : undefined,
+      wlh_id: wlh_ids?.body.length ? 
+        { [wlh_ids.negate ? 'notIn' : 'in']: wlh_ids.body } : undefined,
+      taxon_id: taxon_ids?.body.length ? 
+        { [taxon_ids.negate ? 'notIn' : 'in']: taxon_ids.body } : undefined
     }
     const allCritters = await getAllCritters(whereInput);
     return res.status(200).json(allCritters);
