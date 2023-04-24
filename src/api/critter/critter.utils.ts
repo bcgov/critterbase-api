@@ -158,12 +158,10 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
-    responsible_region_name: lk_region_nr?.region_nr_name,
-    critter_status: mortality.length
-      ? eCritterStatus.mortality
-      : eCritterStatus.alive,
+    responsible_region: lk_region_nr?.region_nr_name,
+    mortality_timestamp: mortality[0]?.mortality_timestamp ?? null,
     system_origin: user_critter_create_userTouser.system_name,
-    collection_unit: array(SimpleCollectionUnitResponseSchema).parse(
+    collection_units: array(SimpleCollectionUnitResponseSchema).parse(
       critter_collection_unit
     ),
     mortality: mortality.map((a) =>
@@ -192,12 +190,10 @@ const CritterDefaultResponseSchema = ResponseSchema.transform((val) => {
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
-    collection_unit: array(SimpleCollectionUnitResponseSchema).parse(
+    collection_units: array(SimpleCollectionUnitResponseSchema).parse(
       critter_collection_unit
     ),
-    critter_status: mortality.length
-      ? eCritterStatus.mortality
-      : eCritterStatus.alive,
+    mortality_timestamp: mortality[0]?.mortality_timestamp ?? null,
   };
 });
 
