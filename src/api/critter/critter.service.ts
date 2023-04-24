@@ -5,12 +5,12 @@ import {
   CritterCreate,
   CritterIdsRequest,
   CritterUpdate,
-  critterFormatOptions,
+  critterFormats,
 } from "./critter.utils";
 
 const getAllCritters = async (format = defaultFormat) => {
   return await prisma.critter.findMany({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: {},
   });
 };
@@ -24,7 +24,7 @@ const getMultipleCrittersByIds = async (
   format = defaultFormat
 ) => {
   const results = await prisma.critter.findMany({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: {
         in: critterIds.critter_ids,
@@ -36,7 +36,7 @@ const getMultipleCrittersByIds = async (
 
 const getCritterById = async (critter_id: string, format = defaultFormat) => {
   return await prisma.critter.findUniqueOrThrow({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: { critter_id: critter_id },
   });
 };
@@ -46,7 +46,7 @@ const getCritterByIdWithDetails = async (
   format = defaultFormat
 ) => {
   const result = await prisma.critter.findUniqueOrThrow({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: critter_id,
     },
@@ -59,7 +59,7 @@ const getCritterByWlhId = async (wlh_id: string, format = defaultFormat) => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results = await prisma.critter.findMany({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       wlh_id: wlh_id,
     },
@@ -74,7 +74,7 @@ const updateCritter = async (
   format = defaultFormat
 ) => {
   return prisma.critter.update({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: critter_id,
     },
@@ -87,7 +87,7 @@ const createCritter = async (
   format = defaultFormat
 ) => {
   const critter = await prisma.critter.create({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     data: critter_data,
   });
   return critter;
@@ -95,7 +95,7 @@ const createCritter = async (
 
 const deleteCritter = async (critter_id: string, format = defaultFormat) => {
   const critter = await prisma.critter.delete({
-    ...critterFormatOptions[format]?.prismaIncludes,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: critter_id,
     },

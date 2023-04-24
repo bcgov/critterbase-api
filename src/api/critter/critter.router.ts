@@ -18,7 +18,7 @@ import {
   CritterIdsRequestSchema,
   CritterQuerySchema,
   CritterUpdateSchema,
-  critterFormatOptions,
+  critterFormats,
 } from "./critter.utils";
 
 export const critterRouter = express.Router();
@@ -35,7 +35,7 @@ critterRouter.get(
       wlh_id
         ? getCritterByWlhId(wlh_id, getFormat(req))
         : getAllCritters(getFormat(req)),
-      critterFormatOptions
+      critterFormats
     );
     if (Array.isArray(critters) && !critters.length && wlh_id) {
       throw apiError.notFound(`No critters found with wlh_id=${wlh_id}`);
@@ -54,7 +54,7 @@ critterRouter.post(
     const critters = await formatParse(
       getFormat(req),
       getMultipleCrittersByIds(parsed, getFormat(req)),
-      critterFormatOptions
+      critterFormats
     );
     return res.status(200).json(critters);
   })
@@ -70,7 +70,7 @@ critterRouter.post(
     const created = await formatParse(
       getFormat(req),
       createCritter(parsed, getFormat(req)),
-      critterFormatOptions
+      critterFormats
     );
     return res.status(201).send(created);
   })
@@ -94,7 +94,7 @@ critterRouter
       const critter = await formatParse(
         getFormat(req),
         getCritterByIdWithDetails(id, getFormat(req)),
-        critterFormatOptions
+        critterFormats
       );
       return res.status(200).json(critter);
     })
@@ -106,7 +106,7 @@ critterRouter
       const critter = await formatParse(
         getFormat(req),
         updateCritter(id, parsed, getFormat(req)),
-        critterFormatOptions
+        critterFormats
       );
       res.status(200).json(critter);
     })
@@ -117,7 +117,7 @@ critterRouter
       const critter = await formatParse(
         getFormat(req),
         deleteCritter(id, getFormat(req)),
-        critterFormatOptions
+        critterFormats
       );
       res.status(200).json(critter);
     })
