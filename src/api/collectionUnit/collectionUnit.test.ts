@@ -13,7 +13,7 @@ import {
   CollectionUnitIncludes,
   collectionUnitIncludes,
   CollectionUnitResponse,
-  collectionUnitResponseSchema,
+  CollectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 
 function get_random(list) {
@@ -78,7 +78,7 @@ beforeAll(async () => {
     data: dummyCollectionUnitInput,
     ...collectionUnitIncludes,
   });
-  dummyCollectionUnit = collectionUnitResponseSchema.parse(
+  dummyCollectionUnit = CollectionUnitResponseSchema.parse(
     dummyCollectionUnitIncludes
   );
   dummyCollectionUnitKeys = Object.keys(dummyCollectionUnit);
@@ -87,9 +87,9 @@ beforeAll(async () => {
 
 describe("API: Collection Unit", () => {
   describe("ZOD SCHEMA", () => {
-    describe("collectionUnitResponseSchema", () => {
+    describe("CollectionUnitResponseSchema", () => {
       it("correctly handles null data from includes", () => {
-        const formattedData = collectionUnitResponseSchema.parse({
+        const formattedData = CollectionUnitResponseSchema.parse({
           ...dummyCollectionUnitIncludes,
           xref_collection_unit: { unit_name: null },
         });
@@ -102,7 +102,7 @@ describe("API: Collection Unit", () => {
 
     it("correctly handles undefined data from includes", () => {
       const { xref_collection_unit, ...rest } = dummyCollectionUnitIncludes;
-      const formattedData = collectionUnitResponseSchema.parse(rest);
+      const formattedData = CollectionUnitResponseSchema.parse(rest);
       expect(formattedData).toStrictEqual({
         ...dummyCollectionUnit,
         unit_name: null,

@@ -1,6 +1,7 @@
 import { PrismaClient, user } from "@prisma/client";
 import supertest from "supertest";
 import { app } from "../server";
+import { QueryFormats } from "./types";
 declare module "express-session" {
   interface SessionData {
     views: number;
@@ -75,6 +76,7 @@ const strings = {
     notFound: "artifact not found",
   },
 };
+const defaultFormat = QueryFormats.default;
 
 export {
   PORT,
@@ -87,4 +89,5 @@ export {
   prisma,
   request,
   strings,
+  defaultFormat,
 };

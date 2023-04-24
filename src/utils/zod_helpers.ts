@@ -13,7 +13,8 @@ import {
   xref_taxon_marking_body_location,
 } from "@prisma/client";
 import { z } from "zod";
-import { AuditColumns, Implements } from "./types";
+import { AuditColumns, Implements, QueryFormats } from "./types";
+
 // Schemas
 const zodID = z.string().uuid();
 
@@ -23,6 +24,10 @@ const zodAudit = {
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
 };
+
+const QueryFormatSchema = z.object({
+  format: z.nativeEnum(QueryFormats).catch(QueryFormats.default),
+});
 
 const NumberToString = z
   .union([z.string(), z.number()])
@@ -173,4 +178,5 @@ export {
   ResponseSchema,
   zodAudit,
   NumberToString,
+  QueryFormatSchema,
 };

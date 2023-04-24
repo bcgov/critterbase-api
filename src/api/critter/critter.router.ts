@@ -1,5 +1,6 @@
-import type { Request, Response } from "express";
-import express, { NextFunction } from "express";
+/* eslint-disable @typescript-eslint/require-await */
+import express, { NextFunction, Request, Response } from "express";
+import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
@@ -15,11 +16,10 @@ import {
 import {
   CritterCreateSchema,
   CritterIdsRequestSchema,
-  CritterDetailedResponseSchema,
+  CritterQuerySchema,
   CritterUpdateSchema,
-  CritterSimpleResponseSchema,
+  critterFormats,
 } from "./critter.utils";
-import { array } from "zod";
 
 export const critterRouter = express.Router();
 
@@ -29,15 +29,18 @@ export const critterRouter = express.Router();
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
-    const isMinimal = "minimal" in req.query;
-    const allCritters = await getAllCritters(isMinimal);
-    return res
-      .status(200)
-      .json(
-        isMinimal
-          ? array(CritterSimpleResponseSchema).parse(allCritters)
-          : allCritters
-      );
+    const { wlh_id } = CritterQuerySchema.parse(req.query);
+    const critters = await formatParse(
+      getFormat(req),
+      wlh_id
+        ? getCritterByWlhId(wlh_id, getFormat(req))
+        : getAllCritters(getFormat(req)),
+      critterFormats
+    );
+    if (Array.isArray(critters) && !critters.length && wlh_id) {
+      throw apiError.notFound(`No critters found with wlh_id=${wlh_id}`);
+    }
+    return res.status(200).json(critters);
   })
 );
 
@@ -48,10 +51,12 @@ critterRouter.post(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterIdsRequestSchema.parse(req.body);
-    const critters = await getMultipleCrittersByIds(parsed);
-    return res
-      .status(200)
-      .json(array(CritterSimpleResponseSchema).parse(critters));
+    const critters = await formatParse(
+      getFormat(req),
+      getMultipleCrittersByIds(parsed, getFormat(req)),
+      critterFormats
+    );
+    return res.status(200).json(critters);
   })
 );
 
@@ -62,21 +67,12 @@ critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterCreateSchema.parse(req.body);
-    const created = await createCritter(parsed);
+    const created = await formatParse(
+      getFormat(req),
+      createCritter(parsed, getFormat(req)),
+      critterFormats
+    );
     return res.status(201).send(created);
-  })
-);
-
-critterRouter.route("/wlh/:wlh_id").get(
-  catchErrors(async (req: Request, res: Response) => {
-    const critters = await getCritterByWlhId(req.params.wlh_id);
-    if (!critters.length) {
-      throw apiError.notFound(
-        "Could not find any animals with the requested WLH ID"
-      );
-    }
-    const format = critters.map((c) => CritterDetailedResponseSchema.parse(c));
-    return res.status(200).json(format);
   })
 );
 
@@ -88,29 +84,41 @@ critterRouter
   .all(
     catchErrors(async (req: Request, res: Response, next: NextFunction) => {
       await uuidParamsSchema.parseAsync(req.params);
+      res.locals.format = getFormat(req);
       next();
     })
   )
   .get(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = await getCritterByIdWithDetails(id);
-      const format = CritterDetailedResponseSchema.parse(critter);
-      return res.status(200).json(format);
+      const critter = await formatParse(
+        getFormat(req),
+        getCritterByIdWithDetails(id, getFormat(req)),
+        critterFormats
+      );
+      return res.status(200).json(critter);
     })
   )
   .put(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const parsed = CritterUpdateSchema.parse(req.body);
-      const critter = await updateCritter(id, parsed);
+      const critter = await formatParse(
+        getFormat(req),
+        updateCritter(id, parsed, getFormat(req)),
+        critterFormats
+      );
       res.status(200).json(critter);
     })
   )
   .delete(
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
-      const critter = await deleteCritter(id);
+      const critter = await formatParse(
+        getFormat(req),
+        deleteCritter(id, getFormat(req)),
+        critterFormats
+      );
       res.status(200).json(critter);
     })
   );
