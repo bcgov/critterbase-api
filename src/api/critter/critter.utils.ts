@@ -93,13 +93,13 @@ type CritterSimpleResponse = Pick<
   | "mortality"
 >;
 
-const SimpleCollectionUnitSchema = ResponseSchema.transform(
-  (val: Partial<Pick<CollectionUnitIncludes, "xref_collection_unit">>) => {
-    return {
-      unit_name: val.xref_collection_unit?.unit_name,
-    };
-  }
-);
+// const SimpleCollectionUnitSchema = ResponseSchema.transform(
+//   (val: Partial<Pick<CollectionUnitIncludes, "xref_collection_unit">>) => {
+//     return {
+//       unit_name: val.xref_collection_unit?.unit_name,
+//     };
+//   }
+// );
 
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
@@ -142,6 +142,8 @@ const CritterCreateSchema = implement<
 const CritterIdsRequestSchema = z.object({
   critter_ids: z.array(zodID),
 });
+
+const CritterQuerySchema = z.object({ wlh_id: z.string().optional() }); //Add additional properties as needed
 
 const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -251,4 +253,5 @@ export {
   CritterUpdateSchema,
   CritterCreateSchema,
   CritterIdsRequestSchema,
+  CritterQuerySchema,
 };

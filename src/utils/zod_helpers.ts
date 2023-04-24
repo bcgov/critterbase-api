@@ -14,7 +14,7 @@ import {
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements, QueryFormats } from "./types";
-const formatErr = `unsupported format: must provide either "simple" OR "detailed"`;
+
 // Schemas
 const zodID = z.string().uuid();
 
