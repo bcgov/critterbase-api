@@ -38,7 +38,7 @@ import { CollectionUnitIncludes } from "../collectionUnit/collectionUnit.utils";
 const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: {
-      select: { taxon_name_latin: true },
+      select: { taxon_name_latin: true, taxon_name_common: true },
     },
     lk_region_nr: {
       select: { region_nr_name: true },
@@ -159,7 +159,7 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   } = val as CritterIncludeResult;
   return {
     ...rest,
-    taxon_name_latin: lk_taxon.taxon_name_latin,
+    taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
     responsible_region_name: lk_region_nr?.region_nr_name,
     collection_unit: array(SimpleCollectionUnitResponseSchema).parse(
       critter_collection_unit
