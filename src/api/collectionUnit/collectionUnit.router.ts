@@ -12,6 +12,7 @@ import {
 } from "./collectionUnit.service";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
+  CollectionUnitCategorySchema,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
   CollectionUnitResponseSchema,
@@ -66,10 +67,8 @@ collectionUnitRouter.route("/critter/:id").get(
 
 collectionUnitRouter.route("/category/").get(
   catchErrors(async (req: Request, res: Response) => {
-    const taxon_common = req.params.taxon_name_common;
-    const taxon_latin = req.params.taxon_name_latin;
-    const category = req.params.category_name;
-    const response = await getCollectionUnitsFromCategory(category, taxon_common, taxon_latin);
+    const parsed = CollectionUnitCategorySchema.parse(req.params);
+    const response = await getCollectionUnitsFromCategory(parsed.category_name, parsed.taxon_name_common, parsed.taxon_name_latin);
     return res.status(200).json(response);
   })
 )
