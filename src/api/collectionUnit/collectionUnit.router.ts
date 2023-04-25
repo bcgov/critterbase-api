@@ -14,7 +14,7 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
-  collectionUnitResponseSchema,
+  CollectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 import { array } from "zod";
 import { prisma } from "../../utils/constants";
@@ -28,7 +28,7 @@ collectionUnitRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
     const collectionUnits = await getAllCollectionUnits();
-    const formattedCollectionUnit = array(collectionUnitResponseSchema).parse(
+    const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
       collectionUnits
     );
     return res.status(200).json(formattedCollectionUnit);
@@ -44,7 +44,7 @@ collectionUnitRouter.post(
     const collectionUnitData = CollectionUnitCreateBodySchema.parse(req.body);
     const collectionUnit = await createCollectionUnit(collectionUnitData);
     const formattedCollectionUnit =
-      collectionUnitResponseSchema.parse(collectionUnit);
+      CollectionUnitResponseSchema.parse(collectionUnit);
     return res.status(201).json(formattedCollectionUnit);
   })
 );
@@ -57,7 +57,7 @@ collectionUnitRouter.route("/critter/:id").get(
       where: { critter_id: id },
     });
     const collectionUnits = await getCollectionUnitsByCritterId(id);
-    const formattedCollectionUnit = array(collectionUnitResponseSchema).parse(
+    const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
       collectionUnits
     );
     return res.status(200).json(formattedCollectionUnit);
@@ -90,7 +90,7 @@ collectionUnitRouter
     catchErrors(async (req: Request, res: Response) => {
       const collectionUnit = await getCollectionUnitById(req.params.id);
       const formattedCollectionUnit =
-        collectionUnitResponseSchema.parse(collectionUnit);
+        CollectionUnitResponseSchema.parse(collectionUnit);
       return res.status(200).json(formattedCollectionUnit);
     })
   )
@@ -102,7 +102,7 @@ collectionUnitRouter
         collectionUnitData
       );
       const formattedCollectionUnit =
-        collectionUnitResponseSchema.parse(collectionUnit);
+        CollectionUnitResponseSchema.parse(collectionUnit);
       return res.status(200).json(formattedCollectionUnit);
     })
   )

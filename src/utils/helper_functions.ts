@@ -1,4 +1,9 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import console from "console";
+import type { Request } from "express";
+import { array, z } from "zod";
+import { FormatParsers, QueryFormats } from "./types";
+import { QueryFormatSchema } from "./zod_helpers";
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -43,4 +48,21 @@ const intersect = <T>(A: Array<T>, B: Array<T>): Array<T> => {
 
 const sessionHours = (hours: number) => hours * 3600000;
 
-export { prismaErrorMsg, sessionHours, intersect };
+const getFormat = (req: Request): QueryFormats =>
+  QueryFormatSchema.parse(req.query).format;
+
+const formatParse = async <TParse extends FormatParsers>(
+  format: QueryFormats,
+  service: Promise<Record<string, unknown> | Record<string, unknown>[]>,
+  formatParse: TParse
+) => {
+  const serviceData = await service;
+  const isArray = Array.isArray(serviceData);
+  const Parser = formatParse[format]?.schema;
+  if (!Parser) {
+    return serviceData;
+  }
+  return isArray ? array(Parser).parse(serviceData) : Parser.parse(serviceData);
+};
+
+export { prismaErrorMsg, sessionHours, formatParse, getFormat, intersect };

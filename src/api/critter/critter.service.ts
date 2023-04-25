@@ -1,22 +1,22 @@
 import { Prisma, critter, mortality } from "@prisma/client";
-import { prisma } from "../../utils/constants";
+import { defaultFormat, prisma } from "../../utils/constants";
+import { QueryFormats } from "../../utils/types";
 import {
   CritterCreate,
   CritterDetailedResponseSchema,
   UniqueCritterQuery,
   CritterIdsRequest,
-  CritterIncludeResult,
-  CritterSimpleIncludeResult,
   CritterUpdate,
-  detailedCritterInclude,
-  simpleCritterInclude,
+  critterFormats,
+  detailedCritterInclude
 } from "./critter.utils";
 import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";
 
-const getAllCritters = async (whereInput: Prisma.critterWhereInput): Promise<critter[]> => {
+const getAllCritters = async (format = defaultFormat, whereFilter = {}) => {
   return await prisma.critter.findMany({
-    where: whereInput
+    ...critterFormats[format]?.prismaIncludes,
+    where: whereFilter,
   });
 };
 
@@ -25,50 +25,33 @@ const getAllCritters = async (whereInput: Prisma.critterWhereInput): Promise<cri
  * Returns minimal required data for faster response
  */
 const getMultipleCrittersByIds = async (
-  critterIds: CritterIdsRequest
-): Promise<
-  Pick<
-    CritterSimpleIncludeResult,
-    | "critter_id"
-    | "wlh_id"
-    | "animal_id"
-    | "critter_collection_unit"
-    | "lk_taxon"
-    | "mortality"
-  >[]
-> => {
-  //const tim1 = performance.now();
-
+  critterIds: CritterIdsRequest,
+  format = defaultFormat
+) => {
   const results = await prisma.critter.findMany({
-    select: {
-      critter_id: true,
-      wlh_id: true,
-      animal_id: true,
-      ...simpleCritterInclude.include,
-    },
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: {
         in: critterIds.critter_ids,
       },
     },
   });
-
-  //console.log(`Operation took ${performance.now() - tim1} ms`);
-
   return results;
 };
 
-const getCritterById = async (critter_id: string): Promise<critter> => {
+const getCritterById = async (critter_id: string, format = defaultFormat) => {
   return await prisma.critter.findUniqueOrThrow({
+    ...critterFormats[format]?.prismaIncludes,
     where: { critter_id: critter_id },
   });
 };
 
 const getCritterByIdWithDetails = async (
-  critter_id: string
-): Promise<CritterIncludeResult> => {
+  critter_id: string,
+  format = defaultFormat
+) => {
   const result = await prisma.critter.findUniqueOrThrow({
-    ...detailedCritterInclude,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: critter_id,
     },
@@ -77,11 +60,11 @@ const getCritterByIdWithDetails = async (
   return result;
 };
 
-const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
+const getCritterByWlhId = async (wlh_id: string, format = defaultFormat) => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
   const results = await prisma.critter.findMany({
-    ...detailedCritterInclude,
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       wlh_id: wlh_id,
     },
@@ -92,9 +75,11 @@ const getCritterByWlhId = async (wlh_id: string): Promise<critter[]> => {
 
 const updateCritter = async (
   critter_id: string,
-  critter_data: CritterUpdate
-): Promise<critter> => {
+  critter_data: CritterUpdate,
+  format = defaultFormat
+) => {
   return prisma.critter.update({
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: critter_id,
     },
@@ -102,15 +87,20 @@ const updateCritter = async (
   });
 };
 
-const createCritter = async (critter_data: CritterCreate): Promise<critter> => {
+const createCritter = async (
+  critter_data: CritterCreate,
+  format = defaultFormat
+) => {
   const critter = await prisma.critter.create({
+    ...critterFormats[format]?.prismaIncludes,
     data: critter_data,
   });
   return critter;
 };
 
-const deleteCritter = async (critter_id: string): Promise<critter> => {
+const deleteCritter = async (critter_id: string, format = defaultFormat) => {
   const critter = await prisma.critter.delete({
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: critter_id,
     },
