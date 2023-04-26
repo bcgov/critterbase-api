@@ -34,7 +34,7 @@ export const critterRouter = express.Router();
 critterRouter.post(
   "/filter",
   catchErrors(async (req: Request, res: Response) => {
-    const {critter_ids, animal_ids, wlh_ids} = req.body;
+    const {critter_ids, animal_ids, wlh_ids, collection_units} = req.body;
     let {taxon_ids, taxon_name_commons} = req.body;
     if(taxon_name_commons) {
       const uuids = await prisma.lk_taxon.findMany({
@@ -53,9 +53,12 @@ critterRouter.post(
       wlh_id: wlh_ids?.body.length ? 
         { [wlh_ids.negate ? 'notIn' : 'in']: wlh_ids.body } : undefined,
       taxon_id: taxon_ids?.body.length ? 
-        { [taxon_ids.negate ? 'notIn' : 'in']: taxon_ids.body } : undefined
+        { [taxon_ids.negate ? 'notIn' : 'in']: taxon_ids.body } : undefined,
+      critter_collection_unit: collection_units?.body.length ? {
+        some: { collection_unit_id: { [collection_units.negate ? 'notIn' : 'in']: collection_units.body } }
+      } : undefined
     }
-    const allCritters = await getAllCritters(QueryFormats.default, whereInput);
+    const allCritters = await formatParse(getFormat(req), getAllCritters(QueryFormats.default, whereInput), critterFormats);
     return res.status(200).json(allCritters);
   })
 );

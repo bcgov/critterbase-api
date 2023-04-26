@@ -68,7 +68,7 @@ collectionUnitRouter.route("/critter/:id").get(
 collectionUnitRouter.route("/category/").get(
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CollectionUnitCategorySchema.parse(req.params);
-    const response = await getCollectionUnitsFromCategory(parsed.category_name, parsed.taxon_name_common, parsed.taxon_name_latin);
+    const response = await getCollectionUnitsFromCategory({...parsed});
     return res.status(200).json(response);
   })
 )

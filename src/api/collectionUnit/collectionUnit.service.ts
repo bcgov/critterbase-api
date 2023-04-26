@@ -51,10 +51,24 @@ const getCollectionUnitsByCritterId = async (
   return collectionUnits;
 };
 
-const getCollectionUnitsFromCategory = async (category_name: string, taxon_name_common: string | undefined, taxon_name_latin: string | undefined) => {
+interface ICollectionParams {
+  category_name: string,
+  taxon_name_common?: string,
+  taxon_name_latin?: string
+}
+
+interface ICollectionUnitParams extends ICollectionParams {
+  unit_name: string
+}
+
+const getCollectionUnitsFromCategory = async (params: ICollectionParams) => {
+  const { category_name, taxon_name_common, taxon_name_latin } = params;
   const taxon_categories = await prisma.xref_taxon_collection_category.findFirstOrThrow({
     where: {
-      lk_taxon:  { taxon_name_common: taxon_name_common, taxon_name_latin: taxon_name_latin },
+      lk_taxon:  { 
+        taxon_name_common: { equals: taxon_name_common, mode: 'insensitive' }, 
+        taxon_name_latin: { equals: taxon_name_latin, mode: 'insensitive' } 
+      },
       lk_collection_category: { category_name: {equals: category_name, mode: 'insensitive' } }
     }
   });
@@ -66,6 +80,7 @@ const getCollectionUnitsFromCategory = async (category_name: string, taxon_name_
   });
   return collectionUnits;
 }
+
 
 /**
  * * Updates an existing critter collection unit in the database
