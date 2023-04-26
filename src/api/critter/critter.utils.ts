@@ -224,10 +224,7 @@ type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
 type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
-const critterFormats: FormatParse<
-  typeof CritterDefaultResponseSchema,
-  typeof CritterDetailedResponseSchema
-> = {
+const critterFormats: FormatParse = {
   default: {
     schema: CritterDefaultResponseSchema,
     prismaIncludes: minimalCritterSelect,

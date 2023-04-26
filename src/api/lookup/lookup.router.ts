@@ -1,16 +1,147 @@
 /* eslint-disable @typescript-eslint/require-await */
+import { sex } from ".prisma/client";
 import express from "express";
 import { Request, Response } from "express-serve-static-core";
+import { prisma } from "../../utils/constants";
+import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { locationRouter } from "../location/location.router";
-import { sex } from ".prisma/client";
+import {
+  codFormats,
+  collectionUnitCategoriesFormats,
+  markingMaterialsFormats,
+  markingTypesFormats,
+  regionEnvFormats,
+  regionNrFormats,
+  wmuFormats,
+} from "./lookup.utils";
+import {
+  cod_confidence,
+  coordinate_uncertainty_unit,
+  frequency_unit,
+  measurement_unit,
+  system,
+} from "@prisma/client";
 
 export const lookupRouter = express.Router();
 
 /**
- ** Get all locations
+ ** Enum lookups
  */
 lookupRouter.get(
-  "/sex",
-  catchErrors(async (req: Request, res: Response) => res.status(200).json(sex))
+  "/enum/sex",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(sex))
+  )
+);
+lookupRouter.get(
+  "/enum/cod-confidence",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(cod_confidence))
+  )
+);
+
+lookupRouter.get(
+  "/enum/coordinate-uncertainty-unit",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(coordinate_uncertainty_unit))
+  )
+);
+lookupRouter.get(
+  "/enum/frequency-units",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(frequency_unit))
+  )
+);
+lookupRouter.get(
+  "/enum/measurement-units",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(measurement_unit))
+  )
+);
+lookupRouter.get(
+  "/enum/supported-systems",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(system))
+  )
+);
+
+/**
+ * * Lookup tables
+ */
+lookupRouter.get(
+  "/region-envs",
+  catchErrors(async (req: Request, res: Response) => {
+    const envs = await formatParse(
+      getFormat(req),
+      prisma.lk_region_env.findMany(),
+      regionEnvFormats
+    );
+    res.status(200).json(envs);
+  })
+);
+lookupRouter.get(
+  "/region-nrs",
+  catchErrors(async (req: Request, res: Response) => {
+    const nr = await formatParse(
+      getFormat(req),
+      prisma.lk_region_nr.findMany(),
+      regionNrFormats
+    );
+    res.status(200).json(nr);
+  })
+);
+lookupRouter.get(
+  "/wmus",
+  catchErrors(async (req: Request, res: Response) => {
+    const wmu = await formatParse(
+      getFormat(req),
+      prisma.lk_wildlife_management_unit.findMany(),
+      wmuFormats
+    );
+    res.status(200).json(wmu);
+  })
+);
+lookupRouter.get(
+  "/cods",
+  catchErrors(async (req: Request, res: Response) => {
+    const cod = await formatParse(
+      getFormat(req),
+      prisma.lk_cause_of_death.findMany(),
+      codFormats
+    );
+    res.status(200).json(cod);
+  })
+);
+lookupRouter.get(
+  "/marking-materials",
+  catchErrors(async (req: Request, res: Response) => {
+    const materials = await formatParse(
+      getFormat(req),
+      prisma.lk_marking_material.findMany(),
+      markingMaterialsFormats
+    );
+    res.status(200).json(materials);
+  })
+);
+lookupRouter.get(
+  "/marking-types",
+  catchErrors(async (req: Request, res: Response) => {
+    const materials = await formatParse(
+      getFormat(req),
+      prisma.lk_marking_type.findMany(),
+      markingTypesFormats
+    );
+    res.status(200).json(materials);
+  })
+);
+lookupRouter.get(
+  "/collection-unit-categories",
+  catchErrors(async (req: Request, res: Response) => {
+    const materials = await formatParse(
+      getFormat(req),
+      prisma.lk_collection_category.findMany(),
+      collectionUnitCategoriesFormats
+    );
+    res.status(200).json(materials);
+  })
 );

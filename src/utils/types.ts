@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Prisma, critter } from ".prisma/client";
 import { z } from "zod";
-import { critterFormats } from "../api/critter/critter.utils";
-
+import { IResponseSchema, ResponseSchema } from "./zod_helpers";
+type uuid = string;
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
  */
@@ -88,34 +88,36 @@ type Implements<Model> = {
     : never;
 };
 
+interface Dropdown {
+  key: string;
+  id: uuid;
+  value: string;
+}
+
 enum QueryFormats {
   default = "default",
-  // simple = "simple",
   detailed = "detailed",
+  dropdown = "dropdown",
 }
 
 type PrismaIncludes = Prisma.HasInclude | Prisma.HasSelect;
-interface FormatParseBody<T extends z.ZodTypeAny | undefined> {
-  schema: T;
+
+interface FormatParseBody {
+  schema: IResponseSchema;
   prismaIncludes?: PrismaIncludes;
 }
-interface FormatParse<
-  TDefault extends z.ZodTypeAny | undefined,
-  TDetailed extends z.ZodTypeAny
-> {
-  // [QueryFormats.default]?: undefined; //placeholder, can modify if default needs parsing
-  [QueryFormats.default]?: FormatParseBody<TDefault>;
-  [QueryFormats.detailed]: FormatParseBody<TDetailed>;
+interface FormatParse {
+  [QueryFormats.default]?: FormatParseBody;
+  [QueryFormats.detailed]?: FormatParseBody;
+  [QueryFormats.dropdown]?: FormatParseBody; //used in UI's for select/dropdowns
 }
-
-type FormatParsers = typeof critterFormats; //Add additional format parsers
 
 export {
   apiError,
   AuditColumns,
   Implements,
   FormatParse,
-  FormatParsers,
   QueryFormats,
-  // CritterParse,
+  Dropdown,
+  FormatParseBody,
 };
