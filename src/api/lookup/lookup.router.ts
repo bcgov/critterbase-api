@@ -21,6 +21,7 @@ import {
   measurement_unit,
   system,
 } from "@prisma/client";
+import { eCritterStatus } from "../critter/critter.utils";
 
 export const lookupRouter = express.Router();
 
@@ -31,6 +32,12 @@ lookupRouter.get(
   "/enum/sex",
   catchErrors(async (req: Request, res: Response) =>
     res.status(200).json(Object.keys(sex))
+  )
+);
+lookupRouter.get(
+  "/enum/critter-status",
+  catchErrors(async (req: Request, res: Response) =>
+    res.status(200).json(Object.keys(eCritterStatus))
   )
 );
 lookupRouter.get(

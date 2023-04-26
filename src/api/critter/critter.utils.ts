@@ -245,6 +245,7 @@ export type {
   CritterIdsRequest,
 };
 export {
+  eCritterStatus,
   critterFormats,
   detailedCritterInclude,
   defaultCritterInclude,
