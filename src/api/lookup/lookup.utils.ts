@@ -8,10 +8,10 @@ import {
   lk_region_nr,
   lk_wildlife_management_unit,
 } from "@prisma/client";
-import { Dropdown, FormatParse } from "../../utils/types";
+import { ISelect, FormatParse } from "../../utils/types";
 import { ResponseSchema } from "../../utils/zod_helpers";
 import { objectOutputType, ZodTypeAny } from "zod";
-const toDropdown = <AsType>(
+const toSelect = <AsType>(
   val: objectOutputType<{}, ZodTypeAny, "passthrough">,
   key: keyof AsType & string,
   valueKey: keyof AsType & string
@@ -21,62 +21,62 @@ const toDropdown = <AsType>(
     key,
     id: String(castVal[key]),
     value: String(castVal[valueKey]),
-  } satisfies Dropdown;
+  } satisfies ISelect;
 };
 
 // * FORMATS *
 const regionEnvFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_region_env>(val, "region_env_id", "region_env_name")
+      toSelect<lk_region_env>(val, "region_env_id", "region_env_name")
     ),
   },
 };
 
 const regionNrFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_region_nr>(val, "region_nr_id", "region_nr_name")
+      toSelect<lk_region_nr>(val, "region_nr_id", "region_nr_name")
     ),
   },
 };
 
 const wmuFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_wildlife_management_unit>(val, "wmu_id", "wmu_name")
+      toSelect<lk_wildlife_management_unit>(val, "wmu_id", "wmu_name")
     ),
   },
 };
 
 const codFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_cause_of_death>(val, "cod_id", "cod_reason")
+      toSelect<lk_cause_of_death>(val, "cod_id", "cod_reason")
     ),
   },
 };
 
 const markingMaterialsFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_marking_material>(val, "marking_material_id", "material")
+      toSelect<lk_marking_material>(val, "marking_material_id", "material")
     ),
   },
 };
 
 const markingTypesFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_marking_type>(val, "marking_type_id", "name")
+      toSelect<lk_marking_type>(val, "marking_type_id", "name")
     ),
   },
 };
 
 const collectionUnitCategoriesFormats: FormatParse = {
-  dropdown: {
+  asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toDropdown<lk_collection_category>(
+      toSelect<lk_collection_category>(
         val,
         "collection_category_id",
         "category_name"

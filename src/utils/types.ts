@@ -88,7 +88,7 @@ type Implements<Model> = {
     : never;
 };
 
-interface Dropdown {
+interface ISelect {
   key: string;
   id: uuid;
   value: string;
@@ -97,7 +97,7 @@ interface Dropdown {
 enum QueryFormats {
   default = "default",
   detailed = "detailed",
-  dropdown = "dropdown",
+  asSelect = "asSelect",
 }
 
 type PrismaIncludes = Prisma.HasInclude | Prisma.HasSelect;
@@ -109,7 +109,7 @@ interface FormatParseBody {
 interface FormatParse {
   [QueryFormats.default]?: FormatParseBody;
   [QueryFormats.detailed]?: FormatParseBody;
-  [QueryFormats.dropdown]?: FormatParseBody; //used in UI's for select/dropdowns
+  [QueryFormats.asSelect]?: FormatParseBody; //used in UI's for select/dropdowns
 }
 
 export {
@@ -118,6 +118,6 @@ export {
   Implements,
   FormatParse,
   QueryFormats,
-  Dropdown,
+  ISelect,
   FormatParseBody,
 };
