@@ -1,19 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { sex } from ".prisma/client";
-import express from "express";
-import { Request, Response } from "express-serve-static-core";
-import { prisma } from "../../utils/constants";
-import { formatParse, getFormat } from "../../utils/helper_functions";
-import { catchErrors } from "../../utils/middleware";
-import {
-  codFormats,
-  collectionUnitCategoriesFormats,
-  markingMaterialsFormats,
-  markingTypesFormats,
-  regionEnvFormats,
-  regionNrFormats,
-  wmuFormats,
-} from "./lookup.utils";
 import {
   cod_confidence,
   coordinate_uncertainty_unit,
@@ -21,7 +7,23 @@ import {
   measurement_unit,
   system,
 } from "@prisma/client";
+import express from "express";
+import { Request, Response } from "express-serve-static-core";
+import { prisma } from "../../utils/constants";
+import { formatParse, getFormat } from "../../utils/helper_functions";
+import { catchErrors } from "../../utils/middleware";
 import { eCritterStatus } from "../critter/critter.utils";
+import {
+  codFormats,
+  collectionUnitCategoriesFormats,
+  markingMaterialsFormats,
+  markingTypesFormats,
+  regionEnvFormats,
+  regionNrFormats,
+  taxonFormats,
+  taxonSpeciesAndSubsWhere,
+  wmuFormats,
+} from "./lookup.utils";
 
 export const lookupRouter = express.Router();
 
@@ -150,5 +152,33 @@ lookupRouter.get(
       collectionUnitCategoriesFormats
     );
     res.status(200).json(materials);
+  })
+);
+/**
+ * This includes all taxons
+ */
+lookupRouter.get(
+  "/taxons",
+  catchErrors(async (req: Request, res: Response) => {
+    const taxons = await formatParse(
+      getFormat(req),
+      prisma.lk_taxon.findMany(),
+      taxonFormats
+    );
+    res.status(200).json(taxons);
+  })
+);
+/**
+ * This includes species and sub species
+ */
+lookupRouter.get(
+  "/taxons/species",
+  catchErrors(async (req: Request, res: Response) => {
+    const species = await formatParse(
+      getFormat(req),
+      prisma.lk_taxon.findMany(taxonSpeciesAndSubsWhere),
+      taxonFormats
+    );
+    res.status(200).json(species);
   })
 );
