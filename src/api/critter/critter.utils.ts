@@ -31,11 +31,15 @@ import {
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
 
-const eCritterStatus = {
-  alive: "Alive",
-  mortality: "Mortality",
-};
+// const eCritterStatus = {
+//   alive: "Alive",
+//   mortality: "Mortality",
+// };
 
+enum eCritterStatus {
+  alive = "alive",
+  mortality = "mortality",
+}
 const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: {
