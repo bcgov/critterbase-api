@@ -1,8 +1,8 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import console from "console";
 import type { Request } from "express";
-import { array, z } from "zod";
-import { FormatParsers, QueryFormats } from "./types";
+import { array } from "zod";
+import { FormatParse, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
 /**
  ** Formats a prisma error messsage based on the prisma error code
@@ -46,10 +46,13 @@ const sessionHours = (hours: number) => hours * 3600000;
 const getFormat = (req: Request): QueryFormats =>
   QueryFormatSchema.parse(req.query).format;
 
-const formatParse = async <TParse extends FormatParsers>(
+type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
+
+//TODO fully type the conditional return. Note: very difficult
+const formatParse = async (
   format: QueryFormats,
-  service: Promise<Record<string, unknown> | Record<string, unknown>[]>,
-  formatParse: TParse
+  service: Promise<ServiceReturn>,
+  formatParse: FormatParse
 ) => {
   const serviceData = await service;
   const isArray = Array.isArray(serviceData);
@@ -59,5 +62,4 @@ const formatParse = async <TParse extends FormatParsers>(
   }
   return isArray ? array(Parser).parse(serviceData) : Parser.parse(serviceData);
 };
-
 export { prismaErrorMsg, sessionHours, formatParse, getFormat };

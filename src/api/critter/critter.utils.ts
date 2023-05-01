@@ -31,11 +31,15 @@ import {
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
 
-const eCritterStatus = {
-  alive: "Alive",
-  mortality: "Mortality",
-};
+// const eCritterStatus = {
+//   alive: "Alive",
+//   mortality: "Mortality",
+// };
 
+enum eCritterStatus {
+  alive = "alive",
+  mortality = "mortality",
+}
 const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: {
@@ -224,10 +228,7 @@ type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
 type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
-const critterFormats: FormatParse<
-  typeof CritterDefaultResponseSchema,
-  typeof CritterDetailedResponseSchema
-> = {
+const critterFormats: FormatParse = {
   default: {
     schema: CritterDefaultResponseSchema,
     prismaIncludes: minimalCritterSelect,
@@ -248,6 +249,7 @@ export type {
   CritterIdsRequest,
 };
 export {
+  eCritterStatus,
   critterFormats,
   detailedCritterInclude,
   defaultCritterInclude,

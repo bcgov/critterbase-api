@@ -158,6 +158,10 @@ const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
   ...zodAudit,
 });
 
+const TransformResponseSchema = ResponseSchema.transform((val) => val); //This is used as a base for a type.
+type IResponseSchema = typeof TransformResponseSchema;
+export type { IResponseSchema };
+
 export {
   uuidParamsSchema,
   critterIDQuerySchema,
