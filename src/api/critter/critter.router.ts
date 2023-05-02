@@ -2,7 +2,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { apiError } from "../../utils/types";
+import { QueryFormats, apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   appendEnglishTaxonAsUUID,
@@ -17,17 +17,70 @@ import {
 } from "./critter.service";
 import {
   CritterCreateSchema,
+  CritterDetailedResponseSchema,
   CritterIdsRequestSchema,
   CritterQuerySchema,
   CritterUpdateSchema,
   critterFormats,
 } from "./critter.utils";
+import { Prisma } from "@prisma/client";
+import { prisma } from "../../utils/constants";
 
 export const critterRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
+critterRouter.post(
+  "/filter",
+  catchErrors(async (req: Request, res: Response) => {
+    const { critter_ids, animal_ids, wlh_ids, collection_units } = req.body;
+    let { taxon_ids, taxon_name_commons } = req.body;
+    if (taxon_name_commons) {
+      const uuids = await prisma.lk_taxon.findMany({
+        where: {
+          taxon_name_common: {
+            [taxon_name_commons.negate ? "notIn" : "in"]:
+              taxon_name_commons.body,
+          },
+        },
+      });
+      taxon_ids = { body: uuids.map((a) => a.taxon_id), negate: false };
+    }
+
+    const whereInput: Prisma.critterWhereInput = {
+      critter_id: critter_ids?.body.length
+        ? { [critter_ids.negate ? "notIn" : "in"]: critter_ids.body }
+        : undefined,
+      animal_id: animal_ids?.body.length
+        ? { [animal_ids.negate ? "notIn" : "in"]: animal_ids.body }
+        : undefined,
+      wlh_id: wlh_ids?.body.length
+        ? { [wlh_ids.negate ? "notIn" : "in"]: wlh_ids.body }
+        : undefined,
+      taxon_id: taxon_ids?.body.length
+        ? { [taxon_ids.negate ? "notIn" : "in"]: taxon_ids.body }
+        : undefined,
+      critter_collection_unit: collection_units?.body.length
+        ? {
+            some: {
+              collection_unit_id: {
+                [collection_units.negate ? "notIn" : "in"]:
+                  collection_units.body,
+              },
+            },
+          }
+        : undefined,
+    };
+    const allCritters = await formatParse(
+      getFormat(req),
+      getAllCritters(QueryFormats.default, whereInput),
+      critterFormats
+    );
+    return res.status(200).json(allCritters);
+  })
+);
+
 critterRouter.get(
   "/",
   catchErrors(async (req: Request, res: Response) => {
@@ -62,24 +115,24 @@ critterRouter.post(
   })
 );
 
-
-
 critterRouter.post(
-  '/unique',
+  "/unique",
   catchErrors(async (req: Request, res: Response) => {
     const unique = await getSimilarCritters(req.body);
     console.log(req.body);
     console.log(unique);
     return res.status(200).json(unique);
   })
-)
+);
 
 /**
  ** Create new critter
  */
-critterRouter.post("/create",
+critterRouter.post(
+  "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const parsed = CritterCreateSchema.parse(req.body);
+    const b = await appendEnglishTaxonAsUUID(req.body);
+    const parsed = CritterCreateSchema.parse(b);
     const created = await formatParse(
       getFormat(req),
       createCritter(parsed, getFormat(req)),
@@ -88,6 +141,19 @@ critterRouter.post("/create",
     return res.status(201).send(created);
   })
 );
+
+// critterRouter.route("/wlh/:wlh_id").get(
+//   catchErrors(async (req: Request, res: Response) => {
+//     const critters = await getCritterByWlhId(req.params.wlh_id);
+//     if (!critters.length) {
+//       throw apiError.notFound(
+//         "Could not find any animals with the requested WLH ID"
+//       );
+//     }
+//     const format = critters.map((c) => CritterDetailedResponseSchema.parse(c));
+//     return res.status(200).json(format);
+//   })
+// );
 
 /**
  * * All critter_id related routes

@@ -135,10 +135,12 @@ const CritterUpdateSchema = implement<
 const CritterCreateSchema = implement<
   Omit<Prisma.critterCreateManyInput, keyof AuditColumns>
 >().with(
-  CritterSchema.omit({...noAudit}).partial().required({
-    taxon_id: true,
-    sex: true,
-  }).shape
+  CritterSchema.omit({ ...noAudit })
+    .partial()
+    .required({
+      taxon_id: true,
+      sex: true,
+    }).shape
 );
 
 /**
@@ -232,6 +234,16 @@ type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
 type FormattedCritter = z.infer<typeof CritterDetailedResponseSchema>;
 type CritterIdsRequest = z.infer<typeof CritterIdsRequestSchema>;
 
+interface UniqueCritterQuery {
+  critter?: Partial<critter> & {
+    taxon_name_latin?: string;
+    taxon_name_common?: string;
+  };
+  markings?: Partial<MarkingResponseSchema>[];
+  captures?: Partial<FormattedCapture>[];
+  mortality?: Partial<FormattedMortality>;
+}
+
 const critterFormats: FormatParse = {
   default: {
     schema: CritterDefaultResponseSchema,
@@ -243,13 +255,6 @@ const critterFormats: FormatParse = {
   },
 };
 
-type UniqueCritterQuery = { 
-    critter?: Partial<critter> & { taxon_name_latin?: string, taxon_name_common?: string},
-    markings?: Partial<MarkingResponseSchema>[]
-    captures?: Partial<FormattedCapture>[],
-    mortality: Partial<FormattedMortality>
-  }
-
 export type {
   FormattedCritter,
   CritterIncludeResult,
@@ -258,7 +263,7 @@ export type {
   CritterCreate,
   CritterUpdate,
   CritterIdsRequest,
-  UniqueCritterQuery
+  UniqueCritterQuery,
 };
 export {
   eCritterStatus,

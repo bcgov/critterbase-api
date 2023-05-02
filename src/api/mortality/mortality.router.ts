@@ -16,7 +16,6 @@ import {
   MortalityResponseSchema,
   MortalityUpdateSchema,
 } from "./mortality.utils";
-import { prisma } from "../../utils/constants";
 
 export const mortalityRouter = express.Router();
 

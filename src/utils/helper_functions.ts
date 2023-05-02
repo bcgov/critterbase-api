@@ -41,10 +41,10 @@ const prismaErrorMsg = (
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
-const intersect = <T>(A: Array<T>, B: Array<T>): Array<T> => {
+const intersect = <T>(A: T[], B: T[]): T[] => {
   const setB = new Set(B);
-  return Array.from(new Set(A)).filter(x => setB.has(x))
-}
+  return Array.from(new Set(A)).filter((x) => setB.has(x));
+};
 
 const sessionHours = (hours: number) => hours * 3600000;
 
