@@ -4,7 +4,8 @@ import { createUser, setUserContext } from "../user/user.service";
 import { AuthLoginSchema, UserCreateBodySchema } from "../user/user.utils";
 
 import express from "express";
-import { loginUser } from "./access.service";
+import { getTableDataTypes, loginUser } from "./access.service";
+import { Prisma } from "@prisma/client";
 
 export const accessRouter = express.Router();
 
@@ -43,5 +44,13 @@ accessRouter.post(
     );
     req.session.user = user;
     return res.status(201).json({ user_id: contextUserId }).end();
+  })
+);
+
+accessRouter.get(
+  "/types/:model",
+  catchErrors(async (req: Request, res: Response) => {
+    const types = await getTableDataTypes(req.params.model as Prisma.ModelName);
+    return res.status(200).json(types);
   })
 );

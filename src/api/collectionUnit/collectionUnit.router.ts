@@ -7,16 +7,18 @@ import {
   getCollectionUnitsByCritterId,
   updateCollectionUnit,
   createCollectionUnit,
-  deleteCollectionUnit,
+  deleteCollectionUnit
 } from "./collectionUnit.service";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
+  CollectionUnitCategorySchema,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
   CollectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 import { array } from "zod";
 import { prisma } from "../../utils/constants";
+import { apiError } from "../../utils/types";
 
 export const collectionUnitRouter = express.Router();
 
@@ -62,6 +64,7 @@ collectionUnitRouter.route("/critter/:id").get(
     return res.status(200).json(formattedCollectionUnit);
   })
 );
+
 
 /**
  ** All collectionUnit_id related routes

@@ -2,6 +2,7 @@ import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
+  appendEnglishMarkingsAsUUID,
   createMarking,
   deleteMarking,
   getAllMarkings,
@@ -38,6 +39,8 @@ markingRouter.get(
 markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
+    const { taxon_id } = await prisma.critter.findUniqueOrThrow({ where: { critter_id: req.body.critter_id }})
+    req.body = await appendEnglishMarkingsAsUUID(req.body, taxon_id);
     const markingData = MarkingCreateBodySchema.parse(req.body);
     const newMarking = markingResponseSchema.parse(
       await createMarking(markingData)

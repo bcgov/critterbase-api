@@ -5,12 +5,14 @@ import { catchErrors } from "../../utils/middleware";
 import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
+  appendEnglishTaxonAsUUID,
   createCritter,
   deleteCritter,
   getAllCritters,
   getCritterByIdWithDetails,
   getCritterByWlhId,
   getMultipleCrittersByIds,
+  getSimilarCritters,
   updateCritter,
 } from "./critter.service";
 import {
@@ -60,11 +62,22 @@ critterRouter.post(
   })
 );
 
+
+
+critterRouter.post(
+  '/unique',
+  catchErrors(async (req: Request, res: Response) => {
+    const unique = await getSimilarCritters(req.body);
+    console.log(req.body);
+    console.log(unique);
+    return res.status(200).json(unique);
+  })
+)
+
 /**
  ** Create new critter
  */
-critterRouter.post(
-  "/create",
+critterRouter.post("/create",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterCreateSchema.parse(req.body);
     const created = await formatParse(

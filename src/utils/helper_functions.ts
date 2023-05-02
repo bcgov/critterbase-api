@@ -41,6 +41,11 @@ const prismaErrorMsg = (
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 
+const intersect = <T>(A: Array<T>, B: Array<T>): Array<T> => {
+  const setB = new Set(B);
+  return Array.from(new Set(A)).filter(x => setB.has(x))
+}
+
 const sessionHours = (hours: number) => hours * 3600000;
 
 const getFormat = (req: Request): QueryFormats =>
@@ -62,4 +67,4 @@ const formatParse = async (
   }
   return isArray ? array(Parser).parse(serviceData) : Parser.parse(serviceData);
 };
-export { prismaErrorMsg, sessionHours, formatParse, getFormat };
+export { prismaErrorMsg, sessionHours, formatParse, getFormat, intersect };

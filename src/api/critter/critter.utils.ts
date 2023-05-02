@@ -11,6 +11,7 @@ import {
 import {
   captureInclude,
   CaptureResponseSchema,
+  FormattedCapture,
 } from "../capture/capture.utils";
 import {
   simpleCollectionUnitIncludes,
@@ -18,6 +19,7 @@ import {
 } from "../collectionUnit/collectionUnit.utils";
 import {
   markingIncludes,
+  MarkingResponseSchema,
   markingResponseSchema,
 } from "../marking/marking.utils";
 import {
@@ -27,9 +29,11 @@ import {
   QuantitativeResponseSchema,
 } from "../measurement/measurement.utils";
 import {
+  FormattedMortality,
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
+import { collectionUnitIncludes } from "../collectionUnit/collectionUnit.utils";
 
 // const eCritterStatus = {
 //   alive: "Alive",
@@ -129,9 +133,9 @@ const CritterUpdateSchema = implement<
 );
 
 const CritterCreateSchema = implement<
-  Omit<Prisma.critterCreateManyInput, "critter_id" | keyof AuditColumns>
+  Omit<Prisma.critterCreateManyInput, keyof AuditColumns>
 >().with(
-  CritterUpdateSchema.required({
+  CritterSchema.omit({...noAudit}).partial().required({
     taxon_id: true,
     sex: true,
   }).shape
@@ -239,6 +243,13 @@ const critterFormats: FormatParse = {
   },
 };
 
+type UniqueCritterQuery = { 
+    critter?: Partial<critter> & { taxon_name_latin?: string, taxon_name_common?: string},
+    markings?: Partial<MarkingResponseSchema>[]
+    captures?: Partial<FormattedCapture>[],
+    mortality: Partial<FormattedMortality>
+  }
+
 export type {
   FormattedCritter,
   CritterIncludeResult,
@@ -247,6 +258,7 @@ export type {
   CritterCreate,
   CritterUpdate,
   CritterIdsRequest,
+  UniqueCritterQuery
 };
 export {
   eCritterStatus,
