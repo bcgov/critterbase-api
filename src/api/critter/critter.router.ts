@@ -18,9 +18,11 @@ import {
 import {
   CritterCreateSchema,
   CritterDetailedResponseSchema,
+  CritterFilterSchema,
   CritterIdsRequestSchema,
   CritterQuerySchema,
   CritterUpdateSchema,
+  UniqueCritterQuerySchema,
   critterFormats,
 } from "./critter.utils";
 import { Prisma } from "@prisma/client";
@@ -34,8 +36,10 @@ export const critterRouter = express.Router();
 critterRouter.post(
   "/filter",
   catchErrors(async (req: Request, res: Response) => {
-    const { critter_ids, animal_ids, wlh_ids, collection_units } = req.body;
-    let { taxon_ids, taxon_name_commons } = req.body;
+    const parsed = CritterFilterSchema.parse(req.body);
+    const { critter_ids, animal_ids, wlh_ids, collection_units, taxon_name_commons } = parsed;
+    let { taxon_ids } = parsed;
+
     if (taxon_name_commons) {
       const uuids = await prisma.lk_taxon.findMany({
         where: {
@@ -118,9 +122,8 @@ critterRouter.post(
 critterRouter.post(
   "/unique",
   catchErrors(async (req: Request, res: Response) => {
-    const unique = await getSimilarCritters(req.body);
-    console.log(req.body);
-    console.log(unique);
+    const parsed = UniqueCritterQuerySchema.parse(req.body);
+    const unique = await getSimilarCritters(parsed);
     return res.status(200).json(unique);
   })
 );
@@ -131,8 +134,8 @@ critterRouter.post(
 critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const b = await appendEnglishTaxonAsUUID(req.body);
-    const parsed = CritterCreateSchema.parse(b);
+    const parsed = CritterCreateSchema.parse(req.body);
+    await appendEnglishTaxonAsUUID(parsed);
     const created = await formatParse(
       getFormat(req),
       createCritter(parsed, getFormat(req)),
