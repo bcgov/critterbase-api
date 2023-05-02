@@ -25,13 +25,13 @@ const getMortalityById = async (
 
 const appendDefaultCOD = async (body: any) => {
   const cod_res = await prisma.lk_cause_of_death.findFirstOrThrow({
-    where: {cod_category: 'Unknown'}
+    where: { cod_category: "Unknown" },
   });
-  if(!body.proximate_cause_of_death_id) {
+  if (!body.proximate_cause_of_death_id) {
     body.proximate_cause_of_death_id = cod_res.cod_id; //This is just a temp solution, ideally they should be forced to provide this.
   }
   return body;
-}
+};
 
 const getMortalityByCritter = async (
   critter_id: string
@@ -80,5 +80,5 @@ export {
   createMortality,
   updateMortality,
   deleteMortality,
-  appendDefaultCOD
+  appendDefaultCOD,
 };
