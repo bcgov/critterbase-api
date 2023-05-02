@@ -21,6 +21,8 @@ declare global {
   }
 }
 
+const oneDay = 60 * 60 * 24 * 1000;
+
 const API_KEY_HEADER = "API-KEY";
 
 const API_KEY = process.env.API_KEY;
@@ -83,4 +85,5 @@ export {
   prisma,
   request,
   strings,
+  oneDay
 };

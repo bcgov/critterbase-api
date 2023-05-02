@@ -23,6 +23,7 @@ import {
   validateApiKey,
 } from "./utils/middleware";
 import { bulkRouter } from "./api/bulk/bulk.router";
+import { xrefRouter } from "./api/xref/xref.router";
 const SafeMemoryStore = memorystore(session);
 const options: session.SessionOptions = {
   cookie: {
@@ -56,6 +57,7 @@ app.use("/api/captures", auth, captureRouter);
 app.use("/api/mortality", auth, mortalityRouter);
 app.use("/api/measurements", auth, measurementRouter);
 app.use("/api/bulk", auth, bulkRouter);
+app.use("/api/xref", auth, xrefRouter);
 
 app.use(errorLogger);
 app.use(errorHandler);

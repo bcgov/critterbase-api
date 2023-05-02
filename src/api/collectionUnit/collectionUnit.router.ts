@@ -7,8 +7,7 @@ import {
   getCollectionUnitsByCritterId,
   updateCollectionUnit,
   createCollectionUnit,
-  deleteCollectionUnit,
-  getCollectionUnitsFromCategory,
+  deleteCollectionUnit
 } from "./collectionUnit.service";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
@@ -19,6 +18,7 @@ import {
 } from "./collectionUnit.utils";
 import { array } from "zod";
 import { prisma } from "../../utils/constants";
+import { apiError } from "../../utils/types";
 
 export const collectionUnitRouter = express.Router();
 
@@ -65,13 +65,6 @@ collectionUnitRouter.route("/critter/:id").get(
   })
 );
 
-collectionUnitRouter.route("/category/").get(
-  catchErrors(async (req: Request, res: Response) => {
-    const parsed = CollectionUnitCategorySchema.parse(req.params);
-    const response = await getCollectionUnitsFromCategory(parsed.category_name, parsed.taxon_name_common, parsed.taxon_name_latin);
-    return res.status(200).json(response);
-  })
-)
 
 /**
  ** All collectionUnit_id related routes

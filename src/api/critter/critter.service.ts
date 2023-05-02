@@ -1,5 +1,5 @@
 import { Prisma, critter, mortality } from "@prisma/client";
-import { prisma } from "../../utils/constants";
+import { oneDay, prisma } from "../../utils/constants";
 import {
   CritterCreate,
   CritterResponseSchema,
@@ -148,7 +148,7 @@ const getSimilarCritters = async (body: UniqueCritterQuery & {detail: boolean}):
     };
   }
 
-  const oneDay = 60 * 60 * 24 * 1000;
+  
   const captures = [];
   if(body.captures) {
     for(const c of body.captures) {

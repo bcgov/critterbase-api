@@ -98,11 +98,11 @@ const CollectionUnitUpdateBodySchema = implement<
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const CollectionUnitCategorySchema = implement<
-  Pick<lk_taxon, 'taxon_name_common' | 'taxon_name_latin'> 
-  & Pick<lk_collection_category, 'category_name'>>().with({
+  Partial<Pick<lk_taxon, 'taxon_name_common' | 'taxon_name_latin'> 
+  & Pick<lk_collection_category, 'category_name'>>>().with({
     category_name: z.string(),
-    taxon_name_latin: z.string(),
-    taxon_name_common: z.string()
+    taxon_name_latin: z.string().optional(),
+    taxon_name_common: z.string().optional()
   });
 
 export {
