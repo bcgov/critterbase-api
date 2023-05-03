@@ -1,11 +1,15 @@
 import { prisma } from "../../utils/constants";
-import { getBodyLocationByNameAndTaxonUUID, getColourByName } from "../lookup_helpers/getters";
+import {
+  getBodyLocationByNameAndTaxonUUID,
+  getColourByName,
+} from "../lookup_helpers/getters";
 import {
   MarkingCreateInput,
   MarkingIncludes,
   markingIncludes,
   MarkingUpdateInput,
 } from "./marking.utils";
+import { ReqBody } from "../../utils/types";
 
 /**
  * * Returns all existing markings from the database
@@ -95,22 +99,32 @@ const deleteMarking = async (marking_id: string): Promise<MarkingIncludes> => {
   });
   return marking;
 };
-
-const appendEnglishMarkingsAsUUID = async (body: any, taxon_id: string) => {
-  if(body.primary_colour) {
+const appendEnglishMarkingsAsUUID = async (
+  body: ReqBody<{
+    primary_colour: string;
+    secondary_colour: string;
+    body_location: string;
+  }>,
+  taxon_id: string
+) => {
+  if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);
     body.primary_colour_id = col?.colour_id;
   }
-  if(body.secondary_colour) {
+  if (body.secondary_colour) {
     const col = await getColourByName(body.secondary_colour);
     body.secondary_colour_id = col?.colour_id;
   }
-  if(body.body_location) {
+  if (body.body_location) {
     const taxon_uuid = taxon_id;
-    const loc = await getBodyLocationByNameAndTaxonUUID(body.body_location, taxon_uuid);
+    const loc = await getBodyLocationByNameAndTaxonUUID(
+      body.body_location,
+      taxon_uuid
+    );
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
   }
-}
+  return body;
+};
 
 export {
   getAllMarkings,
@@ -119,5 +133,5 @@ export {
   updateMarking,
   createMarking,
   deleteMarking,
-  appendEnglishMarkingsAsUUID
+  appendEnglishMarkingsAsUUID,
 };

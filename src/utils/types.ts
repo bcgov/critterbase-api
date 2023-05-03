@@ -112,6 +112,8 @@ interface FormatParse {
   [QueryFormats.asSelect]?: FormatParseBody; //used in UI's for select/dropdowns
 }
 
+type ReqBody<T> = Record<string, unknown> & Partial<T>;
+
 export {
   apiError,
   AuditColumns,
@@ -120,4 +122,5 @@ export {
   QueryFormats,
   ISelect,
   FormatParseBody,
+  ReqBody,
 };

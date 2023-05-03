@@ -41,7 +41,7 @@ const uuidParamsSchema = z.object({
   id: z.string().uuid("query param is an invalid UUID"),
 });
 
-const critterIDQuerySchema = z.object({
+const critterIdSchema = z.object({
   critter_id: zodID,
 });
 
@@ -164,7 +164,7 @@ export type { IResponseSchema };
 
 export {
   uuidParamsSchema,
-  critterIDQuerySchema,
+  critterIdSchema,
   nonEmpty,
   noAudit,
   zodID,

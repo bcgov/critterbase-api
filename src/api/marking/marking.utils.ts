@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { frequency_unit, marking, Prisma } from "@prisma/client";
+import {
+  frequency_unit,
+  marking,
+  Prisma,
+  xref_taxon_marking_body_location,
+} from "@prisma/client";
 import { z, ZodString } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
+  critterIdSchema,
   implement,
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -15,6 +21,12 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { prisma } from "../../utils/constants";
+import { appendEnglishMarkingsAsUUID } from "./marking.service";
+import {
+  getColourByName,
+  getBodyLocationByNameAndTaxonUUID,
+} from "../lookup_helpers/getters";
 
 // Types
 type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
@@ -23,7 +35,10 @@ type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 
 type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
-type MarkingResponseSchema = z.TypeOf<typeof markingResponseSchema>;
+type IMarkingLookup = Pick<
+  xref_taxon_marking_body_location,
+  "body_location"
+> & { primary_colour: string; secondary_colour: string };
 
 // Constants
 
@@ -65,12 +80,12 @@ const markingSchema = implement<marking>().with({
   primary_colour_id: zodID.nullable(),
   secondary_colour_id: zodID.nullable(),
   text_colour_id: zodID.nullable(),
-  identifier: (z
-  .union([z.string(), z.number(), z.null()])
-  .refine((value) => typeof value !== "undefined", {
-    message: "Value is undefined",
-  })
-  .transform((value) => String(value))) as unknown as z.ZodNullable<ZodString>,
+  identifier: z
+    .union([z.string(), z.number(), z.null()])
+    .refine((value) => typeof value !== "undefined", {
+      message: "Value is undefined",
+    })
+    .transform((value) => String(value)) as unknown as z.ZodNullable<ZodString>,
   frequency: z.number().nullable(),
   frequency_unit: z.nativeEnum(frequency_unit).nullable(),
   order: z.number().int().nullable(),
@@ -136,24 +151,60 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
 });
 
 // Validate incoming request body for create marking
-const MarkingCreateBodySchema = implement<
-  Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
->().with(
-  markingSchema
-    .omit({ ...noAudit, marking_id: true })
-    .partial()
-    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
-);
+// const MarkingCreateBodySchema = implement<
+//   Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
+// >().with(
+//   markingSchema
+//     .omit({ ...noAudit, marking_id: true })
+//     .partial()
+//     .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
+// );
+const MarkingCreateBodySchema = markingSchema
+  .extend({
+    primary_colour: z.string().optional(),
+    secondary_colour: z.string().optional(),
+    body_location: z.string().optional(),
+    taxon_marking_body_location_id: zodID.optional(),
+  })
+  .partial()
+  .omit({ ...noAudit, marking_id: true })
+  .transform(async (v) => {
+    const { primary_colour, secondary_colour, body_location } = v;
+    const { taxon_id } = await prisma.critter.findFirstOrThrow({
+      where: { critter_id: v.critter_id },
+    });
+    if (primary_colour) {
+      const col = await getColourByName(primary_colour);
+      v.primary_colour_id = col?.colour_id;
+    }
+    if (secondary_colour) {
+      const col = await getColourByName(secondary_colour);
+      v.secondary_colour_id = col?.colour_id;
+    }
+    if (body_location) {
+      const taxon_uuid = taxon_id;
+      const loc = await getBodyLocationByNameAndTaxonUUID(
+        body_location,
+        taxon_uuid
+      );
+      v.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
+    }
+    return v;
+  });
 
 // Validate incoming request body for update marking
-const MarkingUpdateBodySchema = implement<
-  Omit<
-    Prisma.markingUncheckedUpdateManyInput,
-    "marking_id" | keyof AuditColumns
-  >
->()
-  .with(MarkingCreateBodySchema.partial().shape)
-  .refine(nonEmpty, "no new data was provided or the format was invalid");
+const MarkingUpdateBodySchema = MarkingCreateBodySchema.refine(
+  nonEmpty,
+  "no new data was provided or the format was invalid"
+);
+
+const MarkingCreateWithEnglishSchema = z
+  .object({
+    primary_colour: z.string().optional(),
+    secondary_colour: z.string().optional(),
+    body_location: z.string().optional(),
+  })
+  .passthrough();
 
 export {
   MarkingCreateBodySchema,
@@ -161,10 +212,6 @@ export {
   markingResponseSchema,
   markingIncludes,
   markingIncludesSchema,
+  MarkingCreateWithEnglishSchema,
 };
-export type {
-  MarkingCreateInput,
-  MarkingUpdateInput,
-  MarkingIncludes,
-  MarkingResponseSchema,
-};
+export type { MarkingCreateInput, MarkingUpdateInput, MarkingIncludes };

@@ -10,7 +10,6 @@ import {
   getAllFamilies,
   getAllParents,
   getChildrenOfCritterId,
-  getFamilyById,
   getFamilyByLabel,
   getImmediateFamily,
   getImmediateFamilyOfCritter,

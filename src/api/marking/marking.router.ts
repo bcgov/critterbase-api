@@ -10,14 +10,18 @@ import {
   getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { critterIdSchema, uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
+  MarkingCreateWithEnglishSchema,
   markingResponseSchema,
   MarkingUpdateBodySchema,
 } from "./marking.utils";
-import { array } from "zod";
+import { array, z } from "zod";
 import { prisma } from "../../utils/constants";
+import { getCritterById } from "../critter/critter.service";
+import { QueryFormats } from "../../utils/types";
+import console from "console";
 
 export const markingRouter = express.Router();
 
@@ -39,9 +43,7 @@ markingRouter.get(
 markingRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
-    const { taxon_id } = await prisma.critter.findUniqueOrThrow({ where: { critter_id: req.body.critter_id }})
-    req.body = await appendEnglishMarkingsAsUUID(req.body, taxon_id);
-    const markingData = MarkingCreateBodySchema.parse(req.body);
+    const markingData = await MarkingCreateBodySchema.parseAsync(req.body);
     const newMarking = markingResponseSchema.parse(
       await createMarking(markingData)
     );
@@ -83,7 +85,7 @@ markingRouter
   )
   .patch(
     catchErrors(async (req: Request, res: Response) => {
-      const markingData = MarkingUpdateBodySchema.parse(req.body);
+      const markingData = await MarkingUpdateBodySchema.parseAsync(req.body);
       const updatedMarking = markingResponseSchema.parse(
         await updateMarking(req.params.id, markingData)
       );

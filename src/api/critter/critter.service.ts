@@ -1,6 +1,5 @@
 import { Prisma, critter, lk_taxon, mortality } from "@prisma/client";
 import { defaultFormat, oneDay, prisma } from "../../utils/constants";
-import { QueryFormats } from "../../utils/types";
 import {
   CritterCreate,
   CritterDetailedResponseSchema,
@@ -172,7 +171,7 @@ const getSimilarCritters = async (
     critters = await prisma.critter.findMany({
       where: {
         lk_taxon:
-          body.critter?.taxon_name_common || body.critter?.taxon_name_latin
+          body.critter.taxon_name_common || body.critter.taxon_name_latin
             ? {
                 taxon_name_latin: body.critter.taxon_name_latin ?? undefined,
                 taxon_name_common: body.critter.taxon_name_common ?? undefined,

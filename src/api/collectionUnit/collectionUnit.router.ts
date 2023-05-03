@@ -18,7 +18,6 @@ import {
 } from "./collectionUnit.utils";
 import { array } from "zod";
 import { prisma } from "../../utils/constants";
-import { apiError } from "../../utils/types";
 import { getCollectionUnitsFromCategory } from "../xref/xref.service";
 
 export const collectionUnitRouter = express.Router();
@@ -63,14 +62,6 @@ collectionUnitRouter.route("/critter/:id").get(
       collectionUnits
     );
     return res.status(200).json(formattedCollectionUnit);
-  })
-);
-
-collectionUnitRouter.route("/category/").get(
-  catchErrors(async (req: Request, res: Response) => {
-    const parsed = CollectionUnitCategorySchema.parse(req.params);
-    const response = await getCollectionUnitsFromCategory({ ...parsed });
-    return res.status(200).json(response);
   })
 );
 
