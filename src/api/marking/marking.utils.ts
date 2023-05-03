@@ -7,9 +7,8 @@ import {
   xref_taxon_marking_body_location,
 } from "@prisma/client";
 import { z, ZodString } from "zod";
-import { AuditColumns } from "../../utils/types";
+import { prisma } from "../../utils/constants";
 import {
-  critterIdSchema,
   implement,
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -21,11 +20,9 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
-import { prisma } from "../../utils/constants";
-import { appendEnglishMarkingsAsUUID } from "./marking.service";
 import {
-  getColourByName,
   getBodyLocationByNameAndTaxonUUID,
+  getColourByName,
 } from "../lookup_helpers/getters";
 
 // Types
@@ -168,7 +165,7 @@ const MarkingCreateBodySchema = markingSchema
   })
   .partial()
   .omit({ ...noAudit, marking_id: true })
-  .transform(async (v) => {
+  .transform(async (v): Promise<Omit<marking, "marking_id">> => {
     const { primary_colour, secondary_colour, body_location } = v;
     const { taxon_id } = await prisma.critter.findFirstOrThrow({
       where: { critter_id: v.critter_id },
@@ -189,7 +186,7 @@ const MarkingCreateBodySchema = markingSchema
       );
       v.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
     }
-    return v;
+    return v as marking;
   });
 
 // Validate incoming request body for update marking

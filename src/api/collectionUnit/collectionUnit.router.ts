@@ -1,24 +1,22 @@
-import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
+import express, { NextFunction } from "express";
+import { array } from "zod";
+import { prisma } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
+  createCollectionUnit,
+  deleteCollectionUnit,
   getAllCollectionUnits,
   getCollectionUnitById,
   getCollectionUnitsByCritterId,
   updateCollectionUnit,
-  createCollectionUnit,
-  deleteCollectionUnit,
 } from "./collectionUnit.service";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
-  CollectionUnitCategorySchema,
   CollectionUnitCreateBodySchema,
-  CollectionUnitUpdateBodySchema,
   CollectionUnitResponseSchema,
+  CollectionUnitUpdateBodySchema,
 } from "./collectionUnit.utils";
-import { array } from "zod";
-import { prisma } from "../../utils/constants";
-import { getCollectionUnitsFromCategory } from "../xref/xref.service";
 
 export const collectionUnitRouter = express.Router();
 

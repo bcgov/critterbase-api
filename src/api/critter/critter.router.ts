@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
+import { Prisma } from "@prisma/client";
 import express, { NextFunction, Request, Response } from "express";
+import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { QueryFormats, apiError } from "../../utils/types";
@@ -17,7 +19,6 @@ import {
 } from "./critter.service";
 import {
   CritterCreateSchema,
-  CritterDetailedResponseSchema,
   CritterFilterSchema,
   CritterIdsRequestSchema,
   CritterQuerySchema,
@@ -25,8 +26,6 @@ import {
   UniqueCritterQuerySchema,
   critterFormats,
 } from "./critter.utils";
-import { Prisma } from "@prisma/client";
-import { prisma } from "../../utils/constants";
 
 export const critterRouter = express.Router();
 
@@ -37,7 +36,13 @@ critterRouter.post(
   "/filter",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = CritterFilterSchema.parse(req.body);
-    const { critter_ids, animal_ids, wlh_ids, collection_units, taxon_name_commons } = parsed;
+    const {
+      critter_ids,
+      animal_ids,
+      wlh_ids,
+      collection_units,
+      taxon_name_commons,
+    } = parsed;
     let { taxon_ids } = parsed;
 
     if (taxon_name_commons) {
