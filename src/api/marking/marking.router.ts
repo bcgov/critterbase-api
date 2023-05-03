@@ -1,8 +1,10 @@
-import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
+import express, { NextFunction } from "express";
+import { array } from "zod";
+import { prisma } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
-  appendEnglishMarkingsAsUUID,
   createMarking,
   deleteMarking,
   getAllMarkings,
@@ -10,18 +12,11 @@ import {
   getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
-import { critterIdSchema, uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
-  MarkingCreateWithEnglishSchema,
-  markingResponseSchema,
   MarkingUpdateBodySchema,
+  markingResponseSchema,
 } from "./marking.utils";
-import { array, z } from "zod";
-import { prisma } from "../../utils/constants";
-import { getCritterById } from "../critter/critter.service";
-import { QueryFormats } from "../../utils/types";
-import console from "console";
 
 export const markingRouter = express.Router();
 
