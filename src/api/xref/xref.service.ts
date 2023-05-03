@@ -12,7 +12,7 @@ const getCollectionUnitsFromCategory = async (category_name: string, taxon_name_
         }
       }
     });
-    const category_id = taxon_categories?.collection_category_id;
+    const category_id = taxon_categories.collection_category_id;
     const collectionUnits = await prisma.xref_collection_unit.findMany({
       where: {
         collection_category_id: category_id
