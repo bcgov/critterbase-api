@@ -31,7 +31,7 @@ const errorLogger = (
   next: NextFunction
 ) => {
   if (!IS_TEST) {
-    console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()}`);
+    console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()} -- ${err.stack ?? 'No stack'}`);
   }
 
   next(err);

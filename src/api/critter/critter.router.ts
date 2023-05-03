@@ -128,7 +128,7 @@ critterRouter.post(
   "/unique",
   catchErrors(async (req: Request, res: Response) => {
     const parsed = UniqueCritterQuerySchema.parse(req.body);
-    const unique = await getSimilarCritters(parsed);
+    const unique = await formatParse(getFormat(req), getSimilarCritters(parsed, getFormat(req)), critterFormats);
     return res.status(200).json(unique);
   })
 );
@@ -139,8 +139,8 @@ critterRouter.post(
 critterRouter.post(
   "/create",
   catchErrors(async (req: Request, res: Response) => {
+    await appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
     const parsed = CritterCreateSchema.parse(req.body);
-    await appendEnglishTaxonAsUUID(parsed);
     const created = await formatParse(
       getFormat(req),
       createCritter(parsed, getFormat(req)),

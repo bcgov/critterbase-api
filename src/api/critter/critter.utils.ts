@@ -18,8 +18,8 @@ import {
   SimpleCollectionUnitResponseSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import {
+  FormattedMarking,
   markingIncludes,
-  MarkingResponseSchema,
   markingResponseSchema,
 } from "../marking/marking.utils";
 import {
@@ -133,17 +133,11 @@ const CritterUpdateSchema = implement<
 
 const CritterCreateSchema = implement<
   Omit<
-    Prisma.critterCreateManyInput & {
-      taxon_name_common?: string;
-      taxon_name_latin?: string;
-    },
+    Prisma.critterCreateManyInput,
     keyof AuditColumns
   >
 >().with(
-  CritterSchema.extend({
-    taxon_name_common: z.string().optional(),
-    taxon_name_latin: z.string().optional(),
-  })
+  CritterSchema
     .omit({ ...noAudit })
     .partial()
     .required({
@@ -287,13 +281,13 @@ interface UniqueCritterQuery {
     taxon_name_latin?: string;
     taxon_name_common?: string;
   };
-  markings?: Partial<MarkingResponseSchema>[];
+  markings?: Partial<FormattedMarking>[];
   captures?: Partial<FormattedCapture>[];
   mortality?: Partial<FormattedMortality>;
 }
 
 const UniqueCritterQuerySchema = implement<UniqueCritterQuery>().with({
-  critter: CritterSchema.extend({
+  critter: CritterSchema.partial().extend({
     taxon_name_latin: z.string().optional(),
     taxon_name_common: z.string().optional(),
   }).optional(),

@@ -109,29 +109,27 @@ const deleteCritter = async (critter_id: string, format = defaultFormat) => {
 
 const formatLocationNameSearch = (
   obj: Partial<LocationResponse> | null | undefined
-):
-  | (Prisma.Without<Prisma.LocationRelationFilter, Prisma.locationWhereInput> &
-      Prisma.locationWhereInput)
-  | (Prisma.Without<Prisma.locationWhereInput, Prisma.LocationRelationFilter> &
-      Prisma.LocationRelationFilter)
-  | null
-  | undefined => {
+): (Prisma.Without<Prisma.LocationRelationFilter, Prisma.locationWhereInput> & Prisma.locationWhereInput) | 
+(Prisma.Without<Prisma.locationWhereInput, Prisma.LocationRelationFilter> & Prisma.LocationRelationFilter) | null | undefined => {
   return {
-    lk_region_env: {
+    lk_region_env: obj?.region_env_name ? {
       region_env_name: {
-        contains: obj?.region_env_name ?? undefined,
+        contains: obj.region_env_name,
         mode: "insensitive",
-      },
-    },
-    lk_region_nr: {
+      }
+    } : undefined,
+    lk_region_nr: obj?.region_nr_name ? {
       region_nr_name: {
-        contains: obj?.region_nr_name ?? undefined,
+        contains: obj.region_nr_name,
         mode: "insensitive",
-      },
-    },
-    lk_wildlife_management_unit: {
-      wmu_name: { contains: obj?.wmu_name ?? undefined, mode: "insensitive" },
-    },
+      }
+    } : undefined,
+    lk_wildlife_management_unit: obj?.wmu_name ? {
+      wmu_name: { 
+        contains: obj.wmu_name, 
+        mode: "insensitive" 
+      }
+    } : undefined,
   };
 };
 //changed body: any -> lk_taxon
@@ -168,7 +166,8 @@ const appendEnglishTaxonAsUUID = async (body: {
 };
 
 const getSimilarCritters = async (
-  body: UniqueCritterQuery
+  body: UniqueCritterQuery,
+  format = defaultFormat
 ): Promise<critter[]> => {
   let critters: critter[] = [];
   if (body.critter) {
@@ -265,6 +264,7 @@ const getSimilarCritters = async (
     const mortality_timestamp = m.mortality_timestamp
       ? new Date(m.mortality_timestamp)
       : undefined;
+    if(mortality_timestamp) console.log(new Date(+mortality_timestamp.getTime() + +oneDay));
     const mortality_result = await prisma.mortality.findMany({
       where: {
         mortality_timestamp: mortality_timestamp
@@ -276,6 +276,7 @@ const getSimilarCritters = async (
         location: formatLocationNameSearch(m.location),
       },
     });
+    console.log(JSON.stringify(mortality_result))
     mortality.push(...mortality_result);
   }
 
@@ -285,6 +286,7 @@ const getSimilarCritters = async (
       ...markings.map((a) => a.critter_id),
     ])
   );
+  
   if (critters.length && markings.length) {
     overlappingIds = intersect(
       critters.map((c) => c.critter_id),
@@ -304,8 +306,8 @@ const getSimilarCritters = async (
     );
   }
 
-  const detailedCritters = await prisma.critter.findMany({
-    ...(body.detail && detailedCritterInclude),
+  const foundCritters = await prisma.critter.findMany({
+    ...critterFormats[format]?.prismaIncludes,
     where: {
       critter_id: {
         in:
@@ -315,9 +317,7 @@ const getSimilarCritters = async (
       },
     },
   });
-  return body.detail
-    ? detailedCritters.map((c) => CritterDetailedResponseSchema.parse(c))
-    : detailedCritters;
+  return foundCritters;
 };
 
 export {

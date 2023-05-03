@@ -23,7 +23,7 @@ const getMortalityById = async (
   return mort;
 };
 
-const appendDefaultCOD = async (body: any) => {
+const appendDefaultCOD = async (body: {proximate_cause_of_death_id?: string}) => {
   const cod_res = await prisma.lk_cause_of_death.findFirstOrThrow({
     where: { cod_category: "Unknown" },
   });

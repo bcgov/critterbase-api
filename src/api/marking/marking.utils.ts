@@ -20,17 +20,15 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
-import {
-  getBodyLocationByNameAndTaxonUUID,
-  getColourByName,
-} from "../lookup_helpers/getters";
-
+import { AuditColumns } from "../../utils/types";
 // Types
 type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
 type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 
 type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
+
+type FormattedMarking = z.infer<typeof markingResponseSchema>;
 
 type IMarkingLookup = Pick<
   xref_taxon_marking_body_location,
@@ -147,29 +145,30 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
   };
 });
 
-// Validate incoming request body for create marking
-// const MarkingCreateBodySchema = implement<
-//   Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
-// >().with(
-//   markingSchema
-//     .omit({ ...noAudit, marking_id: true })
-//     .partial()
-//     .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
-// );
-const MarkingCreateBodySchema = markingSchema
+//Validate incoming request body for create marking
+const MarkingCreateBodySchema = implement<
+  Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
+>().with(
+  markingSchema
+    .omit({ ...noAudit, marking_id: true })
+    .partial()
+    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
+);
+/*const MarkingCreateBodySchema = markingSchema
   .extend({
     primary_colour: z.string().optional(),
     secondary_colour: z.string().optional(),
     body_location: z.string().optional(),
     taxon_marking_body_location_id: zodID.optional(),
+    taxon_id: zodID.optional()
   })
   .partial()
   .omit({ ...noAudit, marking_id: true })
   .transform(async (v): Promise<Omit<marking, "marking_id">> => {
     const { primary_colour, secondary_colour, body_location } = v;
-    const { taxon_id } = await prisma.critter.findFirstOrThrow({
+    const taxon_id = v.taxon_id ?? (await prisma.critter.findFirstOrThrow({
       where: { critter_id: v.critter_id },
-    });
+    })).taxon_id;
     if (primary_colour) {
       const col = await getColourByName(primary_colour);
       v.primary_colour_id = col?.colour_id;
@@ -187,7 +186,7 @@ const MarkingCreateBodySchema = markingSchema
       v.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
     }
     return v as marking;
-  });
+  });*/
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.refine(
@@ -211,4 +210,4 @@ export {
   markingIncludesSchema,
   MarkingCreateWithEnglishSchema,
 };
-export type { MarkingCreateInput, MarkingUpdateInput, MarkingIncludes };
+export type { MarkingCreateInput, MarkingUpdateInput, MarkingIncludes, FormattedMarking };
