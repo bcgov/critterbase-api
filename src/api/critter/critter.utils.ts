@@ -33,7 +33,6 @@ import {
   mortalityInclude,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
-import { collectionUnitIncludes } from "../collectionUnit/collectionUnit.utils";
 
 // const eCritterStatus = {
 //   alive: "Alive",
@@ -133,13 +132,18 @@ const CritterUpdateSchema = implement<
 );
 
 const CritterCreateSchema = implement<
-  Omit<Prisma.critterCreateManyInput & {taxon_name_common?: string, taxon_name_latin?: string}, keyof AuditColumns>
+  Omit<
+    Prisma.critterCreateManyInput & {
+      taxon_name_common?: string;
+      taxon_name_latin?: string;
+    },
+    keyof AuditColumns
+  >
 >().with(
-  CritterSchema
-    .extend({
-      taxon_name_common: z.string().optional(),
-      taxon_name_latin: z.string().optional()
-    })
+  CritterSchema.extend({
+    taxon_name_common: z.string().optional(),
+    taxon_name_latin: z.string().optional(),
+  })
     .omit({ ...noAudit })
     .partial()
     .required({
@@ -213,31 +217,43 @@ const CritterDefaultResponseSchema = ResponseSchema.transform((val) => {
 });
 
 const CritterFilterSchema = z.object({
-  critter_ids: z.object({
-    body: z.array(zodID),
-    negate: z.boolean()
-  }).optional(),
-  animal_ids: z.object({
-    body: z.array(z.string()),
-    negate: z.boolean()
-  }).optional(),
-  wlh_ids: z.object({
-    body: z.array(z.string()),
-    negate: z.boolean()
-  }).optional(),
-  collection_units: z.object({
-    body: z.array(zodID),
-    negate: z.boolean()
-  }).optional(),
-  taxon_ids: z.object({
-    body: z.array(zodID),
-    negate: z.boolean()
-  }).optional(),
-  taxon_name_commons: z.object({
-    body: z.array(z.string()),
-    negate: z.boolean()
-  }).optional()
-})
+  critter_ids: z
+    .object({
+      body: z.array(zodID),
+      negate: z.boolean(),
+    })
+    .optional(),
+  animal_ids: z
+    .object({
+      body: z.array(z.string()),
+      negate: z.boolean(),
+    })
+    .optional(),
+  wlh_ids: z
+    .object({
+      body: z.array(z.string()),
+      negate: z.boolean(),
+    })
+    .optional(),
+  collection_units: z
+    .object({
+      body: z.array(zodID),
+      negate: z.boolean(),
+    })
+    .optional(),
+  taxon_ids: z
+    .object({
+      body: z.array(zodID),
+      negate: z.boolean(),
+    })
+    .optional(),
+  taxon_name_commons: z
+    .object({
+      body: z.array(z.string()),
+      negate: z.boolean(),
+    })
+    .optional(),
+});
 
 interface critterInterface {
   critter_id?: string;
@@ -277,11 +293,14 @@ interface UniqueCritterQuery {
 }
 
 const UniqueCritterQuerySchema = implement<UniqueCritterQuery>().with({
-  critter: CritterSchema.extend({ taxon_name_latin: z.string().optional(), taxon_name_common: z.string().optional() }).optional(),
+  critter: CritterSchema.extend({
+    taxon_name_latin: z.string().optional(),
+    taxon_name_common: z.string().optional(),
+  }).optional(),
   markings: z.array(markingResponseSchema).optional(),
   captures: z.array(CaptureResponseSchema).optional(),
-  mortality: MortalityResponseSchema.optional()
-})
+  mortality: MortalityResponseSchema.optional(),
+});
 
 const critterFormats: FormatParse = {
   default: {
@@ -317,5 +336,5 @@ export {
   CritterIdsRequestSchema,
   CritterQuerySchema,
   CritterFilterSchema,
-  UniqueCritterQuerySchema
+  UniqueCritterQuerySchema,
 };

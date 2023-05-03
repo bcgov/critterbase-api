@@ -135,7 +135,11 @@ const formatLocationNameSearch = (
   };
 };
 //changed body: any -> lk_taxon
-const appendEnglishTaxonAsUUID = async (body: {taxon_name_common?: string, taxon_name_latin?: string, taxon_id?: string}) => {
+const appendEnglishTaxonAsUUID = async (body: {
+  taxon_name_common?: string;
+  taxon_name_latin?: string;
+  taxon_id?: string;
+}) => {
   let taxon = null;
   if (body.taxon_name_common) {
     taxon = await prisma.lk_taxon.findFirst({
