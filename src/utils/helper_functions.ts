@@ -19,21 +19,23 @@ const prismaErrorMsg = (
   switch (code) {
     case "P2025":
       return {
-        error: `${JSON.stringify(meta?.cause) || message}`,
+        error: typeof meta?.cause === "string" ? meta.cause : message,
         status: 404,
       };
     case "P2002":
       return {
-        error: `unique constraint failed on the fields: ${JSON.stringify(
-          meta?.target
-        )}`,
+        error: `unique constraint failed on the fields: ${
+          typeof meta?.target === "string" ? meta.target : "unknown fields..."
+        }`,
         status: 400,
       };
     case "P2003":
       return {
-        error: `foreign key constraint failed on the field: ${JSON.stringify(
-          meta?.field_name
-        )}`,
+        error: `foreign key constraint failed on the field: ${
+          typeof meta?.fieldName === "string"
+            ? meta.fieldName
+            : "unknown field name..."
+        }`,
         status: 404,
       };
   }

@@ -31,7 +31,11 @@ const errorLogger = (
   next: NextFunction
 ) => {
   if (!IS_TEST) {
-    console.error(`🛑 ${req.method} ${req.originalUrl} -> ${err.toString()} -- ${err.stack ?? 'No stack'}`);
+    console.error(
+      `🛑 ${req.method} ${req.originalUrl} -> ${err.toString()} -- ${
+        err.stack ?? "No stack"
+      }`
+    );
   }
 
   next(err);
@@ -50,11 +54,22 @@ const errorHandler = (
   if (err instanceof ZodError) {
     //Removed formErrors from object
     const fieldErrors = err.flatten().fieldErrors;
+    const fieldKeys = Object.keys(fieldErrors);
     // const formErrors = err.flatten().formErrors;
-    if (!Object.keys(fieldErrors).length) {
+    if (!fieldKeys.length) {
       return res.status(400).json({ error: err.format()._errors.join(", ") });
     }
-    return res.status(400).json({ errors: fieldErrors });
+    // const errMsg = Object.entries(fieldErrors)
+    //   .map(
+    //     ([key, valueArr]) =>
+    //       `${key.replace("_", " ").replace("id", "ID").toUpperCase()}: ${
+    //         valueArr ? valueArr[0] : "error"
+    //       }`
+    //   )
+    //   .join(",  ");
+    return res.status(400).json({
+      errors: fieldErrors,
+    });
   }
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });
