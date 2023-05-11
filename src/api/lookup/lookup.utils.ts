@@ -52,11 +52,20 @@ const wmuFormats: FormatParse = {
 };
 
 const codFormats: FormatParse = {
-  asSelect: {
+  /*asSelect: {
     schema: ResponseSchema.transform((val) =>
       toSelect<lk_cause_of_death>(val, "cod_id", "cod_reason")
     ),
-  },
+  },*/
+  asSelect: {
+    schema: ResponseSchema.transform((val) => {
+      return {
+        key: 'cod_id',
+        id: val.cod_id,
+        value: String(val.cod_category) + (val.cod_reason ? ' | ' +  String(val.cod_reason) : '')
+      }
+    })
+  }
 };
 
 const markingMaterialsFormats: FormatParse = {

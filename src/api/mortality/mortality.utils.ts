@@ -11,6 +11,8 @@ import {
 import {
   CommonFormattedLocationSchema,
   commonLocationSelect,
+  LocationBody,
+  LocationCreateSchema,
 } from "../location/location.utils";
 
 const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
@@ -78,8 +80,12 @@ const MortalityUpdateSchema = implement<
 
 const MortalityCreateSchema = implement<
   Omit<Prisma.mortalityCreateManyInput, "mortality_id" | keyof AuditColumns>
+  & { location?: LocationBody }
 >().with(
-  MortalityUpdateSchema.required({
+  MortalityUpdateSchema.extend({
+    location: LocationCreateSchema.optional()
+  })
+  .required({
     critter_id: true,
     mortality_timestamp: true,
     proximate_cause_of_death_id: true,
