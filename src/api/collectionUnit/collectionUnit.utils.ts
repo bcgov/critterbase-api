@@ -49,7 +49,9 @@ const simpleCollectionUnitIncludes = {
       select: {
         collection_unit_id: true,
         unit_name: true,
-        lk_collection_category: { select: { category_name: true } },
+        lk_collection_category: {
+          select: { collection_category_id: true, category_name: true },
+        },
       },
     },
   } satisfies Prisma.critter_collection_unitInclude,
@@ -95,11 +97,18 @@ const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
 });
 
 const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
-  const { xref_collection_unit } = obj as SimpleCollectionUnitIncludes;
+  const {
+    xref_collection_unit: {
+      lk_collection_category: { category_name, collection_category_id },
+      unit_name,
+      collection_unit_id,
+    },
+  } = obj as SimpleCollectionUnitIncludes;
   return {
-    category_name: xref_collection_unit.lk_collection_category.category_name,
-    unit_name: xref_collection_unit.unit_name,
-    collection_unit_id: xref_collection_unit.collection_unit_id,
+    category_name,
+    unit_name,
+    collection_unit_id,
+    collection_category_id,
   };
 });
 
