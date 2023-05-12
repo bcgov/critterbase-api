@@ -13,18 +13,7 @@ import {
 import { ZodTypeAny, objectOutputType } from "zod";
 import { FormatParse, ISelect } from "../../utils/types";
 import { ResponseSchema } from "../../utils/zod_helpers";
-const toSelect = <AsType>(
-  val: objectOutputType<{}, ZodTypeAny, "passthrough">,
-  key: keyof AsType & string,
-  valueKey: keyof AsType & string
-) => {
-  const castVal = val as AsType;
-  return {
-    key,
-    id: String(castVal[key]),
-    value: String(castVal[valueKey]),
-  } satisfies ISelect;
-};
+import { toSelect } from "../../utils/helper_functions";
 
 // * FORMATS *
 const regionEnvFormats: FormatParse = {
@@ -60,12 +49,14 @@ const codFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) => {
       return {
-        key: 'cod_id',
+        key: "cod_id",
         id: val.cod_id,
-        value: String(val.cod_category) + (val.cod_reason ? ' | ' +  String(val.cod_reason) : '')
-      }
-    })
-  }
+        value:
+          String(val.cod_category) +
+          (val.cod_reason ? " | " + String(val.cod_reason) : ""),
+      };
+    }),
+  },
 };
 
 const markingMaterialsFormats: FormatParse = {

@@ -164,6 +164,7 @@ lookupRouter.get(
     res.status(200).json(materials);
   })
 );
+
 /**
  * This includes all taxons
  */

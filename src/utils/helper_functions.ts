@@ -1,8 +1,8 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import console from "console";
 import type { Request } from "express";
-import { array } from "zod";
-import { FormatParse, QueryFormats } from "./types";
+import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
+import { FormatParse, ISelect, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
 /**
  ** Formats a prisma error messsage based on the prisma error code
@@ -69,4 +69,24 @@ const formatParse = async (
   }
   return isArray ? array(Parser).parse(serviceData) : Parser.parse(serviceData);
 };
-export { prismaErrorMsg, sessionHours, formatParse, getFormat, intersect };
+
+const toSelect = <AsType>(
+  val: objectOutputType<ZodRawShape, ZodTypeAny, "passthrough">,
+  key: keyof AsType & string,
+  valueKey: keyof AsType & string
+) => {
+  const castVal = val as AsType;
+  return {
+    key,
+    id: String(castVal[key]),
+    value: String(castVal[valueKey]),
+  } satisfies ISelect;
+};
+export {
+  prismaErrorMsg,
+  sessionHours,
+  formatParse,
+  getFormat,
+  intersect,
+  toSelect,
+};
