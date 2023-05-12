@@ -48,8 +48,37 @@ const getMortalityByCritter = async (
 const createMortality = async (
   mortality_data: MortalityCreate
 ): Promise<mortality> => {
+  const {
+    critter_id,
+    location_id,
+    location,
+    proximate_cause_of_death_id,
+    proximate_predated_by_taxon_id,
+    ultimate_cause_of_death_id,
+    ultimate_predated_by_taxon_id,
+    ...rest
+  } = mortality_data;
+
   return await prisma.mortality.create({
-    data: mortality_data,
+    data: {
+      critter: { connect: { critter_id } },
+      location: location_id 
+      ? {
+          connect : { location_id: location_id }
+        }
+      : location 
+      ? { create: location }
+      : undefined,
+      lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: 
+        { connect: { cod_id: proximate_cause_of_death_id }},
+      lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: proximate_predated_by_taxon_id ?
+        { connect: { taxon_id: proximate_predated_by_taxon_id}} : undefined,
+      lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: ultimate_cause_of_death_id ? 
+        { connect: { cod_id: ultimate_cause_of_death_id }} : undefined,
+      lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: ultimate_predated_by_taxon_id ? 
+        { connect: { taxon_id: ultimate_predated_by_taxon_id }} : undefined,
+      ...rest
+    },
   });
 };
 

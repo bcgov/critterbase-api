@@ -107,11 +107,12 @@ lookupRouter.get(
 lookupRouter.get(
   "/wmus",
   catchErrors(async (req: Request, res: Response) => {
+    const rgx = "(\\d)-(\\d+)";
     const wmu = await formatParse(
       getFormat(req),
-      prisma.lk_wildlife_management_unit.findMany({
-        orderBy: { wmu_name: order },
-      }),
+      prisma.$queryRaw`SELECT wmu_id, wmu_name, description, create_user, update_user, create_timestamp, update_timestamp FROM "critterbase"."lk_wildlife_management_unit" lwmu 
+        ORDER BY (regexp_matches(lwmu.wmu_name, ${rgx}))[1]::int,
+          (regexp_matches(lwmu.wmu_name, ${rgx}))[2]::int;`,
       wmuFormats
     );
     res.status(200).json(wmu);
