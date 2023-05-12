@@ -58,12 +58,16 @@ const CaptureCreateSchema = implement<
   Omit<Prisma.captureCreateManyInput, keyof AuditColumns> & {
     capture_location?: LocationBody;
     release_location?: LocationBody;
+    // capture_mortality?: boolean;
+    // release_mortality?: boolean;
   }
 >().with(
   CaptureBodySchema.omit({ ...noAudit })
     .extend({
       capture_location: LocationCreateSchema,
       release_location: LocationCreateSchema,
+      // capture_mortality: z.boolean().optional(),
+      // release_mortality: z.boolean().optional(),
     })
     .partial()
     .required({

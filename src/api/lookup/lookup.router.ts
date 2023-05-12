@@ -4,6 +4,10 @@ import {
   cod_confidence,
   coordinate_uncertainty_unit,
   frequency_unit,
+  lk_cause_of_death,
+  lk_region_env,
+  lk_region_nr,
+  lk_wildlife_management_unit,
   measurement_unit,
   system,
 } from "@prisma/client";
@@ -26,6 +30,7 @@ import {
 } from "./lookup.utils";
 
 export const lookupRouter = express.Router();
+const order = "asc";
 
 /**
  ** Enum lookups
@@ -93,7 +98,7 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const nr = await formatParse(
       getFormat(req),
-      prisma.lk_region_nr.findMany(),
+      prisma.lk_region_nr.findMany({ orderBy: { region_nr_name: order } }),
       regionNrFormats
     );
     res.status(200).json(nr);
@@ -104,7 +109,9 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const wmu = await formatParse(
       getFormat(req),
-      prisma.lk_wildlife_management_unit.findMany(),
+      prisma.lk_wildlife_management_unit.findMany({
+        orderBy: { wmu_name: order },
+      }),
       wmuFormats
     );
     res.status(200).json(wmu);
@@ -115,7 +122,7 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const cod = await formatParse(
       getFormat(req),
-      prisma.lk_cause_of_death.findMany(),
+      prisma.lk_cause_of_death.findMany({ orderBy: { cod_reason: order } }),
       codFormats
     );
     res.status(200).json(cod);
@@ -126,7 +133,7 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const materials = await formatParse(
       getFormat(req),
-      prisma.lk_marking_material.findMany(),
+      prisma.lk_marking_material.findMany({ orderBy: { material: order } }),
       markingMaterialsFormats
     );
     res.status(200).json(materials);
@@ -137,7 +144,7 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const materials = await formatParse(
       getFormat(req),
-      prisma.lk_marking_type.findMany(),
+      prisma.lk_marking_type.findMany({ orderBy: { name: order } }),
       markingTypesFormats
     );
     res.status(200).json(materials);
@@ -148,7 +155,9 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const materials = await formatParse(
       getFormat(req),
-      prisma.lk_collection_category.findMany(),
+      prisma.lk_collection_category.findMany({
+        orderBy: { category_name: order },
+      }),
       collectionUnitCategoriesFormats
     );
     res.status(200).json(materials);
@@ -162,7 +171,9 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const taxons = await formatParse(
       getFormat(req),
-      prisma.lk_taxon.findMany(),
+      prisma.lk_taxon.findMany({
+        orderBy: [{ taxon_name_common: order }, { taxon_name_latin: order }],
+      }),
       taxonFormats
     );
     res.status(200).json(taxons);
@@ -176,7 +187,10 @@ lookupRouter.get(
   catchErrors(async (req: Request, res: Response) => {
     const species = await formatParse(
       getFormat(req),
-      prisma.lk_taxon.findMany(taxonSpeciesAndSubsWhere),
+      prisma.lk_taxon.findMany({
+        ...taxonSpeciesAndSubsWhere,
+        orderBy: [{ taxon_name_common: order }, { taxon_name_latin: order }],
+      }),
       taxonFormats
     );
     res.status(200).json(species);
