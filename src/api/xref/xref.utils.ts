@@ -1,13 +1,14 @@
 import {
-  lk_taxon,
+  Prisma,
   lk_collection_category,
-  lk_region_env,
+  lk_taxon,
   xref_collection_unit,
 } from "@prisma/client";
 import { z } from "zod";
-import { ResponseSchema, implement } from "../../utils/zod_helpers";
 import { toSelect } from "../../utils/helper_functions";
-import { FormatParse } from "../../utils/types";
+import { FormatParse, ISelect } from "../../utils/types";
+import { ResponseSchema, implement } from "../../utils/zod_helpers";
+import { getTaxonCollectionCategories } from "./xref.service";
 
 const CollectionUnitCategorySchema = implement<
   Partial<
@@ -34,8 +35,28 @@ const xrefCollectionUnitFormats: FormatParse = {
   },
 };
 
+const xrefTaxonCollectionCategoryFormats: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) => {
+      const {
+        collection_category_id,
+        lk_collection_category: { category_name },
+      } = val as Prisma.PromiseReturnType<
+        typeof getTaxonCollectionCategories
+      >[0];
+
+      return {
+        id: collection_category_id,
+        key: "collection_category_id",
+        value: category_name,
+      } satisfies ISelect;
+    }),
+  },
+};
+
 export {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
   xrefCollectionUnitFormats,
+  xrefTaxonCollectionCategoryFormats,
 };

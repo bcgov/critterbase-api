@@ -35,4 +35,17 @@ const getCollectionUnitsFromCategory = async (
   return await getCollectionUnitsFromCategoryId(category_id);
 };
 
-export { getCollectionUnitsFromCategory, getCollectionUnitsFromCategoryId };
+const getTaxonCollectionCategories = async (taxon_id?: string) => {
+  return await prisma.xref_taxon_collection_category.findMany({
+    where: { taxon_id },
+    include: {
+      lk_collection_category: { select: { category_name: true } },
+    },
+  });
+};
+
+export {
+  getCollectionUnitsFromCategory,
+  getCollectionUnitsFromCategoryId,
+  getTaxonCollectionCategories,
+};

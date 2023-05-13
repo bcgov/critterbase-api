@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 // /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  critter_collection_unit,
-  lk_collection_category,
-  lk_taxon,
-  Prisma,
-} from "@prisma/client";
+import { critter_collection_unit, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {

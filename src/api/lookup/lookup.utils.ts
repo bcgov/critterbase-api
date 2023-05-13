@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {
   Prisma,
-  lk_cause_of_death,
   lk_collection_category,
   lk_marking_material,
   lk_marking_type,
@@ -10,10 +9,10 @@ import {
   lk_taxon,
   lk_wildlife_management_unit,
 } from "@prisma/client";
-import { ZodTypeAny, objectOutputType } from "zod";
-import { FormatParse, ISelect } from "../../utils/types";
-import { ResponseSchema } from "../../utils/zod_helpers";
+import { z } from "zod";
 import { toSelect } from "../../utils/helper_functions";
+import { FormatParse } from "../../utils/types";
+import { ResponseSchema } from "../../utils/zod_helpers";
 
 // * FORMATS *
 const regionEnvFormats: FormatParse = {
@@ -100,6 +99,12 @@ const taxonFormats: FormatParse = {
   },
 };
 
+const CollectionCategoriesByTaxonIdSchema = z
+  .object({
+    taxon_id: z.string().optional(),
+  })
+  .passthrough();
+
 //Prisma includes/selects/wheres
 const taxonSpeciesAndSubsWhere = {
   where: {
@@ -129,4 +134,5 @@ export {
   collectionUnitCategoriesFormats,
   taxonFormats,
   taxonSpeciesAndSubsWhere,
+  CollectionCategoriesByTaxonIdSchema,
 };

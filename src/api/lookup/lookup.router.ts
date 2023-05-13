@@ -18,6 +18,7 @@ import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { eCritterStatus } from "../critter/critter.utils";
 import {
+  CollectionCategoriesByTaxonIdSchema,
   codFormats,
   collectionUnitCategoriesFormats,
   markingMaterialsFormats,
