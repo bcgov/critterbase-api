@@ -10,6 +10,15 @@ interface IBulkCreate {
     mortalities: Prisma.mortalityCreateManyInput[]
 }
 
+interface IBulkUpdate{
+    critters: Prisma.critterUpdateInput[],
+    collections: Prisma.critter_collection_unitUpdateInput[],
+    markings: Prisma.markingUpdateInput[],
+    locations: Prisma.locationUpdateInput[],
+    captures: Prisma.captureUpdateInput[], 
+    mortalities: Prisma.mortalityUpdateInput[]
+}
+
 const bulkCreateData = async (
         bulkParams: IBulkCreate
     ) => {
@@ -45,4 +54,41 @@ const bulkCreateData = async (
         return result;
 }
 
-export { bulkCreateData, IBulkCreate }
+const bulkUpdateData = async ( bulkParams: IBulkUpdate ) => {
+    const { critters, collections, locations, captures, mortalities } = bulkParams;
+    const result = await prisma.$transaction(async (prisma) => {
+        for(const c of critters) {
+            await prisma.critter.update({
+                where: { critter_id: c.critter_id as string },
+                data: c
+            })
+        }
+        for(const c of collections) {
+            await prisma.critter_collection_unit.update({
+                where: { critter_collection_unit_id: c.critter_collection_unit_id as string},
+                data: c
+            });
+        }
+        for(const l of locations) {
+            await prisma.location.update({
+                where: { location_id: l.location_id as string},
+                data: l
+            });
+        }
+        for(const c of captures) {
+            await prisma.capture.update({
+                where: { capture_id: c.capture_id as string},
+                data: c
+            });
+        }
+        for(const m of mortalities) {
+            await prisma.mortality.update({
+                where: { mortality_id: m.mortality_id as string},
+                data: m
+            });
+        }
+    });
+    return result;
+}
+
+export { bulkCreateData, bulkUpdateData, IBulkCreate, IBulkUpdate }

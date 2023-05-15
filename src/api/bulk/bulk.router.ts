@@ -10,7 +10,7 @@ import { appendDefaultCOD } from "../mortality/mortality.service";
 import {
   MortalityCreateSchema,
 } from "../mortality/mortality.utils";
-import { bulkCreateData } from "./bulk.service";
+import { IBulkUpdate, bulkCreateData, bulkUpdateData } from "./bulk.service";
 import { BulkCreationSchema } from "./bulk.utils";
 import { CollectionUnitCreateBodySchema } from "../collectionUnit/collectionUnit.utils";
 import { z } from "zod";
@@ -86,3 +86,20 @@ bulkRouter.post(
     return res.status(201).json(results);
   })
 );
+
+bulkRouter.put("/",
+catchErrors(async (req: Request, res: Response) => {
+  const {critters, collections, markings, locations, captures, mortalities} = BulkCreationSchema.parse(req.body);
+  const body: IBulkUpdate = {
+    critters: critters ?? [],
+    collections: collections ?? [],
+    markings: markings ?? [],
+    locations: locations ?? [],
+    captures: captures ?? [],
+    mortalities: mortalities ?? []
+  };
+
+  const r = await bulkUpdateData(body);
+  return res.status(200).json(r);
+
+}))
