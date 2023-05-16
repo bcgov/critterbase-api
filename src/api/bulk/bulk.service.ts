@@ -1,5 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../utils/constants";
+import { CritterUpdate } from "../critter/critter.utils";
+import { CollectionUnitUpdateInput } from "../collectionUnit/collectionUnit.utils";
+import { MarkingUpdateInput } from "../marking/marking.utils";
+import { CaptureUpdate } from "../capture/capture.utils";
+import { MortalityUpdate } from "../mortality/mortality.utils";
+import { updateMortality } from "../mortality/mortality.service";
+import { apiError } from "../../utils/types";
 
 interface IBulkCreate {
     critters: Prisma.critterCreateManyInput[], 
@@ -11,12 +18,12 @@ interface IBulkCreate {
 }
 
 interface IBulkUpdate{
-    critters: Prisma.critterUpdateInput[],
-    collections: Prisma.critter_collection_unitUpdateInput[],
-    markings: Prisma.markingUpdateInput[],
+    critters: CritterUpdate[],
+    collections: CollectionUnitUpdateInput[],
+    markings: MarkingUpdateInput[],
     locations: Prisma.locationUpdateInput[],
-    captures: Prisma.captureUpdateInput[], 
-    mortalities: Prisma.mortalityUpdateInput[]
+    captures: CaptureUpdate[], 
+    mortalities: MortalityUpdate[]
 }
 
 const bulkCreateData = async (
@@ -59,7 +66,7 @@ const bulkUpdateData = async ( bulkParams: IBulkUpdate ) => {
     const result = await prisma.$transaction(async (prisma) => {
         for(const c of critters) {
             await prisma.critter.update({
-                where: { critter_id: c.critter_id as string },
+                where: { critter_id: c.critter_id },
                 data: c
             })
         }
@@ -76,16 +83,33 @@ const bulkUpdateData = async ( bulkParams: IBulkUpdate ) => {
             });
         }
         for(const c of captures) {
+            const { capture_location, release_location, critter_id, capture_location_id, release_location_id, ...rest } = c;
+            const upsertBody = {create: {}, update: {}};
+            if(capture_location) {
+                const {location_id, ...others} = capture_location;
+                upsertBody.create = {
+                    ...others
+                };
+                upsertBody.update = {
+                    location_id,
+                    ...others
+                }
+            }
             await prisma.capture.update({
-                where: { capture_id: c.capture_id as string},
-                data: c
+                where: { capture_id: c.capture_id},
+                data: {
+                    location_capture_capture_location_idTolocation: {
+                        upsert: upsertBody
+                    },
+                    ...rest
+                }
             });
         }
         for(const m of mortalities) {
-            await prisma.mortality.update({
-                where: { mortality_id: m.mortality_id as string},
-                data: m
-            });
+            if(!m.mortality_id) {
+                throw apiError.requiredProperty('mortality_id');
+            }
+            await updateMortality(m.mortality_id, m);
         }
     });
     return result;

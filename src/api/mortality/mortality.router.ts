@@ -78,7 +78,6 @@ mortalityRouter
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const parsed = MortalityUpdateSchema.parse(req.body);
-      console.log("parsed was  " + JSON.stringify(parsed, null, 2));
       const mort = await updateMortality(id, parsed);
       res.status(200).json(mort);
     })

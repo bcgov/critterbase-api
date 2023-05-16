@@ -1,20 +1,22 @@
 import express, { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { CaptureCreateSchema } from "../capture/capture.utils";
+import { CaptureCreateSchema, CaptureUpdateSchema } from "../capture/capture.utils";
 import { appendEnglishTaxonAsUUID } from "../critter/critter.service";
-import {  CritterCreateSchema } from "../critter/critter.utils";
+import {  CritterCreateSchema, CritterUpdateSchema } from "../critter/critter.utils";
 import {
-  MarkingCreateBodySchema,
+  MarkingCreateBodySchema, MarkingUpdateBodySchema,
 } from "../marking/marking.utils";
 import { appendDefaultCOD } from "../mortality/mortality.service";
 import {
-  MortalityCreateSchema,
+  MortalityCreateSchema, MortalityUpdateSchema,
 } from "../mortality/mortality.utils";
 import { IBulkUpdate, bulkCreateData, bulkUpdateData } from "./bulk.service";
 import { BulkCreationSchema } from "./bulk.utils";
-import { CollectionUnitCreateBodySchema } from "../collectionUnit/collectionUnit.utils";
+import { CollectionUnitCreateBodySchema, CollectionUnitUpdateBodySchema } from "../collectionUnit/collectionUnit.utils";
 import { z } from "zod";
 import { appendEnglishMarkingsAsUUID } from "../marking/marking.service";
+import { LocationUpdateSchema } from "../location/location.utils";
+import { zodID } from "../../utils/zod_helpers";
 
 export const bulkRouter = express.Router();
 
@@ -91,12 +93,12 @@ bulkRouter.put("/",
 catchErrors(async (req: Request, res: Response) => {
   const {critters, collections, markings, locations, captures, mortalities} = BulkCreationSchema.parse(req.body);
   const body: IBulkUpdate = {
-    critters: critters ?? [],
-    collections: collections ?? [],
-    markings: markings ?? [],
-    locations: locations ?? [],
-    captures: captures ?? [],
-    mortalities: mortalities ?? []
+    critters: critters ? z.array(CritterUpdateSchema.extend({ critter_id: zodID })).parse(critters) : [],
+    collections: collections ? z.array(CollectionUnitUpdateBodySchema).parse(collections) : [],
+    markings: markings ? z.array(MarkingUpdateBodySchema).parse(markings) : [],
+    locations: locations ? z.array(LocationUpdateSchema.extend({ location_id: zodID })).parse(locations) : [],
+    captures: captures ? z.array(CaptureUpdateSchema.extend({capture_id: zodID})).parse(captures) : [],
+    mortalities: mortalities ?  z.array(MortalityUpdateSchema.extend({mortality_id: zodID})).parse(mortalities) : []
   };
 
   const r = await bulkUpdateData(body);

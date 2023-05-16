@@ -35,8 +35,13 @@ const LocationSchema = implement<location>().with({
 const LocationCreateSchema = implement<
   Omit<Prisma.locationCreateManyInput, "location_id" | keyof AuditColumns>
 >()
-  .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape)
-  .strict();
+  .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape);
+
+  type LocationCreate = z.infer<typeof LocationCreateSchema>
+
+const LocationUpdateSchema = implement<
+  Omit<Prisma.locationUncheckedUpdateManyInput,  keyof AuditColumns>>()
+    .with(LocationSchema.omit({ ...noAudit }).partial().shape);
 
 const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -84,16 +89,19 @@ const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
     longitude: true,
     lk_region_env: {
       select: {
+        region_env_id: true,
         region_env_name: true,
       },
     },
     lk_region_nr: {
       select: {
+        region_nr_id: true,
         region_nr_name: true,
       },
     },
     lk_wildlife_management_unit: {
       select: {
+        wmu_id: true,
         wmu_name: true,
       },
     },
@@ -109,16 +117,19 @@ const CommonLocationSchema = implement<CommonLocationType>().with({
   longitude: z.number().nullable(),
   lk_region_env: z
     .object({
+      region_env_id: z.string(),
       region_env_name: z.string(),
     })
     .nullable(),
   lk_region_nr: z
     .object({
+      region_nr_id: z.string(),
       region_nr_name: z.string(),
     })
     .nullable(),
   lk_wildlife_management_unit: z
     .object({
+      wmu_id: z.string(),
       wmu_name: z.string(),
     })
     .nullable(),
@@ -129,6 +140,9 @@ const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
     val;
   return {
     ...rest,
+    region_env_id: lk_region_env?.region_env_id,
+    region_nr_id: lk_region_nr?.region_nr_id,
+    wmu_id: lk_wildlife_management_unit?.wmu_id,
     region_env_name: lk_region_env?.region_env_name,
     region_nr_name: lk_region_nr?.region_nr_name,
     wmu_name: lk_wildlife_management_unit?.wmu_name,
@@ -154,5 +168,6 @@ export {
   locationIncludes,
   LocationResponseSchema,
   LocationSchema,
+  LocationUpdateSchema,
   CommonFormattedLocationSchema,
 };
