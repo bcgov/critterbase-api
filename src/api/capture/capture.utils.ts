@@ -50,6 +50,7 @@ const CaptureUpdateSchema = implement<
   > & {
     capture_location?: LocationBody;
     release_location?: LocationBody;
+    force_create_release?: boolean;
   }
 >().with(
   CaptureBodySchema.omit({
@@ -57,6 +58,7 @@ const CaptureUpdateSchema = implement<
   }).extend({
     capture_location: LocationUpdateSchema,
     release_location: LocationUpdateSchema,
+    force_create_release: z.boolean().optional()
   }).partial().shape
 );
 

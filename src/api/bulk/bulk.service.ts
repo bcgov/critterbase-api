@@ -7,6 +7,7 @@ import { CaptureUpdate } from "../capture/capture.utils";
 import { MortalityUpdate } from "../mortality/mortality.utils";
 import { updateMortality } from "../mortality/mortality.service";
 import { apiError } from "../../utils/types";
+import { updateCapture } from "../capture/capture.service";
 
 interface IBulkCreate {
     critters: Prisma.critterCreateManyInput[], 
@@ -23,7 +24,8 @@ interface IBulkUpdate{
     markings: MarkingUpdateInput[],
     locations: Prisma.locationUpdateInput[],
     captures: CaptureUpdate[], 
-    mortalities: MortalityUpdate[]
+    mortalities: MortalityUpdate[],
+    
 }
 
 const bulkCreateData = async (
@@ -72,7 +74,7 @@ const bulkUpdateData = async ( bulkParams: IBulkUpdate ) => {
         }
         for(const c of collections) {
             await prisma.critter_collection_unit.update({
-                where: { critter_collection_unit_id: c.critter_collection_unit_id as string},
+                where: { critter_collection_unit_id: c.critter_collection_unit_id},
                 data: c
             });
         }
@@ -83,27 +85,10 @@ const bulkUpdateData = async ( bulkParams: IBulkUpdate ) => {
             });
         }
         for(const c of captures) {
-            const { capture_location, release_location, critter_id, capture_location_id, release_location_id, ...rest } = c;
-            const upsertBody = {create: {}, update: {}};
-            if(capture_location) {
-                const {location_id, ...others} = capture_location;
-                upsertBody.create = {
-                    ...others
-                };
-                upsertBody.update = {
-                    location_id,
-                    ...others
-                }
+            if(!c.capture_id) {
+                throw apiError.requiredProperty('capture_id');
             }
-            await prisma.capture.update({
-                where: { capture_id: c.capture_id},
-                data: {
-                    location_capture_capture_location_idTolocation: {
-                        upsert: upsertBody
-                    },
-                    ...rest
-                }
-            });
+            await updateCapture(c.capture_id, c);
         }
         for(const m of mortalities) {
             if(!m.mortality_id) {

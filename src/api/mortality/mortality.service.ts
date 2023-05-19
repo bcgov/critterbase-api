@@ -114,7 +114,7 @@ const updateMortality = async (
               connect: ultimate_cause_of_death_id ? { cod_id: ultimate_cause_of_death_id } : undefined,
           },
           lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: {
-              connect: proximate_predated_by_taxon_id ? { taxon_id: proximate_cause_of_death_id } : undefined
+              connect: proximate_predated_by_taxon_id ? { taxon_id: proximate_predated_by_taxon_id } : undefined
           },
           lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: {
               connect: ultimate_predated_by_taxon_id ? { taxon_id: ultimate_predated_by_taxon_id } : undefined
