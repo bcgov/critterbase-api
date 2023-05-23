@@ -5,13 +5,16 @@ import { taxonIdSchema } from "../../utils/zod_helpers";
 import {
   getCollectionUnitsFromCategory,
   getCollectionUnitsFromCategoryId,
+  getInheritedTaxonIds,
   getTaxonCollectionCategories,
+  getTaxonMarkingBodyLocations,
 } from "./xref.service";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
   xrefCollectionUnitFormats,
   xrefTaxonCollectionCategoryFormats,
+  xrefTaxonMarkingBodyLocationSchema,
 } from "./xref.utils";
 
 export const xrefRouter = express.Router();
@@ -51,6 +54,20 @@ xrefRouter.get(
       getFormat(req),
       getTaxonCollectionCategories(taxon_id),
       xrefTaxonCollectionCategoryFormats
+    );
+    res.status(200).json(response);
+  })
+);
+
+xrefRouter.get(
+  "/taxon-marking-body-locations",
+  catchErrors(async (req: Request, res: Response) => {
+    const { taxon_id } = taxonIdSchema.parse(req.query);
+    console.log(taxon_id);
+    const response = await formatParse(
+      getFormat(req),
+      getTaxonMarkingBodyLocations(taxon_id),
+      xrefTaxonMarkingBodyLocationSchema
     );
     res.status(200).json(response);
   })

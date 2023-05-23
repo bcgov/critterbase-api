@@ -3,6 +3,7 @@ import {
   lk_collection_category,
   lk_taxon,
   xref_collection_unit,
+  xref_taxon_marking_body_location,
 } from "@prisma/client";
 import { z } from "zod";
 import { toSelect } from "../../utils/helper_functions";
@@ -54,9 +55,22 @@ const xrefTaxonCollectionCategoryFormats: FormatParse = {
   },
 };
 
+const xrefTaxonMarkingBodyLocationSchema: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) =>
+      toSelect<xref_taxon_marking_body_location>(
+        val,
+        "taxon_marking_body_location_id",
+        "body_location"
+      )
+    ),
+  },
+};
+
 export {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
   xrefCollectionUnitFormats,
   xrefTaxonCollectionCategoryFormats,
+  xrefTaxonMarkingBodyLocationSchema,
 };

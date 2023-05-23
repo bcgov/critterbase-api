@@ -21,6 +21,7 @@ import {
   CollectionCategoriesByTaxonIdSchema,
   codFormats,
   collectionUnitCategoriesFormats,
+  colourFormats,
   markingMaterialsFormats,
   markingTypesFormats,
   regionEnvFormats,
@@ -83,6 +84,17 @@ lookupRouter.get(
 /**
  * * Lookup tables
  */
+lookupRouter.get(
+  "/colours",
+  catchErrors(async (req: Request, res: Response) => {
+    const colours = await formatParse(
+      getFormat(req),
+      prisma.lk_colour.findMany(),
+      colourFormats
+    );
+    res.status(200).json(colours);
+  })
+);
 lookupRouter.get(
   "/region-envs",
   catchErrors(async (req: Request, res: Response) => {

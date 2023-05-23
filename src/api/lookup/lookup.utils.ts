@@ -2,6 +2,7 @@
 import {
   Prisma,
   lk_collection_category,
+  lk_colour,
   lk_marking_material,
   lk_marking_type,
   lk_region_env,
@@ -15,6 +16,14 @@ import { FormatParse } from "../../utils/types";
 import { ResponseSchema } from "../../utils/zod_helpers";
 
 // * FORMATS *
+const colourFormats: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) =>
+      toSelect<lk_colour>(val, "colour_id", "colour")
+    ),
+  },
+};
+
 const regionEnvFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
@@ -135,4 +144,5 @@ export {
   taxonFormats,
   taxonSpeciesAndSubsWhere,
   CollectionCategoriesByTaxonIdSchema,
+  colourFormats,
 };
