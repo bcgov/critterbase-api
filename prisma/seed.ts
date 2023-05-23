@@ -135,6 +135,15 @@ async function main() {
     },
   });
 
+  // Temporary unit to test animals with multiple collection_units
+  const dummyUnitCategoryID = await queryRandomUUID(prisma);
+  await prisma.lk_collection_category.create({
+    data: {
+      collection_category_id: dummyUnitCategoryID,
+      category_name: "Dummy Unit",
+    },
+  });
+
   const rangiferTarandusUUID = (
     await prisma.lk_taxon.findFirst({
       where: {
@@ -187,6 +196,14 @@ async function main() {
     },
   });
 
+  // Link dummy units to caribou for testing
+  await prisma.xref_taxon_collection_category.create({
+    data: {
+      collection_category_id: dummyUnitCategoryID,
+      taxon_id: rangiferTarandusUUID,
+    },
+  });
+
   /*
    * Now give the Population Unit category all of its usable values.
    */
@@ -196,6 +213,13 @@ async function main() {
   await prisma.xref_collection_unit.createMany({
     data: population_units.map((p) => {
       return { collection_category_id: popUnitCategoryID, unit_name: p };
+    }),
+  });
+
+  // Add possible values to dummy units
+  await prisma.xref_collection_unit.createMany({
+    data: ['Name 1', 'Name 2', 'Name 3'].map((p) => {
+      return { collection_category_id: dummyUnitCategoryID, unit_name: p };
     }),
   });
 
