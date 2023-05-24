@@ -45,6 +45,10 @@ const critterIdSchema = z.object({
   critter_id: zodID,
 });
 
+const taxonIdSchema = z.object({
+  taxon_id: zodID.optional(),
+});
+
 const LookupWmuSchema = implement<lk_wildlife_management_unit>().with({
   wmu_id: zodID,
   wmu_name: z.string(),
@@ -183,4 +187,5 @@ export {
   zodAudit,
   NumberToString,
   QueryFormatSchema,
+  taxonIdSchema,
 };

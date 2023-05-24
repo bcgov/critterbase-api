@@ -1,3 +1,4 @@
+import { randomInt, randomUUID } from "crypto";
 import { prisma, request } from "../../utils/constants";
 import {
   createMarking,
@@ -7,13 +8,12 @@ import {
   getMarkingsByCritterId,
   updateMarking,
 } from "./marking.service";
-import { randomInt, randomUUID } from "crypto";
 import {
-  markingResponseSchema,
-  MarkingResponseSchema,
   MarkingCreateInput,
-  markingIncludes,
   MarkingIncludes,
+  MarkingResponseSchema,
+  markingIncludes,
+  markingResponseSchema,
 } from "./marking.utils";
 
 let dummyMarking: MarkingResponseSchema;
@@ -292,7 +292,7 @@ describe("API: Marking", () => {
       it("returns status 404 when id does not exist", async () => {
         const res = await request
           .patch(`/api/markings/${randomUUID()}`)
-          .send({ identifier: dummyMarking.identifier });
+          .send(dummyMarkingInput);
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
@@ -300,7 +300,7 @@ describe("API: Marking", () => {
       it("returns status 200", async () => {
         const res = await request
           .patch(`/api/markings/${dummyMarking.marking_id}`)
-          .send({ identifier: dummyMarking.identifier });
+          .send(dummyMarkingInput);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
@@ -308,7 +308,7 @@ describe("API: Marking", () => {
       it("returns a marking", async () => {
         const res = await request
           .patch(`/api/markings/${dummyMarking.marking_id}`)
-          .send({ identifier: dummyMarking.identifier });
+          .send(dummyMarkingInput);
         expect.assertions(dummyMarkingKeys.length);
         for (const key of dummyMarkingKeys) {
           expect(res.body).toHaveProperty(key);
@@ -327,7 +327,7 @@ describe("API: Marking", () => {
         const res = await request
           .patch(`/api/markings/${dummyMarking.marking_id}`)
           .send({
-            identifier: dummyMarking.identifier,
+            ...dummyMarkingInput,
             invalidField: "qwerty123",
           });
         expect.assertions(2);

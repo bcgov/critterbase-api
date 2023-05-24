@@ -1,43 +1,72 @@
 import { capture, Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { prisma, request } from "../../utils/constants";
-import { createCapture, deleteCapture, getAllCaptures, getCaptureByCritter, getCaptureById, updateCapture } from "./capture.service";
+import {
+  createCapture,
+  deleteCapture,
+  getAllCaptures,
+  getCaptureByCritter,
+  getCaptureById,
+  updateCapture,
+} from "./capture.service";
 import { CaptureResponseSchema } from "./capture.utils";
 import { commonLocationSelect } from "../location/location.utils";
 
 const tempCaptures: capture[] = [];
 
-const obtainCaptureTemplate = async (): Promise<Prisma.captureUncheckedCreateInput> => {
+const obtainCaptureTemplate =
+  async (): Promise<Prisma.captureUncheckedCreateInput> => {
+    const critter = await prisma.critter.findFirst();
+    const capture_location = await prisma.location.findFirst();
+    if (!critter || !capture_location) throw Error("No critter.");
+    return {
+      critter_id: critter.critter_id,
+      capture_location_id: capture_location.location_id,
+      release_location_id: capture_location.location_id,
+      capture_timestamp: new Date(),
+    };
+  };
+
+const obtainCaptureLocationTemplate = async () => {
   const critter = await prisma.critter.findFirst();
   const capture_location = await prisma.location.findFirst();
-  if(!critter || !capture_location) throw Error('No critter.')
+  if (!critter || !capture_location) throw Error("No critter.");
+  const {
+    location_id,
+    create_user,
+    update_user,
+    create_timestamp,
+    update_timestamp,
+    ...rest
+  } = capture_location;
   return {
     critter_id: critter.critter_id,
-    capture_location_id: capture_location.location_id,
-    release_location_id: capture_location.location_id,
-    capture_timestamp: new Date()
-  }
-}
-
+    capture_location: rest,
+    release_location: rest,
+    capture_timestamp: new Date(),
+  };
+};
 const createTempCapture = async (): Promise<capture> => {
   const c = await prisma.capture.create({
     data: {
-      ...(await obtainCaptureTemplate())
-    }
+      ...(await obtainCaptureTemplate()),
+    },
   });
   tempCaptures.push(c);
   return c;
-}
+};
 
 describe("API: Critter", () => {
   describe("ZOD SCHEMAS", () => {
     describe("CaptureResponseSchema", () => {
       it("should parse the data correctly", async () => {
-        const loc = await prisma.location.findFirst({...commonLocationSelect});
+        const loc = await prisma.location.findFirst({
+          ...commonLocationSelect,
+        });
         const obj = {
-          location_capture_capture_location_idTolocation: loc ,
-          location_capture_release_location_idTolocation: loc ,
-        }
+          location_capture_capture_location_idTolocation: loc,
+          location_capture_release_location_idTolocation: loc,
+        };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
         expect(res.capture_location).not.toBeNull();
@@ -45,25 +74,37 @@ describe("API: Critter", () => {
       });
       it("should parse the data correctly", async () => {
         const obj = {
-          location_capture_capture_location_idTolocation: null ,
-          location_capture_release_location_idTolocation: null ,
-        }
+          location_capture_capture_location_idTolocation: null,
+          location_capture_release_location_idTolocation: null,
+        };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
         expect(res.capture_location).toBeNull();
         expect(res.release_location).toBeNull();
       });
-    })
-  })
+    });
+  });
   describe("SERVICES", () => {
     describe("creating captures", () => {
       it("should create one capture", async () => {
         const m = await obtainCaptureTemplate();
-        const result = await createCapture({...m, capture_timestamp: new Date(), release_timestamp: new Date()});
+        const result = await createCapture({
+          ...m,
+          capture_timestamp: new Date(),
+          release_timestamp: new Date(),
+        });
         expect.assertions(1);
         expect(result).not.toBeNull();
-      })
-    })
+      });
+      it("should create one capture with included location data", async () => {
+        const m = await obtainCaptureLocationTemplate();
+        const result = await createCapture({
+          ...m,
+        });
+        expect.assertions(1);
+        expect(result).not.toBeNull();
+      });
+    });
     describe("getting captures", () => {
       it("returns all captures", async () => {
         const result = await getAllCaptures();
@@ -81,14 +122,16 @@ describe("API: Critter", () => {
         const result = await getCaptureByCritter(critter.critter_id);
         expect.assertions(1);
         expect(result?.length).toBeGreaterThanOrEqual(1);
-      })
+      });
     });
     describe("modifying captures", () => {
       it("modifies the capture", async () => {
         const m = await createTempCapture();
-        const result = await updateCapture(m.capture_id, {capture_comment: 'banana'});
+        const result = await updateCapture(m.capture_id, {
+          capture_comment: "banana",
+        });
         expect.assertions(1);
-        expect(result?.capture_comment).toBe('banana');
+        expect(result?.capture_comment).toBe("banana");
       });
       it("deletes a capture", async () => {
         const m = await createTempCapture();
@@ -97,8 +140,8 @@ describe("API: Critter", () => {
         expect(result?.capture_id).toBe(m.capture_id);
         const exists = await prisma.capture.findUnique({
           where: {
-            capture_id: m.capture_id
-          }
+            capture_id: m.capture_id,
+          },
         });
         expect(exists).toBeNull();
       });
@@ -109,11 +152,20 @@ describe("API: Critter", () => {
       it("should return status 201", async () => {
         expect.assertions(1);
         const res = await request.post("/api/captures/create").send({
-          ...(await obtainCaptureTemplate())
+          ...(await obtainCaptureTemplate()),
         });
         expect(res.status).toBe(201);
       });
-    })
+      it("should return status 201 with included location data", async () => {
+        expect.assertions(1);
+        const locationData = await obtainCaptureLocationTemplate();
+        console.log(JSON.stringify(locationData));
+        const res = await request
+          .post("/api/captures/create")
+          .send(locationData);
+        expect(res.status).toBe(201);
+      });
+    });
     describe("GET /api/critters", () => {
       it("should return status 200", async () => {
         expect.assertions(1);
@@ -125,42 +177,46 @@ describe("API: Critter", () => {
       it("should get one capture", async () => {
         const m = await createTempCapture();
         expect.assertions(1);
-        const res = await request.get("/api/captures/" + m.capture_id)
+        const res = await request.get("/api/captures/" + m.capture_id);
         expect(res.status).toBe(200);
-      })
+      });
       it("should 404", async () => {
         expect.assertions(1);
         const res = await request.get("/api/captures/" + randomUUID());
-        expect(res.status).toBe(404); 
-      })
+        expect(res.status).toBe(404);
+      });
     });
     describe("GET /api/captures/critter/:critter_id", () => {
       it("should return status 200 with an array of captures", async () => {
         expect.assertions(2);
         const critter = await prisma.critter.findFirstOrThrow();
-        const res = await request.get("/api/captures/critter/" + critter.critter_id);
-        console.log('res was ' + JSON.stringify(res, null, 2));
+        const res = await request.get(
+          "/api/captures/critter/" + critter.critter_id
+        );
+        // console.log("res was " + JSON.stringify(res, null, 2));
         expect(res.status).toBe(200);
         expect(res.body.length).toBeGreaterThanOrEqual(1);
       });
       it("should 404 when trying to get a bad critter", async () => {
         expect.assertions(1);
         const res = await request.get("/api/captures/critter/" + randomUUID());
-        expect(res.status).toBe(404); 
-      })
+        expect(res.status).toBe(404);
+      });
     });
     describe("PUT /api/captures/:capture_id", () => {
       it("should return status 200", async () => {
         expect.assertions(1);
         const m = await createTempCapture();
-        const res = await request.put("/api/captures/" + m.capture_id).send({capture_comment: 'eee'});
+        const res = await request
+          .put("/api/captures/" + m.capture_id)
+          .send({ capture_comment: "eee" });
         expect(res.status).toBe(200);
       });
       it("should 404 if the capture is not found", async () => {
         expect.assertions(1);
         const res = await request.put("/api/captures/" + randomUUID());
-        expect(res.status).toBe(404); 
-      })
+        expect(res.status).toBe(404);
+      });
     });
     describe("DELETE /api/captures/:capture_id", () => {
       it("should return status 200", async () => {
@@ -172,20 +228,22 @@ describe("API: Critter", () => {
       it("should 404 if there is no capture to delete", async () => {
         expect.assertions(1);
         const res = await request.delete("/api/captures/" + randomUUID());
-        expect(res.status).toBe(404); 
+        expect(res.status).toBe(404);
       });
-    })
+    });
   });
 });
 
 afterAll(async () => {
-  for(const c of tempCaptures) {
-    if((await prisma.capture.findUnique({ where: { capture_id: c.capture_id}}))) {
+  for (const c of tempCaptures) {
+    if (
+      await prisma.capture.findUnique({ where: { capture_id: c.capture_id } })
+    ) {
       await prisma.capture.delete({
         where: {
-          capture_id: c.capture_id
-        }
-      })
+          capture_id: c.capture_id,
+        },
+      });
     }
   }
-})
+});
