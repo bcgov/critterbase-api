@@ -55,20 +55,21 @@ const errorHandler = (
     //Removed formErrors from object
     const fieldErrors = err.flatten().fieldErrors;
     const fieldKeys = Object.keys(fieldErrors);
-    // const formErrors = err.flatten().formErrors;
+
+    const customErrs: Record<string, string> = {};
+    //Bulk router can throw a custom formatted error.
+    //Splitting them apart to better structure the error response
+    err.errors.forEach((e) => {
+      const t = e.message.split("~");
+      if (t.length === 2) {
+        customErrs[t[0]] = t[1];
+      }
+    });
     if (!fieldKeys.length) {
       return res.status(400).json({ error: err.format()._errors.join(", ") });
     }
-    // const errMsg = Object.entries(fieldErrors)
-    //   .map(
-    //     ([key, valueArr]) =>
-    //       `${key.replace("_", " ").replace("id", "ID").toUpperCase()}: ${
-    //         valueArr ? valueArr[0] : "error"
-    //       }`
-    //   )
-    //   .join(",  ");
     return res.status(400).json({
-      errors: fieldErrors,
+      errors: Object.keys(customErrs).length ? customErrs : fieldErrors,
     });
   }
   if (err instanceof apiError) {
