@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {
   Prisma,
-  lk_cause_of_death,
   lk_collection_category,
+  lk_colour,
   lk_marking_material,
   lk_marking_type,
   lk_region_env,
@@ -10,23 +10,20 @@ import {
   lk_taxon,
   lk_wildlife_management_unit,
 } from "@prisma/client";
-import { ZodTypeAny, objectOutputType } from "zod";
-import { FormatParse, ISelect } from "../../utils/types";
+import { z } from "zod";
+import { toSelect } from "../../utils/helper_functions";
+import { FormatParse } from "../../utils/types";
 import { ResponseSchema } from "../../utils/zod_helpers";
-const toSelect = <AsType>(
-  val: objectOutputType<{}, ZodTypeAny, "passthrough">,
-  key: keyof AsType & string,
-  valueKey: keyof AsType & string
-) => {
-  const castVal = val as AsType;
-  return {
-    key,
-    id: String(castVal[key]),
-    value: String(castVal[valueKey]),
-  } satisfies ISelect;
-};
 
 // * FORMATS *
+const colourFormats: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) =>
+      toSelect<lk_colour>(val, "colour_id", "colour")
+    ),
+  },
+};
+
 const regionEnvFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
@@ -60,12 +57,14 @@ const codFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) => {
       return {
-        key: 'cod_id',
+        key: "cod_id",
         id: val.cod_id,
-        value: String(val.cod_category) + (val.cod_reason ? ' | ' +  String(val.cod_reason) : '')
-      }
-    })
-  }
+        value:
+          String(val.cod_category) +
+          (val.cod_reason ? " | " + String(val.cod_reason) : ""),
+      };
+    }),
+  },
 };
 
 const markingMaterialsFormats: FormatParse = {
@@ -109,6 +108,12 @@ const taxonFormats: FormatParse = {
   },
 };
 
+const CollectionCategoriesByTaxonIdSchema = z
+  .object({
+    taxon_id: z.string().optional(),
+  })
+  .passthrough();
+
 //Prisma includes/selects/wheres
 const taxonSpeciesAndSubsWhere = {
   where: {
@@ -138,4 +143,6 @@ export {
   collectionUnitCategoriesFormats,
   taxonFormats,
   taxonSpeciesAndSubsWhere,
+  CollectionCategoriesByTaxonIdSchema,
+  colourFormats,
 };

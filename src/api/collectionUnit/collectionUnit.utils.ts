@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 // /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  critter_collection_unit,
-  lk_collection_category,
-  lk_taxon,
-  Prisma,
-} from "@prisma/client";
+import { critter_collection_unit, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
@@ -49,7 +44,9 @@ const simpleCollectionUnitIncludes = {
       select: {
         collection_unit_id: true,
         unit_name: true,
-        lk_collection_category: { select: { category_name: true } },
+        lk_collection_category: {
+          select: { collection_category_id: true, category_name: true },
+        },
       },
     },
   } satisfies Prisma.critter_collection_unitInclude,
@@ -95,11 +92,18 @@ const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
 });
 
 const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
-  const { xref_collection_unit } = obj as SimpleCollectionUnitIncludes;
+  const {
+    xref_collection_unit: {
+      lk_collection_category: { category_name, collection_category_id },
+      unit_name,
+      collection_unit_id,
+    },
+  } = obj as SimpleCollectionUnitIncludes;
   return {
-    category_name: xref_collection_unit.lk_collection_category.category_name,
-    unit_name: xref_collection_unit.unit_name,
-    collection_unit_id: xref_collection_unit.collection_unit_id,
+    category_name,
+    unit_name,
+    collection_unit_id,
+    collection_category_id,
   };
 });
 
@@ -126,17 +130,6 @@ const CollectionUnitUpdateBodySchema = implement<
   .with(CollectionUnitCreateBodySchema.omit({critter_id: true}).partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-const CollectionUnitCategorySchema = implement<
-  Partial<
-    Pick<lk_taxon, "taxon_name_common" | "taxon_name_latin"> &
-      Pick<lk_collection_category, "category_name">
-  >
->().with({
-  category_name: z.string(),
-  taxon_name_latin: z.string().optional(),
-  taxon_name_common: z.string().optional(),
-});
-
 export {
   CollectionUnitResponseSchema,
   SimpleCollectionUnitResponseSchema,
@@ -144,7 +137,6 @@ export {
   collectionUnitIncludes,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
-  CollectionUnitCategorySchema,
 };
 export type {
   CollectionUnitIncludes,
