@@ -118,12 +118,12 @@ const markingIncludesSchema = implement<MarkingIncludes>().with({
 const markingResponseSchema = ResponseSchema.transform((obj) => {
   const {
     //omit
-    primary_colour_id,
+    /*primary_colour_id,
     secondary_colour_id,
     text_colour_id,
     marking_type_id,
     marking_material_id,
-    taxon_marking_body_location_id,
+    taxon_marking_body_location_id,*/
     //include
     xref_taxon_marking_body_location,
     lk_marking_type,
