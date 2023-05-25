@@ -34,14 +34,15 @@ const LocationSchema = implement<location>().with({
 
 const LocationCreateSchema = implement<
   Omit<Prisma.locationCreateManyInput, "location_id" | keyof AuditColumns>
->()
-  .with(LocationSchema.omit({ location_id: true, ...noAudit }).partial().shape);
-
-  type LocationCreate = z.infer<typeof LocationCreateSchema>
+>().with(
+  LocationSchema.omit({ location_id: true, ...noAudit })
+    .strict()
+    .partial().shape
+);
 
 const LocationUpdateSchema = implement<
-  Omit<Prisma.locationUncheckedUpdateManyInput,  keyof AuditColumns>>()
-    .with(LocationSchema.omit({ ...noAudit }).partial().shape);
+  Omit<Prisma.locationUncheckedUpdateManyInput, keyof AuditColumns>
+>().with(LocationSchema.omit({ ...noAudit }).partial().shape);
 
 const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {

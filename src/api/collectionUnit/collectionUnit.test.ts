@@ -26,11 +26,11 @@ let dummyCollectionUnitIncludes: CollectionUnitIncludes;
 let dummyCollectionUnitInput: Prisma.critter_collection_unitUncheckedCreateInput;
 let dummyCollectionUnitKeys: string[];
 let dummyCollectionUnitIncludesKeys: string[];
-
+let dummyCollectionUnitId: string;
 /**
  * * Creates a new critter_collection_unit object that references an existing critter and critter_collection_unit location
  */
-async function newCollectionUnit(): Promise<Prisma.critter_collection_unitUncheckedCreateInput> {
+async function newCollectionUnit() {
   const dummyCritterId: string | undefined = get_random(
     await prisma.critter_collection_unit.findMany({
       select: {
@@ -39,7 +39,7 @@ async function newCollectionUnit(): Promise<Prisma.critter_collection_unitUnchec
     })
   )?.critter_id;
   if (!dummyCritterId) throw Error("Could not get critter_id for dummy.");
-  const dummyCollectionUnitId: string | undefined = get_random(
+  dummyCollectionUnitId = get_random(
     await prisma.critter_collection_unit.findMany({
       select: {
         collection_unit_id: true,
@@ -329,7 +329,8 @@ describe("API: Collection Unit", () => {
       it("returns status 404 when id does not exist", async () => {
         const res = await request
           .patch(`/api/collection-units/${randomUUID()}`)
-          .send({ critter_id: dummyCritter.critter_id });
+          .send({ collection_unit_id: dummyCollectionUnitId });
+        console.log(res.body);
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
@@ -339,7 +340,7 @@ describe("API: Collection Unit", () => {
           .patch(
             `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
           )
-          .send({ critter_id: dummyCollectionUnit.critter_id });
+          .send({ collection_unit_id: dummyCollectionUnitId });
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
@@ -349,7 +350,7 @@ describe("API: Collection Unit", () => {
           .patch(
             `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
           )
-          .send({ critter_id: dummyCollectionUnit.critter_id });
+          .send({ collection_unit_id: dummyCollectionUnitId });
         expect.assertions(dummyCollectionUnitKeys.length);
         for (const key of dummyCollectionUnitKeys) {
           expect(res.body).toHaveProperty(key);
@@ -370,7 +371,7 @@ describe("API: Collection Unit", () => {
             `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
           )
           .send({
-            critter_id: dummyCollectionUnit.critter_id,
+            collection_unit_id: dummyCollectionUnitId,
             invalidField: "qwerty123",
           });
         expect.assertions(2);
