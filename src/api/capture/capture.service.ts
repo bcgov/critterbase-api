@@ -74,11 +74,35 @@ const updateCapture = async (
   capture_id: string,
   capture_data: CaptureUpdate
 ): Promise<capture | null> => {
+  const { capture_location, release_location, critter_id, capture_location_id, release_location_id, force_create_release, ...rest } = capture_data;
+  const c_upsertBody = {create: {}, update: {}};
+  const r_upsertBody = {create: {}, update: {}};
+  if(capture_location) {
+      const {location_id, ...others} = capture_location;
+      c_upsertBody.create = {...others};
+      c_upsertBody.update = {location_id, ...others};
+  }
+  if(release_location) {
+      const {location_id, ...others} = release_location;
+      r_upsertBody.create = {...others};
+      r_upsertBody.update = {location_id, ...others};
+  }
   return await prisma.capture.update({
-    data: capture_data,
-    where: {
-      capture_id: capture_id,
-    },
+      where: { capture_id: capture_id },
+      data: {
+          location_capture_capture_location_idTolocation: capture_location ? {
+              upsert: c_upsertBody
+          } : undefined,
+          location_capture_release_location_idTolocation: release_location ? 
+          (force_create_release 
+          ? 
+          {
+              create: r_upsertBody.create
+          } : {
+              upsert: r_upsertBody
+          }) : undefined,
+          ...rest
+      }
   });
 };
 

@@ -122,11 +122,10 @@ const CritterSchema = implement<critter>().with({
 const CritterUpdateSchema = implement<
   Omit<
     Prisma.critterUncheckedUpdateManyInput,
-    "critter_id" | keyof AuditColumns
+     keyof AuditColumns
   >
 >().with(
   CritterSchema.omit({
-    critter_id: true,
     ...noAudit,
   }).partial().shape
 );

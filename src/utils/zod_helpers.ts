@@ -25,6 +25,8 @@ const zodAudit = {
   update_timestamp: z.coerce.date(),
 };
 
+const DeleteSchema = z.object({ _delete: z.boolean() });
+
 const QueryFormatSchema = z.object({
   format: z.nativeEnum(QueryFormats).catch(QueryFormats.default),
 });
@@ -188,4 +190,5 @@ export {
   NumberToString,
   QueryFormatSchema,
   taxonIdSchema,
+  DeleteSchema,
 };

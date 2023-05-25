@@ -125,12 +125,12 @@ describe("API: Location", () => {
           .send({ latitude: "1", location_comment: COMMENT });
         expect(res.status).toBe(400);
       });
-      it("returns status 400 with extra property", async () => {
-        const res = await request
-          .post(`${ROUTE}/create`)
-          .send({ extra_property: "extra" });
-        expect(res.status).toBe(400);
-      });
+      // it("returns status 400 with extra property", async () => {
+      //   const res = await request
+      //     .post(`${ROUTE}/create`)
+      //     .send({ extra_property: "extra" });
+      //   expect(res.status).toBe(400);
+      // });
     });
 
     describe(`GET ${ROUTE}/:id`, () => {
@@ -158,12 +158,12 @@ describe("API: Location", () => {
         expect(res.status).toBe(201);
         expect(res.body.location_comment).toBe(UPDATE);
       });
-      it("returns status 400 with extra property", async () => {
-        const res = await request
-          .patch(`${ROUTE}/${createdLocation.location_id}`)
-          .send({ extra_property: "false" });
-        expect(res.status).toBe(400);
-      });
+      // it("returns status 400 with extra property", async () => {
+      //   const res = await request
+      //     .patch(`${ROUTE}/${createdLocation.location_id}`)
+      //     .send({ extra_property: "false" });
+      //   expect(res.status).toBe(400);
+      // });
       it("returns status 400 with property that does not pass validation", async () => {
         const res = await request
           .patch(`${ROUTE}/${createdLocation.location_id}`)

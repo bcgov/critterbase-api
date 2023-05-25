@@ -97,6 +97,7 @@ interface ISelect {
 enum QueryFormats {
   default = "default",
   detailed = "detailed",
+  full = "full",
   asSelect = "asSelect",
 }
 
@@ -109,6 +110,7 @@ interface FormatParseBody {
 interface FormatParse {
   [QueryFormats.default]?: FormatParseBody;
   [QueryFormats.detailed]?: FormatParseBody;
+  [QueryFormats.full]?: FormatParseBody
   [QueryFormats.asSelect]?: FormatParseBody; //used in UI's for select/dropdowns
 }
 

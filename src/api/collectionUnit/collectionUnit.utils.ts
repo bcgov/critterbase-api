@@ -111,11 +111,11 @@ const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
 const CollectionUnitCreateBodySchema = implement<
   Omit<
     Prisma.critter_collection_unitCreateManyInput,
-    "critter_collection_unit_id" | keyof AuditColumns
+    | keyof AuditColumns
   >
 >().with(
   critter_collection_unitSchema
-    .omit({ ...noAudit, critter_collection_unit_id: true })
+    .omit({ ...noAudit})
     .partial()
     .required({ critter_id: true, collection_unit_id: true }).shape
 );
@@ -124,10 +124,10 @@ const CollectionUnitCreateBodySchema = implement<
 const CollectionUnitUpdateBodySchema = implement<
   Omit<
     Prisma.critter_collection_unitUncheckedUpdateManyInput,
-    "critter_collection_unit_id" | keyof AuditColumns
+    "critter_id" | keyof AuditColumns
   >
 >()
-  .with(CollectionUnitCreateBodySchema.partial().shape)
+  .with(CollectionUnitCreateBodySchema.omit({critter_id: true}).partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export {

@@ -86,11 +86,41 @@ const updateMortality = async (
   mortality_id: string,
   mortality_data: MortalityUpdate
 ) => {
+    const { 
+      location, 
+      location_id, 
+      critter_id, 
+      proximate_cause_of_death_id, 
+      ultimate_cause_of_death_id,
+      proximate_predated_by_taxon_id,
+      ultimate_predated_by_taxon_id, 
+      ...rest } = mortality_data;
+  const upsertBody = {create:{}, update:{}};
+  if(location) {
+      const { location_id, ...others } = location;
+      upsertBody.create = { ...others};
+      upsertBody.update = { location_id, ...others};
+  }
   return await prisma.mortality.update({
-    data: mortality_data,
-    where: {
-      mortality_id: mortality_id,
-    },
+      where: { mortality_id: mortality_id },
+      data: {
+          location: {
+              upsert: upsertBody
+          },
+          lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: {
+              connect: proximate_cause_of_death_id ? { cod_id: proximate_cause_of_death_id } : undefined,
+          },
+          lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: {
+              connect: ultimate_cause_of_death_id ? { cod_id: ultimate_cause_of_death_id } : undefined,
+          },
+          lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: {
+              connect: proximate_predated_by_taxon_id ? { taxon_id: proximate_predated_by_taxon_id } : undefined
+          },
+          lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: {
+              connect: ultimate_predated_by_taxon_id ? { taxon_id: ultimate_predated_by_taxon_id } : undefined
+          },
+          ...rest
+      }
   });
 };
 

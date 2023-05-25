@@ -9,6 +9,7 @@ import {
 import { z, ZodString } from "zod";
 import { prisma } from "../../utils/constants";
 import {
+  DeleteSchema,
   implement,
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -154,45 +155,16 @@ const MarkingCreateBodySchema = implement<
     .partial()
     .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
 );
-/*const MarkingCreateBodySchema = markingSchema
-  .extend({
-    primary_colour: z.string().optional(),
-    secondary_colour: z.string().optional(),
-    body_location: z.string().optional(),
-    taxon_marking_body_location_id: zodID.optional(),
-    taxon_id: zodID.optional()
-  })
-  .partial()
-  .omit({ ...noAudit, marking_id: true })
-  .transform(async (v): Promise<Omit<marking, "marking_id">> => {
-    const { primary_colour, secondary_colour, body_location } = v;
-    const taxon_id = v.taxon_id ?? (await prisma.critter.findFirstOrThrow({
-      where: { critter_id: v.critter_id },
-    })).taxon_id;
-    if (primary_colour) {
-      const col = await getColourByName(primary_colour);
-      v.primary_colour_id = col?.colour_id;
-    }
-    if (secondary_colour) {
-      const col = await getColourByName(secondary_colour);
-      v.secondary_colour_id = col?.colour_id;
-    }
-    if (body_location) {
-      const taxon_uuid = taxon_id;
-      const loc = await getBodyLocationByNameAndTaxonUUID(
-        body_location,
-        taxon_uuid
-      );
-      v.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
-    }
-    return v as marking;
-  });*/
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.refine(
   nonEmpty,
   "no new data was provided or the format was invalid"
 );
+
+const MarkingUpdateByIdSchema = MarkingCreateBodySchema.extend({
+  marking_id: zodID,
+}).refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const MarkingCreateWithEnglishSchema = z
   .object({
@@ -202,6 +174,10 @@ const MarkingCreateWithEnglishSchema = z
   })
   .passthrough();
 
+const MarkingDeleteSchema = markingSchema
+  .pick({ marking_id: true })
+  .extend(DeleteSchema.shape);
+
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
@@ -209,5 +185,12 @@ export {
   markingIncludes,
   markingIncludesSchema,
   MarkingCreateWithEnglishSchema,
+  MarkingDeleteSchema,
+  MarkingUpdateByIdSchema,
 };
-export type { MarkingCreateInput, MarkingUpdateInput, MarkingIncludes, FormattedMarking };
+export type {
+  MarkingCreateInput,
+  MarkingUpdateInput,
+  MarkingIncludes,
+  FormattedMarking,
+};
