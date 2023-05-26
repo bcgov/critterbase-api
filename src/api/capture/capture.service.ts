@@ -2,6 +2,7 @@ import { capture } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { CaptureCreate, captureInclude, CaptureUpdate } from "./capture.utils";
 import { randomUUID } from "crypto";
+import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllCaptures = async (): Promise<capture[]> => {
   return await prisma.capture.findMany({
@@ -72,7 +73,8 @@ const createCapture = async (capture_data: CaptureCreate) => {
 
 const updateCapture = async (
   capture_id: string,
-  capture_data: CaptureUpdate
+  capture_data: CaptureUpdate,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<capture | null> => {
   const { capture_location, release_location, critter_id, capture_location_id, release_location_id, force_create_release, ...rest } = capture_data;
   const c_upsertBody = {create: {}, update: {}};
@@ -87,7 +89,10 @@ const updateCapture = async (
       r_upsertBody.create = {...others};
       r_upsertBody.update = {location_id, ...others};
   }
-  return await prisma.capture.update({
+
+  const client = prismaOverride ?? prisma;
+
+  return await client.capture.update({
       where: { capture_id: capture_id },
       data: {
           location_capture_capture_location_idTolocation: capture_location ? {

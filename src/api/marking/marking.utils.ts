@@ -163,7 +163,7 @@ const MarkingUpdateBodySchema = MarkingCreateBodySchema.refine(
 );
 
 const MarkingUpdateByIdSchema = MarkingCreateBodySchema.extend({
-  marking_id: zodID,
+  marking_id: zodID.optional(),
 }).refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const MarkingCreateWithEnglishSchema = z

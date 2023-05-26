@@ -2,6 +2,7 @@
 import { Prisma, critter } from ".prisma/client";
 import { z } from "zod";
 import { IResponseSchema } from "./zod_helpers";
+import { PrismaClient } from "@prisma/client";
 type uuid = string;
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
@@ -116,6 +117,8 @@ interface FormatParse {
 
 type ReqBody<T> = Record<string, unknown> & Partial<T>;
 
+type PrismaTransactionClient = Omit<PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use">;
+
 export {
   apiError,
   AuditColumns,
@@ -125,4 +128,5 @@ export {
   ISelect,
   FormatParseBody,
   ReqBody,
+  PrismaTransactionClient
 };
