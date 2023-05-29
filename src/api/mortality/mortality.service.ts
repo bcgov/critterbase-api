@@ -1,10 +1,11 @@
 import { prisma } from "../../utils/constants";
-import type { mortality } from "@prisma/client";
+import type { mortality, Prisma, PrismaClient } from "@prisma/client";
 import {
   MortalityCreate,
   mortalityInclude,
   MortalityUpdate,
 } from "./mortality.utils";
+import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllMortalities = async (): Promise<mortality[]> => {
   return await prisma.mortality.findMany();
@@ -84,8 +85,10 @@ const createMortality = async (
 
 const updateMortality = async (
   mortality_id: string,
-  mortality_data: MortalityUpdate
+  mortality_data: MortalityUpdate,
+  prismaOverride?: PrismaTransactionClient
 ) => {
+    const client = prismaOverride ?? prisma;
     const { 
       location, 
       location_id, 
@@ -101,7 +104,7 @@ const updateMortality = async (
       upsertBody.create = { ...others};
       upsertBody.update = { location_id, ...others};
   }
-  return await prisma.mortality.update({
+  return await client.mortality.update({
       where: { mortality_id: mortality_id },
       data: {
           location: {

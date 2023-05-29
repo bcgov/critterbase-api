@@ -1,4 +1,4 @@
-import { Prisma, marking } from "@prisma/client";
+import { Prisma, PrismaClient, marking } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { CritterUpdate } from "../critter/critter.utils";
 import { CollectionUnitUpdateInput } from "../collectionUnit/collectionUnit.utils";
@@ -13,7 +13,7 @@ import { updateMortality } from "../mortality/mortality.service";
 import { apiError } from "../../utils/types";
 import { updateCapture } from "../capture/capture.service";
 import { z } from "zod";
-import { deleteMarking, updateMarking } from "../marking/marking.service";
+import { createMarking, deleteMarking, updateMarking } from "../marking/marking.service";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -120,7 +120,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate) => {
       if (!c.capture_id) {
         throw apiError.requiredProperty("capture_id");
       }
-      await updateCapture(c.capture_id, c);
+      await updateCapture(c.capture_id, c, prisma);
     }
     for (let i = 0; i < mortalities.length; i++) {
       const m = mortalities[i];
@@ -128,19 +128,30 @@ const bulkUpdateData = async (bulkParams: IBulkMutate) => {
       if (!m.mortality_id) {
         throw apiError.requiredProperty("mortality_id");
       }
-      await updateMortality(m.mortality_id, m);
+      await updateMortality(m.mortality_id, m, prisma);
     }
     for (let i = 0; i < markings.length; i++) {
       const ma = markings[i];
       counts.updated.markings = i + 1;
-      await updateMarking(ma.marking_id, ma);
+      if(ma.marking_id) {
+        await prisma.marking.update({
+          where: { marking_id: ma.marking_id},
+          data: ma
+        })
+      }
+      else {
+        await prisma.marking.create({
+          data: ma
+        })
+      }
+      
     }
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
       await deleteMarking(_dma.marking_id);
     }
-  });
+  }, {timeout: 90000});
   return counts;
 };
 
