@@ -2,12 +2,10 @@ import { Prisma, critter, mortality } from "@prisma/client";
 import { defaultFormat, oneDay, prisma } from "../../utils/constants";
 import {
   CritterCreate,
-  CritterDetailedResponseSchema,
   CritterIdsRequest,
   CritterUpdate,
   UniqueCritterQuery,
   critterFormats,
-  detailedCritterInclude,
 } from "./critter.utils";
 import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";

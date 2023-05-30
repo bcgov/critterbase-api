@@ -1,5 +1,5 @@
 import { prisma } from "../../utils/constants";
-import type { mortality, Prisma, PrismaClient } from "@prisma/client";
+import type { mortality } from "@prisma/client";
 import {
   MortalityCreate,
   mortalityInclude,

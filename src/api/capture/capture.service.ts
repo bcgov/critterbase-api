@@ -1,7 +1,6 @@
 import { capture } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { CaptureCreate, captureInclude, CaptureUpdate } from "./capture.utils";
-import { randomUUID } from "crypto";
 import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllCaptures = async (): Promise<capture[]> => {

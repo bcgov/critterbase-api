@@ -1,11 +1,10 @@
-import { Prisma, PrismaClient, marking } from "@prisma/client";
+import { Prisma} from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { CritterUpdate } from "../critter/critter.utils";
 import { CollectionUnitUpdateInput } from "../collectionUnit/collectionUnit.utils";
 import {
   MarkingDeleteSchema,
-  MarkingUpdateByIdSchema,
-  MarkingUpdateInput,
+  MarkingUpdateByIdSchema
 } from "../marking/marking.utils";
 import { CaptureUpdate } from "../capture/capture.utils";
 import { MortalityUpdate } from "../mortality/mortality.utils";
@@ -13,7 +12,7 @@ import { updateMortality } from "../mortality/mortality.service";
 import { apiError } from "../../utils/types";
 import { updateCapture } from "../capture/capture.service";
 import { z } from "zod";
-import { createMarking, deleteMarking, updateMarking } from "../marking/marking.service";
+import { deleteMarking } from "../marking/marking.service";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -89,7 +88,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate) => {
     updated: {},
     deleted: {},
   };
-  const result = await prisma.$transaction(async (prisma) => {
+    await prisma.$transaction(async (prisma) => {
     for (let i = 0; i < critters.length; i++) {
       const c = critters[i];
       counts.updated.critters = i + 1;

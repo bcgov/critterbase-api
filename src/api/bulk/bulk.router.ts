@@ -12,7 +12,6 @@ import {
 import {
   MarkingCreateBodySchema,
   MarkingDeleteSchema,
-  MarkingUpdateBodySchema,
   MarkingUpdateByIdSchema,
 } from "../marking/marking.utils";
 import { appendDefaultCOD } from "../mortality/mortality.service";

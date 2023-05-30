@@ -5,7 +5,6 @@ import { taxonIdSchema } from "../../utils/zod_helpers";
 import {
   getCollectionUnitsFromCategory,
   getCollectionUnitsFromCategoryId,
-  getInheritedTaxonIds,
   getTaxonCollectionCategories,
   getTaxonMarkingBodyLocations,
 } from "./xref.service";

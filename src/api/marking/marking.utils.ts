@@ -3,11 +3,9 @@
 import {
   frequency_unit,
   marking,
-  Prisma,
-  xref_taxon_marking_body_location,
+  Prisma
 } from "@prisma/client";
 import { z, ZodString } from "zod";
-import { prisma } from "../../utils/constants";
 import {
   DeleteSchema,
   implement,
@@ -30,11 +28,6 @@ type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
 type FormattedMarking = z.infer<typeof markingResponseSchema>;
-
-type IMarkingLookup = Pick<
-  xref_taxon_marking_body_location,
-  "body_location"
-> & { primary_colour: string; secondary_colour: string };
 
 // Constants
 

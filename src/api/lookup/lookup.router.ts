@@ -4,10 +4,6 @@ import {
   cod_confidence,
   coordinate_uncertainty_unit,
   frequency_unit,
-  lk_cause_of_death,
-  lk_region_env,
-  lk_region_nr,
-  lk_wildlife_management_unit,
   measurement_unit,
   system,
 } from "@prisma/client";
@@ -18,7 +14,6 @@ import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { eCritterStatus } from "../critter/critter.utils";
 import {
-  CollectionCategoriesByTaxonIdSchema,
   codFormats,
   collectionUnitCategoriesFormats,
   colourFormats,
