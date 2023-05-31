@@ -4,6 +4,7 @@ import type { Request } from "express";
 import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
 import { FormatParse, ISelect, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
+import { prisma } from "./constants";
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -82,6 +83,17 @@ const toSelect = <AsType>(
     value: String(castVal[valueKey]),
   } satisfies ISelect;
 };
+
+const db_getTaxonIds = async (taxon_id: string): Promise<string[]> => {
+  const result: {get_taxon_ids: string[]}[] = await prisma.$queryRaw`SELECT * FROM get_taxon_ids(${taxon_id})`;
+  if(!result.length) {
+    return [];
+  }
+  else {
+    return result[0].get_taxon_ids;
+  }
+}
+
 export {
   prismaErrorMsg,
   sessionHours,
@@ -89,4 +101,5 @@ export {
   getFormat,
   intersect,
   toSelect,
+  db_getTaxonIds
 };

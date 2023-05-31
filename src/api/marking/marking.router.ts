@@ -11,10 +11,12 @@ import {
   getMarkingById,
   getMarkingsByCritterId,
   updateMarking,
+  verifyMarkingsAgainstTaxon,
 } from "./marking.service";
 import {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
+  MarkingVerificationSchema,
   markingResponseSchema,
 } from "./marking.utils";
 
@@ -45,6 +47,14 @@ markingRouter.post(
     return res.status(201).json(newMarking);
   })
 );
+
+markingRouter.post("/verify",
+  catchErrors(async (req: Request, res: Response) => {
+    const parsed = MarkingVerificationSchema.parse(req.body);
+    const problems = await verifyMarkingsAgainstTaxon(parsed.taxon_id, parsed.markings);
+    return res.status(200).json(problems);
+  }
+));
 
 markingRouter.route("/critter/:id").get(
   catchErrors(async (req: Request, res: Response) => {
