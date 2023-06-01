@@ -44,7 +44,6 @@ collectionUnitRouter.post(
     const collectionUnit = await createCollectionUnit(collectionUnitData);
     const formattedCollectionUnit =
       CollectionUnitResponseSchema.parse(collectionUnit);
-    const temp: any;
     return res.status(201).json(formattedCollectionUnit);
   })
 );
