@@ -12,7 +12,7 @@
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
     "start:dev": "nodemon -r dotenv/config ./src/server.ts",
-    "lint": "npx eslint .",
+    "lint": "npx eslint . --max-warnings=0",
     "prisma:deploy": "npx prisma migrate deploy",
     "dead:code": "ts-prune | (! grep -v 'used in module')"
   },
