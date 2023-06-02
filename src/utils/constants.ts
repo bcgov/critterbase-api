@@ -3,7 +3,7 @@ import supertest from "supertest";
 // import { makeApp } from "../server";
 // import { db } from "./database";
 import { QueryFormats } from "./types";
-import { makeApp } from "../makeApp";
+import { makeApp } from "../app";
 import { db } from "./database";
 declare module "express-session" {
   interface SessionData {
@@ -42,7 +42,7 @@ const IS_TEST = process.env.NODE_ENV === "test";
 
 const NO_AUTH = process.env.AUTHENTICATE === "false";
 
-const request = supertest(makeApp(db));
+//const request = supertest(makeApp(db));
 
 /**
  * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
@@ -92,7 +92,7 @@ export {
   API_KEY,
   NO_AUTH,
   prisma,
-  request,
+  // request,
   strings,
   defaultFormat,
   oneDay,
