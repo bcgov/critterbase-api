@@ -1,4 +1,3 @@
-import console from "console";
 import { prisma } from "../../utils/constants";
 
 const getCollectionUnitsFromCategoryId = async (category_id: string) => {
@@ -7,7 +6,6 @@ const getCollectionUnitsFromCategoryId = async (category_id: string) => {
       collection_category_id: category_id,
     },
   });
-  console.log(collectionUnits);
   return collectionUnits;
 };
 
@@ -60,7 +58,6 @@ const getTaxonMarkingBodyLocations = async (taxon_id?: string) => {
   const result = await prisma.xref_taxon_marking_body_location.findMany(
     ids?.length ? { where: { taxon_id: { in: ids } } } : undefined
   );
-  console.log(result);
   return result;
 };
 

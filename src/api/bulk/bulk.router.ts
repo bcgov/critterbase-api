@@ -28,7 +28,8 @@ import {
 import { BulkCreationSchema } from "./bulk.utils";
 import {
   CollectionUnitCreateBodySchema,
-  CollectionUnitUpdateBodySchema,
+  CollectionUnitDeleteSchema,
+  CollectionUnitUpsertSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import { z } from "zod";
 import { appendEnglishMarkingsAsUUID } from "../marking/marking.service";
@@ -126,6 +127,13 @@ bulkRouter.put(
       return m._delete;
     });
 
+    const collectionDeletes = collections?.filter((c, i, arr) => {
+      if(c._delete) {
+        arr.splice(i, 1);
+      }
+      return c._delete;
+    })
+
     const body: IBulkMutate = {
       critters: critters
         ? z
@@ -135,7 +143,7 @@ bulkRouter.put(
             })
         : [],
       collections: collections
-        ? z.array(CollectionUnitUpdateBodySchema).parse(collections, {
+        ? z.array(CollectionUnitUpsertSchema).parse(collections, {
             errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "collections"),
           })
         : [],
@@ -168,6 +176,9 @@ bulkRouter.put(
       _deleteMarkings: markingDeletes
         ? z.array(MarkingDeleteSchema).parse(markingDeletes)
         : [],
+      _deleteUnits: collectionDeletes
+        ? z.array(CollectionUnitDeleteSchema).parse(collectionDeletes)
+        : []
     };
 
     const r = await bulkUpdateData(body);
