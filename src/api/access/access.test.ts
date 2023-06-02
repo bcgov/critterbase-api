@@ -1,10 +1,21 @@
 import { system } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { prisma, request } from "../../utils/constants";
+import { prisma } from "../../utils/constants";
 import { apiError } from "../../utils/types";
 import { createUser } from "../user/user.service";
 import { loginUser } from "./access.service";
 import * as userService from "../user/user.service";
+import { makeApp } from "../../makeApp";
+import supertest from "supertest";
+
+const request = supertest(
+  makeApp({
+    loginUser: () => {
+      console.log("temp");
+    },
+  } as any)
+);
+
 describe("SERVICES", () => {
   let u: any;
   const keycloak_uuid = "11084b96-5cbd-421e-8106-511ecfb51f7b";

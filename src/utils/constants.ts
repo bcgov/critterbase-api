@@ -1,7 +1,10 @@
 import { PrismaClient, user } from "@prisma/client";
 import supertest from "supertest";
-import { app } from "../server";
+// import { makeApp } from "../server";
+// import { db } from "./database";
 import { QueryFormats } from "./types";
+import { makeApp } from "../makeApp";
+import { db } from "./database";
 declare module "express-session" {
   interface SessionData {
     views: number;
@@ -39,7 +42,7 @@ const IS_TEST = process.env.NODE_ENV === "test";
 
 const NO_AUTH = process.env.AUTHENTICATE === "false";
 
-const request = supertest(app);
+const request = supertest(makeApp(db));
 
 /**
  * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
@@ -92,5 +95,5 @@ export {
   request,
   strings,
   defaultFormat,
-  oneDay
+  oneDay,
 };
