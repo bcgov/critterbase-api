@@ -7,7 +7,10 @@ import supertest from "supertest";
 import { makeApp } from "../../app";
 import { prisma } from "../../utils/constants";
 import { ICbDatabase } from "../../utils/database";
-import { loginUser as _loginUser } from "./access.service";
+import {
+  loginUser as _loginUser,
+  getTableDataTypes as _getTableDataTypes,
+} from "./access.service";
 const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 const USER: user = {
   user_id: ID,
@@ -21,8 +24,8 @@ const USER: user = {
 };
 
 const findUnique = jest.spyOn(prisma.user, "findUnique").mockImplementation();
-
 const findFirst = jest.spyOn(prisma.user, "findFirst").mockImplementation();
+const queryRaw = jest.spyOn(prisma, "$queryRaw").mockImplementation();
 
 const loginUser = jest.fn();
 const createUser = jest.fn();
@@ -52,6 +55,7 @@ beforeEach(() => {
   //prisma functions
   findUnique.mockResolvedValue(USER);
   findFirst.mockResolvedValue(USER);
+  queryRaw.mockResolvedValue({ data: "lol" });
 });
 
 describe("SERVICES", () => {
@@ -117,6 +121,13 @@ describe("SERVICES", () => {
       );
       expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
+    });
+  });
+  describe("getTableDataTypes", () => {
+    it("should call prisma raw query", () => {
+      const types = _getTableDataTypes("user");
+      expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(types).toBeDefined();
     });
   });
   describe("ROUTERS", () => {
