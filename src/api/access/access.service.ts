@@ -1,7 +1,6 @@
 import { Prisma, system, user } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { apiError } from "../../utils/types";
-import { setUserContext } from "../user/user.service";
 import { LoginCredentials } from "../user/user.utils";
 
 const loginUser = async (login: LoginCredentials): Promise<user> => {
@@ -30,7 +29,6 @@ const loginUser = async (login: LoginCredentials): Promise<user> => {
   if (!foundUser) {
     throw apiError.notFound("No user found. Login failed");
   }
-  await setUserContext(foundUser.system_user_id, foundUser.system_name);
   return foundUser;
 };
 
@@ -45,6 +43,6 @@ const getTableDataTypes = async (model: Prisma.ModelName) => {
       LEFT JOIN enums ON info.column_name = enums.typname
       WHERE table_name = ${model}`;
   return results;
-}
+};
 
 export { loginUser, getTableDataTypes };

@@ -25,8 +25,12 @@ export const AccessRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const parsedLogin = AuthLoginSchema.parse(req.body);
       const user = await db.loginUser(parsedLogin);
+      const contextUserId = await db.setUserContext(
+        user.system_user_id,
+        user.system_name
+      );
       req.session.user = user;
-      return res.status(200).json({ user_id: user.user_id }).end();
+      return res.status(200).json({ user_id: contextUserId }).end();
     })
   );
 
