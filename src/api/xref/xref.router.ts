@@ -1,13 +1,8 @@
 import express, { Request, Response } from "express";
+import { ICbDatabase } from "../../utils/database";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { taxonIdSchema } from "../../utils/zod_helpers";
-import {
-  getCollectionUnitsFromCategory,
-  getCollectionUnitsFromCategoryId,
-  getTaxonCollectionCategories,
-  getTaxonMarkingBodyLocations,
-} from "./xref.service";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
@@ -15,7 +10,6 @@ import {
   xrefTaxonCollectionCategoryFormats,
   xrefTaxonMarkingBodyLocationSchema,
 } from "./xref.utils";
-import { ICbDatabase } from "../../utils/database";
 
 export const XrefRouter = (db: ICbDatabase) => {
   const xrefRouter = express.Router();
