@@ -274,7 +274,6 @@ const getSimilarCritters = async (
         location: formatLocationNameSearch(m.location),
       },
     });
-    console.log(JSON.stringify(mortality_result))
     mortality.push(...mortality_result);
   }
 

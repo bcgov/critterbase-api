@@ -4,6 +4,7 @@ import { critter_collection_unit, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
+  DeleteSchema,
   implement,
   noAudit,
   nonEmpty,
@@ -45,7 +46,10 @@ const simpleCollectionUnitIncludes = {
         collection_unit_id: true,
         unit_name: true,
         lk_collection_category: {
-          select: { collection_category_id: true, category_name: true },
+          select: { 
+            collection_category_id: true, 
+            category_name: true
+          },
         },
       },
     },
@@ -98,14 +102,20 @@ const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
       unit_name,
       collection_unit_id,
     },
+    critter_collection_unit_id
   } = obj as SimpleCollectionUnitIncludes;
   return {
+    critter_collection_unit_id,
     category_name,
     unit_name,
     collection_unit_id,
-    collection_category_id,
+    collection_category_id
   };
 });
+
+const CollectionUnitDeleteSchema = critter_collection_unitSchema
+  .pick({critter_collection_unit_id: true})
+  .extend(DeleteSchema.shape);
 
 // Validate incoming request body for create critter collection unit
 const CollectionUnitCreateBodySchema = implement<
@@ -127,8 +137,15 @@ const CollectionUnitUpdateBodySchema = implement<
     "critter_id" | keyof AuditColumns
   >
 >()
-  .with(CollectionUnitCreateBodySchema.omit({critter_id: true}).partial().shape)
+  .with(CollectionUnitCreateBodySchema.omit({critter_id: true}).shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
+
+const CollectionUnitUpsertSchema = critter_collection_unitSchema.omit(noAudit).extend({
+  critter_id: zodID.optional(),
+  critter_collection_unit_id: zodID.optional()
+});
+
+type CollectionUnitUpsertType = z.infer<typeof CollectionUnitUpsertSchema>;
 
 export {
   CollectionUnitResponseSchema,
@@ -137,10 +154,13 @@ export {
   collectionUnitIncludes,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
+  CollectionUnitDeleteSchema,
+  CollectionUnitUpsertSchema
 };
 export type {
   CollectionUnitIncludes,
   CollectionUnitCreateInput,
   CollectionUnitUpdateInput,
   CollectionUnitResponse,
+  CollectionUnitUpsertType
 };

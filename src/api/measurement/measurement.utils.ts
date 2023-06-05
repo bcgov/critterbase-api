@@ -128,6 +128,14 @@ const QuantitativeUpdateSchema = QuantitativeCreateSchema.partial().refine(
   "body must include at least one property"
 );
 
+const QuantitativeVerificationSchema = QuantitativeSchema.partial().required({measurement_quantitative_id: true, taxon_measurement_id: true});
+const QualitatitiveVerificationSchema = QualitativeSchema.partial().required({measurement_qualitative_id: true, taxon_measurement_id: true})
+const MeasurementVerificationSchema = z.object({
+  taxon_id: zodID,
+  quantitative: z.array(QuantitativeVerificationSchema),
+  qualitative: z.array(QualitatitiveVerificationSchema)
+})
+
 const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
   const { xref_taxon_measurement_quantitative: x, ...rest } =
     val as Prisma.PromiseReturnType<typeof getQuantMeasurementOrThrow>;
@@ -162,4 +170,7 @@ export {
   QuantitativeCreateSchema,
   QualitativeUpdateSchema,
   QuantitativeUpdateSchema,
+  QuantitativeVerificationSchema,
+  QualitatitiveVerificationSchema,
+  MeasurementVerificationSchema
 };

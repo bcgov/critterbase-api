@@ -171,6 +171,11 @@ const MarkingDeleteSchema = markingSchema
   .pick({ marking_id: true })
   .extend(DeleteSchema.shape);
 
+const MarkingVerificationSchema = z.object({
+  taxon_id: zodID,
+  markings: z.array(markingSchema.partial().required({marking_id: true, taxon_marking_body_location_id: true}))
+});
+
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
@@ -180,6 +185,7 @@ export {
   MarkingCreateWithEnglishSchema,
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
+  MarkingVerificationSchema
 };
 export type {
   MarkingCreateInput,
