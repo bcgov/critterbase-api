@@ -25,7 +25,7 @@ const UserSchema = implement<user>().with({
   user_id: zodID,
   system_user_id: NumberToString,
   system_name: z.nativeEnum(system),
-  keycloak_uuid: zodID.nullable(),
+  keycloak_uuid: z.string().nullable(),
   ...zodAudit,
 });
 
