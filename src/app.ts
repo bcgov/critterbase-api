@@ -16,7 +16,7 @@ import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
-import { xrefRouter } from "./api/xref/xref.router";
+import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
 import { sessionHours } from "./utils/helper_functions";
 import {
@@ -61,7 +61,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/measurements", auth, measurementRouter);
   app.use("/api/lookups", auth, lookupRouter);
   app.use("/api/bulk", auth, bulkRouter);
-  app.use("/api/xref", auth, xrefRouter);
+  app.use("/api/xref", auth, XrefRouter(db));
 
   app.use(errorLogger);
   app.use(errorHandler);

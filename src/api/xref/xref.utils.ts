@@ -28,14 +28,6 @@ const CollectionUnitCategoryIdSchema = z
   })
   .passthrough();
 
-const xrefCollectionUnitFormats: FormatParse = {
-  asSelect: {
-    schema: ResponseSchema.transform((val) =>
-      toSelect<xref_collection_unit>(val, "collection_unit_id", "unit_name")
-    ),
-  },
-};
-
 const xrefTaxonCollectionCategoryFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) => {
@@ -67,6 +59,13 @@ const xrefTaxonMarkingBodyLocationSchema: FormatParse = {
   },
 };
 
+const xrefCollectionUnitFormats: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) =>
+      toSelect<xref_collection_unit>(val, "collection_unit_id", "unit_name")
+    ),
+  },
+};
 export {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,

@@ -1,10 +1,7 @@
 import { PrismaClient, user } from "@prisma/client";
-import supertest from "supertest";
 // import { makeApp } from "../server";
 // import { db } from "./database";
 import { QueryFormats } from "./types";
-import { makeApp } from "../app";
-import { db } from "./database";
 declare module "express-session" {
   interface SessionData {
     views: number;
