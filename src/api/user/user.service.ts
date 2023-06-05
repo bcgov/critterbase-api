@@ -53,6 +53,7 @@ const getUser = async (user_id: string): Promise<user> => {
 
 /**
  * Gets a user by their system_user_id
+ * TODO: Remove this function
  * @param {string} system_user_id - The unique system_user_id for a user
  */
 const getUserBySystemId = async (

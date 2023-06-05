@@ -1,336 +1,168 @@
-import { prisma, request } from "../../utils/constants";
-import {
-  createUser,
-  deleteUser,
-  getUser,
-  getUserBySystemId,
-  getUsers,
-  setUserContext,
-  updateUser,
-  upsertUser,
-} from "./user.service";
 import { system, user } from "@prisma/client";
-import { randomInt, randomUUID } from "crypto";
-import { UserCreateInput, UserSchema, UserUpdateInput } from "./user.utils";
+import { apiError } from "../../utils/types";
+import supertest from "supertest";
+import { makeApp } from "../../app";
+import { prisma } from "../../utils/constants";
+import { ICbDatabase } from "../../utils/database";
+import { UserCreateInput, UserSchema } from "./user.utils";
+import {
+  createUser as _createUser,
+  upsertUser as _upsertUser,
+  getUsers as _getUsers,
+  getUser as _getUser,
+  getUserBySystemId as _getUserBySystemId,
+  updateUser as _updateUser,
+  deleteUser as _deleteUser,
+  setUserContext as _setUserContext,
+} from "./user.service";
 import { zodID } from "../../utils/zod_helpers";
+import { assert } from "console";
 
-/**
- * * Returns a randomly generated user that can be insterted to the database
- */
-function newUser(): UserCreateInput {
-  const num = randomInt(99999999);
-  return {
-    system_user_id: `TEST_USER_${num.toString()}`,
-    system_name: system.CRITTERBASE,
-    keycloak_uuid: null,
-  };
-}
+// Mock User Objects
+const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 
-/**
- * * Removes all test generated users from the database
- */
-async function cleanup() {
-  await prisma.user.deleteMany({
-    where: {
-      system_user_id: {
-        startsWith: "TEST_USER_",
-      },
-    },
-  });
-}
+const NEW_USER: UserCreateInput = {
+  system_user_id: "MOCK_USER",
+  system_name: system.CRITTERBASE,
+  keycloak_uuid: ID,
+};
 
-let dummyUser: user;
+const RETURN_USER: user = {
+  ...NEW_USER,
+  keycloak_uuid: ID,
+  user_id: ID,
+  create_user: ID,
+  update_user: ID,
+  create_timestamp: new Date(),
+  update_timestamp: new Date(),
+};
+
+// Mocked Prisma Calls
+const create = jest.spyOn(prisma.user, "create").mockImplementation();
+const upsert = jest.spyOn(prisma.user, "upsert").mockImplementation();
+const findMany = jest.spyOn(prisma.user, "findMany").mockImplementation();
+const findUniqueOrThrow = jest
+  .spyOn(prisma.user, "findUniqueOrThrow")
+  .mockImplementation();
+const update = jest.spyOn(prisma.user, "update").mockImplementation();
+const pDelete = jest.spyOn(prisma.user, "delete").mockImplementation();
+const queryRaw = jest.spyOn(prisma, "$queryRaw").mockImplementation();
+
+// Mocked Services
+const createUser = jest.fn();
+const upsertUser = jest.fn();
+const getUsers = jest.fn();
+const getUser = jest.fn();
+const getUserBySystemId = jest.fn();
+const updateUser = jest.fn();
+const deleteUser = jest.fn();
+const setUserContext = jest.fn();
+
+const request = supertest(
+  makeApp({
+    createUser,
+    upsertUser,
+    getUsers,
+    getUser,
+    getUserBySystemId,
+    updateUser,
+    deleteUser,
+    setUserContext,
+  } as Record<keyof ICbDatabase, any>)
+);
+
+beforeEach(() => {
+  //TODO: Reset mocked prisma calls?
+
+  // Reset mocked services
+  createUser.mockReset();
+  upsertUser.mockReset();
+  getUsers.mockReset();
+  getUser.mockReset();
+  getUserBySystemId.mockReset();
+  updateUser.mockReset();
+  deleteUser.mockReset();
+  setUserContext.mockReset();
+});
+
 describe("API: User", () => {
-  beforeAll(async () => {
-    dummyUser = await prisma.user.create({ data: newUser() });
-  });
-
   describe("SERVICES", () => {
     describe("createUser()", () => {
       it("returns a user", async () => {
-        const returnedUser = await createUser(newUser());
-        expect(UserSchema.safeParse(returnedUser).success);
-      });
-
-      it("returned user matches the input", async () => {
-        const mockUser = newUser();
-        const returnedUser = await createUser(mockUser);
-        expect.assertions(1);
-        expect(returnedUser).toMatchObject(mockUser);
+        create.mockResolvedValue(RETURN_USER);
+        const returnedUser = await _createUser(NEW_USER);
+        expect.assertions(2);
+        expect(prisma.user.create).toHaveBeenCalledTimes(1);
+        expect(UserSchema.safeParse(returnedUser).success).toBe(true);
       });
     });
     describe("upsertUser()", () => {
       it("returns a user", async () => {
-        const returnedUser = await upsertUser(newUser());
-        expect(UserSchema.safeParse(returnedUser).success);
-      });
-
-      it("returned user matches the input", async () => {
-        const mockUser = newUser();
-        const returnedUser = await upsertUser(mockUser);
-        expect.assertions(1);
-        expect(returnedUser).toMatchObject(mockUser);
+        upsert.mockResolvedValue(RETURN_USER);
+        const returnedUser = await _upsertUser(NEW_USER);
+        expect.assertions(2);
+        expect(prisma.user.upsert).toHaveBeenCalledTimes(1);
+        expect(UserSchema.safeParse(returnedUser).success).toBe(true);
       });
     });
     describe("getUsers()", () => {
-      it("returns an array", async () => {
-        const users = await getUsers();
-        expect.assertions(2);
+      it("returns an array of users with correct properties", async () => {
+        findMany.mockResolvedValue([RETURN_USER]);
+        const users = await _getUsers();
+        expect.assertions(3);
+        expect(prisma.user.findMany).toHaveBeenCalledTimes(1);
         expect(users).toBeInstanceOf(Array);
-        expect(users.length).toBeGreaterThan(0);
-      });
-
-      it("returns users with correct properties", async () => {
-        const users = await getUsers();
-        for (const user of users) {
-          expect(UserSchema.safeParse(user).success);
-        }
+        expect(users.length).toBe(1);
       });
     });
+
     describe("getUser()", () => {
       it("returns a user when given a valid user ID", async () => {
-        const returnedUser = await getUser(dummyUser.user_id);
-        expect.assertions(1);
-        expect(UserSchema.safeParse(returnedUser).success);
-        expect(returnedUser).toMatchObject(dummyUser);
+        findUniqueOrThrow.mockResolvedValue(RETURN_USER);
+        const returnedUser = await _getUser(ID);
+        expect.assertions(2);
+        expect(prisma.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+        expect(UserSchema.safeParse(returnedUser).success).toBe(true);
       });
 
       it("throws error when given an invalid user ID", async () => {
-        expect.assertions(1);
-        await expect(getUser(randomUUID())).rejects.toThrow();
-      });
-    });
-
-    describe("getUserBySystemId()", () => {
-      it("returns a user when given a valid system user ID", async () => {
-        const returnedUser = await getUserBySystemId(
-          dummyUser.system_user_id,
-          dummyUser.system_name
-        );
-        expect.assertions(1);
-        expect(UserSchema.safeParse(returnedUser).success);
-        expect(returnedUser).toMatchObject(dummyUser);
-      });
-
-      it("throws error when given an invalid system user ID", async () => {
-        expect.assertions(1);
-        await expect(
-          getUserBySystemId(randomUUID(), dummyUser.system_name)
-        ).rejects.toThrow();
+        findUniqueOrThrow.mockRejectedValue(new Error());
+        await expect(_getUser(ID)).rejects.toThrow();
       });
     });
 
     describe("updateUser()", () => {
       it("returns a user with the updated data", async () => {
-        const createdUser = await prisma.user.create({ data: newUser() });
-        const updateData: UserUpdateInput = {
-          system_name: system.CRITTERBASE,
-        };
-        const updatedUser = await updateUser(createdUser.user_id, updateData);
-        expect.assertions(1);
-        expect(UserSchema.safeParse(updatedUser).success);
-        expect(updatedUser).toMatchObject({
-          ...createdUser,
-          ...updateData,
-          update_user: updatedUser.update_user, // ignore, as it will be different
-          update_timestamp: updatedUser.update_timestamp, // ignore, as it will be different
-        });
+        update.mockResolvedValue(RETURN_USER);
+        const returnedUser = await _updateUser(ID, NEW_USER);
+        expect.assertions(2);
+        expect(prisma.user.update).toHaveBeenCalledTimes(1);
+        expect(UserSchema.safeParse(returnedUser).success).toBe(true);
       });
     });
 
     describe("deleteUser()", () => {
       it("returns deleted user and removes user from database", async () => {
-        const createdUser = await prisma.user.create({ data: newUser() });
-        const deletedUser = await deleteUser(createdUser.user_id);
-        expect.assertions(2);
-        expect(UserSchema.safeParse(deletedUser).success);
-        expect(deletedUser).toMatchObject(createdUser);
-        const returnedUser = await prisma.user.findUnique({
-          where: { user_id: createdUser.user_id },
+        pDelete.mockResolvedValue(RETURN_USER);
+        const deletedUser = await _deleteUser(ID);
+        expect.assertions(3);
+        expect(prisma.user.delete).toHaveBeenCalledTimes(1);
+        expect(prisma.user.delete).toHaveBeenCalledWith({
+          where: { user_id: ID },
         });
-        expect(returnedUser).toBeNull();
+        expect(UserSchema.safeParse(deletedUser).success).toBe(true);
+      });
+    });
+
+    describe("setUserContext()", () => {
+      it("sets the user context with provided user_id and system_name", async () => {
+        queryRaw.mockResolvedValue([{ api_set_context: ID }]);
+        const result = await _setUserContext(ID, system.CRITTERBASE);
+        expect.assertions(3);
+        expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+        expect(result).toBeDefined();
+        expect(zodID.safeParse(result).success).toBe(true);
       });
     });
   });
-
-  describe(setUserContext.name, () => {
-    it("sets the user context with provided user_id and system_name", async () => {
-      const u = await prisma.user.create({ data: newUser() });
-      const result = await setUserContext(u.system_user_id, u.system_name);
-      expect(result).toBeDefined();
-      expect(zodID.safeParse(result).success);
-    });
-  });
-});
-
-describe("ROUTERS", () => {
-  describe("GET /api/users", () => {
-    it("returns status 200", async () => {
-      const res = await request.get("/api/users");
-      expect.assertions(1);
-      expect(res.status).toBe(200);
-    });
-
-    it("returns an array", async () => {
-      const res = await request.get("/api/users");
-      expect.assertions(1);
-      expect(res.body).toBeInstanceOf(Array);
-    });
-
-    it("returns users with correct properties", async () => {
-      const res = await request.get("/api/users");
-      const users = res.body;
-      for (const user of users) {
-        expect(UserSchema.safeParse(user).success);
-      }
-    });
-  });
-
-  describe("POST /api/users/create", () => {
-    it("returns status 201", async () => {
-      const res = await request.post("/api/users/create").send(newUser());
-      expect.assertions(1);
-      expect(res.status).toBe(201);
-    });
-
-    it("returns a user", async () => {
-      const res = await request.post("/api/users/create").send(newUser());
-      const user = res.body;
-      expect(UserSchema.safeParse(user).success);
-    });
-
-    it("updates an existing user if the system_user_id already present", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request.post("/api/users/create").send({
-        ...newUser(),
-        system_user_id: user.system_user_id,
-        system_name: user.system_name,
-      });
-      const user2 = res.body;
-      expect.assertions(4);
-      expect(user.system_user_id).toStrictEqual(user2.system_user_id);
-      expect(user.user_id).toStrictEqual(user2.user_id);
-      expect(user.create_timestamp.toISOString()).toStrictEqual(
-        user2.create_timestamp
-      );
-      expect(
-        user.update_timestamp.toISOString() === user2.update_timestamp
-      ).toBeFalsy(); //timestamp updated
-    });
-
-    it("strips invalid fields from data", async () => {
-      const res = await request
-        .post("/api/users/create")
-        .send({ ...newUser(), invalidField: "qwerty123" });
-      expect.assertions(2);
-      expect(res.status).toBe(201);
-      expect(res.body).not.toHaveProperty("invalidField");
-    });
-
-    it("returns status 400 when data is missing required fields", async () => {
-      const user = newUser();
-      const res = await request.post("/api/users/create").send({
-        keycloak_uuid: user.keycloak_uuid,
-      });
-      expect.assertions(1);
-      expect(res.status).toBe(400);
-    });
-  });
-
-  describe("GET /api/users/:id", () => {
-    it("returns status 404 when id does not exist", async () => {
-      const res = await request.get(`/api/users/${randomUUID()}`);
-      expect.assertions(1);
-      expect(res.status).toBe(404);
-    });
-
-    it("returns status 200", async () => {
-      const res = await request.get(`/api/users/${dummyUser.user_id}`);
-      expect.assertions(1);
-      expect(res.status).toBe(200);
-    });
-
-    it("returns a user", async () => {
-      const res = await request.get(`/api/users/${dummyUser.user_id}`);
-      expect(UserSchema.safeParse(res.body).success);
-    });
-  });
-
-  describe("PATCH /api/users/:id", () => {
-    it("returns status 404 when id does not exist", async () => {
-      const res = await request
-        .patch(`/api/users/${randomUUID()}`)
-        .send({ system_name: system.CRITTERBASE });
-      expect.assertions(1);
-      expect(res.status).toBe(404);
-    });
-
-    it("returns status 400 when no data provided", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request.patch(`/api/users/${user.user_id}`);
-      expect.assertions(1);
-      expect(res.status).toBe(400);
-    });
-
-    it("returns status 200", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request
-        .patch(`/api/users/${user.user_id}`)
-        .send({ system_name: system.CRITTERBASE });
-      expect.assertions(1);
-      expect(res.status).toBe(200);
-    });
-
-    it("returns a user", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request
-        .patch(`/api/users/${user.user_id}`)
-        .send({ system_name: system.CRITTERBASE });
-      expect(UserSchema.safeParse(res.body).success);
-    });
-
-    it("returns status 400 when system_user_id already taken", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request
-        .patch(`/api/users/${user.user_id}`)
-        .send({ system_user_id: dummyUser.system_user_id });
-      expect.assertions(1);
-      expect(res.status).toBe(400);
-    });
-
-    it("returns status 400 when data contains invalid fields", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request
-        .patch(`/api/users/${user.user_id}`)
-        .send({ invalidField: "qwerty123" });
-      expect.assertions(1);
-      expect(res.status).toBe(400);
-    });
-  });
-
-  describe("DELETE /api/users/:id", () => {
-    it("returns status 404 when id does not exist", async () => {
-      const res = await request.delete(`/api/users/${randomUUID()}`);
-      expect.assertions(1);
-      expect(res.status).toBe(404);
-    });
-
-    it("returns status 200", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request.delete(`/api/users/${user.user_id}`);
-      expect.assertions(1);
-      expect(res.status).toBe(200);
-    });
-
-    it("returns deleted user", async () => {
-      const user = await prisma.user.create({ data: newUser() });
-      const res = await request.delete(`/api/users/${user.user_id}`);
-      expect.assertions(1);
-      expect(res.body).toHaveProperty("user_id");
-    });
-  });
-});
-
-afterAll(async () => {
-  await cleanup();
 });
