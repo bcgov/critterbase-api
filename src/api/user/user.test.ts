@@ -83,6 +83,10 @@ beforeEach(() => {
   updateUser.mockReset();
   deleteUser.mockReset();
   setUserContext.mockReset();
+
+  // Set default returns
+  getUsers.mockResolvedValue([RETURN_USER]);
+  createUser.mockResolvedValue(RETURN_USER);
 });
 
 describe("API: User", () => {
@@ -163,6 +167,83 @@ describe("API: User", () => {
         expect(result).toBeDefined();
         expect(zodID.safeParse(result).success).toBe(true);
       });
+    });
+  });
+
+  describe("ROUTERS", () => {
+    describe("GET /api/users", () => {
+      it("returns status 200", async () => {
+        const res = await request.get("/api/users");
+        expect.assertions(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        const res = await request.get("/api/users");
+        expect.assertions(1);
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns users with correct properties", async () => {
+        const res = await request.get("/api/users");
+        const users = res.body;
+        expect.assertions(1);
+        for (const user of users) {
+          expect(UserSchema.safeParse(user).success).toBe(true);
+        }
+      });
+    });
+
+    describe("POST /api/users/create", () => {
+      it("returns status 201", async () => {
+        const res = await request.post("/api/users/create").send(NEW_USER);
+        expect.assertions(1);
+        expect(res.status).toBe(201);
+      });
+
+      it("returns a user", async () => {
+        const res = await request.post("/api/users/create").send(NEW_USER);
+        const user = res.body;
+        expect(UserSchema.safeParse(user).success);
+      });
+
+      // TODO:
+    //   it("updates an existing user if the system_user_id already present", async () => {
+    //     const user = await prisma.user.create({ data: newUser() });
+    //     const res = await request.post("/api/users/create").send({
+    //       ...newUser(),
+    //       system_user_id: user.system_user_id,
+    //       system_name: user.system_name,
+    //     });
+    //     const user2 = res.body;
+    //     expect.assertions(4);
+    //     expect(user.system_user_id).toStrictEqual(user2.system_user_id);
+    //     expect(user.user_id).toStrictEqual(user2.user_id);
+    //     expect(user.create_timestamp.toISOString()).toStrictEqual(
+    //       user2.create_timestamp
+    //     );
+    //     expect(
+    //       user.update_timestamp.toISOString() === user2.update_timestamp
+    //     ).toBeFalsy(); //timestamp updated
+    //   });
+
+    //   it("strips invalid fields from data", async () => {
+    //     const res = await request
+    //       .post("/api/users/create")
+    //       .send({ ...newUser(), invalidField: "qwerty123" });
+    //     expect.assertions(2);
+    //     expect(res.status).toBe(201);
+    //     expect(res.body).not.toHaveProperty("invalidField");
+    //   });
+
+    //   it("returns status 400 when data is missing required fields", async () => {
+    //     const user = newUser();
+    //     const res = await request.post("/api/users/create").send({
+    //       keycloak_uuid: user.keycloak_uuid,
+    //     });
+    //     expect.assertions(1);
+    //     expect(res.status).toBe(400);
+    //   });
     });
   });
 });
