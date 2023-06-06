@@ -30,6 +30,7 @@ export const AccessRouter = (db: ICbDatabase) => {
         user.system_name
       );
       req.session.user = user;
+      console.log(`Here is the user ${JSON.stringify(user)} ${contextUserId} ${JSON.stringify(req.session.user)}`)
       return res.status(200).json({ user_id: contextUserId }).end();
     })
   );

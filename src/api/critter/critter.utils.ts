@@ -330,4 +330,5 @@ export {
   CritterQuerySchema,
   CritterFilterSchema,
   UniqueCritterQuerySchema,
+  CritterSchema
 };
