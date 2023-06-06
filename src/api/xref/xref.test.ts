@@ -3,20 +3,6 @@ import { makeApp } from "../../app";
 import { ICbDatabase, db } from "../../utils/database";
 import { prisma } from "../../utils/constants";
 const ids = ["a", "b"];
-const queryRaw = jest
-  .spyOn(prisma, "$queryRaw")
-  .mockImplementation()
-  .mockResolvedValue([{ get_taxon_ids: ids }]);
-
-const mockDB: Partial<Record<keyof ICbDatabase, any>> = {
-  getTaxonMarkingBodyLocations: jest.fn(),
-  getTaxonCollectionCategories: jest.fn(),
-  getCollectionUnitsFromCategory: jest.fn(),
-  getCollectionUnitsFromCategoryId: jest.fn(),
-  getInheritedTaxonIds: jest.fn(),
-};
-
-const request = supertest(makeApp(mockDB));
 
 const tmbl = {
   taxon_marking_body_location_id: "2f2d655d-2fd8-4fd8-961a-f3ce7ec3fb40",
@@ -51,6 +37,21 @@ const cu = {
   create_timestamp: "2023-06-02T18:59:36.835Z",
   update_timestamp: "2023-06-02T18:59:36.835Z",
 };
+
+const queryRaw = jest
+  .spyOn(prisma, "$queryRaw")
+  .mockImplementation()
+  .mockResolvedValue([{ get_taxon_ids: ids }]);
+
+const mockDB: Partial<Record<keyof ICbDatabase, any>> = {
+  getTaxonMarkingBodyLocations: jest.fn(),
+  getTaxonCollectionCategories: jest.fn(),
+  getCollectionUnitsFromCategory: jest.fn(),
+  getCollectionUnitsFromCategoryId: jest.fn(),
+  getInheritedTaxonIds: jest.fn(),
+};
+
+const request = supertest(makeApp(mockDB));
 
 beforeEach(() => {
   mockDB.getTaxonMarkingBodyLocations.mockResolvedValue(tmbl);
