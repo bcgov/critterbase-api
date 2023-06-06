@@ -10,13 +10,11 @@ import {
   upsertUser as _upsertUser,
   getUsers as _getUsers,
   getUser as _getUser,
-  getUserBySystemId as _getUserBySystemId,
   updateUser as _updateUser,
   deleteUser as _deleteUser,
   setUserContext as _setUserContext,
 } from "./user.service";
 import { zodID } from "../../utils/zod_helpers";
-import { assert } from "console";
 
 // Mock User Objects
 const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
@@ -53,7 +51,6 @@ const createUser = jest.fn();
 const upsertUser = jest.fn();
 const getUsers = jest.fn();
 const getUser = jest.fn();
-const getUserBySystemId = jest.fn();
 const updateUser = jest.fn();
 const deleteUser = jest.fn();
 const setUserContext = jest.fn();
@@ -64,7 +61,6 @@ const request = supertest(
     upsertUser,
     getUsers,
     getUser,
-    getUserBySystemId,
     updateUser,
     deleteUser,
     setUserContext,
@@ -79,13 +75,13 @@ beforeEach(() => {
   upsertUser.mockReset();
   getUsers.mockReset();
   getUser.mockReset();
-  getUserBySystemId.mockReset();
   updateUser.mockReset();
   deleteUser.mockReset();
   setUserContext.mockReset();
 
   // Set default returns
   getUsers.mockResolvedValue([RETURN_USER]);
+  getUser.mockResolvedValue(RETURN_USER);
   createUser.mockResolvedValue(RETURN_USER);
 });
 
@@ -174,20 +170,23 @@ describe("API: User", () => {
     describe("GET /api/users", () => {
       it("returns status 200", async () => {
         const res = await request.get("/api/users");
-        expect.assertions(1);
+        expect.assertions(2);
+        expect(getUsers.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
       });
 
       it("returns an array", async () => {
         const res = await request.get("/api/users");
-        expect.assertions(1);
+        expect.assertions(2);
+        expect(getUsers.mock.calls.length).toBe(1);
         expect(res.body).toBeInstanceOf(Array);
       });
 
       it("returns users with correct properties", async () => {
         const res = await request.get("/api/users");
         const users = res.body;
-        expect.assertions(1);
+        expect.assertions(2);
+        expect(getUsers.mock.calls.length).toBe(1);
         for (const user of users) {
           expect(UserSchema.safeParse(user).success).toBe(true);
         }
@@ -197,53 +196,135 @@ describe("API: User", () => {
     describe("POST /api/users/create", () => {
       it("returns status 201", async () => {
         const res = await request.post("/api/users/create").send(NEW_USER);
-        expect.assertions(1);
+        expect.assertions(2);
+        expect(createUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
       });
 
       it("returns a user", async () => {
         const res = await request.post("/api/users/create").send(NEW_USER);
         const user = res.body;
-        expect(UserSchema.safeParse(user).success);
+        expect.assertions(2);
+        expect(createUser.mock.calls.length).toBe(1);
+        expect(UserSchema.safeParse(user).success).toBe(true);
       });
 
-      // TODO:
-    //   it("updates an existing user if the system_user_id already present", async () => {
-    //     const user = await prisma.user.create({ data: newUser() });
-    //     const res = await request.post("/api/users/create").send({
-    //       ...newUser(),
-    //       system_user_id: user.system_user_id,
-    //       system_name: user.system_name,
-    //     });
-    //     const user2 = res.body;
-    //     expect.assertions(4);
-    //     expect(user.system_user_id).toStrictEqual(user2.system_user_id);
-    //     expect(user.user_id).toStrictEqual(user2.user_id);
-    //     expect(user.create_timestamp.toISOString()).toStrictEqual(
-    //       user2.create_timestamp
-    //     );
-    //     expect(
-    //       user.update_timestamp.toISOString() === user2.update_timestamp
-    //     ).toBeFalsy(); //timestamp updated
-    //   });
+      it("strips invalid fields from data", async () => {
+        const res = await request
+          .post("/api/users/create")
+          .send({ ...NEW_USER, invalidField: "qwerty123" });
+        expect.assertions(3);
+        expect(createUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
+      });
 
-    //   it("strips invalid fields from data", async () => {
-    //     const res = await request
-    //       .post("/api/users/create")
-    //       .send({ ...newUser(), invalidField: "qwerty123" });
-    //     expect.assertions(2);
-    //     expect(res.status).toBe(201);
-    //     expect(res.body).not.toHaveProperty("invalidField");
-    //   });
+      it("returns status 400 when data is missing required fields", async () => {
+        const res = await request.post("/api/users/create").send({
+          keycloak_uuid: ID,
+        });
+        expect.assertions(2);
+        expect(createUser.mock.calls.length).toBe(0);
+        expect(res.status).toBe(400);
+      });
+    });
 
-    //   it("returns status 400 when data is missing required fields", async () => {
-    //     const user = newUser();
-    //     const res = await request.post("/api/users/create").send({
-    //       keycloak_uuid: user.keycloak_uuid,
-    //     });
-    //     expect.assertions(1);
-    //     expect(res.status).toBe(400);
-    //   });
+    describe("GET /api/users/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        getUser.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.get(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(getUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(getUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a user", async () => {
+        const res = await request.get(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(getUser.mock.calls.length).toBe(1);
+        expect(UserSchema.safeParse(res.body).success).toBe(true);
+      });
+    });
+
+    describe("PATCH /api/users/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        updateUser.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request
+          .patch(`/api/users/${ID}`)
+          .send({ system_name: system.CRITTERBASE });
+        expect.assertions(2);
+        expect(updateUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 400 when paramaters are invalid", async () => {
+        updateUser.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.patch(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(updateUser.mock.calls.length).toBe(0);
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 200", async () => {
+        updateUser.mockResolvedValue(RETURN_USER);
+        const res = await request
+          .patch(`/api/users/${ID}`)
+          .send({ system_name: system.CRITTERBASE });
+        expect.assertions(2);
+        expect(updateUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns a user", async () => {
+        updateUser.mockResolvedValue(RETURN_USER);
+        const res = await request
+          .patch(`/api/users/${ID}`)
+          .send({ system_name: system.CRITTERBASE });
+        expect.assertions(2);
+        expect(updateUser.mock.calls.length).toBe(1);
+        expect(UserSchema.safeParse(res.body).success).toBe(true);
+      });
+    });
+
+    describe("DELETE /api/users/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        deleteUser.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.delete(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(deleteUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        deleteUser.mockResolvedValue(RETURN_USER);
+        const res = await request.delete(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(deleteUser.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns deleted user", async () => {
+        deleteUser.mockResolvedValue(RETURN_USER);
+        const res = await request.delete(`/api/users/${ID}`);
+        expect.assertions(2);
+        expect(deleteUser.mock.calls.length).toBe(1);
+        expect(UserSchema.safeParse(res.body).success).toBe(true);
+      });
     });
   });
 });
