@@ -4,7 +4,7 @@ import session from "express-session";
 import helmet from "helmet";
 import memorystore from "memorystore";
 import { AccessRouter } from "./api/access/access.router";
-import { artifactRouter } from "./api/artifact/artifact.router";
+import { ArtifactRouter } from "./api/artifact/artifact.router";
 import { bulkRouter } from "./api/bulk/bulk.router";
 import { captureRouter } from "./api/capture/capture.router";
 import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
@@ -54,7 +54,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/markings", auth, markingRouter);
   app.use("/api/users", auth, UserRouter(db));
   app.use("/api/collection-units", auth, collectionUnitRouter);
-  app.use("/api/artifacts", auth, artifactRouter);
+  app.use("/api/artifacts", auth, ArtifactRouter(db));
   app.use("/api/family", auth, familyRouter);
   app.use("/api/captures", auth, captureRouter);
   app.use("/api/mortality", auth, mortalityRouter);

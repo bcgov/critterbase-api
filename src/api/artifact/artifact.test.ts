@@ -58,6 +58,7 @@ const getAllArtifacts = jest.fn();
 const updateArtifact = jest.fn();
 const createArtifact = jest.fn();
 const deleteArtifact = jest.fn();
+const getCritterById = jest.fn();
 
 const request = supertest(
   makeApp({
@@ -67,6 +68,7 @@ const request = supertest(
     updateArtifact,
     createArtifact,
     deleteArtifact,
+    getCritterById,
   } as Record<keyof ICbDatabase, any>)
 );
 
@@ -78,8 +80,13 @@ beforeEach(() => {
   updateArtifact.mockReset();
   createArtifact.mockReset();
   deleteArtifact.mockReset();
+  getCritterById.mockReset();
 
   // Set default returns
+  getAllArtifacts.mockResolvedValue([RETURN_ARTIFACT]);
+  createArtifact.mockResolvedValue(RETURN_ARTIFACT);
+  getArtifactById.mockResolvedValue(RETURN_ARTIFACT);
+  getArtifactsByCritterId.mockResolvedValue([RETURN_ARTIFACT]);
 });
 describe("API: Artifact", () => {
   describe("SERVICES", () => {
@@ -152,6 +159,201 @@ describe("API: Artifact", () => {
           where: { artifact_id: ID },
         });
         expect(artifactSchema.safeParse(deletedArtifact).success).toBe(true);
+      });
+    });
+  });
+
+  describe("ROUTERS", () => {
+    describe("GET /api/artifacts", () => {
+      it("returns status 200", async () => {
+        const res = await request.get("/api/artifacts");
+        expect.assertions(2);
+        expect(getAllArtifacts.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array", async () => {
+        const res = await request.get("/api/artifacts");
+        expect.assertions(2);
+        expect(getAllArtifacts.mock.calls.length).toBe(1);
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns artifacts with correct properties", async () => {
+        const res = await request.get("/api/artifacts");
+        const artifacts = res.body;
+        expect.assertions(2);
+        expect(getAllArtifacts.mock.calls.length).toBe(1);
+        for (const artifact of artifacts) {
+          expect(artifactSchema.safeParse(artifact).success).toBe(true);
+        }
+      });
+    });
+
+    describe("POST /api/artifacts/create", () => {
+      it("returns status 201", async () => {
+        const res = await request
+          .post("/api/artifacts/create")
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(createArtifact.mock.calls.length).toBe(1);
+        expect(res.status).toBe(201);
+      });
+
+      it("returns an artifact", async () => {
+        const res = await request
+          .post("/api/artifacts/create")
+          .send(NEW_ARTIFACT);
+        const artifact = res.body;
+        expect.assertions(2);
+        expect(createArtifact.mock.calls.length).toBe(1);
+        expect(artifactSchema.safeParse(artifact).success).toBe(true);
+      });
+
+      it("strips invalid fields from data", async () => {
+        const res = await request
+          .post("/api/artifacts/create")
+          .send({ ...NEW_ARTIFACT, invalidField: "qwerty123" });
+        expect.assertions(3);
+        expect(createArtifact.mock.calls.length).toBe(1);
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty("invalidField");
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const res = await request.post("/api/artifacts/create").send({
+          artifact_id: ID,
+        });
+        expect.assertions(2);
+        expect(createArtifact.mock.calls.length).toBe(0);
+        expect(res.status).toBe(400);
+      });
+    });
+
+    describe("GET /api/artifacts/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        getArtifactById.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.get(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactById.mock.calls.length).toBe(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactById.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an artifact", async () => {
+        const res = await request.get(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactById.mock.calls.length).toBe(1);
+        expect(artifactSchema.safeParse(res.body).success).toBe(true);
+      });
+    });
+
+    describe("PATCH /api/artifacts/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        updateArtifact.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request
+          .patch(`/api/artifacts/${ID}`)
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 400 when paramaters are invalid", async () => {
+        updateArtifact.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.patch(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(0);
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 200", async () => {
+        updateArtifact.mockResolvedValue(RETURN_ARTIFACT);
+        const res = await request
+          .patch(`/api/artifacts/${ID}`)
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an artifact", async () => {
+        updateArtifact.mockResolvedValue(RETURN_ARTIFACT);
+        const res = await request
+          .patch(`/api/artifacts/${ID}`)
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(1);
+        expect(artifactSchema.safeParse(res.body).success).toBe(true);
+      });
+    });
+
+    describe("DELETE /api/artifacts/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        deleteArtifact.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.delete(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(deleteArtifact.mock.calls.length).toBe(1);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        deleteArtifact.mockResolvedValue(RETURN_ARTIFACT);
+        const res = await request.delete(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(deleteArtifact.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+    });
+
+    describe("GET /api/artifacts/critter/:id", () => {
+      it("returns status 404 when id does not exist", async () => {
+        getCritterById.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        expect.assertions(3);
+        expect(getCritterById.mock.calls.length).toBe(1);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(0);
+        expect(res.status).toBe(404);
+      });
+
+      it("returns status 200", async () => {
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(1);
+        expect(res.status).toBe(200);
+      });
+
+      it("returns an array of artifacts", async () => {
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(1);
+        expect(res.body).toBeInstanceOf(Array);
+      });
+
+      it("returns artifacts with correct properties", async () => {
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        const artifacts = res.body;
+        expect.assertions(2);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(1);
+        for (const artifact of artifacts) {
+          expect(artifactSchema.safeParse(artifact).success).toBe(true);
+        }
       });
     });
   });
