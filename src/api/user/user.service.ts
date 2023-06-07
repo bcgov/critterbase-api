@@ -52,26 +52,6 @@ const getUser = async (user_id: string): Promise<user> => {
 };
 
 /**
- * Gets a user by their system_user_id
- * TODO: Remove this function
- * @param {string} system_user_id - The unique system_user_id for a user
- */
-const getUserBySystemId = async (
-  system_user_id: string,
-  system_name: system
-): Promise<user> => {
-  const user = await prisma.user.findUniqueOrThrow({
-    where: {
-      system_and_system_user_id: {
-        system_user_id,
-        system_name,
-      },
-    },
-  });
-  return user;
-};
-
-/**
  * Updates a user in the database
  * @param {string} user_id - The uuid / primary key for the user
  * @param {UserUpdateInput} data - The new data that the record should be updated
@@ -113,7 +93,6 @@ export {
   upsertUser,
   getUsers,
   getUser,
-  getUserBySystemId,
   updateUser,
   deleteUser,
   setUserContext,
