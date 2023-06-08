@@ -30,7 +30,6 @@ const SafeMemoryStore = memorystore(session);
 const options: session.SessionOptions = {
   cookie: {
     maxAge: sessionHours(24), //how long until the session expires
-    secure: false,
   },
   name: "critterbase.sid",
   secret: process.env.SESSION_SECRET,
