@@ -92,5 +92,5 @@ export {
   request,
   strings,
   defaultFormat,
-  oneDay
+  oneDay,
 };

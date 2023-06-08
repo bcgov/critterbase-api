@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
+import cookieParser from "cookie-parser";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint

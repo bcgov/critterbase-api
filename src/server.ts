@@ -16,6 +16,7 @@ import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
 import { sessionHours } from "./utils/helper_functions";
+import cookieParser from "cookie-parser";
 import {
   auth,
   errorHandler,
@@ -29,7 +30,10 @@ const SafeMemoryStore = memorystore(session);
 const options: session.SessionOptions = {
   cookie: {
     maxAge: sessionHours(24), //how long until the session expires
+    secure: false,
   },
+  name: "critterbase.sid",
+  proxy: true,
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -43,6 +47,7 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(session(options));
 app.use(validateApiKey);
 
