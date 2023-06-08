@@ -43,20 +43,6 @@ const getCritterById = async (critter_id: string, format = defaultFormat) => {
   });
 };
 
-const getCritterByIdWithDetails = async (
-  critter_id: string,
-  format = defaultFormat
-) => {
-  const result = await prisma.critter.findUniqueOrThrow({
-    ...critterFormats[format]?.prismaIncludes,
-    where: {
-      critter_id: critter_id,
-    },
-  });
-
-  return result;
-};
-
 const getCritterByWlhId = async (wlh_id: string, format = defaultFormat) => {
   // Might seem weird to return critter array here but it's already well known that WLH ID
   // is not able to guarnatee uniqueness so I think this makes sense.
@@ -262,7 +248,6 @@ const getSimilarCritters = async (
     const mortality_timestamp = m.mortality_timestamp
       ? new Date(m.mortality_timestamp)
       : undefined;
-    if(mortality_timestamp) console.log(new Date(+mortality_timestamp.getTime() + +oneDay));
     const mortality_result = await prisma.mortality.findMany({
       where: {
         mortality_timestamp: mortality_timestamp
@@ -274,7 +259,6 @@ const getSimilarCritters = async (
         location: formatLocationNameSearch(m.location),
       },
     });
-    console.log(JSON.stringify(mortality_result))
     mortality.push(...mortality_result);
   }
 
@@ -325,8 +309,8 @@ export {
   updateCritter,
   createCritter,
   deleteCritter,
-  getCritterByIdWithDetails,
   getSimilarCritters,
   appendEnglishTaxonAsUUID,
   getMultipleCrittersByIds,
+  formatLocationNameSearch
 };

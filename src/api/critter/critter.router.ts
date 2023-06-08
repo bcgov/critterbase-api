@@ -11,7 +11,6 @@ import {
   createCritter,
   deleteCritter,
   getAllCritters,
-  getCritterByIdWithDetails,
   getCritterByWlhId,
   getMultipleCrittersByIds,
   getSimilarCritters,
@@ -186,7 +185,7 @@ export const CritterRouter = (db: ICbDatabase ) => {
         const id = req.params.id;
         const critter = await formatParse(
           getFormat(req),
-          db.getCritterByIdWithDetails(id, getFormat(req)),
+          db.getCritterById(id, getFormat(req)),
           critterFormats
         );
         return res.status(200).json(critter);
