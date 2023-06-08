@@ -7,14 +7,7 @@ import { catchErrors } from "../../utils/middleware";
 import { QueryFormats, apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
-  appendEnglishTaxonAsUUID,
-  createCritter,
-  deleteCritter,
-  getAllCritters,
-  getCritterByWlhId,
-  getMultipleCrittersByIds,
-  getSimilarCritters,
-  updateCritter,
+  appendEnglishTaxonAsUUID
 } from "./critter.service";
 import {
   CritterCreateSchema,

@@ -1,6 +1,4 @@
-import { capture, critter, marking, mortality, Prisma } from "@prisma/client";
-import { PrismaClientValidationError } from "@prisma/client/runtime/library";
-import { queryRandomUUID } from "../../../prisma/prisma_utils";
+import { capture, critter, marking, mortality } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import {
   createCritter as _createCritter,
@@ -17,8 +15,7 @@ import { randomUUID } from "crypto";
 import { makeApp } from "../../app";
 import supertest from "supertest";
 import { ICbDatabase } from "../../utils/database";
-import { loginUser } from "../access/access.service";
-import { CritterCreateSchema, CritterDefaultResponse, CritterDefaultResponseSchema, CritterSchema } from "./critter.utils";
+import { CritterSchema } from "./critter.utils";
 import { apiError } from "../../utils/types";
 
 const getAllCritters = jest.fn();

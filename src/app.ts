@@ -6,7 +6,7 @@ import memorystore from "memorystore";
 import { AccessRouter } from "./api/access/access.router";
 import { ArtifactRouter } from "./api/artifact/artifact.router";
 import { bulkRouter } from "./api/bulk/bulk.router";
-import { captureRouter } from "./api/capture/capture.router";
+import { CaptureRouter } from "./api/capture/capture.router";
 import { collectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { CritterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
@@ -56,7 +56,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/collection-units", auth, collectionUnitRouter);
   app.use("/api/artifacts", auth, ArtifactRouter(db));
   app.use("/api/family", auth, familyRouter);
-  app.use("/api/captures", auth, captureRouter);
+  app.use("/api/captures", auth, CaptureRouter(db));
   app.use("/api/mortality", auth, mortalityRouter);
   app.use("/api/measurements", auth, measurementRouter);
   app.use("/api/lookups", auth, lookupRouter);

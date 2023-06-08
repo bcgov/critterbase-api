@@ -117,4 +117,5 @@ export {
   CaptureCreateSchema,
   CaptureUpdateSchema,
   CaptureResponseSchema,
+  CaptureBodySchema
 };
