@@ -8,7 +8,7 @@ import { ArtifactRouter } from "./api/artifact/artifact.router";
 import { bulkRouter } from "./api/bulk/bulk.router";
 import { captureRouter } from "./api/capture/capture.router";
 import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
-import { critterRouter } from "./api/critter/critter.router";
+import { CritterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
 import { lookupRouter } from "./api/lookup/lookup.router";
