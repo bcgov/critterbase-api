@@ -1,470 +1,381 @@
-import { prisma, request } from "../../utils/constants";
+import { apiError } from "../../utils/types";
+import supertest from "supertest";
+import { makeApp } from "../../app";
+import { prisma } from "../../utils/constants";
+import { ICbDatabase } from "../../utils/database";
 import {
-  getAllCollectionUnits,
-  getCollectionUnitById,
-  getCollectionUnitsByCritterId,
-  updateCollectionUnit,
-  createCollectionUnit,
-  deleteCollectionUnit,
+  getAllCollectionUnits as _getAllCollectionUnits,
+  getCollectionUnitById as _getCollectionUnitById,
+  getCollectionUnitsByCritterId as _getCollectionUnitsByCritterId,
+  updateCollectionUnit as _updateCollectionUnit,
+  createCollectionUnit as _createCollectionUnit,
+  deleteCollectionUnit as _deleteCollectionUnit,
 } from "./collectionUnit.service";
-import type { Prisma, critter } from "@prisma/client";
-import { randomInt, randomUUID } from "crypto";
 import {
+  CollectionUnitCreateInput,
   CollectionUnitIncludes,
-  collectionUnitIncludes,
   CollectionUnitResponse,
   CollectionUnitResponseSchema,
+  CollectionUnitUpdateInput,
+  SimpleCollectionUnitResponseSchema,
 } from "./collectionUnit.utils";
+import { randomUUID } from "crypto";
+import { get } from "http";
 
-function get_random(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
+// Mock CollectionUnit Objects
+const ID = randomUUID();
+const DATE = new Date();
 
-let dummyCritter: critter;
-let dummyCollectionUnit: CollectionUnitResponse;
-let dummyCollectionUnitIncludes: CollectionUnitIncludes;
-let dummyCollectionUnitInput: Prisma.critter_collection_unitUncheckedCreateInput;
-let dummyCollectionUnitKeys: string[];
-let dummyCollectionUnitIncludesKeys: string[];
-let dummyCollectionUnitId: string;
-/**
- * * Creates a new critter_collection_unit object that references an existing critter and critter_collection_unit location
- */
-async function newCollectionUnit() {
-  const dummyCritterId: string | undefined = get_random(
-    await prisma.critter_collection_unit.findMany({
-      select: {
-        critter_id: true,
-      },
-    })
-  )?.critter_id;
-  if (!dummyCritterId) throw Error("Could not get critter_id for dummy.");
-  dummyCollectionUnitId = get_random(
-    await prisma.critter_collection_unit.findMany({
-      select: {
-        collection_unit_id: true,
-      },
-    })
-  )?.collection_unit_id;
-  if (!dummyCollectionUnitId)
-    throw Error(
-      "Could not get taxon_critter_collection_unit_body_location_id for dummy."
-    );
-  const dummyCollectionUnit: Prisma.critter_collection_unitUncheckedCreateInput =
-    {
-      critter_id: dummyCritter.critter_id,
-      collection_unit_id: dummyCollectionUnitId,
-    };
-  return dummyCollectionUnit;
-}
+const mockCollectionUnitCreateInput: CollectionUnitCreateInput = {
+  critter_id: ID,
+  collection_unit_id: ID,
+};
 
-beforeAll(async () => {
-  // Sets a global dummy critter_collection_unit to reduce complexity on similar tests
-  // dummyUser is needed to keep track of other dummy entries created for these tests
-  const dummyTaxon = (
-    await prisma.critter.findFirst({ select: { taxon_id: true } })
-  )?.taxon_id;
-  if (dummyTaxon) {
-    dummyCritter = await prisma.critter.create({
-      data: {
-        taxon_id: dummyTaxon,
-        sex: "Unknown",
-        animal_id: `TEST_CRITTER_${randomInt(99999999)}`,
-      },
-    });
-  }
-  dummyCollectionUnitInput = await newCollectionUnit();
-  dummyCollectionUnitIncludes = await prisma.critter_collection_unit.create({
-    data: dummyCollectionUnitInput,
-    ...collectionUnitIncludes,
-  });
-  dummyCollectionUnit = CollectionUnitResponseSchema.parse(
-    dummyCollectionUnitIncludes
-  );
-  dummyCollectionUnitKeys = Object.keys(dummyCollectionUnit);
-  dummyCollectionUnitIncludesKeys = Object.keys(dummyCollectionUnitIncludes);
+const mockCollectionUnitUpdateInput: CollectionUnitUpdateInput = {
+  collection_unit_id: ID,
+};
+
+const mockXrefUnit = {
+  unit_name: "unit_name",
+  description: "description",
+};
+
+const mockCollectionUnitIncludes: CollectionUnitIncludes = {
+  critter_collection_unit_id: ID,
+  critter_id: ID,
+  collection_unit_id: ID,
+  xref_collection_unit: mockXrefUnit,
+  create_user: ID,
+  update_user: ID,
+  create_timestamp: DATE,
+  update_timestamp: DATE,
+};
+
+const mockCollectionUnitResponse: CollectionUnitResponse = {
+  critter_collection_unit_id: ID,
+  critter_id: ID,
+  unit_name: mockXrefUnit.unit_name,
+  unit_description: mockXrefUnit.description,
+  create_user: ID,
+  update_user: ID,
+  create_timestamp: DATE.toISOString() as unknown as Date,
+  update_timestamp: DATE.toISOString() as unknown as Date,
+};
+
+const mockSimpleCollectionUnitResponse = {
+  category_name: "category_name",
+  unit_name: "unit_name",
+  collection_unit_id: ID,
+  collection_category_id: ID,
+};
+
+// Mock Prisma Calls
+const create = jest
+  .spyOn(prisma.critter_collection_unit, "create")
+  .mockImplementation();
+const upsert = jest
+  .spyOn(prisma.critter_collection_unit, "upsert")
+  .mockImplementation();
+const findMany = jest
+  .spyOn(prisma.critter_collection_unit, "findMany")
+  .mockImplementation();
+const findUniqueOrThrow = jest
+  .spyOn(prisma.critter_collection_unit, "findUniqueOrThrow")
+  .mockImplementation();
+const update = jest
+  .spyOn(prisma.critter_collection_unit, "update")
+  .mockImplementation();
+const pDelete = jest
+  .spyOn(prisma.critter_collection_unit, "delete")
+  .mockImplementation();
+const queryRaw = jest.spyOn(prisma, "$queryRaw").mockImplementation();
+
+// Mock Services
+const getAllCollectionUnits = jest.fn();
+const getCollectionUnitById = jest.fn();
+const getCollectionUnitsByCritterId = jest.fn();
+const updateCollectionUnit = jest.fn();
+const createCollectionUnit = jest.fn();
+const deleteCollectionUnit = jest.fn();
+const getCritterById = jest.fn();
+
+const request = supertest(
+  makeApp({
+    getAllCollectionUnits,
+    getCollectionUnitById,
+    getCollectionUnitsByCritterId,
+    updateCollectionUnit,
+    createCollectionUnit,
+    deleteCollectionUnit,
+    getCritterById,
+  } as Record<keyof ICbDatabase, any>)
+);
+
+beforeEach(() => {
+  //TODO: Reset mocked prisma calls?
+
+  // Reset mocked services
+  getAllCollectionUnits.mockReset();
+  getCollectionUnitById.mockReset();
+  getCollectionUnitsByCritterId.mockReset();
+  updateCollectionUnit.mockReset();
+  createCollectionUnit.mockReset();
+  deleteCollectionUnit.mockReset();
+  getCritterById.mockReset();
+
+  // Set default returns
+  // TODO
 });
 
-describe("API: Collection Unit", () => {
-  describe("ZOD SCHEMA", () => {
-    describe("CollectionUnitResponseSchema", () => {
-      it("correctly handles null data from includes", () => {
-        const formattedData = CollectionUnitResponseSchema.parse({
-          ...dummyCollectionUnitIncludes,
-          xref_collection_unit: { unit_name: null },
+describe("API: CollectionUnit", () => {
+  describe("ZOD SCHEMAS", () => {
+    describe("SimpleCollectionUnitSchema", () => {
+      it("correctly transforms extended data to simplified format", () => {
+        const simpleCollectionUnit = SimpleCollectionUnitResponseSchema.parse({
+          ...mockCollectionUnitIncludes,
+          xref_collection_unit: {
+            unit_name: mockXrefUnit.unit_name,
+            collection_unit_id: ID,
+            lk_collection_category: {
+              category_name: "category_name",
+              collection_category_id: ID,
+            },
+          },
         });
-        expect(formattedData).toStrictEqual({
-          ...dummyCollectionUnit,
-          unit_name: null,
-        });
-      });
-    });
-
-    it("correctly handles undefined data from includes", () => {
-      const { xref_collection_unit, ...rest } = dummyCollectionUnitIncludes;
-      const formattedData = CollectionUnitResponseSchema.parse(rest);
-      expect(formattedData).toStrictEqual({
-        ...dummyCollectionUnit,
-        unit_name: null,
-        unit_description: null,
+        expect.assertions(1);
+        expect(simpleCollectionUnit).toEqual(mockSimpleCollectionUnitResponse);
       });
     });
   });
 
   describe("SERVICES", () => {
-    describe("createCollectionUnit()", () => {
-      it("creates a new critter_collection_unit", async () => {
-        const newCollectionUnitInput = await newCollectionUnit();
-        const critter_collection_unit = await createCollectionUnit(
-          newCollectionUnitInput
-        );
-        expect.assertions(1);
-        expect(critter_collection_unit.critter_id).toBe(
-          newCollectionUnitInput.critter_id
-        );
-      });
-    });
-
     describe("getAllCollectionUnits()", () => {
-      it("returns an array of critter_collection_units", async () => {
-        const critter_collection_units = await getAllCollectionUnits();
-        expect.assertions(2);
-        expect(critter_collection_units).toBeInstanceOf(Array);
-        expect(critter_collection_units.length).toBeGreaterThan(0);
-      });
-
-      it("returns critter_collection_units with correct properties", async () => {
-        const critter_collection_units = await getAllCollectionUnits();
-        expect.assertions(
-          critter_collection_units.length *
-            dummyCollectionUnitIncludesKeys.length
+      it("returns an array of collection units", async () => {
+        findMany.mockResolvedValue([mockCollectionUnitIncludes]);
+        const collectionUnits = await _getAllCollectionUnits();
+        expect.assertions(3);
+        expect(prisma.critter_collection_unit.findMany).toHaveBeenCalledTimes(
+          1
         );
-        for (const critter_collection_unit of critter_collection_units) {
-          for (const key of dummyCollectionUnitIncludesKeys) {
-            expect(critter_collection_unit).toHaveProperty(key);
-          }
-        }
+        expect(collectionUnits).toBeInstanceOf(Array);
+        expect(collectionUnits.length).toBe(1);
       });
     });
 
     describe("getCollectionUnitById()", () => {
-      it("returns the expected critter_collection_unit", async () => {
-        const critter_collection_unit = await getCollectionUnitById(
-          dummyCollectionUnitIncludes.critter_collection_unit_id
-        );
-        expect.assertions(1);
-        expect(critter_collection_unit).toStrictEqual(
-          dummyCollectionUnitIncludes
-        );
+      it("returns a collection unit when given a valid ID", async () => {
+        findUniqueOrThrow.mockResolvedValue(mockCollectionUnitIncludes);
+        const returnedCollectionUnit = await _getCollectionUnitById(ID);
+        expect.assertions(2);
+        expect(
+          prisma.critter_collection_unit.findUniqueOrThrow
+        ).toHaveBeenCalledTimes(1);
+        expect(returnedCollectionUnit).toEqual(mockCollectionUnitIncludes);
+      });
+
+      it("throws error when given an invalid ID", async () => {
+        findUniqueOrThrow.mockRejectedValue(new Error());
+        await expect(_getCollectionUnitById(ID)).rejects.toThrow();
       });
     });
 
     describe("getCollectionUnitsByCritterId()", () => {
-      it("returns an array of critter_collection_units with the expected critter ID", async () => {
-        // create another record with the same critter_id
-        const critter_collection_unitInput = await newCollectionUnit();
-        await prisma.critter_collection_unit.create({
-          data: {
-            ...critter_collection_unitInput,
-            critter_id: dummyCollectionUnitIncludes.critter_id,
-          },
-        });
-        const returnedCollectionUnits = await getCollectionUnitsByCritterId(
-          dummyCollectionUnitIncludes.critter_id
+      it("returns collection units associated with the given critter ID", async () => {
+        findMany.mockResolvedValue([mockCollectionUnitIncludes]);
+        const collectionUnits = await _getCollectionUnitsByCritterId(ID);
+        expect.assertions(3);
+        expect(prisma.critter_collection_unit.findMany).toHaveBeenCalledTimes(
+          1
         );
-        expect.assertions(1 + returnedCollectionUnits.length);
-        expect(returnedCollectionUnits.length).toBeGreaterThanOrEqual(2); // At least two critter_collection_units tied to this critter
-        for (const critter_collection_unit of returnedCollectionUnits) {
-          expect(critter_collection_unit.critter_id).toBe(
-            dummyCollectionUnitIncludes.critter_id
-          );
-        }
+        expect(collectionUnits).toBeInstanceOf(Array);
+        expect(collectionUnits.length).toBe(1);
       });
     });
 
     describe("updateCollectionUnit()", () => {
-      it("updates a critter_collection_unit", async () => {
-        const critter_collection_unit = await createCollectionUnit(
-          await newCollectionUnit()
-        );
-        const updatedCollectionUnit = await updateCollectionUnit(
-          critter_collection_unit.critter_collection_unit_id,
-          { collection_unit_id: dummyCollectionUnitInput.collection_unit_id }
+      it("returns a collection unit with the updated data", async () => {
+        update.mockResolvedValue(mockCollectionUnitIncludes);
+        const returnedCollectionUnit = await _updateCollectionUnit(
+          ID,
+          mockCollectionUnitUpdateInput
         );
         expect.assertions(2);
-        expect(updatedCollectionUnit).toStrictEqual({
-          ...critter_collection_unit,
-          collection_unit_id: dummyCollectionUnitIncludes.collection_unit_id,
-          xref_collection_unit:
-            dummyCollectionUnitIncludes.xref_collection_unit,
-          update_timestamp: updatedCollectionUnit.update_timestamp, // Ignore this field as it will be different
-        });
-        expect(
-          updatedCollectionUnit.update_timestamp ===
-            critter_collection_unit.update_timestamp
-        ).toBeFalsy();
+        expect(prisma.critter_collection_unit.update).toHaveBeenCalledTimes(1);
+        expect(returnedCollectionUnit).toEqual(mockCollectionUnitIncludes);
+      });
+    });
+
+    describe("createCollectionUnit()", () => {
+      it("returns a newly created collection unit", async () => {
+        create.mockResolvedValue(mockCollectionUnitIncludes);
+        const returnedCollectionUnit = await _createCollectionUnit(
+          mockCollectionUnitCreateInput
+        );
+        expect.assertions(2);
+        expect(prisma.critter_collection_unit.create).toHaveBeenCalledTimes(1);
+        expect(returnedCollectionUnit).toEqual(mockCollectionUnitIncludes);
       });
     });
 
     describe("deleteCollectionUnit()", () => {
-      it("deletes a critter_collection_unit", async () => {
-        const critter_collection_unit = await createCollectionUnit(
-          await newCollectionUnit()
-        );
-        const deletedCollectionUnit = await deleteCollectionUnit(
-          critter_collection_unit.critter_collection_unit_id
-        );
-        const critter_collection_unitCheck =
-          await prisma.critter_collection_unit.findUnique({
-            where: {
-              critter_collection_unit_id:
-                critter_collection_unit.critter_collection_unit_id,
-            },
-          });
+      it("returns deleted collection unit and removes it from database", async () => {
+        pDelete.mockResolvedValue(mockCollectionUnitIncludes);
+        const deletedCollectionUnit = await _deleteCollectionUnit(ID);
         expect.assertions(2);
-        expect(deletedCollectionUnit).toStrictEqual(critter_collection_unit);
-        expect(critter_collection_unitCheck).toBeNull();
+        expect(prisma.critter_collection_unit.delete).toHaveBeenCalledTimes(1);
+        expect(deletedCollectionUnit).toEqual(mockCollectionUnitIncludes);
       });
     });
   });
 
   describe("ROUTERS", () => {
     describe("GET /api/collection-units", () => {
-      it("returns status 200", async () => {
-        const res = await request.get("/api/collection-units");
-        expect.assertions(1);
-        expect(res.status).toBe(200);
-      });
-
-      it("returns an array", async () => {
-        const res = await request.get("/api/collection-units");
-        expect.assertions(1);
-        expect(res.body).toBeInstanceOf(Array);
-      });
-
-      it("returns collection_units with correct properties", async () => {
-        const res = await request.get("/api/collection-units");
-        const critter_collection_units = res.body;
-        expect.assertions(
-          critter_collection_units.length * dummyCollectionUnitKeys.length
-        );
-        for (const critter_collection_unit of critter_collection_units) {
-          for (const key of dummyCollectionUnitKeys) {
-            expect(critter_collection_unit).toHaveProperty(key);
-          }
-        }
-      });
-    });
-
-    describe("POST /api/collection_unit/create", () => {
-      it("returns status 201", async () => {
-        const collectionUnit = await newCollectionUnit();
-        const res = await request
-          .post("/api/collection-units/create")
-          .send(collectionUnit);
-        expect.assertions(1);
-        expect(res.status).toBe(201);
-      });
-
-      it("returns a collection unit", async () => {
-        const collectionUnit = await newCollectionUnit();
-        const res = await request
-          .post("/api/collection-units/create")
-          .send(collectionUnit);
-        const returnedCollectionUnits = res.body;
-        expect.assertions(dummyCollectionUnitKeys.length);
-        for (const key of dummyCollectionUnitKeys) {
-          expect(returnedCollectionUnits).toHaveProperty(key);
-        }
-      });
-
-      it("strips invalid fields from data", async () => {
-        const collectionUnit = await newCollectionUnit();
-        const res = await request
-          .post("/api/collection-units/create")
-          .send({ ...collectionUnit, invalidField: "qwerty123" });
-        expect.assertions(2);
-        expect(res.status).toBe(201);
-        expect(res.body).not.toHaveProperty("invalidField");
-      });
-
-      it("returns status 400 when data is missing required fields", async () => {
-        const collectionUnit = await newCollectionUnit();
-        const res = await request.post("/api/collection-units/create").send({
-          // left out required collection_unit_id field
-          critter_id: collectionUnit.critter_id,
-        });
-        expect.assertions(1);
-        expect(res.status).toBe(400);
+      it("returns an array of collection units", async () => {
+        getAllCollectionUnits.mockResolvedValue([mockCollectionUnitIncludes]);
+        const response = await request.get("/api/collection-units");
+        expect.assertions(4);
+        expect(getAllCollectionUnits.mock.calls.length).toBe(1);
+        expect(response.status).toBe(200);
+        expect(response.body).toBeInstanceOf(Array);
+        expect(response.body).toEqual([mockCollectionUnitResponse]);
       });
     });
 
     describe("GET /api/collection-units/:id", () => {
-      it("returns status 404 when id does not exist", async () => {
-        const res = await request.get(`/api/collection-units/${randomUUID()}`);
-        expect.assertions(1);
-        expect(res.status).toBe(404);
+      it("returns a collection unit when given a valid ID", async () => {
+        getCollectionUnitById.mockResolvedValue(mockCollectionUnitIncludes);
+        const response = await request.get(`/api/collection-units/${ID}`);
+        expect.assertions(4);
+        expect(getCollectionUnitById.mock.calls.length).toBe(1);
+        expect(response.status).toBe(200);
+        expect(
+          CollectionUnitResponseSchema.safeParse(response.body).success
+        ).toBe(true);
+        expect(response.body).toEqual(mockCollectionUnitResponse);
       });
 
-      it("returns status 200", async () => {
-        const res = await request.get(
-          `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
-        );
-        expect.assertions(1);
-        expect(res.status).toBe(200);
-      });
-
-      it("returns a marking", async () => {
-        const res = await request.get(
-          `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
-        );
-        expect.assertions(dummyCollectionUnitKeys.length);
-        for (const key of dummyCollectionUnitKeys) {
-          expect(res.body).toHaveProperty(key);
-        }
-      });
-    });
-
-    describe("PATCH /api/collection-units/:id", () => {
-      it("returns status 404 when id does not exist", async () => {
-        const res = await request
-          .patch(`/api/collection-units/${randomUUID()}`)
-          .send({ collection_unit_id: dummyCollectionUnitId });
-        console.log(res.body);
-        expect.assertions(1);
-        expect(res.status).toBe(404);
-      });
-
-      it("returns status 200", async () => {
-        const res = await request
-          .patch(
-            `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
-          )
-          .send({ collection_unit_id: dummyCollectionUnitId });
-        expect.assertions(1);
-        expect(res.status).toBe(200);
-      });
-
-      it("returns a collection unit", async () => {
-        const res = await request
-          .patch(
-            `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
-          )
-          .send({ collection_unit_id: dummyCollectionUnitId });
-        expect.assertions(dummyCollectionUnitKeys.length);
-        for (const key of dummyCollectionUnitKeys) {
-          expect(res.body).toHaveProperty(key);
-        }
-      });
-
-      it("returns status 400 when data is empty", async () => {
-        const res = await request.patch(
-          `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
-        );
-        expect.assertions(1);
-        expect(res.status).toBe(400);
-      });
-
-      it("strips invalid fields from data", async () => {
-        const res = await request
-          .patch(
-            `/api/collection-units/${dummyCollectionUnit.critter_collection_unit_id}`
-          )
-          .send({
-            collection_unit_id: dummyCollectionUnitId,
-            invalidField: "qwerty123",
-          });
+      it("returns 404 when given an invalid ID", async () => {
+        getCollectionUnitById.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const response = await request.get(`/api/collection-units/${ID}`);
         expect.assertions(2);
-        expect(res.status).toBe(200);
-        expect(res.body).not.toHaveProperty("invalidField");
-      });
-    });
-
-    describe("DELETE /api/collection-units/:id", () => {
-      it("returns status 404 when id does not exist", async () => {
-        const res = await request.delete(
-          `/api/collection-units/${randomUUID()}`
-        );
-        expect.assertions(1);
-        expect(res.status).toBe(404);
-      });
-
-      it("returns status 200", async () => {
-        const collection_unit = await prisma.critter_collection_unit.create({
-          data: await newCollectionUnit(),
-        });
-        const res = await request.delete(
-          `/api/collection-units/${collection_unit.critter_collection_unit_id}`
-        );
-        expect.assertions(1);
-        expect(res.status).toBe(200);
-      });
-
-      it("returns collection unit deleted message", async () => {
-        const collection_unit = await prisma.critter_collection_unit.create({
-          data: await newCollectionUnit(),
-        });
-        const res = await request.delete(
-          `/api/collection-units/${collection_unit.critter_collection_unit_id}`
-        );
-        expect.assertions(1);
-        expect(res.body).toStrictEqual(
-          `CollectionUnit ${collection_unit.critter_collection_unit_id} has been deleted`
-        );
+        expect(getCollectionUnitById.mock.calls.length).toBe(1);
+        expect(response.status).toBe(404);
       });
     });
 
     describe("GET /api/collection-units/critter/:id", () => {
-      it("returns status 404 if no collection_units found", async () => {
-        const res = await request.get(
-          `/api/collection-units/critter/${randomUUID()}`
+      it("returns collection units associated with the given critter ID", async () => {
+        getCollectionUnitsByCritterId.mockResolvedValue([
+          mockCollectionUnitIncludes,
+        ]);
+        getCritterById.mockResolvedValue({}); // Doesn't throw
+        const response = await request.get(
+          `/api/collection-units/critter/${ID}`
         );
-        expect.assertions(1);
-        expect(res.status).toBe(404);
+        expect.assertions(4);
+        expect(getCollectionUnitsByCritterId.mock.calls.length).toBe(1);
+        expect(response.status).toBe(200);
+        expect(response.body).toBeInstanceOf(Array);
+        expect(response.body).toEqual([mockCollectionUnitResponse]);
       });
 
-      it("returns status 200", async () => {
-        const res = await request.get(
-          `/api/collection-units/critter/${dummyCollectionUnit.critter_id}`
+      it("returns 404 when given an invalid critter ID", async () => {
+        getCritterById.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const response = await request.get(
+          `/api/collection-units/critter/${ID}`
         );
-        expect.assertions(1);
-        expect(res.status).toBe(200);
-      });
-
-      it("returns an array", async () => {
-        expect.assertions(1);
-        const res = await request.get(
-          `/api/collection-units/critter/${dummyCollectionUnit.critter_id}`
-        );
-        expect(res.body).toBeInstanceOf(Array);
-      });
-
-      it("returns collection-units with correct properties", async () => {
-        const res = await request.get(
-          `/api/collection-units/critter/${dummyCollectionUnit.critter_id}`
-        );
-        const collection_units = res.body;
-        expect.assertions(
-          collection_units.length * (dummyCollectionUnitKeys.length + 1)
-        );
-        for (const collection_unit of collection_units) {
-          expect(collection_unit.critter_id).toBe(
-            dummyCollectionUnit.critter_id
-          );
-          for (const key of dummyCollectionUnitKeys) {
-            expect(collection_unit).toHaveProperty(key);
-          }
-        }
+        expect.assertions(3);
+        expect(getCritterById.mock.calls.length).toBe(1);
+        expect(getCollectionUnitsByCritterId.mock.calls.length).toBe(0);
+        expect(response.status).toBe(404);
       });
     });
-  });
-});
 
-afterAll(async () => {
-  await prisma.critter_collection_unit.deleteMany({
-    where: { critter_id: dummyCritter.critter_id },
-  });
-  await prisma.critter.delete({
-    where: { critter_id: dummyCritter.critter_id },
+    describe("PATCH /api/collection-units/:id", () => {
+      it("returns a collection unit with the updated data", async () => {
+        updateCollectionUnit.mockResolvedValue(mockCollectionUnitIncludes);
+        const response = await request
+          .patch(`/api/collection-units/${ID}`)
+          .send(mockCollectionUnitUpdateInput);
+        expect.assertions(4);
+        expect(updateCollectionUnit.mock.calls.length).toBe(1);
+        expect(response.status).toBe(200);
+        expect(
+          CollectionUnitResponseSchema.safeParse(response.body).success
+        ).toBe(true);
+        expect(response.body).toEqual(mockCollectionUnitResponse);
+      });
+
+      it("returns 404 when given an invalid ID", async () => {
+        updateCollectionUnit.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const response = await request
+          .patch(`/api/collection-units/${ID}`)
+          .send(mockCollectionUnitUpdateInput);
+        expect.assertions(2);
+        expect(updateCollectionUnit.mock.calls.length).toBe(1);
+        expect(response.status).toBe(404);
+      });
+
+      it("returns 400 when given invalid data", async () => {
+        const response = await request
+          .patch(`/api/collection-units/${ID}`)
+          .send({ badData: "badData" });
+        expect.assertions(2);
+        expect(updateCollectionUnit.mock.calls.length).toBe(0); // Not called because zod catches the error
+        expect(response.status).toBe(400);
+      });
+    });
+
+    describe("POST /api/collection-units/create", () => {
+      it("returns a newly created collection unit", async () => {
+        createCollectionUnit.mockResolvedValue(mockCollectionUnitIncludes);
+        const response = await request
+          .post("/api/collection-units/create")
+          .send(mockCollectionUnitCreateInput);
+        expect.assertions(4);
+        expect(createCollectionUnit.mock.calls.length).toBe(1);
+        expect(response.status).toBe(201);
+        expect(
+          CollectionUnitResponseSchema.safeParse(response.body).success
+        ).toBe(true);
+        expect(response.body).toEqual(mockCollectionUnitResponse);
+      });
+
+      it("returns 400 when given invalid data", async () => {
+        const response = await request
+          .post("/api/collection-units/create")
+          .send({ badData: "badData" });
+        expect.assertions(2);
+        expect(createCollectionUnit.mock.calls.length).toBe(0); // Not called because zod catches the error
+        expect(response.status).toBe(400);
+      });
+    });
+
+    describe("DELETE /api/collection-units/:id", () => {
+      it("returns a message for deleted collection unit", async () => {
+        deleteCollectionUnit.mockResolvedValue(mockCollectionUnitIncludes);
+        const response = await request.delete(`/api/collection-units/${ID}`);
+        expect.assertions(3);
+        expect(deleteCollectionUnit.mock.calls.length).toBe(1);
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(`CollectionUnit ${ID} has been deleted`);
+      });
+
+      it("returns 404 when given an invalid ID", async () => {
+        deleteCollectionUnit.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const response = await request.delete(`/api/collection-units/${ID}`);
+        expect.assertions(2);
+        expect(deleteCollectionUnit.mock.calls.length).toBe(1);
+        expect(response.status).toBe(404);
+      });
+    });
   });
 });
