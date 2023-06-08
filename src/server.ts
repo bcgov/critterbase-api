@@ -33,7 +33,6 @@ const options: session.SessionOptions = {
     secure: false,
   },
   name: "critterbase.sid",
-  proxy: true,
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
