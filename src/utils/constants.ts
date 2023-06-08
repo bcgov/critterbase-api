@@ -4,8 +4,7 @@ import { app } from "../server";
 import { QueryFormats } from "./types";
 declare module "express-session" {
   interface SessionData {
-    views: number;
-    user: user;
+    user?: user;
   }
 }
 
