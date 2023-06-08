@@ -1,17 +1,8 @@
 import type { Request, Response } from "express";
 import express, { NextFunction } from "express";
 import { array } from "zod";
-import { prisma } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import {
-  createCollectionUnit,
-  deleteCollectionUnit,
-  getAllCollectionUnits,
-  getCollectionUnitById,
-  getCollectionUnitsByCritterId,
-  updateCollectionUnit,
-} from "./collectionUnit.service";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitResponseSchema,
@@ -28,7 +19,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
   collectionUnitRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
-      const collectionUnits = await getAllCollectionUnits();
+      const collectionUnits = await db.getAllCollectionUnits();
       const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
         collectionUnits
       );
@@ -43,7 +34,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     "/create",
     catchErrors(async (req: Request, res: Response) => {
       const collectionUnitData = CollectionUnitCreateBodySchema.parse(req.body);
-      const collectionUnit = await createCollectionUnit(collectionUnitData);
+      const collectionUnit = await db.createCollectionUnit(collectionUnitData);
       const formattedCollectionUnit =
         CollectionUnitResponseSchema.parse(collectionUnit);
       return res.status(201).json(formattedCollectionUnit);
@@ -54,10 +45,8 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
-      await prisma.critter.findUniqueOrThrow({
-        where: { critter_id: id },
-      });
-      const collectionUnits = await getCollectionUnitsByCritterId(id);
+      await db.getCritterById(id);
+      const collectionUnits = await db.getCollectionUnitsByCritterId(id);
       const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
         collectionUnits
       );
@@ -79,7 +68,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
-        const collectionUnit = await getCollectionUnitById(req.params.id);
+        const collectionUnit = await db.getCollectionUnitById(req.params.id);
         const formattedCollectionUnit =
           CollectionUnitResponseSchema.parse(collectionUnit);
         return res.status(200).json(formattedCollectionUnit);
@@ -90,7 +79,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
         const collectionUnitData = CollectionUnitUpdateBodySchema.parse(
           req.body
         );
-        const collectionUnit = await updateCollectionUnit(
+        const collectionUnit = await db.updateCollectionUnit(
           req.params.id,
           collectionUnitData
         );
@@ -102,9 +91,10 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
-        await deleteCollectionUnit(id);
+        await db.deleteCollectionUnit(id);
         return res.status(200).json(`CollectionUnit ${id} has been deleted`);
       })
     );
+    
   return collectionUnitRouter;
 };
