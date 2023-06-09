@@ -129,6 +129,7 @@ export {
   MortalityCreateSchema,
   MortalityUpdateSchema,
   MortalityResponseSchema,
+  MortalityBodySchema
 };
 export type {
   MortalityIncludeType,

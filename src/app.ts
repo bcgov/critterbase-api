@@ -14,7 +14,7 @@ import { locationRouter } from "./api/location/location.router";
 import { lookupRouter } from "./api/lookup/lookup.router";
 import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
-import { mortalityRouter } from "./api/mortality/mortality.router";
+import { MortalityRouter } from "./api/mortality/mortality.router";
 import { UserRouter } from "./api/user/user.router";
 import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
@@ -57,7 +57,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/artifacts", auth, ArtifactRouter(db));
   app.use("/api/family", auth, familyRouter);
   app.use("/api/captures", auth, CaptureRouter(db));
-  app.use("/api/mortality", auth, mortalityRouter);
+  app.use("/api/mortality", auth, MortalityRouter(db));
   app.use("/api/measurements", auth, measurementRouter);
   app.use("/api/lookups", auth, lookupRouter);
   app.use("/api/bulk", auth, bulkRouter);
