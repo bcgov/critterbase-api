@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, NO_AUTH } from "./constants";
+import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, KEYCLOAK_GUID_HEADER, NO_AUTH, USER_ID_HEADER } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 import cookieParser from "cookie-parser";
@@ -93,8 +93,8 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     next();
   }
   const parsedLogin = AuthLoginSchema.parse({
-    user_id: req.headers.user_id,
-    keycloak_uuid: req.headers.keycloak_uuid,
+    user_id: req.get(USER_ID_HEADER),
+    keycloak_uuid: req.get(KEYCLOAK_GUID_HEADER),
   });
   const user = await loginUser(parsedLogin);
   if (user) {

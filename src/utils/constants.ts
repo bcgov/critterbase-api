@@ -26,6 +26,10 @@ const oneDay = 60 * 60 * 24 * 1000;
 
 const API_KEY_HEADER = "API-KEY";
 
+const USER_ID_HEADER = "USER-ID";
+
+const KEYCLOAK_GUID_HEADER = "KEYCLOAK-GUID";
+
 const API_KEY = process.env.API_KEY;
 
 const PORT = process.env.PORT;
@@ -82,6 +86,8 @@ const defaultFormat = QueryFormats.default;
 export {
   PORT,
   API_KEY_HEADER,
+  USER_ID_HEADER,
+  KEYCLOAK_GUID_HEADER,
   IS_DEV,
   IS_PROD,
   IS_TEST,

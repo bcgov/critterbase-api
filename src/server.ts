@@ -15,7 +15,6 @@ import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
-import { sessionHours } from "./utils/helper_functions";
 import cookieParser from "cookie-parser";
 import {
   auth,
@@ -26,19 +25,6 @@ import {
 import { lookupRouter } from "./api/lookup/lookup.router";
 import { bulkRouter } from "./api/bulk/bulk.router";
 import { xrefRouter } from "./api/xref/xref.router";
-// const SafeMemoryStore = memorystore(session);
-// const options: session.SessionOptions = {
-//   cookie: {
-//     maxAge: sessionHours(24), //how long until the session expires
-//   },
-//   name: "critterbase.sid",
-//   secret: process.env.SESSION_SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   store: new SafeMemoryStore({
-//     checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
-//   }),
-// };
 
 const app = express();
 
