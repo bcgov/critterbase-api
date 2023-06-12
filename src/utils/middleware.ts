@@ -89,7 +89,6 @@ const errorHandler = (
 const auth = (req: Request, res: Response, next: NextFunction) => {
   const cookies = req.signedCookies as Record<string, string>;
   const user = req.session.user;
-  console.log({ cookies, user });
   if (req.session.user || IS_TEST || NO_AUTH) {
     next();
   } else {
