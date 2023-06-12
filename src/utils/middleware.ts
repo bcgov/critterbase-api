@@ -5,6 +5,8 @@ import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 import cookieParser from "cookie-parser";
+import { AuthLoginSchema } from "../api/user/user.utils";
+import { loginUser } from "../api/access/access.service";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -86,16 +88,21 @@ const errorHandler = (
   next(err);
 };
 
-const auth = (req: Request, res: Response, next: NextFunction) => {
-  const cookies = req.signedCookies as Record<string, string>;
-  const user = req.session.user;
-  console.log({ cookies, user });
-  if (req.session.user || IS_TEST || NO_AUTH) {
+const auth = async (req: Request, res: Response, next: NextFunction) => {
+  if (IS_TEST || NO_AUTH) {
+    next();
+  }
+  const parsedLogin = AuthLoginSchema.parse({
+    user_id: req.headers.user_id,
+    keycloak_uuid: req.headers.keycloak_uuid,
+  });
+  const user = await loginUser(parsedLogin);
+  if (user) {
     next();
   } else {
     console.log("err placeholder");
     next(
-      new apiError("Must be logged in to access this route. POST api/login")
+      new apiError("Must provide a user_id and keycloak_uuid headers", 400)
     );
   }
 };

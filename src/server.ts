@@ -26,19 +26,19 @@ import {
 import { lookupRouter } from "./api/lookup/lookup.router";
 import { bulkRouter } from "./api/bulk/bulk.router";
 import { xrefRouter } from "./api/xref/xref.router";
-const SafeMemoryStore = memorystore(session);
-const options: session.SessionOptions = {
-  cookie: {
-    maxAge: sessionHours(24), //how long until the session expires
-  },
-  name: "critterbase.sid",
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: new SafeMemoryStore({
-    checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
-  }),
-};
+// const SafeMemoryStore = memorystore(session);
+// const options: session.SessionOptions = {
+//   cookie: {
+//     maxAge: sessionHours(24), //how long until the session expires
+//   },
+//   name: "critterbase.sid",
+//   secret: process.env.SESSION_SECRET,
+//   resave: false,
+//   saveUninitialized: false,
+//   store: new SafeMemoryStore({
+//     checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
+//   }),
+// };
 
 const app = express();
 
@@ -46,7 +46,7 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser(process.env.SESSION_SECRET));
-app.use(session(options));
+// app.use(session(options));
 app.use(validateApiKey);
 
 app.use("/api/", accessRouter);

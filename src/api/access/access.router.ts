@@ -16,19 +16,20 @@ export const accessRouter = express.Router();
 accessRouter.get("/", (req: Request, res: Response) => {
   return res.status(200).json("Welcome to Critterbase API");
 });
-/**
- ** login endpoint
- * Note: currently accepts, user_id OR keycloak_uuid OR (system_name AND system_user_id)
- */
-accessRouter.post(
-  "/login",
-  catchErrors(async (req: Request, res: Response) => {
-    const parsedLogin = AuthLoginSchema.parse(req.body);
-    const user = await loginUser(parsedLogin);
-    req.session.user = user;
-    return res.status(200).json({ "critterbase.sid": req.sessionID }).end();
-  })
-);
+
+// /**
+//  ** login endpoint
+//  * Note: currently accepts, user_id OR keycloak_uuid OR (system_name AND system_user_id)
+//  */
+// accessRouter.post(
+//   "/login",
+//   catchErrors(async (req: Request, res: Response) => {
+//     const parsedLogin = AuthLoginSchema.parse(req.body);
+//     const user = await loginUser(parsedLogin);
+//     req.session.user = user;
+//     return res.status(200).json({ "critterbase.sid": req.sessionID }).end();
+//   })
+// );
 
 /**
  ** Signup endpoint
