@@ -29,6 +29,8 @@ type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
 type FormattedMarking = z.infer<typeof markingResponseSchema>;
 
+type MarkingVerificationType = z.infer<typeof MarkingVerificationSchema>;
+
 // Constants
 
 // Included related data from lk and xref tables
@@ -192,4 +194,5 @@ export type {
   MarkingUpdateInput,
   MarkingIncludes,
   FormattedMarking,
+  MarkingVerificationType
 };

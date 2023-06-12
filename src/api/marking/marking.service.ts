@@ -130,7 +130,7 @@ const verifyMarkingsAgainstTaxon = async (
   taxon_id: string,
   body: (Partial<marking> & Pick<marking, 'marking_id' | 'taxon_marking_body_location_id'>)[]
 ): Promise<string[]> => {
-  const hier = await db_getTaxonIds(taxon_id);
+  const hier: string[] = await db_getTaxonIds(taxon_id);
   const marking_ids: string[] = body.map(a => a.marking_id);
   const markings = await prisma.marking.findMany({
     include: {
