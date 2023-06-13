@@ -24,11 +24,11 @@ declare global {
 
 const oneDay = 60 * 60 * 24 * 1000;
 
-const API_KEY_HEADER = "API-KEY";
+const API_KEY_HEADER = "api-key";
 
-const USER_ID_HEADER = "USER-ID";
+const USER_ID_HEADER = "user-id";
 
-const KEYCLOAK_GUID_HEADER = "KEYCLOAK-GUID";
+const KEYCLOAK_UUID_HEADER = "keycloak-uuid";
 
 const API_KEY = process.env.API_KEY;
 
@@ -87,7 +87,7 @@ export {
   PORT,
   API_KEY_HEADER,
   USER_ID_HEADER,
-  KEYCLOAK_GUID_HEADER,
+  KEYCLOAK_UUID_HEADER,
   IS_DEV,
   IS_PROD,
   IS_TEST,

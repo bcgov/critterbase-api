@@ -1,6 +1,11 @@
 import { Prisma, user } from ".prisma/client";
 import { system } from "@prisma/client";
 import { z } from "zod";
+import {
+  API_KEY_HEADER,
+  KEYCLOAK_UUID_HEADER,
+  USER_ID_HEADER,
+} from "../../utils/constants";
 import { AuditColumns } from "../../utils/types";
 import {
   NumberToString,
@@ -50,10 +55,29 @@ const AuthLoginSchema = z.object({
   keycloak_uuid: z.string(),
 });
 
+const AuthHeadersSchema = z
+  .object({
+    [API_KEY_HEADER]: z
+      .string({
+        required_error: `A valid uuid for header: '${API_KEY_HEADER}' must be provided`,
+      })
+      .uuid(),
+    [USER_ID_HEADER]: z
+      .string({
+        required_error: `A valid uuid for header: '${USER_ID_HEADER}' must be provided`,
+      })
+      .uuid(),
+    [KEYCLOAK_UUID_HEADER]: z.string({
+      required_error: `A valid keycloak uuid for header: '${KEYCLOAK_UUID_HEADER}' must be provided`,
+    }),
+  })
+  .passthrough();
+
 export {
   UserCreateBodySchema,
   UserUpdateBodySchema,
   AuthLoginSchema,
   UserSchema,
+  AuthHeadersSchema,
 };
 export type { UserCreateInput, UserUpdateInput, LoginCredentials };

@@ -1,19 +1,11 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import {
-  API_KEY,
-  API_KEY_HEADER,
-  IS_DEV,
-  IS_TEST,
-  KEYCLOAK_GUID_HEADER,
-  NO_AUTH,
-  USER_ID_HEADER,
-} from "./constants";
+import { loginUser } from "../api/access/access.service";
+import { AuthHeadersSchema } from "../api/user/user.utils";
+import { IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
-import { AuthLoginSchema } from "../api/user/user.utils";
-import { loginUser } from "../api/access/access.service";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -95,38 +87,16 @@ const errorHandler = (
   next(err);
 };
 
-const auth = async (req: Request, res: Response, next: NextFunction) => {
-  if (IS_TEST || NO_AUTH) return next();
-
-  const parsedLogin = AuthLoginSchema.safeParse({
-    user_id: req.get(USER_ID_HEADER),
-    keycloak_uuid: req.get(KEYCLOAK_GUID_HEADER),
-  });
-
-  try {
-    if (parsedLogin.success && (await loginUser(parsedLogin.data)))
-      return next();
-  } catch (err) {
-    console.error(err);
+const auth = catchErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (IS_TEST || NO_AUTH) return next();
+    const headers = AuthHeadersSchema.parse(req.headers);
+    await loginUser({
+      user_id: headers["user-id"],
+      keycloak_uuid: headers["keycloak-uuid"],
+    });
+    next();
   }
+);
 
-  return next(
-    new apiError("Must provide a user_id and keycloak_uuid headers", 400)
-  );
-};
-
-const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
-  if (IS_DEV || IS_TEST || NO_AUTH) {
-    return next();
-  }
-  const apiKey = req.get(API_KEY_HEADER);
-  if (!apiKey) {
-    throw new apiError(`Header: '${API_KEY_HEADER}' must be provided`);
-  }
-  if (apiKey !== API_KEY) {
-    throw new apiError(`Header: '${API_KEY_HEADER}' is incorrect`);
-  }
-  next();
-};
-
-export { errorLogger, errorHandler, catchErrors, auth, validateApiKey };
+export { errorLogger, errorHandler, catchErrors, auth };
