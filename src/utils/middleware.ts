@@ -1,10 +1,17 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, KEYCLOAK_GUID_HEADER, NO_AUTH, USER_ID_HEADER } from "./constants";
+import {
+  API_KEY,
+  API_KEY_HEADER,
+  IS_DEV,
+  IS_TEST,
+  KEYCLOAK_GUID_HEADER,
+  NO_AUTH,
+  USER_ID_HEADER,
+} from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
-import cookieParser from "cookie-parser";
 import { AuthLoginSchema } from "../api/user/user.utils";
 import { loginUser } from "../api/access/access.service";
 
@@ -89,22 +96,23 @@ const errorHandler = (
 };
 
 const auth = async (req: Request, res: Response, next: NextFunction) => {
-  if (IS_TEST || NO_AUTH) {
-    next();
-  }
-  const parsedLogin = AuthLoginSchema.parse({
+  if (IS_TEST || NO_AUTH) return next();
+
+  const parsedLogin = AuthLoginSchema.safeParse({
     user_id: req.get(USER_ID_HEADER),
     keycloak_uuid: req.get(KEYCLOAK_GUID_HEADER),
   });
-  const user = await loginUser(parsedLogin);
-  if (user) {
-    next();
-  } else {
-    console.log("err placeholder");
-    next(
-      new apiError("Must provide a user_id and keycloak_uuid headers", 400)
-    );
+
+  try {
+    if (parsedLogin.success && (await loginUser(parsedLogin.data)))
+      return next();
+  } catch (err) {
+    console.error(err);
   }
+
+  return next(
+    new apiError("Must provide a user_id and keycloak_uuid headers", 400)
+  );
 };
 
 const validateApiKey = (req: Request, res: Response, next: NextFunction) => {

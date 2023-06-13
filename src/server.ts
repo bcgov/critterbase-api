@@ -1,8 +1,6 @@
 import cors from "cors";
 import express from "express";
-import session from "express-session";
 import helmet from "helmet";
-import memorystore from "memorystore";
 import { accessRouter } from "./api/access/access.router";
 import { artifactRouter } from "./api/artifact/artifact.router";
 import { captureRouter } from "./api/capture/capture.router";
@@ -15,7 +13,6 @@ import { measurementRouter } from "./api/measurement/measurement.router";
 import { mortalityRouter } from "./api/mortality/mortality.router";
 import { userRouter } from "./api/user/user.router";
 import { IS_DEV, IS_PROD, PORT } from "./utils/constants";
-import cookieParser from "cookie-parser";
 import {
   auth,
   errorHandler,
@@ -31,8 +28,6 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(cookieParser(process.env.SESSION_SECRET));
-// app.use(session(options));
 app.use(validateApiKey);
 
 app.use("/api/", accessRouter);

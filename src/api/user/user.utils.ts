@@ -45,18 +45,10 @@ const UserUpdateBodySchema = implement<
   .with(UserCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-const AuthLoginSchema = UserSchema.partial()
-  .pick({
-    user_id: true,
-    keycloak_uuid: true,
-    system_name: true,
-    system_user_id: true,
-  })
-  .strict()
-  .refine(
-    nonEmpty,
-    "to login you must provide either user_id OR keycloak_uuid"
-  );
+const AuthLoginSchema = z.object({
+  user_id: zodID,
+  keycloak_uuid: z.string(),
+});
 
 export {
   UserCreateBodySchema,
