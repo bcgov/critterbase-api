@@ -7,15 +7,7 @@ import { catchErrors } from "../../utils/middleware";
 import { QueryFormats, apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
-  appendEnglishTaxonAsUUID,
-  createCritter,
-  deleteCritter,
-  getAllCritters,
-  getCritterByIdWithDetails,
-  getCritterByWlhId,
-  getMultipleCrittersByIds,
-  getSimilarCritters,
-  updateCritter,
+  appendEnglishTaxonAsUUID
 } from "./critter.service";
 import {
   CritterCreateSchema,
@@ -26,36 +18,38 @@ import {
   UniqueCritterQuerySchema,
   critterFormats,
 } from "./critter.utils";
+import { ICbDatabase } from "../../utils/database";
 
-export const critterRouter = express.Router();
+export const CritterRouter = (db: ICbDatabase ) => {
+  const critterRouter = express.Router();
 
 /**
  ** Critter Router Home
  */
-critterRouter.post(
-  "/filter",
-  catchErrors(async (req: Request, res: Response) => {
-    const parsed = CritterFilterSchema.parse(req.body);
-    const {
-      critter_ids,
-      animal_ids,
-      wlh_ids,
-      collection_units,
-      taxon_name_commons,
-    } = parsed;
-    let { taxon_ids } = parsed;
+  critterRouter.post(
+    "/filter",
+    catchErrors(async (req: Request, res: Response) => {
+      const parsed = CritterFilterSchema.parse(req.body);
+      const {
+        critter_ids,
+        animal_ids,
+        wlh_ids,
+        collection_units,
+        taxon_name_commons,
+      } = parsed;
+      let { taxon_ids } = parsed;
 
-    if (taxon_name_commons) {
-      const uuids = await prisma.lk_taxon.findMany({
-        where: {
-          taxon_name_common: {
-            [taxon_name_commons.negate ? "notIn" : "in"]:
-              taxon_name_commons.body,
+      if (taxon_name_commons) {
+        const uuids = await prisma.lk_taxon.findMany({
+          where: {
+            taxon_name_common: {
+              [taxon_name_commons.negate ? "notIn" : "in"]:
+                taxon_name_commons.body,
+            },
           },
-        },
-      });
-      taxon_ids = { body: uuids.map((a) => a.taxon_id), negate: false };
-    }
+        });
+        taxon_ids = { body: uuids.map((a) => a.taxon_id), negate: false };
+      }
 
     const whereInput: Prisma.critterWhereInput = {
       critter_id: critter_ids?.body.length
@@ -83,72 +77,76 @@ critterRouter.post(
     };
     const allCritters = await formatParse(
       getFormat(req),
-      getAllCritters(QueryFormats.default, whereInput),
+      db.getAllCritters(QueryFormats.default, whereInput),
       critterFormats
     );
     return res.status(200).json(allCritters);
   })
 );
 
-critterRouter.get(
-  "/",
-  catchErrors(async (req: Request, res: Response) => {
-    const { wlh_id } = CritterQuerySchema.parse(req.query);
-    const critters = await formatParse(
-      getFormat(req),
-      wlh_id
-        ? getCritterByWlhId(wlh_id, getFormat(req))
-        : getAllCritters(getFormat(req)),
-      critterFormats
-    );
-    if (Array.isArray(critters) && !critters.length && wlh_id) {
-      throw apiError.notFound(`No critters found with wlh_id=${wlh_id}`);
-    }
-    return res.status(200).json(critters);
-  })
-);
+  critterRouter.get(
+    "/",
+    catchErrors(async (req: Request, res: Response) => {
+      const { wlh_id } = CritterQuerySchema.parse(req.query);
+      const critters = await formatParse(
+        getFormat(req),
+        wlh_id
+          ? db.getCritterByWlhId(wlh_id, getFormat(req))
+          : db.getAllCritters(getFormat(req)),
+        critterFormats
+      );
+      if (Array.isArray(critters) && !critters.length && wlh_id) {
+        throw apiError.notFound(`No critters found with wlh_id=${wlh_id}`);
+      }
+      return res.status(200).json(critters);
+    })
+  );
 
-/**
- ** Fetch multiple critters by their IDs
- */
-critterRouter.post(
-  "/",
-  catchErrors(async (req: Request, res: Response) => {
-    const parsed = CritterIdsRequestSchema.parse(req.body);
-    const critters = await formatParse(
-      getFormat(req),
-      getMultipleCrittersByIds(parsed, getFormat(req)),
-      critterFormats
-    );
-    return res.status(200).json(critters);
-  })
-);
+  /**
+   ** Fetch multiple critters by their IDs
+  */
+  critterRouter.post(
+    "/",
+    catchErrors(async (req: Request, res: Response) => {
+      const parsed = CritterIdsRequestSchema.parse(req.body);
+      const critters = await formatParse(
+        getFormat(req),
+        db.getMultipleCrittersByIds(parsed, getFormat(req)),
+        critterFormats
+      );
+      return res.status(200).json(critters);
+    })
+  );
 
-critterRouter.post(
-  "/unique",
-  catchErrors(async (req: Request, res: Response) => {
-    const parsed = UniqueCritterQuerySchema.parse(req.body);
-    const unique = await formatParse(getFormat(req), getSimilarCritters(parsed, getFormat(req)), critterFormats);
-    return res.status(200).json(unique);
-  })
-);
+  critterRouter.post(
+    "/unique",
+    catchErrors(async (req: Request, res: Response) => {
+      const parsed = UniqueCritterQuerySchema.parse(req.body);
+      const unique = await formatParse(
+        getFormat(req), 
+        db.getSimilarCritters(parsed, getFormat(req)), 
+        critterFormats
+      );
+      return res.status(200).json(unique);
+    })
+  );
 
 /**
  ** Create new critter
  */
-critterRouter.post(
-  "/create",
-  catchErrors(async (req: Request, res: Response) => {
-    await appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
-    const parsed = CritterCreateSchema.parse(req.body);
-    const created = await formatParse(
-      getFormat(req),
-      createCritter(parsed, getFormat(req)),
-      critterFormats
-    );
-    return res.status(201).send(created);
-  })
-);
+  critterRouter.post(
+    "/create",
+    catchErrors(async (req: Request, res: Response) => {
+      await appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
+      const parsed = CritterCreateSchema.parse(req.body);
+      const created = await formatParse(
+        getFormat(req),
+        db.createCritter(parsed, getFormat(req)),
+        critterFormats
+      );
+      return res.status(201).send(created);
+    })
+  );
 
 // critterRouter.route("/wlh/:wlh_id").get(
 //   catchErrors(async (req: Request, res: Response) => {
@@ -166,46 +164,49 @@ critterRouter.post(
 /**
  * * All critter_id related routes
  */
-critterRouter
-  .route("/:id")
-  .all(
-    catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-      await uuidParamsSchema.parseAsync(req.params);
-      res.locals.format = getFormat(req);
-      next();
-    })
-  )
-  .get(
-    catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const critter = await formatParse(
-        getFormat(req),
-        getCritterByIdWithDetails(id, getFormat(req)),
-        critterFormats
-      );
-      return res.status(200).json(critter);
-    })
-  )
-  .put(
-    catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const parsed = CritterUpdateSchema.parse(req.body);
-      const critter = await formatParse(
-        getFormat(req),
-        updateCritter(id, parsed, getFormat(req)),
-        critterFormats
-      );
-      res.status(200).json(critter);
-    })
-  )
-  .delete(
-    catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.id;
-      const critter = await formatParse(
-        getFormat(req),
-        deleteCritter(id, getFormat(req)),
-        critterFormats
-      );
-      res.status(200).json(critter);
-    })
-  );
+  critterRouter
+    .route("/:id")
+    .all(
+      catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+        await uuidParamsSchema.parseAsync(req.params);
+        res.locals.format = getFormat(req);
+        next();
+      })
+    )
+    .get(
+      catchErrors(async (req: Request, res: Response) => {
+        const id = req.params.id;
+        const critter = await formatParse(
+          getFormat(req),
+          db.getCritterById(id, getFormat(req)),
+          critterFormats
+        );
+        return res.status(200).json(critter);
+      })
+    )
+    .put(
+      catchErrors(async (req: Request, res: Response) => {
+        const id = req.params.id;
+        const parsed = CritterUpdateSchema.parse(req.body);
+        const critter = await formatParse(
+          getFormat(req),
+          db.updateCritter(id, parsed, getFormat(req)),
+          critterFormats
+        );
+        res.status(200).json(critter);
+      })
+    )
+    .delete(
+      catchErrors(async (req: Request, res: Response) => {
+        const id = req.params.id;
+        const critter = await formatParse(
+          getFormat(req),
+          db.deleteCritter(id, getFormat(req)),
+          critterFormats
+        );
+        res.status(200).json(critter);
+      })
+    );
+
+  return critterRouter;
+}

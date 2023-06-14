@@ -2,7 +2,6 @@ import { system, user } from "@prisma/client";
 import { apiError } from "../../utils/types";
 // import { createUser } from "../user/user.service";
 import { PrismaClient as OriginalPrismaClient } from "@prisma/client";
-import { mockDeep } from "jest-mock-extended";
 import supertest from "supertest";
 import { makeApp } from "../../app";
 import { prisma } from "../../utils/constants";

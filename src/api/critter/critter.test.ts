@@ -1,139 +1,390 @@
-import { critter, Prisma } from "@prisma/client";
-import { PrismaClientValidationError } from "@prisma/client/runtime/library";
-import { queryRandomUUID } from "../../../prisma/prisma_utils";
-import { prisma, request } from "../../utils/constants";
+import { capture, critter, marking, mortality } from "@prisma/client";
+import { prisma } from "../../utils/constants";
 import {
-  createCritter,
-  deleteCritter,
-  getAllCritters,
-  getCritterById,
-  getCritterByWlhId,
-  updateCritter,
+  createCritter as _createCritter,
+  deleteCritter as _deleteCritter,
+  getAllCritters as _getAllCritters,
+  getCritterById as _getCritterById,
+  getCritterByWlhId as _getCritterByWlhId,
+  updateCritter as _updateCritter,
+  getMultipleCrittersByIds as _getMultipleCrittersByIds,
+  getSimilarCritters as _getSimilarCritters,
+  formatLocationNameSearch as _formatLocationNameSearch
 } from "./critter.service";
 import { randomUUID } from "crypto";
+import { makeApp } from "../../app";
+import supertest from "supertest";
+import { ICbDatabase } from "../../utils/database";
+import { CritterSchema } from "./critter.utils";
+import { apiError } from "../../utils/types";
 
-const tempCritters: critter[] = [];
+const getAllCritters = jest.fn();
+const getMultipleCrittersByIds = jest.fn();
+const getCritterById = jest.fn();
+const getCritterByWlhId = jest.fn();
+const updateCritter = jest.fn();
+const createCritter = jest.fn();
+const getSimilarCritters = jest.fn();
+const deleteCritter = jest.fn();
 
-const obtainCritterTemplate =
-  async (): Promise<Prisma.critterUncheckedCreateInput> => {
-    const dummyTaxon = (
-      await prisma.lk_taxon.findFirst({
-        where: {
-          taxon_name_latin: {
-            equals: "Rangifer tarandus",
-            mode: "insensitive",
-          },
-        },
-      })
-    )?.taxon_id;
-    if (!dummyTaxon) throw Error("Could not get taxon for dummy.");
-    return {
-      critter_id: await queryRandomUUID(prisma),
-      sex: "Male",
-      wlh_id: "TEST",
-      taxon_id: dummyTaxon,
-    };
-  };
 
-const createTempCritter = async (): Promise<critter> => {
-  const critter = await obtainCritterTemplate();
-  const res = await prisma.critter.create({
-    data: critter,
-  });
-  tempCritters.push(res);
-  return res;
+const request = supertest(
+  makeApp({
+    getAllCritters,
+    getMultipleCrittersByIds,
+    getCritterById,
+    getCritterByWlhId,
+    updateCritter,
+    createCritter,
+    getSimilarCritters,
+    deleteCritter,
+  } as Record<keyof ICbDatabase, any>)
+);
+
+const create = jest.spyOn(prisma.critter, "create").mockImplementation();
+const update = jest.spyOn(prisma.critter, "update").mockImplementation();
+const findMany = jest.spyOn(prisma.critter, "findMany").mockImplementation();
+const findUniqueOrThrow = jest.spyOn(prisma.critter, "findUniqueOrThrow").mockImplementation();
+const pDelete = jest.spyOn(prisma.critter, "delete").mockImplementation();
+const markingFindMany = jest.spyOn(prisma.marking, "findMany").mockImplementation();
+const captureFindMany = jest.spyOn(prisma.capture, "findMany").mockImplementation();
+const mortalityFindMany = jest.spyOn(prisma.mortality, "findMany").mockImplementation();
+
+
+const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
+const OTHER_CRITTER_ID = '27e2b7c9-2754-4286-9eb9-fd4f0a8378ef'
+const WLH_ID = '12-1234';
+const CRITTER: critter = {
+  critter_id: CRITTER_ID,
+  taxon_id: '98f9fede-95fc-4321-9444-7c2742e336fe',
+  wlh_id: WLH_ID,
+  animal_id: 'A13',
+  sex: "Male",
+  responsible_region_nr_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
+  create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+  update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+  create_timestamp: new Date(),
+  update_timestamp: new Date(),
+  critter_comment: 'Hi :)'
 };
+
+const OTHER_CRITTER: critter = {
+  ...CRITTER,
+  critter_id: OTHER_CRITTER_ID
+}
+
+const DEFAULTFORMAT_CRITTER = {
+  ...CRITTER,
+  lk_taxon: {
+    taxon_name_common: 'Caribou',
+    taxon_name_latin: 'Rangifer tarandus'
+  },
+  lk_region_nr: {
+    region_nr_name: 'Somewhere'
+  },
+  critter_collection_unit: [{
+    xref_collection_unit: {
+      lk_collection_category: { category_name: 'name', collection_category_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'},
+      unit_name: 'name',
+      unit_description: 'desc'
+    }
+  }],
+  mortality: []
+}
+
+const MARKING: marking = {
+  marking_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+  critter_id: CRITTER_ID,
+  capture_id: null,
+  mortality_id: null,
+  taxon_marking_body_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+  marking_type_id: null,
+  marking_material_id: null,
+  primary_colour_id: null,
+  secondary_colour_id: null,
+  text_colour_id: null,
+  identifier: null,
+  frequency: null,
+  frequency_unit: null,
+  order: null,
+  comment: null,
+  attached_timestamp: new Date(),
+  removed_timestamp: null,
+  create_user: "",
+  update_user: "",
+  create_timestamp: new Date(),
+  update_timestamp: new Date()
+}
+
+const CAPTURE: capture = {
+  capture_id: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  critter_id: CRITTER_ID,
+  capture_location_id: null,
+  release_location_id: null,
+  capture_timestamp: new Date(),
+  release_timestamp: null,
+  capture_comment: null,
+  release_comment: null,
+  create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  create_timestamp: new Date(),
+  update_timestamp: new Date()
+}
+
+const MORTALITY: mortality = {
+  mortality_id: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  critter_id: CRITTER_ID,
+  location_id: null,
+  mortality_timestamp: new Date(),
+  proximate_cause_of_death_id: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  proximate_cause_of_death_confidence: null,
+  proximate_predated_by_taxon_id: null,
+  ultimate_cause_of_death_id: null,
+  ultimate_cause_of_death_confidence: null,
+  ultimate_predated_by_taxon_id: null,
+  mortality_comment: null,
+  create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  create_timestamp: new Date(),
+  update_timestamp: new Date()
+}
+
+const DETAILEDFORMAT_CRITTER = {
+  ...DEFAULTFORMAT_CRITTER,
+  user_critter_create_userTouser: {
+    system_name: 'CRITTERBASE'
+  },
+  capture: [],
+  marking: [],
+  measurement_qualitative: [],
+  measurement_quantitative: []
+}
+
+beforeEach(() => {
+  getAllCritters.mockReset();
+  getMultipleCrittersByIds.mockReset();
+  getCritterById.mockReset();
+  getCritterByWlhId.mockReset();
+  updateCritter.mockReset();
+  createCritter.mockReset();
+  getSimilarCritters.mockReset();
+  deleteCritter.mockReset();
+
+ // getAllCritters.mockResolvedValue(Promise.resolve([DEFAULTFORMAT_CRITTER]));
+  getAllCritters.mockImplementation(() => {
+    return [DEFAULTFORMAT_CRITTER];
+  })
+  getCritterById.mockImplementation(() => {
+    return DEFAULTFORMAT_CRITTER;
+  });
+  getCritterByWlhId.mockImplementation(() => {
+    return [DEFAULTFORMAT_CRITTER];
+  });
+
+  createCritter.mockImplementation(() => {
+    return DEFAULTFORMAT_CRITTER;
+  });
+
+  deleteCritter.mockImplementation(() => {
+    return DEFAULTFORMAT_CRITTER;
+  })
+
+  getMultipleCrittersByIds.mockImplementation(() => {
+    return [DEFAULTFORMAT_CRITTER];
+  });
+
+  getSimilarCritters.mockImplementation(() => {
+    return [DEFAULTFORMAT_CRITTER];
+  })
+
+})
 
 describe("API: Critter", () => {
   describe("SERVICES", () => {
-    describe("making critters", () => {
+    describe("createCritter", () => {
       it("creates a critter", async () => {
-        const c = await obtainCritterTemplate();
-        const critter = await createCritter(c);
+        create.mockResolvedValue(CRITTER);
+        const returnedCritter = await _createCritter(CRITTER);
         expect.assertions(2);
-        expect(critter.wlh_id).toBe("TEST");
-        expect(critter.sex).toBe("Male");
+        expect(prisma.critter.create).toHaveBeenCalled();
+        expect(CritterSchema.safeParse(returnedCritter).success).toBe(true);
       });
       it("fails to create a critter", async () => {
-        await expect(
-          async () => await createCritter({} as any)
-        ).rejects.toBeInstanceOf(PrismaClientValidationError);
+       create.mockRejectedValue(new Error());
+       await expect(_createCritter(CRITTER)).rejects.toThrow();
       });
     });
-    describe("getting critters", () => {
+    describe("getAllCritters()", () => {
       it("returns many critters", async () => {
-        const critters = await getAllCritters();
-        expect.assertions(1);
-        expect(critters.length).toBeGreaterThan(1);
-      });
-      it("returns just one critter", async () => {
-        const c = await createTempCritter();
-        const critter = await getCritterById(c.critter_id);
-        expect.assertions(1);
-        expect(critter?.critter_id).toBe(c.critter_id);
-      });
-      it("returns one critter matching the WLH ID", async () => {
-        const c = await createTempCritter();
-        const critters = await getCritterByWlhId(c.wlh_id as string);
-        expect.assertions(2);
-        expect(critters?.length).toBeGreaterThanOrEqual(1);
-        expect(critters?.[0].wlh_id).toBe("TEST");
+        findMany.mockResolvedValue([CRITTER]);
+        const returnedCritter = await _getAllCritters();
+        expect.assertions(3);
+        expect(prisma.critter.findMany).toHaveBeenCalled();
+        expect(returnedCritter).toBeInstanceOf(Array);
+        expect(returnedCritter.length).toBe(1);
       });
     });
-    describe("modifying critters", () => {
-      it("updates a critter with the specified value", async () => {
-        const c = await createTempCritter();
-        const critter = await updateCritter(c.critter_id, {
-          animal_id: "macaroni",
-        });
-        expect.assertions(2);
-        expect(critter.wlh_id).toBe("TEST");
-        expect(critter.animal_id).toBe("macaroni");
-      });
-      it("deletes a critter with the specified id", async () => {
-        const c = await createTempCritter();
-        await deleteCritter(c.critter_id);
-        const deleted = await prisma.critter.findFirst({
-          where: { critter_id: c.critter_id },
-        });
-        expect(deleted).toBeNull();
+    describe("getCritterById()", () => {
+      it("returns a critter by ID", async () => {
+        findUniqueOrThrow.mockResolvedValue(CRITTER);
+        const returnedCritter = await _getCritterById(CRITTER_ID);
+        expect.assertions(1);
+        expect(prisma.critter.findUniqueOrThrow).toHaveBeenCalled();
+      })
+    });
+    describe("getCritterByWlhId(wlh_id: string)", () => {
+      it("returns a critter by wlh_id", async () => {
+        findMany.mockResolvedValue([CRITTER]);
+        const returnedCritter = await _getCritterByWlhId(WLH_ID);
+        expect.assertions(1);
+        expect(prisma.critter.findMany).toHaveBeenCalled();
       });
     });
+    describe("updateCritter()", () => {
+      it("updates a critter with the body provided", async () => {
+        update.mockResolvedValue(CRITTER);
+        const returnedCritter = await _updateCritter(CRITTER_ID, CRITTER);
+        expect.assertions(2);
+        expect(prisma.critter.update).toHaveBeenCalled();
+        expect(CritterSchema.safeParse(returnedCritter).success).toBe(true);
+      })
+    });
+    describe("deleteCritter()", () => {
+      it("should delete a critter", async () => {
+        pDelete.mockResolvedValue(CRITTER);
+        const returnedCritter = await _deleteCritter(CRITTER_ID);
+        expect.assertions(2);
+        expect(prisma.critter.delete).toHaveBeenCalled();
+        expect(CritterSchema.safeParse(returnedCritter).success).toBe(true);
+      })
+    });
+    describe("getMultipleCrittersByIds()", () => {
+      it("should return critters matching the given ids", async () => {
+        findMany.mockResolvedValue([CRITTER, OTHER_CRITTER]);
+        const returnedCritters = await _getMultipleCrittersByIds({critter_ids: [CRITTER_ID, OTHER_CRITTER_ID]});
+        expect.assertions(3);
+        expect(prisma.critter.findMany).toHaveBeenCalled();
+        expect(returnedCritters).toBeInstanceOf(Array);
+        expect(returnedCritters.length).toBe(2);
+      })
+    });
+    describe("getSimilarCritters()", () => {
+      it("should return critters by their wlh_id", async () => {
+        findMany.mockResolvedValue([CRITTER]);
+        const returnedCritters = await _getSimilarCritters({ critter: { wlh_id: WLH_ID }});
+        expect.assertions(3);
+        expect(prisma.critter.findMany).toHaveBeenCalledTimes(2);
+        expect(returnedCritters).toBeInstanceOf(Array);
+        expect(returnedCritters.length).toBe(1);
+      });
+      it("should return critters by their markings", async () => {
+        markingFindMany.mockResolvedValue([MARKING]);
+        const returnedCritters = await _getSimilarCritters({ markings: [{primary_colour: 'Red'}]});
+        expect.assertions(3);
+        expect(prisma.marking.findMany).toHaveBeenCalledTimes(1);
+        expect(returnedCritters).toBeInstanceOf(Array);
+        expect(returnedCritters[0].critter_id).toBe(CRITTER_ID);
+      });
+      it("should return critters by capture data", async () => {
+        captureFindMany.mockResolvedValue([CAPTURE]);
+        const returnedCritters = await _getSimilarCritters({ captures: [{capture_timestamp: new Date()}]});
+        expect.assertions(3);
+        expect(prisma.capture.findMany).toHaveBeenCalledTimes(1);
+        expect(returnedCritters).toBeInstanceOf(Array);
+        expect(returnedCritters[0].critter_id).toBe(CRITTER_ID);
+      });
+      it("should return critters by mortality", async () => {
+        mortalityFindMany.mockResolvedValue([MORTALITY]);
+        const returnedCritters = await _getSimilarCritters({ mortality: {mortality_timestamp: new Date()}});
+        expect.assertions(3);
+        expect(prisma.mortality.findMany).toHaveBeenCalledTimes(1);
+        expect(returnedCritters).toBeInstanceOf(Array);
+        expect(returnedCritters[0].critter_id).toBe(CRITTER_ID);
+      })
+    })
+    describe("formatLocationNameSearch()", () => {
+      it("should return an object with entries for each of the location unit types", async () => {
+        const obj = {region_env_name: 'Somewhere', region_nr_name: 'Name', wmu_name: 'wmu'};
+        const res = _formatLocationNameSearch(obj);
+        expect.assertions(3);
+        expect(res?.lk_region_env).not.toBeNull();
+        expect(res?.lk_region_nr).not.toBeNull();
+        expect(res?.lk_wildlife_management_unit).not.toBeNull();
+      })
+    })
   });
   describe("ROUTERS", () => {
     describe("GET /api/critters", () => {
       it("should return status 200", async () => {
-        expect.assertions(2);
+        expect.assertions(3);
         const res = await request.get("/api/critters");
         expect(res.status).toBe(200);
-        expect(res.body.length).toBeGreaterThan(1);
+        expect(getAllCritters.mock.calls.length).toBe(1);
+        expect(getAllCritters.mock.results[0].value[0].critter_id).toBe(CRITTER_ID);
       });
     });
+    describe("POST /api/critters/filter", () => {
+      it("should return status 200", async () => {
+        const body = {
+          critter_ids: {body: [CRITTER_ID], negate: false },
+          wlh_ids: { body: [WLH_ID], negate: false }
+        }
+        const res = await request.post("/api/critters/filter").send(body);
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body[0].critter_id).toBe(CRITTER_ID)
+      })
+    });
+    describe("POST /api/critters/unique", () => {
+      it("should return status 200", async () => {
+        const body = { critter: CRITTER };
+        const res = await request.post("/api/critters/unique").send(body);
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body[0].critter_id).toBe(CRITTER_ID);
+      })
+    })
+    describe("POST /api/critters/", () => {
+      it("should return status 200", async () => {
+        const body = {critter_ids: [CRITTER_ID]};
+        const res = await request.post("/api/critters/").send(body);
+        expect.assertions(2);
+        expect(res.status).toBe(200);
+        expect(res.body[0].critter_id).toBe(CRITTER_ID);
+      })
+    })
     describe("POST /api/critters/create", () => {
       it("should return a critter with status code 201", async () => {
-        const c = await obtainCritterTemplate();
-        const res = await request.post("/api/critters/create").send(c);
+        const res = await request.post("/api/critters/create").send({...CRITTER, taxon_name_common: 'Caribou'});
         expect.assertions(2);
         expect(res.status).toBe(201);
-        expect(res.body.wlh_id).toBe("TEST");
+        expect(res.body.wlh_id).toBe(WLH_ID);
+      });
+      it("should return a critter with status code 201", async () => {
+        const res = await request.post("/api/critters/create").send({...CRITTER, taxon_name_latin: 'Rangifer tarandus'});
+        expect.assertions(2);
+        expect(res.status).toBe(201);
+        expect(res.body.wlh_id).toBe(WLH_ID);
       });
       it("should return 400 if trying to create with bad value type", async () => {
-        const c = await obtainCritterTemplate();
         const res = await request
           .post("/api/critters/create")
-          .send({ taxon_id: c.taxon_id, sex: 123 });
+          .send({ taxon_id: '11084b96-5cbd-421e-8106-511ecfb51f7a', sex: 123 });
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
     });
     describe("GET /api/critters?wlh_id={wlh_id}", () => {
       it("should return status 200 and a valid critter", async () => {
-        const res = await request.get("/api/critters?wlh_id=TEST");
+        const res = await request.get("/api/critters?wlh_id=" + WLH_ID);
         expect.assertions(2);
         expect(res.status).toBe(200);
         expect(res.body.length).toBeGreaterThanOrEqual(1);
       });
       it("should return status 404 if searching bad wlh id", async () => {
+        getCritterByWlhId.mockImplementation(() => {
+          return [];
+        })
         const res = await request.get("/api/critters?wlh_id=WHAT");
         expect.assertions(1);
         expect(res.status).toBe(404);
@@ -141,12 +392,14 @@ describe("API: Critter", () => {
     });
     describe("GET /api/critters/:id", () => {
       it("should return status 200", async () => {
-        const c = await createTempCritter();
-        const res = await request.get("/api/critters/" + c.critter_id);
+        const res = await request.get("/api/critters/" + CRITTER_ID);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
       it("should return status 404 when critter id is not found", async () => {
+        getCritterById.mockImplementation(() => {
+          throw apiError.notFound('critter_id');
+        })
         const res = await request.get("/api/critters/" + randomUUID());
         expect.assertions(1);
         expect(res.status).toBe(404);
@@ -154,52 +407,50 @@ describe("API: Critter", () => {
     });
     describe("PUT /api/critters/:id", () => {
       it("should return status 200, and update the critter", async () => {
-        const c = await createTempCritter();
+        updateCritter.mockImplementation(() => {
+          return {...DEFAULTFORMAT_CRITTER, animal_id: 'Banana'}
+        })
         const res = await request
-          .put("/api/critters/" + c.critter_id)
+          .put("/api/critters/" + CRITTER_ID)
           .send({ animal_id: "Banana" });
         expect.assertions(2);
         expect(res.status).toBe(200);
         expect(res.body.animal_id).toBe("Banana");
       });
       it("should return status 400 if you try to modify with a bad value type", async () => {
-        const c = await createTempCritter();
+        updateCritter.mockImplementation(() => {
+          throw Error();
+        });
         const res = await request
-          .put("/api/critters/" + c.critter_id)
+          .put("/api/critters/" + CRITTER_ID)
           .send({ sex: 1234 });
         expect.assertions(1);
         expect(res.status).toBe(400);
       });
       it("should return status 404 when critter id is not found", async () => {
-        const res = await request.delete("/api/critters/" + randomUUID());
+        updateCritter.mockImplementation(() => {
+          throw apiError.notFound('critter_id');
+        });
+        const res = await request.put("/api/critters/" + randomUUID()).send({ animal_id: "Banana" });;
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
     });
     describe("DELETE /api/critters/:id", () => {
       it("should return status 200 and delete the critter", async () => {
-        const c = await createTempCritter();
-        const res = await request.delete("/api/critters/" + c.critter_id);
+        const res = await request.delete("/api/critters/" + CRITTER_ID);
         expect.assertions(2);
         expect(res.status).toBe(200);
-        expect(res.body.wlh_id).toBe("TEST");
+        expect(res.body.wlh_id).toBe(WLH_ID);
       });
       it("should return status 404 when critter id is not found", async () => {
+        deleteCritter.mockImplementation(() => {
+          throw apiError.notFound('not found');
+        })
         const res = await request.delete("/api/critters/" + randomUUID());
         expect.assertions(1);
         expect(res.status).toBe(404);
       });
     });
   });
-});
-
-afterAll(async () => {
-  for (const c of tempCritters) {
-    const exists = await prisma.critter.findFirst({
-      where: { critter_id: c.critter_id },
-    });
-    if (exists) {
-      await prisma.critter.delete({ where: { critter_id: c.critter_id } });
-    }
-  }
 });

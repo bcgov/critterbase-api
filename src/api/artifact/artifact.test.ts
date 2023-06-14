@@ -1,136 +1,164 @@
 import { artifact } from "@prisma/client";
 import { randomInt, randomUUID } from "crypto";
-import { prisma, request } from "../../utils/constants";
-import { ArtifactCreate } from "./artifact.utils";
+import { prisma } from "../../utils/constants";
+import { ICbDatabase } from "../../utils/database";
 import {
-  createArtifact,
-  deleteArtifact,
-  getAllArtifacts,
-  getArtifactById,
-  getArtifactsByCritterId,
-  updateArtifact,
+  ArtifactCreate,
+  ArtifactUpdate,
+  artifactSchema,
+} from "./artifact.utils";
+import {
+  createArtifact as _createArtifact,
+  deleteArtifact as _deleteArtifact,
+  getAllArtifacts as _getAllArtifacts,
+  getArtifactById as _getArtifactById,
+  getArtifactsByCritterId as _getArtifactsByCritterId,
+  updateArtifact as _updateArtifact,
 } from "./artifact.service";
+import { apiError } from "../../utils/types";
+import { makeApp } from "../../app";
+import supertest from "supertest";
 
-function checkArtifactProperties(artifact, keys) {
-  for (const key of keys) {
-    expect(artifact).toHaveProperty(key);
-  }
-}
+// Mock Artifact
+const ID = randomUUID();
+const CRITTER_ID = randomUUID();
 
-/**
- * * Creates a random input for an artifact with reference to a valid critter_id
- */
-async function newArtifact(): Promise<ArtifactCreate> {
-  const totalRows = await prisma.critter.count();
-  const critter = await prisma.critter.findFirst({
-    skip: Math.floor(Math.random() * totalRows),
-  });
-  if (!critter) {
-    throw Error("Could not find Critter for dummy.");
-  }
-  return {
-    critter_id: critter?.critter_id,
-    artifact_url: `https://example.com/artifact${randomInt(999999999)}.jpeg`,
-    artifact_comment: `TEST_COMMENT_${randomInt(999999999)}`,
-  };
-}
+const NEW_ARTIFACT: ArtifactCreate = {
+  critter_id: CRITTER_ID,
+  artifact_url: "https://example.com/artifact",
+};
 
+const RETURN_ARTIFACT: artifact = {
+  ...NEW_ARTIFACT,
+  artifact_id: ID,
+  artifact_comment: null,
+  capture_id: null,
+  mortality_id: null,
+  measurement_qualitative: null,
+  measurement_quantitative: null,
+  create_user: ID,
+  update_user: ID,
+  create_timestamp: new Date(),
+  update_timestamp: new Date(),
+};
+
+// Mocked Prisma Calls
+const create = jest.spyOn(prisma.artifact, "create").mockImplementation();
+const findMany = jest.spyOn(prisma.artifact, "findMany").mockImplementation();
+const findUniqueOrThrow = jest
+  .spyOn(prisma.artifact, "findUniqueOrThrow")
+  .mockImplementation();
+const update = jest.spyOn(prisma.artifact, "update").mockImplementation();
+const pDelete = jest.spyOn(prisma.artifact, "delete").mockImplementation();
+
+// Mocked Services
+const getArtifactById = jest.fn();
+const getArtifactsByCritterId = jest.fn();
+const getAllArtifacts = jest.fn();
+const updateArtifact = jest.fn();
+const createArtifact = jest.fn();
+const deleteArtifact = jest.fn();
+const getCritterById = jest.fn();
+
+const request = supertest(
+  makeApp({
+    getArtifactById,
+    getArtifactsByCritterId,
+    getAllArtifacts,
+    updateArtifact,
+    createArtifact,
+    deleteArtifact,
+    getCritterById,
+  } as Record<keyof ICbDatabase, any>)
+);
+
+beforeEach(() => {
+  // Reset mocked services
+  getArtifactById.mockReset();
+  getArtifactsByCritterId.mockReset();
+  getAllArtifacts.mockReset();
+  updateArtifact.mockReset();
+  createArtifact.mockReset();
+  deleteArtifact.mockReset();
+  getCritterById.mockReset();
+
+  // Set default returns
+  getAllArtifacts.mockResolvedValue([RETURN_ARTIFACT]);
+  createArtifact.mockResolvedValue(RETURN_ARTIFACT);
+  getArtifactById.mockResolvedValue(RETURN_ARTIFACT);
+  getArtifactsByCritterId.mockResolvedValue([RETURN_ARTIFACT]);
+});
 describe("API: Artifact", () => {
-  let dummyArtifact: artifact;
-  let dummyArtifactKeys: string[];
-  beforeAll(async () => {
-    dummyArtifact = await prisma.artifact.create({ data: await newArtifact() });
-    dummyArtifactKeys = Object.keys(dummyArtifact);
-  });
-
   describe("SERVICES", () => {
     describe("createArtifact()", () => {
-      it("creates a new artifact", async () => {
-        const newArtifactInput = await newArtifact();
-        const artifact = await createArtifact(newArtifactInput);
-        expect(artifact).toEqual(expect.objectContaining(newArtifactInput));
+      it("returns an artifact", async () => {
+        create.mockResolvedValue(RETURN_ARTIFACT);
+        const returnedArtifact = await _createArtifact(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(prisma.artifact.create).toHaveBeenCalledTimes(1);
+        expect(artifactSchema.safeParse(returnedArtifact).success).toBe(true);
+      });
+    });
+
+    describe("getArtifactsByCritterId()", () => {
+      it("returns a list of artifacts", async () => {
+        findMany.mockResolvedValue([RETURN_ARTIFACT]);
+        const returnedArtifacts = await _getArtifactsByCritterId(CRITTER_ID);
+        expect.assertions(3);
+        expect(prisma.artifact.findMany).toHaveBeenCalledTimes(1);
+        expect(returnedArtifacts).toBeInstanceOf(Array);
+        expect(returnedArtifacts.length).toBe(1);
       });
     });
 
     describe("getAllArtifacts()", () => {
-      it("returns an array of artifacts", async () => {
-        const artifacts = await getAllArtifacts();
-        expect.assertions(2);
-        expect(artifacts).toBeInstanceOf(Array);
-        expect(artifacts.length).toBeGreaterThan(0);
-      });
-
-      it("returns artifacts with correct properties", async () => {
-        const artifacts = await getAllArtifacts();
-        expect.assertions(artifacts.length * dummyArtifactKeys.length);
-        for (const artifact of artifacts) {
-          checkArtifactProperties(artifact, dummyArtifactKeys);
-        }
+      it("returns a list of all artifacts", async () => {
+        findMany.mockResolvedValue([RETURN_ARTIFACT]);
+        const returnedArtifacts = await _getAllArtifacts();
+        expect.assertions(3);
+        expect(prisma.artifact.findMany).toHaveBeenCalledTimes(1);
+        expect(returnedArtifacts).toBeInstanceOf(Array);
+        expect(returnedArtifacts.length).toBe(1);
       });
     });
 
     describe("getArtifactById()", () => {
-      it("returns the expected artifact", async () => {
-        const artifact = await getArtifactById(dummyArtifact.artifact_id);
-        expect.assertions(1);
-        expect(artifact).toStrictEqual(dummyArtifact);
-      });
-    });
-
-    describe("getArtifactsByCritterId", () => {
-      it("returns an array of artifacts with the expected critter ID", async () => {
-        // create another record with the same critter_id
-        const artifactInput = await newArtifact();
-        await prisma.artifact.create({
-          data: { ...artifactInput, critter_id: dummyArtifact.critter_id },
-        });
-        const returnedArtifacts = await getArtifactsByCritterId(
-          dummyArtifact.critter_id
-        );
-        expect.assertions(1 + returnedArtifacts.length);
-        expect(returnedArtifacts.length).toBeGreaterThanOrEqual(2); // At least two artifacts tied to this critter
-        for (const artifact of returnedArtifacts) {
-          expect(artifact.critter_id).toBe(dummyArtifact.critter_id);
-        }
+      it("returns an artifact by ID", async () => {
+        findUniqueOrThrow.mockResolvedValue(RETURN_ARTIFACT);
+        const returnedArtifact = await _getArtifactById(ID);
+        expect.assertions(2);
+        expect(prisma.artifact.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+        expect(artifactSchema.safeParse(returnedArtifact).success).toBe(true);
       });
     });
 
     describe("updateArtifact()", () => {
-      it("updates an artifact", async () => {
-        const artifact = await prisma.artifact.create({
-          data: await newArtifact(),
-        });
-        const newData = {
-          artifact_comment: `TEST_COMMENT_UPDATED${randomInt(99999999)}`,
+      it("returns an updated artifact", async () => {
+        const UPDATED_ARTIFACT: ArtifactUpdate = {
+          artifact_url: "https://example.com/artifact_updated",
         };
-        const updatedArtifact = await updateArtifact(
-          artifact.artifact_id,
-          newData
-        );
-        expect.assertions(2);
-        expect(updatedArtifact).toStrictEqual({
-          ...artifact,
-          ...newData,
-          update_timestamp: updatedArtifact.update_timestamp, // Ignore this field as it will be different
+        update.mockResolvedValue({ ...RETURN_ARTIFACT, ...UPDATED_ARTIFACT });
+        const returnedArtifact = await _updateArtifact(ID, UPDATED_ARTIFACT);
+        expect.assertions(3);
+        expect(prisma.artifact.update).toHaveBeenCalledTimes(1);
+        expect(prisma.artifact.update).toHaveBeenCalledWith({
+          where: { artifact_id: ID },
+          data: UPDATED_ARTIFACT,
         });
-        expect(
-          updatedArtifact.update_timestamp === artifact.update_timestamp
-        ).toBeFalsy();
+        expect(artifactSchema.safeParse(returnedArtifact).success).toBe(true);
       });
     });
 
     describe("deleteArtifact()", () => {
-      it("deletes a artifact", async () => {
-        const artifact = await prisma.artifact.create({
-          data: await newArtifact(),
+      it("returns deleted artifact and removes artifact from database", async () => {
+        pDelete.mockResolvedValue(RETURN_ARTIFACT);
+        const deletedArtifact = await _deleteArtifact(ID);
+        expect.assertions(3);
+        expect(prisma.artifact.delete).toHaveBeenCalledTimes(1);
+        expect(prisma.artifact.delete).toHaveBeenCalledWith({
+          where: { artifact_id: ID },
         });
-        const deletedArtifact = await deleteArtifact(artifact.artifact_id);
-        const artifactCheck = await prisma.artifact.findUnique({
-          where: { artifact_id: artifact.artifact_id },
-        });
-        expect.assertions(2);
-        expect(deletedArtifact).toStrictEqual(artifact);
-        expect(artifactCheck).toBeNull();
+        expect(artifactSchema.safeParse(deletedArtifact).success).toBe(true);
       });
     });
   });
@@ -138,212 +166,195 @@ describe("API: Artifact", () => {
   describe("ROUTERS", () => {
     describe("GET /api/artifacts", () => {
       it("returns status 200", async () => {
-        expect.assertions(1);
         const res = await request.get("/api/artifacts");
+        expect.assertions(2);
+        expect(getAllArtifacts.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
       });
 
       it("returns an array", async () => {
-        expect.assertions(1);
         const res = await request.get("/api/artifacts");
+        expect.assertions(2);
+        expect(getAllArtifacts.mock.calls.length).toBe(1);
         expect(res.body).toBeInstanceOf(Array);
       });
 
       it("returns artifacts with correct properties", async () => {
         const res = await request.get("/api/artifacts");
         const artifacts = res.body;
-        expect.assertions(artifacts.length * dummyArtifactKeys.length);
+        expect.assertions(2);
+        expect(getAllArtifacts.mock.calls.length).toBe(1);
         for (const artifact of artifacts) {
-          checkArtifactProperties(artifact, dummyArtifactKeys);
+          expect(artifactSchema.safeParse(artifact).success).toBe(true);
         }
       });
     });
 
     describe("POST /api/artifacts/create", () => {
       it("returns status 201", async () => {
-        const artifact = await newArtifact();
-        const res = await request.post("/api/artifacts/create").send(artifact);
-        expect.assertions(1);
+        const res = await request
+          .post("/api/artifacts/create")
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(createArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
       });
 
-      it("returns a artifact", async () => {
-        const artifact = await newArtifact();
-        const res = await request.post("/api/artifacts/create").send(artifact);
-        const returnedArtifact = res.body;
-        expect.assertions(dummyArtifactKeys.length);
-        for (const key of dummyArtifactKeys) {
-          expect(returnedArtifact).toHaveProperty(key);
-        }
+      it("returns an artifact", async () => {
+        const res = await request
+          .post("/api/artifacts/create")
+          .send(NEW_ARTIFACT);
+        const artifact = res.body;
+        expect.assertions(2);
+        expect(createArtifact.mock.calls.length).toBe(1);
+        expect(artifactSchema.safeParse(artifact).success).toBe(true);
       });
 
       it("strips invalid fields from data", async () => {
-        const artifact = await newArtifact();
         const res = await request
           .post("/api/artifacts/create")
-          .send({ ...artifact, invalidField: "qwerty123" });
-        expect.assertions(2);
+          .send({ ...NEW_ARTIFACT, invalidField: "qwerty123" });
+        expect.assertions(3);
+        expect(createArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
         expect(res.body).not.toHaveProperty("invalidField");
       });
 
       it("returns status 400 when data is missing required fields", async () => {
-        const artifact = await newArtifact();
         const res = await request.post("/api/artifacts/create").send({
-          // left out required artifact_url
-          critter_id: artifact.critter_id,
-          artifact_comment: artifact.artifact_comment,
+          artifact_id: ID,
         });
-        expect.assertions(1);
+        expect.assertions(2);
+        expect(createArtifact.mock.calls.length).toBe(0);
         expect(res.status).toBe(400);
       });
     });
 
     describe("GET /api/artifacts/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.get(`/api/artifacts/${randomUUID()}`);
-        expect.assertions(1);
+        getArtifactById.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.get(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactById.mock.calls.length).toBe(1);
         expect(res.status).toBe(404);
       });
 
       it("returns status 200", async () => {
-        const res = await request.get(
-          `/api/artifacts/${dummyArtifact.artifact_id}`
-        );
-        expect.assertions(1);
+        const res = await request.get(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactById.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
       });
 
-      it("returns a artifact", async () => {
-        const res = await request.get(
-          `/api/artifacts/${dummyArtifact.artifact_id}`
-        );
-        expect.assertions(dummyArtifactKeys.length);
-        for (const key of dummyArtifactKeys) {
-          expect(res.body).toHaveProperty(key);
-        }
+      it("returns an artifact", async () => {
+        const res = await request.get(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactById.mock.calls.length).toBe(1);
+        expect(artifactSchema.safeParse(res.body).success).toBe(true);
       });
     });
 
     describe("PATCH /api/artifacts/:id", () => {
       it("returns status 404 when id does not exist", async () => {
+        updateArtifact.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
         const res = await request
-          .patch(`/api/artifacts/${randomUUID()}`)
-          .send({ artifact_comment: dummyArtifact.artifact_comment });
-        expect.assertions(1);
+          .patch(`/api/artifacts/${ID}`)
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(404);
       });
 
-      it("returns status 200", async () => {
-        const res = await request
-          .patch(`/api/artifacts/${dummyArtifact.artifact_id}`)
-          .send({ artifact_comment: dummyArtifact.artifact_comment });
-        expect.assertions(1);
-        expect(res.status).toBe(200);
-      });
-
-      it("returns a artifact", async () => {
-        const res = await request
-          .patch(`/api/artifacts/${dummyArtifact.artifact_id}`)
-          .send({ artifact_comment: dummyArtifact.artifact_comment });
-        expect.assertions(dummyArtifactKeys.length);
-        for (const key of dummyArtifactKeys) {
-          expect(res.body).toHaveProperty(key);
-        }
-      });
-
-      it("returns status 400 when data is empty", async () => {
-        const res = await request.patch(
-          `/api/artifacts/${dummyArtifact.artifact_id}`
-        );
-        expect.assertions(1);
+      it("returns status 400 when paramaters are invalid", async () => {
+        updateArtifact.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.patch(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(0);
         expect(res.status).toBe(400);
       });
 
-      it("strips invalid fields from data", async () => {
+      it("returns status 200", async () => {
+        updateArtifact.mockResolvedValue(RETURN_ARTIFACT);
         const res = await request
-          .patch(`/api/artifacts/${dummyArtifact.artifact_id}`)
-          .send({
-            artifact_comment: dummyArtifact.artifact_comment,
-            invalidField: "qwerty123",
-          });
+          .patch(`/api/artifacts/${ID}`)
+          .send(NEW_ARTIFACT);
         expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
-        expect(res.body).not.toHaveProperty("invalidField");
+      });
+
+      it("returns an artifact", async () => {
+        updateArtifact.mockResolvedValue(RETURN_ARTIFACT);
+        const res = await request
+          .patch(`/api/artifacts/${ID}`)
+          .send(NEW_ARTIFACT);
+        expect.assertions(2);
+        expect(updateArtifact.mock.calls.length).toBe(1);
+        expect(artifactSchema.safeParse(res.body).success).toBe(true);
       });
     });
 
     describe("DELETE /api/artifacts/:id", () => {
       it("returns status 404 when id does not exist", async () => {
-        const res = await request.delete(`/api/artifacts/${randomUUID()}`);
-        expect.assertions(1);
+        deleteArtifact.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.delete(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(deleteArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(404);
       });
 
       it("returns status 200", async () => {
-        const artifact = await prisma.artifact.create({
-          data: await newArtifact(),
-        });
-        const res = await request.delete(
-          `/api/artifacts/${artifact.artifact_id}`
-        );
-        expect.assertions(1);
+        deleteArtifact.mockResolvedValue(RETURN_ARTIFACT);
+        const res = await request.delete(`/api/artifacts/${ID}`);
+        expect.assertions(2);
+        expect(deleteArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
-      });
-
-      it("returns artifact deleted message", async () => {
-        const artifact = await prisma.artifact.create({
-          data: await newArtifact(),
-        });
-        const res = await request.delete(
-          `/api/artifacts/${artifact.artifact_id}`
-        );
-        expect.assertions(1);
-        expect(res.body).toStrictEqual(
-          `Artifact ${artifact.artifact_id} has been deleted`
-        );
       });
     });
 
     describe("GET /api/artifacts/critter/:id", () => {
-      it("returns status 404 if no artifacts found", async () => {
-        const res = await request.get(`/api/artifacts/critter/${randomUUID()}`);
-        expect.assertions(1);
+      it("returns status 404 when id does not exist", async () => {
+        getCritterById.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        expect.assertions(3);
+        expect(getCritterById.mock.calls.length).toBe(1);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(0);
         expect(res.status).toBe(404);
       });
 
       it("returns status 200", async () => {
-        const res = await request.get(
-          `/api/artifacts/critter/${dummyArtifact.critter_id}`
-        );
-        expect.assertions(1);
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
       });
 
-      it("returns an array", async () => {
-        expect.assertions(1);
-        const res = await request.get(
-          `/api/artifacts/critter/${dummyArtifact.critter_id}`
-        );
+      it("returns an array of artifacts", async () => {
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
+        expect.assertions(2);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(1);
         expect(res.body).toBeInstanceOf(Array);
       });
 
       it("returns artifacts with correct properties", async () => {
-        const res = await request.get(
-          `/api/artifacts/critter/${dummyArtifact.critter_id}`
-        );
+        const res = await request.get(`/api/artifacts/critter/${ID}`);
         const artifacts = res.body;
-        expect.assertions(artifacts.length * (dummyArtifactKeys.length + 1));
+        expect.assertions(2);
+        expect(getArtifactsByCritterId.mock.calls.length).toBe(1);
         for (const artifact of artifacts) {
-          expect(artifact.critter_id).toBe(dummyArtifact.critter_id);
-          checkArtifactProperties(artifact, dummyArtifactKeys);
+          expect(artifactSchema.safeParse(artifact).success).toBe(true);
         }
       });
-    });
-  });
-  afterAll(async () => {
-    await prisma.artifact.deleteMany({
-      where: { artifact_comment: { startsWith: "TEST_COMMENT" } },
     });
   });
 });
