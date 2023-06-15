@@ -120,10 +120,7 @@ const CritterSchema = implement<critter>().with({
 });
 
 const CritterUpdateSchema = implement<
-  Omit<
-    Prisma.critterUncheckedUpdateManyInput,
-     keyof AuditColumns
-  >
+  Omit<Prisma.critterUncheckedUpdateManyInput, keyof AuditColumns>
 >().with(
   CritterSchema.omit({
     ...noAudit,
@@ -131,13 +128,9 @@ const CritterUpdateSchema = implement<
 );
 
 const CritterCreateSchema = implement<
-  Omit<
-    Prisma.critterCreateManyInput,
-    keyof AuditColumns
-  >
+  Omit<Prisma.critterCreateManyInput, keyof AuditColumns>
 >().with(
-  CritterSchema
-    .omit({ ...noAudit })
+  CritterSchema.omit({ ...noAudit })
     .partial()
     .required({
       taxon_id: true,
@@ -286,10 +279,12 @@ interface UniqueCritterQuery {
 }
 
 const UniqueCritterQuerySchema = implement<UniqueCritterQuery>().with({
-  critter: CritterSchema.partial().extend({
-    taxon_name_latin: z.string().optional(),
-    taxon_name_common: z.string().optional(),
-  }).optional(),
+  critter: CritterSchema.partial()
+    .extend({
+      taxon_name_latin: z.string().optional(),
+      taxon_name_common: z.string().optional(),
+    })
+    .optional(),
   markings: z.array(markingResponseSchema).optional(),
   captures: z.array(CaptureResponseSchema).optional(),
   mortality: MortalityResponseSchema.optional(),
