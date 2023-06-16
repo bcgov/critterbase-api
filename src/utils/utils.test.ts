@@ -189,6 +189,7 @@ describe("Utils", () => {
         const middleware = require("./middleware");
         middleware.errorLogger(new Error("Error"), mockReq, mockRes, mockNext);
         expect(consoleError.mock.calls.length).toBe(1);
+        process.env.NODE_ENV = "test";
       });
     });
     describe("catchErrors", () => {

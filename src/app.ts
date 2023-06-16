@@ -11,10 +11,10 @@ import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router
 import { CritterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
-import { lookupRouter } from "./api/lookup/lookup.router";
 import { markingRouter } from "./api/marking/marking.router";
 import { measurementRouter } from "./api/measurement/measurement.router";
 import { MortalityRouter } from "./api/mortality/mortality.router";
+import { LookupRouter } from "./api/lookup/lookup.router";
 import { UserRouter } from "./api/user/user.router";
 import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
@@ -59,7 +59,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/captures", auth, CaptureRouter(db));
   app.use("/api/mortality", auth, MortalityRouter(db));
   app.use("/api/measurements", auth, measurementRouter);
-  app.use("/api/lookups", auth, lookupRouter);
+  app.use("/api/lookups", auth, LookupRouter(db));
   app.use("/api/bulk", auth, bulkRouter);
   app.use("/api/xref", auth, XrefRouter(db));
 
