@@ -150,7 +150,7 @@ const MarkingCreateBodySchema = implement<
 );
 
 // Validate incoming request body for update marking
-const MarkingUpdateBodySchema = MarkingCreateBodySchema.refine(
+const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
   nonEmpty,
   "no new data was provided or the format was invalid"
 );

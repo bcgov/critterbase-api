@@ -84,8 +84,8 @@ export const MarkingRouter = (db: ICbDatabase) => {
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
-        await db.deleteMarking(id);
-        return res.status(200).json(`Marking ${id} has been deleted`);
+        const deleted = await db.deleteMarking(id);
+        return res.status(200).json(deleted);
       })
     );
     return markingRouter;
