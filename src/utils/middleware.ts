@@ -25,7 +25,7 @@ const catchErrors =
  * @params All four express params.
  */
 const errorLogger = (
-  err: apiError,
+  err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   req: Request,
   res: Response,
   next: NextFunction
@@ -55,7 +55,6 @@ const errorHandler = (
     //Removed formErrors from object
     const fieldErrors = err.flatten().fieldErrors;
     const fieldKeys = Object.keys(fieldErrors);
-
     const customErrs: Record<string, string> = {};
     //Bulk router can throw a custom formatted error.
     //Splitting them apart to better structure the error response
@@ -80,7 +79,7 @@ const errorHandler = (
     return res.status(status).json({ error });
   }
   if (err instanceof Error) {
-    return res.status(400).json(err.message || "unknown error");
+    return res.status(400).json({ error: err.message || "unknown error" });
   }
   next(err);
 };
