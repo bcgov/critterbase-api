@@ -40,7 +40,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const parsed = uuidParamsSchema.parse(req.params);
       const result = await db.getCaptureByCritter(parsed.id);
-      const format = result?.map((c) => CaptureResponseSchema.parse(c));
+      const format = result.map((c) => CaptureResponseSchema.parse(c));
       res.status(200).json(format);
     })
   );
