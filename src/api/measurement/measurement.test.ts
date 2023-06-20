@@ -320,13 +320,33 @@ describe("API: Measurement", () => {
       });
     });
     describe(`POST ${QUAL_ROUTE}/verify`, () => {
-      it("should respond with zero qualitative and quantitative problem ids", async () => {
-        const res = await request.get(`${ROUTE}/verify`).send({
+      it("should respond with zero qualitative and quantitative problem ids and verified = true", async () => {
+        const res = await request.post(`${ROUTE}/verify`).send({
           taxon_id: ID,
-          quantitative: quantMeasurement,
-          qualitative: qualMeasurement,
+          quantitative: [quantMeasurement],
+          qualitative: [qualMeasurement],
         });
-        console.log(res.body);
+        const { invalid_measurements, verified } = res.body;
+        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(0);
+        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(0);
+        expect(verified).toBe(true);
+      });
+      it("should respond 1 zero qualitative and quantitative problem ids and verified = false", async () => {
+        mockDB.verifyQualitativeMeasurementsAgainstTaxon.mockResolvedValue([
+          ID,
+        ]);
+        mockDB.verifyQuantitativeMeasurementsAgainstTaxon.mockResolvedValue([
+          ID,
+        ]);
+        const res = await request.post(`${ROUTE}/verify`).send({
+          taxon_id: badID,
+          quantitative: [quantMeasurement],
+          qualitative: [qualMeasurement],
+        });
+        const { invalid_measurements, verified } = res.body;
+        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(1);
+        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(1);
+        expect(verified).toBe(false);
       });
     });
   });

@@ -43,7 +43,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/xref", XrefRouter(db));
 
   app.all("*", (req, res) => {
-    throw apiError.notFound(`${req.url} route not found`);
+    throw apiError.notFound(`${req.method} ${req.url} -> route not found`);
   });
 
   app.use(errorLogger);

@@ -68,13 +68,16 @@ export const MeasurementRouter = (db: ICbDatabase) => {
         parsed.taxon_id,
         parsed.qualitative
       );
-      const quan = await verifyQuantitativeMeasurementsAgainstTaxon(
+      const quan = await db.verifyQuantitativeMeasurementsAgainstTaxon(
         parsed.taxon_id,
         parsed.quantitative
       );
       return res.status(200).json({
-        qualitative: qual,
-        quantitative: quan,
+        verified: qual.length + quan.length === 0,
+        invalid_measurements: {
+          qualitative_measurement_ids: qual,
+          quantitative_measurement_ids: quan,
+        },
       });
     })
   );
