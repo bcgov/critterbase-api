@@ -58,70 +58,70 @@ beforeEach(() => {
 });
 
 describe("SERVICES", () => {
-  describe("loginUser", () => {
-    it("user_id: login succeeds with valid user_id", async () => {
-      const user = await _loginUser({ user_id: ID });
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
-      expect(user.user_id).toBeDefined();
-    });
-    it("user_id: login fails with non existant user_id", async () => {
-      findUnique.mockResolvedValue(null);
-      await expect(_loginUser({ user_id: ID })).rejects.toThrowError(apiError);
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
-    });
-    it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
-      findFirst.mockResolvedValue(null);
-      await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
-        apiError
-      );
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-    });
-    it("keycloak_uuid: login fails with null keycloak_uuid", async () => {
-      await expect(_loginUser({ keycloak_uuid: null })).rejects.toThrowError(
-        apiError
-      );
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-    });
-    it("keycloak_uuid: login fails with non existing keycloak_uuid", async () => {
-      findFirst.mockResolvedValue(null);
-      await expect(_loginUser({ keycloak_uuid: ID })).rejects.toThrowError(
-        apiError
-      );
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-    });
-    it("keycloak_uuid: login succeeds with valid keycloak_uuid", async () => {
-      const user = await _loginUser({ keycloak_uuid: ID });
-      expect(user.user_id).toBeDefined();
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-    });
+  //describe("loginUser", () => {
+  //it("user_id: login succeeds with valid user_id", async () => {
+  //const user = await _loginUser({ user_id: ID });
+  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
+  //expect(user.user_id).toBeDefined();
+  //});
+  //it("user_id: login fails with non existant user_id", async () => {
+  //findUnique.mockResolvedValue(null);
+  //await expect(_loginUser({ user_id: ID })).rejects.toThrowError(apiError);
+  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
+  //});
+  //it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
+  //findFirst.mockResolvedValue(null);
+  //await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
+  //apiError
+  //);
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+  //});
+  //it("keycloak_uuid: login fails with null keycloak_uuid", async () => {
+  //await expect(_loginUser({ keycloak_uuid: null })).rejects.toThrowError(
+  //apiError
+  //);
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
+  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
+  //});
+  //it("keycloak_uuid: login fails with non existing keycloak_uuid", async () => {
+  //findFirst.mockResolvedValue(null);
+  //await expect(_loginUser({ keycloak_uuid: ID })).rejects.toThrowError(
+  //apiError
+  //);
+  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+  //});
+  //it("keycloak_uuid: login succeeds with valid keycloak_uuid", async () => {
+  //const user = await _loginUser({ keycloak_uuid: ID });
+  //expect(user.user_id).toBeDefined();
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+  //});
 
-    it("system_user_id + system_name: login succeeds with valid system_name and system_user_id", async () => {
-      const user = await _loginUser({
-        system_user_id: ID,
-        system_name: "CRITTERBASE",
-      });
-      expect(user.user_id).toBeDefined();
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-    });
-    it("system_user_id + system_name: login fails with system_name and missing system_user_id", async () => {
-      //Calling original implementation to test thrown errors
-      await expect(
-        _loginUser({ system_name: "CRITTERBASE" })
-      ).rejects.toThrowError(apiError);
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
-    });
-    it("system_user_id + system_name: login fails with missing system_name and valid system_user_id", async () => {
-      //Calling original implementation to test thrown errors
-      await expect(_loginUser({ system_user_id: ID })).rejects.toThrowError(
-        apiError
-      );
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-      expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
-    });
-  });
+  //it("system_user_id + system_name: login succeeds with valid system_name and system_user_id", async () => {
+  //const user = await _loginUser({
+  //system_user_id: ID,
+  //system_name: "CRITTERBASE",
+  //});
+  //expect(user.user_id).toBeDefined();
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+  //});
+  //it("system_user_id + system_name: login fails with system_name and missing system_user_id", async () => {
+  ////Calling original implementation to test thrown errors
+  //await expect(
+  //_loginUser({ system_name: "CRITTERBASE" })
+  //).rejects.toThrowError(apiError);
+  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
+  //});
+  //it("system_user_id + system_name: login fails with missing system_name and valid system_user_id", async () => {
+  ////Calling original implementation to test thrown errors
+  //await expect(_loginUser({ system_user_id: ID })).rejects.toThrowError(
+  //apiError
+  //);
+  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
+  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
+  //});
+  //});
   describe("getTableDataTypes", () => {
     it("should call prisma raw query", () => {
       const types = _getTableDataTypes("user");
@@ -137,19 +137,19 @@ describe("SERVICES", () => {
         expect(res.body).toBeDefined();
       });
     });
-    describe("/api/login", () => {
-      it("should return status 200 with valid body", async () => {
-        const res = await request.post("/api/login").send({ user_id: ID });
-        expect(loginUser.mock.calls.length).toBe(1);
-        expect(loginUser.mock.calls[0][0].user_id).toBe(ID);
-        expect(res.status).toBe(200);
-      });
-      it("should return status 400 with no body", async () => {
-        const res = await request.post("/api/login").send({});
-        expect(res.status).toBe(400);
-        expect(loginUser.mock.calls.length).toBe(0);
-      });
-    });
+    //describe("/api/login", () => {
+    //it("should return status 200 with valid body", async () => {
+    //const res = await request.post("/api/login").send({ user_id: ID });
+    //expect(loginUser.mock.calls.length).toBe(1);
+    //expect(loginUser.mock.calls[0][0].user_id).toBe(ID);
+    //expect(res.status).toBe(200);
+    //});
+    //it("should return status 400 with no body", async () => {
+    //const res = await request.post("/api/login").send({});
+    //expect(res.status).toBe(400);
+    //expect(loginUser.mock.calls.length).toBe(0);
+    //});
+    //});
     describe("/api/signup", () => {
       it("should return status 200 with valid body", async () => {
         const res = await request

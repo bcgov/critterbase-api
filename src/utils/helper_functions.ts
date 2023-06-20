@@ -85,15 +85,15 @@ const toSelect = <AsType>(
   } satisfies ISelect;
 };
 
-const db_getTaxonIds = async (taxon_id: string): Promise<string[]> => {
-  const result: {get_taxon_ids: string[]}[] = await prisma.$queryRaw`SELECT * FROM get_taxon_ids(${taxon_id})`;
-  if(!result.length) {
+const getParentTaxonIds = async (taxon_id: string): Promise<string[]> => {
+  const result: { get_taxon_ids: string[] }[] =
+    await prisma.$queryRaw`SELECT * FROM get_taxon_ids(${taxon_id})`;
+  if (!result.length) {
     return [];
-  }
-  else {
+  } else {
     return result[0].get_taxon_ids;
   }
-}
+};
 //Putting the function here so tests dont run utils each time
 export const prisMock = (
   model: Prisma.ModelName,
@@ -121,5 +121,5 @@ export {
   intersect,
   toSelect,
   ServiceReturn,
-  db_getTaxonIds
+  getParentTaxonIds,
 };

@@ -1,4 +1,5 @@
 import { prisma } from "../../utils/constants";
+import { getParentTaxonIds } from "../../utils/helper_functions";
 
 const getCollectionUnitsFromCategoryId = async (category_id: string) => {
   const collectionUnits = await prisma.xref_collection_unit.findMany({
@@ -43,20 +44,10 @@ const getTaxonCollectionCategories = async (taxon_id?: string) => {
   });
 };
 
-//* Useful function to find inherited taxon ids for a single taxon. Returns araray of parent ids and taxon_id
-const getInheritedTaxonIds = async (
-  taxon_id?: string
-): Promise<string[] | null> => {
-  const result: [{ get_taxon_ids: string[] }] =
-    await prisma.$queryRaw`SELECT * FROM get_taxon_ids(${taxon_id})`;
-  return result[0].get_taxon_ids;
-};
-
 const getTaxonMarkingBodyLocations = async (taxon_id?: string) => {
-  const ids = await getInheritedTaxonIds(taxon_id);
-  console.log(ids);
+  const ids = taxon_id && (await getParentTaxonIds(taxon_id));
   const result = await prisma.xref_taxon_marking_body_location.findMany(
-    ids?.length ? { where: { taxon_id: { in: ids } } } : undefined
+    ids ? { where: { taxon_id: { in: ids } } } : undefined
   );
   return result;
 };
@@ -65,6 +56,5 @@ export {
   getCollectionUnitsFromCategory,
   getCollectionUnitsFromCategoryId,
   getTaxonCollectionCategories,
-  getInheritedTaxonIds,
   getTaxonMarkingBodyLocations,
 };
