@@ -20,7 +20,6 @@ import {
   SimpleCollectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 import { randomUUID } from "crypto";
-import { get } from "http";
 
 // Mock CollectionUnit Objects
 const ID = randomUUID();
@@ -128,7 +127,7 @@ beforeEach(() => {
 });
 
 describe("API: CollectionUnit", () => {
-  describe("ZOD SCHEMAS", () => {
+  describe("UTILS", () => {
     describe("SimpleCollectionUnitSchema", () => {
       it("correctly transforms extended data to simplified format", () => {
         const simpleCollectionUnit = SimpleCollectionUnitResponseSchema.parse({
