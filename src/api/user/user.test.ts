@@ -45,6 +45,7 @@ const findUniqueOrThrow = jest
 const update = jest.spyOn(prisma.user, "update").mockImplementation();
 const pDelete = jest.spyOn(prisma.user, "delete").mockImplementation();
 const queryRaw = jest.spyOn(prisma, "$queryRaw").mockImplementation();
+const findFirst = jest.spyOn(prisma.user, "findFirst").mockImplementation();
 
 // Mocked Services
 const createUser = jest.fn();
@@ -93,6 +94,15 @@ describe("API: User", () => {
         const returnedUser = await _createUser(NEW_USER);
         expect.assertions(2);
         expect(prisma.user.create).toHaveBeenCalledTimes(1);
+        expect(UserSchema.safeParse(returnedUser).success).toBe(true);
+      });
+
+      it("returns an existing user if one exists", async () => {
+        findFirst.mockResolvedValue(RETURN_USER);
+        const returnedUser = await _createUser(NEW_USER);
+        expect.assertions(3);
+        expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+        expect(prisma.user.create).not.toHaveBeenCalled();
         expect(UserSchema.safeParse(returnedUser).success).toBe(true);
       });
     });
