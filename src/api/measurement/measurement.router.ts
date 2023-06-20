@@ -11,7 +11,10 @@ import {
   QuantitativeResponseSchema,
   QuantitativeUpdateSchema,
 } from "./measurement.utils";
-import { verifyQualitativeMeasurementsAgainstTaxon, verifyQuantitativeMeasurementsAgainstTaxon } from "./measurement.service";
+import {
+  verifyQualitativeMeasurementsAgainstTaxon,
+  verifyQuantitativeMeasurementsAgainstTaxon,
+} from "./measurement.service";
 export const MeasurementRouter = (db: ICbDatabase) => {
   const measurementRouter = express.Router();
 
@@ -61,17 +64,23 @@ export const MeasurementRouter = (db: ICbDatabase) => {
   );
 
   measurementRouter.post(
-    '/verify',
+    "/verify",
     catchErrors(async (req: Request, res: Response) => {
       const parsed = MeasurementVerificationSchema.parse(req.body);
-      const qual = await verifyQualitativeMeasurementsAgainstTaxon(parsed.taxon_id, parsed.qualitative);
-      const quan = await verifyQuantitativeMeasurementsAgainstTaxon(parsed.taxon_id, parsed.quantitative);
+      const qual = await db.verifyQualitativeMeasurementsAgainstTaxon(
+        parsed.taxon_id,
+        parsed.qualitative
+      );
+      const quan = await verifyQuantitativeMeasurementsAgainstTaxon(
+        parsed.taxon_id,
+        parsed.quantitative
+      );
       return res.status(200).json({
         qualitative: qual,
-        quantitative: quan
+        quantitative: quan,
       });
     })
-  )
+  );
 
   /**
    * * All qualitative measurement id related routes

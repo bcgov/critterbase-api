@@ -1,8 +1,6 @@
 import cors from "cors";
 import express from "express";
-import session from "express-session";
 import helmet from "helmet";
-import memorystore from "memorystore";
 import { AccessRouter } from "./api/access/access.router";
 import { ArtifactRouter } from "./api/artifact/artifact.router";
 import { BulkRouter } from "./api/bulk/bulk.router";
@@ -11,32 +9,15 @@ import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router
 import { CritterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { locationRouter } from "./api/location/location.router";
+import { LookupRouter } from "./api/lookup/lookup.router";
 import { MarkingRouter } from "./api/marking/marking.router";
 import { MeasurementRouter } from "./api/measurement/measurement.router";
 import { MortalityRouter } from "./api/mortality/mortality.router";
-import { LookupRouter } from "./api/lookup/lookup.router";
 import { UserRouter } from "./api/user/user.router";
 import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
-import { sessionHours } from "./utils/helper_functions";
-import {
-  auth,
-  errorHandler,
-  errorLogger,
-} from "./utils/middleware";
-
-const SafeMemoryStore = memorystore(session);
-const options: session.SessionOptions = {
-  cookie: {
-    maxAge: sessionHours(24), //how long until the session expires
-  },
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: new SafeMemoryStore({
-    checkPeriod: sessionHours(1), //how frequently it attempts to prune stale sessions
-  }),
-};
+import { auth, errorHandler, errorLogger } from "./utils/middleware";
+import { apiError } from "./utils/types";
 
 export const makeApp = (db: ICbDatabase) => {
   const app = express();
@@ -44,8 +25,6 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(cors());
   app.use(helmet());
   app.use(express.json());
-  app.use(session(options));
-  //app.use(validateApiKey);
 
   app.use("/api/", AccessRouter(db));
   app.use("/api/critters", auth, CritterRouter(db));
@@ -61,6 +40,10 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/lookups", auth, LookupRouter(db));
   app.use("/api/bulk", auth, BulkRouter(db));
   app.use("/api/xref", auth, XrefRouter(db));
+
+  app.all("*", (req, res) => {
+    throw apiError.notFound(`${req.url} route not found`);
+  });
 
   app.use(errorLogger);
   app.use(errorHandler);

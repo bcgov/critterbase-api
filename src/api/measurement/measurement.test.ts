@@ -2,6 +2,7 @@ import { array } from "zod";
 import { prisma } from "../../utils/constants";
 import { makeApp } from "../../app";
 import { ResponseSchema } from "../../utils/zod_helpers";
+import * as helpers from "../../utils/helper_functions";
 import {
   createQualMeasurement,
   createQuantMeasurement,
@@ -16,6 +17,8 @@ import {
   getQuantMeasurementsByCritterId,
   updateQualMeasurement,
   updateQuantMeasurement,
+  verifyQualitativeMeasurementsAgainstTaxon,
+  verifyQuantitativeMeasurementsAgainstTaxon,
 } from "./measurement.service";
 import {
   QualitativeResponseSchema,
@@ -92,6 +95,8 @@ const mockDB = {
   deleteQuantMeasurement: jest.fn().mockResolvedValue(true),
   updateQuantMeasurement: jest.fn().mockResolvedValue(true),
   updateQualMeasurement: jest.fn().mockResolvedValue(true),
+  verifyQualitativeMeasurementsAgainstTaxon: jest.fn().mockResolvedValue([]),
+  verifyQuantitativeMeasurementsAgainstTaxon: jest.fn().mockResolvedValue([]),
 };
 const request = supertest(makeApp(mockDB as any));
 
@@ -314,9 +319,79 @@ describe("API: Measurement", () => {
         expect(mockDB.deleteQualMeasurement.mock.calls[0][0]).toBe(ID);
       });
     });
+    describe(`POST ${QUAL_ROUTE}/verify`, () => {
+      it("should respond with zero qualitative and quantitative problem ids", async () => {
+        const res = await request.get(`${ROUTE}/verify`).send({
+          taxon_id: ID,
+          quantitative: quantMeasurement,
+          qualitative: qualMeasurement,
+        });
+        console.log(res.body);
+      });
+    });
   });
   describe("SERVICES", () => {
     describe("measurement.service.ts", () => {
+      const a = jest
+        .spyOn(helpers, "getParentTaxonIds")
+        .mockImplementation()
+        .mockResolvedValue([ID]);
+      describe(verifyQuantitativeMeasurementsAgainstTaxon.name, () => {
+        it("should return no problem ids if measurement taxon id is in parent ids", async () => {
+          const b = prisMock("measurement_quantitative", "findMany", [
+            { xref_taxon_measurement_quantitative: { taxon_id: ID } },
+          ]);
+          const data = await verifyQuantitativeMeasurementsAgainstTaxon(ID, []);
+          expect(a.mock.calls.length).toBe(1);
+          expect(a.mock.calls[0][0]).toBe(ID);
+          expect(b.mock.calls.length).toBe(1);
+          //No problem ids means passes validation
+          expect(data.length).toBe(0);
+        });
+        it("should return array of problem ids if measurement taxon id is not in parent ids", async () => {
+          const b = prisMock("measurement_quantitative", "findMany", [
+            {
+              xref_taxon_measurement_quantitative: { taxon_id: "BAD-ID" },
+              measurement_quantitative_id: "GOOD-ID",
+            },
+          ]);
+          const data = await verifyQuantitativeMeasurementsAgainstTaxon(ID, []);
+          expect(a.mock.calls.length).toBe(1);
+          expect(a.mock.calls[0][0]).toBe(ID);
+          expect(b.mock.calls.length).toBe(1);
+          //No problem ids means passes validation
+          expect(data.length).toBe(1);
+          expect(data[0]).toBe("GOOD-ID");
+        });
+      });
+      describe(verifyQualitativeMeasurementsAgainstTaxon.name, () => {
+        it("should return no problem ids if measurement taxon id is in parent ids", async () => {
+          const b = prisMock("measurement_qualitative", "findMany", [
+            { xref_taxon_measurement_qualitative: { taxon_id: ID } },
+          ]);
+          const data = await verifyQualitativeMeasurementsAgainstTaxon(ID, []);
+          expect(a.mock.calls.length).toBe(1);
+          expect(a.mock.calls[0][0]).toBe(ID);
+          expect(b.mock.calls.length).toBe(1);
+          //No problem ids means passes validation
+          expect(data.length).toBe(0);
+        });
+        it("should return array of problem ids if measurement taxon id is not in parent ids", async () => {
+          const b = prisMock("measurement_qualitative", "findMany", [
+            {
+              xref_taxon_measurement_qualitative: { taxon_id: "BAD-ID" },
+              measurement_qualitative_id: "GOOD-ID",
+            },
+          ]);
+          const data = await verifyQualitativeMeasurementsAgainstTaxon(ID, []);
+          expect(a.mock.calls.length).toBe(1);
+          expect(a.mock.calls[0][0]).toBe(ID);
+          expect(b.mock.calls.length).toBe(1);
+          //No problem ids means passes validation
+          expect(data.length).toBe(1);
+          expect(data[0]).toBe("GOOD-ID");
+        });
+      });
       describe(getAllQualMeasurements.name, () => {
         it("should return array of qual measurements", async () => {
           const p = prisMock("measurement_qualitative", "findMany", [true]);
