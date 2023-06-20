@@ -18,6 +18,7 @@ import {
   getColourByName,
   getMarkingTypeByName,
 } from "./lookup.service";
+import { codFormats } from "./lookup.utils";
 
 const mockDB: Partial<Record<keyof ICbDatabase, any>> = {};
 const request = supertest(makeApp(mockDB));
@@ -32,6 +33,19 @@ const prismaMock = (
     .mockResolvedValue(mockVal);
 
 describe("API: Lookup", () => {
+  describe("UTILS", () => {
+    describe("codFormats", () => {
+      it("should correctly format cod_category with cod_reason", () => {
+        const parser = codFormats!.asSelect!.schema;
+        const parsed = parser.parse({
+          cod_id: "ID",
+          cod_category: "A",
+          cod_reason: "REASON",
+        });
+        expect(parsed.value).toEqual("A | REASON");
+      });
+    });
+  });
   describe("SERVICES", () => {
     it(getColourByName.name, async () => {
       const mock = prismaMock("lk_colour", "findFirst");
