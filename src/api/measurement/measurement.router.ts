@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { ICbDatabase } from "../../utils/database";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { verifyQuantitativeMeasurementsAgainstTaxon } from "./measurement.service";
 import {
   MeasurementVerificationSchema,
   QualitativeCreateSchema,
@@ -11,10 +12,6 @@ import {
   QuantitativeResponseSchema,
   QuantitativeUpdateSchema,
 } from "./measurement.utils";
-import {
-  verifyQualitativeMeasurementsAgainstTaxon,
-  verifyQuantitativeMeasurementsAgainstTaxon,
-} from "./measurement.service";
 export const MeasurementRouter = (db: ICbDatabase) => {
   const measurementRouter = express.Router();
 
