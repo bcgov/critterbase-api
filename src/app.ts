@@ -10,7 +10,7 @@ import { CaptureRouter } from "./api/capture/capture.router";
 import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { CritterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
-import { locationRouter } from "./api/location/location.router";
+import { LocationRouter } from "./api/location/location.router";
 import { MarkingRouter } from "./api/marking/marking.router";
 import { MeasurementRouter } from "./api/measurement/measurement.router";
 import { MortalityRouter } from "./api/mortality/mortality.router";
@@ -49,7 +49,7 @@ export const makeApp = (db: ICbDatabase) => {
 
   app.use("/api/", AccessRouter(db));
   app.use("/api/critters", auth, CritterRouter(db));
-  app.use("/api/locations", auth, locationRouter);
+  app.use("/api/locations", auth, LocationRouter(db));
   app.use("/api/markings", auth, MarkingRouter(db));
   app.use("/api/users", auth, UserRouter(db));
   app.use("/api/collection-units", auth, CollectionUnitRouter(db));

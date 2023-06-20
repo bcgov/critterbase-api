@@ -12,7 +12,7 @@ import {
   QuantitativeBody,
   QuantitativeUpdateBody,
 } from "./measurement.utils";
-import { db_getTaxonIds } from "../../utils/helper_functions";
+import { getParentTaxonIds } from "../../utils/helper_functions";
 
 const getAllQuantMeasurements = async (): Promise<
   measurement_quantitative[]
@@ -134,55 +134,67 @@ const deleteQuantMeasurement = async (
 
 const verifyQuantitativeMeasurementsAgainstTaxon = async (
   taxon_id: string,
-  body: Partial<measurement_quantitative> & Pick<measurement_quantitative, 'measurement_quantitative_id' | 'taxon_measurement_id'>[]
+  body: Partial<measurement_quantitative> &
+    Pick<
+      measurement_quantitative,
+      "measurement_quantitative_id" | "taxon_measurement_id"
+    >[]
 ): Promise<string[]> => {
-  const hier = await db_getTaxonIds(taxon_id);
-  const measurement_ids: string[] = body.map(m => m.measurement_quantitative_id);
+  const hier = await getParentTaxonIds(taxon_id);
+  const measurement_ids: string[] = body.map(
+    (m) => m.measurement_quantitative_id
+  );
   const measurements = await prisma.measurement_quantitative.findMany({
     include: {
       xref_taxon_measurement_quantitative: {
         select: {
-          taxon_id: true
-        }
-      }
+          taxon_id: true,
+        },
+      },
     },
-    where: { measurement_quantitative_id: { in: measurement_ids } }
+    where: { measurement_quantitative_id: { in: measurement_ids } },
   });
   const problemIds = [];
-  for (const m of measurements) { 
+  for (const m of measurements) {
     const curr_id = m.xref_taxon_measurement_quantitative.taxon_id;
-    if(!hier.includes(curr_id) && taxon_id != curr_id) {
+    if (!hier.includes(curr_id) && taxon_id != curr_id) {
       problemIds.push(m.measurement_quantitative_id);
     }
   }
   return problemIds;
-}
+};
 
 const verifyQualitativeMeasurementsAgainstTaxon = async (
   taxon_id: string,
-  body: Partial<measurement_qualitative> & Pick<measurement_qualitative, 'measurement_qualitative_id' | 'taxon_measurement_id'>[]
+  body: Partial<measurement_qualitative> &
+    Pick<
+      measurement_qualitative,
+      "measurement_qualitative_id" | "taxon_measurement_id"
+    >[]
 ): Promise<string[]> => {
-  const hier = await db_getTaxonIds(taxon_id);
-  const measurement_ids: string[] = body.map(m => m.measurement_qualitative_id);
+  const hier = await getParentTaxonIds(taxon_id);
+  const measurement_ids: string[] = body.map(
+    (m) => m.measurement_qualitative_id
+  );
   const measurements = await prisma.measurement_qualitative.findMany({
     include: {
       xref_taxon_measurement_qualitative: {
         select: {
-          taxon_id: true
-        }
-      }
+          taxon_id: true,
+        },
+      },
     },
-    where: { measurement_qualitative_id: { in: measurement_ids } }
+    where: { measurement_qualitative_id: { in: measurement_ids } },
   });
   const problemIds = [];
-  for (const m of measurements) { 
+  for (const m of measurements) {
     const curr_id = m.xref_taxon_measurement_qualitative.taxon_id;
-    if(!hier.includes(curr_id) && taxon_id != curr_id) {
+    if (!hier.includes(curr_id) && taxon_id != curr_id) {
       problemIds.push(m.measurement_qualitative_id);
     }
   }
   return problemIds;
-}
+};
 
 export {
   getAllQualMeasurements,
@@ -199,5 +211,5 @@ export {
   updateQuantMeasurement,
   updateQualMeasurement,
   verifyQualitativeMeasurementsAgainstTaxon,
-  verifyQuantitativeMeasurementsAgainstTaxon
+  verifyQuantitativeMeasurementsAgainstTaxon,
 };
