@@ -65,7 +65,7 @@ const getBodyLocationByNameAndTaxonUUID = jest
   .spyOn(lookups, "getBodyLocationByNameAndTaxonUUID")
   .mockImplementation();
 const db_getTaxonIds = jest
-  .spyOn(helpers, "db_getTaxonIds")
+  .spyOn(helpers, "getParentTaxonIds")
   .mockImplementation();
 
 const MARKING_ID = "4804d622-9539-40e6-a8a5-b7b223c2f09f";
