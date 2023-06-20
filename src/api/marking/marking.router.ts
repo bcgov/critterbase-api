@@ -59,7 +59,7 @@ export const MarkingRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(req.body);
       const problems = await db.verifyMarkingsAgainstTaxon(parsed.taxon_id, parsed.markings);
-      return res.status(200).json(problems);
+      return res.status(200).json({verified: problems.length === 0, invalid_markings: problems});
     }
   ));
 

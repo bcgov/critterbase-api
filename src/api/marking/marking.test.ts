@@ -347,13 +347,14 @@ describe("API: Marking", () => {
 
     describe("POST /api/markings/verify", () => {
       it("should return status 200", async () => {
-        expect.assertions(4);
+        expect.assertions(5);
         verifyMarkingsAgainstTaxon.mockResolvedValue([MARKING_ID]);
         const res = await request.post("/api/markings/verify").send({taxon_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f', markings: [MARKING]});
         expect(res.status).toBe(200);
         expect(verifyMarkingsAgainstTaxon.mock.calls.length).toBe(1);
-        expect(res.body.length).toBe(1);
-        expect(res.body[0]).toBe(MARKING_ID);
+        expect(res.body.verified).toBe(false);
+        expect(res.body.invalid_markings.length).toBe(1);
+        expect(res.body.invalid_markings[0]).toBe(MARKING_ID);
       });
     });
 
