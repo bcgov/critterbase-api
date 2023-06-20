@@ -13,6 +13,7 @@ import { apiError } from "../../utils/types";
 import { updateCapture } from "../capture/capture.service";
 import { z } from "zod";
 import { deleteMarking } from "../marking/marking.service";
+import { ICbDatabase } from "../../utils/database";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -74,7 +75,7 @@ const bulkCreateData = async (bulkParams: IBulkCreate) => {
   return result;
 };
 
-const bulkUpdateData = async (bulkParams: IBulkMutate) => {
+const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
   const {
     critters,
     collections,
@@ -119,7 +120,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate) => {
       if (!c.capture_id) {
         throw apiError.requiredProperty("capture_id");
       }
-      await updateCapture(c.capture_id, c, prisma);
+      await db.updateCapture(c.capture_id, c, prisma);
     }
     for (let i = 0; i < mortalities.length; i++) {
       const m = mortalities[i];
@@ -127,7 +128,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate) => {
       if (!m.mortality_id) {
         throw apiError.requiredProperty("mortality_id");
       }
-      await updateMortality(m.mortality_id, m, prisma);
+      await db.updateMortality(m.mortality_id, m, prisma);
     }
     for (let i = 0; i < markings.length; i++) {
       const ma = markings[i];

@@ -16,7 +16,7 @@ import { Prisma, critter, lk_cause_of_death, mortality } from "@prisma/client";
 import { makeApp } from "../../app";
 import { ICbDatabase } from "../../utils/database";
 import supertest from "supertest";
-import { MortalityBodySchema } from "./mortality.utils";
+import { FormattedMortality, MortalityBodySchema, MortalityResponseSchema } from "./mortality.utils";
 
 const createMortality = jest.fn();
 const deleteMortality = jest.fn();
@@ -63,9 +63,13 @@ const MORTALITY: mortality = {
   update_timestamp: new Date()
 }
 
+
 const LOCATION = {
   latitude: 2,
-  longitude: 2
+  longitude: 2,
+  lk_region_env: null,
+  lk_region_nr: null,
+  lk_wildlife_management_unit: null
 }
 
 const COD: lk_cause_of_death = {
@@ -92,6 +96,15 @@ const CRITTER: critter = {
   critter_comment: 'Hi :)'
 };
 
+const MORTALITY_FORMATTED = {
+  ...MORTALITY,
+  location: LOCATION,
+  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: { cod_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'},
+  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: { cod_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'},
+  lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: { taxon_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'},
+  lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: { taxon_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'}
+}
+
 beforeEach(() => {
   createMortality.mockImplementation(() => {
     return MORTALITY;
@@ -115,6 +128,28 @@ beforeEach(() => {
 })
 
 describe("API: Critter", () => {
+  describe("UTILS", () => {
+    describe("MoratlityResponseSchema", () => {
+      it("test with extra info included", () => {
+        const parsed = MortalityResponseSchema.parse(MORTALITY_FORMATTED);
+        expect.assertions(5);
+        expect(parsed.location).toBeDefined();
+        expect(parsed.proximate_cause_of_death).toBeDefined();
+        expect(parsed.ultimate_cause_of_death).toBeDefined();
+        expect(parsed.proximate_cause_of_death_taxon).toBeDefined();
+        expect(parsed.ultimate_cause_of_death_taxon).toBeDefined();
+      })
+      it("test with no extra info included", () => {
+        const parsed = MortalityResponseSchema.parse(MORTALITY);
+        expect.assertions(5);
+        expect(parsed.location).toBeNull();
+        expect(parsed.proximate_cause_of_death).toBeNull();
+        expect(parsed.ultimate_cause_of_death).toBeNull();
+        expect(parsed.proximate_cause_of_death_taxon).toBeNull();
+        expect(parsed.ultimate_cause_of_death_taxon).toBeNull();
+      })
+    })
+  })
   describe("SERVICES", () => {
     describe("getting mortalities", () => {
       it("returns all mortalities", async () => {
@@ -125,14 +160,14 @@ describe("API: Critter", () => {
         expect(res.length).toBeGreaterThanOrEqual(1);
       });
       it("returns one mortality", async () => {
-        findUniqueOrThrow.mockResolvedValue(MORTALITY);
+        findUniqueOrThrow.mockResolvedValue(MORTALITY_FORMATTED);
         const res = await _getMortalityById(MORTALITY_ID);
         expect.assertions(2);
         expect(prisma.mortality.findUniqueOrThrow).toHaveBeenCalled();
         expect(res?.mortality_id).toBe(MORTALITY_ID);
       });
       it("should get one or more mortalities for this critter", async () => {
-        findMany.mockResolvedValue([MORTALITY])
+        findMany.mockResolvedValue([MORTALITY_FORMATTED])
         const res = await _getMortalityByCritter(CRITTER_ID);
         expect.assertions(2);
         expect(prisma.mortality.findMany).toHaveBeenCalled();
@@ -145,6 +180,9 @@ describe("API: Critter", () => {
         const res = await _createMortality({
           critter_id: CRITTER_ID, 
           proximate_cause_of_death_id: '6109c0a8-a71d-4662-9604-a8beb72f2f6f', 
+          proximate_predated_by_taxon_id: '6109c0a8-a71d-4662-9604-a8beb72f2f6f',
+          ultimate_cause_of_death_id: '6109c0a8-a71d-4662-9604-a8beb72f2f6f',
+          ultimate_predated_by_taxon_id: '6109c0a8-a71d-4662-9604-a8beb72f2f6f',
           mortality_timestamp: new Date()});
         expect.assertions(3);
         expect(MortalityBodySchema.safeParse(res).success).toBe(true);
@@ -173,8 +211,18 @@ describe("API: Critter", () => {
     });
     describe("modifying mortalities", () => {
       it("updates an existing mortality", async () => {
-        update.mockResolvedValue({...MORTALITY, mortality_comment: 'banana'})
-        const res = await _updateMortality(MORTALITY_ID, {mortality_comment: 'banana'});
+        update.mockResolvedValue({...MORTALITY, 
+        mortality_comment: 'banana', 
+        ultimate_cause_of_death_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
+        proximate_predated_by_taxon_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
+        ultimate_predated_by_taxon_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10'})
+        const res = await _updateMortality(MORTALITY_ID, 
+          {
+            mortality_comment: 'banana',
+            ultimate_cause_of_death_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
+            proximate_predated_by_taxon_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
+            ultimate_predated_by_taxon_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10'
+          });
         expect.assertions(2);
         expect(prisma.mortality.update).toHaveBeenCalled();
         expect(res.mortality_comment).toBe('banana');
