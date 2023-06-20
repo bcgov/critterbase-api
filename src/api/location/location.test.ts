@@ -15,6 +15,7 @@ import {
   LocationResponse,
   LocationBody,
   CommonLocationType,
+  LocationResponseSchema,
 } from "./location.utils";
 import { randomUUID } from "crypto";
 import { location } from "@prisma/client";
@@ -135,6 +136,27 @@ describe("API: Location", () => {
         expect(CommonFormattedLocationSchema.parse(mockCommonLocation)).toEqual(
           mockFormattedLocation
         );
+      });
+    });
+
+    describe("LocationResponseSchema", () => {
+      it("should fill in null values where necessary", () => {
+        expect.assertions(1);
+        expect(
+          LocationResponseSchema.parse({
+            ...mockCommonLocation,
+            create_timestamp: mockLocation.create_timestamp.toISOString(),
+            update_timestamp: mockLocation.update_timestamp.toISOString(),
+            lk_region_env: null,
+            lk_region_nr: null,
+            lk_wildlife_management_unit: null,
+          })
+        ).toEqual({
+          ...mockLocationResponse,
+          region_env_name: null,
+          region_nr_name: null,
+          wmu_name: null,
+        });
       });
     });
   });
