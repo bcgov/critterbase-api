@@ -2,7 +2,6 @@ import express, { NextFunction, Request, Response } from "express";
 import { ICbDatabase } from "../../utils/database";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { verifyQuantitativeMeasurementsAgainstTaxon } from "./measurement.service";
 import {
   MeasurementVerificationSchema,
   QualitativeCreateSchema,
