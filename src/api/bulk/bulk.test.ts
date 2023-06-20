@@ -17,6 +17,8 @@ const updateMortality = jest.fn();
 const appendEnglishTaxonAsUUID = jest.fn();
 const appendEnglishMarkingsAsUUID = jest.fn();
 const appendDefaultCOD = jest.fn();
+const deleteMarking = jest.fn();
+const deleteCollectionUnit = jest.fn();
 
 const db = {
     bulkCreateData,
@@ -25,7 +27,9 @@ const db = {
     updateMortality,
     appendEnglishTaxonAsUUID,
     appendEnglishMarkingsAsUUID,
-    appendDefaultCOD
+    appendDefaultCOD,
+    deleteMarking,
+    deleteCollectionUnit
 } as Record<keyof ICbDatabase, any>
 
 const request = supertest(
@@ -226,6 +230,7 @@ const mortalityCreateMany = jest.spyOn(prisma.mortality, "createMany").mockImple
 const markingCreateMany = jest.spyOn(prisma.marking, "createMany").mockImplementation();
 const locationCreateMany = jest.spyOn(prisma.location, "createMany").mockImplementation();
 const collectionCreateMany = jest.spyOn(prisma.critter_collection_unit, "createMany").mockImplementation();
+const collectionCreate = jest.spyOn(prisma.critter_collection_unit, "create").mockImplementation();
 
 const critterUpdate = jest.spyOn(prisma.critter, "update").mockImplementation();
 const markingCreate = jest.spyOn(prisma.marking, "create").mockImplementation();
@@ -278,7 +283,8 @@ describe("API: Bulk", () => {
                     captures: [CAPTURE],
                     mortalities: [MORTALITY],
                     markings: [MARKING],
-                    _deleteMarkings: []
+                    _deleteMarkings: [],
+                    _deleteUnits: []
                 }, db);
 
                 expect.assertions(6);
@@ -298,7 +304,8 @@ describe("API: Bulk", () => {
                     mortalities: [],
                     markings: [],
                     captures: [{capture_comment: 'a'}],
-                    _deleteMarkings: []
+                    _deleteMarkings: [],
+                    _deleteUnits: []
                 }, db)).rejects.toThrow(apiError.requiredProperty('capture_id'));
             });
             it("should error out on missing mortality id", async () => {
@@ -310,7 +317,8 @@ describe("API: Bulk", () => {
                     mortalities: [{mortality_comment: 'a'}],
                     markings: [],
                     captures: [],
-                    _deleteMarkings: []
+                    _deleteMarkings: [],
+                    _deleteUnits: []
                 }, db)).rejects.toThrow(apiError.requiredProperty('mortality_id'));
             });
             it("should create marking instead of update marking if id is missing", async () => {
@@ -323,12 +331,13 @@ describe("API: Bulk", () => {
                     mortalities: [],
                     markings: [{critter_id: '98f9fede-95fc-4321-9444-7c2742e336fe', taxon_marking_body_location_id: "98f9fede-95fc-4321-9444-7c2742e336fe"}],
                     captures: [],
-                    _deleteMarkings: []
+                    _deleteMarkings: [],
+                    _deleteUnits: []
                 }, db);
                 expect(prisma.marking.create).toHaveBeenCalledTimes(1);
             });
             it("should delete marking if included in _deleteMarkings", async () => {
-                expect.assertions(1);
+                expect.assertions(2);
                 markingDelete.mockResolvedValue(MARKING);
                 await _bulkUpdateData({
                     critters: [],
@@ -337,10 +346,26 @@ describe("API: Bulk", () => {
                     mortalities: [],
                     markings: [],
                     captures: [],
-                    _deleteMarkings: [{marking_id: '98f9fede-95fc-4321-9444-7c2742e336fe', _delete: true}]
+                    _deleteMarkings: [{marking_id: '98f9fede-95fc-4321-9444-7c2742e336fe', _delete: true}],
+                    _deleteUnits: [{critter_collection_unit_id: '98f9fede-95fc-4321-9444-7c2742e336fe', _delete: true}]
                 }, db);
-                expect(prisma.marking.delete).toHaveBeenCalledTimes(1);
+                expect(deleteMarking.mock.calls.length).toBe(1);
+                expect(deleteCollectionUnit.mock.calls.length).toBe(1);
             });
+            it("should create a new collection unit when a critter_id is provided but no primary key", async () => {
+                expect.assertions(1);
+                await _bulkUpdateData({
+                    critters: [],
+                    collections: [{critter_id: CRITTER_ID, collection_unit_id: '98f9fede-95fc-4321-9444-7c2742e336fe'}],
+                    locations: [],
+                    mortalities: [],
+                    markings: [],
+                    captures: [],
+                    _deleteMarkings: [],
+                    _deleteUnits: []
+                }, db);
+                expect(prisma.critter_collection_unit.create).toBeCalledTimes(1);
+            })
         });
 
         describe("bulkErrMap()", () => {
@@ -390,7 +415,7 @@ describe("API: Bulk", () => {
             it("should return status 200", async () => {
                 const body = {
                     critters: [CRITTER],
-                    collections: [COLLECTION],
+                    collections: [COLLECTION, {...COLLECTION, _delete: true}],
                     locations: [LOCATION],
                     captures: [CAPTURE],
                     mortalities: [MORTALITY],
