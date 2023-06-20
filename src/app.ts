@@ -5,7 +5,7 @@ import helmet from "helmet";
 import memorystore from "memorystore";
 import { AccessRouter } from "./api/access/access.router";
 import { ArtifactRouter } from "./api/artifact/artifact.router";
-import { bulkRouter } from "./api/bulk/bulk.router";
+import { BulkRouter } from "./api/bulk/bulk.router";
 import { CaptureRouter } from "./api/capture/capture.router";
 import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { CritterRouter } from "./api/critter/critter.router";
@@ -60,7 +60,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/mortality", auth, MortalityRouter(db));
   app.use("/api/measurements", auth, measurementRouter);
   app.use("/api/lookups", auth, LookupRouter(db));
-  app.use("/api/bulk", auth, bulkRouter);
+  app.use("/api/bulk", auth, BulkRouter(db));
   app.use("/api/xref", auth, XrefRouter(db));
 
   app.use(errorLogger);
