@@ -9,6 +9,7 @@ import {
   getMarkingsByCritterId as _getMarkingsByCritterId,
   updateMarking as _updateMarking,
   appendEnglishMarkingsAsUUID as _appendEnglishMarkingsAsUUID,
+  verifyMarkingsAgainstTaxon as _verifyMarkingsAgainstTaxon,
 } from "./marking.service";
 import { makeApp } from "../../app";
 import supertest from "supertest";
@@ -21,6 +22,7 @@ import {
 } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import * as lookups from "../lookup/lookup.service";
+import * as helpers from "../../utils/helper_functions";
 
 const createMarking = jest.fn();
 const getAllMarkings = jest.fn();
@@ -28,6 +30,7 @@ const updateMarking = jest.fn();
 const deleteMarking = jest.fn();
 const getMarkingById = jest.fn();
 const getMarkingsByCritterId = jest.fn();
+const verifyMarkingsAgainstTaxon = jest.fn();
 //const getColourByName = jest.fn();
 //const getBodyLocationByNameAndTaxonUUID = jest.fn();
 
@@ -39,6 +42,7 @@ const request = supertest(
     deleteMarking,
     getMarkingById,
     getMarkingsByCritterId,
+    verifyMarkingsAgainstTaxon
     //getColourByName,
     //getBodyLocationByNameAndTaxonUUID
   } as Record<keyof ICbDatabase, any>)
@@ -59,6 +63,9 @@ const getColourByName = jest
   .mockImplementation();
 const getBodyLocationByNameAndTaxonUUID = jest
   .spyOn(lookups, "getBodyLocationByNameAndTaxonUUID")
+  .mockImplementation();
+const db_getTaxonIds = jest
+  .spyOn(helpers, "getParentTaxonIds")
   .mockImplementation();
 
 const MARKING_ID = "4804d622-9539-40e6-a8a5-b7b223c2f09f";
@@ -240,6 +247,26 @@ describe("API: Marking", () => {
         expect(new_body).not.toHaveProperty("secondary_colour_id");
         expect(new_body).not.toHaveProperty("taxon_marking_body_location_id");
       });
+      it("should fail to append bad english names", async () => {
+        const body = {
+          primary_colour: 'foo',
+          secondary_colour: 'foo',
+          body_location: 'foo'
+        }
+        getColourByName.mockResolvedValue(null);
+        getBodyLocationByNameAndTaxonUUID.mockResolvedValue(null);
+        const new_body = await _appendEnglishMarkingsAsUUID(
+          body,
+          "f91ae2d3-4f5b-4502-aceb-264351709695"
+        );
+        expect.assertions(5);
+        expect(getColourByName.mock.calls.length).toBe(2);
+        expect(getBodyLocationByNameAndTaxonUUID.mock.calls.length).toBe(1);
+        expect(new_body.primary_colour_id).toBeUndefined();
+        expect(new_body.secondary_colour_id).toBeUndefined();
+        expect(new_body.taxon_marking_body_location_id).toBeUndefined();
+      })
+
     });
 
     describe("getMarkingById()", () => {
@@ -290,6 +317,19 @@ describe("API: Marking", () => {
         expect(prisma.marking.delete).toHaveBeenCalled();
       });
     });
+
+    describe("verifyMarkingAgainstTaxon()", () => {
+      it("returns an array of ids that can't be matched to the provided taxon", async () => {
+        type markingWithInclude = (marking & {xref_taxon_marking_body_location: {taxon_id: string }});
+        db_getTaxonIds.mockResolvedValue(['32f9fede-32fc-4321-3232-1c2142e336fe']);
+        findMany.mockResolvedValue([{...MARKING, xref_taxon_marking_body_location: { taxon_id: '12f9fede-12fc-4321-1212-1c2142e336fe' }}] as markingWithInclude[])
+        const failed_ids = await _verifyMarkingsAgainstTaxon('98f9fede-95fc-4321-9444-7c2742e336fe', [MARKING]);
+        expect.assertions(3);
+        expect(db_getTaxonIds.mock.calls.length).toBe(1);
+        expect(failed_ids.length).toBe(1);
+        expect(failed_ids[0]).toBe(MARKING_ID);
+      })
+    })
   });
 
   describe("ROUTERS", () => {
@@ -302,6 +342,18 @@ describe("API: Marking", () => {
         expect(getAllMarkings.mock.results[0].value[0].marking_id).toBe(
           MARKING_ID
         );
+      });
+    });
+
+    describe("POST /api/markings/verify", () => {
+      it("should return status 200", async () => {
+        expect.assertions(4);
+        verifyMarkingsAgainstTaxon.mockResolvedValue([MARKING_ID]);
+        const res = await request.post("/api/markings/verify").send({taxon_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f', markings: [MARKING]});
+        expect(res.status).toBe(200);
+        expect(verifyMarkingsAgainstTaxon.mock.calls.length).toBe(1);
+        expect(res.body.length).toBe(1);
+        expect(res.body[0]).toBe(MARKING_ID);
       });
     });
 

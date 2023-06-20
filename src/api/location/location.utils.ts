@@ -161,6 +161,7 @@ export type {
   FormattedLocation,
   LocationResponse,
   LocationBody,
+  CommonLocationType,
 };
 export {
   commonLocationSelect,

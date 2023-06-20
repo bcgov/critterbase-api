@@ -32,4 +32,4 @@ const getTableDataTypes = async (model: Prisma.ModelName) => {
   return results;
 };
 
-export { loginUser, getTableDataTypes };
+export { getTableDataTypes, loginUser };

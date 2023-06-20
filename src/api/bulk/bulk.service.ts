@@ -9,10 +9,8 @@ import {
 } from "../marking/marking.utils"; 
 import { MortalityUpdate } from "../mortality/mortality.utils";
 import { apiError } from "../../utils/types";
-import { deleteMarking } from "../marking/marking.service";
 import { ICbDatabase } from "../../utils/database";
 import { CaptureUpdate } from "../capture/capture.utils";
-import { deleteCollectionUnit } from "../collectionUnit/collectionUnit.service";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -160,12 +158,12 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
-      await deleteMarking(_dma.marking_id);
+      await db.deleteMarking(_dma.marking_id);
     }
     for(let i = 0; i < _deleteUnits.length; i++) {
       const _dma = _deleteUnits[i];
       counts.deleted.collections = i + 1;
-      await deleteCollectionUnit(_dma.critter_collection_unit_id);
+      await db.deleteCollectionUnit(_dma.critter_collection_unit_id);
     }
   }, {timeout: 90000});
   return counts;

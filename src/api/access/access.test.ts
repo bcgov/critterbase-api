@@ -10,6 +10,7 @@ import {
   loginUser as _loginUser,
   getTableDataTypes as _getTableDataTypes,
 } from "./access.service";
+import { LoginCredentials } from "../user/user.utils";
 const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 const USER: user = {
   user_id: ID,
@@ -58,70 +59,25 @@ beforeEach(() => {
 });
 
 describe("SERVICES", () => {
-  //describe("loginUser", () => {
-  //it("user_id: login succeeds with valid user_id", async () => {
-  //const user = await _loginUser({ user_id: ID });
-  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
-  //expect(user.user_id).toBeDefined();
-  //});
-  //it("user_id: login fails with non existant user_id", async () => {
-  //findUnique.mockResolvedValue(null);
-  //await expect(_loginUser({ user_id: ID })).rejects.toThrowError(apiError);
-  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
-  //});
-  //it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
-  //findFirst.mockResolvedValue(null);
-  //await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
-  //apiError
-  //);
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-  //});
-  //it("keycloak_uuid: login fails with null keycloak_uuid", async () => {
-  //await expect(_loginUser({ keycloak_uuid: null })).rejects.toThrowError(
-  //apiError
-  //);
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
-  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-  //});
-  //it("keycloak_uuid: login fails with non existing keycloak_uuid", async () => {
-  //findFirst.mockResolvedValue(null);
-  //await expect(_loginUser({ keycloak_uuid: ID })).rejects.toThrowError(
-  //apiError
-  //);
-  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-  //});
-  //it("keycloak_uuid: login succeeds with valid keycloak_uuid", async () => {
-  //const user = await _loginUser({ keycloak_uuid: ID });
-  //expect(user.user_id).toBeDefined();
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-  //});
-
-  //it("system_user_id + system_name: login succeeds with valid system_name and system_user_id", async () => {
-  //const user = await _loginUser({
-  //system_user_id: ID,
-  //system_name: "CRITTERBASE",
-  //});
-  //expect(user.user_id).toBeDefined();
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-  //});
-  //it("system_user_id + system_name: login fails with system_name and missing system_user_id", async () => {
-  ////Calling original implementation to test thrown errors
-  //await expect(
-  //_loginUser({ system_name: "CRITTERBASE" })
-  //).rejects.toThrowError(apiError);
-  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
-  //});
-  //it("system_user_id + system_name: login fails with missing system_name and valid system_user_id", async () => {
-  ////Calling original implementation to test thrown errors
-  //await expect(_loginUser({ system_user_id: ID })).rejects.toThrowError(
-  //apiError
-  //);
-  //expect(prisma.user.findUnique).toHaveBeenCalledTimes(0);
-  //expect(prisma.user.findFirst).toHaveBeenCalledTimes(0);
-  //});
-  //});
+  describe("loginUser", () => {
+    it("user_id: login succeeds with valid user_id", async () => {
+      const user = await _loginUser({ user_id: ID, keycloak_uuid: ID });
+      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(user?.user_id).toBeDefined();
+    });
+    it("user_id: login fails with non existant user_id", async () => {
+      findFirst.mockResolvedValue(null);
+      await expect(_loginUser({ user_id: 'd3984687-0e85-4126-94e5-22a0eb0b5569', keycloak_uuid: 'd39846870e85412694e522a0eb0b5569'})).rejects.toThrowError(apiError);
+      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+    });
+    it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
+      findFirst.mockResolvedValue(null);
+      await expect(_loginUser({ user_id: 'd3984687-0e85-4126-94e5-22a0eb0b5569', keycloak_uuid: "test" })).rejects.toThrowError(
+      apiError
+    );
+    expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+    });
+  })
   describe("getTableDataTypes", () => {
     it("should call prisma raw query", () => {
       const types = _getTableDataTypes("user");
