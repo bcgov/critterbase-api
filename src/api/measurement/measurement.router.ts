@@ -12,8 +12,11 @@ import {
   getQuantMeasurementOrThrow,
   updateQualMeasurement,
   updateQuantMeasurement,
+  verifyQualitativeMeasurementsAgainstTaxon,
+  verifyQuantitativeMeasurementsAgainstTaxon,
 } from "./measurement.service";
 import {
+  MeasurementVerificationSchema,
   QualitativeCreateSchema,
   QualitativeResponseSchema,
   QualitativeUpdateSchema,
@@ -56,6 +59,19 @@ measurementRouter.post(
     return res.status(201).json(measurement);
   })
 );
+
+measurementRouter.post(
+  '/verify',
+  catchErrors(async (req: Request, res: Response) => {
+    const parsed = MeasurementVerificationSchema.parse(req.body);
+    const qual = await verifyQualitativeMeasurementsAgainstTaxon(parsed.taxon_id, parsed.qualitative);
+    const quan = await verifyQuantitativeMeasurementsAgainstTaxon(parsed.taxon_id, parsed.quantitative);
+    return res.status(200).json({
+      qualitative: qual,
+      quantitative: quan
+    });
+  })
+)
 
 /**
  ** Create new quantitative measurement

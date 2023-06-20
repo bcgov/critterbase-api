@@ -7,6 +7,8 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
+  MarkingVerificationSchema,
+  MarkingVerificationType,
   markingResponseSchema,
 } from "./marking.utils";
 import { ICbDatabase } from "../../utils/database";
@@ -52,6 +54,14 @@ export const MarkingRouter = (db: ICbDatabase) => {
       return res.status(200).json(formattedMarkings);
     })
   );
+
+  markingRouter.post("/verify",
+    catchErrors(async (req: Request, res: Response) => {
+      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(req.body);
+      const problems = await db.verifyMarkingsAgainstTaxon(parsed.taxon_id, parsed.markings);
+      return res.status(200).json(problems);
+    }
+  ));
 
   /**
    ** All marking_id related routes

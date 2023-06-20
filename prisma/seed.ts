@@ -4,7 +4,7 @@ import { insertDefaultTaxons } from "./seed_scripts/seed_taxons";
 import { prisma } from "../src/utils/constants";
 import * as fs from "fs";
 import path from "path";
-import { system } from "@prisma/client";
+import { Prisma, system } from "@prisma/client";
 
 async function main() {
   const systemUserUUID = await queryRandomUUID(prisma);
@@ -32,6 +32,18 @@ async function main() {
   });
 
   await prisma.$executeRaw`ALTER TABLE critterbase."user" ENABLE TRIGGER all`;
+
+  const dev_users = await import("./seed_scripts/seed_users");
+  if(dev_users) {
+    try {
+      await prisma.user.createMany({
+        data: dev_users.default as unknown as Prisma.userCreateManyInput[]
+      })
+    }
+    catch (e) {
+      console.log('Failed to create default dev users, skipping.')
+    }
+  }
 
   /**
    * Insert all region table values.

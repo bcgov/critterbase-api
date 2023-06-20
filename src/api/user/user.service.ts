@@ -8,6 +8,15 @@ import { UserCreateInput, UserUpdateInput } from "./user.utils";
  * @param {UserCreateInput} newUserData - The newly created user
  */
 const createUser = async (newUserData: UserCreateInput): Promise<user> => {
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      keycloak_uuid: newUserData.keycloak_uuid,
+      system_user_id: newUserData.system_user_id
+    }
+  });
+  if(existingUser) {
+    return existingUser;
+  }
   const newUser = await prisma.user.create({ data: newUserData });
   return newUser;
 };

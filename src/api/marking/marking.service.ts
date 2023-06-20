@@ -1,3 +1,4 @@
+import { marking } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { ReqBody } from "../../utils/types";
 import { getBodyLocationByNameAndTaxonUUID, getColourByName } from "../lookup/lookup.service";
@@ -7,6 +8,7 @@ import {
   MarkingUpdateInput,
   markingIncludes,
 } from "./marking.utils";
+import { db_getTaxonIds } from "../../utils/helper_functions";
 
 /**
  * * Returns all existing markings from the database
@@ -124,6 +126,32 @@ const appendEnglishMarkingsAsUUID = async (
   return body;
 };
 
+const verifyMarkingsAgainstTaxon = async (
+  taxon_id: string,
+  body: (Partial<marking> & Pick<marking, 'marking_id' | 'taxon_marking_body_location_id'>)[]
+): Promise<string[]> => {
+  const hier: string[] = await db_getTaxonIds(taxon_id);
+  const marking_ids: string[] = body.map(a => a.marking_id);
+  const markings = await prisma.marking.findMany({
+    include: {
+      xref_taxon_marking_body_location: {
+        select: {
+          taxon_id: true
+        }
+      }
+    },
+    where: { marking_id: { in: marking_ids }}
+  });
+  const problemIds = [];
+  for (const m of markings) {
+    const curr_id = m.xref_taxon_marking_body_location.taxon_id;
+    if(!hier.includes(curr_id) && taxon_id != curr_id ) {
+      problemIds.push(m.marking_id)
+    }
+  }
+  return problemIds;
+}
+
 export {
   getAllMarkings,
   getMarkingById,
@@ -131,5 +159,6 @@ export {
   updateMarking,
   createMarking,
   deleteMarking,
-  appendEnglishMarkingsAsUUID
+  appendEnglishMarkingsAsUUID,
+  verifyMarkingsAgainstTaxon
 };

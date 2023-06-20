@@ -23,7 +23,6 @@ import {
   auth,
   errorHandler,
   errorLogger,
-  validateApiKey,
 } from "./utils/middleware";
 
 const SafeMemoryStore = memorystore(session);
@@ -46,7 +45,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(helmet());
   app.use(express.json());
   app.use(session(options));
-  app.use(validateApiKey);
+  //app.use(validateApiKey);
 
   app.use("/api/", AccessRouter(db));
   app.use("/api/critters", auth, CritterRouter(db));

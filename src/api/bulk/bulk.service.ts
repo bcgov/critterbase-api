@@ -1,19 +1,18 @@
 import { Prisma} from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { CritterUpdate } from "../critter/critter.utils";
-import { CollectionUnitUpdateInput } from "../collectionUnit/collectionUnit.utils";
+import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from "../collectionUnit/collectionUnit.utils";
 import {
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema
 } from "../marking/marking.utils";
 import { CaptureUpdate } from "../capture/capture.utils";
 import { MortalityUpdate } from "../mortality/mortality.utils";
-import { updateMortality } from "../mortality/mortality.service";
 import { apiError } from "../../utils/types";
-import { updateCapture } from "../capture/capture.service";
 import { z } from "zod";
 import { deleteMarking } from "../marking/marking.service";
 import { ICbDatabase } from "../../utils/database";
+import { deleteCollectionUnit } from "../collectionUnit/collectionUnit.service";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -26,13 +25,14 @@ interface IBulkCreate {
 
 interface IBulkMutate {
   critters: CritterUpdate[];
-  collections: CollectionUnitUpdateInput[];
+  collections: CollectionUnitUpsertType[];
   markings: z.infer<typeof MarkingUpdateByIdSchema>[];
   locations: Prisma.locationUpdateInput[];
   captures: CaptureUpdate[];
   mortalities: MortalityUpdate[];
   //Deletes
   _deleteMarkings: z.infer<typeof MarkingDeleteSchema>[];
+  _deleteUnits: z.infer<typeof CollectionUnitDeleteSchema>[];
 }
 
 interface IBulkResCount {
@@ -84,6 +84,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     mortalities,
     markings,
     _deleteMarkings,
+    _deleteUnits
   } = bulkParams;
   const counts: Omit<IBulkResCount, "created"> = {
     updated: {},
@@ -101,10 +102,20 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     for (let i = 0; i < collections.length; i++) {
       const c = collections[i];
       counts.updated.collections = i + 1;
-      await prisma.critter_collection_unit.update({
-        where: { critter_collection_unit_id: c.critter_collection_unit_id },
-        data: c,
-      });
+      if(c.critter_collection_unit_id) {
+        await prisma.critter_collection_unit.update({
+          where: { critter_collection_unit_id: c.critter_collection_unit_id },
+          data: c,
+        });
+      }
+      else if(c.critter_id !== undefined) {
+        await prisma.critter_collection_unit.create({
+          data: { //XOR typing seems to force me to use the connect syntax here 
+            critter: { connect: { critter_id: c.critter_id }},
+            xref_collection_unit: { connect: { collection_unit_id: c.collection_unit_id }}
+          }
+        })
+      }
     }
     for (let i = 0; i < locations.length; i++) {
       const l = locations[i];
@@ -149,7 +160,13 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
+      console.log('Will delete marking ' + _dma.marking_id);
       await deleteMarking(_dma.marking_id);
+    }
+    for(let i = 0; i < _deleteUnits.length; i++) {
+      const _dma = _deleteUnits[i];
+      counts.deleted.collections = i + 1;
+      await deleteCollectionUnit(_dma.critter_collection_unit_id);
     }
   }, {timeout: 90000});
   return counts;
