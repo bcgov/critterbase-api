@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
-import { AuthLoginSchema, UserCreateBodySchema } from "../user/user.utils";
+import { UserCreateBodySchema } from "../user/user.utils";
 
 import { Prisma } from "@prisma/client";
 import express from "express";
@@ -20,7 +20,7 @@ export const AccessRouter = (db: ICbDatabase) => {
    ** login endpoint
    * Note: currently accepts, user_id OR keycloak_uuid OR (system_name AND system_user_id)
    */
-  accessRouter.post(
+  /*accessRouter.post(
     "/login",
     catchErrors(async (req: Request, res: Response) => {
       const parsedLogin = AuthLoginSchema.parse(req.body);
@@ -29,11 +29,9 @@ export const AccessRouter = (db: ICbDatabase) => {
         user.system_user_id,
         user.system_name
       );
-      req.session.user = user;
-      console.log(`Here is the user ${JSON.stringify(user)} ${contextUserId} ${JSON.stringify(req.session.user)}`)
       return res.status(200).json({ user_id: contextUserId }).end();
     })
-  );
+  );*/
 
   /**
    ** Signup endpoint
@@ -47,8 +45,7 @@ export const AccessRouter = (db: ICbDatabase) => {
         user.system_user_id,
         user.system_name
       );
-      req.session.user = user;
-      return res.status(201).json({ user_id: contextUserId }).end();
+      return res.status(201).json({user_id: contextUserId}).end();
     })
   );
 

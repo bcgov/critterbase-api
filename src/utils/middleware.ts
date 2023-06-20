@@ -1,7 +1,9 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { API_KEY, API_KEY_HEADER, IS_DEV, IS_TEST, NO_AUTH } from "./constants";
+import { loginUser } from "../api/access/access.service";
+import { AuthHeadersSchema } from "../api/user/user.utils";
+import { IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -32,7 +34,7 @@ const errorLogger = (
 ) => {
   if (!IS_TEST) {
     console.error(
-      `🛑 ${req.method} ${req.originalUrl} -> ${err.toString()} -- ${
+      `🛑 ${req.method} ${req.originalUrl} -> ${JSON.stringify(err)} -- ${
         err.stack ?? "No stack"
       }`
     );
@@ -84,28 +86,16 @@ const errorHandler = (
   next(err);
 };
 
-const auth = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session.user || IS_TEST || NO_AUTH) {
+const auth = catchErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (IS_TEST || NO_AUTH) return next();
+    const headers = AuthHeadersSchema.parse(req.headers);
+    await loginUser({
+      user_id: headers["user-id"],
+      keycloak_uuid: headers["keycloak-uuid"],
+    });
     next();
-  } else {
-    next(
-      new apiError("Must be logged in to access this route. POST api/login")
-    );
   }
-};
+);
 
-const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
-  if (IS_DEV || IS_TEST || NO_AUTH) {
-    return next();
-  }
-  const apiKey = req.get(API_KEY_HEADER);
-  if (!apiKey) {
-    throw new apiError(`Header: '${API_KEY_HEADER}' must be provided`);
-  }
-  if (apiKey !== API_KEY) {
-    throw new apiError(`Header: '${API_KEY_HEADER}' is incorrect`);
-  }
-  next();
-};
-
-export { errorLogger, errorHandler, catchErrors, auth, validateApiKey };
+export { auth, catchErrors, errorHandler, errorLogger };

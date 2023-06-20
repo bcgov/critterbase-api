@@ -281,11 +281,13 @@ describe("API: Bulk", () => {
                     _deleteMarkings: []
                 }, db);
 
-                expect.assertions(4);
+                expect.assertions(6);
                 expect(critterUpdate).toHaveBeenCalledTimes(1);
                 expect(markingUpdate).toHaveBeenCalledTimes(1);
                 expect(locationUpdate).toHaveBeenCalledTimes(1);
                 expect(collectionUpdate).toHaveBeenCalledTimes(1);
+                expect(updateCapture.mock.calls.length).toBe(1);
+                expect(updateMortality.mock.calls.length).toBe(1);
             });
             it("should error out on missing capture id", async () => {
                 expect.assertions(1);
@@ -404,6 +406,44 @@ describe("API: Bulk", () => {
                 const res = await request.put("/api/bulk").send(body);
                 expect.assertions(1);
                 expect(res.status).toBe(200);
+            });
+            it("should return status 400, trigger errors", async () => {
+                expect.assertions(6);
+                const body = {
+                    critters: [{critter_id: 2}],
+                };
+                let res = await request.put("/api/bulk").send(body);
+                expect(res.status).toBe(400);
+
+                const body2 = {
+                    collections: [{critter_id: 2}],
+                };
+                res = await request.put("/api/bulk").send(body2);
+                expect(res.status).toBe(400);
+
+                const body3 = {
+                    locations: [{location_id: 2}],
+                };
+                res = await request.put("/api/bulk").send(body3);
+                expect(res.status).toBe(400);
+
+                const body4 = {
+                    captures: [{capture_id: 2}],
+                };
+                res = await request.put("/api/bulk").send(body4);
+                expect(res.status).toBe(400);
+
+                const body5 = {
+                    mortalities: [{mortality_id: 2}],
+                };
+                res = await request.put("/api/bulk").send(body5);
+                expect(res.status).toBe(400);
+
+                const body6 = {
+                    mortalities: [{mortality_id: 2}],
+                };
+                res = await request.put("/api/bulk").send(body5);
+                expect(res.status).toBe(400);
             })
         })
     })

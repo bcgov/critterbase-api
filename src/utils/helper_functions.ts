@@ -4,6 +4,8 @@ import type { Request } from "express";
 import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
 import { FormatParse, ISelect, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
+import { Prisma } from "@prisma/client";
+import { prisma } from "./constants";
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -82,6 +84,35 @@ const toSelect = <AsType>(
     value: String(castVal[valueKey]),
   } satisfies ISelect;
 };
+
+const getParentTaxonIds = async (taxon_id: string): Promise<string[]> => {
+  const result: { get_taxon_ids: string[] }[] =
+    await prisma.$queryRaw`SELECT * FROM get_taxon_ids(${taxon_id})`;
+  if (!result.length) {
+    return [];
+  } else {
+    return result[0].get_taxon_ids;
+  }
+};
+//Putting the function here so tests dont run utils each time
+export const prisMock = (
+  model: Prisma.ModelName,
+  method:
+    | "findMany"
+    | "findFirst"
+    | "findUniqueOrThrow"
+    | "update"
+    | "delete"
+    | "create" = "findMany",
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  returns: any
+) =>
+  jest
+    .spyOn(prisma[model], method)
+    .mockImplementation()
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    .mockResolvedValue(returns);
+
 export {
   prismaErrorMsg,
   sessionHours,
@@ -90,4 +121,5 @@ export {
   intersect,
   toSelect,
   ServiceReturn,
+  getParentTaxonIds,
 };

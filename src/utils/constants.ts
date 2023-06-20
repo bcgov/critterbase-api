@@ -4,8 +4,7 @@ import { PrismaClient, user } from "@prisma/client";
 import { QueryFormats } from "./types";
 declare module "express-session" {
   interface SessionData {
-    views: number;
-    user: user;
+    user?: user;
   }
 }
 
@@ -25,7 +24,11 @@ declare global {
 
 const oneDay = 60 * 60 * 24 * 1000;
 
-const API_KEY_HEADER = "API-KEY";
+const API_KEY_HEADER = "api-key";
+
+const USER_ID_HEADER = "user-id";
+
+const KEYCLOAK_UUID_HEADER = "keycloak-uuid";
 
 const API_KEY = process.env.API_KEY;
 
@@ -83,6 +86,8 @@ const defaultFormat = QueryFormats.default;
 export {
   PORT,
   API_KEY_HEADER,
+  USER_ID_HEADER,
+  KEYCLOAK_UUID_HEADER,
   IS_DEV,
   IS_PROD,
   IS_TEST,

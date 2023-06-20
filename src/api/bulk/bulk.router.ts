@@ -25,7 +25,8 @@ import {
 import { BulkCreationSchema } from "./bulk.utils";
 import {
   CollectionUnitCreateBodySchema,
-  CollectionUnitUpdateBodySchema,
+  CollectionUnitDeleteSchema,
+  CollectionUnitUpsertSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import { z } from "zod";
 import { LocationUpdateSchema } from "../location/location.utils";
@@ -124,30 +125,37 @@ export const BulkRouter = (db: ICbDatabase) => {
         return m._delete;
       });
 
-      const body: IBulkMutate = {
-        critters: critters
-          ? z
-              .array(CritterUpdateSchema.extend({ critter_id: zodID }))
-              .parse(critters, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "critters"),
-              })
-          : [],
-        collections: collections
-          ? z.array(CollectionUnitUpdateBodySchema).parse(collections, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "collections"),
+    const collectionDeletes = collections?.filter((c, i, arr) => {
+      if(c._delete) {
+        arr.splice(i, 1);
+      }
+      return c._delete;
+    })
+
+    const body: IBulkMutate = {
+      critters: critters
+        ? z
+            .array(CritterUpdateSchema.extend({ critter_id: zodID }))
+            .parse(critters, {
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "critters"),
             })
-          : [],
-        markings: markings
-          ? z.array(MarkingUpdateByIdSchema).parse(markings, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "markings"),
+        : [],
+      collections: collections
+        ? z.array(CollectionUnitUpsertSchema).parse(collections, {
+            errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "collections"),
+          })
+        : [],
+      markings: markings
+        ? z.array(MarkingUpdateByIdSchema).parse(markings, {
+            errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "markings"),
+          })
+        : [],
+      locations: locations
+        ? z
+            .array(LocationUpdateSchema.extend({ location_id: zodID }))
+            .parse(locations, {
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "locations"),
             })
-          : [],
-        locations: locations
-          ? z
-              .array(LocationUpdateSchema.extend({ location_id: zodID }))
-              .parse(locations, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "locations"),
-              })
           : [],
         captures: captures
           ? z
@@ -166,6 +174,9 @@ export const BulkRouter = (db: ICbDatabase) => {
         _deleteMarkings: markingDeletes
           ? z.array(MarkingDeleteSchema).parse(markingDeletes)
           : [],
+        _deleteUnits: collectionDeletes
+        ? z.array(CollectionUnitDeleteSchema).parse(collectionDeletes)
+        : []
       };
 
       const r = await db.bulkUpdateData(body, db);

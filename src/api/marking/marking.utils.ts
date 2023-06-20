@@ -29,6 +29,8 @@ type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
 type FormattedMarking = z.infer<typeof markingResponseSchema>;
 
+type MarkingVerificationType = z.infer<typeof MarkingVerificationSchema>;
+
 // Constants
 
 // Included related data from lk and xref tables
@@ -171,6 +173,11 @@ const MarkingDeleteSchema = markingSchema
   .pick({ marking_id: true })
   .extend(DeleteSchema.shape);
 
+const MarkingVerificationSchema = z.object({
+  taxon_id: zodID,
+  markings: z.array(markingSchema.partial().required({marking_id: true, taxon_marking_body_location_id: true}))
+});
+
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
@@ -180,10 +187,12 @@ export {
   MarkingCreateWithEnglishSchema,
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
+  MarkingVerificationSchema
 };
 export type {
   MarkingCreateInput,
   MarkingUpdateInput,
   MarkingIncludes,
   FormattedMarking,
+  MarkingVerificationType
 };

@@ -12,7 +12,7 @@ import { CritterRouter } from "./api/critter/critter.router";
 import { familyRouter } from "./api/family/family.router";
 import { LocationRouter } from "./api/location/location.router";
 import { MarkingRouter } from "./api/marking/marking.router";
-import { measurementRouter } from "./api/measurement/measurement.router";
+import { MeasurementRouter } from "./api/measurement/measurement.router";
 import { MortalityRouter } from "./api/mortality/mortality.router";
 import { LookupRouter } from "./api/lookup/lookup.router";
 import { UserRouter } from "./api/user/user.router";
@@ -23,7 +23,6 @@ import {
   auth,
   errorHandler,
   errorLogger,
-  validateApiKey,
 } from "./utils/middleware";
 
 const SafeMemoryStore = memorystore(session);
@@ -46,7 +45,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(helmet());
   app.use(express.json());
   app.use(session(options));
-  app.use(validateApiKey);
+  //app.use(validateApiKey);
 
   app.use("/api/", AccessRouter(db));
   app.use("/api/critters", auth, CritterRouter(db));
@@ -58,7 +57,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/family", auth, familyRouter);
   app.use("/api/captures", auth, CaptureRouter(db));
   app.use("/api/mortality", auth, MortalityRouter(db));
-  app.use("/api/measurements", auth, measurementRouter);
+  app.use("/api/measurements", auth, MeasurementRouter(db));
   app.use("/api/lookups", auth, LookupRouter(db));
   app.use("/api/bulk", auth, BulkRouter(db));
   app.use("/api/xref", auth, XrefRouter(db));
