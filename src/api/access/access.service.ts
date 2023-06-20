@@ -3,7 +3,7 @@ import { prisma } from "../../utils/constants";
 import { apiError } from "../../utils/types";
 import { LoginCredentials } from "../user/user.utils";
 
-/*const loginUser = async (login: LoginCredentials): Promise<user | null> => {
+const loginUser = async (login: LoginCredentials): Promise<user | null> => {
   const { user_id, keycloak_uuid } = login;
 
   // Find a user that matches both `user_id` and `keycloak_uuid`
@@ -17,7 +17,7 @@ import { LoginCredentials } from "../user/user.utils";
     throw apiError.notFound("No user found. Login failed");
   }
   return foundUser;
-};*/
+};
 
 const getTableDataTypes = async (model: Prisma.ModelName) => {
   const results = await prisma.$queryRaw`
@@ -32,4 +32,4 @@ const getTableDataTypes = async (model: Prisma.ModelName) => {
   return results;
 };
 
-export { getTableDataTypes };
+export { getTableDataTypes, loginUser };
