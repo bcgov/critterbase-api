@@ -320,8 +320,9 @@ describe("API: Marking", () => {
 
     describe("verifyMarkingAgainstTaxon()", () => {
       it("returns an array of ids that can't be matched to the provided taxon", async () => {
+        type markingWithInclude = (marking & {xref_taxon_marking_body_location: {taxon_id: string }});
         db_getTaxonIds.mockResolvedValue(['32f9fede-32fc-4321-3232-1c2142e336fe']);
-        findMany.mockResolvedValue([{...MARKING, xref_taxon_marking_body_location: { taxon_id: '12f9fede-12fc-4321-1212-1c2142e336fe' }}])
+        findMany.mockResolvedValue([{...MARKING, xref_taxon_marking_body_location: { taxon_id: '12f9fede-12fc-4321-1212-1c2142e336fe' }}] as markingWithInclude[])
         const failed_ids = await _verifyMarkingsAgainstTaxon('98f9fede-95fc-4321-9444-7c2742e336fe', [MARKING]);
         expect.assertions(3);
         expect(db_getTaxonIds.mock.calls.length).toBe(1);
