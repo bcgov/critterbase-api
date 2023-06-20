@@ -34,7 +34,7 @@ const errorLogger = (
 ) => {
   if (!IS_TEST) {
     console.error(
-      `🛑 ${req.method} ${req.originalUrl} -> ${err.toString()} -- ${
+      `🛑 ${req.method} ${req.originalUrl} -> ${JSON.stringify(err)} -- ${
         err.stack ?? "No stack"
       }`
     );
@@ -98,4 +98,4 @@ const auth = catchErrors(
   }
 );
 
-export { errorLogger, errorHandler, catchErrors, auth };
+export { auth, catchErrors, errorHandler, errorLogger };

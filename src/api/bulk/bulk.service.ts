@@ -1,17 +1,17 @@
-import { Prisma} from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { z } from "zod";
 import { prisma } from "../../utils/constants";
 import { CritterUpdate } from "../critter/critter.utils";
 import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from "../collectionUnit/collectionUnit.utils";
 import {
   MarkingDeleteSchema,
-  MarkingUpdateByIdSchema
-} from "../marking/marking.utils";
-import { CaptureUpdate } from "../capture/capture.utils";
+  MarkingUpdateByIdSchema,
+} from "../marking/marking.utils"; 
 import { MortalityUpdate } from "../mortality/mortality.utils";
 import { apiError } from "../../utils/types";
-import { z } from "zod";
 import { deleteMarking } from "../marking/marking.service";
 import { ICbDatabase } from "../../utils/database";
+import { CaptureUpdate } from "../capture/capture.utils";
 import { deleteCollectionUnit } from "../collectionUnit/collectionUnit.service";
 
 interface IBulkCreate {
@@ -160,7 +160,6 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
-      console.log('Will delete marking ' + _dma.marking_id);
       await deleteMarking(_dma.marking_id);
     }
     for(let i = 0; i < _deleteUnits.length; i++) {
@@ -180,4 +179,4 @@ const bulkErrMap = (
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`,
 });
 
-export { bulkCreateData, bulkUpdateData, IBulkCreate, IBulkMutate, bulkErrMap };
+export { IBulkCreate, IBulkMutate, bulkCreateData, bulkErrMap, bulkUpdateData };

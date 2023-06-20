@@ -21,6 +21,7 @@ import { getAllCritters } from "../api/critter/critter.service";
 import * as constants from "./constants";
 import { ZodError, ZodIssueCode } from "zod";
 import { NumberToString } from "./zod_helpers";
+import { Prisma } from "@prisma/client";
 
 describe("Utils", () => {
   describe("File: helper_functions.ts", () => {
