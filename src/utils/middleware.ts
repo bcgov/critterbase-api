@@ -32,7 +32,7 @@ const errorLogger = (
 ) => {
   if (!IS_TEST) {
     console.error(
-      `🛑 ${req.method} ${req.originalUrl} -> ${err.toString()} -- ${
+      `🛑 ${req.method} ${req.originalUrl} -> ${JSON.stringify(err)} -- ${
         err.stack ?? "No stack"
       }`
     );
@@ -108,4 +108,4 @@ const validateApiKey = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-export { errorLogger, errorHandler, catchErrors, auth, validateApiKey };
+export { auth, catchErrors, errorHandler, errorLogger, validateApiKey };

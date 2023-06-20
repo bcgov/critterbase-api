@@ -1,19 +1,17 @@
-import { Prisma} from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { z } from "zod";
 import { prisma } from "../../utils/constants";
-import { CritterUpdate } from "../critter/critter.utils";
+import { ICbDatabase } from "../../utils/database";
+import { apiError } from "../../utils/types";
+import { CaptureUpdate } from "../capture/capture.utils";
 import { CollectionUnitUpdateInput } from "../collectionUnit/collectionUnit.utils";
+import { CritterUpdate } from "../critter/critter.utils";
+import { deleteMarking } from "../marking/marking.service";
 import {
   MarkingDeleteSchema,
-  MarkingUpdateByIdSchema
+  MarkingUpdateByIdSchema,
 } from "../marking/marking.utils";
-import { CaptureUpdate } from "../capture/capture.utils";
 import { MortalityUpdate } from "../mortality/mortality.utils";
-import { updateMortality } from "../mortality/mortality.service";
-import { apiError } from "../../utils/types";
-import { updateCapture } from "../capture/capture.service";
-import { z } from "zod";
-import { deleteMarking } from "../marking/marking.service";
-import { ICbDatabase } from "../../utils/database";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -89,69 +87,70 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     updated: {},
     deleted: {},
   };
-    await prisma.$transaction(async (prisma) => {
-    for (let i = 0; i < critters.length; i++) {
-      const c = critters[i];
-      counts.updated.critters = i + 1;
-      await prisma.critter.update({
-        where: { critter_id: c.critter_id },
-        data: c,
-      });
-    }
-    for (let i = 0; i < collections.length; i++) {
-      const c = collections[i];
-      counts.updated.collections = i + 1;
-      await prisma.critter_collection_unit.update({
-        where: { critter_collection_unit_id: c.critter_collection_unit_id },
-        data: c,
-      });
-    }
-    for (let i = 0; i < locations.length; i++) {
-      const l = locations[i];
-      counts.updated.locations = i + 1;
-      await prisma.location.update({
-        where: { location_id: l.location_id as string },
-        data: l,
-      });
-    }
-    for (let i = 0; i < captures.length; i++) {
-      const c = captures[i];
-      counts.updated.captures = i + 1;
-      if (!c.capture_id) {
-        throw apiError.requiredProperty("capture_id");
+  await prisma.$transaction(
+    async (prisma) => {
+      for (let i = 0; i < critters.length; i++) {
+        const c = critters[i];
+        counts.updated.critters = i + 1;
+        await prisma.critter.update({
+          where: { critter_id: c.critter_id },
+          data: c,
+        });
       }
-      await db.updateCapture(c.capture_id, c, prisma);
-    }
-    for (let i = 0; i < mortalities.length; i++) {
-      const m = mortalities[i];
-      counts.updated.mortalities = i + 1;
-      if (!m.mortality_id) {
-        throw apiError.requiredProperty("mortality_id");
+      for (let i = 0; i < collections.length; i++) {
+        const c = collections[i];
+        counts.updated.collections = i + 1;
+        await prisma.critter_collection_unit.update({
+          where: { critter_collection_unit_id: c.critter_collection_unit_id },
+          data: c,
+        });
       }
-      await db.updateMortality(m.mortality_id, m, prisma);
-    }
-    for (let i = 0; i < markings.length; i++) {
-      const ma = markings[i];
-      counts.updated.markings = i + 1;
-      if(ma.marking_id) {
-        await prisma.marking.update({
-          where: { marking_id: ma.marking_id},
-          data: ma
-        })
+      for (let i = 0; i < locations.length; i++) {
+        const l = locations[i];
+        counts.updated.locations = i + 1;
+        await prisma.location.update({
+          where: { location_id: l.location_id as string },
+          data: l,
+        });
       }
-      else {
-        await prisma.marking.create({
-          data: ma
-        })
+      for (let i = 0; i < captures.length; i++) {
+        const c = captures[i];
+        counts.updated.captures = i + 1;
+        if (!c.capture_id) {
+          throw apiError.requiredProperty("capture_id");
+        }
+        await db.updateCapture(c.capture_id, c, prisma);
       }
-      
-    }
-    for (let i = 0; i < _deleteMarkings.length; i++) {
-      const _dma = _deleteMarkings[i];
-      counts.deleted.markings = i + 1;
-      await deleteMarking(_dma.marking_id);
-    }
-  }, {timeout: 90000});
+      for (let i = 0; i < mortalities.length; i++) {
+        const m = mortalities[i];
+        counts.updated.mortalities = i + 1;
+        if (!m.mortality_id) {
+          throw apiError.requiredProperty("mortality_id");
+        }
+        await db.updateMortality(m.mortality_id, m, prisma);
+      }
+      for (let i = 0; i < markings.length; i++) {
+        const ma = markings[i];
+        counts.updated.markings = i + 1;
+        if (ma.marking_id) {
+          await prisma.marking.update({
+            where: { marking_id: ma.marking_id },
+            data: ma,
+          });
+        } else {
+          await prisma.marking.create({
+            data: ma,
+          });
+        }
+      }
+      for (let i = 0; i < _deleteMarkings.length; i++) {
+        const _dma = _deleteMarkings[i];
+        counts.deleted.markings = i + 1;
+        await deleteMarking(_dma.marking_id);
+      }
+    },
+    { timeout: 90000 }
+  );
   return counts;
 };
 
@@ -163,4 +162,4 @@ const bulkErrMap = (
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`,
 });
 
-export { bulkCreateData, bulkUpdateData, IBulkCreate, IBulkMutate, bulkErrMap };
+export { IBulkCreate, IBulkMutate, bulkCreateData, bulkErrMap, bulkUpdateData };
