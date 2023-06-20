@@ -21,7 +21,7 @@ const getCaptureById = async (capture_id: string): Promise<capture | null> => {
 
 const getCaptureByCritter = async (
   critter_id: string
-): Promise<capture[] | null> => {
+): Promise<capture[]> => {
   await prisma.critter.findUniqueOrThrow({
     where: {
       critter_id: critter_id,

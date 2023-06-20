@@ -79,7 +79,8 @@ const LOCATION = {
 
 const CAPTURE_WITH_LOCATION = {
   ...CAPTURE,
-  capture_location: LOCATION
+  capture_location: LOCATION,
+  release_location: LOCATION
 }
 
 beforeEach(() => {
@@ -151,6 +152,15 @@ describe("API: Critter", () => {
         expect(prisma.capture.create).toHaveBeenCalled();
         expect(CaptureBodySchema.safeParse(result).success).toBe(true);
       });
+      it("should create one capture and connect to existing location", async () => {
+        create.mockResolvedValue({...CAPTURE, capture_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f', release_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f'});
+        const result = await _createCapture({...CAPTURE, capture_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f', release_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f'});
+        expect.assertions(4);
+        expect(prisma.capture.create).toHaveBeenCalled();
+        expect(CaptureBodySchema.safeParse(result).success).toBe(true);
+        expect(result.capture_location_id).toBe('4804d622-9539-40e6-a8a5-b7b223c2f09f');
+        expect(result.release_location_id).toBe('4804d622-9539-40e6-a8a5-b7b223c2f09f');
+      });
     });
     describe("getting captures", () => {
       it("returns all captures", async () => {
@@ -188,12 +198,14 @@ describe("API: Critter", () => {
         expect(result?.capture_comment).toBe("banana");
       });
       it("modifies capture, upserts location data", async () => {
-        update.mockResolvedValue({...CAPTURE, capture_location_id: '3572f49f-4c81-472a-8255-5d390dfdc66b'})
+        update.mockResolvedValue({...CAPTURE, capture_location_id: '3572f49f-4c81-472a-8255-5d390dfdc66b', release_location_id: '3572f49f-4c81-472a-8255-5d390dfdc66b'})
         const result = await _updateCapture(CAPTURE_ID, {
-          capture_location: LOCATION
+          capture_location: LOCATION,
+          release_location: LOCATION
         });
-        expect.assertions(2);
+        expect.assertions(3);
         expect(result?.capture_location_id).toBe('3572f49f-4c81-472a-8255-5d390dfdc66b');
+        expect(result?.release_location_id).toBe('3572f49f-4c81-472a-8255-5d390dfdc66b');
         expect(prisma.capture.update).toHaveBeenCalled();
       });
       it("modifies capture, forces creation of release data", async () => {
@@ -206,6 +218,7 @@ describe("API: Critter", () => {
         expect(result?.capture_location_id).not.toBe(result?.release_location_id);
         expect(prisma.capture.update).toHaveBeenCalled();
       })
+      
       it("deletes a capture", async () => {
         cdelete.mockResolvedValue(CAPTURE);
         const result = await _deleteCapture(CAPTURE_ID);
@@ -265,9 +278,8 @@ describe("API: Critter", () => {
     describe("GET /api/captures/critter/:critter_id", () => {
       it("should return status 200 with an array of captures", async () => {
         expect.assertions(3);
-        const critter = await prisma.critter.findFirstOrThrow();
         const res = await request.get(
-          "/api/captures/critter/" + critter.critter_id
+          "/api/captures/critter/" + CRITTER_ID
         );
         expect(res.status).toBe(200);
         expect(getCaptureByCritter.mock.calls.length).toBe(1);

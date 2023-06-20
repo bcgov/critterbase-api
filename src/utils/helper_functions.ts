@@ -89,4 +89,5 @@ export {
   getFormat,
   intersect,
   toSelect,
+  ServiceReturn,
 };
