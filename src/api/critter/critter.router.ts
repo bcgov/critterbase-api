@@ -18,12 +18,12 @@ import {
 } from "./critter.utils";
 import { ICbDatabase } from "../../utils/database";
 
-export const CritterRouter = (db: ICbDatabase ) => {
+export const CritterRouter = (db: ICbDatabase) => {
   const critterRouter = express.Router();
 
-/**
- ** Critter Router Home
- */
+  /**
+   ** Critter Router Home
+   */
   critterRouter.post(
     "/filter",
     catchErrors(async (req: Request, res: Response) => {
@@ -49,38 +49,38 @@ export const CritterRouter = (db: ICbDatabase ) => {
         taxon_ids = { body: uuids.map((a) => a.taxon_id), negate: false };
       }
 
-    const whereInput: Prisma.critterWhereInput = {
-      critter_id: critter_ids?.body.length
-        ? { [critter_ids.negate ? "notIn" : "in"]: critter_ids.body }
-        : undefined,
-      animal_id: animal_ids?.body.length
-        ? { [animal_ids.negate ? "notIn" : "in"]: animal_ids.body }
-        : undefined,
-      wlh_id: wlh_ids?.body.length
-        ? { [wlh_ids.negate ? "notIn" : "in"]: wlh_ids.body }
-        : undefined,
-      taxon_id: taxon_ids?.body.length
-        ? { [taxon_ids.negate ? "notIn" : "in"]: taxon_ids.body }
-        : undefined,
-      critter_collection_unit: collection_units?.body.length
-        ? {
-            some: {
-              collection_unit_id: {
-                [collection_units.negate ? "notIn" : "in"]:
-                  collection_units.body,
+      const whereInput: Prisma.critterWhereInput = {
+        critter_id: critter_ids?.body.length
+          ? { [critter_ids.negate ? "notIn" : "in"]: critter_ids.body }
+          : undefined,
+        animal_id: animal_ids?.body.length
+          ? { [animal_ids.negate ? "notIn" : "in"]: animal_ids.body }
+          : undefined,
+        wlh_id: wlh_ids?.body.length
+          ? { [wlh_ids.negate ? "notIn" : "in"]: wlh_ids.body }
+          : undefined,
+        taxon_id: taxon_ids?.body.length
+          ? { [taxon_ids.negate ? "notIn" : "in"]: taxon_ids.body }
+          : undefined,
+        critter_collection_unit: collection_units?.body.length
+          ? {
+              some: {
+                collection_unit_id: {
+                  [collection_units.negate ? "notIn" : "in"]:
+                    collection_units.body,
+                },
               },
-            },
-          }
-        : undefined,
-    };
-    const allCritters = await formatParse(
-      getFormat(req),
-      db.getAllCritters(QueryFormats.default, whereInput),
-      critterFormats
-    );
-    return res.status(200).json(allCritters);
-  })
-);
+            }
+          : undefined,
+      };
+      const allCritters = await formatParse(
+        getFormat(req),
+        db.getAllCritters(QueryFormats.default, whereInput),
+        critterFormats
+      );
+      return res.status(200).json(allCritters);
+    })
+  );
 
   critterRouter.get(
     "/",
@@ -102,7 +102,7 @@ export const CritterRouter = (db: ICbDatabase ) => {
 
   /**
    ** Fetch multiple critters by their IDs
-  */
+   */
   critterRouter.post(
     "/",
     catchErrors(async (req: Request, res: Response) => {
@@ -121,17 +121,17 @@ export const CritterRouter = (db: ICbDatabase ) => {
     catchErrors(async (req: Request, res: Response) => {
       const parsed = UniqueCritterQuerySchema.parse(req.body);
       const unique = await formatParse(
-        getFormat(req), 
-        db.getSimilarCritters(parsed, getFormat(req)), 
+        getFormat(req),
+        db.getSimilarCritters(parsed, getFormat(req)),
         critterFormats
       );
       return res.status(200).json(unique);
     })
   );
 
-/**
- ** Create new critter
- */
+  /**
+   ** Create new critter
+   */
   critterRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
@@ -146,22 +146,22 @@ export const CritterRouter = (db: ICbDatabase ) => {
     })
   );
 
-// critterRouter.route("/wlh/:wlh_id").get(
-//   catchErrors(async (req: Request, res: Response) => {
-//     const critters = await getCritterByWlhId(req.params.wlh_id);
-//     if (!critters.length) {
-//       throw apiError.notFound(
-//         "Could not find any animals with the requested WLH ID"
-//       );
-//     }
-//     const format = critters.map((c) => CritterDetailedResponseSchema.parse(c));
-//     return res.status(200).json(format);
-//   })
-// );
+  // critterRouter.route("/wlh/:wlh_id").get(
+  //   catchErrors(async (req: Request, res: Response) => {
+  //     const critters = await getCritterByWlhId(req.params.wlh_id);
+  //     if (!critters.length) {
+  //       throw apiError.notFound(
+  //         "Could not find any animals with the requested WLH ID"
+  //       );
+  //     }
+  //     const format = critters.map((c) => CritterDetailedResponseSchema.parse(c));
+  //     return res.status(200).json(format);
+  //   })
+  // );
 
-/**
- * * All critter_id related routes
- */
+  /**
+   * * All critter_id related routes
+   */
   critterRouter
     .route("/:id")
     .all(
@@ -207,4 +207,4 @@ export const CritterRouter = (db: ICbDatabase ) => {
     );
 
   return critterRouter;
-}
+};
