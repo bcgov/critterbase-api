@@ -15,6 +15,7 @@ import { makeApp } from "../../app";
 import { ICbDatabase } from "../../utils/database";
 import supertest from "supertest";
 import { apiError } from "../../utils/types";
+import { mockCommonLocation } from "../location/location.test";
 
 const getAllCaptures = jest.fn();
 const getCaptureByCritter = jest.fn();
@@ -108,12 +109,9 @@ describe("API: Critter", () => {
   describe("ZOD SCHEMAS", () => {
     describe("CaptureResponseSchema", () => {
       it("should parse the data correctly", async () => {
-        const loc = await prisma.location.findFirst({
-          ...commonLocationSelect,
-        });
         const obj = {
-          location_capture_capture_location_idTolocation: loc,
-          location_capture_release_location_idTolocation: loc,
+          location_capture_capture_location_idTolocation: mockCommonLocation,
+          location_capture_release_location_idTolocation: mockCommonLocation,
         };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
