@@ -8,7 +8,7 @@ import { makeApp } from "../../app";
 import { ICbDatabase } from "../../utils/database";
 import { prisma } from "../../utils/constants";
 import { capture, critter, critter_collection_unit, lk_taxon, marking, measurement_qualitative, measurement_quantitative, mortality, location } from "@prisma/client";
-import { apiError } from "../../utils/types";
+import { PrismaTransactionClient, apiError } from "../../utils/types";
 
 const bulkCreateData = jest.fn();
 const bulkUpdateData = jest.fn();
@@ -224,31 +224,26 @@ const DETAILEDFORMAT_CRITTER = {
   measurement_quantitative: [QUANTITATIVE]
 }
 
-const critterCreateMany = jest.spyOn(prisma.critter, "createMany").mockImplementation();
-const captureCreateMany = jest.spyOn(prisma.capture, "createMany").mockImplementation();
-const mortalityCreateMany = jest.spyOn(prisma.mortality, "createMany").mockImplementation();
-const markingCreateMany = jest.spyOn(prisma.marking, "createMany").mockImplementation();
-const locationCreateMany = jest.spyOn(prisma.location, "createMany").mockImplementation();
-const collectionCreateMany = jest.spyOn(prisma.critter_collection_unit, "createMany").mockImplementation();
-const collectionCreate = jest.spyOn(prisma.critter_collection_unit, "create").mockImplementation();
-
-const critterUpdate = jest.spyOn(prisma.critter, "update").mockImplementation();
-const markingCreate = jest.spyOn(prisma.marking, "create").mockImplementation();
-const markingUpdate = jest.spyOn(prisma.marking, "update").mockImplementation();
-const markingDelete = jest.spyOn(prisma.marking, "delete").mockImplementation();
-const locationUpdate = jest.spyOn(prisma.location, "update").mockImplementation();
-const collectionUpdate = jest.spyOn(prisma.critter_collection_unit, "update").mockImplementation();
+const prismaMock = {
+    critter: {createMany: jest.fn().mockResolvedValue({count: 1}), update: jest.fn()},
+    capture: {createMany: jest.fn().mockResolvedValue({count: 1}) },
+    mortality: {createMany: jest.fn().mockResolvedValue({count: 1}) },
+    marking: {createMany: jest.fn().mockResolvedValue({count: 1}), delete: jest.fn(), update: jest.fn(), create: jest.fn() },
+    location: {createMany: jest.fn().mockResolvedValue({count: 1}), delete: jest.fn(), update: jest.fn() },
+    critter_collection_unit: {createMany: jest.fn().mockResolvedValue({count: 1}), create: jest.fn(), update: jest.fn() }
+};
+jest.spyOn(prisma, '$transaction').mockImplementation((callback) => callback(prismaMock as unknown as PrismaTransactionClient));
 
 describe("API: Bulk", () => {
     describe("SERVICES", () => {
         describe("bulkCreateData()", () => {
             it("should insert critters, collections, locations, captures, mortalityies, markings", async () => {
-                critterCreateMany.mockResolvedValue({count: 1});
-                captureCreateMany.mockResolvedValue({count: 1});
-                mortalityCreateMany.mockResolvedValue({count: 1});
-                markingCreateMany.mockResolvedValue({count: 1});
-                locationCreateMany.mockResolvedValue({count: 1});
-                collectionCreateMany.mockResolvedValue({count: 1});
+                prismaMock.critter.createMany.mockResolvedValue({count: 1});
+                prismaMock.capture.createMany.mockResolvedValue({count: 1});
+                prismaMock.mortality.createMany.mockResolvedValue({count: 1});
+                prismaMock.location.createMany.mockResolvedValue({count: 1});
+                prismaMock.marking.createMany.mockResolvedValue({count: 1});
+                prismaMock.critter_collection_unit.createMany.mockResolvedValue({count: 1});
                 const result = await _bulkCreateData({
                     critters: [CRITTER],
                     collections: [COLLECTION],
@@ -258,21 +253,21 @@ describe("API: Bulk", () => {
                     markings: [MARKING]
                 });
                 expect.assertions(6);
-                expect(critterCreateMany).toHaveBeenCalledTimes(1);
-                expect(captureCreateMany).toHaveBeenCalledTimes(1);
-                expect(mortalityCreateMany).toHaveBeenCalledTimes(1);
-                expect(markingCreateMany).toHaveBeenCalledTimes(1);
-                expect(locationCreateMany).toHaveBeenCalledTimes(1);
-                expect(collectionCreateMany).toHaveBeenCalledTimes(1);
+                expect(prismaMock.critter.createMany.mock.calls.length).toBe(1);
+                expect(prismaMock.capture.createMany.mock.calls.length).toBe(1);
+                expect(prismaMock.mortality.createMany.mock.calls.length).toBe(1);
+                expect(prismaMock.location.createMany.mock.calls.length).toBe(1);
+                expect(prismaMock.marking.createMany.mock.calls.length).toBe(1);
+                expect(prismaMock.critter_collection_unit.createMany.mock.calls.length).toBe(1);
             })
         });
 
         describe("bulkUpdateData()", () => {
             it("should update critters, collections, locations, captures, mortalityies, markings", async () => {
-                critterUpdate.mockResolvedValue(CRITTER);
-                markingUpdate.mockResolvedValue(MARKING);
-                locationUpdate.mockResolvedValue(LOCATION);
-                collectionUpdate.mockResolvedValue(COLLECTION);
+                prismaMock.critter.update.mockResolvedValue(CRITTER);
+                prismaMock.marking.update.mockResolvedValue(MARKING);
+                prismaMock.location.update.mockResolvedValue(LOCATION);
+                prismaMock.critter_collection_unit.update.mockResolvedValue(COLLECTION);
                 updateCapture.mockResolvedValue(CAPTURE);
                 updateMortality.mockResolvedValue(MORTALITY);
 
@@ -288,10 +283,10 @@ describe("API: Bulk", () => {
                 }, db);
 
                 expect.assertions(6);
-                expect(critterUpdate).toHaveBeenCalledTimes(1);
-                expect(markingUpdate).toHaveBeenCalledTimes(1);
-                expect(locationUpdate).toHaveBeenCalledTimes(1);
-                expect(collectionUpdate).toHaveBeenCalledTimes(1);
+                expect(prismaMock.critter.update.mock.calls.length).toBe(1);
+                expect(prismaMock.marking.update.mock.calls.length).toBe(1);
+                expect(prismaMock.location.update.mock.calls.length).toBe(1);
+                expect(prismaMock.critter_collection_unit.update.mock.calls.length).toBe(1);
                 expect(updateCapture.mock.calls.length).toBe(1);
                 expect(updateMortality.mock.calls.length).toBe(1);
             });
@@ -323,7 +318,7 @@ describe("API: Bulk", () => {
             });
             it("should create marking instead of update marking if id is missing", async () => {
                 expect.assertions(1);
-                markingCreate.mockResolvedValue(MARKING);
+                prismaMock.marking.create.mockResolvedValue(MARKING);
                 await _bulkUpdateData({
                     critters: [],
                     collections: [],
@@ -334,11 +329,11 @@ describe("API: Bulk", () => {
                     _deleteMarkings: [],
                     _deleteUnits: []
                 }, db);
-                expect(prisma.marking.create).toHaveBeenCalledTimes(1);
+                expect(prismaMock.marking.create.mock.calls.length).toBe(1);
             });
             it("should delete marking if included in _deleteMarkings", async () => {
                 expect.assertions(2);
-                markingDelete.mockResolvedValue(MARKING);
+                prismaMock.marking.delete.mockResolvedValue(MARKING);
                 await _bulkUpdateData({
                     critters: [],
                     collections: [],
@@ -364,7 +359,7 @@ describe("API: Bulk", () => {
                     _deleteMarkings: [],
                     _deleteUnits: []
                 }, db);
-                expect(prisma.critter_collection_unit.create).toBeCalledTimes(1);
+                expect(prismaMock.critter_collection_unit.create.mock.calls.length).toBe(1);
             })
         });
 
@@ -400,6 +395,7 @@ describe("API: Bulk", () => {
                     markings: [MARKING]
                 }
                 const res = await request.post("/api/bulk").send(body);
+                console.log(`Res in router + ${JSON.stringify(res, null, 2)}`)
                 expect.assertions(1);
                 expect(res.status).toBe(201);
             });
@@ -467,7 +463,7 @@ describe("API: Bulk", () => {
                 const body6 = {
                     mortalities: [{mortality_id: 2}],
                 };
-                res = await request.put("/api/bulk").send(body5);
+                res = await request.put("/api/bulk").send(body6);
                 expect(res.status).toBe(400);
             })
         })

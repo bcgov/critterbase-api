@@ -1,4 +1,4 @@
-import { capture, critter } from "@prisma/client";
+import { capture, critter, location } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { prisma } from "../../utils/constants";
 import {
@@ -10,7 +10,6 @@ import {
   updateCapture as _updateCapture,
 } from "./capture.service";
 import { CaptureBodySchema, CaptureResponseSchema } from "./capture.utils";
-import { commonLocationSelect } from "../location/location.utils";
 import { makeApp } from "../../app";
 import { ICbDatabase } from "../../utils/database";
 import supertest from "supertest";
@@ -77,6 +76,23 @@ const LOCATION = {
   longitude: 2
 }
 
+const LOCATION_COMMONSELECT = {
+  latitude: 2,
+  longitude: 2,
+  lk_region_env: {
+    region_env_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
+    region_env_name: 'E'
+  },
+  lk_region_nr: {
+    region_nr_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
+    region_nr_name: 'E'
+  },
+  lk_wildlife_management_unit: {
+    wmu_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
+    wmu_name: 'E'
+  }
+}
+
 const CAPTURE_WITH_LOCATION = {
   ...CAPTURE,
   capture_location: LOCATION,
@@ -102,18 +118,15 @@ beforeEach(() => {
   createCapture.mockImplementation(() => {
     return CAPTURE;
   })
-})
+});
 
 describe("API: Critter", () => {
   describe("ZOD SCHEMAS", () => {
     describe("CaptureResponseSchema", () => {
       it("should parse the data correctly", async () => {
-        const loc = await prisma.location.findFirst({
-          ...commonLocationSelect,
-        });
         const obj = {
-          location_capture_capture_location_idTolocation: loc,
-          location_capture_release_location_idTolocation: loc,
+          location_capture_capture_location_idTolocation: LOCATION_COMMONSELECT,
+          location_capture_release_location_idTolocation: LOCATION_COMMONSELECT,
         };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
