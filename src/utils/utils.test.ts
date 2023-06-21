@@ -5,8 +5,10 @@ import supertest from "supertest";
 import {
   formatParse,
   getFormat,
+  getParentTaxonIds,
   intersect,
   prismaErrorMsg,
+  prisMock,
   sessionHours,
   toSelect,
 } from "./helper_functions";
@@ -22,6 +24,7 @@ import * as constants from "./constants";
 import { ZodError, ZodIssueCode } from "zod";
 import { NumberToString } from "./zod_helpers";
 import { Prisma } from "@prisma/client";
+import { prisma } from "./constants";
 
 describe("Utils", () => {
   describe("File: helper_functions.ts", () => {
@@ -167,6 +170,28 @@ describe("Utils", () => {
           parser
         );
         expect(arrData.length);
+      });
+    });
+    describe(getParentTaxonIds.name, () => {
+      const p = jest
+        .spyOn(prisma, "$queryRaw")
+        .mockImplementation()
+        .mockResolvedValue([{ get_taxon_ids: ["UUID"] }]);
+      it("should return an array of taxon Ids", async () => {
+        const ids = await getParentTaxonIds("TEST");
+        expect(ids.length).toBe(1);
+        expect(ids[0]).toBe("UUID");
+      });
+      it("returns empty array if no parent taxon_ids found", async () => {
+        p.mockResolvedValue({});
+        const ids = await getParentTaxonIds("TEST");
+        expect(ids.length).toBe(0);
+      });
+    });
+    describe(prisMock.name, () => {
+      it("should return a primsa spyOn mock instance", () => {
+        const p = prisMock("user", "findMany", { value: true });
+        expect(p.mock).toBeDefined();
       });
     });
   });
