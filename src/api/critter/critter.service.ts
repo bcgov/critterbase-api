@@ -93,27 +93,38 @@ const deleteCritter = async (critter_id: string, format = defaultFormat) => {
 
 const formatLocationNameSearch = (
   obj: Partial<LocationResponse> | null | undefined
-): (Prisma.Without<Prisma.LocationRelationFilter, Prisma.locationWhereInput> & Prisma.locationWhereInput) | 
-(Prisma.Without<Prisma.locationWhereInput, Prisma.LocationRelationFilter> & Prisma.LocationRelationFilter) | null | undefined => {
+):
+  | (Prisma.Without<Prisma.LocationRelationFilter, Prisma.locationWhereInput> &
+      Prisma.locationWhereInput)
+  | (Prisma.Without<Prisma.locationWhereInput, Prisma.LocationRelationFilter> &
+      Prisma.LocationRelationFilter)
+  | null
+  | undefined => {
   return {
-    lk_region_env: obj?.region_env_name ? {
-      region_env_name: {
-        contains: obj.region_env_name,
-        mode: "insensitive",
-      }
-    } : undefined,
-    lk_region_nr: obj?.region_nr_name ? {
-      region_nr_name: {
-        contains: obj.region_nr_name,
-        mode: "insensitive",
-      }
-    } : undefined,
-    lk_wildlife_management_unit: obj?.wmu_name ? {
-      wmu_name: { 
-        contains: obj.wmu_name, 
-        mode: "insensitive" 
-      }
-    } : undefined,
+    lk_region_env: obj?.region_env_name
+      ? {
+          region_env_name: {
+            contains: obj.region_env_name,
+            mode: "insensitive",
+          },
+        }
+      : undefined,
+    lk_region_nr: obj?.region_nr_name
+      ? {
+          region_nr_name: {
+            contains: obj.region_nr_name,
+            mode: "insensitive",
+          },
+        }
+      : undefined,
+    lk_wildlife_management_unit: obj?.wmu_name
+      ? {
+          wmu_name: {
+            contains: obj.wmu_name,
+            mode: "insensitive",
+          },
+        }
+      : undefined,
   };
 };
 //changed body: any -> lk_taxon
@@ -268,7 +279,7 @@ const getSimilarCritters = async (
       ...markings.map((a) => a.critter_id),
     ])
   );
-  
+
   if (critters.length && markings.length) {
     overlappingIds = intersect(
       critters.map((c) => c.critter_id),
@@ -312,5 +323,5 @@ export {
   getSimilarCritters,
   appendEnglishTaxonAsUUID,
   getMultipleCrittersByIds,
-  formatLocationNameSearch
+  formatLocationNameSearch,
 };

@@ -55,7 +55,7 @@ const mockLocation: location = {
   update_timestamp: DATE,
 };
 
-const mockCommonLocation: CommonLocationType & location = {
+export const mockCommonLocation: CommonLocationType & location = {
   ...mockLocation,
   lk_region_env: { region_env_id: ID, region_env_name: "test" },
   lk_region_nr: { region_nr_id: ID, region_nr_name: "test" },
@@ -137,6 +137,25 @@ describe("API: Location", () => {
           mockFormattedLocation
         );
       });
+      it("should return a formatted location", () => {
+        const location = {
+          ...mockLocation, 
+          lk_region_env: null, 
+          lk_region_nr: null, 
+          lk_wildlife_management_unit: null
+        }
+        expect.assertions(1);
+        expect(CommonFormattedLocationSchema.parse(location)).toEqual(
+          {latitude: 1,
+          longitude: 1,
+          region_nr_name: undefined,
+          region_env_name: undefined,
+          wmu_name: undefined,
+          region_nr_id: undefined,
+          region_env_id: undefined,
+          wmu_id: undefined}
+        );
+      });
     });
 
     describe("LocationResponseSchema", () => {
@@ -155,7 +174,7 @@ describe("API: Location", () => {
           ...mockLocationResponse,
           region_env_name: null,
           region_nr_name: null,
-          wmu_name: null,
+          wmu_name: null
         });
       });
     });

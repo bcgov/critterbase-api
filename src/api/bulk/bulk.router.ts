@@ -13,7 +13,6 @@ import {
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
 } from "../marking/marking.utils";
-import { appendDefaultCOD } from "../mortality/mortality.service";
 import {
   MortalityCreateSchema,
   MortalityUpdateSchema,
@@ -84,7 +83,7 @@ export const BulkRouter = (db: ICbDatabase) => {
       const parsedMortalities = mortalities
         ? await Promise.all(
             mortalities.map(async (m: Record<string, unknown>) => {
-              await appendDefaultCOD(m);
+              await db.appendDefaultCOD(m);
               return MortalityCreateSchema.parse(m);
             })
           )
