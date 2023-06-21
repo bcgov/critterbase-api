@@ -1,6 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { NextFunction, Request, Response } from "express";
-import supertest from "supertest";
+import { Request } from "express";
 // import { app } from "../server";
 import {
   formatParse,
@@ -13,19 +12,13 @@ import {
   toSelect,
 } from "./helper_functions";
 // import { catchErrors, errorHandler, errorLogger } from "./middleware";
-import { apiError, QueryFormats } from "./types";
-import { FormatParse } from "./types";
-import { ResponseSchema } from "./zod_helpers";
-import { makeApp } from "../app";
-import { ICbDatabase } from "./database";
-import * as mw from "./middleware";
-import { getAllCritters } from "../api/critter/critter.service";
-import * as constants from "./constants";
 import { ZodError, ZodIssueCode } from "zod";
-import { NumberToString } from "./zod_helpers";
-import { Prisma } from "@prisma/client";
 import { prisma } from "./constants";
-
+import * as mw from "./middleware";
+import { apiError, FormatParse, QueryFormats } from "./types";
+import { NumberToString, ResponseSchema } from "./zod_helpers";
+const ID = "e47da43e-bb5b-46e9-8403-f0eff31e5522";
+const KEYCLOAK_ID = "ababababababababababababababababab";
 describe("Utils", () => {
   describe("File: helper_functions.ts", () => {
     describe(sessionHours.name, () => {
@@ -196,7 +189,7 @@ describe("Utils", () => {
     });
   });
   describe("File: middleware.ts", () => {
-    let mockReq = {} as Request;
+    let mockReq = { method: "GET", originalUrl: "url" } as Request;
     let mockNext = jest.fn();
     const mockRes = {
       json: jest.fn(),
@@ -215,21 +208,43 @@ describe("Utils", () => {
         const middleware = require("./middleware");
         middleware.errorLogger(new Error("Error"), mockReq, mockRes, mockNext);
         expect(consoleError.mock.calls.length).toBe(1);
+        middleware.errorLogger("TEST", mockReq, mockRes, mockNext);
+        expect(consoleError.mock.calls[0][0]).toBeDefined();
         process.env.NODE_ENV = "test";
       });
     });
     describe("catchErrors", () => {
-      //const middleware = require("./middleware");
-      //const mockHandler = jest.fn().mockResolvedValue("handled");
-      //const mockNext2 = true as any;
-      //it("should call next once when error caught", () => {
-      //middleware.catchErrors(mockHandler(mockReq, mockRes, mockNext2));
-      //expect(mockHandler.mock.calls.length).toBe(1);
-      //expect(mockHandler.mock.calls).rejects.toBe(true);
-      //});
+      const mockHandler = jest.fn().mockResolvedValue("tmp");
+      it("should call mockHandler", async () => {
+        const test = mw.catchErrors(mockHandler);
+        test(mockReq, mockRes, mockNext);
+        expect(mockHandler.mock.calls.length).toBe(1);
+      });
     });
 
-    describe("auth", () => {});
+    describe("auth", () => {
+      it("should call next if IS_TEST or NO_AUTH", () => {
+        mw.auth(mockReq, mockRes, mockNext);
+        expect(mockNext.mock.calls.length).toBe(1);
+      });
+      it("should parse headers if not test and auth enabled", () => {
+        process.env.NODE_ENV = "development";
+        mockReq.headers = {
+          "user-id": ID,
+          "keycloak-uuid": ID,
+          "api-key": ID,
+        };
+        jest.resetModules();
+        jest.mock("../api/access/access.service", () => ({
+          loginUser: async () => {
+            console.log("mock loginUser called");
+          },
+        }));
+        const middleware = require("./middleware");
+        middleware.auth(mockReq, mockRes, mockNext);
+        process.env.NODE_ENV = "test";
+      });
+    });
     describe("errorHandler", () => {
       const middleware = require("./middleware");
       it("should catch Errors", () => {
@@ -238,6 +253,13 @@ describe("Utils", () => {
         expect(mockRes.json.mock.calls[0][0]).toEqual({ error: "Error" });
       });
 
+      it("should catch Errors with safeguard for no message", () => {
+        middleware.errorHandler(new Error(), mockReq, mockRes, mockNext);
+        expect(mockRes.status.mock.calls[0][0]).toBe(400);
+        expect(mockRes.json.mock.calls[0][0]).toEqual({
+          error: "unknown error",
+        });
+      });
       it("should catch apiError", () => {
         middleware.errorHandler(
           new apiError("apiError"),
@@ -264,7 +286,7 @@ describe("Utils", () => {
         });
       });
 
-      it("should catch ZodError", () => {
+      it("should catch custom ZodError", () => {
         middleware.errorHandler(
           new ZodError([
             {
@@ -283,7 +305,25 @@ describe("Utils", () => {
         expect(mockRes.json.mock.calls[0][0].errors.ZodErr).toBeDefined();
       });
 
-      it("should catch ZodError", () => {
+      it("should catch custom ZodError", () => {
+        middleware.errorHandler(
+          new ZodError([
+            {
+              code: ZodIssueCode.unrecognized_keys,
+              keys: ["KeyA"],
+              path: ["PathA"],
+              message: "",
+            },
+          ]),
+          mockReq,
+          mockRes,
+          mockNext
+        );
+        expect(mockRes.status.mock.calls[0][0]).toBe(400);
+        expect(mockRes.json.mock.calls[0][0]).toBeDefined();
+        expect(mockRes.json.mock.calls[0][0].errors.ZodErr).not.toBeDefined();
+      });
+      it("should catch fieldKey ZodError", () => {
         middleware.errorHandler(
           new ZodError([
             {
