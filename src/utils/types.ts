@@ -117,7 +117,7 @@ interface FormatParse {
 
 type ReqBody<T> = Record<string, unknown> & Partial<T>;
 
-type PrismaTransactionClient = Omit<PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use">;
+type PrismaTransactionClient = Omit<PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 
