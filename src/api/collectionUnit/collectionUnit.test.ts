@@ -66,6 +66,7 @@ const mockSimpleCollectionUnitResponse = {
   unit_name: "unit_name",
   collection_unit_id: ID,
   collection_category_id: ID,
+  critter_collection_unit_id: ID,
 };
 
 // Mock Prisma Calls

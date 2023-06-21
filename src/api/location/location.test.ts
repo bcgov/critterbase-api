@@ -253,7 +253,7 @@ describe("API: Location", () => {
     });
   });
 
-  describe("POST /api/locations", () => {
+  describe("POST /api/locations/create", () => {
     it("should create a location", async () => {
       createLocation.mockResolvedValue(mockLocation);
       const res = await request
