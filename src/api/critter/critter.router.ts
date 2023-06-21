@@ -6,9 +6,7 @@ import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { QueryFormats, apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
-import {
-  appendEnglishTaxonAsUUID
-} from "./critter.service";
+
 import {
   CritterCreateSchema,
   CritterFilterSchema,
@@ -137,7 +135,7 @@ export const CritterRouter = (db: ICbDatabase ) => {
   critterRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
-      await appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
+      await db.appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
       const parsed = CritterCreateSchema.parse(req.body);
       const created = await formatParse(
         getFormat(req),

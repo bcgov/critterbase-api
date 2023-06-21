@@ -9,7 +9,8 @@ import {
   updateCritter as _updateCritter,
   getMultipleCrittersByIds as _getMultipleCrittersByIds,
   getSimilarCritters as _getSimilarCritters,
-  formatLocationNameSearch as _formatLocationNameSearch
+  formatLocationNameSearch as _formatLocationNameSearch,
+  appendEnglishTaxonAsUUID as _appendEnglishTaxonAsUUID,
 } from "./critter.service";
 import { randomUUID } from "crypto";
 import { makeApp } from "../../app";
@@ -26,6 +27,7 @@ const updateCritter = jest.fn();
 const createCritter = jest.fn();
 const getSimilarCritters = jest.fn();
 const deleteCritter = jest.fn();
+const appendEnglishTaxonAsUUID = jest.fn();
 
 
 const request = supertest(
@@ -38,6 +40,7 @@ const request = supertest(
     createCritter,
     getSimilarCritters,
     deleteCritter,
+    appendEnglishTaxonAsUUID,
   } as Record<keyof ICbDatabase, any>)
 );
 
@@ -50,6 +53,7 @@ const markingFindMany = jest.spyOn(prisma.marking, "findMany").mockImplementatio
 const captureFindMany = jest.spyOn(prisma.capture, "findMany").mockImplementation();
 const mortalityFindMany = jest.spyOn(prisma.mortality, "findMany").mockImplementation();
 const taxonFindMany = jest.spyOn(prisma.lk_taxon, "findMany").mockImplementation();
+const taxonFindFirst = jest.spyOn(prisma.lk_taxon, "findFirst").mockImplementation();
 
 
 const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
@@ -247,6 +251,10 @@ beforeEach(() => {
 
   getSimilarCritters.mockImplementation(() => {
     return [DEFAULTFORMAT_CRITTER];
+  })
+
+  appendEnglishTaxonAsUUID.mockImplementation(() => {
+    return { ...CRITTER, taxon_id: TAXON.taxon_id }
   })
 
 })
@@ -558,6 +566,26 @@ describe("API: Critter", () => {
         expect(res?.lk_wildlife_management_unit).not.toBeNull();
       })
     })
+
+    describe("appendEnglishTaxonAsUUID()", () => {
+      it("should add taxon information to an object when common name is provided", async () => {
+        taxonFindFirst.mockResolvedValue(TAXON);
+        const res = await _appendEnglishTaxonAsUUID({taxon_name_common: 'Caribou'});
+        expect.assertions(3);
+        expect(taxonFindFirst).toHaveBeenCalledTimes(1);
+        expect(res).toHaveProperty('taxon_id');
+        expect(res.taxon_id).toBe(TAXON.taxon_id);
+      });
+
+      it("should add taxon information to an object when latin name is provided", async () => {
+        taxonFindFirst.mockResolvedValue(TAXON);
+        const res = await _appendEnglishTaxonAsUUID({taxon_name_latin: 'Rangifer tarandus'});
+        expect.assertions(3);
+        expect(taxonFindFirst).toHaveBeenCalledTimes(1);
+        expect(res).toHaveProperty('taxon_id');
+        expect(res.taxon_id).toBe(TAXON.taxon_id);
+      });
+    });
   });
   describe("ROUTERS", () => {
     describe("GET /api/critters", () => {
@@ -636,7 +664,9 @@ describe("API: Critter", () => {
     describe("POST /api/critters/create", () => {
       it("should return a critter with status code 201", async () => {
         const res = await request.post("/api/critters/create").send({...CRITTER, taxon_name_common: 'Caribou'});
-        expect.assertions(2);
+        console.log(res.body);
+        expect.assertions(3);
+        expect(createCritter).toHaveBeenCalledTimes(1);
         expect(res.status).toBe(201);
         expect(res.body.wlh_id).toBe(WLH_ID);
       });
