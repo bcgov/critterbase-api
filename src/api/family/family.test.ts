@@ -41,7 +41,6 @@ import {
   family_parent,
   sex,
 } from ".prisma/client";
-import { get } from "superagent";
 
 // Mock Location Objects
 const ID = randomUUID();
@@ -113,9 +112,19 @@ const mockImmediateFamily: ImmediateFamily = {
   children: [mockCritter],
 };
 
+const mockImmediateFamilyResponse = {
+  parents: [mockCritterResponse],
+  children: [mockCritterResponse],
+};
+
 const mockImmediateFamilyCritter: ImmediateFamilyCritter = {
   ...mockImmediateFamily,
   siblings: [mockCritter],
+};
+
+const mockImmediateFamilyCritterResponse = {
+  ...mockImmediateFamilyResponse,
+  siblings: [mockCritterResponse],
 };
 
 // TODO: finish mocking objects
@@ -141,6 +150,9 @@ const findFirst_family = jest
 const update_family = jest.spyOn(prisma.family, "update").mockImplementation();
 const deleteFn_family = jest
   .spyOn(prisma.family, "delete")
+  .mockImplementation();
+const findUniqueOrThrow_family = jest
+  .spyOn(prisma.family, "findUniqueOrThrow")
   .mockImplementation();
 
 // Family Child
@@ -200,6 +212,7 @@ const request = supertest(
     getFamilyByLabel,
     getParentsOfCritterId,
     getChildrenOfCritterId,
+    getSiblingsOfCritterId,
     createNewFamily,
     removeChildOfFamily,
     removeParentOfFamily,
@@ -231,6 +244,7 @@ beforeEach(() => {
   getImmediateFamily.mockReset();
 
   // TODO: Set default return values for mocked services
+  findUniqueOrThrow_family.mockResolvedValue(mockFamily);
 });
 
 // Tests
@@ -558,6 +572,164 @@ describe("API: Family", () => {
         expect.assertions(2);
         expect(makeParentOfFamily).toHaveBeenCalledTimes(0);
         expect(res.status).toEqual(400);
+      });
+    });
+
+    describe("DELETE /api/family/parents", () => {
+      it("should remove a parent from a family", async () => {
+        removeParentOfFamily.mockResolvedValue(mockFamilyParent);
+        const res = await request
+          .delete("/api/family/parents")
+          .send({ family_id: ID, parent_critter_id: ID });
+        expect.assertions(3);
+        expect(removeParentOfFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockFamilyParentResponse);
+      });
+
+      it("should return a 400 error if data is invalid", async () => {
+        removeParentOfFamily.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.delete("/api/family/parents");
+        expect.assertions(2);
+        expect(removeParentOfFamily).toHaveBeenCalledTimes(0);
+        expect(res.status).toEqual(400);
+      });
+    });
+
+    describe("POST /api/family/children", () => {
+      it("should add a child to a family", async () => {
+        makeChildOfFamily.mockResolvedValue(mockFamilyChild);
+        const res = await request
+          .post("/api/family/children")
+          .send({ family_id: ID, child_critter_id: ID });
+        expect.assertions(3);
+        expect(makeChildOfFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(201);
+        expect(res.body).toEqual(mockFamilyChildResponse);
+      });
+
+      it("should return a 400 error if data is invalid", async () => {
+        makeChildOfFamily.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.post("/api/family/children");
+        expect.assertions(2);
+        expect(makeChildOfFamily).toHaveBeenCalledTimes(0);
+        expect(res.status).toEqual(400);
+      });
+    });
+
+    describe("DELETE /api/family/children", () => {
+      it("should remove a child from a family", async () => {
+        removeChildOfFamily.mockResolvedValue(mockFamilyChild);
+        const res = await request
+          .delete("/api/family/children")
+          .send({ family_id: ID, child_critter_id: ID });
+        expect.assertions(3);
+        expect(removeChildOfFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockFamilyChildResponse);
+      });
+
+      it("should return a 400 error if data is invalid", async () => {
+        removeChildOfFamily.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.delete("/api/family/children");
+        expect.assertions(2);
+        expect(removeChildOfFamily).toHaveBeenCalledTimes(0);
+        expect(res.status).toEqual(400);
+      });
+    });
+
+    describe("GET /api/family/immediate/:id", () => {
+      it("should return an immediate family object", async () => {
+        getParentsOfCritterId.mockResolvedValue([mockCritter]);
+        getChildrenOfCritterId.mockResolvedValue([mockCritter]);
+        getSiblingsOfCritterId.mockResolvedValue([mockCritter]);
+        const res = await request.get(`/api/family/immediate/${ID}`);
+        expect.assertions(5);
+        expect(getParentsOfCritterId).toHaveBeenCalledTimes(1);
+        expect(getChildrenOfCritterId).toHaveBeenCalledTimes(1);
+        expect(getSiblingsOfCritterId).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockImmediateFamilyCritterResponse);
+      });
+    });
+
+    describe("GET /api/family/:id", () => {
+      it("should return the family when a valid id is provided", async () => {
+        getImmediateFamily.mockResolvedValue(mockImmediateFamily);
+        const res = await request.get(`/api/family/${ID}`);
+        expect.assertions(3);
+        expect(getImmediateFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockImmediateFamilyResponse);
+      });
+
+      it("should return a 404 error when an invalid id is provided", async () => {
+        findUniqueOrThrow_family.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.get(`/api/family/${ID}`);
+        expect.assertions(3);
+        expect(getImmediateFamily).toHaveBeenCalledTimes(0);
+        expect(findUniqueOrThrow_family).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(404);
+      });
+    });
+
+    describe("PUT /api/family/:id", () => {
+      it("should update a family", async () => {
+        updateFamily.mockResolvedValue(mockFamily);
+        const res = await request
+          .put(`/api/family/${ID}`)
+          .send({ family_label: FAMILY_LABEL });
+        expect.assertions(3);
+        expect(updateFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockFamilyResponse);
+      });
+
+      it("should return a 400 error if data is invalid", async () => {
+        const res = await request.put(`/api/family/${ID}`);
+        expect.assertions(2);
+        expect(updateFamily).toHaveBeenCalledTimes(0);
+        expect(res.status).toEqual(400);
+      });
+    });
+
+    describe("DELETE /api/family/:id", () => {
+      it("should delete a family", async () => {
+        deleteFamily.mockResolvedValue(mockFamily);
+        const res = await request.delete(`/api/family/${ID}`);
+        expect.assertions(3);
+        expect(deleteFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockFamilyResponse);
+      });
+
+      it("should return a 404 error if id is invalid", async () => {
+        deleteFamily.mockImplementation(() => {
+          throw apiError.notFound("error");
+        });
+        const res = await request.delete(`/api/family/${ID}`);
+        expect.assertions(2);
+        expect(deleteFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(404);
+      });
+    });
+
+    describe("GET /api/family/label/:label", () => {
+      it("should return a family when a valid label is provided", async () => {
+        getFamilyByLabel.mockResolvedValue(mockFamily);
+        const res = await request.get(`/api/family/label/${FAMILY_LABEL}`);
+        expect.assertions(3);
+        expect(getFamilyByLabel).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual(mockFamilyResponse);
       });
     });
   });

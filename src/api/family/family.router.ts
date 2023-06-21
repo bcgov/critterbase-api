@@ -7,7 +7,6 @@ import {
   FamilyChildCreateBodySchema,
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema,
-  ImmediateFamilyCritter,
 } from "./family.utils";
 import { ICbDatabase } from "../../utils/database";
 
@@ -123,7 +122,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       const parents = await db.getParentsOfCritterId(id);
       const children = await db.getChildrenOfCritterId(id);
       const siblings = await db.getSiblingsOfCritterId(id);
-      const result: ImmediateFamilyCritter = {
+      const result = {
         children: children,
         siblings: siblings,
         parents: parents,
