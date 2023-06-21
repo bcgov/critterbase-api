@@ -48,7 +48,6 @@ const mockDB: Partial<Record<keyof ICbDatabase, any>> = {
   getTaxonCollectionCategories: jest.fn(),
   getCollectionUnitsFromCategory: jest.fn(),
   getCollectionUnitsFromCategoryId: jest.fn(),
-  getInheritedTaxonIds: jest.fn(),
 };
 
 const request = supertest(makeApp(mockDB));
@@ -58,7 +57,6 @@ beforeEach(() => {
   mockDB.getTaxonCollectionCategories.mockResolvedValue(tcc);
   mockDB.getCollectionUnitsFromCategory.mockResolvedValue(cu);
   mockDB.getCollectionUnitsFromCategoryId.mockResolvedValue(cu);
-  mockDB.getInheritedTaxonIds.mockResolvedValue(ids);
 });
 
 describe("SERVICES", () => {
@@ -74,15 +72,6 @@ describe("SERVICES", () => {
     });
   });
 
-  describe("getInheritedTaxonIds", () => {
-    it("returns array of taxonIds", async () => {
-      const ret = await db.getInheritedTaxonIds("id");
-      expect(queryRaw.mock.calls.length).toBe(1);
-      if (ret) {
-        expect(ret).toEqual(ids);
-      }
-    });
-  });
   describe("getTaxonMarkingBodyLocations", () => {
     const findMany = jest
       .spyOn(prisma.xref_taxon_marking_body_location, "findMany")
