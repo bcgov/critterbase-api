@@ -55,7 +55,7 @@ const mockLocation: location = {
   update_timestamp: DATE,
 };
 
-const mockCommonLocation: CommonLocationType & location = {
+export const mockCommonLocation: CommonLocationType & location = {
   ...mockLocation,
   lk_region_env: { region_env_id: ID, region_env_name: "test" },
   lk_region_nr: { region_nr_id: ID, region_nr_name: "test" },

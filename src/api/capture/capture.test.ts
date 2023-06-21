@@ -14,6 +14,7 @@ import { makeApp } from "../../app";
 import { ICbDatabase } from "../../utils/database";
 import supertest from "supertest";
 import { apiError } from "../../utils/types";
+import { mockCommonLocation } from "../location/location.test";
 
 const getAllCaptures = jest.fn();
 const getCaptureByCritter = jest.fn();
@@ -76,23 +77,6 @@ const LOCATION = {
   longitude: 2
 }
 
-const LOCATION_COMMONSELECT = {
-  latitude: 2,
-  longitude: 2,
-  lk_region_env: {
-    region_env_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
-    region_env_name: 'E'
-  },
-  lk_region_nr: {
-    region_nr_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
-    region_nr_name: 'E'
-  },
-  lk_wildlife_management_unit: {
-    wmu_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
-    wmu_name: 'E'
-  }
-}
-
 const CAPTURE_WITH_LOCATION = {
   ...CAPTURE,
   capture_location: LOCATION,
@@ -125,8 +109,8 @@ describe("API: Critter", () => {
     describe("CaptureResponseSchema", () => {
       it("should parse the data correctly", async () => {
         const obj = {
-          location_capture_capture_location_idTolocation: LOCATION_COMMONSELECT,
-          location_capture_release_location_idTolocation: LOCATION_COMMONSELECT,
+          location_capture_capture_location_idTolocation: mockCommonLocation,
+          location_capture_release_location_idTolocation: mockCommonLocation,
         };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
