@@ -8,7 +8,6 @@ import type {
 import {
   FamilyUpdate,
   ImmediateFamily,
-  ImmediateFamilyCritter,
 } from "./family.utils";
 
 const getAllFamilies = async (): Promise<family[]> => {
@@ -23,8 +22,8 @@ const getAllChildren = async (): Promise<family_child[]> => {
   return await prisma.family_child.findMany();
 };
 
-const getFamilyById = async (family_id: string): Promise<family | null> => {
-  return await prisma.family.findFirst({
+const getFamilyById = async (family_id: string): Promise<family> => {
+  return await prisma.family.findFirstOrThrow({
     where: {
       family_id: family_id,
     },
@@ -224,28 +223,15 @@ const getImmediateFamily = async (
   };
 };
 
-const getImmediateFamilyOfCritter = async (
-  critter_id: string
-): Promise<ImmediateFamilyCritter> => {
-  const parents = await getParentsOfCritterId(critter_id);
-  const children = await getChildrenOfCritterId(critter_id);
-  const siblings = await getSiblingsOfCritterId(critter_id);
-  return {
-    children: children,
-    siblings: siblings,
-    parents: parents,
-  };
-};
-
 export {
   getAllFamilies,
   getAllChildren,
   getAllParents,
   getParentsOfCritterId,
   getChildrenOfCritterId,
+  getSiblingsOfCritterId,
   getImmediateFamily,
   getFamilyById,
-  getImmediateFamilyOfCritter,
   getFamilyByLabel,
   makeChildOfFamily,
   makeParentOfFamily,

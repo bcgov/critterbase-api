@@ -7,7 +7,7 @@ import { BulkRouter } from "./api/bulk/bulk.router";
 import { CaptureRouter } from "./api/capture/capture.router";
 import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
 import { CritterRouter } from "./api/critter/critter.router";
-import { familyRouter } from "./api/family/family.router";
+import { FamilyRouter } from "./api/family/family.router";
 import { LocationRouter } from "./api/location/location.router";
 import { MarkingRouter } from "./api/marking/marking.router";
 import { MeasurementRouter } from "./api/measurement/measurement.router";
@@ -34,7 +34,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use("/api/users", UserRouter(db));
   app.use("/api/collection-units", CollectionUnitRouter(db));
   app.use("/api/artifacts", ArtifactRouter(db));
-  app.use("/api/family", familyRouter);
+  app.use("/api/family", FamilyRouter(db));
   app.use("/api/captures", CaptureRouter(db));
   app.use("/api/mortality", MortalityRouter(db));
   app.use("/api/measurements", MeasurementRouter(db));
