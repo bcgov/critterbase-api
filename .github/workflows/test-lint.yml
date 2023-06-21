@@ -1,4 +1,4 @@
-name: Lint
+name: Test & Lint
 
 on: [push]
 
@@ -13,5 +13,7 @@ jobs:
           cache: "npm"
       - name: Setup Node
         run: npm install
+      - name: Run Tests
+        run: npm run test
       - name: Run ESLint
         run: npm run lint
