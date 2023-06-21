@@ -66,8 +66,8 @@ export const FamilyRouter = (db: ICbDatabase) => {
     "/children/:id",
     catchErrors(async (req: Request, res: Response) => {
       const { id } = uuidParamsSchema.parse(req.params);
-      const parents = await db.getChildrenOfCritterId(id);
-      return res.status(200).json(parents);
+      const children = await db.getChildrenOfCritterId(id);
+      return res.status(200).json(children);
     })
   );
 

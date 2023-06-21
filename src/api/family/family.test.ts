@@ -66,10 +66,22 @@ const mockCritter: critter = {
   ...mockAuditColumns,
 };
 
+const mockCritterResponse = {
+  ...mockCritter,
+  create_timestamp: DATE.toISOString(),
+  update_timestamp: DATE.toISOString(),
+};
+
 const mockFamily: family = {
   family_id: ID,
   family_label: "test",
   ...mockAuditColumns,
+};
+
+const mockFamilyResponse = {
+  ...mockFamily,
+  create_timestamp: DATE.toISOString(),
+  update_timestamp: DATE.toISOString(),
 };
 
 const mockFamilyChild: family_child = {
@@ -78,10 +90,22 @@ const mockFamilyChild: family_child = {
   ...mockAuditColumns,
 };
 
+const mockFamilyChildResponse = {
+  ...mockFamilyChild,
+  create_timestamp: DATE.toISOString(),
+  update_timestamp: DATE.toISOString(),
+};
+
 const mockFamilyParent: family_parent = {
   family_id: ID,
   parent_critter_id: ID,
   ...mockAuditColumns,
+};
+
+const mockFamilyParentResponse = {
+  ...mockFamilyParent,
+  create_timestamp: DATE.toISOString(),
+  update_timestamp: DATE.toISOString(),
 };
 
 const mockImmediateFamily: ImmediateFamily = {
@@ -435,5 +459,106 @@ describe("API: Family", () => {
     });
   });
 
-  // TODO: Router Tests
+  describe("ROUTERS", () => {
+    describe("GET /api/family", () => {
+      it("should return an array of families", async () => {
+        getAllFamilies.mockResolvedValue([mockFamily]);
+        const res = await request.get("/api/family");
+        expect.assertions(3);
+        expect(getAllFamilies).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual([mockFamilyResponse]);
+      });
+    });
+
+    describe("POST /api/family/create", () => {
+      it("should create a new family", async () => {
+        createNewFamily.mockResolvedValue(mockFamily);
+        const res = await request
+          .post("/api/family/create")
+          .send({ family_label: FAMILY_LABEL });
+        expect.assertions(3);
+        expect(createNewFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(201);
+        expect(res.body).toEqual(mockFamilyResponse);
+      });
+
+      it("should return a 400 error if family_label is not provided", async () => {
+        createNewFamily.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.post("/api/family/create");
+        expect.assertions(2);
+        expect(createNewFamily).toHaveBeenCalledTimes(0);
+        expect(res.status).toEqual(400);
+      });
+    });
+
+    describe("GET /api/family/children", () => {
+      it("should return an array of children", async () => {
+        getAllChildren.mockResolvedValue([mockFamilyChild]);
+        const res = await request.get("/api/family/children");
+        expect.assertions(3);
+        expect(getAllChildren).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual([mockFamilyChildResponse]);
+      });
+    });
+
+    describe("GET /api/family/parents", () => {
+      it("should return an array of parents", async () => {
+        getAllParents.mockResolvedValue([mockFamilyParent]);
+        const res = await request.get("/api/family/parents");
+        expect.assertions(3);
+        expect(getAllParents).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual([mockFamilyParentResponse]);
+      });
+    });
+
+    describe("GET /api/family/children/:id", () => {
+      it("should return an array of children", async () => {
+        getChildrenOfCritterId.mockResolvedValue([mockCritter]);
+        const res = await request.get(`/api/family/children/${ID}`);
+        expect.assertions(3);
+        expect(getChildrenOfCritterId).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual([mockCritterResponse]);
+      });
+    });
+
+    describe("GET /api/family/parents/:id", () => {
+      it("should return an array of parents", async () => {
+        getParentsOfCritterId.mockResolvedValue([mockCritter]);
+        const res = await request.get(`/api/family/parents/${ID}`);
+        expect.assertions(3);
+        expect(getParentsOfCritterId).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual([mockCritterResponse]);
+      });
+    });
+
+    describe("POST /api/family/parents", () => {
+      it("should add a parent to a family", async () => {
+        makeParentOfFamily.mockResolvedValue(mockFamilyParent);
+        const res = await request
+          .post("/api/family/parents")
+          .send({ family_id: ID, parent_critter_id: ID });
+        expect.assertions(3);
+        expect(makeParentOfFamily).toHaveBeenCalledTimes(1);
+        expect(res.status).toEqual(201);
+        expect(res.body).toEqual(mockFamilyParentResponse);
+      });
+
+      it("should return a 400 error if data is invalid", async () => {
+        makeParentOfFamily.mockImplementation(() => {
+          throw apiError.requiredProperty("error");
+        });
+        const res = await request.post("/api/family/parents");
+        expect.assertions(2);
+        expect(makeParentOfFamily).toHaveBeenCalledTimes(0);
+        expect(res.status).toEqual(400);
+      });
+    });
+  });
 });
