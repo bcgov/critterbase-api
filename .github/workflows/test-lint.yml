@@ -3,7 +3,7 @@ name: Test & Lint
 on: [push]
 
 jobs:
-  eslint:
+  test-and-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
