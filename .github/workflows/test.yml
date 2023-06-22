@@ -1,0 +1,17 @@
+name: Test Suite
+
+on: [push]
+
+jobs:
+  jest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+      - name: Setup Node
+        run: npm install
+      - name: Run Tests
+        run: npm run test

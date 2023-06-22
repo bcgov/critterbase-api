@@ -1,9 +1,9 @@
-name: Test & Lint
+name: EsLint
 
 on: [push]
 
 jobs:
-  test-and-lint:
+  EsLint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -13,7 +13,5 @@ jobs:
           cache: "npm"
       - name: Setup Node
         run: npm install
-      - name: Run Tests
-        run: npm run test
       - name: Run ESLint
         run: npm run lint
