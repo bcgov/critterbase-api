@@ -98,7 +98,7 @@ To run tests, run the following command
 
 ## Authors
 
-- [@Macgregor (Product Owner)]()
+- [@Macgregor Aubertin (Product Owner)](https://github.com/mauberti-bc)
 
 - [@Graham Stewart (Developer)](https://github.com/GrahamS-Quartech)
 
