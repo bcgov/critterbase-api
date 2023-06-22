@@ -319,6 +319,7 @@ describe("Utils", () => {
           mockRes,
           mockNext
         );
+
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
         expect(mockRes.json.mock.calls[0][0].errors.ZodErr).not.toBeDefined();
