@@ -2,7 +2,7 @@
 
 # Critterbase API
 
-A brief description of what this project does and who it's for
+Critterbase is a shared component of BiodiversityHubBC that manages information about individual animals, including capture and mortality events, measurements, markings, family relationships, and photos.
 
 ## Table of Contents
 
