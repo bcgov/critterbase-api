@@ -88,6 +88,9 @@ const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
   select: {
     latitude: true,
     longitude: true,
+    coordinate_uncertainty: true,
+    temperature: true,
+    location_comment: true,
     lk_region_env: {
       select: {
         region_env_id: true,
@@ -116,6 +119,9 @@ type CommonLocationType = Prisma.locationGetPayload<
 const CommonLocationSchema = implement<CommonLocationType>().with({
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
+  coordinate_uncertainty: z.number().nullable(),
+  temperature: z.number().nullable(),
+  location_comment: z.string().nullable(),
   lk_region_env: z
     .object({
       region_env_id: z.string(),
