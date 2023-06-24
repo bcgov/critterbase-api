@@ -55,8 +55,8 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
       select: { system_name: true },
     },
     critter_collection_unit: simpleCollectionUnitIncludes,
-    capture: captureInclude,
-    mortality: mortalityInclude,
+    capture: {...captureInclude, orderBy: { capture_timestamp: 'desc' }},
+    mortality: {...mortalityInclude, orderBy: { mortality_timestamp: 'desc' } },
     marking: markingIncludes,
     measurement_qualitative: measurementQualitativeInclude,
     measurement_quantitative: measurementQuantitativeInclude,
@@ -74,6 +74,9 @@ const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
       select: simpleCollectionUnitIncludes.include,
     },
     mortality: {
+      orderBy: {
+        mortality_timestamp: 'desc'
+      },
       select: {
         mortality_timestamp: true,
       },
