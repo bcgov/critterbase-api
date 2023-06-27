@@ -69,7 +69,7 @@ const errorHandler = (
     if (!fieldKeys.length) {
       return res.status(400).json({ error: err.format()._errors.join(", ") });
     }
-    console.log(Object.keys(customErrs).length);
+    // console.log(Object.keys(customErrs).length);
     return res.status(400).json({
       errors: Object.keys(customErrs).length ? customErrs : fieldErrors,
     });

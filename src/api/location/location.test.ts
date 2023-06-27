@@ -83,6 +83,9 @@ const mockLocationResponse: LocationResponse = {
 const mockFormattedLocation = {
   latitude: 1,
   longitude: 1,
+  coordinate_uncertainty: 1,
+  location_comment: "test",
+  temperature: 1,
   ...mockCommonLocation.lk_region_env,
   ...mockCommonLocation.lk_region_nr,
   ...mockCommonLocation.lk_wildlife_management_unit,
@@ -139,22 +142,21 @@ describe("API: Location", () => {
       });
       it("should return a formatted location", () => {
         const location = {
-          ...mockLocation, 
-          lk_region_env: null, 
-          lk_region_nr: null, 
-          lk_wildlife_management_unit: null
-        }
+          ...mockLocation,
+          lk_region_env: null,
+          lk_region_nr: null,
+          lk_wildlife_management_unit: null,
+        };
         expect.assertions(1);
-        expect(CommonFormattedLocationSchema.parse(location)).toEqual(
-          {latitude: 1,
-          longitude: 1,
+        expect(CommonFormattedLocationSchema.parse(location)).toEqual({
+          ...mockFormattedLocation,
           region_nr_name: undefined,
           region_env_name: undefined,
           wmu_name: undefined,
           region_nr_id: undefined,
           region_env_id: undefined,
-          wmu_id: undefined}
-        );
+          wmu_id: undefined,
+        });
       });
     });
 
@@ -174,7 +176,7 @@ describe("API: Location", () => {
           ...mockLocationResponse,
           region_env_name: null,
           region_nr_name: null,
-          wmu_name: null
+          wmu_name: null,
         });
       });
     });

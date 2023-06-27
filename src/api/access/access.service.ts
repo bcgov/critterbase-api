@@ -4,7 +4,7 @@ import { apiError } from "../../utils/types";
 import { LoginCredentials } from "../user/user.utils";
 
 const loginUser = async (login: LoginCredentials): Promise<user | null> => {
-  console.log("real login called");
+  // console.log("real login called");
   const { user_id, keycloak_uuid } = login;
 
   // Find a user that matches both `user_id` and `keycloak_uuid`
