@@ -486,7 +486,6 @@ describe("API: Bulk", () => {
           markings: [MARKING],
         };
         const res = await request.post("/api/bulk").send(body);
-        // console.log(`Res in router + ${JSON.stringify(res, null, 2)}`);
         expect.assertions(1);
         expect(res.status).toBe(201);
       });
