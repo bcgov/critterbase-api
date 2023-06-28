@@ -31,20 +31,17 @@ const artifactSchema = implement<artifact>().with({
 
 // Validate incoming request body for create artifact
 const ArtifactCreateBodySchema = implement<
-  Omit<Prisma.artifactCreateManyInput, "artifact_id" | keyof AuditColumns>
+  Omit<Prisma.artifactCreateManyInput, keyof AuditColumns>
 >().with(
   artifactSchema
-    .omit({ ...noAudit, artifact_id: true })
+    .omit({ ...noAudit })
     .partial()
     .required({ critter_id: true, artifact_url: true }).shape
 );
 
 // Validate incoming request body for update artifact
 const ArtifactUpdateBodySchema = implement<
-  Omit<
-    Prisma.artifactUncheckedUpdateManyInput,
-    "artifact_id" | keyof AuditColumns
-  >
+  Omit<Prisma.artifactUncheckedUpdateManyInput, keyof AuditColumns>
 >()
   .with(ArtifactCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");

@@ -1,5 +1,6 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
+import multer from "multer";
 import { catchErrors } from "../../utils/middleware";
 import {
   ArtifactCreateBodySchema,
@@ -7,6 +8,9 @@ import {
 } from "./artifact.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
+import { uploadFileToS3, getFileDownloadUrl } from "../../utils/object_store";
+import { randomUUID } from "crypto";
+
 
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
@@ -27,8 +31,24 @@ export const ArtifactRouter = (db: ICbDatabase) => {
   artifactRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
-      const artifactData = ArtifactCreateBodySchema.parse(req.body);
+      if (!req.file) {
+        console.log("No file found in the request");
+        return res.status(400).send("No file uploaded");
+      }
+      const artifact_id = randomUUID();
+      console.log("File found, starting upload to S3");
+      // upload the file to S3 and get the URL
+      const artifactUrl = await uploadFileToS3(req.file, artifact_id);
+      console.log(`File uploaded to S3, received URL: ${artifactUrl}`);
+      // then, include this URL in the artifactData
+      const artifactData = ArtifactCreateBodySchema.parse({
+        ...req.body,
+        artifact_id,
+        artifact_url: artifactUrl,
+      });
+      console.log("Parsed artifact data, creating artifact in database");
       const newArtifact = await db.createArtifact(artifactData);
+      console.log("Artifact successfully created");
       return res.status(201).json(newArtifact);
     })
   );
