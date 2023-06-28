@@ -11,6 +11,8 @@ import { ICbDatabase } from "../../utils/database";
 import { uploadFileToS3, getFileDownloadUrl } from "../../utils/object_store";
 import { randomUUID } from "crypto";
 
+// A middleware for handling multipart/form-data
+const upload = multer({ storage: multer.memoryStorage() });
 
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
@@ -30,6 +32,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
    */
   artifactRouter.post(
     "/create",
+    upload.single("artifact"), // 'artifact' should match the 'name' attribute in your form input
     catchErrors(async (req: Request, res: Response) => {
       if (!req.file) {
         console.log("No file found in the request");
