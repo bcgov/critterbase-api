@@ -1,6 +1,5 @@
 import express, { NextFunction } from "express";
 import type { Request, Response } from "express";
-import multer from "multer";
 import { catchErrors } from "../../utils/middleware";
 import {
   ArtifactCreateBodySchema,
@@ -8,12 +7,14 @@ import {
 } from "./artifact.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
-import { uploadFileToS3, getFileDownloadUrl } from "../../utils/object_store";
+import {
+  uploadFileToS3,
+  getFileDownloadUrl,
+  upload,
+} from "../../utils/object_store";
 import { randomUUID } from "crypto";
 
-// A middleware for handling multipart/form-data
-const upload = multer({ storage: multer.memoryStorage() });
-
+// TODO: Returned signed URLs or files from get requests
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
 
@@ -29,29 +30,31 @@ export const ArtifactRouter = (db: ICbDatabase) => {
 
   /**
    ** Create new artifact
+   ** Artifact file is uploaded to S3 (Object Store) and the artifact_url is stored in the database
+   ** Files are stored in a flat structure in the root of the bucket
+   ** The file names follow the pattern: <artifact_id>_<original_file_name>.<file_extension>
+   ** Because the files are stored in the root of the bucket, the artifact_url is simply the file name
    */
   artifactRouter.post(
     "/create",
     upload.single("artifact"), // 'artifact' should match the 'name' attribute in your form input
     catchErrors(async (req: Request, res: Response) => {
       if (!req.file) {
-        console.log("No file found in the request");
         return res.status(400).send("No file uploaded");
       }
+
+      // TODO: user and timestamp metadata could be added here, but this is redundant with the database
+      const metadata = {
+        filename: req.file.originalname,
+      };
       const artifact_id = randomUUID();
-      console.log("File found, starting upload to S3");
-      // upload the file to S3 and get the URL
-      const artifactUrl = await uploadFileToS3(req.file, artifact_id);
-      console.log(`File uploaded to S3, received URL: ${artifactUrl}`);
-      // then, include this URL in the artifactData
+      const artifactUrl = await uploadFileToS3(req.file, artifact_id, metadata);
       const artifactData = ArtifactCreateBodySchema.parse({
         ...req.body,
         artifact_id,
         artifact_url: artifactUrl,
       });
-      console.log("Parsed artifact data, creating artifact in database");
       const newArtifact = await db.createArtifact(artifactData);
-      console.log("Artifact successfully created");
       return res.status(201).json(newArtifact);
     })
   );

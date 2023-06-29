@@ -1,18 +1,31 @@
 import AWS from "aws-sdk";
 import { Metadata } from "aws-sdk/clients/s3";
+import multer from "multer";
+import { apiError } from "./types";
+
+// A middleware for handling multipart/form-data
+export const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * Local getter for retrieving the S3 client.
  *
  * @returns {*} {AWS.S3} The S3 client
+ * @throws {apiError} If necessary environment variables are not defined
  */
 export const _getS3Client = (): AWS.S3 => {
+  const accessKeyId = process.env.OBJECT_STORE_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.OBJECT_STORE_SECRET_KEY_ID;
+
+  if (!accessKeyId || !secretAccessKey) {
+    throw apiError.serverIssue();
+  }
+
   const awsEndpoint = new AWS.Endpoint(_getObjectStoreUrl());
 
   return new AWS.S3({
     endpoint: awsEndpoint.href,
-    accessKeyId: process.env.OBJECT_STORE_ACCESS_KEY_ID,
-    secretAccessKey: process.env.OBJECT_STORE_SECRET_KEY_ID,
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
     signatureVersion: "v4",
     s3ForcePathStyle: true,
   });
@@ -22,18 +35,32 @@ export const _getS3Client = (): AWS.S3 => {
  * Local getter for retrieving the S3 object store URL.
  *
  * @returns {*} {string} The object store URL
+ * @throws {apiError} If OBJECT_STORE_URL environment variable is not defined
  */
 export const _getObjectStoreUrl = (): string => {
-  return process.env.OBJECT_STORE_URL ?? "nrs.objectstore.gov.bc.ca";
+  const url = process.env.OBJECT_STORE_URL;
+
+  if (!url) {
+    throw apiError.serverIssue();
+  }
+
+  return url;
 };
 
 /**
  * Local getter for retrieving the S3 object store bucket name.
  *
  * @returns {*} {string} The object store bucket name
+ * @throws {apiError} If OBJECT_STORE_BUCKET_NAME environment variable is not defined
  */
 export const _getObjectStoreBucketName = (): string => {
-  return process.env.OBJECT_STORE_BUCKET_NAME ?? "";
+  const bucketName = process.env.OBJECT_STORE_BUCKET_NAME;
+
+  if (!bucketName) {
+    throw apiError.serverIssue();
+  }
+
+  return bucketName;
 };
 
 /**
@@ -51,7 +78,6 @@ export const getS3HostUrl = (key?: string): string => {
   }`.replace(/\/{0,2}$/, "");
 };
 
-// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
 const uploadFileToS3 = async (
   file: Express.Multer.File,
   artifact_id: string,

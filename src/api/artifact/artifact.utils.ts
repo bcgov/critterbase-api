@@ -40,10 +40,19 @@ const ArtifactCreateBodySchema = implement<
 );
 
 // Validate incoming request body for update artifact
+// * Note: artifact_url and artifact_id are not allowed to be updated
 const ArtifactUpdateBodySchema = implement<
-  Omit<Prisma.artifactUncheckedUpdateManyInput, keyof AuditColumns>
+  Omit<
+    Prisma.artifactUncheckedUpdateManyInput,
+    "artifact_url" | "artifact_id" | keyof AuditColumns
+  >
 >()
-  .with(ArtifactCreateBodySchema.partial().shape)
+  .with(
+    ArtifactCreateBodySchema.partial().omit({
+      artifact_url: true,
+      artifact_id: true,
+    }).shape
+  )
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 export { artifactSchema, ArtifactCreateBodySchema, ArtifactUpdateBodySchema };
