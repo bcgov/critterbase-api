@@ -18,6 +18,7 @@ import {
 import { apiError } from "../../utils/types";
 import { makeApp } from "../../app";
 import supertest from "supertest";
+import { Buffer } from "buffer";
 
 // Mock Artifact
 const ID = randomUUID();
@@ -42,6 +43,8 @@ const RETURN_ARTIFACT: artifact = {
   update_timestamp: new Date(),
 };
 
+const MOCK_FILE = Buffer.from("This is a mock file");
+
 // Mocked Prisma Calls
 const create = jest.spyOn(prisma.artifact, "create").mockImplementation();
 const findMany = jest.spyOn(prisma.artifact, "findMany").mockImplementation();
@@ -50,6 +53,10 @@ const findUniqueOrThrow = jest
   .mockImplementation();
 const update = jest.spyOn(prisma.artifact, "update").mockImplementation();
 const pDelete = jest.spyOn(prisma.artifact, "delete").mockImplementation();
+const object_store = require("../../utils/object_store");
+const uploadFileToS3 = jest
+  .spyOn(object_store, "uploadFileToS3")
+  .mockImplementation();
 
 // Mocked Services
 const getArtifactById = jest.fn();
@@ -87,6 +94,7 @@ beforeEach(() => {
   createArtifact.mockResolvedValue(RETURN_ARTIFACT);
   getArtifactById.mockResolvedValue(RETURN_ARTIFACT);
   getArtifactsByCritterId.mockResolvedValue([RETURN_ARTIFACT]);
+  uploadFileToS3.mockResolvedValue(`${ID}.png`);
 });
 describe("API: Artifact", () => {
   describe("SERVICES", () => {
@@ -135,7 +143,7 @@ describe("API: Artifact", () => {
     describe("updateArtifact()", () => {
       it("returns an updated artifact", async () => {
         const UPDATED_ARTIFACT: ArtifactUpdate = {
-          artifact_url: "https://example.com/artifact_updated",
+          critter_id: ID,
         };
         update.mockResolvedValue({ ...RETURN_ARTIFACT, ...UPDATED_ARTIFACT });
         const returnedArtifact = await _updateArtifact(ID, UPDATED_ARTIFACT);
@@ -191,39 +199,44 @@ describe("API: Artifact", () => {
     });
 
     describe("POST /api/artifacts/create", () => {
-      it("returns status 201", async () => {
+      it("returns and artifact record with status 201", async () => {
         const res = await request
           .post("/api/artifacts/create")
-          .send(NEW_ARTIFACT);
-        expect.assertions(2);
+          .attach("artifact", MOCK_FILE, "test.png")
+          .field("critter_id", CRITTER_ID);
+        expect.assertions(4);
+        expect(uploadFileToS3).toHaveBeenCalledTimes(1);
         expect(createArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
-      });
-
-      it("returns an artifact", async () => {
-        const res = await request
-          .post("/api/artifacts/create")
-          .send(NEW_ARTIFACT);
-        const artifact = res.body;
-        expect.assertions(2);
-        expect(createArtifact.mock.calls.length).toBe(1);
-        expect(artifactSchema.safeParse(artifact).success).toBe(true);
+        expect(artifactSchema.safeParse(res.body).success).toBe(true);
       });
 
       it("strips invalid fields from data", async () => {
         const res = await request
           .post("/api/artifacts/create")
-          .send({ ...NEW_ARTIFACT, invalidField: "qwerty123" });
+          .attach("artifact", MOCK_FILE, "test.png")
+          .field("critter_id", CRITTER_ID)
+          .field("invalidField", "qwerty123");
         expect.assertions(3);
         expect(createArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
         expect(res.body).not.toHaveProperty("invalidField");
       });
 
-      it("returns status 400 when data is missing required fields", async () => {
+      it("returns status 400 when data is missing attached file", async () => {
         const res = await request.post("/api/artifacts/create").send({
-          artifact_id: ID,
+          CRITTER_ID: ID,
         });
+        expect.assertions(3);
+        expect(createArtifact.mock.calls.length).toBe(0);
+        expect(uploadFileToS3).toBeCalledTimes(0);
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const res = await request
+          .post("/api/artifacts/create")
+          .field("artifact_id", ID);
         expect.assertions(2);
         expect(createArtifact.mock.calls.length).toBe(0);
         expect(res.status).toBe(400);

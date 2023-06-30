@@ -92,10 +92,8 @@ const uploadFileToS3 = async (
     Metadata: metadata,
   };
   const s3Client = _getS3Client();
-
   // Uploading files to the bucket
   const response = await s3Client.upload(params).promise();
-
   return response.Key;
 };
 
