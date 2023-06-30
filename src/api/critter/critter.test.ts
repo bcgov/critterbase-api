@@ -834,7 +834,6 @@ describe("API: Critter", () => {
         const res = await request
           .post("/api/critters/create")
           .send({ ...CRITTER, taxon_name_common: "Caribou" });
-        console.log(res.body);
         expect.assertions(3);
         expect(createCritter).toHaveBeenCalledTimes(1);
         expect(res.status).toBe(201);
