@@ -89,6 +89,7 @@ const uploadFileToS3 = async (
     Key: `${artifact_id}_${file.originalname}`,
     Body: file.buffer,
     ContentType: file.mimetype,
+    // ContentDisposition: 'inline', // This causes the file to be opened in the browser instead of downloaded
     Metadata: metadata,
   };
   const s3Client = _getS3Client();
