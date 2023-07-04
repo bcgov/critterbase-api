@@ -99,7 +99,6 @@ const uploadFileToS3 = async (
   return response.Key;
 };
 
-// TODO: File retrieval
 const getFileDownloadUrl = (fileName: string): string => {
   // Setting up S3 download parameters
   const params: AWS.S3.GetObjectRequest = {
