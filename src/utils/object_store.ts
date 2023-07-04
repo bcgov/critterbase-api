@@ -28,6 +28,7 @@ export const _getS3Client = (): AWS.S3 => {
     secretAccessKey: secretAccessKey,
     signatureVersion: "v4",
     s3ForcePathStyle: true,
+    region: "us-west-2", // TODO: determine if this is necessary with object store service
   });
 };
 
