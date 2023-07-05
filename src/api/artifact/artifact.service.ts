@@ -7,6 +7,7 @@ import {
 } from "./artifact.utils";
 import { randomUUID } from "crypto";
 import { getFileDownloadUrl, uploadFileToS3 } from "../../utils/object_store";
+import { S3 } from "aws-sdk";
 
 /**
  * * Gets an artifact by the artifact_id
@@ -78,7 +79,7 @@ const createArtifact = async (
   file: Express.Multer.File
 ): Promise<ArtifactResponse> => {
   // TODO: user and timestamp metadata could be added here, but this is redundant with the database
-  const metadata = {
+  const metadata: S3.Metadata = {
     filename: file.originalname,
   };
   const artifact_id = randomUUID();

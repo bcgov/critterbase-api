@@ -4,7 +4,7 @@ import multer from "multer";
 import { apiError } from "./types";
 
 // A middleware for handling multipart/form-data
-export const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * Local getter for retrieving the S3 client.
@@ -12,7 +12,7 @@ export const upload = multer({ storage: multer.memoryStorage() });
  * @returns {*} {AWS.S3} The S3 client
  * @throws {apiError} If necessary environment variables are not defined
  */
-export const _getS3Client = (): AWS.S3 => {
+const _getS3Client = (): AWS.S3 => {
   const accessKeyId = process.env.OBJECT_STORE_ACCESS_KEY_ID;
   const secretAccessKey = process.env.OBJECT_STORE_SECRET_KEY_ID;
 
@@ -38,7 +38,7 @@ export const _getS3Client = (): AWS.S3 => {
  * @returns {*} {string} The object store URL
  * @throws {apiError} If OBJECT_STORE_URL environment variable is not defined
  */
-export const _getObjectStoreUrl = (): string => {
+const _getObjectStoreUrl = (): string => {
   const url = process.env.OBJECT_STORE_URL;
 
   if (!url) {
@@ -54,7 +54,7 @@ export const _getObjectStoreUrl = (): string => {
  * @returns {*} {string} The object store bucket name
  * @throws {apiError} If OBJECT_STORE_BUCKET_NAME environment variable is not defined
  */
-export const _getObjectStoreBucketName = (): string => {
+const _getObjectStoreBucketName = (): string => {
   const bucketName = process.env.OBJECT_STORE_BUCKET_NAME;
 
   if (!bucketName) {
@@ -72,7 +72,7 @@ export const _getObjectStoreBucketName = (): string => {
  * @param {string} [key] The key to an object in S3
  * @returns {*} {string} The s3 host URL
  */
-export const getS3HostUrl = (key?: string): string => {
+const getS3HostUrl = (key?: string): string => {
   // Appends the given S3 object key, trimming between 0 and 2 trailing '/' characters
   return `${_getObjectStoreUrl()}/${_getObjectStoreBucketName()}/${
     key ?? ""
@@ -110,4 +110,12 @@ const getFileDownloadUrl = (fileName: string): string => {
   return s3Client.getSignedUrl("getObject", params);
 };
 
-export { uploadFileToS3, getFileDownloadUrl };
+export {
+  upload,
+  _getS3Client,
+  _getObjectStoreUrl,
+  _getObjectStoreBucketName,
+  getS3HostUrl,
+  uploadFileToS3,
+  getFileDownloadUrl,
+};
