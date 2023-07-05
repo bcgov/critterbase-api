@@ -9,7 +9,6 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
 import { upload } from "../../utils/object_store";
 
-// TODO: Returned signed URLs or files from get requests
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
 

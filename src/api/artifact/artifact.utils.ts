@@ -14,7 +14,7 @@ type ArtifactCreate = z.infer<typeof ArtifactCreateBodySchema>;
 
 type ArtifactUpdate = z.infer<typeof ArtifactUpdateBodySchema>;
 
-type ArtifactResponse = artifact & {signed_url: string};
+type ArtifactResponse = artifact & { signed_url: string };
 
 // Schemas
 
