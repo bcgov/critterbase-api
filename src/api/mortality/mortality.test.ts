@@ -67,6 +67,9 @@ const MORTALITY: mortality = {
 const LOCATION = {
   latitude: 2,
   longitude: 2,
+  coordinate_uncertainty: 2,
+  temperature: 2,
+  location_comment: "test",
   lk_region_env: null,
   lk_region_nr: null,
   lk_wildlife_management_unit: null

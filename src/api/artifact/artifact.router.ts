@@ -68,7 +68,6 @@ export const ArtifactRouter = (db: ICbDatabase) => {
         const artifactData = await ArtifactUpdateBodySchema.parseAsync(
           req.body
         );
-        console.log(artifactData);
         const artifact = await db.updateArtifact(req.params.id, artifactData);
         return res.status(200).json(artifact);
       })
