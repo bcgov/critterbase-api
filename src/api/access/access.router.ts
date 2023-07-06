@@ -6,6 +6,23 @@ import { Prisma } from "@prisma/client";
 import express from "express";
 import { ICbDatabase } from "../../utils/database";
 
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - system_user_id
+ *         - system_name
+ *       properties:
+ *         system_user_id:
+ *           type: string
+ *           description: The id of the user.
+ *         system_name:
+ *           type: string
+ *           description: The name of the user.
+ */
 export const AccessRouter = (db: ICbDatabase) => {
   const accessRouter = express.Router();
 
@@ -13,28 +30,43 @@ export const AccessRouter = (db: ICbDatabase) => {
    ** Logs basic details about the current supported routes
    * @params All four express params.
    */
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Logs basic details about the current supported routes
+   *     responses:
+   *       200:
+   *         description: Welcome to Critterbase API
+   */
   accessRouter.get("/", (req: Request, res: Response) => {
     return res.status(200).json("Welcome to Critterbase API");
   });
-  /**
-   ** login endpoint
-   * Note: currently accepts, user_id OR keycloak_uuid OR (system_name AND system_user_id)
-   */
-  /*accessRouter.post(
-    "/login",
-    catchErrors(async (req: Request, res: Response) => {
-      const parsedLogin = AuthLoginSchema.parse(req.body);
-      const user = await db.loginUser(parsedLogin);
-      const contextUserId = await db.setUserContext(
-        user.system_user_id,
-        user.system_name
-      );
-      return res.status(200).json({ user_id: contextUserId }).end();
-    })
-  );*/
 
   /**
    ** Signup endpoint
+   */
+  /**
+   * @openapi
+   * /signup:
+   *   post:
+   *     description: Signup endpoint
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/User'
+   *     responses:
+   *       201:
+   *         description: Successfully created user
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 user_id:
+   *                   type: string
    */
   accessRouter.post(
     "/signup",
@@ -45,10 +77,26 @@ export const AccessRouter = (db: ICbDatabase) => {
         user.system_user_id,
         user.system_name
       );
-      return res.status(201).json({user_id: contextUserId}).end();
+      return res.status(201).json({ user_id: contextUserId }).end();
     })
   );
 
+  /**
+   * @openapi
+   * /types/{model}:
+   *   get:
+   *     parameters:
+   *       - in: path
+   *         name: model
+   *         required: true
+   *         description: Model name
+   *         schema:
+   *           type: string
+   *     description: Retrieves data types of a given model
+   *     responses:
+   *       200:
+   *         description: Data types of the model
+   */
   accessRouter.get(
     "/types/:model",
     catchErrors(async (req: Request, res: Response) => {
