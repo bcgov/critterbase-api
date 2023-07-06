@@ -55,9 +55,9 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
       select: { system_name: true },
     },
     critter_collection_unit: simpleCollectionUnitIncludes,
-    capture: {...captureInclude, orderBy: { capture_timestamp: 'desc' }},
+    capture: {...captureInclude, orderBy: { capture_timestamp: 'desc' } },
     mortality: {...mortalityInclude, orderBy: { mortality_timestamp: 'desc' } },
-    marking: markingIncludes,
+    marking: {...markingIncludes, orderBy: { attached_timestamp: 'desc'} },
     measurement_qualitative: measurementQualitativeInclude,
     measurement_quantitative: measurementQuantitativeInclude,
   },
@@ -288,9 +288,9 @@ const UniqueCritterQuerySchema = implement<UniqueCritterQuery>().with({
       taxon_name_common: z.string().optional(),
     })
     .optional(),
-  markings: z.array(markingResponseSchema).optional(),
-  captures: z.array(CaptureResponseSchema).optional(),
-  mortality: MortalityResponseSchema.optional(),
+  markings: z.array(ResponseSchema).optional(),
+  captures: z.array(ResponseSchema).optional(),
+  mortality: ResponseSchema.optional(),
 });
 
 const critterFormats: FormatParse = {
