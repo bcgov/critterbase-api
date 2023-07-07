@@ -1,40 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { ZodOpenApiOperationObject, createDocument } from 'zod-openapi';
-import { CollectionUnitCreateBodySchema, CollectionUnitResponseSchema } from './api/collectionUnit/collectionUnit.utils';
+
+import {  createDocument } from 'zod-openapi';
 import { stringify } from 'yaml';
-
-const getCollectionUnits: ZodOpenApiOperationObject = {
-    operationId: 'getCollectionUnit',
-    summary: 'Get all collection units',
-    responses: { 
-        '200': {
-            description: 'Successful operation',
-            content: { 
-                'application/json': {
-                    schema: CollectionUnitResponseSchema
-                }
-            }
-        }
-    }
-}
-
-const createCollectionUnit: ZodOpenApiOperationObject = {
-    operationId: 'createCollectionUnit',
-    summary: 'Create a collection unit',
-    requestBody: {
-        content: {
-            'application/json' : {
-                schema: CollectionUnitCreateBodySchema
-            }
-        }
-    },
-    responses: {
-        '201' : {
-            description: 'amogus'
-        }
-    }
-}
+import { createCollectionUnit, deleteCollectionUnit, getCollectionUnits, updateCollectionUnit } from './api/collectionUnit/collectionUnit.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -49,6 +16,10 @@ const document = createDocument({
     paths: {
         '/collection-units' : {
             get: getCollectionUnits,
+            patch: updateCollectionUnit,
+            delete: deleteCollectionUnit
+        },
+        '/collection-units/create' : {
             post: createCollectionUnit
         }
     }

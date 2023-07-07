@@ -95,7 +95,9 @@ const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.trans
     unit_name: xref_collection_unit?.unit_name ?? null,
     unit_description: xref_collection_unit?.description ?? null,
   };
-}).openapi({description: 'Response with english names.', effectType: 'output', type: 'object'});
+}).pipe(
+  critter_collection_unitIncludesSchema.omit({collection_unit_id: true, xref_collection_unit: true}).extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
+).openapi({description: 'Response with english names.'});
 
 const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
   const {
