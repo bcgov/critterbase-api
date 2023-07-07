@@ -53,8 +53,8 @@ class apiError extends Error {
   /**
    ** Internal server issue or problem occurs
    */
-  static serverIssue() {
-    return new apiError(`Internal Server Error`, 500, "serverIssue");
+  static serverIssue(message = "Internal Server Error") {
+    return new apiError(message, 500, "serverIssue");
   }
 
   /**

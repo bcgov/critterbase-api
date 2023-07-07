@@ -17,7 +17,7 @@ const _getS3Client = (): AWS.S3 => {
   const secretAccessKey = process.env.OBJECT_STORE_SECRET_KEY_ID;
 
   if (!accessKeyId || !secretAccessKey) {
-    throw apiError.serverIssue();
+    throw apiError.serverIssue("Object store credentials are not defined");
   }
 
   const awsEndpoint = new AWS.Endpoint(_getObjectStoreUrl());
@@ -42,7 +42,7 @@ const _getObjectStoreUrl = (): string => {
   const url = process.env.OBJECT_STORE_URL;
 
   if (!url) {
-    throw apiError.serverIssue();
+    throw apiError.serverIssue("Object store URL is not defined");
   }
 
   return url;
@@ -58,7 +58,7 @@ const _getObjectStoreBucketName = (): string => {
   const bucketName = process.env.OBJECT_STORE_BUCKET_NAME;
 
   if (!bucketName) {
-    throw apiError.serverIssue();
+    throw apiError.serverIssue("Object store bucket name is not defined");
   }
 
   return bucketName;
