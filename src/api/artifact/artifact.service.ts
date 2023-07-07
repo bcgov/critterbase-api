@@ -22,7 +22,7 @@ const getArtifactById = async (
       artifact_id: artifact_id,
     },
   });
-  return addSignedUrlToArtifacts([artifact])[0];
+  return addSignedUrlToArtifact(artifact);
 };
 
 /**
@@ -56,14 +56,14 @@ const getAllArtifacts = async (): Promise<ArtifactResponse[]> => {
 const updateArtifact = async (
   artifact_id: string,
   artifact_data: ArtifactUpdate
-): Promise<artifact> => {
+): Promise<ArtifactResponse> => {
   const artifact = await prisma.artifact.update({
     where: {
       artifact_id: artifact_id,
     },
     data: artifact_data,
   });
-  return addSignedUrlToArtifacts([artifact])[0];
+  return addSignedUrlToArtifact(artifact);
 };
 
 /**
@@ -87,7 +87,7 @@ const createArtifact = async (
   const artifact = await prisma.artifact.create({
     data: { ...artifact_data, artifact_id, artifact_url },
   });
-  return addSignedUrlToArtifacts([artifact])[0];
+  return addSignedUrlToArtifact(artifact);
 };
 
 /**
@@ -104,15 +104,20 @@ const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
 };
 
 /**
+ * * Adds a signed URL to an artifact
+ * @param {artifact} artifact
+ */
+const addSignedUrlToArtifact = (artifact: artifact): ArtifactResponse => {
+  const signed_url = getFileDownloadUrl(artifact.artifact_url);
+  return { ...artifact, signed_url };
+};
+
+/**
  * * Maps over an array of artifacts and adds a signed URL to each one
  * @param {artifact[]} artifacts
  */
-const addSignedUrlToArtifacts = (artifacts: artifact[]): ArtifactResponse[] => {
-  return artifacts.map((artifact) => {
-    const signed_url = getFileDownloadUrl(artifact.artifact_url);
-    return { ...artifact, signed_url };
-  });
-};
+const addSignedUrlToArtifacts = (artifacts: artifact[]): ArtifactResponse[] =>
+  artifacts.map(addSignedUrlToArtifact);
 
 export {
   getArtifactById,
