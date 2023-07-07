@@ -2,6 +2,7 @@ import { capture, Prisma } from "@prisma/client";
 import {
   CommonFormattedLocationSchema,
   commonLocationSelect,
+  CommonLocationValidation,
   LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema,
@@ -14,19 +15,8 @@ import {
   zodID,
 } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
+import { CommonLocationSchema } from "../location/location.utils";
 
-const captureInclude = Prisma.validator<Prisma.captureArgs>()({
-  include: {
-    location_capture_capture_location_idTolocation: {
-      ...commonLocationSelect,
-    },
-    location_capture_release_location_idTolocation: {
-      ...commonLocationSelect,
-    },
-  },
-});
-
-type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
 
 const CaptureBodySchema = implement<capture>().with({
   capture_id: zodID,
@@ -42,6 +32,26 @@ const CaptureBodySchema = implement<capture>().with({
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
 });
+
+const captureInclude = Prisma.validator<Prisma.captureArgs>()({
+  include: {
+    location_capture_capture_location_idTolocation: {
+      ...commonLocationSelect,
+    },
+    location_capture_release_location_idTolocation: {
+      ...commonLocationSelect,
+    },
+  },
+});
+
+type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
+
+const CaptureIncludeSchema = implement<CaptureIncludeType>().with({
+  ...CaptureBodySchema.shape,
+  location_capture_capture_location_idTolocation: CommonLocationSchema,
+  location_capture_release_location_idTolocation: CommonLocationSchema
+})
+
 
 const CaptureUpdateSchema = implement<
   Omit<
@@ -87,7 +97,7 @@ const CaptureCreateSchema = implement<
 type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
 type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
-const CaptureResponseSchema = ResponseSchema.transform((val) => {
+const CaptureResponseSchema = CaptureIncludeSchema.transform((val) => {
   const {
     location_capture_capture_location_idTolocation: c_location,
     location_capture_release_location_idTolocation: r_location,
@@ -104,6 +114,14 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
+const CaptureValidation = CaptureIncludeSchema.omit({
+  location_capture_capture_location_idTolocation: true, 
+  location_capture_release_location_idTolocation: true
+}).extend({
+  capture_location: CommonLocationValidation.nullable(),
+  release_location: CommonLocationValidation.nullable()
+})
+
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
 export type {
@@ -117,5 +135,7 @@ export {
   CaptureCreateSchema,
   CaptureUpdateSchema,
   CaptureResponseSchema,
-  CaptureBodySchema
+  CaptureBodySchema,
+  CaptureIncludeSchema,
+  CaptureValidation
 };

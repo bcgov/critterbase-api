@@ -16,7 +16,8 @@ export const getCritterById: ZodOpenApiOperationObject = {
                 'application/json': {
                     schema: {
                         oneOf: [
-                            { "$ref": "#/components/schemas/defaultCritterResponse" }
+                            { "$ref": "#/components/schemas/defaultCritterResponse" },
+                            { "$ref": "#/components/schemas/detailedCritterResponse"}
                         ]
                     }
                 }

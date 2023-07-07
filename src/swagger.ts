@@ -3,14 +3,15 @@ import {  createDocument } from 'zod-openapi';
 import { stringify } from 'yaml';
 import { createCollectionUnit, deleteCollectionUnit, getAllCollectionUnits, getCollectionUnits, updateCollectionUnit } from './api/collectionUnit/collectionUnit.swagger';
 import { getCritterById } from './api/critter/critter.swagger';
-import { CritterDefaultResponseSchema } from './api/critter/critter.utils';
+import { CritterDefaultResponseSchema, CritterDetailedResponseSchema } from './api/critter/critter.utils';
 import  {z}from 'zod'
 
 const document = createDocument({
     openapi: '3.1.0',
     components: {
         schemas: {
-            defaultCritterResponse: CritterDefaultResponseSchema
+            defaultCritterResponse: CritterDefaultResponseSchema,
+            detailedCritterResponse: CritterDetailedResponseSchema
         }
     },
     info: {

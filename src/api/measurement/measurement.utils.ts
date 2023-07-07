@@ -2,6 +2,7 @@
 import {
   measurement_qualitative,
   measurement_quantitative,
+  measurement_unit,
   Prisma,
 } from "@prisma/client";
 import { z } from "zod";
@@ -20,6 +21,36 @@ import {
 } from "./measurement.service";
 // Zod Schemas
 
+/**
+ ** Base measurement_qualitatitive schema
+ */
+ const QualitativeSchema = implement<measurement_qualitative>().with({
+  measurement_qualitative_id: zodID,
+  critter_id: zodID,
+  taxon_measurement_id: zodID,
+  capture_id: zodID.nullable(),
+  mortality_id: zodID.nullable(),
+  qualitative_option_id: zodID,
+  measurement_comment: z.string().nullable(),
+  measured_timestamp: z.coerce.date().nullable(),
+  ...zodAudit,
+});
+
+/**
+ ** Base measurement_quantitative schema
+ */
+ const QuantitativeSchema = implement<measurement_quantitative>().with({
+  measurement_quantitative_id: zodID,
+  critter_id: zodID,
+  taxon_measurement_id: zodID,
+  capture_id: zodID.nullable(),
+  mortality_id: zodID.nullable(),
+  value: z.number(),
+  measurement_comment: z.string().nullable(),
+  measured_timestamp: z.coerce.date().nullable(),
+  ...zodAudit,
+});
+
 const measurementQualitativeInclude =
   Prisma.validator<Prisma.measurement_qualitativeArgs>()({
     include: {
@@ -35,21 +66,43 @@ const measurementQuantitativeInclude =
     },
   });
 
+type MeasurementQualitativeInclude = Prisma.measurement_qualitativeGetPayload<typeof measurementQualitativeInclude>;
+const MeasurementQualitativeIncludeSchema = implement<MeasurementQualitativeInclude>().with({
+  ...QualitativeSchema.shape,
+  xref_taxon_measurement_qualitative: z.object({
+    taxon_measurement_id: zodID,
+    taxon_id: zodID,
+    measurement_name: z.string(),
+    measurement_desc: z.string().nullable(),        
+    ...zodAudit
+  }),
+  xref_taxon_measurement_qualitative_option: z.object({
+    qualitative_option_id: zodID,
+    taxon_measurement_id: zodID,
+    option_label: z.string().nullable(),
+    option_value: z.number(),
+    option_desc: z.string().nullable(),
+    ...zodAudit
+  })
+})
+
+type MeasurementQuantitativeInclude = Prisma.measurement_quantitativeGetPayload<typeof measurementQuantitativeInclude>;
+const MeasurementQuantitativeIncludeSchema = implement<MeasurementQuantitativeInclude>().with({
+  ...QuantitativeSchema.shape,
+  xref_taxon_measurement_quantitative: z.object({
+    taxon_measurement_id: zodID,
+    taxon_id: zodID,
+    measurement_name: z.string(),
+    measurement_desc: z.string().nullable(),
+    min_value: z.number().nullable(),
+    max_value: z.number().nullable(),
+    unit: z.nativeEnum(measurement_unit),
+    ...zodAudit
+  })
+})
+
 // Qualitatitive
-/**
- ** Base measurement_qualitatitive schema
- */
-const QualitativeSchema = implement<measurement_qualitative>().with({
-  measurement_qualitative_id: zodID,
-  critter_id: zodID,
-  taxon_measurement_id: zodID,
-  capture_id: zodID.nullable(),
-  mortality_id: zodID.nullable(),
-  qualitative_option_id: zodID,
-  measurement_comment: z.string().nullable(),
-  measured_timestamp: z.coerce.date().nullable(),
-  ...zodAudit,
-});
+
 
 const QualitativeCreateSchema = implement<
   Omit<
@@ -90,21 +143,17 @@ const QualitativeResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
+const QualitativeValidationSchema = MeasurementQualitativeIncludeSchema.omit({
+  xref_taxon_measurement_qualitative: true,
+  xref_taxon_measurement_qualitative_option: true
+}).extend({
+  measurement_name: z.string().nullable(),
+  option_label: z.string().nullable(),
+  option_value: z.string().nullable()
+})
+
 // Quantitative
-/**
- ** Base measurement_quantitative schema
- */
-const QuantitativeSchema = implement<measurement_quantitative>().with({
-  measurement_quantitative_id: zodID,
-  critter_id: zodID,
-  taxon_measurement_id: zodID,
-  capture_id: zodID.nullable(),
-  mortality_id: zodID.nullable(),
-  value: z.number(),
-  measurement_comment: z.string().nullable(),
-  measured_timestamp: z.coerce.date().nullable(),
-  ...zodAudit,
-});
+
 
 const QuantitativeCreateSchema = implement<
   Omit<
@@ -142,6 +191,12 @@ const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
   return { ...rest, measurement_name: x?.measurement_name ?? null };
 });
 
+const QuantitativeValidationSchema = MeasurementQuantitativeIncludeSchema.omit({
+  xref_taxon_measurement_quantitative: true
+}).extend({
+  measurement_name: z.string().nullable()
+})
+
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
 type QualitativeUpdateBody = z.infer<typeof QualitativeUpdateSchema>;
 type QuantitativeUpdateBody = z.infer<typeof QuantitativeUpdateSchema>;
@@ -172,5 +227,9 @@ export {
   QuantitativeUpdateSchema,
   QuantitativeVerificationSchema,
   QualitatitiveVerificationSchema,
-  MeasurementVerificationSchema
+  MeasurementVerificationSchema,
+  MeasurementQualitativeIncludeSchema,
+  MeasurementQuantitativeIncludeSchema,
+  QuantitativeValidationSchema,
+  QualitativeValidationSchema
 };

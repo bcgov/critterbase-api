@@ -6,11 +6,14 @@ import {
   implement,
   noAudit,
   ResponseSchema,
+  zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
 import {
   captureInclude,
+  CaptureIncludeSchema,
   CaptureResponseSchema,
+  CaptureValidation,
   FormattedCapture,
 } from "../capture/capture.utils";
 import {
@@ -23,17 +26,24 @@ import {
   FormattedMarking,
   markingIncludes,
   markingResponseSchema,
+  MarkingResponseValidation,
 } from "../marking/marking.utils";
 import {
   measurementQualitativeInclude,
+  MeasurementQualitativeIncludeSchema,
   measurementQuantitativeInclude,
+  MeasurementQuantitativeIncludeSchema,
   QualitativeResponseSchema,
+  QualitativeValidationSchema,
   QuantitativeResponseSchema,
+  QuantitativeValidationSchema,
 } from "../measurement/measurement.utils";
 import {
   FormattedMortality,
   mortalityInclude,
+  MortalityIncludeSchema,
   MortalityResponseSchema,
+  MortalityResponseValidation,
 } from "../mortality/mortality.utils";
 
 // const eCritterStatus = {
@@ -42,6 +52,7 @@ import {
 // };
 
 import { extendZodWithOpenApi } from 'zod-openapi';
+import { markingIncludesSchema } from "../marking/marking.utils";
 extendZodWithOpenApi(z);
 
 enum eCritterStatus {
@@ -195,11 +206,16 @@ const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().w
   user_critter_create_userTouser: z.object({
     system_name: z.nativeEnum(system)
   }),
-  critter_collection_unit: SimpleCollectionUnitIncludesSchema.array()
+  critter_collection_unit: SimpleCollectionUnitIncludesSchema.array(),
+  capture: CaptureIncludeSchema.array(),
+  mortality: MortalityIncludeSchema.array(),
+  marking: markingIncludesSchema.array(),
+  measurement_qualitative: MeasurementQualitativeIncludeSchema.array(),
+  measurement_quantitative: MeasurementQuantitativeIncludeSchema.array()
 })
 
 
-const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
+const CritterDetailedResponseSchema = DetailedCritterIncludeSchema.transform((val) => {
   const {
     mortality,
     capture,
@@ -211,7 +227,7 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
     user_critter_create_userTouser,
     critter_collection_unit,
     ...rest
-  } = val as CCritterDetailedDetailedIncludeResult
+  } = val as CritterDetailedIncludeResult
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
@@ -239,7 +255,24 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
       ),
     },
   };
-});
+}).pipe(
+  DetailedCritterIncludeSchema
+  .omit({measurement_qualitative: true, measurement_quantiatitve: true, lk_taxon: true, lk_region_nr: true, user_critter_create_userTouser: true, critter_collection_unit: true})
+  .extend({
+    taxon: z.string(),
+    responsible_region: z.string().nullable(),
+    mortality_timestamp: z.date().nullable(),
+    system_origin: z.nativeEnum(system),
+    collection_units: SimpleCollectionResponseValidation.array(),
+    mortality: MortalityResponseValidation.omit({critter_id: true, ...noAudit}).array(),
+    capture: CaptureValidation.omit({critter_id: true, ...noAudit}).array(),
+    marking: MarkingResponseValidation.omit({critter_id: true, ...noAudit}).array(),
+    measurement: z.object({
+      qualitative: QualitativeValidationSchema.omit({critter_id: true, ...noAudit}).array(),
+      quantitative: QuantitativeValidationSchema.omit({critter_id: true, ...noAudit}).array()
+    })
+  }
+));
 
 const CritterDefaultResponseSchema = DefaultCritterIncludeSchema.transform((val) => {
   const { critter_collection_unit, lk_taxon, mortality, ...rest } =
@@ -341,9 +374,9 @@ const UniqueCritterQuerySchema = implement<UniqueCritterQuery>().with({
       taxon_name_common: z.string().optional(),
     })
     .optional(),
-  markings: z.array(markingResponseSchema).optional(),
-  captures: z.array(CaptureResponseSchema).optional(),
-  mortality: MortalityResponseSchema.optional(),
+  markings: z.array(ResponseSchema).optional(),
+  captures: z.array(ResponseSchema).optional(),
+  mortality: ResponseSchema.optional(),
 });
 
 const critterFormats: FormatParse = {
@@ -359,7 +392,7 @@ const critterFormats: FormatParse = {
 
 export type {
   FormattedCritter,
-  CCritterDetailedIncludeResult as CritterDetailedIncludeResult as CritterIncludeResult
+  CritterDetailedIncludeResult,
   CritterDefaultIncludeResult,
   CritterDefaultResponse,
   CritterCreate,
