@@ -164,8 +164,8 @@ const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
   ...zodAudit,
 });
 
-const TransformResponseSchema = ResponseSchema.transform((val) => val); //This is used as a base for a type.
-type IResponseSchema = typeof TransformResponseSchema;
+//const TransformResponseSchema = ResponseSchema.transform((val) => val); //This is used as a base for a type.
+type IResponseSchema= z.ZodTypeAny | z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny>;
 export type { IResponseSchema };
 
 export {

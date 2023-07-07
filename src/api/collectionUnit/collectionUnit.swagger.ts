@@ -5,7 +5,10 @@ import { zodID } from '../../utils/zod_helpers';
 
 export const getCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnit',
-    summary: 'Get all collection units',
+    summary: 'Get a collection unit by id',
+    requestParams: {
+        path: z.object( {id: zodID} )
+    },
     responses: { 
         '200': {
             description: 'Successful operation',
@@ -18,9 +21,24 @@ export const getCollectionUnits: ZodOpenApiOperationObject = {
     }
 }
 
+export const getAllCollectionUnits: ZodOpenApiOperationObject = {
+    operationId: 'getCollectionUnits',
+    summary: 'Get every critter collection unit entry.',
+    responses: { 
+        '200': {
+            description: 'Successful operation',
+            content: { 
+                'application/json': {
+                    schema: CollectionUnitResponseSchema.array()
+                }
+            }
+        }
+    }
+}
+
 export const createCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'createCollectionUnit',
-    summary: 'Create a collection unit',
+    summary: 'Create a critter collection unit assignment',
     requestBody: {
         content: {
             'application/json' : {
@@ -30,7 +48,7 @@ export const createCollectionUnit: ZodOpenApiOperationObject = {
     },
     responses: {
         '201' : {
-            description: 'amogus',
+            description: 'Created successfully.',
             content: {
                 'application/json' : {
                     schema: CollectionUnitResponseSchema
@@ -43,6 +61,9 @@ export const createCollectionUnit: ZodOpenApiOperationObject = {
 export const updateCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'updateCollectionUnit',
     summary: 'Update a collection unit',
+    requestParams: {
+        path: z.object( {id: zodID} )
+    },
     requestBody: {
         content: {
             'application/json' : {
@@ -52,7 +73,7 @@ export const updateCollectionUnit: ZodOpenApiOperationObject = {
     },
     responses: {
         '200' : {
-            description: 'amogus',
+            description: 'Updated successfully.',
             content: {
                 'application/json' : {
                     schema: CollectionUnitResponseSchema

@@ -1,10 +1,18 @@
 
 import {  createDocument } from 'zod-openapi';
 import { stringify } from 'yaml';
-import { createCollectionUnit, deleteCollectionUnit, getCollectionUnits, updateCollectionUnit } from './api/collectionUnit/collectionUnit.swagger';
+import { createCollectionUnit, deleteCollectionUnit, getAllCollectionUnits, getCollectionUnits, updateCollectionUnit } from './api/collectionUnit/collectionUnit.swagger';
+import { getCritterById } from './api/critter/critter.swagger';
+import { CritterDefaultResponseSchema } from './api/critter/critter.utils';
+import  {z}from 'zod'
 
 const document = createDocument({
     openapi: '3.1.0',
+    components: {
+        schemas: {
+            defaultCritterResponse: CritterDefaultResponseSchema
+        }
+    },
     info: {
         title: 'Critterbase API',
         version: '1.0.0',
@@ -14,13 +22,19 @@ const document = createDocument({
         },
     },
     paths: {
-        '/collection-units' : {
+        '/collection-units/' : {
+            get: getAllCollectionUnits
+        },
+        '/collection-units/:id' : {
             get: getCollectionUnits,
             patch: updateCollectionUnit,
             delete: deleteCollectionUnit
         },
         '/collection-units/create' : {
             post: createCollectionUnit
+        },
+        '/critter/:id' : {
+            get: getCritterById
         }
     }
 });

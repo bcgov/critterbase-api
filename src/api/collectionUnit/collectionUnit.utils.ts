@@ -78,6 +78,32 @@ const critter_collection_unitIncludesSchema =
       description: z.string().nullable()
     }),
   });
+/*
+include: {
+    xref_collection_unit: {
+      select: {
+        collection_unit_id: true,
+        unit_name: true,
+        lk_collection_category: {
+          select: { 
+            collection_category_id: true, 
+            category_name: true
+          },
+        },
+      },
+    },*/
+  const SimpleCollectionUnitIncludesSchema = 
+    implement<SimpleCollectionUnitIncludes>().with({
+      ...critter_collection_unitSchema.shape,
+      xref_collection_unit: z.object({
+        collection_unit_id: zodID,
+        unit_name: z.string(),
+        lk_collection_category: z.object({
+          collection_category_id: zodID,
+          category_name: z.string()
+        })
+      }),
+    })
 
 // Formatted API response schema which omits fields and unpacks nested data
 const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.transform((obj) => {
@@ -96,10 +122,14 @@ const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.trans
     unit_description: xref_collection_unit?.description ?? null,
   };
 }).pipe(
-  critter_collection_unitIncludesSchema.omit({collection_unit_id: true, xref_collection_unit: true}).extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
-).openapi({description: 'Response with english names.'});
+  critter_collection_unitIncludesSchema
+    .omit({collection_unit_id: true, xref_collection_unit: true})
+    .extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
+  ).openapi({description: 'Response with english names.'});
 
-const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
+const SimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema.omit({xref_collection_unit: true}).extend({category_name: z.string(), unit_name: z.string(), collection_category_id: zodID})
+
+const SimpleCollectionUnitResponseSchema = SimpleCollectionUnitIncludesSchema.transform((obj) => {
   const {
     xref_collection_unit: {
       lk_collection_category: { category_name, collection_category_id },
@@ -107,7 +137,7 @@ const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
       collection_unit_id,
     },
     critter_collection_unit_id
-  } = obj as SimpleCollectionUnitIncludes;
+  } = obj;
   return {
     critter_collection_unit_id,
     category_name,
@@ -115,7 +145,7 @@ const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     collection_unit_id,
     collection_category_id
   };
-});
+}).pipe(SimpleCollectionResponseValidation);
 
 const CollectionUnitDeleteSchema = critter_collection_unitSchema
   .pick({critter_collection_unit_id: true})
@@ -159,7 +189,9 @@ export {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
   CollectionUnitDeleteSchema,
-  CollectionUnitUpsertSchema
+  CollectionUnitUpsertSchema,
+  SimpleCollectionUnitIncludesSchema,
+  SimpleCollectionResponseValidation
 };
 export type {
   CollectionUnitIncludes,

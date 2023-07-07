@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { critter, Prisma, sex } from "@prisma/client";
+import { critter, Prisma, sex, system } from "@prisma/client";
 import { array, z } from "zod";
 import { AuditColumns, FormatParse } from "../../utils/types";
 import {
@@ -14,7 +14,9 @@ import {
   FormattedCapture,
 } from "../capture/capture.utils";
 import {
+  SimpleCollectionResponseValidation,
   simpleCollectionUnitIncludes,
+  SimpleCollectionUnitIncludesSchema,
   SimpleCollectionUnitResponseSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import {
@@ -38,6 +40,9 @@ import {
 //   alive: "Alive",
 //   mortality: "Mortality",
 // };
+
+import { extendZodWithOpenApi } from 'zod-openapi';
+extendZodWithOpenApi(z);
 
 enum eCritterStatus {
   alive = "alive",
@@ -63,7 +68,7 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   },
 });
 
-type CritterIncludeResult = Prisma.critterGetPayload<
+type CritterDetailedIncludeResult = Prisma.critterGetPayload<
   typeof detailedCritterInclude
 >;
 
@@ -83,6 +88,7 @@ const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     },
   },
 });
+
 
 const minimalCritterSelect = Prisma.validator<Prisma.critterArgs>()({
   select: {
@@ -150,6 +156,49 @@ const CritterIdsRequestSchema = z.object({
 
 const CritterQuerySchema = z.object({ wlh_id: z.string().optional() }); //Add additional properties as needed
 
+const DefaultCritterIncludeSchema = implement<CritterDefaultIncludeResult>().with({
+  ...CritterSchema.shape,
+  lk_taxon: z.object({
+    taxon_name_latin: z.string(),
+    taxon_name_common: z.string().nullable()
+  }),
+  critter_collection_unit: SimpleCollectionUnitIncludesSchema.array(),
+  mortality: z.object({mortality_timestamp: z.date() }).array()
+});
+/*
+include: {
+    lk_taxon: {
+      select: { taxon_name_latin: true, taxon_name_common: true },
+    },
+    lk_region_nr: {
+      select: { region_nr_name: true },
+    },
+    user_critter_create_userTouser: {
+      select: { system_name: true },
+    },
+    critter_collection_unit: simpleCollectionUnitIncludes,
+    capture: {...captureInclude, orderBy: { capture_timestamp: 'desc' }},
+    mortality: {...mortalityInclude, orderBy: { mortality_timestamp: 'desc' } },
+    marking: markingIncludes,
+    measurement_qualitative: measurementQualitativeInclude,
+    measurement_quantitative: measurementQuantitativeInclude,
+  },*/
+const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().with({
+  ...CritterSchema.shape,
+  lk_taxon: z.object({
+    taxon_name_latin: z.string(),
+    taxon_name_common: z.string().nullable()
+  }),
+  lk_region_nr: z.object({
+    region_nr_name: z.string()
+  }).nullable(),
+  user_critter_create_userTouser: z.object({
+    system_name: z.nativeEnum(system)
+  }),
+  critter_collection_unit: SimpleCollectionUnitIncludesSchema.array()
+})
+
+
 const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   const {
     mortality,
@@ -162,7 +211,7 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
     user_critter_create_userTouser,
     critter_collection_unit,
     ...rest
-  } = val as CritterIncludeResult;
+  } = val as CCritterDetailedDetailedIncludeResult
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
@@ -192,7 +241,7 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
-const CritterDefaultResponseSchema = ResponseSchema.transform((val) => {
+const CritterDefaultResponseSchema = DefaultCritterIncludeSchema.transform((val) => {
   const { critter_collection_unit, lk_taxon, mortality, ...rest } =
     val as CritterDefaultIncludeResult;
   return {
@@ -203,7 +252,11 @@ const CritterDefaultResponseSchema = ResponseSchema.transform((val) => {
     ),
     mortality_timestamp: mortality[0]?.mortality_timestamp ?? null,
   };
-});
+}).pipe(
+  DefaultCritterIncludeSchema
+  .omit({critter_collection_unit: true, lk_taxon: true, mortality: true})
+  .extend({taxon: z.string(), collection_units: array(SimpleCollectionResponseValidation), mortality_timestamp: z.date().nullable()})
+);
 
 const CritterFilterSchema = z.object({
   critter_ids: z
@@ -306,7 +359,7 @@ const critterFormats: FormatParse = {
 
 export type {
   FormattedCritter,
-  CritterIncludeResult,
+  CCritterDetailedIncludeResult as CritterDetailedIncludeResult as CritterIncludeResult
   CritterDefaultIncludeResult,
   CritterDefaultResponse,
   CritterCreate,
