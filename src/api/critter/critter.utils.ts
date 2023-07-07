@@ -120,7 +120,7 @@ const CritterSchema = implement<critter>().with({
   update_user: zodID,
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
-});
+})
 
 const CritterUpdateSchema = implement<
   Omit<Prisma.critterUncheckedUpdateManyInput, keyof AuditColumns>
@@ -128,7 +128,7 @@ const CritterUpdateSchema = implement<
   CritterSchema.omit({
     ...noAudit,
   }).partial().shape
-);
+)
 
 const CritterCreateSchema = implement<
   Omit<Prisma.critterCreateManyInput, keyof AuditColumns>

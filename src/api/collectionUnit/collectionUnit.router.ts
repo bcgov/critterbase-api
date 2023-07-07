@@ -29,7 +29,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: '#/components/schemas/CollectionUnit'
+   *                 $ref: '#/components/schemas/CollectionUnitResponse'
    */
   collectionUnitRouter.get(
     "/",

@@ -12,6 +12,8 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { extendZodWithOpenApi } from 'zod-openapi';
+extendZodWithOpenApi(z);
 
 // Types
 type CollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
@@ -67,18 +69,18 @@ const critter_collection_unitSchema = implement<critter_collection_unit>().with(
   }
 );
 
-// Extended schema which has both base schema and included fields
-// const critter_collection_unitIncludesSchema =
-//   implement<CollectionUnitIncludes>().with({
-//     ...critter_collection_unitSchema.shape,
-//     xref_collection_unit: XrefCollectionUnitSchema.pick({
-//       unit_name: true,
-//       description: true,
-//     }),
-//   });
+//Extended schema which has both base schema and included fields
+const critter_collection_unitIncludesSchema =
+  implement<CollectionUnitIncludes>().with({
+    ...critter_collection_unitSchema.shape,
+    xref_collection_unit: z.object({
+      unit_name: z.string(),
+      description: z.string().nullable()
+    }),
+  });
 
 // Formatted API response schema which omits fields and unpacks nested data
-const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
+const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.transform((obj) => {
   const {
     // omit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -86,14 +88,14 @@ const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     // include
     xref_collection_unit,
     ...rest
-  } = obj as CollectionUnitIncludes;
+  } = obj;
 
   return {
     ...rest,
     unit_name: xref_collection_unit?.unit_name ?? null,
     unit_description: xref_collection_unit?.description ?? null,
   };
-});
+}).openapi({description: 'Response with english names.', effectType: 'output', type: 'object'});
 
 const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
   const {
@@ -128,7 +130,7 @@ const CollectionUnitCreateBodySchema = implement<
     .omit({ ...noAudit})
     .partial()
     .required({ critter_id: true, collection_unit_id: true }).shape
-);
+).openapi({description: 'For creating collection untis'});
 
 // Validate incoming request body for update critter collection unit
 const CollectionUnitUpdateBodySchema = implement<

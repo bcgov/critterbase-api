@@ -22,6 +22,7 @@ import swaggerUIExperss from "swagger-ui-express";
 import { options } from "./openapi/root-api-doc";
 
 import swaggerJSDoc from "swagger-jsdoc";
+import { yaml } from "./swagger";
 
 export const makeApp = (db: ICbDatabase) => {
   const app = express();
@@ -33,7 +34,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(
     "/api-docs",
     swaggerUIExperss.serve,
-    swaggerUIExperss.setup(swaggerJSDoc(options))
+    swaggerUIExperss.setup(yaml)
   );
 
   app.use("/api/", AccessRouter(db));

@@ -55,6 +55,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
     "ts-node": "^10.9.1",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "zod-openapi": "^2.6.2"
   }
 }
