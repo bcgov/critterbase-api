@@ -5,6 +5,7 @@ import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagge
 import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
 import { CritterDefaultResponseSchema, CritterDetailedResponseSchema } from './api/critter/critter.utils';
 import  {z}from 'zod'
+import { capturePaths } from './api/capture/capture.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -23,7 +24,8 @@ const document = createDocument({
     },
     paths: {
         ...collectionUnitsPaths,
-        ...critterPaths
+        ...critterPaths,
+        ...capturePaths,
     }
 });
 //console.log(stringify(document));

@@ -145,16 +145,15 @@ const CommonLocationSchema = implement<CommonLocationType>().with({
 const CommonLocationValidation = CommonLocationSchema.omit({
   lk_region_env: true,
   lk_region_nr: true,
-  lk_wildlife_management_unit: true
-})
-.extend({
-  region_env_id: zodID.optional(),
-  region_nr_id: zodID.optional(),
-  wmu_id: zodID.optional(),
-  region_env_name: z.string().optional(),
-  region_nr_name: z.string().optional(),
-  wmu_name: z.string().optional(),
-})
+  lk_wildlife_management_unit: true,
+}).extend({
+  region_env_id: zodID.nullish(),
+  region_nr_id: zodID.nullish(),
+  wmu_id: zodID.nullish(),
+  region_env_name: z.string().nullish(),
+  region_nr_name: z.string().nullish(),
+  wmu_name: z.string().nullish(),
+});
 
 const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
   const { lk_region_env, lk_region_nr, lk_wildlife_management_unit, ...rest } =
@@ -169,8 +168,6 @@ const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
     wmu_name: lk_wildlife_management_unit?.wmu_name,
   };
 });
-
-
 
 const locationIncludes: Prisma.locationInclude = {
   lk_wildlife_management_unit: true,
@@ -194,5 +191,5 @@ export {
   LocationSchema,
   LocationUpdateSchema,
   CommonFormattedLocationSchema,
-  CommonLocationValidation
+  CommonLocationValidation,
 };
