@@ -24,7 +24,7 @@ const document = createDocument({
     },
     paths: {
         '/collection-units/' : {
-            get: getAllCollectionUnits
+            get: getAllCollectionUnits,
         },
         '/collection-units/:id' : {
             get: getCollectionUnits,
@@ -36,7 +36,7 @@ const document = createDocument({
         },
         '/critter/:id' : {
             get: getCritterById
-        }
+        },
     }
 });
 console.log(stringify(document));
