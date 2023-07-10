@@ -12,20 +12,21 @@ import { ICbDatabase } from "../../utils/database";
 export const CaptureRouter = (db: ICbDatabase) => {
   const captureRouter = express.Router();
 
-/**
- ** Critter Router Home
- */
+  /**
+   ** Critter Router Home
+   */
   captureRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
-      const allCritters = await db.getAllCaptures();
-      return res.status(200).json(allCritters);
+      const allCaptures = await db.getAllCaptures();
+      const result = allCaptures.map((c) => CaptureResponseSchema.parse(c));
+      return res.status(200).json(result);
     })
   );
 
   /**
    ** Create new critter
-  */
+   */
   captureRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
@@ -79,6 +80,6 @@ export const CaptureRouter = (db: ICbDatabase) => {
         res.status(200).json(result);
       })
     );
-  
+
   return captureRouter;
-}
+};

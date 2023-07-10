@@ -9,10 +9,10 @@ const getCollectionUnits: ZodOpenApiOperationObject = {
     requestParams: {
         path: z.object( {id: zodID} )
     },
-    responses: { 
+    responses: {
         '200': {
             description: 'Successful operation',
-            content: { 
+            content: {
                 'application/json': {
                     schema: CollectionUnitResponseSchema
                 }
@@ -24,10 +24,10 @@ const getCollectionUnits: ZodOpenApiOperationObject = {
 const getAllCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnits',
     summary: 'Get every critter collection unit entry.',
-    responses: { 
+    responses: {
         '200': {
             description: 'Successful operation',
-            content: { 
+            content: {
                 'application/json': {
                     schema: CollectionUnitResponseSchema.array()
                 }

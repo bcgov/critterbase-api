@@ -9,6 +9,8 @@ import {
   zodID,
 } from "../../utils/zod_helpers";
 import { getLocationOrThrow } from "./location.service";
+import { extendZodWithOpenApi } from 'zod-openapi';
+extendZodWithOpenApi(z);
 
 // Zod Schemas
 /**
@@ -38,11 +40,11 @@ const LocationCreateSchema = implement<
   LocationSchema.omit({ location_id: true, ...noAudit })
     .strict()
     .partial().shape
-);
+).openapi({description: 'Responds with created location'});
 
 const LocationUpdateSchema = implement<
   Omit<Prisma.locationUncheckedUpdateManyInput, keyof AuditColumns>
->().with(LocationSchema.omit({ ...noAudit }).partial().shape);
+>().with(LocationSchema.omit({ ...noAudit }).partial().shape).openapi({description: 'Responds with updated location'});
 
 const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -63,7 +65,7 @@ const LocationResponseSchema = ResponseSchema.transform((val) => {
     region_nr_name: lk_region_nr?.region_nr_name ?? null,
     region_env_name: lk_region_env?.region_env_name ?? null,
   };
-});
+}).openapi({description: 'Responds with updated location'});
 
 // Types
 type LocationResponse = z.infer<typeof LocationResponseSchema>;
@@ -140,21 +142,21 @@ const CommonLocationSchema = implement<CommonLocationType>().with({
       wmu_name: z.string(),
     })
     .nullable(),
-});
+}).openapi({description: 'Responds with default location'});
 
 const CommonLocationValidation = CommonLocationSchema.omit({
   lk_region_env: true,
   lk_region_nr: true,
-  lk_wildlife_management_unit: true
-})
-.extend({
-  region_env_id: zodID.optional(),
-  region_nr_id: zodID.optional(),
-  wmu_id: zodID.optional(),
-  region_env_name: z.string().optional(),
-  region_nr_name: z.string().optional(),
-  wmu_name: z.string().optional(),
-})
+  lk_wildlife_management_unit: true,
+}).extend({
+  region_env_id: zodID.nullish(),
+  region_nr_id: zodID.nullish(),
+  wmu_id: zodID.nullish(),
+  region_env_name: z.string().nullish(),
+  region_nr_name: z.string().nullish(),
+  wmu_name: z.string().nullish(),
+});
+
 
 const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
   const { lk_region_env, lk_region_nr, lk_wildlife_management_unit, ...rest } =
@@ -168,8 +170,7 @@ const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
     region_nr_name: lk_region_nr?.region_nr_name,
     wmu_name: lk_wildlife_management_unit?.wmu_name,
   };
-});
-
+}).openapi({description: 'Responds with formatted location'});
 
 
 const locationIncludes: Prisma.locationInclude = {
@@ -194,5 +195,5 @@ export {
   LocationSchema,
   LocationUpdateSchema,
   CommonFormattedLocationSchema,
-  CommonLocationValidation
+  CommonLocationValidation,
 };
