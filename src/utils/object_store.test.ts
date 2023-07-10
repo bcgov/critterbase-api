@@ -56,7 +56,7 @@ describe("File: object_store.ts", () => {
         fail("Expected _getS3Client to throw an error");
       } catch (error) {
         expect(error).toBeInstanceOf(apiError);
-        expect(error.message).toBe("Internal Server Error");
+        expect(error.message).toBe("Object store credentials are not defined");
         expect(error.status).toBe(500);
         expect(error.errorType).toBe("serverIssue");
       }
@@ -77,7 +77,7 @@ describe("File: object_store.ts", () => {
         fail("Expected _getObjectStoreUrl to throw an error");
       } catch (error) {
         expect(error).toBeInstanceOf(apiError);
-        expect(error.message).toBe("Internal Server Error");
+        expect(error.message).toBe("Object store URL is not defined");
         expect(error.status).toBe(500);
         expect(error.errorType).toBe("serverIssue");
       }
@@ -98,7 +98,7 @@ describe("File: object_store.ts", () => {
         fail("Expected _getObjectStoreBucketName to throw an error");
       } catch (error) {
         expect(error).toBeInstanceOf(apiError);
-        expect(error.message).toBe("Internal Server Error");
+        expect(error.message).toBe("Object store bucket name is not defined");
         expect(error.status).toBe(500);
         expect(error.errorType).toBe("serverIssue");
       }
