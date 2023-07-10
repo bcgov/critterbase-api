@@ -62,14 +62,14 @@ const formatParse = async (
   format: QueryFormats,
   service: Promise<ServiceReturn>,
   formatParse: FormatParse
-) => {
+): Promise<Record<string, unknown> | Record<string, unknown>[]> => {
   const serviceData = await service;
   const isArray = Array.isArray(serviceData);
   const Parser = formatParse[format]?.schema;
   if (!Parser) {
     return serviceData;
   }
-  return isArray ? array(Parser).parse(serviceData) : Parser.parse(serviceData);
+  return isArray ? array(Parser).parse(serviceData) as Record<string, unknown>[] : Parser.parse(serviceData) as Record<string, unknown>;
 };
 
 const toSelect = <AsType>(
