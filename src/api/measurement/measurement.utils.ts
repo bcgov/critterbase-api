@@ -96,7 +96,7 @@ const MeasurementQuantitativeIncludeSchema = implement<MeasurementQuantitativeIn
     measurement_desc: z.string().nullable(),
     min_value: z.number().nullable(),
     max_value: z.number().nullable(),
-    unit: z.nativeEnum(measurement_unit),
+    unit: z.nativeEnum(measurement_unit).nullable(),
     ...zodAudit
   })
 })
@@ -149,7 +149,7 @@ const QualitativeValidationSchema = MeasurementQualitativeIncludeSchema.omit({
 }).extend({
   measurement_name: z.string().nullable(),
   option_label: z.string().nullable(),
-  option_value: z.string().nullable()
+  option_value: z.number().nullable()
 })
 
 // Quantitative

@@ -140,10 +140,10 @@ const MortalityResponseValidation = MortalityIncludeSchema.omit({
     lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: true})
     .extend({
       location: CommonLocationValidation.nullable(),
-      proximate_cause_of_death: z.string().nullable(),
-      ultimate_cause_of_death: z.string().nullable(),
-      proximate_cause_of_death_taxon: z.string().nullable(),
-      ultimate_cause_of_death_taxon: z.string().nullable()
+      proximate_cause_of_death: z.object({cod_category: z.string(), cod_reason: z.string().nullable()}),
+      ultimate_cause_of_death: z.object({cod_category: z.string(), cod_reason: z.string().nullable()}).nullable(),
+      proximate_cause_of_death_taxon: z.object({taxon_id: z.string(), taxon_name_latin: z.string()}).nullable(),
+      ultimate_cause_of_death_taxon: z.object({taxon_id: z.string(), taxon_name_latin: z.string()}).nullable()
   })
 
 type FormattedMortality = z.infer<typeof MortalityResponseValidation>;
