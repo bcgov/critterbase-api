@@ -3,7 +3,7 @@ import { CollectionUnitCreateBodySchema, CollectionUnitResponseSchema, Collectio
 import {z} from 'zod';
 import { zodID } from '../../utils/zod_helpers';
 
-export const getCollectionUnits: ZodOpenApiOperationObject = {
+const getCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnit',
     summary: 'Get a collection unit by id',
     requestParams: {
@@ -21,7 +21,7 @@ export const getCollectionUnits: ZodOpenApiOperationObject = {
     }
 }
 
-export const getAllCollectionUnits: ZodOpenApiOperationObject = {
+const getAllCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnits',
     summary: 'Get every critter collection unit entry.',
     responses: { 
@@ -36,7 +36,7 @@ export const getAllCollectionUnits: ZodOpenApiOperationObject = {
     }
 }
 
-export const createCollectionUnit: ZodOpenApiOperationObject = {
+const createCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'createCollectionUnit',
     summary: 'Create a critter collection unit assignment',
     requestBody: {
@@ -58,7 +58,7 @@ export const createCollectionUnit: ZodOpenApiOperationObject = {
     }
 }
 
-export const updateCollectionUnit: ZodOpenApiOperationObject = {
+const updateCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'updateCollectionUnit',
     summary: 'Update a collection unit',
     requestParams: {
@@ -83,7 +83,7 @@ export const updateCollectionUnit: ZodOpenApiOperationObject = {
     }
 }
 
-export const deleteCollectionUnit: ZodOpenApiOperationObject = {
+const deleteCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'deleteCollectionUnit',
     summary: 'Deletes a collection unit',
     requestParams: {
@@ -99,4 +99,18 @@ export const deleteCollectionUnit: ZodOpenApiOperationObject = {
             }
         }
     }
+}
+
+export const collectionUnitsPaths = {
+    '/collection-units/' : {
+        get: getAllCollectionUnits
+    },
+    '/collection-units/:id' : {
+        get: getCollectionUnits,
+        patch: updateCollectionUnit,
+        delete: deleteCollectionUnit
+    },
+    '/collection-units/create' : {
+        post: createCollectionUnit
+    },
 }

@@ -83,7 +83,7 @@ type CritterDetailedIncludeResult = Prisma.critterGetPayload<
   typeof detailedCritterInclude
 >;
 
-const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
+/*const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
     critter_collection_unit: {
@@ -98,7 +98,7 @@ const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
       },
     },
   },
-});
+});*/
 
 
 const minimalCritterSelect = Prisma.validator<Prisma.critterArgs>()({
@@ -107,15 +107,26 @@ const minimalCritterSelect = Prisma.validator<Prisma.critterArgs>()({
     wlh_id: true,
     animal_id: true,
     sex: true,
-    ...defaultCritterInclude.include,
+    lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
+    critter_collection_unit: {
+      ...simpleCollectionUnitIncludes,
+    },
+    mortality: {
+      orderBy: {
+        mortality_timestamp: 'desc'
+      },
+      select: {
+        mortality_timestamp: true,
+      },
+    },
   },
 });
 
 type CritterDefaultIncludeResult = Prisma.critterGetPayload<
-  typeof defaultCritterInclude
+  typeof minimalCritterSelect
 >;
 
-type CritterDefaultResponse = Pick<
+/*type CritterDefaultResponse = Pick<
   CritterDefaultIncludeResult,
   | "critter_id"
   | "wlh_id"
@@ -123,7 +134,7 @@ type CritterDefaultResponse = Pick<
   | "critter_collection_unit"
   | "lk_taxon"
   | "mortality"
->;
+>;*/
 
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
@@ -168,7 +179,10 @@ const CritterIdsRequestSchema = z.object({
 const CritterQuerySchema = z.object({ wlh_id: z.string().optional() }); //Add additional properties as needed
 
 const DefaultCritterIncludeSchema = implement<CritterDefaultIncludeResult>().with({
-  ...CritterSchema.shape,
+  critter_id: zodID,
+  wlh_id: z.string().nullable(),
+  animal_id: z.string().nullable(),
+  sex: z.nativeEnum(sex),
   lk_taxon: z.object({
     taxon_name_latin: z.string(),
     taxon_name_common: z.string().nullable()
@@ -257,10 +271,10 @@ const CritterDetailedResponseSchema = DetailedCritterIncludeSchema.transform((va
   };
 }).pipe(
   DetailedCritterIncludeSchema
-  .omit({measurement_qualitative: true, measurement_quantiatitve: true, lk_taxon: true, lk_region_nr: true, user_critter_create_userTouser: true, critter_collection_unit: true})
+  .omit({measurement_qualitative: true, measurement_quantitative: true, lk_taxon: true, lk_region_nr: true, user_critter_create_userTouser: true, critter_collection_unit: true})
   .extend({
     taxon: z.string(),
-    responsible_region: z.string().nullable(),
+    responsible_region: z.string().optional(),
     mortality_timestamp: z.date().nullable(),
     system_origin: z.nativeEnum(system),
     collection_units: SimpleCollectionResponseValidation.array(),
@@ -288,8 +302,26 @@ const CritterDefaultResponseSchema = DefaultCritterIncludeSchema.transform((val)
 }).pipe(
   DefaultCritterIncludeSchema
   .omit({critter_collection_unit: true, lk_taxon: true, mortality: true})
-  .extend({taxon: z.string(), collection_units: array(SimpleCollectionResponseValidation), mortality_timestamp: z.date().nullable()})
-);
+  .extend({taxon: z.string(), collection_units: SimpleCollectionResponseValidation.array(), mortality_timestamp: z.string().nullable()})
+).openapi({
+  example: {
+    "critter_id": "43201d4d-f16f-4f8e-8413-dde5d4a195e6",
+    "wlh_id": "17-1053322",
+    "animal_id": "94",
+    "sex": "Female",
+    "taxon": "Caribou",
+    "collection_units": [
+        {
+            "critter_collection_unit_id": "c971d7c8-5ddf-44ac-a206-70e3f83d9ce1",
+            "collection_unit_id": "a3218908-8b78-4f76-94dd-ba74273b8c93",
+            "category_name": "Population Unit",
+            "unit_name": "Columbia North",
+            "collection_category_id": "c8e23255-7ed2-4551-b0a4-0d980dba1298"
+        }
+    ],
+    "mortality_timestamp": "2021-12-09T10:00:00.000Z"
+  }
+});
 
 const CritterFilterSchema = z.object({
   critter_ids: z
@@ -393,8 +425,7 @@ const critterFormats: FormatParse = {
 export type {
   FormattedCritter,
   CritterDetailedIncludeResult,
-  CritterDefaultIncludeResult,
-  CritterDefaultResponse,
+  CritterDefaultIncludeResult, 
   CritterCreate,
   CritterUpdate,
   CritterIdsRequest,
@@ -404,7 +435,6 @@ export {
   eCritterStatus,
   critterFormats,
   detailedCritterInclude,
-  defaultCritterInclude,
   minimalCritterSelect,
   CritterDetailedResponseSchema,
   CritterDefaultResponseSchema,

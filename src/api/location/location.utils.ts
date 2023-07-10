@@ -148,12 +148,12 @@ const CommonLocationValidation = CommonLocationSchema.omit({
   lk_wildlife_management_unit: true
 })
 .extend({
-  region_env_id: zodID.nullable(),
-  region_nr_id: zodID.nullable(),
-  wmu_id: zodID.nullable(),
-  region_env_name: z.string().nullable(),
-  region_nr_name: z.string().nullable(),
-  wmu_name: z.string().nullable(),
+  region_env_id: zodID.optional(),
+  region_nr_id: zodID.optional(),
+  wmu_id: zodID.optional(),
+  region_env_name: z.string().optional(),
+  region_nr_name: z.string().optional(),
+  wmu_name: z.string().optional(),
 })
 
 const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {

@@ -127,7 +127,12 @@ const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.trans
     .extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
   ).openapi({description: 'Response with english names.'});
 
-const SimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema.omit({xref_collection_unit: true}).extend({category_name: z.string(), unit_name: z.string(), collection_category_id: zodID})
+const SimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema
+.omit({xref_collection_unit: true, critter_id: true, ...noAudit}).extend({
+  category_name: z.string(), 
+  unit_name: z.string(), 
+  collection_category_id: zodID
+})
 
 const SimpleCollectionUnitResponseSchema = SimpleCollectionUnitIncludesSchema.transform((obj) => {
   const {

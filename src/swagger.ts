@@ -1,8 +1,8 @@
 
 import {  createDocument } from 'zod-openapi';
 import { stringify } from 'yaml';
-import { createCollectionUnit, deleteCollectionUnit, getAllCollectionUnits, getCollectionUnits, updateCollectionUnit } from './api/collectionUnit/collectionUnit.swagger';
-import { getCritterById } from './api/critter/critter.swagger';
+import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagger';
+import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
 import { CritterDefaultResponseSchema, CritterDetailedResponseSchema } from './api/critter/critter.utils';
 import  {z}from 'zod'
 
@@ -10,8 +10,7 @@ const document = createDocument({
     openapi: '3.1.0',
     components: {
         schemas: {
-            defaultCritterResponse: CritterDefaultResponseSchema,
-            detailedCritterResponse: CritterDetailedResponseSchema
+            ...critterSchemas
         }
     },
     info: {
@@ -23,21 +22,9 @@ const document = createDocument({
         },
     },
     paths: {
-        '/collection-units/' : {
-            get: getAllCollectionUnits
-        },
-        '/collection-units/:id' : {
-            get: getCollectionUnits,
-            patch: updateCollectionUnit,
-            delete: deleteCollectionUnit
-        },
-        '/collection-units/create' : {
-            post: createCollectionUnit
-        },
-        '/critter/:id' : {
-            get: getCritterById
-        }
+        ...collectionUnitsPaths,
+        ...critterPaths
     }
 });
-console.log(stringify(document));
+//console.log(stringify(document));
 export const yaml = document;
