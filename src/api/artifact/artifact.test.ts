@@ -1,9 +1,10 @@
 import { artifact } from "@prisma/client";
-import { randomInt, randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 import { prisma } from "../../utils/constants";
 import { ICbDatabase } from "../../utils/database";
 import {
   ArtifactCreate,
+  ArtifactResponse,
   ArtifactUpdate,
   artifactSchema,
 } from "./artifact.utils";
@@ -18,19 +19,21 @@ import {
 import { apiError } from "../../utils/types";
 import { makeApp } from "../../app";
 import supertest from "supertest";
+import { Buffer } from "buffer";
 
 // Mock Artifact
 const ID = randomUUID();
 const CRITTER_ID = randomUUID();
+const URL = "https://example.com/artifact";
 
 const NEW_ARTIFACT: ArtifactCreate = {
   critter_id: CRITTER_ID,
-  artifact_url: "https://example.com/artifact",
 };
 
-const RETURN_ARTIFACT: artifact = {
+const PRISMA_ARTIFACT: artifact = {
   ...NEW_ARTIFACT,
   artifact_id: ID,
+  artifact_url: URL,
   artifact_comment: null,
   capture_id: null,
   mortality_id: null,
@@ -42,6 +45,13 @@ const RETURN_ARTIFACT: artifact = {
   update_timestamp: new Date(),
 };
 
+const RETURN_ARTIFACT: ArtifactResponse = {
+  ...PRISMA_ARTIFACT,
+  signed_url: URL,
+};
+
+const MOCK_FILE = Buffer.from("This is a mock file");
+
 // Mocked Prisma Calls
 const create = jest.spyOn(prisma.artifact, "create").mockImplementation();
 const findMany = jest.spyOn(prisma.artifact, "findMany").mockImplementation();
@@ -50,6 +60,13 @@ const findUniqueOrThrow = jest
   .mockImplementation();
 const update = jest.spyOn(prisma.artifact, "update").mockImplementation();
 const pDelete = jest.spyOn(prisma.artifact, "delete").mockImplementation();
+const object_store = require("../../utils/object_store");
+const uploadFileToS3 = jest
+  .spyOn(object_store, "uploadFileToS3")
+  .mockImplementation();
+const getFileDownloadUrl = jest
+  .spyOn(object_store, "getFileDownloadUrl")
+  .mockImplementation();
 
 // Mocked Services
 const getArtifactById = jest.fn();
@@ -87,14 +104,21 @@ beforeEach(() => {
   createArtifact.mockResolvedValue(RETURN_ARTIFACT);
   getArtifactById.mockResolvedValue(RETURN_ARTIFACT);
   getArtifactsByCritterId.mockResolvedValue([RETURN_ARTIFACT]);
+  uploadFileToS3.mockResolvedValue(`${ID}.png`);
+  getFileDownloadUrl.mockResolvedValue(URL);
 });
 describe("API: Artifact", () => {
   describe("SERVICES", () => {
     describe("createArtifact()", () => {
       it("returns an artifact", async () => {
-        create.mockResolvedValue(RETURN_ARTIFACT);
-        const returnedArtifact = await _createArtifact(NEW_ARTIFACT);
-        expect.assertions(2);
+        create.mockResolvedValue(PRISMA_ARTIFACT);
+        const returnedArtifact = await _createArtifact(
+          NEW_ARTIFACT,
+          MOCK_FILE as unknown as Express.Multer.File
+        );
+        expect.assertions(4);
+        expect(uploadFileToS3).toHaveBeenCalledTimes(1);
+        expect(getFileDownloadUrl).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.create).toHaveBeenCalledTimes(1);
         expect(artifactSchema.safeParse(returnedArtifact).success).toBe(true);
       });
@@ -102,9 +126,10 @@ describe("API: Artifact", () => {
 
     describe("getArtifactsByCritterId()", () => {
       it("returns a list of artifacts", async () => {
-        findMany.mockResolvedValue([RETURN_ARTIFACT]);
+        findMany.mockResolvedValue([PRISMA_ARTIFACT]);
         const returnedArtifacts = await _getArtifactsByCritterId(CRITTER_ID);
-        expect.assertions(3);
+        expect.assertions(4);
+        expect(getFileDownloadUrl).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.findMany).toHaveBeenCalledTimes(1);
         expect(returnedArtifacts).toBeInstanceOf(Array);
         expect(returnedArtifacts.length).toBe(1);
@@ -113,9 +138,10 @@ describe("API: Artifact", () => {
 
     describe("getAllArtifacts()", () => {
       it("returns a list of all artifacts", async () => {
-        findMany.mockResolvedValue([RETURN_ARTIFACT]);
+        findMany.mockResolvedValue([PRISMA_ARTIFACT]);
         const returnedArtifacts = await _getAllArtifacts();
-        expect.assertions(3);
+        expect.assertions(4);
+        expect(getFileDownloadUrl).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.findMany).toHaveBeenCalledTimes(1);
         expect(returnedArtifacts).toBeInstanceOf(Array);
         expect(returnedArtifacts.length).toBe(1);
@@ -124,9 +150,10 @@ describe("API: Artifact", () => {
 
     describe("getArtifactById()", () => {
       it("returns an artifact by ID", async () => {
-        findUniqueOrThrow.mockResolvedValue(RETURN_ARTIFACT);
+        findUniqueOrThrow.mockResolvedValue(PRISMA_ARTIFACT);
         const returnedArtifact = await _getArtifactById(ID);
-        expect.assertions(2);
+        expect.assertions(3);
+        expect(getFileDownloadUrl).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.findUniqueOrThrow).toHaveBeenCalledTimes(1);
         expect(artifactSchema.safeParse(returnedArtifact).success).toBe(true);
       });
@@ -135,11 +162,12 @@ describe("API: Artifact", () => {
     describe("updateArtifact()", () => {
       it("returns an updated artifact", async () => {
         const UPDATED_ARTIFACT: ArtifactUpdate = {
-          artifact_url: "https://example.com/artifact_updated",
+          critter_id: ID,
         };
-        update.mockResolvedValue({ ...RETURN_ARTIFACT, ...UPDATED_ARTIFACT });
+        update.mockResolvedValue({ ...PRISMA_ARTIFACT, ...UPDATED_ARTIFACT });
         const returnedArtifact = await _updateArtifact(ID, UPDATED_ARTIFACT);
-        expect.assertions(3);
+        expect.assertions(4);
+        expect(getFileDownloadUrl).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.update).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.update).toHaveBeenCalledWith({
           where: { artifact_id: ID },
@@ -151,7 +179,7 @@ describe("API: Artifact", () => {
 
     describe("deleteArtifact()", () => {
       it("returns deleted artifact and removes artifact from database", async () => {
-        pDelete.mockResolvedValue(RETURN_ARTIFACT);
+        pDelete.mockResolvedValue(PRISMA_ARTIFACT);
         const deletedArtifact = await _deleteArtifact(ID);
         expect.assertions(3);
         expect(prisma.artifact.delete).toHaveBeenCalledTimes(1);
@@ -191,39 +219,43 @@ describe("API: Artifact", () => {
     });
 
     describe("POST /api/artifacts/create", () => {
-      it("returns status 201", async () => {
+      it("returns and artifact record with status 201", async () => {
         const res = await request
           .post("/api/artifacts/create")
-          .send(NEW_ARTIFACT);
-        expect.assertions(2);
+          .attach("artifact", MOCK_FILE, "test.png")
+          .field("critter_id", CRITTER_ID);
+        expect.assertions(3);
         expect(createArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
-      });
-
-      it("returns an artifact", async () => {
-        const res = await request
-          .post("/api/artifacts/create")
-          .send(NEW_ARTIFACT);
-        const artifact = res.body;
-        expect.assertions(2);
-        expect(createArtifact.mock.calls.length).toBe(1);
-        expect(artifactSchema.safeParse(artifact).success).toBe(true);
+        expect(artifactSchema.safeParse(res.body).success).toBe(true);
       });
 
       it("strips invalid fields from data", async () => {
         const res = await request
           .post("/api/artifacts/create")
-          .send({ ...NEW_ARTIFACT, invalidField: "qwerty123" });
+          .attach("artifact", MOCK_FILE, "test.png")
+          .field("critter_id", CRITTER_ID)
+          .field("invalidField", "qwerty123");
         expect.assertions(3);
         expect(createArtifact.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
         expect(res.body).not.toHaveProperty("invalidField");
       });
 
-      it("returns status 400 when data is missing required fields", async () => {
+      it("returns status 400 when data is missing attached file", async () => {
         const res = await request.post("/api/artifacts/create").send({
-          artifact_id: ID,
+          CRITTER_ID: ID,
         });
+        expect.assertions(3);
+        expect(createArtifact.mock.calls.length).toBe(0);
+        expect(uploadFileToS3).toBeCalledTimes(0);
+        expect(res.status).toBe(400);
+      });
+
+      it("returns status 400 when data is missing required fields", async () => {
+        const res = await request
+          .post("/api/artifacts/create")
+          .field("artifact_id", ID);
         expect.assertions(2);
         expect(createArtifact.mock.calls.length).toBe(0);
         expect(res.status).toBe(400);

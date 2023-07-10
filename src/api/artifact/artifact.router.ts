@@ -7,6 +7,7 @@ import {
 } from "./artifact.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
+import { upload } from "../../utils/object_store";
 
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
@@ -26,9 +27,14 @@ export const ArtifactRouter = (db: ICbDatabase) => {
    */
   artifactRouter.post(
     "/create",
+    upload.single("artifact"), // 'artifact' should match the 'name' attribute in your form input
     catchErrors(async (req: Request, res: Response) => {
+      if (!req.file) {
+        return res.status(400).send("No file uploaded");
+      }
+
       const artifactData = ArtifactCreateBodySchema.parse(req.body);
-      const newArtifact = await db.createArtifact(artifactData);
+      const newArtifact = await db.createArtifact(artifactData, req.file);
       return res.status(201).json(newArtifact);
     })
   );
