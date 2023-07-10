@@ -5,6 +5,7 @@ import { createCollectionUnit, deleteCollectionUnit, getAllCollectionUnits, getC
 import { getCritterById } from './api/critter/critter.swagger';
 import { CritterDefaultResponseSchema, CritterDetailedResponseSchema } from './api/critter/critter.utils';
 import  {z}from 'zod'
+import { capturePaths } from './api/capture/capture.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -36,7 +37,8 @@ const document = createDocument({
         },
         '/critter/:id' : {
             get: getCritterById
-        }
+        },
+        capturePaths,
     }
 });
 console.log(stringify(document));

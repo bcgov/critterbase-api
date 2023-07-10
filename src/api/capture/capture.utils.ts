@@ -17,7 +17,6 @@ import {
 import { AuditColumns } from "../../utils/types";
 import { CommonLocationSchema } from "../location/location.utils";
 
-
 const CaptureBodySchema = implement<capture>().with({
   capture_id: zodID,
   critter_id: zodID,
@@ -49,15 +48,11 @@ type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
 const CaptureIncludeSchema = implement<CaptureIncludeType>().with({
   ...CaptureBodySchema.shape,
   location_capture_capture_location_idTolocation: CommonLocationSchema,
-  location_capture_release_location_idTolocation: CommonLocationSchema
-})
-
+  location_capture_release_location_idTolocation: CommonLocationSchema,
+});
 
 const CaptureUpdateSchema = implement<
-  Omit<
-    Prisma.captureUncheckedUpdateManyInput,
-    keyof AuditColumns
-  > & {
+  Omit<Prisma.captureUncheckedUpdateManyInput, keyof AuditColumns> & {
     capture_location?: LocationBody;
     release_location?: LocationBody;
     force_create_release?: boolean;
@@ -65,11 +60,13 @@ const CaptureUpdateSchema = implement<
 >().with(
   CaptureBodySchema.omit({
     ...noAudit,
-  }).extend({
-    capture_location: LocationUpdateSchema,
-    release_location: LocationUpdateSchema,
-    force_create_release: z.boolean().optional()
-  }).partial().shape
+  })
+    .extend({
+      capture_location: LocationUpdateSchema,
+      release_location: LocationUpdateSchema,
+      force_create_release: z.boolean().optional(),
+    })
+    .partial().shape
 );
 
 const CaptureCreateSchema = implement<
@@ -112,15 +109,23 @@ const CaptureResponseSchema = CaptureIncludeSchema.transform((val) => {
       ? CommonFormattedLocationSchema.parse(r_location)
       : null,
   };
-});
+}).pipe(
+  CaptureIncludeSchema.omit({
+    location_capture_capture_location_idTolocation: true,
+    location_capture_release_location_idTolocation: true,
+  }).extend({
+    capture_location: CommonLocationSchema,
+    release_location: CommonLocationSchema,
+  })
+);
 
 const CaptureValidation = CaptureIncludeSchema.omit({
-  location_capture_capture_location_idTolocation: true, 
-  location_capture_release_location_idTolocation: true
+  location_capture_capture_location_idTolocation: true,
+  location_capture_release_location_idTolocation: true,
 }).extend({
   capture_location: CommonLocationValidation.nullable(),
-  release_location: CommonLocationValidation.nullable()
-})
+  release_location: CommonLocationValidation.nullable(),
+});
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
@@ -137,5 +142,5 @@ export {
   CaptureResponseSchema,
   CaptureBodySchema,
   CaptureIncludeSchema,
-  CaptureValidation
+  CaptureValidation,
 };
