@@ -7,13 +7,14 @@ import {
   CaptureResponseSchema,
   CaptureUpdateSchema,
 } from "./capture.utils";
+import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 
 const getCaptures: ZodOpenApiOperationObject = {
   operationId: "getCaptures",
   summary: "Get all captures",
   responses: {
     "200": {
-      description: "Successful operation",
+      description: SwagDesc.get,
       content: {
         "application/json": {
           schema: z.array(CaptureResponseSchema),
@@ -35,13 +36,14 @@ const createCapture: ZodOpenApiOperationObject = {
   },
   responses: {
     "201": {
-      description: "Successful operation",
+      description: SwagDesc.create,
       content: {
         "application/json": {
           schema: CaptureResponseSchema,
         },
       },
     },
+    ...SwagErr,
   },
 };
 
@@ -50,13 +52,15 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
   summary: "Get captures by critter id",
   responses: {
     "200": {
-      description: "Successful operation",
+      description: SwagDesc.get,
       content: {
         "application/json": {
           schema: z.array(CaptureResponseSchema),
         },
       },
     },
+    ...SwagErr,
+    ...SwagNotFound,
   },
 };
 
@@ -68,13 +72,14 @@ const getCaptureById: ZodOpenApiOperationObject = {
   },
   responses: {
     "200": {
-      description: "Successful operation",
+      description: SwagDesc.get,
       content: {
         "application/json": {
           schema: CaptureResponseSchema,
         },
       },
     },
+    ...SwagNotFound,
   },
 };
 
@@ -93,13 +98,15 @@ const updateCapture: ZodOpenApiOperationObject = {
   },
   responses: {
     "200": {
-      description: "Successful operation",
+      description: SwagDesc.update,
       content: {
         "application/json": {
           schema: CaptureResponseSchema,
         },
       },
     },
+    ...SwagErr,
+    ...SwagNotFound,
   },
 };
 
@@ -111,13 +118,14 @@ const deleteCapture: ZodOpenApiOperationObject = {
   },
   responses: {
     "200": {
-      description: "Successful operation",
+      description: SwagDesc.delete,
       content: {
         "application/json": {
           schema: CaptureResponseSchema,
         },
       },
     },
+    ...SwagNotFound,
   },
 };
 
