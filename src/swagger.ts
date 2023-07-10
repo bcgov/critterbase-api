@@ -38,7 +38,7 @@ const document = createDocument({
         '/critter/:id' : {
             get: getCritterById
         },
-        capturePaths,
+        ...capturePaths,
     }
 });
 console.log(stringify(document));
