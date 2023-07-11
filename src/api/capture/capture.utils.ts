@@ -11,6 +11,7 @@ import { z } from "zod";
 import {
   implement,
   noAudit,
+  ResponseSchema,
   zodID,
 } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
@@ -103,7 +104,7 @@ const CaptureValidation = CaptureIncludeSchema.omit({
 type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
 type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
-const CaptureResponseSchema = CaptureIncludeSchema.transform((val) => {
+const CaptureResponseSchema = ResponseSchema.transform((val) => {
   const {
     location_capture_capture_location_idTolocation: c_location,
     location_capture_release_location_idTolocation: r_location,
@@ -118,7 +119,9 @@ const CaptureResponseSchema = CaptureIncludeSchema.transform((val) => {
       ? CommonFormattedLocationSchema.parse(r_location)
       : null,
   };
-}).pipe(CaptureValidation);
+});
+
+const SwagCaptureResponseSchema = CaptureResponseSchema.pipe(CaptureValidation);
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
@@ -136,4 +139,5 @@ export {
   CaptureBodySchema,
   CaptureIncludeSchema,
   CaptureValidation,
+  SwagCaptureResponseSchema,
 };
