@@ -50,6 +50,9 @@ const createCapture: ZodOpenApiOperationObject = {
 const getCaptureByCritterId: ZodOpenApiOperationObject = {
   operationId: "getCaptureByCritterId",
   summary: "Get captures by critter id",
+  requestParams: {
+    path: z.object({ id: zodID }),
+  },
   responses: {
     "200": {
       description: SwagDesc.get,
@@ -121,7 +124,9 @@ const deleteCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         "application/json": {
-          schema: CaptureResponseSchema,
+          schema: z.object({
+            message: z.string(),
+          }),
         },
       },
     },
