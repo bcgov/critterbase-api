@@ -60,8 +60,8 @@ export const LocationRouter = (db: ICbDatabase) => {
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
-        await db.deleteLocation(req.params.id);
-        res.status(200).json(strings.location.deleted(req.params.id));
+        const location = await db.deleteLocation(req.params.id);
+        res.status(200).json(location);
       })
     );
 
