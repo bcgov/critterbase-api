@@ -5,6 +5,7 @@ import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
 import { capturePaths } from './api/capture/capture.swagger';
 import { artifactPaths } from './api/artifact/artifact.swagger';
 import { locationPaths } from './api/location/location.swagger';
+import { userPaths } from './api/user/user.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -27,6 +28,7 @@ const document = createDocument({
         ...capturePaths,
         ...artifactPaths,
         ...locationPaths,
+        ...userPaths,
     }
 });
 //console.log(stringify(document));
