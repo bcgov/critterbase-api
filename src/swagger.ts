@@ -6,6 +6,7 @@ import { capturePaths } from './api/capture/capture.swagger';
 import { bulkPaths } from './api/bulk/bulk.swagger';
 import { artifactPaths } from './api/artifact/artifact.swagger';
 import { locationPaths } from './api/location/location.swagger';
+import { enumPaths } from './api/lookup/lookup.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -29,7 +30,9 @@ const document = createDocument({
         ...bulkPaths,
         ...artifactPaths,
         ...locationPaths,
+        ...enumPaths
     }
 });
+
 //console.log(stringify(document));
 export const yaml = document;
