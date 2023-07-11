@@ -143,14 +143,6 @@ const QualitativeResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
-const QualitativeValidationSchema = MeasurementQualitativeIncludeSchema.omit({
-  xref_taxon_measurement_qualitative: true,
-  xref_taxon_measurement_qualitative_option: true
-}).extend({
-  measurement_name: z.string().nullable(),
-  option_label: z.string().nullable(),
-  option_value: z.number().nullable()
-})
 
 // Quantitative
 
@@ -191,12 +183,6 @@ const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
   return { ...rest, measurement_name: x?.measurement_name ?? null };
 });
 
-const QuantitativeValidationSchema = MeasurementQuantitativeIncludeSchema.omit({
-  xref_taxon_measurement_quantitative: true
-}).extend({
-  measurement_name: z.string().nullable()
-})
-
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
 type QualitativeUpdateBody = z.infer<typeof QualitativeUpdateSchema>;
 type QuantitativeUpdateBody = z.infer<typeof QuantitativeUpdateSchema>;
@@ -230,6 +216,4 @@ export {
   MeasurementVerificationSchema,
   MeasurementQualitativeIncludeSchema,
   MeasurementQuantitativeIncludeSchema,
-  QuantitativeValidationSchema,
-  QualitativeValidationSchema
 };

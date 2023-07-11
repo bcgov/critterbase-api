@@ -3,6 +3,7 @@ import {  createDocument } from 'zod-openapi';
 import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagger';
 import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
 import { capturePaths } from './api/capture/capture.swagger';
+import { bulkPaths } from './api/bulk/bulk.swagger';
 import { artifactPaths } from './api/artifact/artifact.swagger';
 import { locationPaths } from './api/location/location.swagger';
 import { userPaths } from './api/user/user.swagger';
@@ -26,6 +27,7 @@ const document = createDocument({
         ...collectionUnitsPaths,
         ...critterPaths,
         ...capturePaths,
+        ...bulkPaths,
         ...artifactPaths,
         ...locationPaths,
         ...userPaths,

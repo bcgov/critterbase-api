@@ -121,20 +121,11 @@ const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.trans
     unit_name: xref_collection_unit?.unit_name ?? null,
     unit_description: xref_collection_unit?.description ?? null,
   };
-}).pipe(
-  critter_collection_unitIncludesSchema
-    .omit({collection_unit_id: true, xref_collection_unit: true})
-    .extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
-  ).openapi({description: 'Response with english names.'});
+});
 
-const SimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema
-.omit({xref_collection_unit: true, critter_id: true, ...noAudit}).extend({
-  category_name: z.string(), 
-  unit_name: z.string(), 
-  collection_category_id: zodID
-})
 
-const SimpleCollectionUnitResponseSchema = SimpleCollectionUnitIncludesSchema.transform((obj) => {
+
+const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
   const {
     xref_collection_unit: {
       lk_collection_category: { category_name, collection_category_id },
@@ -142,7 +133,7 @@ const SimpleCollectionUnitResponseSchema = SimpleCollectionUnitIncludesSchema.tr
       collection_unit_id,
     },
     critter_collection_unit_id
-  } = obj;
+  } = obj as SimpleCollectionUnitIncludes;
   return {
     critter_collection_unit_id,
     category_name,
@@ -150,7 +141,7 @@ const SimpleCollectionUnitResponseSchema = SimpleCollectionUnitIncludesSchema.tr
     collection_unit_id,
     collection_category_id
   };
-}).pipe(SimpleCollectionResponseValidation);
+});
 
 const CollectionUnitDeleteSchema = critter_collection_unitSchema
   .pick({critter_collection_unit_id: true})
@@ -196,7 +187,7 @@ export {
   CollectionUnitDeleteSchema,
   CollectionUnitUpsertSchema,
   SimpleCollectionUnitIncludesSchema,
-  SimpleCollectionResponseValidation
+  critter_collection_unitIncludesSchema
 };
 export type {
   CollectionUnitIncludes,

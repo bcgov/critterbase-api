@@ -3,9 +3,18 @@ import { z } from "zod";
 import { zodID } from "../../utils/zod_helpers";
 import {
   CaptureCreateSchema,
+  CaptureIncludeSchema,
   CaptureUpdateSchema,
-  SwagCaptureResponseSchema,
 } from "./capture.utils";
+import { CommonLocationValidation } from "../location/location.utils";
+
+export const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
+  location_capture_capture_location_idTolocation: true,
+  location_capture_release_location_idTolocation: true,
+}).extend({
+  capture_location: CommonLocationValidation.nullable(),
+  release_location: CommonLocationValidation.nullable(),
+});
 import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
@@ -20,7 +29,7 @@ const getCaptures: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: z.array(SwagCaptureResponseSchema),
+          schema: z.array(SwaggerCaptureResponseValidation),
         },
       },
     },
@@ -43,7 +52,7 @@ const createCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: SwagCaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },
@@ -63,7 +72,7 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: z.array(SwagCaptureResponseSchema),
+          schema: z.array(SwaggerCaptureResponseValidation),
         },
       },
     },
@@ -84,7 +93,7 @@ const getCaptureById: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: SwagCaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },
@@ -111,7 +120,7 @@ const updateCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: SwagCaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },
@@ -132,9 +141,7 @@ const deleteCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         "application/json": {
-          schema: z.object({
-            message: z.string(),
-          }),
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },

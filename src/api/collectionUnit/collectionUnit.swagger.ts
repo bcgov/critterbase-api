@@ -1,7 +1,12 @@
 import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { CollectionUnitCreateBodySchema, CollectionUnitResponseSchema, CollectionUnitUpdateBodySchema } from './collectionUnit.utils';
+import { CollectionUnitCreateBodySchema, CollectionUnitResponseSchema, CollectionUnitUpdateBodySchema, SimpleCollectionUnitIncludesSchema, critter_collection_unitIncludesSchema } from './collectionUnit.utils';
 import {z} from 'zod';
-import { zodID } from '../../utils/zod_helpers';
+import { noAudit, zodID } from '../../utils/zod_helpers';
+
+const SwaggerCollectionResponseValidation = 
+    critter_collection_unitIncludesSchema
+      .omit({collection_unit_id: true, xref_collection_unit: true})
+      .extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
 
 const getCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnit',
@@ -14,7 +19,7 @@ const getCollectionUnits: ZodOpenApiOperationObject = {
             description: 'Successful operation',
             content: {
                 'application/json': {
-                    schema: CollectionUnitResponseSchema
+                    schema: SwaggerCollectionResponseValidation
                 }
             }
         }
@@ -29,7 +34,7 @@ const getAllCollectionUnits: ZodOpenApiOperationObject = {
             description: 'Successful operation',
             content: {
                 'application/json': {
-                    schema: CollectionUnitResponseSchema.array()
+                    schema: SwaggerCollectionResponseValidation.array()
                 }
             }
         }
@@ -51,7 +56,7 @@ const createCollectionUnit: ZodOpenApiOperationObject = {
             description: 'Created successfully.',
             content: {
                 'application/json' : {
-                    schema: CollectionUnitResponseSchema
+                    schema: SwaggerCollectionResponseValidation
                 }
             }
         }
@@ -76,7 +81,7 @@ const updateCollectionUnit: ZodOpenApiOperationObject = {
             description: 'Updated successfully.',
             content: {
                 'application/json' : {
-                    schema: CollectionUnitResponseSchema
+                    schema: SwaggerCollectionResponseValidation
                 }
             }
         }
@@ -94,12 +99,21 @@ const deleteCollectionUnit: ZodOpenApiOperationObject = {
             description: 'Item successfully deleted.',
             content: {
                 'application/json' : {
-                    schema: CollectionUnitResponseSchema
+                    schema: SwaggerCollectionResponseValidation
                 }
             }
         }
     }
 }
+
+
+
+export const SwaggerSimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema
+.omit({xref_collection_unit: true, critter_id: true, ...noAudit}).extend({
+  category_name: z.string(), 
+  unit_name: z.string(), 
+  collection_category_id: zodID
+})
 
 export const collectionUnitsPaths = {
     '/collection-units/' : {
