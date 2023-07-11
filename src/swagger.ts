@@ -6,13 +6,38 @@ import { bulkPaths } from "./api/bulk/bulk.swagger";
 import { artifactPaths } from "./api/artifact/artifact.swagger";
 import { locationPaths } from "./api/location/location.swagger";
 import { userPaths } from "./api/user/user.swagger";
-import { PORT } from "./utils/constants";
+import {
+  API_KEY_HEADER,
+  KEYCLOAK_UUID_HEADER,
+  PORT,
+  USER_ID_HEADER,
+} from "./utils/constants";
 
 const document = createDocument({
   openapi: "3.1.0",
   components: {
     schemas: {
       ...critterSchemas,
+    },
+    securitySchemes: {
+      apiKeyAuth: {
+        type: "apiKey",
+        in: "header",
+        name: API_KEY_HEADER,
+        description: `A valid uuid for header: '${API_KEY_HEADER}' must be provided`,
+      },
+      userIdAuth: {
+        type: "apiKey",
+        in: "header",
+        name: USER_ID_HEADER,
+        description: `This header is used to identify the user. A valid uuid for header: '${USER_ID_HEADER}' must be provided`,
+      },
+      keycloakUuidAuth: {
+        type: "apiKey",
+        in: "header",
+        name: KEYCLOAK_UUID_HEADER,
+        description: `This header is used for user identification with Keycloak. A valid Keycloak uuid for header: '${KEYCLOAK_UUID_HEADER}' must be provided`,
+      },
     },
   },
   info: {
@@ -48,6 +73,13 @@ const document = createDocument({
     {
       url: "https://moe-critterbase-api-prod.apps.silver.devops.gov.bc.ca",
       description: "deployed api in prod environment",
+    },
+  ],
+  security: [
+    {
+      apiKeyAuth: [],
+      userIdAuth: [],
+      keycloakUuidAuth: [],
     },
   ],
 });
