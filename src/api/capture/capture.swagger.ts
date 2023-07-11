@@ -4,9 +4,18 @@ import { z } from "zod";
 import { zodID } from "../../utils/zod_helpers";
 import {
   CaptureCreateSchema,
-  CaptureResponseSchema,
+  CaptureIncludeSchema,
   CaptureUpdateSchema,
 } from "./capture.utils";
+import { CommonLocationValidation } from "../location/location.utils";
+
+export const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
+  location_capture_capture_location_idTolocation: true,
+  location_capture_release_location_idTolocation: true,
+}).extend({
+  capture_location: CommonLocationValidation.nullable(),
+  release_location: CommonLocationValidation.nullable(),
+});
 
 const getCaptures: ZodOpenApiOperationObject = {
   operationId: "getCaptures",
@@ -16,7 +25,7 @@ const getCaptures: ZodOpenApiOperationObject = {
       description: "Successful operation",
       content: {
         "application/json": {
-          schema: z.array(CaptureResponseSchema),
+          schema: z.array(SwaggerCaptureResponseValidation),
         },
       },
     },
@@ -38,7 +47,7 @@ const createCapture: ZodOpenApiOperationObject = {
       description: "Successful operation",
       content: {
         "application/json": {
-          schema: CaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },
@@ -53,7 +62,7 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
       description: "Successful operation",
       content: {
         "application/json": {
-          schema: z.array(CaptureResponseSchema),
+          schema: z.array(SwaggerCaptureResponseValidation),
         },
       },
     },
@@ -71,7 +80,7 @@ const getCaptureById: ZodOpenApiOperationObject = {
       description: "Successful operation",
       content: {
         "application/json": {
-          schema: CaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },
@@ -96,7 +105,7 @@ const updateCapture: ZodOpenApiOperationObject = {
       description: "Successful operation",
       content: {
         "application/json": {
-          schema: CaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },
@@ -114,7 +123,7 @@ const deleteCapture: ZodOpenApiOperationObject = {
       description: "Successful operation",
       content: {
         "application/json": {
-          schema: CaptureResponseSchema,
+          schema: SwaggerCaptureResponseValidation,
         },
       },
     },

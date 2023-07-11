@@ -2,7 +2,6 @@ import { capture, Prisma } from "@prisma/client";
 import {
   CommonFormattedLocationSchema,
   commonLocationSelect,
-  CommonLocationValidation,
   LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema,
@@ -11,6 +10,7 @@ import { z } from "zod";
 import {
   implement,
   noAudit,
+  ResponseSchema,
   zodID,
 } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
@@ -92,18 +92,10 @@ const CaptureCreateSchema = implement<
     }).shape
 );
 
-const CaptureValidation = CaptureIncludeSchema.omit({
-  location_capture_capture_location_idTolocation: true,
-  location_capture_release_location_idTolocation: true,
-}).extend({
-  capture_location: CommonLocationValidation.nullable(),
-  release_location: CommonLocationValidation.nullable(),
-});
-
 type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
 type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
-const CaptureResponseSchema = CaptureIncludeSchema.transform((val) => {
+const CaptureResponseSchema = ResponseSchema.transform((val) => {
   const {
     location_capture_capture_location_idTolocation: c_location,
     location_capture_release_location_idTolocation: r_location,
@@ -118,7 +110,7 @@ const CaptureResponseSchema = CaptureIncludeSchema.transform((val) => {
       ? CommonFormattedLocationSchema.parse(r_location)
       : null,
   };
-}).pipe(CaptureValidation);
+});
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
@@ -135,5 +127,4 @@ export {
   CaptureResponseSchema,
   CaptureBodySchema,
   CaptureIncludeSchema,
-  CaptureValidation,
 };

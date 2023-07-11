@@ -6,18 +6,15 @@ import {
   implement,
   noAudit,
   ResponseSchema,
-  zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
 import {
   captureInclude,
   CaptureIncludeSchema,
   CaptureResponseSchema,
-  CaptureValidation,
   FormattedCapture,
 } from "../capture/capture.utils";
 import {
-  SimpleCollectionResponseValidation,
   simpleCollectionUnitIncludes,
   SimpleCollectionUnitIncludesSchema,
   SimpleCollectionUnitResponseSchema,
@@ -26,7 +23,6 @@ import {
   FormattedMarking,
   markingIncludes,
   markingResponseSchema,
-  MarkingResponseValidation,
 } from "../marking/marking.utils";
 import {
   measurementQualitativeInclude,
@@ -34,16 +30,13 @@ import {
   measurementQuantitativeInclude,
   MeasurementQuantitativeIncludeSchema,
   QualitativeResponseSchema,
-  QualitativeValidationSchema,
   QuantitativeResponseSchema,
-  QuantitativeValidationSchema,
 } from "../measurement/measurement.utils";
 import {
   FormattedMortality,
   mortalityInclude,
   MortalityIncludeSchema,
   MortalityResponseSchema,
-  MortalityResponseValidation,
 } from "../mortality/mortality.utils";
 
 // const eCritterStatus = {
@@ -194,24 +187,7 @@ const DefaultCritterIncludeSchema = implement<CritterDefaultIncludeResult>().wit
   critter_collection_unit: SimpleCollectionUnitIncludesSchema.array(),
   mortality: z.object({mortality_timestamp: z.date() }).array()
 });
-/*
-include: {
-    lk_taxon: {
-      select: { taxon_name_latin: true, taxon_name_common: true },
-    },
-    lk_region_nr: {
-      select: { region_nr_name: true },
-    },
-    user_critter_create_userTouser: {
-      select: { system_name: true },
-    },
-    critter_collection_unit: simpleCollectionUnitIncludes,
-    capture: {...captureInclude, orderBy: { capture_timestamp: 'desc' }},
-    mortality: {...mortalityInclude, orderBy: { mortality_timestamp: 'desc' } },
-    marking: markingIncludes,
-    measurement_qualitative: measurementQualitativeInclude,
-    measurement_quantitative: measurementQuantitativeInclude,
-  },*/
+
 const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().with({
   ...CritterSchema.shape,
   lk_taxon: z.object({
@@ -233,7 +209,7 @@ const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().w
 })
 
 
-const CritterDetailedResponseSchema = DetailedCritterIncludeSchema.transform((val) => {
+const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   const {
     mortality,
     capture,
@@ -273,26 +249,9 @@ const CritterDetailedResponseSchema = DetailedCritterIncludeSchema.transform((va
       ),
     },
   };
-}).pipe(
-  DetailedCritterIncludeSchema
-  .omit({measurement_qualitative: true, measurement_quantitative: true, lk_taxon: true, lk_region_nr: true, user_critter_create_userTouser: true, critter_collection_unit: true})
-  .extend({
-    taxon: z.string(),
-    responsible_region: z.string().optional(),
-    mortality_timestamp: z.date().nullable(),
-    system_origin: z.nativeEnum(system),
-    collection_units: SimpleCollectionResponseValidation.array(),
-    mortality: MortalityResponseValidation.omit({critter_id: true, ...noAudit}).array(),
-    capture: CaptureValidation.omit({critter_id: true, ...noAudit}).array(),
-    marking: MarkingResponseValidation.omit({critter_id: true, ...noAudit}).array(),
-    measurement: z.object({
-      qualitative: QualitativeValidationSchema.omit({critter_id: true, ...noAudit}).array(),
-      quantitative: QuantitativeValidationSchema.omit({critter_id: true, ...noAudit}).array()
-    })
-  }
-));
+});
 
-const CritterDefaultResponseSchema = DefaultCritterIncludeSchema.transform((val) => {
+const CritterDefaultResponseSchema = ResponseSchema.transform((val) => {
   const { critter_collection_unit, lk_taxon, mortality, ...rest } =
     val as CritterDefaultIncludeResult;
   return {
@@ -303,29 +262,7 @@ const CritterDefaultResponseSchema = DefaultCritterIncludeSchema.transform((val)
     ),
     mortality_timestamp: mortality[0]?.mortality_timestamp ?? null,
   };
-}).pipe(
-  DefaultCritterIncludeSchema
-  .omit({critter_collection_unit: true, lk_taxon: true, mortality: true})
-  .extend({taxon: z.string(), collection_units: SimpleCollectionResponseValidation.array(), mortality_timestamp: z.string().nullable()})
-).openapi({
-  example: {
-    "critter_id": "43201d4d-f16f-4f8e-8413-dde5d4a195e6",
-    "wlh_id": "17-1053322",
-    "animal_id": "94",
-    "sex": "Female",
-    "taxon": "Caribou",
-    "collection_units": [
-        {
-            "critter_collection_unit_id": "c971d7c8-5ddf-44ac-a206-70e3f83d9ce1",
-            "collection_unit_id": "a3218908-8b78-4f76-94dd-ba74273b8c93",
-            "category_name": "Population Unit",
-            "unit_name": "Columbia North",
-            "collection_category_id": "c8e23255-7ed2-4551-b0a4-0d980dba1298"
-        }
-    ],
-    "mortality_timestamp": "2021-12-09T10:00:00.000Z"
-  }
-});
+})
 
 const CritterFilterSchema = z.object({
   critter_ids: z
@@ -449,5 +386,7 @@ export {
   CritterFilterSchema,
   UniqueCritterQuerySchema,
   CritterSchema,
-  CritterCreateEngTaxonSchema
+  CritterCreateEngTaxonSchema,
+  DefaultCritterIncludeSchema,
+  DetailedCritterIncludeSchema
 };
