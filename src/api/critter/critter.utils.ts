@@ -169,6 +169,10 @@ const CritterCreateSchema = implement<
     }).shape
 );
 
+const CritterCreateEngTaxonSchema = CritterCreateSchema
+  .omit({taxon_id: true})
+  .extend({ taxon_name_common: z.string().optional(), taxon_name_latin: z.string().optional() })
+
 /**
  * Schema for validating a request to fetch multiple critters by their IDs
  */
@@ -445,4 +449,5 @@ export {
   CritterFilterSchema,
   UniqueCritterQuerySchema,
   CritterSchema,
+  CritterCreateEngTaxonSchema
 };

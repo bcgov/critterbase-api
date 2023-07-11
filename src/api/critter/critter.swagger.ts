@@ -2,10 +2,14 @@ import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
 import { zodID } from '../../utils/zod_helpers';
 import { CritterCreateSchema, CritterDefaultResponseSchema, CritterDetailedResponseSchema, CritterFilterSchema, CritterIdsRequestSchema, CritterUpdateSchema, UniqueCritterQuerySchema } from './critter.utils';
+import { routes } from '../../utils/constants';
+
+const TAG = 'Critter';
 
 const getCritterById: ZodOpenApiOperationObject = {
     operationId: 'getCritterById',
     summary: 'Get a critter by id',
+    tags: [TAG],
     requestParams: {
         path: z.object( { id: zodID }),
         query: z.object( {format: z.enum(['default', 'detailed'])})
@@ -30,6 +34,7 @@ const getCritterById: ZodOpenApiOperationObject = {
 const updateCritterById: ZodOpenApiOperationObject = {
     operationId: 'updateCritterById',
     summary: 'Update a critter by id',
+    tags: [TAG],
     requestParams: {
         path: z.object( { id: zodID } ),
         query: z.object( {format: z.enum(['default', 'detailed'])})
@@ -61,6 +66,7 @@ const updateCritterById: ZodOpenApiOperationObject = {
 const deleteCritterById: ZodOpenApiOperationObject = {
     operationId: 'deleteCritterById',
     summary: 'Delete a critter by id',
+    tags: [TAG],
     requestParams: {
         path: z.object( { id: zodID } ),
         query: z.object( {format: z.enum(['default', 'detailed'])})
@@ -85,6 +91,7 @@ const deleteCritterById: ZodOpenApiOperationObject = {
 const createCritter: ZodOpenApiOperationObject = {
     operationId: 'createCritter',
     summary: 'Create a new critter',
+    tags: [TAG],
     requestParams: {
         path: z.object( { id: zodID } ),
         query: z.object( {format: z.enum(['default', 'detailed'])})
@@ -116,6 +123,7 @@ const createCritter: ZodOpenApiOperationObject = {
 const getAllCritters: ZodOpenApiOperationObject = {
     operationId: 'getAllCritters',
     summary: 'Fetch all critters available in critterbase',
+    tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']), wlh_id: z.string().optional() })
     },
@@ -142,6 +150,7 @@ const getAllCritters: ZodOpenApiOperationObject = {
 const getUniqueCritters: ZodOpenApiOperationObject = {
     operationId: 'getUniqueCritters',
     summary: 'Determine whether a critter is unique or not through various identifiable features.',
+    tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']) })
     },
@@ -172,6 +181,7 @@ const getUniqueCritters: ZodOpenApiOperationObject = {
 const getFilteredCritters: ZodOpenApiOperationObject = { 
     operationId: 'filterCritters',
     summary: 'Filter the entire list of critters by various features',
+    tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']) })
     },
@@ -202,6 +212,7 @@ const getFilteredCritters: ZodOpenApiOperationObject = {
 const getCrittersById: ZodOpenApiOperationObject = {
     operationId: 'crittersById',
     summary: 'Retrieved specific critters by a list of IDs',
+    tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']) })
     },
@@ -237,20 +248,20 @@ export const critterSchemas = {
 }
 
 export const critterPaths = {
-    '/critters/' : {
+    [`${routes.critters}`] : {
         get: getAllCritters,
         post: getCrittersById
     },
-    '/critters/filter/' : {
+    [`${routes.critters}/filter`] : {
         post: getFilteredCritters
     },
-    '/critters/unique/' : {
+    [`${routes.critters}/unique`] : {
         post: getUniqueCritters
     },
-    '/critter/create' : {
+    [`${routes.critters}/create`] : {
         post: createCritter
     },
-    '/critter/:id' : {
+    [`${routes.critters}/:id`] : {
         get: getCritterById,
         put: updateCritterById,
         delete: deleteCritterById
