@@ -56,10 +56,10 @@ export const BulkRouter = (db: ICbDatabase) => {
           )
         : [];
       const taxonLookup: Record<string, string> = {};
-      if (critters) {
-        for (const c of critters) {
+      if (crittersAppend.length) {
+        for (const c of crittersAppend) {
           if (c.critter_id) {
-            taxonLookup[c.critter_id as string] = c.taxon_id as string;
+            taxonLookup[c.critter_id] = c.taxon_id;
           }
         }
       }

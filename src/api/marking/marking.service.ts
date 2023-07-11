@@ -4,6 +4,7 @@ import { ReqBody } from "../../utils/types";
 import {
   getBodyLocationByNameAndTaxonUUID,
   getColourByName,
+  getMarkingTypeByName,
 } from "../lookup/lookup.service";
 import {
   MarkingCreateInput,
@@ -105,6 +106,7 @@ const appendEnglishMarkingsAsUUID = async (
     primary_colour: string;
     secondary_colour: string;
     body_location: string;
+    marking_type: string;
   }>,
   taxon_id: string
 ) => {
@@ -123,6 +125,10 @@ const appendEnglishMarkingsAsUUID = async (
       taxon_uuid
     );
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
+  }
+  if(body.marking_type) {
+    const marking_type = await getMarkingTypeByName(body.marking_type);
+    body.marking_type_id = marking_type?.marking_type_id;
   }
   return body;
 };
