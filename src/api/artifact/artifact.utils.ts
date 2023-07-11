@@ -31,6 +31,12 @@ const artifactSchema = implement<artifact>().with({
   ...zodAudit,
 });
 
+// Validate outgoing response for artifacts
+const SwagArtifactResponseSchema = implement<ArtifactResponse>().with({
+  ...artifactSchema.shape,
+  signed_url: z.string(),
+});
+
 // Validate incoming request body for create artifact
 const ArtifactCreateBodySchema = implement<
   Omit<
@@ -55,5 +61,10 @@ const ArtifactUpdateBodySchema = implement<
   .with(ArtifactCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-export { artifactSchema, ArtifactCreateBodySchema, ArtifactUpdateBodySchema };
+export {
+  artifactSchema,
+  ArtifactCreateBodySchema,
+  ArtifactUpdateBodySchema,
+  SwagArtifactResponseSchema,
+};
 export type { ArtifactCreate, ArtifactUpdate, ArtifactResponse };

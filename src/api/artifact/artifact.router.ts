@@ -18,7 +18,8 @@ export const ArtifactRouter = (db: ICbDatabase) => {
   artifactRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
-      return res.status(200).json(await db.getAllArtifacts());
+      const artifacts = await db.getAllArtifacts();
+      return res.status(200).json(artifacts);
     })
   );
 
@@ -32,7 +33,6 @@ export const ArtifactRouter = (db: ICbDatabase) => {
       if (!req.file) {
         return res.status(400).send("No file uploaded");
       }
-
       const artifactData = ArtifactCreateBodySchema.parse(req.body);
       const newArtifact = await db.createArtifact(artifactData, req.file);
       return res.status(201).json(newArtifact);
@@ -66,7 +66,8 @@ export const ArtifactRouter = (db: ICbDatabase) => {
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
-        return res.status(200).json(await db.getArtifactById(req.params.id));
+        const artifact = await db.getArtifactById(req.params.id);
+        return res.status(200).json(artifact);
       })
     )
     .patch(
