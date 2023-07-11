@@ -1,6 +1,6 @@
 import { capture, critter, location } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { prisma } from "../../utils/constants";
+import { prisma, routes } from "../../utils/constants";
 import {
   createCapture as _createCapture,
   deleteCapture as _deleteCapture,
@@ -30,7 +30,7 @@ const request = supertest(
     getCaptureById,
     updateCapture,
     deleteCapture,
-    createCapture
+    createCapture,
   } as Record<keyof ICbDatabase, any>)
 );
 
@@ -38,11 +38,15 @@ const create = jest.spyOn(prisma.capture, "create").mockImplementation();
 const update = jest.spyOn(prisma.capture, "update").mockImplementation();
 const cdelete = jest.spyOn(prisma.capture, "delete").mockImplementation();
 const findMany = jest.spyOn(prisma.capture, "findMany").mockImplementation();
-const findUniqueOrThrow = jest.spyOn(prisma.capture, "findUniqueOrThrow").mockImplementation();
-const critterFindUniqueOrThrow = jest.spyOn(prisma.critter, "findUniqueOrThrow").mockImplementation();
+const findUniqueOrThrow = jest
+  .spyOn(prisma.capture, "findUniqueOrThrow")
+  .mockImplementation();
+const critterFindUniqueOrThrow = jest
+  .spyOn(prisma.critter, "findUniqueOrThrow")
+  .mockImplementation();
 
-const CRITTER_ID ='11084b96-5cbd-421e-8106-511ecfb51f7a';
-const CAPTURE_ID ='1af85263-6a7e-4b76-8ca6-118fd3c43f50';
+const CRITTER_ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
+const CAPTURE_ID = "1af85263-6a7e-4b76-8ca6-118fd3c43f50";
 const CAPTURE: capture = {
   capture_id: CAPTURE_ID,
   critter_id: CRITTER_ID,
@@ -55,33 +59,33 @@ const CAPTURE: capture = {
   create_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   update_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const CRITTER: critter = {
   critter_id: CRITTER_ID,
-  taxon_id: '98f9fede-95fc-4321-9444-7c2742e336fe',
-  wlh_id: '12-1234',
-  animal_id: 'A13',
+  taxon_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
+  wlh_id: "12-1234",
+  animal_id: "A13",
   sex: "Male",
-  responsible_region_nr_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f',
-  create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+  responsible_region_nr_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+  create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
+  update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
   update_timestamp: new Date(),
-  critter_comment: 'Hi :)'
+  critter_comment: "Hi :)",
 };
 
 const LOCATION = {
   latitude: 2,
-  longitude: 2
-}
+  longitude: 2,
+};
 
 const CAPTURE_WITH_LOCATION = {
   ...CAPTURE,
   capture_location: LOCATION,
-  release_location: LOCATION
-}
+  release_location: LOCATION,
+};
 
 beforeEach(() => {
   getAllCaptures.mockImplementation(() => {
@@ -95,13 +99,13 @@ beforeEach(() => {
   });
   updateCapture.mockImplementation(() => {
     return CAPTURE;
-  })
+  });
   deleteCapture.mockImplementation(() => {
     return CAPTURE;
   });
   createCapture.mockImplementation(() => {
     return CAPTURE;
-  })
+  });
 });
 
 describe("API: Critter", () => {
@@ -150,13 +154,25 @@ describe("API: Critter", () => {
         expect(CaptureBodySchema.safeParse(result).success).toBe(true);
       });
       it("should create one capture and connect to existing location", async () => {
-        create.mockResolvedValue({...CAPTURE, capture_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f', release_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f'});
-        const result = await _createCapture({...CAPTURE, capture_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f', release_location_id: '4804d622-9539-40e6-a8a5-b7b223c2f09f'});
+        create.mockResolvedValue({
+          ...CAPTURE,
+          capture_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+          release_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+        });
+        const result = await _createCapture({
+          ...CAPTURE,
+          capture_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+          release_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
+        });
         expect.assertions(4);
         expect(prisma.capture.create).toHaveBeenCalled();
         expect(CaptureBodySchema.safeParse(result).success).toBe(true);
-        expect(result.capture_location_id).toBe('4804d622-9539-40e6-a8a5-b7b223c2f09f');
-        expect(result.release_location_id).toBe('4804d622-9539-40e6-a8a5-b7b223c2f09f');
+        expect(result.capture_location_id).toBe(
+          "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+        );
+        expect(result.release_location_id).toBe(
+          "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+        );
       });
     });
     describe("getting captures", () => {
@@ -186,7 +202,7 @@ describe("API: Critter", () => {
     });
     describe("modifying captures", () => {
       it("modifies the capture", async () => {
-        update.mockResolvedValue({...CAPTURE, capture_comment: 'banana'})
+        update.mockResolvedValue({ ...CAPTURE, capture_comment: "banana" });
         const result = await _updateCapture(CAPTURE_ID, {
           capture_comment: "banana",
         });
@@ -195,27 +211,41 @@ describe("API: Critter", () => {
         expect(result?.capture_comment).toBe("banana");
       });
       it("modifies capture, upserts location data", async () => {
-        update.mockResolvedValue({...CAPTURE, capture_location_id: '3572f49f-4c81-472a-8255-5d390dfdc66b', release_location_id: '3572f49f-4c81-472a-8255-5d390dfdc66b'})
+        update.mockResolvedValue({
+          ...CAPTURE,
+          capture_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b",
+          release_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b",
+        });
         const result = await _updateCapture(CAPTURE_ID, {
           capture_location: LOCATION,
-          release_location: LOCATION
+          release_location: LOCATION,
         });
         expect.assertions(3);
-        expect(result?.capture_location_id).toBe('3572f49f-4c81-472a-8255-5d390dfdc66b');
-        expect(result?.release_location_id).toBe('3572f49f-4c81-472a-8255-5d390dfdc66b');
+        expect(result?.capture_location_id).toBe(
+          "3572f49f-4c81-472a-8255-5d390dfdc66b"
+        );
+        expect(result?.release_location_id).toBe(
+          "3572f49f-4c81-472a-8255-5d390dfdc66b"
+        );
         expect(prisma.capture.update).toHaveBeenCalled();
       });
       it("modifies capture, forces creation of release data", async () => {
-        update.mockResolvedValue({...CAPTURE, capture_location_id: '3572f49f-4c81-472a-8255-5d390dfdc66b', release_location_id: 'be8d11b4-e638-4b22-a10a-9a5bdcc1fbcc'});
+        update.mockResolvedValue({
+          ...CAPTURE,
+          capture_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b",
+          release_location_id: "be8d11b4-e638-4b22-a10a-9a5bdcc1fbcc",
+        });
         const result = await _updateCapture(CAPTURE_ID, {
           release_location: LOCATION,
-          force_create_release: true
+          force_create_release: true,
         });
         expect.assertions(2);
-        expect(result?.capture_location_id).not.toBe(result?.release_location_id);
+        expect(result?.capture_location_id).not.toBe(
+          result?.release_location_id
+        );
         expect(prisma.capture.update).toHaveBeenCalled();
-      })
-      
+      });
+
       it("deletes a capture", async () => {
         cdelete.mockResolvedValue(CAPTURE);
         const result = await _deleteCapture(CAPTURE_ID);
@@ -226,7 +256,7 @@ describe("API: Critter", () => {
     });
   });
   describe("ROUTERS", () => {
-    describe("POST /api/critters/create", () => {
+    describe(`POST ${routes.captures}/create`, () => {
       it("should return status 201", async () => {
         expect.assertions(3);
         const res = await request.post("/api/captures/create").send(CAPTURE);
@@ -244,7 +274,7 @@ describe("API: Critter", () => {
         expect(createCapture.mock.results[0].value.capture_id).toBe(CAPTURE_ID);
       });
     });
-    describe("GET /api/critters", () => {
+    describe(`GET ${routes.captures}`, () => {
       it("should return status 200", async () => {
         expect.assertions(4);
         const res = await request.get("/api/captures/");
@@ -252,10 +282,9 @@ describe("API: Critter", () => {
         expect(res.body).toBeInstanceOf(Array);
         expect(res.body.length).toBe(1);
         expect(res.status).toBe(200);
-
       });
     });
-    describe("GET /api/captures/:capture_id", () => {
+    describe(`GET ${routes.captures}/:capture_id`, () => {
       it("should get one capture", async () => {
         expect.assertions(3);
         const res = await request.get("/api/captures/" + CAPTURE_ID);
@@ -266,18 +295,16 @@ describe("API: Critter", () => {
       it("should 404", async () => {
         expect.assertions(1);
         getCaptureById.mockImplementation(() => {
-          throw apiError.notFound('not found');
-        })
+          throw apiError.notFound("not found");
+        });
         const res = await request.get("/api/captures/" + randomUUID());
         expect(res.status).toBe(404);
       });
     });
-    describe("GET /api/captures/critter/:critter_id", () => {
+    describe(`GET ${routes.captures}/critter/:critter_id`, () => {
       it("should return status 200 with an array of captures", async () => {
         expect.assertions(3);
-        const res = await request.get(
-          "/api/captures/critter/" + CRITTER_ID
-        );
+        const res = await request.get("/api/captures/critter/" + CRITTER_ID);
         expect(res.status).toBe(200);
         expect(getCaptureByCritter.mock.calls.length).toBe(1);
         expect(res.body.length).toBeGreaterThanOrEqual(1);
@@ -285,35 +312,35 @@ describe("API: Critter", () => {
       it("should 404 when trying to get a bad critter", async () => {
         expect.assertions(1);
         getCaptureByCritter.mockImplementation(() => {
-          throw apiError.notFound('not found');
-        })
+          throw apiError.notFound("not found");
+        });
         const res = await request.get("/api/captures/critter/" + randomUUID());
         expect(res.status).toBe(404);
       });
     });
-    describe("PUT /api/captures/:capture_id", () => {
+    describe(`PUT ${routes.captures}/:capture_id`, () => {
       it("should return status 200", async () => {
         expect.assertions(3);
         updateCapture.mockImplementation(() => {
-          return {...CAPTURE, capture_comment: 'eee'}
-        })
+          return { ...CAPTURE, capture_comment: "eee" };
+        });
         const res = await request
           .put("/api/captures/" + CAPTURE_ID)
           .send({ capture_comment: "eee" });
         expect(res.status).toBe(200);
         expect(updateCapture.mock.calls.length).toBe(1);
-        expect(res.body.capture_comment).toBe('eee');
+        expect(res.body.capture_comment).toBe("eee");
       });
       it("should 404 if the capture is not found", async () => {
         expect.assertions(1);
         updateCapture.mockImplementation(() => {
-          throw apiError.notFound('not found');
-        })
+          throw apiError.notFound("not found");
+        });
         const res = await request.put("/api/captures/" + randomUUID());
         expect(res.status).toBe(404);
       });
     });
-    describe("DELETE /api/captures/:capture_id", () => {
+    describe(`DELETE ${routes.captures}/:capture_id`, () => {
       it("should return status 200", async () => {
         expect.assertions(1);
         const res = await request.delete("/api/captures/" + CAPTURE_ID);
@@ -322,8 +349,8 @@ describe("API: Critter", () => {
       it("should 404 if there is no capture to delete", async () => {
         expect.assertions(1);
         deleteCapture.mockImplementation(() => {
-          throw apiError.notFound('not found');
-        })
+          throw apiError.notFound("not found");
+        });
         const res = await request.delete("/api/captures/" + randomUUID());
         expect(res.status).toBe(404);
       });

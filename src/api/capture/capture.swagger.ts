@@ -8,6 +8,7 @@ import {
   CaptureUpdateSchema,
 } from "./capture.utils";
 import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import { routes } from "../../utils/constants";
 
 const getCaptures: ZodOpenApiOperationObject = {
   operationId: "getCaptures",
@@ -130,16 +131,16 @@ const deleteCapture: ZodOpenApiOperationObject = {
 };
 
 export const capturePaths = {
-  "/captures": {
+  [routes.captures]: {
     get: getCaptures,
   },
-  "/captures/create": {
+  [`${routes.captures}/create`]: {
     post: createCapture,
   },
-  "/captures/critter/:id": {
+  [`${routes.captures}/critter/:id`]: {
     get: getCaptureByCritterId,
   },
-  "/captures/:id": {
+  [`${routes.captures}/:id`]: {
     get: getCaptureById,
     put: updateCapture,
     delete: deleteCapture,
