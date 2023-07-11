@@ -32,7 +32,7 @@ const LocationSchema = implement<location>().with({
   temperature: z.number().nullable(),
   location_comment: z.string().nullable(),
   ...zodAudit,
-});
+}).openapi({ description: 'Responds with default location' });
 
 const LocationCreateSchema = implement<
   Omit<Prisma.locationCreateManyInput, "location_id" | keyof AuditColumns>
@@ -40,11 +40,11 @@ const LocationCreateSchema = implement<
   LocationSchema.omit({ location_id: true, ...noAudit })
     .strict()
     .partial().shape
-).openapi({description: 'Responds with created location'});
+).openapi({ description: 'Responds with created location' });
 
 const LocationUpdateSchema = implement<
   Omit<Prisma.locationUncheckedUpdateManyInput, keyof AuditColumns>
->().with(LocationSchema.omit({ ...noAudit }).partial().shape).openapi({description: 'Responds with updated location'});
+>().with(LocationSchema.omit({ ...noAudit }).partial().shape).openapi({ description: 'Responds with updated location' });
 
 const LocationResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -65,7 +65,7 @@ const LocationResponseSchema = ResponseSchema.transform((val) => {
     region_nr_name: lk_region_nr?.region_nr_name ?? null,
     region_env_name: lk_region_env?.region_env_name ?? null,
   };
-}).openapi({description: 'Responds with updated location'});
+}).openapi({ description: 'Responds with updated location' });
 
 // Types
 type LocationResponse = z.infer<typeof LocationResponseSchema>;
@@ -142,7 +142,7 @@ const CommonLocationSchema = implement<CommonLocationType>().with({
       wmu_name: z.string(),
     })
     .nullable(),
-}).openapi({description: 'Responds with default location'});
+}).openapi({ description: 'Responds with default location' });
 
 const CommonLocationValidation = CommonLocationSchema.omit({
   lk_region_env: true,
@@ -170,7 +170,7 @@ const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
     region_nr_name: lk_region_nr?.region_nr_name,
     wmu_name: lk_wildlife_management_unit?.wmu_name,
   };
-}).openapi({description: 'Responds with formatted location'});
+}).openapi({ description: 'Responds with formatted location' });
 
 
 const locationIncludes: Prisma.locationInclude = {

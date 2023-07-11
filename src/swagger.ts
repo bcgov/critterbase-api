@@ -1,11 +1,9 @@
 
 import {  createDocument } from 'zod-openapi';
-import { stringify } from 'yaml';
 import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagger';
 import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
-import { CritterDefaultResponseSchema, CritterDetailedResponseSchema } from './api/critter/critter.utils';
-import  {z}from 'zod'
 import { capturePaths } from './api/capture/capture.swagger';
+import { locationPaths } from './api/location/location.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -26,6 +24,7 @@ const document = createDocument({
         ...collectionUnitsPaths,
         ...critterPaths,
         ...capturePaths,
+        ...locationPaths
     }
 });
 //console.log(stringify(document));

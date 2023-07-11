@@ -41,6 +41,7 @@ const routes = {
   xref: `${api}/xref`,
   //modifiers
   create: 'create',
+  id: ':id'
 }
 
 const oneDay = 60 * 60 * 24 * 1000;

@@ -1,10 +1,15 @@
 import { z } from "zod";
 import { ZodOpenApiOperationObject } from "zod-openapi";
+import { routes } from "../../utils/constants";
 import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 import { zodID } from "../../utils/zod_helpers";
 import { LocationCreateSchema, LocationResponseSchema, LocationSchema, LocationUpdateSchema } from "./location.utils";
 
-const TAG = 'Locations';
+const TAG = 'Location';
+const SN = z.string().nullable()
+const SwagLocationResponseSchema = LocationSchema
+  .omit({ wmu_id: true, region_nr_id: true, region_env_id: true })
+  .extend({ wmu_name: SN, region_nr_name: SN, region_env_name: SN })
 
 const defaultLocationContent = {
   content: {
@@ -15,8 +20,11 @@ const defaultLocationContent = {
 }
 
 const formattedLocationContent = {
-  ...defaultLocationContent,
-  schema: LocationResponseSchema
+  content: {
+    'application/json': {
+      schema: SwagLocationResponseSchema
+    }
+  }
 }
 
 const reqIdParam = {
@@ -25,20 +33,24 @@ const reqIdParam = {
   }
 }
 
-export const SwagGetAllLocations: ZodOpenApiOperationObject = {
+const SwagGetAllLocations: ZodOpenApiOperationObject = {
   operationId: 'getAllLocations',
   summary: 'Gets all location records.',
   tags: [TAG],
   responses: {
     '200': {
       description: SwagDesc.get,
-      ...formattedLocationContent
+      content: {
+        'application/json': {
+          schema: SwagLocationResponseSchema.array()
+        }
+      }
     },
     ...SwagErr,
   }
 }
 
-export const SwagCreateLocation: ZodOpenApiOperationObject = {
+const SwagCreateLocation: ZodOpenApiOperationObject = {
   operationId: 'createLocation',
   summary: 'Create a location. These are usually associated to captures and mortalities',
   tags: [TAG],
@@ -57,7 +69,7 @@ export const SwagCreateLocation: ZodOpenApiOperationObject = {
     ...SwagErr
   }
 }
-export const SwagUpdateLocation: ZodOpenApiOperationObject = {
+const SwagUpdateLocation: ZodOpenApiOperationObject = {
   operationId: 'updateLocation',
   summary: 'Updates location. These are usually associated to captures and mortalities',
   tags: [TAG],
@@ -78,7 +90,7 @@ export const SwagUpdateLocation: ZodOpenApiOperationObject = {
     ...SwagNotFound
   }
 }
-export const SwagGetLocation: ZodOpenApiOperationObject = {
+const SwagGetLocation: ZodOpenApiOperationObject = {
   operationId: 'getLocation',
   summary: 'Get location by id',
   tags: [TAG],
@@ -92,17 +104,31 @@ export const SwagGetLocation: ZodOpenApiOperationObject = {
     ...SwagNotFound
   }
 }
-export const SwagDeleteLocation: ZodOpenApiOperationObject = {
-  operationId:'deleteLocation',
+const SwagDeleteLocation: ZodOpenApiOperationObject = {
+  operationId: 'deleteLocation',
   summary: 'Delete location by id',
   tags: [TAG],
   ...reqIdParam,
   responses: {
     '200': {
       description: SwagDesc.delete,
-      ...formattedLocationContent
+      ...defaultLocationContent
     },
     ...SwagErr,
     ...SwagNotFound
   }
+}
+
+export const locationPaths = {
+  [routes.locations]: {
+    get: SwagGetAllLocations
+  },
+  [`${routes.locations}/${routes.id}`]: {
+    get: SwagGetLocation,
+    patch: SwagUpdateLocation,
+    delete: SwagDeleteLocation
+  },
+  [`${routes.locations}/${routes.create}`]: {
+    post: SwagCreateLocation
+  },
 }
