@@ -6,6 +6,7 @@ import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
 import { CritterDefaultResponseSchema, CritterDetailedResponseSchema } from './api/critter/critter.utils';
 import  {z}from 'zod'
 import { capturePaths } from './api/capture/capture.swagger';
+import { artifactPaths } from './api/artifact/artifact.swagger';
 
 const document = createDocument({
     openapi: '3.1.0',
@@ -26,6 +27,7 @@ const document = createDocument({
         ...collectionUnitsPaths,
         ...critterPaths,
         ...capturePaths,
+        ...artifactPaths
     }
 });
 //console.log(stringify(document));
