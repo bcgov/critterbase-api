@@ -14,6 +14,8 @@ type ArtifactCreate = z.infer<typeof ArtifactCreateBodySchema>;
 
 type ArtifactUpdate = z.infer<typeof ArtifactUpdateBodySchema>;
 
+type ArtifactResponse = artifact & { signed_url: string };
+
 // Schemas
 
 // Base schema for all artifacts
@@ -29,25 +31,40 @@ const artifactSchema = implement<artifact>().with({
   ...zodAudit,
 });
 
+// Validate outgoing response for artifacts
+const SwagArtifactResponseSchema = implement<ArtifactResponse>().with({
+  ...artifactSchema.shape,
+  signed_url: z.string(),
+});
+
 // Validate incoming request body for create artifact
 const ArtifactCreateBodySchema = implement<
-  Omit<Prisma.artifactCreateManyInput, "artifact_id" | keyof AuditColumns>
+  Omit<
+    Prisma.artifactCreateManyInput,
+    keyof AuditColumns | "artifact_id" | "artifact_url"
+  >
 >().with(
   artifactSchema
-    .omit({ ...noAudit, artifact_id: true })
+    .omit({ ...noAudit, artifact_id: true, artifact_url: true })
     .partial()
-    .required({ critter_id: true, artifact_url: true }).shape
+    .required({ critter_id: true }).shape
 );
 
 // Validate incoming request body for update artifact
+// * Note: artifact_url and artifact_id are not allowed to be updated
 const ArtifactUpdateBodySchema = implement<
   Omit<
     Prisma.artifactUncheckedUpdateManyInput,
-    "artifact_id" | keyof AuditColumns
+    "artifact_url" | "artifact_id" | keyof AuditColumns
   >
 >()
   .with(ArtifactCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-export { artifactSchema, ArtifactCreateBodySchema, ArtifactUpdateBodySchema };
-export type { ArtifactCreate, ArtifactUpdate };
+export {
+  artifactSchema,
+  ArtifactCreateBodySchema,
+  ArtifactUpdateBodySchema,
+  SwagArtifactResponseSchema,
+};
+export type { ArtifactCreate, ArtifactUpdate, ArtifactResponse };

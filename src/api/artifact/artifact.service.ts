@@ -1,6 +1,13 @@
 import { prisma } from "../../utils/constants";
 import { artifact } from "@prisma/client";
-import { ArtifactCreate, ArtifactUpdate } from "./artifact.utils";
+import {
+  ArtifactCreate,
+  ArtifactResponse,
+  ArtifactUpdate,
+} from "./artifact.utils";
+import { randomUUID } from "crypto";
+import { getFileDownloadUrl, uploadFileToS3 } from "../../utils/object_store";
+import { S3 } from "aws-sdk";
 
 /**
  * * Gets an artifact by the artifact_id
@@ -9,12 +16,13 @@ import { ArtifactCreate, ArtifactUpdate } from "./artifact.utils";
  */
 const getArtifactById = async (
   artifact_id: string
-): Promise<artifact> => {
-  return await prisma.artifact.findUniqueOrThrow({
+): Promise<ArtifactResponse> => {
+  const artifact = await prisma.artifact.findUniqueOrThrow({
     where: {
       artifact_id: artifact_id,
     },
   });
+  return addSignedUrlToArtifact(artifact);
 };
 
 /**
@@ -23,20 +31,21 @@ const getArtifactById = async (
  */
 const getArtifactsByCritterId = async (
   critter_id: string
-): Promise<artifact[]> => {
-  return await prisma.artifact.findMany({
+): Promise<ArtifactResponse[]> => {
+  const artifacts = await prisma.artifact.findMany({
     where: {
       critter_id: critter_id,
     },
   });
+  return addSignedUrlToArtifacts(artifacts);
 };
 
 /**
  * Gets all artifacts from the database
  */
-const getAllArtifacts = async (): Promise<artifact[]> => {
-  const allArtifacts = await prisma.artifact.findMany();
-  return allArtifacts;
+const getAllArtifacts = async (): Promise<ArtifactResponse[]> => {
+  const artifacts = await prisma.artifact.findMany();
+  return addSignedUrlToArtifacts(artifacts);
 };
 
 /**
@@ -47,30 +56,43 @@ const getAllArtifacts = async (): Promise<artifact[]> => {
 const updateArtifact = async (
   artifact_id: string,
   artifact_data: ArtifactUpdate
-): Promise<artifact> => {
-  return await prisma.artifact.update({
+): Promise<ArtifactResponse> => {
+  const artifact = await prisma.artifact.update({
     where: {
       artifact_id: artifact_id,
     },
     data: artifact_data,
   });
+  return addSignedUrlToArtifact(artifact);
 };
 
 /**
  * * Creates a new artifact in the database
- * * Valid reference to existing critter_id and artifact_url must be provided
+ * * Artifact file is uploaded to S3 (Object Store) and the artifact_url is stored in the database
+ * * Files are stored in a flat structure in the root of the bucket
+ * * The file names follow the pattern: <artifact_id>_<original_file_name>.<file_extension>
+ * * Because the files are stored in the root of the bucket, the artifact_url is simply the file name
  * @param {ArtifactCreate} artifact_data
  */
 const createArtifact = async (
-  artifact_data: ArtifactCreate
-): Promise<artifact> => {
-  return await prisma.artifact.create({
-    data: artifact_data,
+  artifact_data: ArtifactCreate,
+  file: Express.Multer.File
+): Promise<ArtifactResponse> => {
+  // TODO: user and timestamp metadata could be added here, but this is redundant with the database
+  const metadata: S3.Metadata = {
+    filename: file.originalname,
+  };
+  const artifact_id = randomUUID();
+  const artifact_url = await uploadFileToS3(file, artifact_id, metadata);
+  const artifact = await prisma.artifact.create({
+    data: { ...artifact_data, artifact_id, artifact_url },
   });
+  return addSignedUrlToArtifact(artifact);
 };
 
 /**
  * * Removes an artifact from the database
+ * * Resource will NOT be removed from object store
  * @param {string} artifact_id
  */
 const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
@@ -80,6 +102,22 @@ const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
     },
   });
 };
+
+/**
+ * * Adds a signed URL to an artifact
+ * @param {artifact} artifact
+ */
+const addSignedUrlToArtifact = (artifact: artifact): ArtifactResponse => {
+  const signed_url = getFileDownloadUrl(artifact.artifact_url);
+  return { ...artifact, signed_url };
+};
+
+/**
+ * * Maps over an array of artifacts and adds a signed URL to each one
+ * @param {artifact[]} artifacts
+ */
+const addSignedUrlToArtifacts = (artifacts: artifact[]): ArtifactResponse[] =>
+  artifacts.map(addSignedUrlToArtifact);
 
 export {
   getArtifactById,
