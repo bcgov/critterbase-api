@@ -230,7 +230,7 @@ const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
 const critterArr = z.string().array();
 const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
   operationId: 'immediateFamilyOfCritter',
-  summary: 'Gets immediate family members of critter id',
+  summary: 'Gets all immediate family members of critter id',
   tags: [TAG],
   ...reqIdParam,
   responses: {
@@ -246,6 +246,84 @@ const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
   }
 }
 
+const SwagGetImmediateSiblingsChildren: ZodOpenApiOperationObject = {
+  operationId: 'immediateSiblingsChildrenOfCritter',
+  summary: 'Gets immediate parents and children of critter id',
+  tags: [TAG],
+  ...reqIdParam,
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: z.object({children: critterArr,  parents: critterArr})
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const SwagUpdateImmediateSiblingsChildrenOfCritter: ZodOpenApiOperationObject = {
+  operationId: 'immediateSiblingsChildrenOfCritter',
+  summary: 'Updates immediate parents and children of critter id',
+  tags: [TAG],
+  ...reqIdParam,
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: FamilyCreateBodySchema,
+      }
+    }
+  },
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilySchema,
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const SwagDeleteFamilyOfCritter: ZodOpenApiOperationObject = {
+  operationId: 'deleteFamilyOfCritter',
+  summary: 'Deletes family associations of critter',
+  tags: [TAG],
+  ...reqIdParam,
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilySchema
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const SwagGetFamilyByLabel: ZodOpenApiOperationObject = {
+  operationId: 'getFailyByLabel',
+  summary: 'Gets family by label value',
+  tags: [TAG],
+  ...reqIdParam,
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilySchema
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
 
 export const familyPaths = {
   [routes.family]: {
@@ -253,6 +331,11 @@ export const familyPaths = {
   },
   [`${routes.family}/${routes.create}`]: {
     post: SwagCreateFamily,
+  },
+  [`${routes.family}/{id}`]: {
+    get: SwagGetImmediateSiblingsChildren,
+    put: SwagUpdateImmediateSiblingsChildrenOfCritter,
+    delete: SwagDeleteFamilyOfCritter
   },
   [`${routes.family}/immediate/{id}`]: {
     get: SwagGetImmediateFamilyOfCritter,
@@ -273,4 +356,8 @@ export const familyPaths = {
     delete: SwagParentsCreate,
     post: SwagDeleteParents,
   },
+  [`${routes.family}/label/{label}`]: {
+    get: SwagGetFamilyByLabel,
+  },
+
 }
