@@ -1,16 +1,20 @@
 import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { CollectionUnitCreateBodySchema, CollectionUnitResponseSchema, CollectionUnitUpdateBodySchema, SimpleCollectionUnitIncludesSchema, critter_collection_unitIncludesSchema } from './collectionUnit.utils';
+import { CollectionUnitCreateBodySchema, CollectionUnitUpdateBodySchema, SimpleCollectionUnitIncludesSchema, critter_collection_unitIncludesSchema } from './collectionUnit.utils';
 import {z} from 'zod';
 import { noAudit, zodID } from '../../utils/zod_helpers';
+import { routes } from '../../utils/constants';
 
 const SwaggerCollectionResponseValidation = 
     critter_collection_unitIncludesSchema
       .omit({collection_unit_id: true, xref_collection_unit: true})
       .extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
 
+const TAG = 'Collection units';
+
 const getCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnit',
     summary: 'Get a collection unit by id',
+    tags: [TAG],
     requestParams: {
         path: z.object( {id: zodID} )
     },
@@ -29,6 +33,7 @@ const getCollectionUnits: ZodOpenApiOperationObject = {
 const getAllCollectionUnits: ZodOpenApiOperationObject = {
     operationId: 'getCollectionUnits',
     summary: 'Get every critter collection unit entry.',
+    tags: [TAG],
     responses: {
         '200': {
             description: 'Successful operation',
@@ -44,6 +49,7 @@ const getAllCollectionUnits: ZodOpenApiOperationObject = {
 const createCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'createCollectionUnit',
     summary: 'Create a critter collection unit assignment',
+    tags: [TAG],
     requestBody: {
         content: {
             'application/json' : {
@@ -66,6 +72,7 @@ const createCollectionUnit: ZodOpenApiOperationObject = {
 const updateCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'updateCollectionUnit',
     summary: 'Update a collection unit',
+    tags: [TAG],
     requestParams: {
         path: z.object( {id: zodID} )
     },
@@ -91,6 +98,7 @@ const updateCollectionUnit: ZodOpenApiOperationObject = {
 const deleteCollectionUnit: ZodOpenApiOperationObject = {
     operationId: 'deleteCollectionUnit',
     summary: 'Deletes a collection unit',
+    tags: [TAG],
     requestParams: {
         path: z.object( {id: zodID} )
     },
@@ -106,6 +114,24 @@ const deleteCollectionUnit: ZodOpenApiOperationObject = {
     }
 }
 
+const getCollectionUnitsByCritterId: ZodOpenApiOperationObject = {
+    operationId: 'getCollectionUnitsByCritterId',
+    summary: 'Get all critter collection units associated with the provided critter id.',
+    tags: [TAG],
+    requestParams: {
+        path: z.object( {id: zodID} )
+    },
+    responses: {
+        '200' : {
+            description: 'Item successfully deleted.',
+            content: {
+                'application/json' : {
+                    schema: SwaggerCollectionResponseValidation.array()
+                }
+            }
+        }
+    }
+}
 
 
 export const SwaggerSimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema
@@ -116,15 +142,18 @@ export const SwaggerSimpleCollectionResponseValidation = SimpleCollectionUnitInc
 })
 
 export const collectionUnitsPaths = {
-    '/collection-units/' : {
+    [`${routes.collection_units}`] : {
         get: getAllCollectionUnits
     },
-    '/collection-units/:id' : {
+    [`${routes.collection_units}/create`] : {
+        post: createCollectionUnit
+    },
+    [`${routes.collection_units}/critter/:id`] : {
+        get: getCollectionUnitsByCritterId
+    },
+    [`${routes.collection_units}/:id`] : {
         get: getCollectionUnits,
         patch: updateCollectionUnit,
         delete: deleteCollectionUnit
-    },
-    '/collection-units/create' : {
-        post: createCollectionUnit
-    },
+    }
 }

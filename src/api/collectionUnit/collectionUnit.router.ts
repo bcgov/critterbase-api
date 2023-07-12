@@ -13,24 +13,6 @@ import { ICbDatabase } from "../../utils/database";
 export const CollectionUnitRouter = (db: ICbDatabase) => {
   const collectionUnitRouter = express.Router();
 
-  /**
-   ** collectionUnit Router Home
-   */
-  /**
-   * @openapi
-   * /collection-units/:
-   *   get:
-   *     description: Fetches all CollectionUnits
-   *     responses:
-   *       200:
-   *         description: An array of CollectionUnits
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/CollectionUnitResponse'
-   */
   collectionUnitRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
@@ -42,28 +24,6 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     })
   );
 
-  /**
-   ** Create new collectionUnit
-   */
-  /**
-   * @openapi
-   * /collection-units/create:
-   *   post:
-   *     description: Creates a new CollectionUnit
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/CollectionUnitCreate'
-   *     responses:
-   *       201:
-   *         description: The created CollectionUnit
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/CollectionUnit'
-   */
   collectionUnitRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
@@ -75,28 +35,6 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     })
   );
 
-  /**
-   * @openapi
-   * /collection-units/critter/{id}:
-   *   get:
-   *     description: Fetches CollectionUnits associated with a given critter id
-   *     parameters:
-   *       - name: id
-   *         in: path
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *     responses:
-   *       200:
-   *         description: An array of CollectionUnits associated with the critter
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/CollectionUnit'
-   */
   collectionUnitRouter.route("/critter/:id").get(
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
