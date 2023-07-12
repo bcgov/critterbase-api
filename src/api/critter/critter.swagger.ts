@@ -308,7 +308,7 @@ export const critterPaths = {
     [`${routes.critters}/create`] : {
         post: createCritter
     },
-    [`${routes.critters}/:id`] : {
+    [`${routes.critters}/{id}`] : {
         get: getCritterById,
         put: updateCritterById,
         delete: deleteCritterById

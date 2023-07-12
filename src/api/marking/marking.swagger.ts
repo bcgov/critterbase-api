@@ -177,10 +177,10 @@ export const markingPaths = {
   [`${routes.markings}/verify`]: {
     get: verifyMarkings
   },
-  [`${routes.markings}/critter/:id`]: {
+  [`${routes.markings}/critter/{id}`]: {
     post: getMarkingsByCritterId
   },
-  [`${routes.markings}/:id`]: {
+  [`${routes.markings}/{id}`]: {
     get: getMarkingById,
     put: updateMarkingById,
     delete: deleteMarkingById

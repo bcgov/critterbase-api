@@ -148,10 +148,10 @@ export const collectionUnitsPaths = {
     [`${routes.collection_units}/create`] : {
         post: createCollectionUnit
     },
-    [`${routes.collection_units}/critter/:id`] : {
+    [`${routes.collection_units}/critter/{id}`] : {
         get: getCollectionUnitsByCritterId
     },
-    [`${routes.collection_units}/:id`] : {
+    [`${routes.collection_units}/{id}`] : {
         get: getCollectionUnits,
         patch: updateCollectionUnit,
         delete: deleteCollectionUnit
