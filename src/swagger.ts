@@ -13,6 +13,7 @@ import {
   USER_ID_HEADER,
 } from "./utils/constants";
 import { accessPaths } from "./api/access/access.swagger";
+import { enumPaths } from "./api/lookup/lookup.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -58,6 +59,7 @@ const document = createDocument({
     ...locationPaths,
     ...userPaths,
     ...accessPaths,
+    ...enumPaths,
   },
   servers: [
     {
@@ -85,5 +87,6 @@ const document = createDocument({
     },
   ],
 });
+
 //console.log(stringify(document));
 export const yaml = document;
