@@ -12,6 +12,7 @@ import {
   PORT,
   USER_ID_HEADER,
 } from "./utils/constants";
+import { accessPaths } from "./api/access/access.swagger";
 import { enumPaths } from "./api/lookup/lookup.swagger";
 import { markingPaths } from "./api/marking/marking.swagger";
 
@@ -59,6 +60,7 @@ const document = createDocument({
     ...artifactPaths,
     ...locationPaths,
     ...userPaths,
+    ...accessPaths,
     ...enumPaths,
   },
   servers: [
