@@ -1,27 +1,3 @@
-<<<<<<< HEAD
-
-import { createDocument } from 'zod-openapi';
-import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagger';
-import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
-import { capturePaths } from './api/capture/capture.swagger';
-import { artifactPaths } from './api/artifact/artifact.swagger';
-import { locationPaths } from './api/location/location.swagger';
-import { familyPaths} from './api/family/family.swagger';
-
-const document = createDocument({
-  openapi: '3.1.0',
-  components: {
-    schemas: {
-      ...critterSchemas
-    }
-  },
-  info: {
-    title: 'Critterbase API',
-    version: '1.0.0',
-    description: 'A simple demo for zod-openapi',
-    license: {
-      name: 'MIT'
-=======
 import { createDocument } from "zod-openapi";
 import { collectionUnitsPaths } from "./api/collectionUnit/collectionUnit.swagger";
 import { critterPaths, critterSchemas } from "./api/critter/critter.swagger";
@@ -38,6 +14,7 @@ import {
 } from "./utils/constants";
 import { accessPaths } from "./api/access/access.swagger";
 import { enumPaths } from "./api/lookup/lookup.swagger";
+import { familyPaths } from "./api/family/family.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -72,25 +49,19 @@ const document = createDocument({
     description: "A simple demo for zod-openapi",
     license: {
       name: "MIT",
->>>>>>> c7c7bfa6a9494234870eccc89ed49e1a30029bba
     },
   },
   paths: {
     ...collectionUnitsPaths,
     ...critterPaths,
     ...capturePaths,
-<<<<<<< HEAD
-    ...artifactPaths,
-    ...locationPaths,
-    ...familyPaths
-  }
-=======
     ...bulkPaths,
     ...artifactPaths,
     ...locationPaths,
     ...userPaths,
     ...accessPaths,
     ...enumPaths,
+    ...familyPaths,
   },
   servers: [
     {
@@ -117,7 +88,6 @@ const document = createDocument({
       keycloakUuidAuth: [],
     },
   ],
->>>>>>> c7c7bfa6a9494234870eccc89ed49e1a30029bba
 });
 
 //console.log(stringify(document));

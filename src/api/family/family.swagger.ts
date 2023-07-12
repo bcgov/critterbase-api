@@ -4,7 +4,7 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 import { routes } from "../../utils/constants";
 import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 import { zodAudit, zodID } from "../../utils/zod_helpers";
-import { FamilyChildSchema, FamilyCreateBodySchema, FamilyParentSchema, FamilySchema } from "./family.utils";
+import { FamilyChildCreateBodySchema, FamilyChildSchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyParentSchema, FamilySchema } from "./family.utils";
 
 const TAG = 'Family';
 
@@ -130,23 +130,147 @@ const SwagGetCritterChildren: ZodOpenApiOperationObject = {
   }
 }
 
+
+const SwagParentsCreate: ZodOpenApiOperationObject = {
+  operationId: 'createParentsOfFamily',
+  summary: 'Creates a parent record for a know family',
+  tags: [TAG],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: FamilyParentCreateBodySchema,
+      }
+    }
+  },
+  responses: {
+    '201': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilyParentSchema
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const SwagDeleteParents: ZodOpenApiOperationObject = {
+  operationId: 'deletesParentsOfFamily',
+  summary: 'Deletes parent record for a know family',
+  tags: [TAG],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: FamilyParentCreateBodySchema,
+      }
+    }
+  },
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilyParentSchema
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const SwagCreateChildOfFamily: ZodOpenApiOperationObject = {
+  operationId: 'createsChildOfFamily',
+  summary: 'Creates child of family',
+  tags: [TAG],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: FamilyChildCreateBodySchema,
+      }
+    }
+  },
+  responses: {
+    '201': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilyChildSchema
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
+  operationId: 'deletesChildOfFamily',
+  summary: 'Deletes child of family',
+  tags: [TAG],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: FamilyChildCreateBodySchema,
+      }
+    }
+  },
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: FamilyChildSchema
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+const critterArr = z.string().array();
+const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
+  operationId: 'immediateFamilyOfCritter',
+  summary: 'Gets immediate family members of critter id',
+  tags: [TAG],
+  ...reqIdParam,
+  responses: {
+    '200': {
+      description: SwagDesc.create,
+      content: {
+        'application/json': {
+          schema: z.object({children: critterArr,  siblings: critterArr, parents: critterArr})
+        }
+      }
+    },
+    ...SwagErr
+  }
+}
+
+
 export const familyPaths = {
   [routes.family]: {
     get: SwagGetAllFamilies
   },
+  [`${routes.family}/${routes.create}`]: {
+    post: SwagCreateFamily,
+  },
+  [`${routes.family}/immediate/{id}`]: {
+    get: SwagGetImmediateFamilyOfCritter,
+  },
   [`${routes.family}/children`]: {
     get: SwagGetFamilyChildren,
+    delete: SwagDeleteChildOfFamily,
+    post: SwagCreateChildOfFamily,
   },
-  [`${routes.family}/children/${routes.id}`]: {
+  [`${routes.family}/children/{id}`]: {
     get: SwagGetCritterChildren,
+  },
+  [`${routes.family}/parents/{id}`]: {
+    get: SwagGetCritterParents,
   },
   [`${routes.family}/parents`]: {
     get: SwagGetFamilyParents,
-  },
-  [`${routes.family}/parents/${routes.id}`]: {
-    get: SwagGetCritterParents,
-  },
-  [`${routes.family}/${routes.create}`]: {
-    post: SwagCreateFamily,
+    delete: SwagParentsCreate,
+    post: SwagDeleteParents,
   },
 }
