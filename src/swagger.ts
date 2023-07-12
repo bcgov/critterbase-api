@@ -1,33 +1,35 @@
 
-import {  createDocument } from 'zod-openapi';
+import { createDocument } from 'zod-openapi';
 import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagger';
 import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
 import { capturePaths } from './api/capture/capture.swagger';
 import { artifactPaths } from './api/artifact/artifact.swagger';
 import { locationPaths } from './api/location/location.swagger';
+import { familyPaths} from './api/family/family.swagger';
 
 const document = createDocument({
-    openapi: '3.1.0',
-    components: {
-        schemas: {
-            ...critterSchemas
-        }
-    },
-    info: {
-        title: 'Critterbase API',
-        version: '1.0.0',
-        description: 'A simple demo for zod-openapi',
-        license: {
-            name: 'MIT'
-        },
-    },
-    paths: {
-        ...collectionUnitsPaths,
-        ...critterPaths,
-        ...capturePaths,
-        ...artifactPaths,
-        ...locationPaths,
+  openapi: '3.1.0',
+  components: {
+    schemas: {
+      ...critterSchemas
     }
+  },
+  info: {
+    title: 'Critterbase API',
+    version: '1.0.0',
+    description: 'A simple demo for zod-openapi',
+    license: {
+      name: 'MIT'
+    },
+  },
+  paths: {
+    ...collectionUnitsPaths,
+    ...critterPaths,
+    ...capturePaths,
+    ...artifactPaths,
+    ...locationPaths,
+    ...familyPaths
+  }
 });
 //console.log(stringify(document));
 export const yaml = document;
