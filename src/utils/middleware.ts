@@ -3,7 +3,13 @@ import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { loginUser } from "../api/access/access.service";
 import { AuthHeadersSchema } from "../api/user/user.utils";
-import { IS_TEST, NO_AUTH } from "./constants";
+import {
+  API_KEY_HEADER,
+  IS_TEST,
+  KEYCLOAK_UUID_HEADER,
+  NO_AUTH,
+  USER_ID_HEADER,
+} from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -58,6 +64,11 @@ const errorHandler = (
     const fieldErrors = err.flatten().fieldErrors;
     const fieldKeys = Object.keys(fieldErrors);
     const customErrs: Record<string, string> = {};
+    const status = [API_KEY_HEADER, USER_ID_HEADER, KEYCLOAK_UUID_HEADER].some(
+      (h) => err.message.includes(h)
+    )
+      ? 401
+      : 400;
     //Bulk router can throw a custom formatted error.
     //Splitting them apart to better structure the error response
     err.errors.forEach((e) => {
@@ -67,10 +78,10 @@ const errorHandler = (
       }
     });
     if (!fieldKeys.length) {
-      return res.status(400).json({ error: err.format()._errors.join(", ") });
+      return res.status(status).json({ error: err.format()._errors.join(", ") });
     }
     console.log(Object.keys(customErrs).length);
-    return res.status(400).json({
+    return res.status(status).json({
       errors: Object.keys(customErrs).length ? customErrs : fieldErrors,
     });
   }

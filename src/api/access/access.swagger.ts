@@ -9,7 +9,7 @@ const TAG = "Access";
 
 const getAccess: ZodOpenApiOperationObject = {
   operationId: "getAccess",
-  summary: "Welcome to the API",
+  summary: "Welcomes users to the API",
   security: [],
   tags: [TAG],
   responses: {
@@ -28,7 +28,7 @@ const getAccess: ZodOpenApiOperationObject = {
 
 const signup: ZodOpenApiOperationObject = {
   operationId: "signup",
-  summary: "Sign up a new user",
+  summary: "Registers a new user account",
   security: [],
   tags: [TAG],
   requestBody: {
@@ -53,7 +53,7 @@ const signup: ZodOpenApiOperationObject = {
 
 const getTypes: ZodOpenApiOperationObject = {
   operationId: "getTypes",
-  summary: "Get types of supported routes",
+  summary: "Gets types of all supported routes",
   security: [],
   tags: [TAG],
   requestParams: {
@@ -76,7 +76,7 @@ export const accessPaths = {
   [routes.home]: {
     get: getAccess,
   },
-  [routes.home + "/types/:model"]: {
+  [routes.home + "/types/{model}"]: {
     get: getTypes,
   },
   [routes.home + "/signup"]: {

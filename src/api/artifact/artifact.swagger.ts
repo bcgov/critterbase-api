@@ -13,7 +13,7 @@ const TAG = "Artifact";
 
 const getArtifacts: ZodOpenApiOperationObject = {
   operationId: "getArtifacts",
-  summary: "Get all artifacts",
+  summary: "Gets all artifacts",
   tags: [TAG],
   responses: {
     "200": {
@@ -31,7 +31,7 @@ const getArtifacts: ZodOpenApiOperationObject = {
 
 const createArtifact: ZodOpenApiOperationObject = {
   operationId: "createArtifact",
-  summary: "Create an artifact",
+  summary: "Creates a new artifact in Critterbase and stores the file in Object Store",
   tags: [TAG],
   requestBody: {
     content: {
@@ -61,7 +61,7 @@ const createArtifact: ZodOpenApiOperationObject = {
 
 const getArtifactsByCritterId: ZodOpenApiOperationObject = {
   operationId: "getArtifactsByCritterId",
-  summary: "Get all artifacts by critter id",
+  summary: "Gets all artifacts with a specific critter id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -82,7 +82,7 @@ const getArtifactsByCritterId: ZodOpenApiOperationObject = {
 
 const getArtifactById: ZodOpenApiOperationObject = {
   operationId: "getArtifactById",
-  summary: "Get an artifact by id",
+  summary: "Gets a specifc artifact by its id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -102,7 +102,7 @@ const getArtifactById: ZodOpenApiOperationObject = {
 
 const updateArtifact: ZodOpenApiOperationObject = {
   operationId: "updateArtifact",
-  summary: "Update an artifact",
+  summary: "Updates a specific artifacts data",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -130,7 +130,7 @@ const updateArtifact: ZodOpenApiOperationObject = {
 
 const deleteArtifact: ZodOpenApiOperationObject = {
   operationId: "deleteArtifact",
-  summary: "Delete an artifact",
+  summary: "Deletes a specific artifact",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -158,10 +158,10 @@ export const artifactPaths = {
   [`${routes.artifacts}/create`]: {
     post: createArtifact,
   },
-  [`${routes.artifacts}/critter/:id`]: {
+  [`${routes.artifacts}/critter/{id}`]: {
     get: getArtifactsByCritterId,
   },
-  [`${routes.artifacts}/:id`]: {
+  [`${routes.artifacts}/{id}`]: {
     get: getArtifactById,
     patch: updateArtifact,
     delete: deleteArtifact,

@@ -78,7 +78,6 @@ const createArtifact = async (
   artifact_data: ArtifactCreate,
   file: Express.Multer.File
 ): Promise<ArtifactResponse> => {
-  // TODO: user and timestamp metadata could be added here, but this is redundant with the database
   const metadata: S3.Metadata = {
     filename: file.originalname,
   };

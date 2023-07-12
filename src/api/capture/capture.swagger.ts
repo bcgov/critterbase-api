@@ -22,7 +22,7 @@ const TAG = "Capture";
 
 const getCaptures: ZodOpenApiOperationObject = {
   operationId: "getCaptures",
-  summary: "Get all captures",
+  summary: "Gets all capture events",
   tags: [TAG],
   responses: {
     "200": {
@@ -38,7 +38,7 @@ const getCaptures: ZodOpenApiOperationObject = {
 
 const createCapture: ZodOpenApiOperationObject = {
   operationId: "createCapture",
-  summary: "Create a capture event",
+  summary: "Creates a new capture event",
   tags: [TAG],
   requestBody: {
     content: {
@@ -62,7 +62,7 @@ const createCapture: ZodOpenApiOperationObject = {
 
 const getCaptureByCritterId: ZodOpenApiOperationObject = {
   operationId: "getCaptureByCritterId",
-  summary: "Get captures by critter id",
+  summary: "Gets all captures with a specific critter id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -83,7 +83,7 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
 
 const getCaptureById: ZodOpenApiOperationObject = {
   operationId: "getCaptureById",
-  summary: "Get a capture by id",
+  summary: "Gets a specifc capture event by its id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -103,7 +103,7 @@ const getCaptureById: ZodOpenApiOperationObject = {
 
 const updateCapture: ZodOpenApiOperationObject = {
   operationId: "updateCapture",
-  summary: "Update a capture",
+  summary: "Updates a specific capture event",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -131,7 +131,7 @@ const updateCapture: ZodOpenApiOperationObject = {
 
 const deleteCapture: ZodOpenApiOperationObject = {
   operationId: "deleteCapture",
-  summary: "Delete a capture",
+  summary: "Delete a specific capture event",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -156,10 +156,10 @@ export const capturePaths = {
   [`${routes.captures}/create`]: {
     post: createCapture,
   },
-  [`${routes.captures}/critter/:id`]: {
+  [`${routes.captures}/critter/{id}`]: {
     get: getCaptureByCritterId,
   },
-  [`${routes.captures}/:id`]: {
+  [`${routes.captures}/{id}`]: {
     get: getCaptureById,
     put: updateCapture,
     delete: deleteCapture,
