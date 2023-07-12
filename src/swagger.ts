@@ -13,6 +13,7 @@ import {
   USER_ID_HEADER,
 } from "./utils/constants";
 import { enumPaths } from "./api/lookup/lookup.swagger";
+import { markingPaths } from "./api/marking/marking.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -50,14 +51,15 @@ const document = createDocument({
     },
   },
   paths: {
-    ...collectionUnitsPaths,
     ...critterPaths,
     ...capturePaths,
+    ...collectionUnitsPaths,
+    ...markingPaths,
     ...bulkPaths,
     ...artifactPaths,
     ...locationPaths,
     ...userPaths,
-    ...enumPaths
+    ...enumPaths,
   },
   servers: [
     {
