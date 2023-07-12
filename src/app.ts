@@ -19,7 +19,6 @@ import { ICbDatabase } from "./utils/database";
 import { auth, errorHandler, errorLogger } from "./utils/middleware";
 import { apiError } from "./utils/types";
 import swaggerUIExperss from "swagger-ui-express";
-import { options } from "./openapi/root-api-doc";
 
 import swaggerJSDoc from "swagger-jsdoc";
 import { yaml } from "./swagger";
@@ -35,7 +34,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(
     "/api-docs",
     swaggerUIExperss.serve,
-    swaggerUIExperss.setup(yaml)
+    swaggerUIExperss.setup(yaml/*, {swaggerOptions: { supportedSubmitMethods: [ 'get' ] }}*/)
   );
 
   app.use(routes.home, AccessRouter(db));

@@ -14,7 +14,9 @@ import {
 } from "./utils/constants";
 import { accessPaths } from "./api/access/access.swagger";
 import { enumPaths } from "./api/lookup/lookup.swagger";
+import { markingPaths } from "./api/marking/marking.swagger";
 import { familyPaths } from "./api/family/family.swagger";
+import { mortalityPaths } from "./api/mortality/mortality.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -52,9 +54,11 @@ const document = createDocument({
     },
   },
   paths: {
-    ...collectionUnitsPaths,
     ...critterPaths,
     ...capturePaths,
+    ...mortalityPaths,
+    ...collectionUnitsPaths,
+    ...markingPaths,
     ...bulkPaths,
     ...artifactPaths,
     ...locationPaths,
