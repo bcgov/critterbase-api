@@ -1,7 +1,7 @@
-import { critter, Prisma } from "@prisma/client";
+import { critter, family, family_child, family_parent, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
-import { implement, zodID } from "../../utils/zod_helpers";
+import { implement, zodAudit, zodID } from "../../utils/zod_helpers";
 
 interface ImmediateFamily {
   children: critter[];
@@ -13,6 +13,22 @@ interface ImmediateFamilyCritter {
   siblings: critter[];
   parents: critter[];
 }
+
+const FamilySchema = implement<family>().with({
+  family_id: zodID,
+  family_label: z.string(),
+  ...zodAudit
+})
+
+const FamilyChildSchema = implement<family_child>().with({
+  ...FamilySchema.omit({ family_label: true }).shape,
+  child_critter_id: zodID,
+})
+
+const FamilyParentSchema = implement<family_parent>().with({
+  ...FamilySchema.omit({ family_label: true }).shape,
+  parent_critter_id: zodID,
+})
 
 const FamilyCreateBodySchema = implement<
   Omit<Prisma.familyCreateManyInput, "family_id" | keyof AuditColumns>
@@ -40,9 +56,12 @@ type FamilyParentCreate = z.infer<typeof FamilyParentCreateBodySchema>;
 type FamilyChildCreate = z.infer<typeof FamilyChildCreateBodySchema>;
 
 export {
+  FamilyChildSchema,
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema,
   FamilyChildCreateBodySchema,
+  FamilySchema,
+  FamilyParentSchema
 };
 export type {
   ImmediateFamily,

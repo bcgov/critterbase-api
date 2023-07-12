@@ -15,7 +15,10 @@ export const SwagErr: ZodOpenApiOperationObject['responses'] = {
     description: SwagDesc.error,
     content: {
       'application/json': {
-        schema: z.object({ error: z.string() })
+        schema: z.object({
+          error: z.string().optional(),
+          errors: z.object({ "fieldName": z.string().optional() }).optional()
+        })
       }
     }
   }

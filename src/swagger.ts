@@ -15,6 +15,7 @@ import {
 import { accessPaths } from "./api/access/access.swagger";
 import { enumPaths, lookupSchemas } from "./api/lookup/lookup.swagger";
 import { markingPaths } from "./api/marking/marking.swagger";
+import { familyPaths } from "./api/family/family.swagger";
 import { mortalityPaths } from "./api/mortality/mortality.swagger";
 
 const document = createDocument({
@@ -65,6 +66,7 @@ const document = createDocument({
     ...userPaths,
     ...accessPaths,
     ...enumPaths,
+    ...familyPaths,
   },
   servers: [
     {
