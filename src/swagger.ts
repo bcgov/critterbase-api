@@ -12,6 +12,7 @@ import {
   PORT,
   USER_ID_HEADER,
 } from "./utils/constants";
+import { accessPaths } from "./api/access/access.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -56,6 +57,7 @@ const document = createDocument({
     ...artifactPaths,
     ...locationPaths,
     ...userPaths,
+    ...accessPaths,
   },
   servers: [
     {
