@@ -13,7 +13,7 @@ import {
   USER_ID_HEADER,
 } from "./utils/constants";
 import { accessPaths } from "./api/access/access.swagger";
-import { enumPaths } from "./api/lookup/lookup.swagger";
+import { enumPaths, lookupSchemas } from "./api/lookup/lookup.swagger";
 import { markingPaths } from "./api/marking/marking.swagger";
 import { mortalityPaths } from "./api/mortality/mortality.swagger";
 
@@ -22,6 +22,7 @@ const document = createDocument({
   components: {
     schemas: {
       ...critterSchemas,
+      ...lookupSchemas,
     },
     securitySchemes: {
       apiKeyAuth: {
