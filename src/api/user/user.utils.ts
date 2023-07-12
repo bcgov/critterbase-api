@@ -34,6 +34,8 @@ const UserSchema = implement<user>().with({
   ...zodAudit,
 });
 
+const SwagUserSchema = UserSchema.extend({ system_user_id: z.string() });
+
 // Validate incoming request body for create user
 const UserCreateBodySchema = implement<
   Omit<Prisma.userCreateManyInput, "user_id" | keyof AuditColumns>
@@ -79,5 +81,6 @@ export {
   AuthLoginSchema,
   UserSchema,
   AuthHeadersSchema,
+  SwagUserSchema,
 };
 export type { UserCreateInput, UserUpdateInput, LoginCredentials };

@@ -2,7 +2,6 @@ import { capture, Prisma } from "@prisma/client";
 import {
   CommonFormattedLocationSchema,
   commonLocationSelect,
-  CommonLocationValidation,
   LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema,
@@ -93,14 +92,6 @@ const CaptureCreateSchema = implement<
     }).shape
 );
 
-const CaptureValidation = CaptureIncludeSchema.omit({
-  location_capture_capture_location_idTolocation: true,
-  location_capture_release_location_idTolocation: true,
-}).extend({
-  capture_location: CommonLocationValidation.nullable(),
-  release_location: CommonLocationValidation.nullable(),
-});
-
 type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
 type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 
@@ -121,8 +112,6 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
-const SwagCaptureResponseSchema = CaptureResponseSchema.pipe(CaptureValidation);
-
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
 export type {
@@ -138,6 +127,4 @@ export {
   CaptureResponseSchema,
   CaptureBodySchema,
   CaptureIncludeSchema,
-  CaptureValidation,
-  SwagCaptureResponseSchema,
 };
