@@ -37,22 +37,6 @@ export const FamilyRouter = (db: ICbDatabase) => {
   );
 
   familyRouter.get(
-    "/children",
-    catchErrors(async (req: Request, res: Response) => {
-      const children = await db.getAllChildren();
-      return res.status(200).json(children);
-    })
-  );
-
-  familyRouter.get(
-    "/parents",
-    catchErrors(async (req: Request, res: Response) => {
-      const parents = await db.getAllParents();
-      return res.status(200).json(parents);
-    })
-  );
-
-  familyRouter.get(
     "/parents/:id",
     catchErrors(async (req: Request, res: Response) => {
       const { id } = uuidParamsSchema.parse(req.params);
@@ -61,17 +45,14 @@ export const FamilyRouter = (db: ICbDatabase) => {
     })
   );
 
-  familyRouter.get(
-    "/children/:id",
-    catchErrors(async (req: Request, res: Response) => {
-      const { id } = uuidParamsSchema.parse(req.params);
-      const children = await db.getChildrenOfCritterId(id);
-      return res.status(200).json(children);
-    })
-  );
-
   familyRouter
     .route("/parents")
+    .get(
+      catchErrors(async (req: Request, res: Response) => {
+        const parents = await db.getAllParents();
+        return res.status(200).json(parents);
+      })
+    )
     .post(
       catchErrors(async (req: Request, res: Response) => {
         const parsed = FamilyParentCreateBodySchema.parse(req.body);
@@ -91,8 +72,23 @@ export const FamilyRouter = (db: ICbDatabase) => {
       })
     );
 
+  familyRouter.get(
+    "/children/:id",
+    catchErrors(async (req: Request, res: Response) => {
+      const { id } = uuidParamsSchema.parse(req.params);
+      const children = await db.getChildrenOfCritterId(id);
+      return res.status(200).json(children);
+    })
+  );
+
   familyRouter
     .route("/children")
+    .get(
+      catchErrors(async (req: Request, res: Response) => {
+        const children = await db.getAllChildren();
+        return res.status(200).json(children);
+      })
+    )
     .post(
       catchErrors(async (req: Request, res: Response) => {
         const parsed = FamilyChildCreateBodySchema.parse(req.body);

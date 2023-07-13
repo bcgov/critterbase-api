@@ -5,7 +5,8 @@
     "strict": true,
     "lib": ["esnext"],
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+
     // "noUnusedLocals": true,
     // "noUnusedParameters": false
   },

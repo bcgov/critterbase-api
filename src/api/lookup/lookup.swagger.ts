@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex, system } from "@prisma/client";
 import { routes } from "../../utils/constants";
 import { eCritterStatus } from "../critter/critter.utils";
-import { zodID } from "../../utils/zod_helpers";
+import { LookUpColourSchema, LookUpMarkingTypeSchema, LookUpMaterialSchema, LookupCodSchema, LookupCollectionUnitCategorySchema, LookupRegionEnvSchema, LookupRegionNrSchema, LookupTaxonSchema, LookupWmuSchema, zodID } from "../../utils/zod_helpers";
 
 const availValues = 'Available values for this enumerated type.';
 const availRows = 'Available rows for this type of data as specified in a lookup table.';
@@ -117,11 +117,14 @@ const lookupColours: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "colour_id",
-                    "id": "55fd2db8-f31d-4f86-b349-89ddbcd15474",
-                    "value": "Blue"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/colourDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -134,11 +137,14 @@ const lookupRegionEnvs: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "region_env_id",
-                    "id": "804bca87-240d-4833-b367-c8f1aeb6b398",
-                    "value": "Peace"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/regionEnvDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -151,11 +157,14 @@ const lookupRegionNRs: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "region_nr_id",
-                    "id": "26a03e84-0185-4959-9fb5-2ad7c90242eb",
-                    "value": "Cariboo Natural Resource Region"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/regionNrDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -168,11 +177,14 @@ const lookupWMUs: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "wmu_id",
-                    "id": "a555aa9b-2736-4950-a9cd-1133f69fd663",
-                    "value": "1-1"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/wmuDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -185,11 +197,14 @@ const lookupCods: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "cod_id",
-                    "id": "8cc5a957-6132-4b5b-9040-94dcf27b2a28",
-                    "value": "Harvest | Aboriginal"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/codDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -202,11 +217,14 @@ const lookupMarkingMaterials: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "marking_material_id",
-                    "id": "405b7bf3-2929-4fb1-baa9-bc1e123ecbaf",
-                    "value": "Metal"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/markingMaterialDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -219,11 +237,14 @@ const lookupMarkingTypes: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [{
-                    "key": "marking_type_id",
-                    "id": "d6366a17-0c47-4e5d-ab4e-4e55b7450ace",
-                    "value": "Ear Tag"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/markingTypeDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -236,11 +257,14 @@ const lookupCollectionUnitCategories: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [ {
-                    "key": "collection_category_id",
-                    "id": "c8e23255-7ed2-4551-b0a4-0d980dba1298",
-                    "value": "Population Unit"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/collectionCategoryDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -253,11 +277,14 @@ const lookupTaxons: ZodOpenApiOperationObject = {
         '200' : {
             description: availRows,
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [  {
-                    "key": "taxon_id",
-                    "id": "9cd17578-28a8-448c-8b06-10454277aedd",
-                    "value": "Caribou"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/taxonDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
@@ -270,14 +297,30 @@ const lookupTaxonSpecies: ZodOpenApiOperationObject = {
         '200' : {
             description: 'Differs from normal taxon lookup in that it will filter to only rows at the "Species" level.',
             content: {
-                'application/json' : {schema: asSelectSchema.array().openapi({example: [ {
-                    "key": "taxon_id",
-                    "id": "9cd17578-28a8-448c-8b06-10454277aedd",
-                    "value": "Caribou"
-                }]}) }
+                'application/json' : {
+                    schema: {
+                        oneOf: [
+                            { "$ref" : "#/components/schemas/taxonDefaultSchema" },
+                            { "$ref" : "#/components/schemas/asSelectSchema" },
+                        ]
+                    }
+                }
             }
         }
     }
+}
+
+export const lookupSchemas = {
+    asSelectSchema: asSelectSchema.array(),
+    colourDefaultSchema: LookUpColourSchema.array(),
+    regionEnvDefaultSchema: LookupRegionEnvSchema.array(),
+    regionNrDefaultSchema: LookupRegionNrSchema.array(),
+    wmuDefaultSchema: LookupWmuSchema.array(),
+    collectionCategoryDefaultSchema: LookupCollectionUnitCategorySchema.array(),
+    codDefaultSchema: LookupCodSchema.array(),
+    markingMaterialDefaultSchema: LookUpMaterialSchema.array(),
+    markingTypeDefaultSchema: LookUpMarkingTypeSchema.array(),
+    taxonDefaultSchema: LookupTaxonSchema.array()
 }
 
 export const enumPaths = {

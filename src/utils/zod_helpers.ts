@@ -11,6 +11,9 @@ import {
   lk_marking_material,
   lk_marking_type,
   xref_taxon_marking_body_location,
+  lk_collection_category,
+  lk_cause_of_death,
+  lk_taxon,
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements, QueryFormats } from "./types";
@@ -125,6 +128,23 @@ export function implement<Model = never>() {
   };
 }
 
+const LookupTaxonSchema = implement<lk_taxon>().with({
+    taxon_id: zodID,
+    kingdom_id: zodID.nullable(),
+    phylum_id: zodID.nullable(),
+    class_id: zodID.nullable(),
+    order_id: zodID.nullable(),
+    family_id: zodID.nullable(),
+    genus_id: zodID.nullable(),
+    species_id: zodID.nullable(),
+    sub_species_id: zodID.nullable(),
+    spi_taxonomy_id: z.number(),
+    taxon_description: z.string().nullable(),
+    taxon_name_common: z.string().nullable(),
+    taxon_name_latin: z.string(),
+    ...zodAudit
+})
+
 const LookUpColourSchema = implement<lk_colour>().with({
   colour_id: z.string().uuid(),
   colour: z.string(),
@@ -146,6 +166,20 @@ const LookUpMaterialSchema = implement<lk_marking_material>().with({
   description: z.string().nullable(),
   ...zodAudit,
 });
+
+const LookupCollectionUnitCategorySchema = implement<lk_collection_category>().with({
+    collection_category_id: zodID,
+    category_name: z.string(),
+    description: z.string().nullable(),
+    ...zodAudit
+});
+
+const LookupCodSchema = implement<lk_cause_of_death>().with({
+    cod_id: zodID,
+    cod_category: z.string(),
+    cod_reason: z.string().nullable(),
+    ...zodAudit
+})
 
 const XrefTaxonMarkingBodyLocationSchema =
   implement<xref_taxon_marking_body_location>().with({
@@ -191,4 +225,7 @@ export {
   QueryFormatSchema,
   taxonIdSchema,
   DeleteSchema,
+  LookupCollectionUnitCategorySchema,
+  LookupCodSchema,
+  LookupTaxonSchema
 };
