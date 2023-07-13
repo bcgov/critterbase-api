@@ -18,6 +18,7 @@ import { markingPaths } from "./api/marking/marking.swagger";
 import { familyPaths } from "./api/family/family.swagger";
 import { mortalityPaths } from "./api/mortality/mortality.swagger";
 import { xrefPaths, xrefSchemas } from "./api/xref/xref.swagger";
+import { measurementPaths } from "./api/measurement/measurement.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -70,6 +71,7 @@ const document = createDocument({
     ...enumPaths,
     ...xrefPaths,
     ...familyPaths,
+    ...measurementPaths
   },
   servers: [
     {
