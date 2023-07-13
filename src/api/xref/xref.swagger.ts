@@ -1,6 +1,6 @@
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from "zod";
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagUnauthorized } from "../../utils/swagger_helpers";
 import { XrefCollectionUnitSchema, XrefTaxonCollectionCategorySchema, XrefTaxonMarkingBodyLocationSchema, taxonIdSchema } from "../../utils/zod_helpers";
 import {
     CollectionUnitCategoryIdSchema,
@@ -45,7 +45,7 @@ const getXrefCollectionUnits: ZodOpenApiOperationObject = {
 
 const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
     operationId: "getCollectionTaxonCategories",
-    summary: "Get all collection to taxon category mappings available in the DB.",
+    summary: "Get all collection to taxon category mappings available in the DB. A single taxon may have multiple different types of collection units available to them.",
     tags: [TAG],
     requestParams: {
         query: taxonIdSchema.extend({format: formats})

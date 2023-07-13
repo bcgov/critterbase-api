@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
 import { array } from "zod";
-import { strings } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { LocationCreateSchema, LocationResponseSchema } from "./location.utils";

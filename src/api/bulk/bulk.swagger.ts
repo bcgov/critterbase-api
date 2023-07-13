@@ -41,7 +41,7 @@ const bulkCreation: ZodOpenApiOperationObject = {
 
 const bulkUpdate: ZodOpenApiOperationObject = {
     operationId: 'bulkUpdate',
-    summary: 'Update multiple records in one batch, and rollback changes if any one entry fails. You can also nest location updates inside capture entries, and delete supported types.',
+    summary: 'Update multiple records in one batch, and rollback changes if any one entry fails. You can also nest location updates inside capture entries, and delete rows for supported types.',
     tags: [TAG],
     requestBody: {
         content: {

@@ -12,7 +12,6 @@ import {
   CommonFormattedLocationSchema,
   CommonLocationSchema,
   commonLocationSelect,
-  CommonLocationValidation,
   LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema,

@@ -19,8 +19,6 @@ import { ICbDatabase } from "./utils/database";
 import { auth, errorHandler, errorLogger } from "./utils/middleware";
 import { apiError } from "./utils/types";
 import swaggerUIExperss from "swagger-ui-express";
-
-import swaggerJSDoc from "swagger-jsdoc";
 import { yaml } from "./swagger";
 import { routes } from "./utils/constants";
 

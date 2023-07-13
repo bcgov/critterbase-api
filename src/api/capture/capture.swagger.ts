@@ -45,7 +45,7 @@ const getCaptures: ZodOpenApiOperationObject = {
 
 const createCapture: ZodOpenApiOperationObject = {
   operationId: "createCapture",
-  summary: "Creates a new capture event",
+  summary: "Creates a new capture event. Note that it is possible to nest location creation data here, which will automatically create and link location rows to this capture.",
   tags: [TAG],
   requestBody: {
     content: {
@@ -115,7 +115,9 @@ const getCaptureById: ZodOpenApiOperationObject = {
 
 const updateCapture: ZodOpenApiOperationObject = {
   operationId: "updateCapture",
-  summary: "Updates a specific capture event",
+  summary: `Updates a specific capture event. 
+  Note that it is possible to nest capture data, which will update the associated location data, or create new data if none is present.
+  You can also force the creation of release data, useful in the case where capture event currently uses the same location record for both capture and release, but you wish to separate them.`,
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),

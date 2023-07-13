@@ -4,7 +4,7 @@ import { MortalityCreateSchema, MortalityIncludeSchema, MortalityUpdateSchema } 
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { zodID } from "../../utils/zod_helpers";
 import { routes } from "../../utils/constants";
-import { SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 
 export const SwaggerMortalityResponseValidation = MortalityIncludeSchema.omit({
     lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: true, 
@@ -27,7 +27,7 @@ const getAllMortalities: ZodOpenApiOperationObject = {
     tags: [TAG],
     responses: {
         '200' : {
-            description: 'Returned all mortalities.',
+            description: SwagDesc.get,
             content: {
                 'application/json' : {
                     schema: SwaggerMortalityResponseValidation.array()
@@ -41,7 +41,7 @@ const getAllMortalities: ZodOpenApiOperationObject = {
 
 const createMortality: ZodOpenApiOperationObject = {
     operationId: 'createMortality',
-    summary: 'Create a new mortality.',
+    summary: 'Create a new mortality. Note that you may also nest location data, which will automatically create and link a location row.',
     tags: [TAG],
     requestBody: {
       content: {
@@ -52,7 +52,7 @@ const createMortality: ZodOpenApiOperationObject = {
     },
     responses: {
         '201' : {
-            description: 'Successfully inserted the mortality.',
+            description: SwagDesc.create,
             content: {
                 'application/json' : {
                     schema: SwaggerMortalityResponseValidation
@@ -96,7 +96,7 @@ const getMortalityById: ZodOpenApiOperationObject = {
   },
   responses: {
       '200' : {
-          description: 'Retrieved the mortality.',
+          description: SwagDesc.get,
           content: {
               'application/json' : {
                   schema: SwaggerMortalityResponseValidation
@@ -111,7 +111,7 @@ const getMortalityById: ZodOpenApiOperationObject = {
 
 const updateMortality: ZodOpenApiOperationObject = {
   operationId: 'updateMortality',
-  summary: 'Update a mortality by ID.',
+  summary: 'Update a mortality by ID. Note that you may also nest location data, which will update an existing associated location row, or create one if it does not exist.',
   tags: [TAG],
   requestParams : {
     path: z.object( { id: zodID } )
@@ -125,7 +125,7 @@ const updateMortality: ZodOpenApiOperationObject = {
   },
   responses: {
       '200' : {
-          description: 'Updated the mortality.',
+          description: SwagDesc.update,
           content: {
               'application/json' : {
                   schema: SwaggerMortalityResponseValidation
@@ -147,7 +147,7 @@ const deleteMortality: ZodOpenApiOperationObject = {
   },
   responses: {
       '200' : {
-          description: 'Deleted the mortality.',
+          description: SwagDesc.delete,
           content: {
               'application/json' : {
                   schema: SwaggerMortalityResponseValidation

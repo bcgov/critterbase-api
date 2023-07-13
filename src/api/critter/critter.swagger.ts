@@ -9,7 +9,7 @@ import { SwaggerMortalityResponseValidation } from '../mortality/mortality.swagg
 import { SwaggerCaptureResponseValidation } from '../capture/capture.swagger';
 import { SwaggerMarkingResponseValidation } from '../marking/marking.swagger';
 import { SwaggerQualitativeResponseValidationSchema, SwaggerQuantitativeResponseValidationSchema } from '../measurement/measurement.swagger'
-import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 
 const TAG = 'Critter';
 
@@ -58,7 +58,7 @@ const updateCritterById: ZodOpenApiOperationObject = {
     },
     responses: { 
         '200': {
-            description: 'Successfully updated critter',
+            description: SwagDesc.update,
             content: { 
                 'application/json': {
                     schema: {
@@ -86,7 +86,7 @@ const deleteCritterById: ZodOpenApiOperationObject = {
     },
     responses: { 
         '200': {
-            description: 'Successfully deleted critter',
+            description: SwagDesc.delete,
             content: { 
                 'application/json': {
                     schema: {
@@ -121,7 +121,7 @@ const createCritter: ZodOpenApiOperationObject = {
     },
     responses: {
         '201' : {
-            description: 'Successfully created a new critter',
+            description: SwagDesc.create,
             content: {
                 'application/json' : {
                     schema: {
@@ -170,7 +170,9 @@ const getAllCritters: ZodOpenApiOperationObject = {
 
 const getUniqueCritters: ZodOpenApiOperationObject = {
     operationId: 'getUniqueCritters',
-    summary: 'Determine whether a critter is unique or not through various identifiable features.',
+    summary: `Determine whether a critter is unique or not through various identifiable features. 
+    This endpoint will return an array of critters that may be partial matches to the info provided. 
+    Note that providing WLH ID will override the rest of the search and filter critters by WLH ID alone.`,
     tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']) })
@@ -204,7 +206,7 @@ const getUniqueCritters: ZodOpenApiOperationObject = {
 
 const getFilteredCritters: ZodOpenApiOperationObject = { 
     operationId: 'filterCritters',
-    summary: 'Filter the entire list of critters by various features',
+    summary: 'Filter the entire list of critters by various features. You can also do negative filters, retrieving all critters that do not match certain features.',
     tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']) })
@@ -238,7 +240,7 @@ const getFilteredCritters: ZodOpenApiOperationObject = {
 
 const getCrittersById: ZodOpenApiOperationObject = {
     operationId: 'crittersById',
-    summary: 'Retrieved specific critters by a list of IDs',
+    summary: 'Retrieve specific critters by a list of IDs',
     tags: [TAG],
     requestParams: {
         query: z.object( {format: z.enum(['default', 'detailed']) })
@@ -252,7 +254,7 @@ const getCrittersById: ZodOpenApiOperationObject = {
     },
     responses: {
         '200' : {
-            description: 'Returned all critters in the list.',
+            description: SwagDesc.get,
             content: {
                 'application/json' : {
                     schema: {

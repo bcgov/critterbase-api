@@ -4,7 +4,7 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 import { zodID } from "../../utils/zod_helpers";
 import { MarkingUpdateBodySchema } from "./marking.utils";
 import { routes } from "../../utils/constants";
-import { SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 
 const TAG = 'Markings'
 export const SwaggerMarkingResponseValidation = markingIncludesSchema.omit({
@@ -32,7 +32,7 @@ const getMarkingById: ZodOpenApiOperationObject = {
     },
     responses: { 
         '200': {
-            description: 'Successfully returned marking',
+            description: SwagDesc.get,
             content: { 
                 'application/json': {
                     schema: SwaggerMarkingResponseValidation
@@ -61,7 +61,7 @@ const updateMarkingById: ZodOpenApiOperationObject = {
     },
     responses: { 
         '200': {
-            description: 'Successfully updated marking',
+            description: SwagDesc.update,
             content: { 
                 'application/json': {
                     schema: SwaggerMarkingResponseValidation
@@ -83,7 +83,7 @@ const deleteMarkingById: ZodOpenApiOperationObject = {
     },
     responses: { 
         '200': {
-            description: 'Successfully returned marking',
+            description: SwagDesc.delete,
             content: { 
                 'application/json': {
                     schema: SwaggerMarkingResponseValidation
@@ -105,7 +105,7 @@ const getMarkingsByCritterId: ZodOpenApiOperationObject = {
   },
   responses: { 
     '200': {
-        description: 'Successfully returned markings of critter.',
+        description: SwagDesc.get,
         content: { 
             'application/json': {
                 schema: SwaggerMarkingResponseValidation.array()
@@ -121,7 +121,9 @@ const getMarkingsByCritterId: ZodOpenApiOperationObject = {
 const verifyMarkings: ZodOpenApiOperationObject = {
   operationId: 'verifyMarkings',
   tags: [TAG],
-  summary: 'Verify whether the supplied markings can be attached to a specific taxon using the taxon_id.',
+  summary: `Verify whether the supplied markings can be attached to a specific taxon using the taxon_id. 
+  If all markings pass, verified is true. 
+  If not, verified is false and invalid_markings contains primary id of problematic markings.`,
   requestBody: {
     content: {
       'application/json' : {
@@ -131,7 +133,7 @@ const verifyMarkings: ZodOpenApiOperationObject = {
   },
   responses: { 
     '200': {
-        description: 'Successfully returned markings of critter.',
+        description: SwagDesc.get,
         content: { 
             'application/json': {
                 schema: z.object({verified: z.boolean(), invalid_marking: zodID.array() })
@@ -157,7 +159,7 @@ const createMarking: ZodOpenApiOperationObject = {
   },
   responses: { 
     '200': {
-        description: 'Successfully returned markings of critter.',
+        description: SwagDesc.create,
         content: { 
             'application/json': {
                 schema: SwaggerMarkingResponseValidation
@@ -176,7 +178,7 @@ const getAllMarkings: ZodOpenApiOperationObject = {
   summary: 'Get all markings from the db.',
   responses: { 
     '200': {
-        description: 'Successfully returned all markings.',
+        description: SwagDesc.get,
         content: { 
             'application/json': {
                 schema: SwaggerMarkingResponseValidation.array()
