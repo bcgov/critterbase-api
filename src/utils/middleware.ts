@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { loginUser } from "../api/access/access.service";
 import { AuthHeadersSchema } from "../api/user/user.utils";
-import { IS_TEST, NO_AUTH } from "./constants";
+import { API_KEY, API_KEY_HEADER, IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 
@@ -91,6 +91,10 @@ const auth = catchErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     if (IS_TEST || NO_AUTH) return next();
     const headers = AuthHeadersSchema.parse(req.headers);
+    // validate api key
+    if (headers[API_KEY_HEADER] != API_KEY) {
+      throw new apiError("Invalid API key", 401);
+    }
     await loginUser({
       user_id: headers["user-id"],
       keycloak_uuid: headers["keycloak-uuid"],

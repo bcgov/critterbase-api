@@ -1,5 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { Request } from "express";
+import e, { Request } from "express";
 // import { app } from "../server";
 import {
   formatParse,
@@ -17,6 +17,7 @@ import { prisma } from "./constants";
 import * as mw from "./middleware";
 import { apiError, FormatParse, QueryFormats } from "./types";
 import { NumberToString, ResponseSchema } from "./zod_helpers";
+import { randomUUID } from "crypto";
 
 const ID = "e47da43e-bb5b-46e9-8403-f0eff31e5522";
 const KEYCLOAK_ID = "ababababababababababababababababab";
@@ -230,6 +231,7 @@ describe("Utils", () => {
       });
       it("should parse headers if not test and auth enabled", () => {
         process.env.NODE_ENV = "development";
+        process.env.API_KEY = ID;
         mockReq.headers = {
           "user-id": ID,
           "keycloak-uuid": ID,
@@ -243,6 +245,28 @@ describe("Utils", () => {
         }));
         const middleware = require("./middleware");
         middleware.auth(mockReq, mockRes, mockNext);
+        process.env.NODE_ENV = "test";
+      });
+      it("should return 401 if the api key is not valid", () => {
+        process.env.NODE_ENV = "development";
+        process.env.API_KEY = ID;
+        mockReq.headers = {
+          "user-id": ID,
+          "keycloak-uuid": ID,
+          "api-key": randomUUID(),
+        };
+        jest.resetModules();
+        jest.mock("../api/access/access.service", () => ({
+          loginUser: async () => {
+            console.log("mock loginUser called");
+          },
+        }));
+        const middleware = require("./middleware");
+        try {
+          middleware.auth(mockReq, mockRes, mockNext);
+        } catch (e) {
+          expect(e.status).toBe(401);
+        }
         process.env.NODE_ENV = "test";
       });
     });
