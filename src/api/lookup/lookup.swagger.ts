@@ -4,6 +4,7 @@ import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measuremen
 import { routes } from "../../utils/constants";
 import { eCritterStatus } from "../critter/critter.utils";
 import { LookUpColourSchema, LookUpMarkingTypeSchema, LookUpMaterialSchema, LookupCodSchema, LookupCollectionUnitCategorySchema, LookupRegionEnvSchema, LookupRegionNrSchema, LookupTaxonSchema, LookupWmuSchema, zodID } from "../../utils/zod_helpers";
+import { SwagErr, SwagServerError, SwagUnauthorized } from "../../utils/swagger_helpers";
 
 const availValues = 'Available values for this enumerated type.';
 const availRows = 'Available rows for this type of data as specified in a lookup table.';
@@ -26,7 +27,8 @@ const enumSex: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(sex)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -39,7 +41,8 @@ const enumCritterStatus: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(eCritterStatus)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -52,7 +55,8 @@ const enumCodConfidence: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(cod_confidence)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -65,7 +69,8 @@ const enumCoordinateUncertainty: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(coordinate_uncertainty_unit)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -78,7 +83,8 @@ const enumFrequencyUnits: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(frequency_unit)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -91,7 +97,8 @@ const enumMeasurementUnit: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(measurement_unit)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -104,7 +111,8 @@ const enumSystem: ZodOpenApiOperationObject = {
             content: {
                 'application/json' : {schema:  z.string().array().openapi({example: Object.keys(system)}) }
             }
-        }
+        },
+        ...SwagUnauthorized,
     }
 }
 
@@ -126,7 +134,9 @@ const lookupColours: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagServerError,
+        ...SwagUnauthorized,
     }
 }
 
@@ -146,7 +156,9 @@ const lookupRegionEnvs: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -166,7 +178,9 @@ const lookupRegionNRs: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -186,7 +200,9 @@ const lookupWMUs: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -206,7 +222,9 @@ const lookupCods: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -226,7 +244,9 @@ const lookupMarkingMaterials: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -246,7 +266,9 @@ const lookupMarkingTypes: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -266,7 +288,9 @@ const lookupCollectionUnitCategories: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -286,7 +310,9 @@ const lookupTaxons: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -306,7 +332,9 @@ const lookupTaxonSpecies: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 

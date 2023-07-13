@@ -4,6 +4,7 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 import { zodID } from "../../utils/zod_helpers";
 import { MarkingUpdateBodySchema } from "./marking.utils";
 import { routes } from "../../utils/constants";
+import { SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 
 const TAG = 'Markings'
 export const SwaggerMarkingResponseValidation = markingIncludesSchema.omit({
@@ -37,7 +38,10 @@ const getMarkingById: ZodOpenApiOperationObject = {
                     schema: SwaggerMarkingResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -63,7 +67,10 @@ const updateMarkingById: ZodOpenApiOperationObject = {
                     schema: SwaggerMarkingResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -82,7 +89,10 @@ const deleteMarkingById: ZodOpenApiOperationObject = {
                     schema: SwaggerMarkingResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -101,7 +111,10 @@ const getMarkingsByCritterId: ZodOpenApiOperationObject = {
                 schema: SwaggerMarkingResponseValidation.array()
             }
         }
-    }
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -124,7 +137,10 @@ const verifyMarkings: ZodOpenApiOperationObject = {
                 schema: z.object({verified: z.boolean(), invalid_marking: zodID.array() })
             }
         }
-    }
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -147,7 +163,10 @@ const createMarking: ZodOpenApiOperationObject = {
                 schema: SwaggerMarkingResponseValidation
             }
         }
-    }
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -163,7 +182,9 @@ const getAllMarkings: ZodOpenApiOperationObject = {
                 schema: SwaggerMarkingResponseValidation.array()
             }
         }
-    }
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
   }
 }
 

@@ -1,6 +1,6 @@
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from "zod";
-import { SwagDesc } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 import { XrefCollectionUnitSchema, XrefTaxonCollectionCategorySchema, XrefTaxonMarkingBodyLocationSchema, taxonIdSchema } from "../../utils/zod_helpers";
 import {
     CollectionUnitCategoryIdSchema,
@@ -38,6 +38,8 @@ const getXrefCollectionUnits: ZodOpenApiOperationObject = {
             },
         },
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
     },
 }
 
@@ -62,6 +64,8 @@ const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
             },
         },
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
     },
 }
 
@@ -86,6 +90,8 @@ const getTaxonMarkingBodyLocations: ZodOpenApiOperationObject = {
             },
         },
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
     },
 }
 

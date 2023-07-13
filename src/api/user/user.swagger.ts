@@ -6,7 +6,7 @@ import {
   UserUpdateBodySchema,
   SwagUserSchema,
 } from "./user.utils";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
 const TAG = "User";
@@ -24,6 +24,7 @@ const getUsers: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagUnauthorized,
   },
 };
 
@@ -48,6 +49,7 @@ const createUser: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
@@ -69,6 +71,7 @@ const getUser: ZodOpenApiOperationObject = {
       },
     },
     ...SwagNotFound,
+    ...SwagUnauthorized,
   },
 };
 
@@ -96,6 +99,7 @@ const updateUser: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
@@ -116,7 +120,9 @@ const deleteUser: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
     ...SwagNotFound,
+    ...SwagUnauthorized
   },
 };
 
