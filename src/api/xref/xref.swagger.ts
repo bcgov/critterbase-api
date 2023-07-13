@@ -1,6 +1,6 @@
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from "zod";
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagUnauthorized } from "../../utils/swagger_helpers";
 import { XrefCollectionUnitSchema, XrefTaxonCollectionCategorySchema, XrefTaxonMarkingBodyLocationSchema, taxonIdSchema } from "../../utils/zod_helpers";
 import {
     CollectionUnitCategoryIdSchema,
