@@ -6,7 +6,13 @@ import {
   ArtifactUpdateBodySchema,
   SwagArtifactResponseSchema,
 } from "./artifact.utils";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagServerError,
+  SwagUnauthorized,
+} from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
 const TAG = "Artifact";
@@ -25,13 +31,15 @@ const getArtifacts: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
-    ...SwagNotFound,
+    ...SwagUnauthorized,
+    ...SwagServerError,
   },
 };
 
 const createArtifact: ZodOpenApiOperationObject = {
   operationId: "createArtifact",
-  summary: "Creates a new artifact in Critterbase and stores the file in Object Store",
+  summary:
+    "Creates a new artifact in Critterbase and stores the file in Object Store",
   tags: [TAG],
   requestBody: {
     content: {
@@ -55,6 +63,8 @@ const createArtifact: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
@@ -76,6 +86,8 @@ const getArtifactsByCritterId: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
@@ -96,6 +108,9 @@ const getArtifactById: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
@@ -124,6 +139,8 @@ const updateArtifact: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
@@ -147,6 +164,8 @@ const deleteArtifact: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
