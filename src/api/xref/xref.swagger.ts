@@ -45,7 +45,7 @@ const getXrefCollectionUnits: ZodOpenApiOperationObject = {
 
 const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
     operationId: "getCollectionTaxonCategories",
-    summary: "Get all collection to taxon category mappings available in the DB.",
+    summary: "Get all collection to taxon category mappings available in the DB. A single taxon may have multiple different types of collection units available to them.",
     tags: [TAG],
     requestParams: {
         query: taxonIdSchema.extend({format: formats})
