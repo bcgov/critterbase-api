@@ -12,7 +12,8 @@ type ErrorType =
   | "syntaxIssue"
   | "serverIssue"
   | "notFound"
-  | "conflict";
+  | "conflict"
+  | "unauthorized";
 
 class apiError extends Error {
   status: number;
@@ -49,6 +50,13 @@ class apiError extends Error {
   static syntaxIssue(message: string) {
     return new apiError(message, 400, "syntaxIssue");
   }
+
+  /**
+   ** Authorization headers are missing or incorrect
+   */
+   static unauthorized(message: string) {
+     return new apiError(message, 401, "unauthorized");
+   }
 
   /**
    ** Internal server issue or problem occurs

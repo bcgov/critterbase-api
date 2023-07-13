@@ -105,7 +105,7 @@ const auth = catchErrors(
     const headers = AuthHeadersSchema.parse(req.headers);
     // validate api key
     if (headers[API_KEY_HEADER] != API_KEY) {
-      throw new apiError("Invalid API key", 401);
+      throw apiError.unauthorized("Invalid API Key");
     }
     await loginUser({
       user_id: headers["user-id"],
