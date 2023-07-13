@@ -9,6 +9,7 @@ import { SwaggerMortalityResponseValidation } from '../mortality/mortality.swagg
 import { SwaggerCaptureResponseValidation } from '../capture/capture.swagger';
 import { SwaggerMarkingResponseValidation } from '../marking/marking.swagger';
 import { SwaggerQualitativeResponseValidationSchema, SwaggerQuantitativeResponseValidationSchema } from '../measurement/measurement.swagger'
+import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 
 const TAG = 'Critter';
 
@@ -33,7 +34,10 @@ const getCritterById: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -65,7 +69,10 @@ const updateCritterById: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -90,7 +97,10 @@ const deleteCritterById: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -122,7 +132,10 @@ const createCritter: ZodOpenApiOperationObject = {
                     }
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -149,7 +162,9 @@ const getAllCritters: ZodOpenApiOperationObject = {
         },
         '404' : {
             description: 'Will return 404 if there were no critters matching a provided WLH ID'
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -181,6 +196,9 @@ const getUniqueCritters: ZodOpenApiOperationObject = {
                 }
             }
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -212,6 +230,9 @@ const getFilteredCritters: ZodOpenApiOperationObject = {
                 }
             }
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -243,6 +264,9 @@ const getCrittersById: ZodOpenApiOperationObject = {
                 }
             }
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 

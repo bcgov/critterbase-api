@@ -2,14 +2,15 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from "zod";
 import { zodID } from "../../utils/zod_helpers";
 import { UserCreateBodySchema } from "../user/user.utils";
-import { SwagDesc, SwagErr } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
+import { SwagUnauthorized } from "../../utils/swagger_helpers";
 
 const TAG = "Access";
 
 const getAccess: ZodOpenApiOperationObject = {
   operationId: "getAccess",
-  summary: "Welcome to the API",
+  summary: "Welcomes users to the API",
   security: [],
   tags: [TAG],
   responses: {
@@ -28,7 +29,7 @@ const getAccess: ZodOpenApiOperationObject = {
 
 const signup: ZodOpenApiOperationObject = {
   operationId: "signup",
-  summary: "Sign up a new user",
+  summary: "Registers a new user account",
   security: [],
   tags: [TAG],
   requestBody: {
@@ -48,12 +49,13 @@ const signup: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized
   },
 };
 
 const getTypes: ZodOpenApiOperationObject = {
   operationId: "getTypes",
-  summary: "Get types of supported routes",
+  summary: "Gets types of all supported routes",
   security: [],
   tags: [TAG],
   requestParams: {
@@ -69,6 +71,8 @@ const getTypes: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagNotFound,
   },
 };
 
@@ -76,7 +80,7 @@ export const accessPaths = {
   [routes.home]: {
     get: getAccess,
   },
-  [routes.home + "/types/:model"]: {
+  [routes.home + "/types/{model}"]: {
     get: getTypes,
   },
   [routes.home + "/signup"]: {

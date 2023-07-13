@@ -1,9 +1,8 @@
-import { family } from "@prisma/client";
 import { z } from "zod";
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { routes } from "../../utils/constants";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
-import { zodAudit, zodID } from "../../utils/zod_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import { zodID } from "../../utils/zod_helpers";
 import { FamilyChildCreateBodySchema, FamilyChildSchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyParentSchema, FamilySchema } from "./family.utils";
 import { CritterSchema } from "../critter/critter.utils";
 
@@ -39,6 +38,8 @@ const SwagGetAllFamilies: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -58,7 +59,9 @@ const SwagCreateFamily: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       ...defaultFamilyContent
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetFamilyChildren: ZodOpenApiOperationObject = {
@@ -75,6 +78,8 @@ const SwagGetFamilyChildren: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetFamilyParents: ZodOpenApiOperationObject = {
@@ -91,7 +96,8 @@ const SwagGetFamilyParents: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetCritterParents: ZodOpenApiOperationObject = {
@@ -109,7 +115,8 @@ const SwagGetCritterParents: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -128,7 +135,8 @@ const SwagGetCritterChildren: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -153,7 +161,9 @@ const SwagParentsCreate: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -177,7 +187,9 @@ const SwagDeleteParents: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -201,7 +213,9 @@ const SwagCreateChildOfFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -225,7 +239,9 @@ const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -243,7 +259,9 @@ const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -261,7 +279,9 @@ const SwagGetParentsChildrenFromFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -286,7 +306,9 @@ const SwagUpdateFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -304,7 +326,9 @@ const SwagDeleteFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -322,7 +346,9 @@ const SwagGetFamilyByLabel: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 

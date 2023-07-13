@@ -13,7 +13,7 @@ const TAG = "User";
 
 const getUsers: ZodOpenApiOperationObject = {
   operationId: "getUsers",
-  summary: "Get all users",
+  summary: "Gets all users",
   tags: [TAG],
   responses: {
     "200": {
@@ -29,7 +29,7 @@ const getUsers: ZodOpenApiOperationObject = {
 
 const createUser: ZodOpenApiOperationObject = {
   operationId: "createUser",
-  summary: "Create a new user",
+  summary: "Creates a new user",
   tags: [TAG],
   requestBody: {
     content: {
@@ -54,7 +54,7 @@ const createUser: ZodOpenApiOperationObject = {
 
 const getUser: ZodOpenApiOperationObject = {
   operationId: "getUser",
-  summary: "Get a user",
+  summary: "Gets a specific user by their id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -74,7 +74,7 @@ const getUser: ZodOpenApiOperationObject = {
 
 const updateUser: ZodOpenApiOperationObject = {
   operationId: "updateUser",
-  summary: "Update a user",
+  summary: "Updates a specific user",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -102,7 +102,7 @@ const updateUser: ZodOpenApiOperationObject = {
 
 const deleteUser: ZodOpenApiOperationObject = {
   operationId: "deleteUser",
-  summary: "Delete a user",
+  summary: "Deletes a specific user",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),

@@ -2,12 +2,13 @@ import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
 import { zodID } from '../../utils/zod_helpers';
 import { CritterCreateEngTaxonSchema, CritterUpdateSchema } from '../critter/critter.utils';
-import { MarkingCreateBodySchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
+import { MarkingCreateBodySchema } from '../marking/marking.utils';
 import { CaptureCreateSchema, CaptureUpdateSchema } from '../capture/capture.utils';
 import { routes } from '../../utils/constants';
 import { MortalityCreateSchema, MortalityUpdateSchema } from '../mortality/mortality.utils';
 import { CollectionUnitCreateBodySchema, CollectionUnitUpsertSchema } from '../collectionUnit/collectionUnit.utils';
 import { LocationCreateSchema, LocationUpdateSchema } from '../location/location.utils';
+import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 
 const TAG = 'Bulk'
 const bulkCreation: ZodOpenApiOperationObject = {
@@ -31,7 +32,10 @@ const bulkCreation: ZodOpenApiOperationObject = {
     responses: {
         '200' : {
             description: 'Successfully inserted all records.'
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -74,7 +78,10 @@ const bulkUpdate: ZodOpenApiOperationObject = {
                     })
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
