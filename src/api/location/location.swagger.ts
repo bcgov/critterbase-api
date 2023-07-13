@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { routes } from "../../utils/constants";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 import { zodID } from "../../utils/zod_helpers";
-import { LocationCreateSchema, LocationResponseSchema, LocationSchema, LocationUpdateSchema } from "./location.utils";
+import { LocationCreateSchema, LocationSchema, LocationUpdateSchema } from "./location.utils";
 
 const TAG = 'Location';
 const SN = z.string().nullable()
@@ -47,6 +47,7 @@ const SwagGetAllLocations: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
+    ...SwagUnauthorized,
   }
 }
 
@@ -66,7 +67,9 @@ const SwagCreateLocation: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       ...defaultLocationContent
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagUpdateLocation: ZodOpenApiOperationObject = {
@@ -87,7 +90,8 @@ const SwagUpdateLocation: ZodOpenApiOperationObject = {
       ...defaultLocationContent
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetLocation: ZodOpenApiOperationObject = {
@@ -101,7 +105,8 @@ const SwagGetLocation: ZodOpenApiOperationObject = {
       ...formattedLocationContent
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagDeleteLocation: ZodOpenApiOperationObject = {
@@ -115,7 +120,8 @@ const SwagDeleteLocation: ZodOpenApiOperationObject = {
       ...defaultLocationContent
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 

@@ -4,6 +4,7 @@ import { MortalityCreateSchema, MortalityIncludeSchema, MortalityUpdateSchema } 
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { zodID } from "../../utils/zod_helpers";
 import { routes } from "../../utils/constants";
+import { SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 
 export const SwaggerMortalityResponseValidation = MortalityIncludeSchema.omit({
     lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: true, 
@@ -33,6 +34,8 @@ const getAllMortalities: ZodOpenApiOperationObject = {
                 }
             }
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -56,6 +59,9 @@ const createMortality: ZodOpenApiOperationObject = {
                 }
             }
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -75,6 +81,9 @@ const getMortalityByCritter: ZodOpenApiOperationObject = {
                 }
             }
         },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -94,6 +103,9 @@ const getMortalityById: ZodOpenApiOperationObject = {
               }
           }
       },
+      ...SwagErr,
+      ...SwagUnauthorized,
+      ...SwagNotFound,
   }
 }
 
@@ -120,6 +132,9 @@ const updateMortality: ZodOpenApiOperationObject = {
               }
           }
       },
+      ...SwagErr,
+      ...SwagUnauthorized,
+      ...SwagNotFound,
   }
 }
 
@@ -139,6 +154,9 @@ const deleteMortality: ZodOpenApiOperationObject = {
               }
           }
       },
+      ...SwagErr,
+      ...SwagUnauthorized,
+      ...SwagNotFound,
   }
 }
 

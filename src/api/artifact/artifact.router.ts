@@ -9,6 +9,7 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
 import { upload } from "../../utils/object_store";
 
+
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
 

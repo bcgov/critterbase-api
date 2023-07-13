@@ -17,6 +17,7 @@ import { enumPaths, lookupSchemas } from "./api/lookup/lookup.swagger";
 import { markingPaths } from "./api/marking/marking.swagger";
 import { familyPaths } from "./api/family/family.swagger";
 import { mortalityPaths } from "./api/mortality/mortality.swagger";
+import { xrefPaths, xrefSchemas } from "./api/xref/xref.swagger";
 import { measurementPaths } from "./api/measurement/measurement.swagger";
 
 const document = createDocument({
@@ -25,6 +26,7 @@ const document = createDocument({
     schemas: {
       ...critterSchemas,
       ...lookupSchemas,
+      ...xrefSchemas,
     },
     securitySchemes: {
       apiKeyAuth: {
@@ -67,6 +69,7 @@ const document = createDocument({
     ...userPaths,
     ...accessPaths,
     ...enumPaths,
+    ...xrefPaths,
     ...familyPaths,
     ...measurementPaths
   },

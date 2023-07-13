@@ -1,12 +1,13 @@
-import { family } from "@prisma/client";
 import { z } from "zod";
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { routes } from "../../utils/constants";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
-import { zodAudit, zodID } from "../../utils/zod_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import { zodID } from "../../utils/zod_helpers";
 import { FamilyChildCreateBodySchema, FamilyChildSchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyParentSchema, FamilySchema } from "./family.utils";
+import { CritterSchema } from "../critter/critter.utils";
 
 const TAG = 'Family';
+const critterArr = CritterSchema.array();
 
 const defaultFamilyContent = {
   content: {
@@ -37,12 +38,14 @@ const SwagGetAllFamilies: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
 const SwagCreateFamily: ZodOpenApiOperationObject = {
   operationId: 'createFamily',
-  summary: 'Create a critter family association',
+  summary: 'Create a critter family association.',
   tags: [TAG],
   requestBody: {
     content: {
@@ -56,7 +59,9 @@ const SwagCreateFamily: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       ...defaultFamilyContent
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetFamilyChildren: ZodOpenApiOperationObject = {
@@ -73,6 +78,8 @@ const SwagGetFamilyChildren: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetFamilyParents: ZodOpenApiOperationObject = {
@@ -89,7 +96,8 @@ const SwagGetFamilyParents: ZodOpenApiOperationObject = {
       }
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 const SwagGetCritterParents: ZodOpenApiOperationObject = {
@@ -102,12 +110,13 @@ const SwagGetCritterParents: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'appliaction/json': {
-          schema: FamilyParentSchema.array()
+          schema: critterArr
         }
       }
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -121,19 +130,20 @@ const SwagGetCritterChildren: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'appliaction/json': {
-          schema: FamilyChildSchema.array()
+          schema: critterArr
         }
       }
     },
     ...SwagErr,
-    ...SwagNotFound
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
 
 const SwagParentsCreate: ZodOpenApiOperationObject = {
   operationId: 'createParentsOfFamily',
-  summary: 'Creates a parent record for a know family',
+  summary: 'Registers a critter as a parent of a family',
   tags: [TAG],
   requestBody: {
     content: {
@@ -151,13 +161,15 @@ const SwagParentsCreate: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
 const SwagDeleteParents: ZodOpenApiOperationObject = {
   operationId: 'deletesParentsOfFamily',
-  summary: 'Deletes parent record for a know family',
+  summary: 'Removes a critter from being a parent of the given family.',
   tags: [TAG],
   requestBody: {
     content: {
@@ -175,13 +187,15 @@ const SwagDeleteParents: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
 const SwagCreateChildOfFamily: ZodOpenApiOperationObject = {
   operationId: 'createsChildOfFamily',
-  summary: 'Creates child of family',
+  summary: 'Registers a critter as a child of a family',
   tags: [TAG],
   requestBody: {
     content: {
@@ -199,13 +213,15 @@ const SwagCreateChildOfFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
 const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
   operationId: 'deletesChildOfFamily',
-  summary: 'Deletes child of family',
+  summary: 'Removes a critter from being a child of a given family.',
   tags: [TAG],
   requestBody: {
     content: {
@@ -223,11 +239,12 @@ const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
-const critterArr = z.string().array();
 const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
   operationId: 'immediateFamilyOfCritter',
   summary: 'Gets all immediate family members of critter id',
@@ -242,13 +259,15 @@ const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
-const SwagGetImmediateSiblingsChildren: ZodOpenApiOperationObject = {
-  operationId: 'immediateSiblingsChildrenOfCritter',
-  summary: 'Gets immediate parents and children of critter id',
+const SwagGetParentsChildrenFromFamily: ZodOpenApiOperationObject = {
+  operationId: 'getParentsChildrenFromFamily',
+  summary: 'Gets immediate parents and children in a family from the given family id.',
   tags: [TAG],
   ...reqIdParam,
   responses: {
@@ -260,13 +279,15 @@ const SwagGetImmediateSiblingsChildren: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
-const SwagUpdateImmediateSiblingsChildrenOfCritter: ZodOpenApiOperationObject = {
-  operationId: 'immediateSiblingsChildrenOfCritter',
-  summary: 'Updates immediate parents and children of critter id',
+const SwagUpdateFamily: ZodOpenApiOperationObject = {
+  operationId: 'updateFamily',
+  summary: 'Updates metadata for a given family.',
   tags: [TAG],
   ...reqIdParam,
   requestBody: {
@@ -278,37 +299,41 @@ const SwagUpdateImmediateSiblingsChildrenOfCritter: ZodOpenApiOperationObject = 
   },
   responses: {
     '200': {
-      description: SwagDesc.create,
+      description: SwagDesc.update,
       content: {
         'application/json': {
           schema: FamilySchema,
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
-const SwagDeleteFamilyOfCritter: ZodOpenApiOperationObject = {
-  operationId: 'deleteFamilyOfCritter',
-  summary: 'Deletes family associations of critter',
+const SwagDeleteFamily: ZodOpenApiOperationObject = {
+  operationId: 'deleteFamily',
+  summary: 'Deletes a family row. Note that all children and parent rows associated to this family must be deleted first.',
   tags: [TAG],
   ...reqIdParam,
   responses: {
     '200': {
-      description: SwagDesc.create,
+      description: SwagDesc.delete,
       content: {
         'application/json': {
           schema: FamilySchema
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
 const SwagGetFamilyByLabel: ZodOpenApiOperationObject = {
-  operationId: 'getFailyByLabel',
+  operationId: 'getFamilyByLabel',
   summary: 'Gets family by label value',
   tags: [TAG],
   ...reqIdParam,
@@ -321,7 +346,9 @@ const SwagGetFamilyByLabel: ZodOpenApiOperationObject = {
         }
       }
     },
-    ...SwagErr
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   }
 }
 
@@ -333,9 +360,9 @@ export const familyPaths = {
     post: SwagCreateFamily,
   },
   [`${routes.family}/{id}`]: {
-    get: SwagGetImmediateSiblingsChildren,
-    put: SwagUpdateImmediateSiblingsChildrenOfCritter,
-    delete: SwagDeleteFamilyOfCritter
+    get: SwagGetParentsChildrenFromFamily,
+    put: SwagUpdateFamily,
+    delete: SwagDeleteFamily
   },
   [`${routes.family}/immediate/{id}`]: {
     get: SwagGetImmediateFamilyOfCritter,
@@ -353,8 +380,8 @@ export const familyPaths = {
   },
   [`${routes.family}/parents`]: {
     get: SwagGetFamilyParents,
-    delete: SwagParentsCreate,
-    post: SwagDeleteParents,
+    delete: SwagDeleteParents,
+    post: SwagParentsCreate,
   },
   [`${routes.family}/label/{label}`]: {
     get: SwagGetFamilyByLabel,

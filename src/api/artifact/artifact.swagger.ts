@@ -6,14 +6,20 @@ import {
   ArtifactUpdateBodySchema,
   SwagArtifactResponseSchema,
 } from "./artifact.utils";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagServerError,
+  SwagUnauthorized,
+} from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
 const TAG = "Artifact";
 
 const getArtifacts: ZodOpenApiOperationObject = {
   operationId: "getArtifacts",
-  summary: "Get all artifacts",
+  summary: "Gets all artifacts",
   tags: [TAG],
   responses: {
     "200": {
@@ -25,13 +31,15 @@ const getArtifacts: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
-    ...SwagNotFound,
+    ...SwagUnauthorized,
+    ...SwagServerError,
   },
 };
 
 const createArtifact: ZodOpenApiOperationObject = {
   operationId: "createArtifact",
-  summary: "Create an artifact",
+  summary:
+    "Creates a new artifact in Critterbase and stores the file in Object Store",
   tags: [TAG],
   requestBody: {
     content: {
@@ -55,13 +63,15 @@ const createArtifact: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
 
 const getArtifactsByCritterId: ZodOpenApiOperationObject = {
   operationId: "getArtifactsByCritterId",
-  summary: "Get all artifacts by critter id",
+  summary: "Gets all artifacts with a specific critter id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -76,13 +86,15 @@ const getArtifactsByCritterId: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
 
 const getArtifactById: ZodOpenApiOperationObject = {
   operationId: "getArtifactById",
-  summary: "Get an artifact by id",
+  summary: "Gets a specifc artifact by its id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -96,13 +108,16 @@ const getArtifactById: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
 
 const updateArtifact: ZodOpenApiOperationObject = {
   operationId: "updateArtifact",
-  summary: "Update an artifact",
+  summary: "Updates a specific artifacts data",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -124,13 +139,15 @@ const updateArtifact: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
 
 const deleteArtifact: ZodOpenApiOperationObject = {
   operationId: "deleteArtifact",
-  summary: "Delete an artifact",
+  summary: "Deletes a specific artifact",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -147,6 +164,8 @@ const deleteArtifact: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagServerError,
     ...SwagNotFound,
   },
 };
@@ -158,10 +177,10 @@ export const artifactPaths = {
   [`${routes.artifacts}/create`]: {
     post: createArtifact,
   },
-  [`${routes.artifacts}/critter/:id`]: {
+  [`${routes.artifacts}/critter/{id}`]: {
     get: getArtifactsByCritterId,
   },
-  [`${routes.artifacts}/:id`]: {
+  [`${routes.artifacts}/{id}`]: {
     get: getArtifactById,
     patch: updateArtifact,
     delete: deleteArtifact,

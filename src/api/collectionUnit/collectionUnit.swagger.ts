@@ -3,6 +3,7 @@ import { CollectionUnitCreateBodySchema, CollectionUnitUpdateBodySchema, SimpleC
 import {z} from 'zod';
 import { noAudit, zodID } from '../../utils/zod_helpers';
 import { routes } from '../../utils/constants';
+import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 
 const SwaggerCollectionResponseValidation = 
     critter_collection_unitIncludesSchema
@@ -26,7 +27,10 @@ const getCollectionUnits: ZodOpenApiOperationObject = {
                     schema: SwaggerCollectionResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -42,7 +46,9 @@ const getAllCollectionUnits: ZodOpenApiOperationObject = {
                     schema: SwaggerCollectionResponseValidation.array()
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
     }
 }
 
@@ -65,7 +71,10 @@ const createCollectionUnit: ZodOpenApiOperationObject = {
                     schema: SwaggerCollectionResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -91,7 +100,10 @@ const updateCollectionUnit: ZodOpenApiOperationObject = {
                     schema: SwaggerCollectionResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -110,7 +122,10 @@ const deleteCollectionUnit: ZodOpenApiOperationObject = {
                     schema: SwaggerCollectionResponseValidation
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 
@@ -129,7 +144,10 @@ const getCollectionUnitsByCritterId: ZodOpenApiOperationObject = {
                     schema: SwaggerCollectionResponseValidation.array()
                 }
             }
-        }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound,
     }
 }
 

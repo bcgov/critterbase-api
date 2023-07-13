@@ -6,14 +6,14 @@ import {
   UserUpdateBodySchema,
   SwagUserSchema,
 } from "./user.utils";
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
 const TAG = "User";
 
 const getUsers: ZodOpenApiOperationObject = {
   operationId: "getUsers",
-  summary: "Get all users",
+  summary: "Gets all users",
   tags: [TAG],
   responses: {
     "200": {
@@ -24,12 +24,13 @@ const getUsers: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagUnauthorized,
   },
 };
 
 const createUser: ZodOpenApiOperationObject = {
   operationId: "createUser",
-  summary: "Create a new user",
+  summary: "Creates a new user",
   tags: [TAG],
   requestBody: {
     content: {
@@ -48,13 +49,14 @@ const createUser: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
 
 const getUser: ZodOpenApiOperationObject = {
   operationId: "getUser",
-  summary: "Get a user",
+  summary: "Gets a specific user by their id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -69,12 +71,13 @@ const getUser: ZodOpenApiOperationObject = {
       },
     },
     ...SwagNotFound,
+    ...SwagUnauthorized,
   },
 };
 
 const updateUser: ZodOpenApiOperationObject = {
   operationId: "updateUser",
-  summary: "Update a user",
+  summary: "Updates a specific user",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -96,13 +99,14 @@ const updateUser: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
 
 const deleteUser: ZodOpenApiOperationObject = {
   operationId: "deleteUser",
-  summary: "Delete a user",
+  summary: "Deletes a specific user",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID }),
@@ -116,7 +120,9 @@ const deleteUser: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
     ...SwagNotFound,
+    ...SwagUnauthorized
   },
 };
 
