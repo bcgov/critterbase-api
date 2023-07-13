@@ -198,6 +198,14 @@ const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
   ...zodAudit,
 });
 
+const XrefTaxonCollectionCategorySchema = implement<xref_collection_unit>().with({
+  collection_unit_id: zodID,
+  collection_category_id: zodID,
+  unit_name: z.string(),
+  description: z.string().nullable(),
+  ...zodAudit
+})
+
 //const TransformResponseSchema = ResponseSchema.transform((val) => val); //This is used as a base for a type.
 type IResponseSchema= z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny> | z.ZodTypeAny;
 export type { IResponseSchema };
@@ -227,5 +235,6 @@ export {
   DeleteSchema,
   LookupCollectionUnitCategorySchema,
   LookupCodSchema,
-  LookupTaxonSchema
+  LookupTaxonSchema,
+  XrefTaxonCollectionCategorySchema
 };
