@@ -17,6 +17,7 @@ import { enumPaths, lookupSchemas } from "./api/lookup/lookup.swagger";
 import { markingPaths } from "./api/marking/marking.swagger";
 import { familyPaths } from "./api/family/family.swagger";
 import { mortalityPaths } from "./api/mortality/mortality.swagger";
+import { measurementPaths } from "./api/measurement/measurement.swagger";
 
 const document = createDocument({
   openapi: "3.1.0",
@@ -67,6 +68,7 @@ const document = createDocument({
     ...accessPaths,
     ...enumPaths,
     ...familyPaths,
+    ...measurementPaths
   },
   servers: [
     {
