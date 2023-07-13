@@ -2,8 +2,9 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from "zod";
 import { zodID } from "../../utils/zod_helpers";
 import { UserCreateBodySchema } from "../user/user.utils";
-import { SwagDesc, SwagErr } from "../../utils/swagger_helpers";
+import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
+import { SwagUnauthorized } from "../../utils/swagger_helpers";
 
 const TAG = "Access";
 
@@ -48,6 +49,7 @@ const signup: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized
   },
 };
 
@@ -69,6 +71,8 @@ const getTypes: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagNotFound,
   },
 };
 

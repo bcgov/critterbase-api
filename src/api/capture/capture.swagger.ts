@@ -15,7 +15,12 @@ export const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
   capture_location: CommonLocationValidation.nullable(),
   release_location: CommonLocationValidation.nullable(),
 });
-import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized,
+} from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
 const TAG = "Capture";
@@ -33,6 +38,8 @@ const getCaptures: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagUnauthorized,
   },
 };
 
@@ -57,6 +64,8 @@ const createCapture: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
   },
 };
 
@@ -77,6 +86,7 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
@@ -97,6 +107,8 @@ const getCaptureById: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
@@ -125,6 +137,7 @@ const updateCapture: ZodOpenApiOperationObject = {
       },
     },
     ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
@@ -145,6 +158,8 @@ const deleteCapture: ZodOpenApiOperationObject = {
         },
       },
     },
+    ...SwagErr,
+    ...SwagUnauthorized,
     ...SwagNotFound,
   },
 };
