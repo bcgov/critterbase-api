@@ -172,7 +172,7 @@ export const mortalityPaths = {
   },
   [`${routes.mortality}/{id}`] : {
     get: getMortalityById,
-    put: updateMortality,
+    patch: updateMortality,
     delete: deleteMortality
   },
 }

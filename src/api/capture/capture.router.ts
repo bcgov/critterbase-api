@@ -65,7 +65,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
         return res.status(200).json(format);
       })
     )
-    .put(
+    .patch(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const parsed = CaptureUpdateSchema.parse(req.body);

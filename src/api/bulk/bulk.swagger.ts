@@ -88,6 +88,6 @@ const bulkUpdate: ZodOpenApiOperationObject = {
 export const bulkPaths = {
     [`${routes.bulk}`] : {
         post: bulkCreation,
-        put: bulkUpdate
+        patch: bulkUpdate
     }
 }

@@ -318,14 +318,14 @@ describe("API: Critter", () => {
         expect(res.status).toBe(404);
       });
     });
-    describe(`PUT ${routes.captures}/:capture_id`, () => {
+    describe(`PATCH ${routes.captures}/:capture_id`, () => {
       it("should return status 200", async () => {
         expect.assertions(3);
         updateCapture.mockImplementation(() => {
           return { ...CAPTURE, capture_comment: "eee" };
         });
         const res = await request
-          .put("/api/captures/" + CAPTURE_ID)
+          .patch("/api/captures/" + CAPTURE_ID)
           .send({ capture_comment: "eee" });
         expect(res.status).toBe(200);
         expect(updateCapture.mock.calls.length).toBe(1);
@@ -336,7 +336,7 @@ describe("API: Critter", () => {
         updateCapture.mockImplementation(() => {
           throw apiError.notFound("not found");
         });
-        const res = await request.put("/api/captures/" + randomUUID());
+        const res = await request.patch("/api/captures/" + randomUUID());
         expect(res.status).toBe(404);
       });
     });

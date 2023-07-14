@@ -105,7 +105,7 @@ export const BulkRouter = (db: ICbDatabase) => {
     })
   );
 
-  bulkRouter.put(
+  bulkRouter.patch(
     "/",
     catchErrors(async (req: Request, res: Response) => {
       const {

@@ -361,7 +361,7 @@ export const familyPaths = {
   },
   [`${routes.family}/{id}`]: {
     get: SwagGetParentsChildrenFromFamily,
-    put: SwagUpdateFamily,
+    patch: SwagUpdateFamily,
     delete: SwagDeleteFamily
   },
   [`${routes.family}/immediate/{id}`]: {

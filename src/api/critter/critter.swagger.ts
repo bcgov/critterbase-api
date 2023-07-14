@@ -336,7 +336,7 @@ export const critterPaths = {
     },
     [`${routes.critters}/{id}`] : {
         get: getCritterById,
-        put: updateCritterById,
+        patch: updateCritterById,
         delete: deleteCritterById
     }
 }

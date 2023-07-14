@@ -147,7 +147,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
         return res.status(200).json(family);
       })
     )
-    .put(
+    .patch(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const parsed = FamilyCreateBodySchema.parse(req.body);

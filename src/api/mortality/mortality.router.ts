@@ -65,7 +65,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
         return res.status(200).json(parsed);
       })
     )
-    .put(
+    .patch(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const parsed = MortalityUpdateSchema.parse(req.body);

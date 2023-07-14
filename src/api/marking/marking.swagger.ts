@@ -205,7 +205,7 @@ export const markingPaths = {
   },
   [`${routes.markings}/{id}`]: {
     get: getMarkingById,
-    put: updateMarkingById,
+    patch: updateMarkingById,
     delete: deleteMarkingById
   },
 }

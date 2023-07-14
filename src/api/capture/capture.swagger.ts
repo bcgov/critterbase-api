@@ -178,7 +178,7 @@ export const capturePaths = {
   },
   [`${routes.captures}/{id}`]: {
     get: getCaptureById,
-    put: updateCapture,
+    patch: updateCapture,
     delete: deleteCapture,
   },
 };
