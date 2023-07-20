@@ -641,4 +641,5 @@ enum sex {
 enum system {
   CRITTERBASE
   BCTW
+  SIMS
 }
