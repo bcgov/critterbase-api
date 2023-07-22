@@ -1,11 +1,12 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 import { loginUser } from "../api/access/access.service";
-import { AuthHeadersSchema } from "../api/user/user.utils";
+import { AuthHeadersSchema, AuthLoginSchema } from "../api/user/user.utils";
 import { API_KEY, API_KEY_HEADER, IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
+import { authenticateRequest } from "../authentication/auth";
 
 /**
  * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
@@ -90,15 +91,18 @@ const errorHandler = (
 const auth = catchErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     if (IS_TEST || NO_AUTH) return next();
-    const headers = AuthHeadersSchema.parse(req.headers);
-    // validate api key
-    if (headers[API_KEY_HEADER] != API_KEY) {
-      throw new apiError("Invalid API key", 401);
-    }
-    await loginUser({
-      user_id: headers["user-id"],
-      keycloak_uuid: headers["keycloak-uuid"],
-    });
+    // const headers = AuthHeadersSchema.parse(req.headers);
+    // // validate api key
+    // if (headers[API_KEY_HEADER] != API_KEY) {
+    //   throw new apiError("Invalid API key", 401);
+    // }
+    // await loginUser({
+    //   user_id: headers["user-id"],
+    //   keycloak_uuid: headers["keycloak-uuid"],
+    // });
+    const kc = await authenticateRequest(req);
+    const parsed = AuthLoginSchema.parse({keycloak_uuid: kc, system_name: req.headers['system-name']});
+    await loginUser(parsed);
     next();
   }
 );

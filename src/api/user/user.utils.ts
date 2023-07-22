@@ -40,7 +40,7 @@ const UserCreateBodySchema = implement<
 >().with(
   UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
-    .required({ system_name: true, system_user_id: true }).shape
+    .required({ system_name: true, system_user_id: true, keycloak_uuid: true }).shape
 );
 
 // Validate incoming request body for update artifact
@@ -51,7 +51,7 @@ const UserUpdateBodySchema = implement<
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const AuthLoginSchema = z.object({
-  user_id: zodID,
+  system_name: z.nativeEnum(system),
   keycloak_uuid: z.string(),
 });
 

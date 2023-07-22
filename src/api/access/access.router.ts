@@ -5,6 +5,7 @@ import { UserCreateBodySchema } from "../user/user.utils";
 import { Prisma } from "@prisma/client";
 import express from "express";
 import { ICbDatabase } from "../../utils/database";
+import { authenticateRequest } from "../../authentication/auth";
 
 export const AccessRouter = (db: ICbDatabase) => {
   const accessRouter = express.Router();
@@ -39,7 +40,8 @@ export const AccessRouter = (db: ICbDatabase) => {
   accessRouter.post(
     "/signup",
     catchErrors(async (req: Request, res: Response) => {
-      const parsedUser = UserCreateBodySchema.parse(req.body);
+      const kc = await authenticateRequest(req);
+      const parsedUser = UserCreateBodySchema.parse({...req.body, keycloak_uuid: kc});
       const user = await db.createUser(parsedUser);
       const contextUserId = await db.setUserContext(
         user.system_user_id,
