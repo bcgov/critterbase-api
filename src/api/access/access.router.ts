@@ -42,10 +42,10 @@ export const AccessRouter = (db: ICbDatabase) => {
     "/signup",
     catchErrors(async (req: Request, res: Response) => {
       const kc = await authenticateRequest(req);
-      const parsedUser = UserCreateBodySchema.parse({...req.body, keycloak_uuid: kc.keycloak_uuid});
-      const user = await db.createUser(parsedUser);
+      const parsedUser = UserCreateBodySchema.parse({user_identifier: kc.identifier, keycloak_uuid: kc.keycloak_uuid});
+      await db.createUser(parsedUser);
       const contextUserId = await db.setUserContext(
-        user.user_identifier,
+        kc.keycloak_uuid,
         kc.system_name
       );
       return res.status(201).json({user_id: contextUserId}).end();

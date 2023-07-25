@@ -11,6 +11,8 @@ type BCGovJwtPayload = JwtPayload & {
   idir_user_guid?: string;
   bceid_user_guid?: string;
   bceid_business_guid?: string;
+  idir_username?: string;
+  bceid_username?: string;
 }
 
 /**
@@ -22,7 +24,7 @@ type BCGovJwtPayload = JwtPayload & {
  * @return {*} {Promise<true>} true if the token is authenticated
  * @throws {HTTP401} if the bearer token is missing or invalid
  */
-export const authenticateRequest = async function (req: Request): Promise<{keycloak_uuid: string, system_name: string}> {
+export const authenticateRequest = async function (req: Request): Promise<{keycloak_uuid: string, system_name: string, identifier: string}> {
   try {
     if (!req.headers.authorization) {
       throw apiError.forbidden('Access Denied');
@@ -82,10 +84,16 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
     }
 
     const keycloak_uuid = (verifiedToken as BCGovJwtPayload).idir_user_guid ?? (verifiedToken as BCGovJwtPayload).bceid_user_guid ?? (verifiedToken as BCGovJwtPayload).bceid_business_guid;
-    if(!keycloak_uuid) {
-      throw apiError.serverIssue('Could not determine Keycloak identifier from token.');
+    const identifier = (verifiedToken as BCGovJwtPayload).idir_username ?? (verifiedToken as BCGovJwtPayload).bceid_business_guid;
+
+    if(!keycloak_uuid || !identifier) {
+      throw apiError.serverIssue('Token did not contain required keys.');
     }
-    return { keycloak_uuid: keycloak_uuid, system_name: (verifiedToken as BCGovJwtPayload).aud as string };
+    return { 
+      keycloak_uuid: keycloak_uuid, 
+      system_name: (verifiedToken as BCGovJwtPayload).aud as string,
+      identifier: identifier
+    };
   } catch (error) {
     console.log(JSON.stringify(error));
     throw apiError.forbidden('Access Denied');
