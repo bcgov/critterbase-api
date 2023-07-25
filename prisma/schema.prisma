@@ -33,6 +33,7 @@ model audit_log {
   audit_log_id                     String   @id(map: "audit_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   table_name                       String
   operation                        String
+  system_name                      String
   before_value                     Json?
   after_value                      Json?
   create_user                      String   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid

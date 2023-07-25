@@ -7,7 +7,7 @@ const loginUser = async (login: LoginCredentials): Promise<user | null> => {
   // Find a user that matches both `user_id` and `keycloak_uuid`
   const foundUser = await prisma.user.findFirst({
     where: {
-      AND: [ {keycloak_uuid: login.keycloak_uuid}, {system_name: login.system_name} ]
+      keycloak_uuid: login.keycloak_uuid
     },
   });
 

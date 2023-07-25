@@ -51,7 +51,6 @@ const UserUpdateBodySchema = implement<
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const AuthLoginSchema = z.object({
-  system_name: z.nativeEnum(system),
   keycloak_uuid: z.string(),
 });
 

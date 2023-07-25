@@ -10,8 +10,7 @@ import { UserCreateInput, UserUpdateInput } from "./user.utils";
 const createUser = async (newUserData: UserCreateInput): Promise<user> => {
   const existingUser = await prisma.user.findFirst({
     where: {
-      keycloak_uuid: newUserData.keycloak_uuid,
-      system_user_id: newUserData.system_user_id
+      keycloak_uuid: newUserData.keycloak_uuid
     }
   });
   if(existingUser) {
@@ -91,9 +90,9 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
-const setUserContext = async (system_user_id: string, system_name: system) => {
+const setUserContext = async (system_user_id: string, system_name: string) => {
   const result: [{ api_set_context: string }] =
-    await prisma.$queryRaw`SELECT * FROM api_set_context(${system_user_id}, ${system_name}::system)`;
+    await prisma.$queryRaw`SELECT * FROM api_set_context(${system_user_id}, ${system_name})`;
   return result[0].api_set_context;
 };
 

@@ -22,10 +22,10 @@ type BCGovJwtPayload = JwtPayload & {
  * @return {*} {Promise<true>} true if the token is authenticated
  * @throws {HTTP401} if the bearer token is missing or invalid
  */
-export const authenticateRequest = async function (req: Request): Promise<string> {
+export const authenticateRequest = async function (req: Request): Promise<{keycloak_uuid: string, system_name: string}> {
   try {
     if (!req.headers.authorization) {
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
     // Authorization header should be a string with format: Bearer xxxxxx.yyyyyyy.zzzzzz
@@ -34,7 +34,7 @@ export const authenticateRequest = async function (req: Request): Promise<string
     // Check if the header is a valid bearer format
     if (!authorizationHeaderString.startsWith('Bearer ')) {
       console.log('Could not get Bearer format.')
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
     // Parse out token portion of the authorization header
@@ -42,7 +42,7 @@ export const authenticateRequest = async function (req: Request): Promise<string
 
     if (!tokenString) {
       console.log('Could not get tokenString');
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
     // Decode token without verifying signature
@@ -50,14 +50,14 @@ export const authenticateRequest = async function (req: Request): Promise<string
 
     if (!decodedToken) {
       console.log('Could not decode token.')
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
     // Get token header kid (key id)
     const kid = decodedToken.header.kid;
 
     if (!kid) {
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
     const jwksClient = new JwksClient({ jwksUri: KEYCLOAK_URL });
@@ -67,7 +67,7 @@ export const authenticateRequest = async function (req: Request): Promise<string
 
     if (!key) {
       console.log('Key not found.');
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
     // Parse out public portion of signing key
@@ -78,20 +78,17 @@ export const authenticateRequest = async function (req: Request): Promise<string
 
     if (!verifiedToken) {
       console.log('Could not verify token.');
-      throw apiError.serverIssue('Access Denied');
+      throw apiError.forbidden('Access Denied');
     }
 
-    // Add the verified token to the request for future use, if needed
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    //req['keycloak_token'] = verifiedToken;
     const keycloak_uuid = (verifiedToken as BCGovJwtPayload).idir_user_guid ?? (verifiedToken as BCGovJwtPayload).bceid_user_guid ?? (verifiedToken as BCGovJwtPayload).bceid_business_guid;
     if(!keycloak_uuid) {
       throw apiError.serverIssue('Could not determine Keycloak identifier from token.');
     }
-    return keycloak_uuid;
+    return { keycloak_uuid: keycloak_uuid, system_name: (verifiedToken as BCGovJwtPayload).aud as string };
   } catch (error) {
     console.log(JSON.stringify(error));
-    throw apiError.serverIssue('Access Denied');
+    throw apiError.forbidden('Access Denied');
   }
 };
 
