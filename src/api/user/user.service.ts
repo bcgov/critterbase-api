@@ -1,6 +1,7 @@
 import { prisma } from "../../utils/constants";
-import type { system, user } from "@prisma/client";
+import type { user } from "@prisma/client";
 import { UserCreateInput, UserUpdateInput } from "./user.utils";
+import { apiError } from "../../utils/types";
 
 /**
  * * Adds a user to the database
@@ -25,12 +26,12 @@ const createUser = async (newUserData: UserCreateInput): Promise<user> => {
  * @param {UserCreateInput} newUserData - The user data to be upserted
  */
 const upsertUser = async (newUserData: UserCreateInput): Promise<user> => {
+  if(!newUserData.keycloak_uuid) {
+    throw apiError.requiredProperty('keycloak_uuid');
+  }
   const newUser = await prisma.user.upsert({
     where: {
-      system_and_system_user_id: {
-        system_user_id: newUserData.system_user_id,
-        system_name: newUserData.system_name, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-      },
+      keycloak_uuid: newUserData.keycloak_uuid
     },
     update: newUserData,
     create: newUserData,

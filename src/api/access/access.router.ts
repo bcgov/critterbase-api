@@ -45,7 +45,7 @@ export const AccessRouter = (db: ICbDatabase) => {
       const parsedUser = UserCreateBodySchema.parse({...req.body, keycloak_uuid: kc.keycloak_uuid});
       const user = await db.createUser(parsedUser);
       const contextUserId = await db.setUserContext(
-        user.system_user_id,
+        user.user_identifier,
         kc.system_name
       );
       return res.status(201).json({user_id: contextUserId}).end();

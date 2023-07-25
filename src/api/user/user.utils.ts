@@ -1,5 +1,4 @@
 import { Prisma, user } from ".prisma/client";
-import { system } from "@prisma/client";
 import { z } from "zod";
 import {
   API_KEY_HEADER,
@@ -28,8 +27,7 @@ type LoginCredentials = z.infer<typeof AuthLoginSchema>;
 // Base schema for all user
 const UserSchema = implement<user>().with({
   user_id: zodID,
-  system_user_id: NumberToString,
-  system_name: z.nativeEnum(system),
+  user_identifier: NumberToString,
   keycloak_uuid: z.string().nullable(),
   ...zodAudit,
 });
@@ -40,7 +38,7 @@ const UserCreateBodySchema = implement<
 >().with(
   UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
-    .required({ system_name: true, system_user_id: true, keycloak_uuid: true }).shape
+    .required({ user_identifier: true, keycloak_uuid: true }).shape
 );
 
 // Validate incoming request body for update artifact

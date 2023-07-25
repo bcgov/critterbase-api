@@ -104,6 +104,7 @@ const auth = catchErrors(
     const kc = await authenticateRequest(req);
     const parsed = AuthLoginSchema.parse({keycloak_uuid: kc.keycloak_uuid, system_name: kc.system_name});
     await loginUser(parsed);
+    console.log(JSON.stringify(kc));
     await setUserContext(kc.keycloak_uuid, kc.system_name);
     next();
   }

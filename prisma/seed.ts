@@ -4,7 +4,7 @@ import { insertDefaultTaxons } from "./seed_scripts/seed_taxons";
 import { prisma } from "../src/utils/constants";
 import * as fs from "fs";
 import path from "path";
-import { Prisma, system } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 async function main() {
   const systemUserUUID = await queryRandomUUID(prisma);
@@ -14,17 +14,9 @@ async function main() {
   /**
    * Create system user, which is required for auto filling the create and update user of all subsequent rows.
    */
-  await prisma.user.upsert({
-    where: {
-      system_and_system_user_id: {
-        system_name: system.CRITTERBASE,
-        system_user_id: "SYSTEM",
-      },
-    },
-    update: { system_user_id: "SYSTEM" },
-    create: {
-      system_user_id: "SYSTEM",
-      system_name: system.CRITTERBASE,
+  await prisma.user.create({
+    data: {
+      user_identifier: "SYSTEM",
       user_id: systemUserUUID,
       create_user: systemUserUUID,
       update_user: systemUserUUID,

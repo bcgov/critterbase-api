@@ -450,8 +450,7 @@ model mortality {
 
 model user {
   user_id                                                                                               String                                      @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  system_user_id                                                                                        String
-  system_name                                                                                           system
+  user_identifier                                                                                       String
   keycloak_uuid                                                                                         String?                                     @unique(map: "critterbase_user_keycloak_uuid_unq") @db.Char(32)
   create_user                                                                                           String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                                                                                           String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
@@ -507,8 +506,6 @@ model user {
   xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser xref_taxon_measurement_qualitative_option[] @relation("xref_taxon_measurement_qualitative_option_update_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_create_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_update_userTouser")
-
-  @@unique([system_user_id, system_name], name: "system_and_system_user_id")
 }
 
 model xref_collection_unit {
