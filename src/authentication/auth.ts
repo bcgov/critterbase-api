@@ -29,7 +29,6 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
     if (!req.headers.authorization) {
       throw apiError.forbidden('Access Denied');
     }
-
     // Authorization header should be a string with format: Bearer xxxxxx.yyyyyyy.zzzzzz
     const authorizationHeaderString = req.headers.authorization;
 
@@ -80,20 +79,26 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
     // Verify token using public signing key
     const verifiedToken = verify(tokenString, signingKey, { issuer: [KEYCLOAK_ISSUER] });
 
-    if (!verifiedToken) {
+    if (!verifiedToken || typeof verifiedToken === 'string') {
       console.log('Could not verify token.');
       throw apiError.forbidden('Access Denied');
     }
 
-    const keycloak_uuid = (verifiedToken as BCGovJwtPayload).idir_user_guid ?? (verifiedToken as BCGovJwtPayload).bceid_user_guid ?? (verifiedToken as BCGovJwtPayload).bceid_business_guid;
-    const identifier = (verifiedToken as BCGovJwtPayload).idir_username ?? (verifiedToken as BCGovJwtPayload).bceid_business_guid;
+    const allowedAudiences = String(process.env.ALLOWED_AUD).split(' ');
+    const bcgovToken = verifiedToken as BCGovJwtPayload;
+    if(typeof bcgovToken.aud !== 'string' || !allowedAudiences.includes(bcgovToken.aud)) {
+      throw apiError.forbidden('Access Denied');
+    }
+  
+    const keycloak_uuid = bcgovToken.idir_user_guid ?? bcgovToken.bceid_user_guid ?? bcgovToken.bceid_business_guid;
+    const identifier = bcgovToken.idir_username ?? bcgovToken.bceid_business_guid;
 
     if(!keycloak_uuid || !identifier) {
       throw apiError.serverIssue('Token did not contain required keys.');
     }
     return { 
       keycloak_uuid: keycloak_uuid, 
-      system_name: (verifiedToken as BCGovJwtPayload).aud as string,
+      system_name: String(bcgovToken.aud),
       identifier: identifier
     };
   } catch (error) {
