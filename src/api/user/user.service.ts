@@ -91,9 +91,9 @@ const deleteUser = async (user_id: string): Promise<user> => {
   return deletedUser;
 };
 
-const setUserContext = async (system_user_id: string, system_name: string) => {
+const setUserContext = async (keycloak_uuid: string, system_name: string) => {
   const result: [{ api_set_context: string }] =
-    await prisma.$queryRaw`SELECT * FROM api_set_context(${system_user_id}, ${system_name})`;
+    await prisma.$queryRaw`SELECT * FROM api_set_context(${keycloak_uuid}, ${system_name})`;
   return result[0].api_set_context;
 };
 

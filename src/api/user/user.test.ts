@@ -1,4 +1,4 @@
-import { system, user } from "@prisma/client";
+import { user } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import supertest from "supertest";
 import { makeApp } from "../../app";
@@ -20,8 +20,7 @@ import { zodID } from "../../utils/zod_helpers";
 const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 
 const NEW_USER: UserCreateInput = {
-  system_user_id: "MOCK_USER",
-  system_name: system.CRITTERBASE,
+  user_identifier: "MOCK_USER",
   keycloak_uuid: ID,
 };
 
@@ -167,7 +166,7 @@ describe("API: User", () => {
     describe("setUserContext()", () => {
       it("sets the user context with provided user_id and system_name", async () => {
         queryRaw.mockResolvedValue([{ api_set_context: ID }]);
-        const result = await _setUserContext(ID, system.CRITTERBASE);
+        const result = await _setUserContext(ID, 'CRITTERBASE');
         expect.assertions(3);
         expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
         expect(result).toBeDefined();
@@ -272,7 +271,7 @@ describe("API: User", () => {
         });
         const res = await request
           .patch(`/api/users/${ID}`)
-          .send({ system_name: system.CRITTERBASE });
+          .send({ user_identifier: 'CRITTERBASE' });
         expect.assertions(2);
         expect(updateUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(404);
@@ -292,7 +291,7 @@ describe("API: User", () => {
         updateUser.mockResolvedValue(RETURN_USER);
         const res = await request
           .patch(`/api/users/${ID}`)
-          .send({ system_name: system.CRITTERBASE });
+          .send({ user_identifier: 'CRITTERBASE' });
         expect.assertions(2);
         expect(updateUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
@@ -302,7 +301,7 @@ describe("API: User", () => {
         updateUser.mockResolvedValue(RETURN_USER);
         const res = await request
           .patch(`/api/users/${ID}`)
-          .send({ system_name: system.CRITTERBASE });
+          .send({ user_identifier: 'CRITTERBASE' });
         expect.assertions(2);
         expect(updateUser.mock.calls.length).toBe(1);
         expect(UserSchema.safeParse(res.body).success).toBe(true);

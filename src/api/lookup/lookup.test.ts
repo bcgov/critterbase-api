@@ -75,7 +75,7 @@ describe("API: Lookup", () => {
         { route: "coordinate-uncertainty-unit", enum: Object.keys(cuu) },
         { route: "frequency-units", enum: Object.keys(frequency_unit) },
         { route: "measurement-units", enum: Object.keys(measurement_unit) },
-        { route: "supported-systems", enum: Object.keys(system) },
+        //{ route: "supported-systems", enum: Object.keys(system) },
       ];
       it("all enum routes should respond with enum values and status 200", async () => {
         for (const req of e) {
