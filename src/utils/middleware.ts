@@ -1,9 +1,9 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
-import { ZodError, z } from "zod";
+import { ZodError } from "zod";
 import { loginUser } from "../api/access/access.service";
-import { AuthHeadersSchema, AuthLoginSchema } from "../api/user/user.utils";
-import { API_KEY, API_KEY_HEADER, IS_TEST, NO_AUTH } from "./constants";
+import { AuthLoginSchema } from "../api/user/user.utils";
+import { IS_TEST, NO_AUTH } from "./constants";
 import { prismaErrorMsg } from "./helper_functions";
 import { apiError } from "./types";
 import { authenticateRequest } from "../authentication/auth";

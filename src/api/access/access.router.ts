@@ -6,7 +6,6 @@ import { Prisma } from "@prisma/client";
 import express from "express";
 import { ICbDatabase } from "../../utils/database";
 import { authenticateRequest } from "../../authentication/auth";
-import { apiError } from "../../utils/types";
 
 export const AccessRouter = (db: ICbDatabase) => {
   const accessRouter = express.Router();

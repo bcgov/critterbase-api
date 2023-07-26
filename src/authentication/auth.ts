@@ -67,6 +67,8 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
     // Get signing key from certificate issuer
     const key = await jwksClient.getSigningKey(kid);
 
+    // This ESLint warning makes no sense
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!key) {
       console.log('Key not found.');
       throw apiError.forbidden('Access Denied');
