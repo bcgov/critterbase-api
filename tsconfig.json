@@ -6,8 +6,9 @@
     "lib": ["esnext"],
     "esModuleInterop": true,
     "resolveJsonModule": true
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": false
+  },
+  "ts-node": {
+    "swc": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts", "dist/*"]
