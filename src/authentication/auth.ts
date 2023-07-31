@@ -24,9 +24,10 @@ type BCGovJwtPayload = JwtPayload & {
  * @return {*} {Promise<true>} true if the token is authenticated
  * @throws {HTTP401} if the bearer token is missing or invalid
  */
-export const authenticateRequest = async function (req: Request): Promise<{keycloak_uuid: string, system_name: string, identifier: string}> {
+export const authenticateRequest = async function(req: Request): Promise<{ keycloak_uuid: string, system_name: string, identifier: string }> {
   try {
     if (!req.headers.authorization) {
+      console.log('No auth header found');
       throw apiError.forbidden('Access Denied');
     }
     // Authorization header should be a string with format: Bearer xxxxxx.yyyyyyy.zzzzzz
@@ -50,7 +51,7 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
     const decodedToken = decode(tokenString, { complete: true, json: true });
 
     if (!decodedToken) {
-      console.log('Could not decode token.')
+      console.log('Could not decode token.');
       throw apiError.forbidden('Access Denied');
     }
 
@@ -58,6 +59,7 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
     const kid = decodedToken.header.kid;
 
     if (!kid) {
+      console.log('No key id in token');
       throw apiError.forbidden('Access Denied');
     }
 
@@ -86,18 +88,19 @@ export const authenticateRequest = async function (req: Request): Promise<{keycl
 
     const allowedAudiences = String(process.env.ALLOWED_AUD).split(' ');
     const bcgovToken = verifiedToken as BCGovJwtPayload;
-    if(typeof bcgovToken.aud !== 'string' || !allowedAudiences.includes(bcgovToken.aud)) {
+    if (typeof bcgovToken.aud !== 'string' || !allowedAudiences.includes(bcgovToken.aud)) {
+      console.log('Client not found');
       throw apiError.forbidden('Access Denied');
     }
-  
+
     const keycloak_uuid = bcgovToken.idir_user_guid ?? bcgovToken.bceid_user_guid ?? bcgovToken.bceid_business_guid;
     const identifier = bcgovToken.idir_username ?? bcgovToken.bceid_business_guid;
 
-    if(!keycloak_uuid || !identifier) {
+    if (!keycloak_uuid || !identifier) {
       throw apiError.serverIssue('Token did not contain required keys.');
     }
-    return { 
-      keycloak_uuid: keycloak_uuid, 
+    return {
+      keycloak_uuid: keycloak_uuid,
       system_name: String(bcgovToken.aud),
       identifier: identifier
     };
