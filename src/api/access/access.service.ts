@@ -4,12 +4,10 @@ import { apiError } from "../../utils/types";
 import { LoginCredentials } from "../user/user.utils";
 
 const loginUser = async (login: LoginCredentials): Promise<user | null> => {
-  const { user_id, keycloak_uuid } = login;
-
   // Find a user that matches both `user_id` and `keycloak_uuid`
   const foundUser = await prisma.user.findFirst({
     where: {
-      AND: [{ user_id }, { keycloak_uuid }],
+      keycloak_uuid: login.keycloak_uuid
     },
   });
 

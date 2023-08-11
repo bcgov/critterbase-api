@@ -8,7 +8,8 @@ import {
   CollectionUnitCategorySchema,
   xrefCollectionUnitFormats,
   xrefTaxonCollectionCategoryFormats,
-  xrefTaxonMarkingBodyLocationSchema,
+  xrefTaxonMarkingBodyLocationFormats,
+  xrefTaxonQuantitativeMeasurementFormats,
 } from "./xref.utils";
 
 export const XrefRouter = (db: ICbDatabase) => {
@@ -61,7 +62,46 @@ export const XrefRouter = (db: ICbDatabase) => {
       const response = await formatParse(
         getFormat(req),
         db.getTaxonMarkingBodyLocations(taxon_id),
-        xrefTaxonMarkingBodyLocationSchema
+        xrefTaxonMarkingBodyLocationFormats
+      );
+      res.status(200).json(response);
+    })
+  );
+
+  xrefRouter.get(
+    "/taxon-marking-body-locations",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_id } = taxonIdSchema.parse(req.query);
+      const response = await formatParse(
+        getFormat(req),
+        db.getTaxonMarkingBodyLocations(taxon_id),
+        xrefTaxonMarkingBodyLocationFormats
+      );
+      res.status(200).json(response);
+    })
+  );
+
+  xrefRouter.get(
+    "/taxon-qualitative-measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_id } = taxonIdSchema.parse(req.query);
+      const response = await formatParse(
+        getFormat(req),
+        db.getTaxonQualitativeMeasurements(taxon_id),
+        xrefTaxonQuantitativeMeasurementFormats
+      );
+      res.status(200).json(response);
+    })
+  );
+
+  xrefRouter.get(
+    "/taxon-quantitative-measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_id } = taxonIdSchema.parse(req.query);
+      const response = await formatParse(
+        getFormat(req),
+        db.getTaxonQuantitativeMeasurements(taxon_id),
+        xrefTaxonQuantitativeMeasurementFormats
       );
       res.status(200).json(response);
     })

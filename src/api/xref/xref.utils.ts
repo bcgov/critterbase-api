@@ -4,6 +4,8 @@ import {
   lk_taxon,
   xref_collection_unit,
   xref_taxon_marking_body_location,
+  xref_taxon_measurement_qualitative,
+  xref_taxon_measurement_quantitative,
 } from "@prisma/client";
 import { z } from "zod";
 import { toSelect } from "../../utils/helper_functions";
@@ -47,7 +49,31 @@ const xrefTaxonCollectionCategoryFormats: FormatParse = {
   },
 };
 
-const xrefTaxonMarkingBodyLocationSchema: FormatParse = {
+const xrefTaxonQualitativeMeasurementSchema: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) =>
+      toSelect<xref_taxon_measurement_qualitative>(
+        val,
+        "taxon_measurement_id",
+        "measurement_name"
+      )
+    ),
+  },
+};
+
+const xrefTaxonQuantitativeMeasurementFormats: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) =>
+      toSelect<xref_taxon_measurement_quantitative>(
+        val,
+        "taxon_measurement_id",
+        "measurement_name"
+      )
+    ),
+  },
+};
+
+const xrefTaxonMarkingBodyLocationFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
       toSelect<xref_taxon_marking_body_location>(
@@ -71,5 +97,7 @@ export {
   CollectionUnitCategorySchema,
   xrefCollectionUnitFormats,
   xrefTaxonCollectionCategoryFormats,
-  xrefTaxonMarkingBodyLocationSchema,
+  xrefTaxonMarkingBodyLocationFormats,
+  xrefTaxonQualitativeMeasurementSchema,
+  xrefTaxonQuantitativeMeasurementFormats
 };
