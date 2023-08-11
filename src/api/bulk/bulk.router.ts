@@ -31,6 +31,7 @@ import { z } from "zod";
 import { LocationUpdateSchema } from "../location/location.utils";
 import { zodID } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
+import { QualitativeCreateSchema, QuantitativeCreateSchema } from "../measurement/measurement.utils";
 
 export const BulkRouter = (db: ICbDatabase) => {
   const bulkRouter = express.Router();
@@ -45,6 +46,8 @@ export const BulkRouter = (db: ICbDatabase) => {
         locations,
         captures,
         mortalities,
+        qualitative_measurements,
+        quantitative_measurements
       } = await BulkCreationSchema.parseAsync(req.body);
 
       const crittersAppend = critters
@@ -93,6 +96,12 @@ export const BulkRouter = (db: ICbDatabase) => {
         ? z.array(CollectionUnitCreateBodySchema).parse(collections)
         : [];
 
+      const parsedQualitativeMeasurements = qualitative_measurements ? 
+        z.array(QualitativeCreateSchema).parse(qualitative_measurements) : [];
+
+      const parsedQuantitativeMeasurements = quantitative_measurements ? 
+        z.array(QuantitativeCreateSchema).parse(quantitative_measurements) : [];
+
       const results = await db.bulkCreateData({
         critters: crittersAppend,
         collections: parsedCollections,
@@ -100,6 +109,8 @@ export const BulkRouter = (db: ICbDatabase) => {
         locations: locations ?? [],
         captures: parsedCaptures,
         mortalities: parsedMortalities,
+        qualitative_measurements: parsedQualitativeMeasurements,
+        quantitative_measurements: parsedQuantitativeMeasurements
       });
       return res.status(201).json(results);
     })

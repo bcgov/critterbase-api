@@ -7,7 +7,7 @@ import {
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
 } from "../marking/marking.utils"; 
-import { MortalityUpdate } from "../mortality/mortality.utils";
+import { MortalityUpdate, mortalityInclude } from "../mortality/mortality.utils";
 import { apiError } from "../../utils/types";
 import { ICbDatabase } from "../../utils/database";
 import { CaptureUpdate } from "../capture/capture.utils";
@@ -16,6 +16,8 @@ interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
   collections: Prisma.critter_collection_unitCreateManyInput[];
   markings: Prisma.markingCreateManyInput[];
+  quantitative_measurements: Prisma.measurement_quantitativeCreateManyInput[];
+  qualitative_measurements: Prisma.measurement_qualitativeCreateManyInput[];
   locations: Prisma.locationCreateManyInput[];
   captures: Prisma.captureCreateManyInput[];
   mortalities: Prisma.mortalityCreateManyInput[];
@@ -40,37 +42,55 @@ interface IBulkResCount {
 }
 
 const bulkCreateData = async (bulkParams: IBulkCreate) => {
-  const { critters, collections, markings, locations, captures, mortalities } =
+  const { critters, collections, markings, locations, captures, mortalities, quantitative_measurements, qualitative_measurements } =
     bulkParams;
-  const result = await prisma.$transaction(async (prisma) => {
-    const critterRes = await prisma.critter.createMany({
+  const counts: Omit<IBulkResCount, "updated" | "deleted"> = {
+    created: {}
+  };
+  console.log (JSON.stringify(bulkParams, null, 2) );
+  await prisma.$transaction(async (prisma) => {
+    const critterCount = await prisma.critter.createMany({
       data: critters,
     });
+    counts.created.critters = critterCount.count;
 
-    await prisma.critter_collection_unit.createMany({
+    const cuCount = await prisma.critter_collection_unit.createMany({
       data: collections,
     });
+    counts.created.collections = cuCount.count;
 
-    await prisma.location.createMany({
+    const locCount = await prisma.location.createMany({
       data: locations,
     });
+    counts.created.locations = locCount.count;
 
-    await prisma.capture.createMany({
+    const captureCount = await prisma.capture.createMany({
       data: captures,
     });
-
-    await prisma.mortality.createMany({
+    counts.created.captures = captureCount.count;
+    
+    const mortalitycount = await prisma.mortality.createMany({
       data: mortalities,
     });
+    counts.created.mortalities = mortalitycount.count;
 
-    await prisma.marking.createMany({
+    const markingCount = await prisma.marking.createMany({
       data: markings,
     });
+    counts.created.markings = markingCount.count;
 
-    return critterRes;
+    const measQualCount = await prisma.measurement_qualitative.createMany({
+      data: qualitative_measurements,
+    });
+    counts.created.qualitative_measurements = measQualCount.count;
+
+    const measQuantCount = await prisma.measurement_quantitative.createMany({
+      data: quantitative_measurements,
+    });
+    counts.created.quantitative_measurements = measQuantCount.count;
   });
 
-  return result;
+  return counts;
 };
 
 const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
