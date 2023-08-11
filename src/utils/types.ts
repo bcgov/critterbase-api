@@ -12,7 +12,8 @@ type ErrorType =
   | "syntaxIssue"
   | "serverIssue"
   | "notFound"
-  | "conflict";
+  | "conflict"
+  | "forbidden";
 
 class apiError extends Error {
   status: number;
@@ -62,6 +63,10 @@ class apiError extends Error {
    */
   static conflictIssue(message: string) {
     return new apiError(message, 409, "conflict");
+  }
+
+  static forbidden(message: string) {
+    return new apiError(message, 403, "forbidden");
   }
 
   toString(): string {

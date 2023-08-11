@@ -5,7 +5,6 @@ import {
   coordinate_uncertainty_unit,
   frequency_unit,
   measurement_unit,
-  system,
 } from "@prisma/client";
 import express from "express";
 import { Request, Response } from "express-serve-static-core";
@@ -71,12 +70,12 @@ export const LookupRouter = (db: ICbDatabase) => {
       res.status(200).json(Object.keys(measurement_unit))
     )
   );
-  lookupRouter.get(
+  /*lookupRouter.get(
     "/enum/supported-systems",
     catchErrors(async (req: Request, res: Response) =>
       res.status(200).json(Object.keys(system))
     )
-  );
+  );*/
 
   /**
    * * Lookup tables

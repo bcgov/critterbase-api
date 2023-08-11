@@ -51,9 +51,6 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     lk_region_nr: {
       select: { region_nr_name: true },
     },
-    user_critter_create_userTouser: {
-      select: { system_name: true },
-    },
     critter_collection_unit: simpleCollectionUnitIncludes,
     capture: {...captureInclude, orderBy: { capture_timestamp: 'desc' } },
     mortality: {...mortalityInclude, orderBy: { mortality_timestamp: 'desc' } },
@@ -159,7 +156,6 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
     marking,
     measurement_qualitative,
     measurement_quantitative,
-    user_critter_create_userTouser,
     critter_collection_unit,
     ...rest
   } = val as CritterIncludeResult;
@@ -168,7 +164,6 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
     responsible_region: lk_region_nr?.region_nr_name,
     mortality_timestamp: mortality[0]?.mortality_timestamp ?? null,
-    system_origin: user_critter_create_userTouser.system_name,
     collection_units: array(SimpleCollectionUnitResponseSchema).parse(
       critter_collection_unit
     ),
