@@ -51,6 +51,10 @@ const taxonIdSchema = z.object({
   taxon_id: zodID.optional(),
 });
 
+const taxonMeasurementIdSchema = z.object({
+  taxon_measurement_id: zodID,
+});
+
 const LookupWmuSchema = implement<lk_wildlife_management_unit>().with({
   wmu_id: zodID,
   wmu_name: z.string(),
@@ -191,4 +195,5 @@ export {
   QueryFormatSchema,
   taxonIdSchema,
   DeleteSchema,
+  taxonMeasurementIdSchema
 };
