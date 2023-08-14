@@ -7,6 +7,9 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
+  "ts-node": {
+    "swc": true
+  },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts", "dist/*"]
 }
