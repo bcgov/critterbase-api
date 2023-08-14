@@ -1,14 +1,17 @@
 import express, { Request, Response } from "express";
+import { prisma } from "../../utils/constants";
 import { ICbDatabase } from "../../utils/database";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { taxonIdSchema } from "../../utils/zod_helpers";
+import { taxonIdSchema, taxonMeasurementIdSchema, uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
   xrefCollectionUnitFormats,
   xrefTaxonCollectionCategoryFormats,
   xrefTaxonMarkingBodyLocationFormats,
+  xrefTaxonMeasurementOptionSchema,
+  xrefTaxonMeasurementSchema,
   xrefTaxonQuantitativeMeasurementFormats,
 } from "./xref.utils";
 
@@ -88,7 +91,20 @@ export const XrefRouter = (db: ICbDatabase) => {
       const response = await formatParse(
         getFormat(req),
         db.getTaxonQualitativeMeasurements(taxon_id),
-        xrefTaxonQuantitativeMeasurementFormats
+        xrefTaxonMeasurementSchema
+      );
+      res.status(200).json(response);
+    })
+  );
+
+  xrefRouter.get(
+    "/taxon-qualitative-measurement-options",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_measurement_id } = taxonMeasurementIdSchema.parse(req.query);
+      const response = await formatParse(
+        getFormat(req),
+        prisma.xref_taxon_measurement_qualitative_option.findMany({ where: { taxon_measurement_id } }),
+        xrefTaxonMeasurementOptionSchema
       );
       res.status(200).json(response);
     })
@@ -101,7 +117,20 @@ export const XrefRouter = (db: ICbDatabase) => {
       const response = await formatParse(
         getFormat(req),
         db.getTaxonQuantitativeMeasurements(taxon_id),
-        xrefTaxonQuantitativeMeasurementFormats
+        xrefTaxonMeasurementSchema
+      );
+      res.status(200).json(response);
+    })
+  );
+
+  xrefRouter.get(
+    "/taxon-measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_id } = taxonIdSchema.parse(req.query);
+      const response = await formatParse(
+        getFormat(req),
+        db.getTaxonMeasurements(taxon_id),
+        xrefTaxonMeasurementSchema
       );
       res.status(200).json(response);
     })

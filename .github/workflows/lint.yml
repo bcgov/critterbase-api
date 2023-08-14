@@ -5,11 +5,14 @@ on: [push]
 jobs:
   EsLint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: ${{matrix.node-version}}
           cache: "npm"
       - name: Setup Node
         run: npm install
