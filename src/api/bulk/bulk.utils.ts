@@ -9,7 +9,8 @@ const BulkCreationSchema = z.object({
     captures: z.array(ResponseSchema).optional(),
     mortalities: z.array(ResponseSchema).optional(),
     quantitative_measurements: z.array(ResponseSchema).optional(),
-    qualitative_measurements: z.array(ResponseSchema).optional()
+    qualitative_measurements: z.array(ResponseSchema).optional(),
+    families: ResponseSchema.optional()
 });
 
 export { BulkCreationSchema }

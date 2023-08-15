@@ -15,8 +15,9 @@ interface ImmediateFamilyCritter {
 }
 
 const FamilyCreateBodySchema = implement<
-  Omit<Prisma.familyCreateManyInput, "family_id" | keyof AuditColumns>
+  Omit<Prisma.familyCreateManyInput, keyof AuditColumns>
 >().with({
+  family_id: zodID,
   family_label: z.string(),
 });
 

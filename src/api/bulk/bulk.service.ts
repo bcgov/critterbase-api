@@ -21,6 +21,9 @@ interface IBulkCreate {
   locations: Prisma.locationCreateManyInput[];
   captures: Prisma.captureCreateManyInput[];
   mortalities: Prisma.mortalityCreateManyInput[];
+  families: Prisma.familyCreateManyInput[];
+  family_parents: Prisma.family_parentCreateManyInput[];
+  family_children: Prisma.family_childCreateManyInput[];
 }
 
 interface IBulkMutate {
@@ -42,7 +45,7 @@ interface IBulkResCount {
 }
 
 const bulkCreateData = async (bulkParams: IBulkCreate) => {
-  const { critters, collections, markings, locations, captures, mortalities, quantitative_measurements, qualitative_measurements } =
+  const { critters, collections, markings, locations, captures, mortalities, quantitative_measurements, qualitative_measurements, families, family_children, family_parents } =
     bulkParams;
   const counts: Omit<IBulkResCount, "updated" | "deleted"> = {
     created: {}
@@ -88,6 +91,21 @@ const bulkCreateData = async (bulkParams: IBulkCreate) => {
       data: quantitative_measurements,
     });
     counts.created.quantitative_measurements = measQuantCount.count;
+
+    const familyCount = await prisma.family.createMany({
+      data: families
+    });
+    counts.created.families = familyCount.count;
+
+    const familyParentCount = await prisma.family_parent.createMany({
+      data: family_parents
+    });
+    counts.created.family_parents = familyParentCount.count;
+
+    const familyChildCount = await prisma.family_child.createMany({
+      data: family_children
+    });
+    counts.created.family_children = familyChildCount.count;
   });
 
   return counts;
