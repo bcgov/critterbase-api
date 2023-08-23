@@ -15,6 +15,11 @@ type BCGovJwtPayload = JwtPayload & {
   bceid_username?: string;
 }
 
+type UserHeader = {
+  keycloak_guid: string;
+  username: string;
+}
+
 /**
  * Authenticate the request by validating the authorization bearer token (JWT).
  *
@@ -93,16 +98,14 @@ export const authenticateRequest = async function(req: Request): Promise<{ keycl
       throw apiError.forbidden('Access Denied');
     }
 
-    const keycloak_uuid = bcgovToken.idir_user_guid ?? bcgovToken.bceid_user_guid ?? bcgovToken.bceid_business_guid;
-    const identifier = bcgovToken.idir_username ?? bcgovToken.bceid_business_guid;
-
-    if (!keycloak_uuid || !identifier) {
-      throw apiError.serverIssue('Token did not contain required keys.');
+    const user = JSON.parse(req.headers.user as string) as UserHeader;
+    if (!user.keycloak_guid || !user.username) {
+      throw apiError.syntaxIssue('User header was not provided.');
     }
     return {
-      keycloak_uuid: keycloak_uuid,
-      system_name: String(bcgovToken.aud),
-      identifier: identifier
+      keycloak_uuid: user.keycloak_guid,
+      identifier: user.username,
+      system_name: String(bcgovToken.client_id),
     };
   } catch (error) {
     console.log(JSON.stringify(error));
