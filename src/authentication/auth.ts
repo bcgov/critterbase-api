@@ -93,6 +93,7 @@ export const authenticateRequest = async function(req: Request): Promise<{ keycl
 
     const allowedAudiences = String(process.env.ALLOWED_AUD).split(' ');
     const bcgovToken = verifiedToken as BCGovJwtPayload;
+
     if (typeof bcgovToken.aud !== 'string' || !allowedAudiences.includes(bcgovToken.aud)) {
       console.log('Client not found');
       throw apiError.forbidden('Access Denied');
@@ -102,10 +103,13 @@ export const authenticateRequest = async function(req: Request): Promise<{ keycl
     if (!user.keycloak_guid || !user.username) {
       throw apiError.syntaxIssue('User header was not provided.');
     }
+
+    console.log(JSON.stringify(bcgovToken, null, 2));
+
     return {
-      keycloak_uuid: user.keycloak_guid,
+      keycloak_uuid: user.keycloak_guid.toUpperCase(),
       identifier: user.username,
-      system_name: String(bcgovToken.client_id),
+      system_name: String(bcgovToken.clientId),
     };
   } catch (error) {
     console.log(JSON.stringify(error));
