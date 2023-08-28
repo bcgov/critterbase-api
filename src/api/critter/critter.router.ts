@@ -43,6 +43,7 @@ export const CritterRouter = (db: ICbDatabase) => {
             taxon_name_common: {
               [taxon_name_commons.negate ? "notIn" : "in"]:
                 taxon_name_commons.body,
+              mode: 'insensitive'
             },
           },
         });
