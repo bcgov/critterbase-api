@@ -1,6 +1,6 @@
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from 'zod';
-import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex, system } from "@prisma/client";
+import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex } from "@prisma/client";
 import { routes } from "../../utils/constants";
 import { eCritterStatus } from "../critter/critter.utils";
 import { LookUpColourSchema, LookUpMarkingTypeSchema, LookUpMaterialSchema, LookupCodSchema, LookupCollectionUnitCategorySchema, LookupRegionEnvSchema, LookupRegionNrSchema, LookupTaxonSchema, LookupWmuSchema, zodID } from "../../utils/zod_helpers";
