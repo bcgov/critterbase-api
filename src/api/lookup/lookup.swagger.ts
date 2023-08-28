@@ -102,20 +102,6 @@ const enumMeasurementUnit: ZodOpenApiOperationObject = {
     }
 }
 
-const enumSystem: ZodOpenApiOperationObject = {
-    operationId: 'enumSystem',
-    tags: [TAG],
-    responses: {
-        '200' : {
-            description: availValues,
-            content: {
-                'application/json' : {schema:  z.string().array().openapi({example: Object.keys(system)}) }
-            }
-        },
-        ...SwagUnauthorized,
-    }
-}
-
 const asSelectSchema = z.object({ key: z.string(), id: zodID, value: z.string() })
 
 const lookupColours: ZodOpenApiOperationObject = {
@@ -369,9 +355,6 @@ export const enumPaths = {
     },
     [`${routes.lookups}/enum/measurement-unit`] : {
         get: enumMeasurementUnit
-    },
-    [`${routes.lookups}/enum/supported-systems`] : {
-        get: enumSystem
     },
     [`${routes.lookups}/colours`] : {
         get: lookupColours
