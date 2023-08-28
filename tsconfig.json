@@ -5,10 +5,10 @@
     "strict": true,
     "lib": ["esnext"],
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": false
+    "resolveJsonModule": true
+  },
+  "ts-node": {
+    "swc": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts", "dist/*"]

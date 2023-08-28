@@ -1,4 +1,4 @@
-import { system, user } from "@prisma/client";
+import { user } from "@prisma/client";
 import { apiError } from "../../utils/types";
 // import { createUser } from "../user/user.service";
 import { PrismaClient as OriginalPrismaClient } from "@prisma/client";
@@ -11,11 +11,11 @@ import {
   getTableDataTypes as _getTableDataTypes,
 } from "./access.service";
 import { LoginCredentials } from "../user/user.utils";
+import * as auth from '../../authentication/auth';
 const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 const USER: user = {
   user_id: ID,
-  system_user_id: "1",
-  system_name: "CRITTERBASE",
+  user_identifier: "1",
   keycloak_uuid: ID,
   create_user: ID,
   update_user: ID,
@@ -26,6 +26,7 @@ const USER: user = {
 const findUnique = jest.spyOn(prisma.user, "findUnique").mockImplementation();
 const findFirst = jest.spyOn(prisma.user, "findFirst").mockImplementation();
 const queryRaw = jest.spyOn(prisma, "$queryRaw").mockImplementation();
+const authRequest = jest.spyOn(auth, "authenticateRequest").mockImplementation();
 
 const loginUser = jest.fn();
 const createUser = jest.fn();
@@ -56,23 +57,24 @@ beforeEach(() => {
   findUnique.mockResolvedValue(USER);
   findFirst.mockResolvedValue(USER);
   queryRaw.mockResolvedValue({ data: "lol" });
+  authRequest.mockResolvedValue({keycloak_uuid: ID, system_name: 'system_string', identifier: 'jimbob'})
 });
 
 describe("SERVICES", () => {
   describe("loginUser", () => {
     it("user_id: login succeeds with valid user_id", async () => {
-      const user = await _loginUser({ user_id: ID, keycloak_uuid: ID });
+      const user = await _loginUser({ keycloak_uuid: ID });
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
       expect(user?.user_id).toBeDefined();
     });
     it("user_id: login fails with non existant user_id", async () => {
       findFirst.mockResolvedValue(null);
-      await expect(_loginUser({ user_id: 'd3984687-0e85-4126-94e5-22a0eb0b5569', keycloak_uuid: 'd39846870e85412694e522a0eb0b5569'})).rejects.toThrowError(apiError);
+      await expect(_loginUser({ keycloak_uuid: 'd39846870e85412694e522a0eb0b5569'})).rejects.toThrowError(apiError);
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });
     it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
       findFirst.mockResolvedValue(null);
-      await expect(_loginUser({ user_id: 'd3984687-0e85-4126-94e5-22a0eb0b5569', keycloak_uuid: "test" })).rejects.toThrowError(
+      await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
       apiError
     );
     expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
@@ -110,11 +112,11 @@ describe("SERVICES", () => {
       it("should return status 200 with valid body", async () => {
         const res = await request
           .post("/api/signup")
-          .send({ system_name: system.BCTW, system_user_id: 1 });
+          .send({ user_identifier: 1 });
         expect(createUser.mock.calls.length).toBe(1);
         expect(setUserContext.mock.calls.length).toBe(1);
         expect(setUserContext.mock.calls[0][0]).toBe(ID);
-        expect(setUserContext.mock.calls[0][1]).toBe("CRITTERBASE");
+        expect(setUserContext.mock.calls[0][1]).toBe('system_string');
         expect(res.status).toBe(201);
       });
     });

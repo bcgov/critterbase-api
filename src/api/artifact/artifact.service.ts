@@ -6,8 +6,11 @@ import {
   ArtifactUpdate,
 } from "./artifact.utils";
 import { randomUUID } from "crypto";
-import { getFileDownloadUrl, uploadFileToS3 } from "../../utils/object_store";
-import { S3 } from "aws-sdk";
+import {
+  Metadata,
+  getFileDownloadUrl,
+  uploadFileToS3,
+} from "../../utils/object_store";
 
 /**
  * * Gets an artifact by the artifact_id
@@ -78,7 +81,7 @@ const createArtifact = async (
   artifact_data: ArtifactCreate,
   file: Express.Multer.File
 ): Promise<ArtifactResponse> => {
-  const metadata: S3.Metadata = {
+  const metadata: Metadata = {
     filename: file.originalname,
   };
   const artifact_id = randomUUID();
@@ -106,8 +109,10 @@ const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
  * * Adds a signed URL to an artifact
  * @param {artifact} artifact
  */
-const addSignedUrlToArtifact = (artifact: artifact): ArtifactResponse => {
-  const signed_url = getFileDownloadUrl(artifact.artifact_url);
+const addSignedUrlToArtifact = async (
+  artifact: artifact
+): Promise<ArtifactResponse> => {
+  const signed_url = await getFileDownloadUrl(artifact.artifact_url);
   return { ...artifact, signed_url };
 };
 
@@ -115,8 +120,10 @@ const addSignedUrlToArtifact = (artifact: artifact): ArtifactResponse => {
  * * Maps over an array of artifacts and adds a signed URL to each one
  * @param {artifact[]} artifacts
  */
-const addSignedUrlToArtifacts = (artifacts: artifact[]): ArtifactResponse[] =>
-  artifacts.map(addSignedUrlToArtifact);
+const addSignedUrlToArtifacts = async (
+  artifacts: artifact[]
+): Promise<ArtifactResponse[]> =>
+  Promise.all(artifacts.map(addSignedUrlToArtifact));
 
 export {
   getArtifactById,

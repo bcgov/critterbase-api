@@ -52,9 +52,46 @@ const getTaxonMarkingBodyLocations = async (taxon_id?: string) => {
   return result;
 };
 
+const getTaxonQualitativeMeasurements = async (taxon_id?: string) => {
+  const ids = taxon_id && (await getParentTaxonIds(taxon_id));
+
+  const qual = await prisma.xref_taxon_measurement_qualitative.findMany(
+    ids ? { where: { taxon_id: { in: ids } } } : undefined
+  );
+
+  return qual
+};
+
+const getTaxonQuantitativeMeasurements = async (taxon_id?: string) => {
+  const ids = taxon_id && (await getParentTaxonIds(taxon_id));
+
+  const quant = await prisma.xref_taxon_measurement_quantitative.findMany(
+    ids ? { where: { taxon_id: { in: ids } } } : undefined
+  );
+
+  return quant;
+};
+
+const getTaxonMeasurements = async (taxon_id?: string) => {
+  const ids = taxon_id && (await getParentTaxonIds(taxon_id));
+
+  const quant = await prisma.xref_taxon_measurement_qualitative.findMany(
+    ids ? { where: { taxon_id: { in: ids } } } : undefined
+  );
+
+  const qual = await prisma.xref_taxon_measurement_quantitative.findMany(
+    ids ? { where: { taxon_id: { in: ids } } } : undefined
+  );
+
+  return [...quant, ...qual];
+};
+
 export {
   getCollectionUnitsFromCategory,
   getCollectionUnitsFromCategoryId,
   getTaxonCollectionCategories,
   getTaxonMarkingBodyLocations,
+  getTaxonQuantitativeMeasurements,
+  getTaxonQualitativeMeasurements,
+  getTaxonMeasurements
 };
