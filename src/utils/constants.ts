@@ -22,6 +22,28 @@ declare global {
   }
 }
 
+const api = '/api'
+const routes = {
+  home: api,
+  //routes
+  critters:`${api}/critters`,
+  locations: `${api}/locations`,
+  markings: `${api}/markings`,
+  users: `${api}/users`,
+  collection_units: `${api}/collection-units`,
+  artifacts: `${api}/artifacts`,
+  family: `${api}/family`,
+  captures: `${api}/captures`,
+  mortality: `${api}/mortality`,
+  measurements: `${api}/measurements`,
+  lookups: `${api}/lookups`,
+  bulk: `${api}/bulk`,
+  xref: `${api}/xref`,
+  //modifiers
+  create: 'create',
+  id: ':id'
+}
+
 const oneDay = 60 * 60 * 24 * 1000;
 
 const API_KEY_HEADER = "api-key";
@@ -98,4 +120,5 @@ export {
   strings,
   defaultFormat,
   oneDay,
+  routes
 };

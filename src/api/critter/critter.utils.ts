@@ -10,11 +10,13 @@ import {
 } from "../../utils/zod_helpers";
 import {
   captureInclude,
+  CaptureIncludeSchema,
   CaptureResponseSchema,
   FormattedCapture,
 } from "../capture/capture.utils";
 import {
   simpleCollectionUnitIncludes,
+  SimpleCollectionUnitIncludesSchema,
   SimpleCollectionUnitResponseSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import {
@@ -24,13 +26,16 @@ import {
 } from "../marking/marking.utils";
 import {
   measurementQualitativeInclude,
+  MeasurementQualitativeIncludeSchema,
   measurementQuantitativeInclude,
+  MeasurementQuantitativeIncludeSchema,
   QualitativeResponseSchema,
   QuantitativeResponseSchema,
 } from "../measurement/measurement.utils";
 import {
   FormattedMortality,
   mortalityInclude,
+  MortalityIncludeSchema,
   MortalityResponseSchema,
 } from "../mortality/mortality.utils";
 
@@ -38,6 +43,10 @@ import {
 //   alive: "Alive",
 //   mortality: "Mortality",
 // };
+
+import { extendZodWithOpenApi } from 'zod-openapi';
+import { markingIncludesSchema } from "../marking/marking.utils";
+extendZodWithOpenApi(z);
 
 enum eCritterStatus {
   alive = "alive",
@@ -60,11 +69,11 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   },
 });
 
-type CritterIncludeResult = Prisma.critterGetPayload<
+type CritterDetailedIncludeResult = Prisma.critterGetPayload<
   typeof detailedCritterInclude
 >;
 
-const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
+/*const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
   include: {
     lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
     critter_collection_unit: {
@@ -79,7 +88,8 @@ const defaultCritterInclude = Prisma.validator<Prisma.critterArgs>()({
       },
     },
   },
-});
+});*/
+
 
 const minimalCritterSelect = Prisma.validator<Prisma.critterArgs>()({
   select: {
@@ -87,15 +97,26 @@ const minimalCritterSelect = Prisma.validator<Prisma.critterArgs>()({
     wlh_id: true,
     animal_id: true,
     sex: true,
-    ...defaultCritterInclude.include,
+    lk_taxon: { select: { taxon_name_latin: true, taxon_name_common: true } },
+    critter_collection_unit: {
+      ...simpleCollectionUnitIncludes,
+    },
+    mortality: {
+      orderBy: {
+        mortality_timestamp: 'desc'
+      },
+      select: {
+        mortality_timestamp: true,
+      },
+    },
   },
 });
 
 type CritterDefaultIncludeResult = Prisma.critterGetPayload<
-  typeof defaultCritterInclude
+  typeof minimalCritterSelect
 >;
 
-type CritterDefaultResponse = Pick<
+/*type CritterDefaultResponse = Pick<
   CritterDefaultIncludeResult,
   | "critter_id"
   | "wlh_id"
@@ -103,7 +124,7 @@ type CritterDefaultResponse = Pick<
   | "critter_collection_unit"
   | "lk_taxon"
   | "mortality"
->;
+>;*/
 
 const CritterSchema = implement<critter>().with({
   critter_id: zodID,
@@ -117,7 +138,7 @@ const CritterSchema = implement<critter>().with({
   update_user: zodID,
   create_timestamp: z.coerce.date(),
   update_timestamp: z.coerce.date(),
-});
+})
 
 const CritterUpdateSchema = implement<
   Omit<Prisma.critterUncheckedUpdateManyInput, keyof AuditColumns>
@@ -125,7 +146,7 @@ const CritterUpdateSchema = implement<
   CritterSchema.omit({
     ...noAudit,
   }).partial().shape
-);
+)
 
 const CritterCreateSchema = implement<
   Omit<Prisma.critterCreateManyInput, keyof AuditColumns>
@@ -138,6 +159,10 @@ const CritterCreateSchema = implement<
     }).shape
 );
 
+const CritterCreateEngTaxonSchema = CritterCreateSchema
+  .omit({taxon_id: true})
+  .extend({ taxon_name_common: z.string().optional(), taxon_name_latin: z.string().optional() })
+
 /**
  * Schema for validating a request to fetch multiple critters by their IDs
  */
@@ -146,6 +171,37 @@ const CritterIdsRequestSchema = z.object({
 });
 
 const CritterQuerySchema = z.object({ wlh_id: z.string().optional() }); //Add additional properties as needed
+
+const DefaultCritterIncludeSchema = implement<CritterDefaultIncludeResult>().with({
+  critter_id: zodID,
+  wlh_id: z.string().nullable(),
+  animal_id: z.string().nullable(),
+  sex: z.nativeEnum(sex),
+  lk_taxon: z.object({
+    taxon_name_latin: z.string(),
+    taxon_name_common: z.string().nullable()
+  }),
+  critter_collection_unit: SimpleCollectionUnitIncludesSchema.array(),
+  mortality: z.object({mortality_timestamp: z.date() }).array()
+});
+
+const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().with({
+  ...CritterSchema.shape,
+  lk_taxon: z.object({
+    taxon_name_latin: z.string(),
+    taxon_name_common: z.string().nullable()
+  }),
+  lk_region_nr: z.object({
+    region_nr_name: z.string()
+  }).nullable(),
+  critter_collection_unit: SimpleCollectionUnitIncludesSchema.array(),
+  capture: CaptureIncludeSchema.array(),
+  mortality: MortalityIncludeSchema.array(),
+  marking: markingIncludesSchema.array(),
+  measurement_qualitative: MeasurementQualitativeIncludeSchema.array(),
+  measurement_quantitative: MeasurementQuantitativeIncludeSchema.array()
+})
+
 
 const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -158,7 +214,7 @@ const CritterDetailedResponseSchema = ResponseSchema.transform((val) => {
     measurement_quantitative,
     critter_collection_unit,
     ...rest
-  } = val as CritterIncludeResult;
+  } = val as CritterDetailedIncludeResult
   return {
     ...rest,
     taxon: lk_taxon.taxon_name_common ?? lk_taxon.taxon_name_latin,
@@ -198,7 +254,7 @@ const CritterDefaultResponseSchema = ResponseSchema.transform((val) => {
     ),
     mortality_timestamp: mortality[0]?.mortality_timestamp ?? null,
   };
-});
+})
 
 const CritterFilterSchema = z.object({
   critter_ids: z
@@ -301,9 +357,8 @@ const critterFormats: FormatParse = {
 
 export type {
   FormattedCritter,
-  CritterIncludeResult,
-  CritterDefaultIncludeResult,
-  CritterDefaultResponse,
+  CritterDetailedIncludeResult,
+  CritterDefaultIncludeResult, 
   CritterCreate,
   CritterUpdate,
   CritterIdsRequest,
@@ -313,7 +368,6 @@ export {
   eCritterStatus,
   critterFormats,
   detailedCritterInclude,
-  defaultCritterInclude,
   minimalCritterSelect,
   CritterDetailedResponseSchema,
   CritterDefaultResponseSchema,
@@ -324,4 +378,7 @@ export {
   CritterFilterSchema,
   UniqueCritterQuerySchema,
   CritterSchema,
+  CritterCreateEngTaxonSchema,
+  DefaultCritterIncludeSchema,
+  DetailedCritterIncludeSchema
 };

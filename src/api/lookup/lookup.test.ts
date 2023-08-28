@@ -8,7 +8,6 @@ import {
   coordinate_uncertainty_unit as cuu,
   frequency_unit,
   measurement_unit,
-  system,
 } from "@prisma/client";
 import { eCritterStatus } from "../critter/critter.utils";
 import { PrismaTransactionClient } from "../../utils/types";

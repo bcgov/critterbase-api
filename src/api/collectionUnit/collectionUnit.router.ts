@@ -13,9 +13,6 @@ import { ICbDatabase } from "../../utils/database";
 export const CollectionUnitRouter = (db: ICbDatabase) => {
   const collectionUnitRouter = express.Router();
 
-  /**
-   ** collectionUnit Router Home
-   */
   collectionUnitRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
@@ -27,9 +24,6 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     })
   );
 
-  /**
-   ** Create new collectionUnit
-   */
   collectionUnitRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
@@ -95,6 +89,6 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
         return res.status(200).json(`CollectionUnit ${id} has been deleted`);
       })
     );
-    
+
   return collectionUnitRouter;
 };

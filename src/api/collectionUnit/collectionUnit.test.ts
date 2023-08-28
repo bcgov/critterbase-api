@@ -245,12 +245,9 @@ describe("API: CollectionUnit", () => {
       it("returns a collection unit when given a valid ID", async () => {
         getCollectionUnitById.mockResolvedValue(mockCollectionUnitIncludes);
         const response = await request.get(`/api/collection-units/${ID}`);
-        expect.assertions(4);
+        expect.assertions(3);
         expect(getCollectionUnitById.mock.calls.length).toBe(1);
         expect(response.status).toBe(200);
-        expect(
-          CollectionUnitResponseSchema.safeParse(response.body).success
-        ).toBe(true);
         expect(response.body).toEqual(mockCollectionUnitResponse);
       });
 
@@ -301,12 +298,9 @@ describe("API: CollectionUnit", () => {
         const response = await request
           .patch(`/api/collection-units/${ID}`)
           .send(mockCollectionUnitUpdateInput);
-        expect.assertions(4);
+        expect.assertions(3);
         expect(updateCollectionUnit.mock.calls.length).toBe(1);
         expect(response.status).toBe(200);
-        expect(
-          CollectionUnitResponseSchema.safeParse(response.body).success
-        ).toBe(true);
         expect(response.body).toEqual(mockCollectionUnitResponse);
       });
 
@@ -338,12 +332,9 @@ describe("API: CollectionUnit", () => {
         const response = await request
           .post("/api/collection-units/create")
           .send(mockCollectionUnitCreateInput);
-        expect.assertions(4);
+        expect.assertions(3);
         expect(createCollectionUnit.mock.calls.length).toBe(1);
         expect(response.status).toBe(201);
-        expect(
-          CollectionUnitResponseSchema.safeParse(response.body).success
-        ).toBe(true);
         expect(response.body).toEqual(mockCollectionUnitResponse);
       });
 

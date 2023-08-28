@@ -309,10 +309,10 @@ describe("API: Critter", () => {
         expect(res.status).toBe(404);
       })
     });
-    describe("PUT /api/mortality/:mortality_id", () => {
+    describe("PATCH /api/mortality/:mortality_id", () => {
       it("should return status 200",async () => {
         updateMortality.mockResolvedValue({...MORTALITY, mortality_comment: 'banana'});
-        const mort = await request.put("/api/mortality/" + MORTALITY_ID)
+        const mort = await request.patch("/api/mortality/" + MORTALITY_ID)
           .send({mortality_comment: 'banana'});
         expect.assertions(2);
         expect(updateMortality.mock.calls.length).toBe(1);
@@ -322,7 +322,7 @@ describe("API: Critter", () => {
         updateMortality.mockImplementation(() => {
           throw Error()
         })
-        const mort = await request.put("/api/mortality/" + '6109c0a8-a71d-4662-9604-a8beb72f2f6f').send({mortality_comment: 123});
+        const mort = await request.patch("/api/mortality/" + '6109c0a8-a71d-4662-9604-a8beb72f2f6f').send({mortality_comment: 123});
         expect.assertions(1);
         expect(mort.status).toBe(400);
       })

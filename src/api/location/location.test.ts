@@ -351,7 +351,7 @@ describe("API: Location", () => {
       expect.assertions(3);
       expect(deleteLocation).toBeCalledTimes(1);
       expect(res.status).toEqual(200);
-      expect(res.body).toEqual(`Deleted location ${ID}`);
+      expect(res.body.location_id).toBeDefined();
     });
 
     it("should return a 404 if location is not found", async () => {

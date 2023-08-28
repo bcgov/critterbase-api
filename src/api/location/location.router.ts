@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
 import { array } from "zod";
-import { strings } from "../../utils/constants";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { LocationCreateSchema, LocationResponseSchema } from "./location.utils";
@@ -60,8 +59,8 @@ export const LocationRouter = (db: ICbDatabase) => {
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
-        await db.deleteLocation(req.params.id);
-        res.status(200).json(strings.location.deleted(req.params.id));
+        const location = await db.deleteLocation(req.params.id);
+        res.status(200).json(location);
       })
     );
 

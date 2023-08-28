@@ -37,9 +37,9 @@ export const MortalityRouter = (db: ICbDatabase) => {
   );
 
   mortalityRouter.get(
-    "/critter/:critter_id",
+    "/critter/:id",
     catchErrors(async (req: Request, res: Response) => {
-      const id = req.params.critter_id;
+      const id = req.params.id;
       const mort = await db.getMortalityByCritter(id);
       const parsed = mort.map((a) => MortalityResponseSchema.parse(a));
       return res.status(200).json(parsed);
@@ -65,7 +65,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
         return res.status(200).json(parsed);
       })
     )
-    .put(
+    .patch(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const parsed = MortalityUpdateSchema.parse(req.body);

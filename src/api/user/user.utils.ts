@@ -7,7 +7,6 @@ import {
 } from "../../utils/constants";
 import { AuditColumns } from "../../utils/types";
 import {
-  NumberToString,
   implement,
   noAudit,
   nonEmpty,
@@ -27,10 +26,12 @@ type LoginCredentials = z.infer<typeof AuthLoginSchema>;
 // Base schema for all user
 const UserSchema = implement<user>().with({
   user_id: zodID,
-  user_identifier: NumberToString,
+  user_identifier: z.string(),
   keycloak_uuid: z.string().nullable(),
   ...zodAudit,
 });
+
+const SwagUserSchema = UserSchema.extend({ system_user_id: z.string() });
 
 // Validate incoming request body for create user
 const UserCreateBodySchema = implement<
@@ -76,5 +77,6 @@ export {
   AuthLoginSchema,
   UserSchema,
   AuthHeadersSchema,
+  SwagUserSchema,
 };
 export type { UserCreateInput, UserUpdateInput, LoginCredentials };
