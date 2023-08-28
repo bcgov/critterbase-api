@@ -9,24 +9,35 @@ import {
 import { apiError } from "./types";
 
 // Mock the AWS SDK
-jest.mock("aws-sdk", () => {
-  const mS3Instance = {
-    upload: jest.fn().mockReturnThis(),
-    promise: jest.fn().mockResolvedValue({ Key: "mockKey" }),
-    getSignedUrl: jest.fn().mockReturnValue("mockSignedUrl"),
-  };
-
-  const mS3Endpoint = {
-    href: "mockUrl",
-  };
-
+jest.mock("@aws-sdk/client-s3", () => {
+  const PutObjectCommandMock = jest.fn();
+  const GetObjectCommandMock = jest.fn();
   return {
-    S3: jest.fn(() => mS3Instance),
-    Endpoint: jest.fn(() => mS3Endpoint),
+    S3Client: jest.fn(() => ({
+      send: jest.fn().mockImplementation((command) => {
+        if (command instanceof PutObjectCommandMock) {
+          return Promise.resolve({ Key: "mockKey" });
+        } else if (command instanceof GetObjectCommandMock) {
+          return Promise.resolve();
+        }
+      }),
+    })),
+    PutObjectCommand: PutObjectCommandMock,
+    GetObjectCommand: GetObjectCommandMock,
   };
 });
 
-const AWS = require("aws-sdk");
+jest.mock("@aws-sdk/s3-request-presigner", () => ({
+  getSignedUrl: jest.fn().mockReturnValue("mockSignedUrl"),
+}));
+
+// Import after mocking
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 describe("File: object_store.ts", () => {
   beforeEach(() => {
@@ -44,7 +55,7 @@ describe("File: object_store.ts", () => {
     it("should return a S3 client", () => {
       const s3Client = _getS3Client();
       expect(s3Client).toBeDefined();
-      expect(AWS.S3).toHaveBeenCalledTimes(1);
+      expect(S3Client).toHaveBeenCalledTimes(1);
     });
 
     it("should throw a server error if S3 keys are undefined", () => {
@@ -121,17 +132,17 @@ describe("File: object_store.ts", () => {
       } as Express.Multer.File;
 
       const result = await uploadFileToS3(mockFile, "id");
-      expect(result).toBe("mockKey");
-      expect(AWS.Endpoint).toHaveBeenCalledTimes(1);
-      expect(AWS.S3).toHaveBeenCalledTimes(1);
+      expect(result).toBe("id_testFile");
+      expect(PutObjectCommand).toHaveBeenCalledTimes(1);
     });
   });
 
   describe(getFileDownloadUrl.name, () => {
-    it("should return a file download url", () => {
+    it("should return a file download url", async () => {
       const fileKey = "mockKey";
-      const downloadUrl = getFileDownloadUrl(fileKey);
+      const downloadUrl = await getFileDownloadUrl(fileKey);
       expect(downloadUrl).toBe("mockSignedUrl");
+      expect(GetObjectCommand).toHaveBeenCalledTimes(1);
     });
   });
 });

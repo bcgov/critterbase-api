@@ -1,7 +1,13 @@
-import AWS from "aws-sdk";
-import { Metadata } from "aws-sdk/clients/s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import multer from "multer";
 import { apiError } from "./types";
+
+export type Metadata = Record<string, string>;
 
 // A middleware for handling multipart/form-data
 const upload = multer({ storage: multer.memoryStorage() });
@@ -12,7 +18,7 @@ const upload = multer({ storage: multer.memoryStorage() });
  * @returns {*} {AWS.S3} The S3 client
  * @throws {apiError} If necessary environment variables are not defined
  */
-const _getS3Client = (): AWS.S3 => {
+const _getS3Client = (): S3Client => {
   const accessKeyId = process.env.OBJECT_STORE_ACCESS_KEY_ID;
   const secretAccessKey = process.env.OBJECT_STORE_SECRET_KEY_ID;
 
@@ -20,15 +26,16 @@ const _getS3Client = (): AWS.S3 => {
     throw apiError.serverIssue("Object store credentials are not defined");
   }
 
-  const awsEndpoint = new AWS.Endpoint(_getObjectStoreUrl());
+  const url = _getObjectStoreUrl();
 
-  return new AWS.S3({
-    endpoint: awsEndpoint.href,
-    accessKeyId: accessKeyId,
-    secretAccessKey: secretAccessKey,
-    signatureVersion: "v4",
-    s3ForcePathStyle: true,
+  return new S3Client({
+    endpoint: url,
+    credentials: {
+      accessKeyId: accessKeyId,
+      secretAccessKey: secretAccessKey,
+    },
     region: "ca-central-1",
+    forcePathStyle: true,
   });
 };
 
@@ -85,29 +92,31 @@ const uploadFileToS3 = async (
   metadata: Metadata = {}
 ): Promise<string> => {
   // Setting up S3 upload parameters
-  const params: AWS.S3.PutObjectRequest = {
+  const key = `${artifact_id}_${file.originalname}`;
+  const params = {
     Bucket: _getObjectStoreBucketName(),
-    Key: `${artifact_id}_${file.originalname}`,
+    Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,
-    // ContentDisposition: 'inline', // This causes the file to be opened in the browser instead of downloaded
     Metadata: metadata,
   };
   const s3Client = _getS3Client();
   // Uploading files to the bucket
-  const response = await s3Client.upload(params).promise();
-  return response.Key;
+  const command = new PutObjectCommand(params);
+  await s3Client.send(command);
+  return key;
 };
 
-const getFileDownloadUrl = (fileName: string): string => {
+const getFileDownloadUrl = async (fileName: string): Promise<string> => {
   // Setting up S3 download parameters
-  const params: AWS.S3.GetObjectRequest = {
+  const params = {
     Bucket: _getObjectStoreBucketName(),
     Key: fileName,
   };
   const s3Client = _getS3Client();
 
-  return s3Client.getSignedUrl("getObject", params);
+  const command = new GetObjectCommand(params);
+  return getSignedUrl(s3Client, command);
 };
 
 export {
