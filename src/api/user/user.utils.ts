@@ -7,7 +7,6 @@ import {
 } from "../../utils/constants";
 import { AuditColumns } from "../../utils/types";
 import {
-  NumberToString,
   implement,
   noAudit,
   nonEmpty,
@@ -27,7 +26,7 @@ type LoginCredentials = z.infer<typeof AuthLoginSchema>;
 // Base schema for all user
 const UserSchema = implement<user>().with({
   user_id: zodID,
-  user_identifier: NumberToString,
+  user_identifier: z.string(),
   keycloak_uuid: z.string().nullable(),
   ...zodAudit,
 });

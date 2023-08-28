@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { critter, Prisma, sex, system } from "@prisma/client";
+import { critter, Prisma, sex } from "@prisma/client";
 import { array, z } from "zod";
 import { AuditColumns, FormatParse } from "../../utils/types";
 import {
@@ -194,9 +194,6 @@ const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().w
   lk_region_nr: z.object({
     region_nr_name: z.string()
   }).nullable(),
-  user_critter_create_userTouser: z.object({
-    system_name: z.nativeEnum(system)
-  }),
   critter_collection_unit: SimpleCollectionUnitIncludesSchema.array(),
   capture: CaptureIncludeSchema.array(),
   mortality: MortalityIncludeSchema.array(),

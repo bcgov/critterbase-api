@@ -70,12 +70,6 @@ export const LookupRouter = (db: ICbDatabase) => {
       res.status(200).json(Object.keys(measurement_unit))
     )
   );
-  /*lookupRouter.get(
-    "/enum/supported-systems",
-    catchErrors(async (req: Request, res: Response) =>
-      res.status(200).json(Object.keys(system))
-    )
-  );*/
 
   /**
    * * Lookup tables

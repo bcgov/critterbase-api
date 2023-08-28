@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { noAudit, zodID } from '../../utils/zod_helpers';
 import { CritterCreateSchema, DefaultCritterIncludeSchema, DetailedCritterIncludeSchema, CritterFilterSchema, CritterIdsRequestSchema, CritterUpdateSchema, UniqueCritterQuerySchema } from './critter.utils';
 import { routes } from '../../utils/constants';
-import { system } from '@prisma/client';
 import { SwaggerSimpleCollectionResponseValidation } from '../collectionUnit/collectionUnit.swagger';
 import { SwaggerMortalityResponseValidation } from '../mortality/mortality.swagger';
 import { SwaggerCaptureResponseValidation } from '../capture/capture.swagger';
@@ -301,7 +300,6 @@ const getCrittersById: ZodOpenApiOperationObject = {
       taxon: z.string(),
       responsible_region: z.string().optional(),
       mortality_timestamp: z.date().nullable(),
-      system_origin: z.nativeEnum(system),
       collection_units: SwaggerSimpleCollectionResponseValidation.array(),
       mortality: SwaggerMortalityResponseValidation.omit({critter_id: true, ...noAudit}).array(),
       capture: SwaggerCaptureResponseValidation.omit({critter_id: true, ...noAudit}).array(),
