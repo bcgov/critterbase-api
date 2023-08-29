@@ -31,10 +31,13 @@ const FamilyParentSchema = implement<family_parent>().with({
 })
 
 const FamilyCreateBodySchema = implement<
-  Omit<Prisma.familyCreateManyInput, "family_id" | keyof AuditColumns>
+  Omit<Prisma.familyCreateManyInput, keyof AuditColumns>
 >().with({
+  family_id: zodID,
   family_label: z.string(),
 });
+
+const FamilyUpdateBodySchema = FamilyCreateBodySchema.omit({ family_id : true });
 
 const FamilyParentCreateBodySchema = implement<
   Omit<Prisma.family_parentCreateManyInput, keyof AuditColumns>
@@ -50,7 +53,7 @@ const FamilyChildCreateBodySchema = implement<
   child_critter_id: zodID,
 });
 
-type FamilyUpdate = z.infer<typeof FamilyCreateBodySchema>;
+type FamilyUpdate = z.infer<typeof FamilyUpdateBodySchema>;
 type FamilyCreate = z.infer<typeof FamilyCreateBodySchema>;
 type FamilyParentCreate = z.infer<typeof FamilyParentCreateBodySchema>;
 type FamilyChildCreate = z.infer<typeof FamilyChildCreateBodySchema>;
@@ -58,6 +61,7 @@ type FamilyChildCreate = z.infer<typeof FamilyChildCreateBodySchema>;
 export {
   FamilyChildSchema,
   FamilyCreateBodySchema,
+  FamilyUpdateBodySchema,
   FamilyParentCreateBodySchema,
   FamilyChildCreateBodySchema,
   FamilySchema,

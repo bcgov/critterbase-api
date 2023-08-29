@@ -31,6 +31,8 @@ import { z } from "zod";
 import { LocationUpdateSchema } from "../location/location.utils";
 import { zodID } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
+import { QualitativeCreateSchema, QuantitativeCreateSchema } from "../measurement/measurement.utils";
+import { FamilyChildCreateBodySchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema } from "../family/family.utils";
 
 export const BulkRouter = (db: ICbDatabase) => {
   const bulkRouter = express.Router();
@@ -45,6 +47,9 @@ export const BulkRouter = (db: ICbDatabase) => {
         locations,
         captures,
         mortalities,
+        qualitative_measurements,
+        quantitative_measurements,
+        families
       } = await BulkCreationSchema.parseAsync(req.body);
 
       const crittersAppend = critters
@@ -93,6 +98,22 @@ export const BulkRouter = (db: ICbDatabase) => {
         ? z.array(CollectionUnitCreateBodySchema).parse(collections)
         : [];
 
+      const parsedQualitativeMeasurements = qualitative_measurements ? 
+        z.array(QualitativeCreateSchema).parse(qualitative_measurements) : [];
+
+      const parsedQuantitativeMeasurements = quantitative_measurements ? 
+        z.array(QuantitativeCreateSchema).parse(quantitative_measurements) : [];
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const familyUnits = families?.families ?
+            z.array(FamilyCreateBodySchema).parse(families.families) : [];
+      
+      const familyParents = families?.parents ? 
+            z.array(FamilyParentCreateBodySchema).parse(families.parents) : [];
+      
+      const familyChildren = families?.children ? 
+            z.array(FamilyChildCreateBodySchema).parse(families.children) : [];
+
       const results = await db.bulkCreateData({
         critters: crittersAppend,
         collections: parsedCollections,
@@ -100,6 +121,11 @@ export const BulkRouter = (db: ICbDatabase) => {
         locations: locations ?? [],
         captures: parsedCaptures,
         mortalities: parsedMortalities,
+        qualitative_measurements: parsedQualitativeMeasurements,
+        quantitative_measurements: parsedQuantitativeMeasurements,
+        families: familyUnits,
+        family_children: familyChildren,
+        family_parents: familyParents
       });
       return res.status(201).json(results);
     })

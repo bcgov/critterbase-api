@@ -16,9 +16,14 @@ interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
   collections: Prisma.critter_collection_unitCreateManyInput[];
   markings: Prisma.markingCreateManyInput[];
+  quantitative_measurements: Prisma.measurement_quantitativeCreateManyInput[];
+  qualitative_measurements: Prisma.measurement_qualitativeCreateManyInput[];
   locations: Prisma.locationCreateManyInput[];
   captures: Prisma.captureCreateManyInput[];
   mortalities: Prisma.mortalityCreateManyInput[];
+  families: Prisma.familyCreateManyInput[];
+  family_parents: Prisma.family_parentCreateManyInput[];
+  family_children: Prisma.family_childCreateManyInput[];
 }
 
 interface IBulkMutate {
@@ -40,37 +45,70 @@ interface IBulkResCount {
 }
 
 const bulkCreateData = async (bulkParams: IBulkCreate) => {
-  const { critters, collections, markings, locations, captures, mortalities } =
+  const { critters, collections, markings, locations, captures, mortalities, quantitative_measurements, qualitative_measurements, families, family_children, family_parents } =
     bulkParams;
-  const result = await prisma.$transaction(async (prisma) => {
-    const critterRes = await prisma.critter.createMany({
+  const counts: Omit<IBulkResCount, "updated" | "deleted"> = {
+    created: {}
+  };
+  console.log (JSON.stringify(bulkParams, null, 2) );
+  await prisma.$transaction(async (prisma) => {
+    const critterCount = await prisma.critter.createMany({
       data: critters,
     });
+    counts.created.critters = critterCount.count;
 
-    await prisma.critter_collection_unit.createMany({
+    const cuCount = await prisma.critter_collection_unit.createMany({
       data: collections,
     });
+    counts.created.collections = cuCount.count;
 
-    await prisma.location.createMany({
+    const locCount = await prisma.location.createMany({
       data: locations,
     });
+    counts.created.locations = locCount.count;
 
-    await prisma.capture.createMany({
+    const captureCount = await prisma.capture.createMany({
       data: captures,
     });
-
-    await prisma.mortality.createMany({
+    counts.created.captures = captureCount.count;
+    
+    const mortalitycount = await prisma.mortality.createMany({
       data: mortalities,
     });
+    counts.created.mortalities = mortalitycount.count;
 
-    await prisma.marking.createMany({
+    const markingCount = await prisma.marking.createMany({
       data: markings,
     });
+    counts.created.markings = markingCount.count;
 
-    return critterRes;
+    const measQualCount = await prisma.measurement_qualitative.createMany({
+      data: qualitative_measurements,
+    });
+    counts.created.qualitative_measurements = measQualCount.count;
+
+    const measQuantCount = await prisma.measurement_quantitative.createMany({
+      data: quantitative_measurements,
+    });
+    counts.created.quantitative_measurements = measQuantCount.count;
+
+    const familyCount = await prisma.family.createMany({
+      data: families
+    });
+    counts.created.families = familyCount.count;
+
+    const familyParentCount = await prisma.family_parent.createMany({
+      data: family_parents
+    });
+    counts.created.family_parents = familyParentCount.count;
+
+    const familyChildCount = await prisma.family_child.createMany({
+      data: family_children
+    });
+    counts.created.family_children = familyChildCount.count;
   });
 
-  return result;
+  return counts;
 };
 
 const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
