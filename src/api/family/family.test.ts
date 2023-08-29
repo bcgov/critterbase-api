@@ -490,7 +490,7 @@ describe("API: Family", () => {
         createNewFamily.mockResolvedValue(mockFamily);
         const res = await request
           .post("/api/family/create")
-          .send({ family_label: FAMILY_LABEL });
+          .send({ family_label: FAMILY_LABEL, family_id: randomUUID() });
         expect.assertions(3);
         expect(createNewFamily).toHaveBeenCalledTimes(1);
         expect(res.status).toEqual(201);

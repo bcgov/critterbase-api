@@ -7,6 +7,7 @@ import {
   FamilyChildCreateBodySchema,
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema,
+  FamilyUpdateBodySchema,
 } from "./family.utils";
 import { ICbDatabase } from "../../utils/database";
 
@@ -150,7 +151,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
-        const parsed = FamilyCreateBodySchema.parse(req.body);
+        const parsed = FamilyUpdateBodySchema.parse(req.body);
         const family = await db.updateFamily(id, parsed);
         return res.status(200).json(family);
       })

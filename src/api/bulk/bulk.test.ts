@@ -260,6 +260,21 @@ const prismaMock = {
     create: jest.fn(),
     update: jest.fn(),
   },
+  measurement_quantitative: {
+    createMany: jest.fn().mockResolvedValue({ count: 1 })
+  },
+  measurement_qualitative: {
+    createMany: jest.fn().mockResolvedValue({ count: 1 })
+  },
+  family: {
+    createMany: jest.fn().mockResolvedValue({ count: 1 })
+  },
+  family_child: {
+    createMany: jest.fn().mockResolvedValue({ count: 1 })
+  },
+  family_parent: {
+    createMany: jest.fn().mockResolvedValue({ count: 1 })
+  }
 };
 jest
   .spyOn(prisma, "$transaction")
@@ -279,6 +294,7 @@ describe("API: Bulk", () => {
         prismaMock.critter_collection_unit.createMany.mockResolvedValue({
           count: 1,
         });
+        prismaMock.measurement_qualitative.createMany.mockResolvedValue({ count: 1});
         const result = await _bulkCreateData({
           critters: [CRITTER],
           collections: [COLLECTION],
@@ -286,6 +302,11 @@ describe("API: Bulk", () => {
           captures: [CAPTURE],
           mortalities: [MORTALITY],
           markings: [MARKING],
+          quantitative_measurements: [],
+          qualitative_measurements: [],
+          families: [],
+          family_parents: [],
+          family_children: []
         });
         expect.assertions(6);
         expect(prismaMock.critter.createMany.mock.calls.length).toBe(1);
@@ -484,6 +505,9 @@ describe("API: Bulk", () => {
           captures: [CAPTURE],
           mortalities: [MORTALITY],
           markings: [MARKING],
+          quantitative_measurements: [],
+          qualitative_measurements: [],
+          families: {families: [], parents: [], children: []}
         };
         const res = await request.post("/api/bulk").send(body);
         expect.assertions(1);
