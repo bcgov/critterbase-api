@@ -3,7 +3,7 @@ import { prisma } from "../../utils/constants";
 import { ICbDatabase } from "../../utils/database";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { taxonIdSchema, taxonMeasurementIdSchema, uuidParamsSchema } from "../../utils/zod_helpers";
+import { taxonIdSchema, taxonMeasurementIdSchema } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
@@ -11,8 +11,7 @@ import {
   xrefTaxonCollectionCategoryFormats,
   xrefTaxonMarkingBodyLocationFormats,
   xrefTaxonMeasurementOptionSchema,
-  xrefTaxonMeasurementSchema,
-  xrefTaxonQuantitativeMeasurementFormats,
+  xrefTaxonMeasurementSchema
 } from "./xref.utils";
 
 export const XrefRouter = (db: ICbDatabase) => {

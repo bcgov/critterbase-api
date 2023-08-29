@@ -7,7 +7,7 @@ import {
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
 } from "../marking/marking.utils"; 
-import { MortalityUpdate, mortalityInclude } from "../mortality/mortality.utils";
+import { MortalityUpdate } from "../mortality/mortality.utils";
 import { apiError } from "../../utils/types";
 import { ICbDatabase } from "../../utils/database";
 import { CaptureUpdate } from "../capture/capture.utils";

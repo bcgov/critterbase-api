@@ -104,6 +104,7 @@ export const BulkRouter = (db: ICbDatabase) => {
       const parsedQuantitativeMeasurements = quantitative_measurements ? 
         z.array(QuantitativeCreateSchema).parse(quantitative_measurements) : [];
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const familyUnits = families?.families ?
             z.array(FamilyCreateBodySchema).parse(families.families) : [];
       
