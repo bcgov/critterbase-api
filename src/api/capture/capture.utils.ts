@@ -14,19 +14,7 @@ import {
   zodID,
 } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
-
-const captureInclude = Prisma.validator<Prisma.captureArgs>()({
-  include: {
-    location_capture_capture_location_idTolocation: {
-      ...commonLocationSelect,
-    },
-    location_capture_release_location_idTolocation: {
-      ...commonLocationSelect,
-    },
-  },
-});
-
-type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
+import { CommonLocationSchema } from "../location/location.utils";
 
 const CaptureBodySchema = implement<capture>().with({
   capture_id: zodID,
@@ -43,11 +31,29 @@ const CaptureBodySchema = implement<capture>().with({
   update_timestamp: z.coerce.date(),
 });
 
+const captureInclude = Prisma.validator<Prisma.captureArgs>()({
+  include: {
+    location_capture_capture_location_idTolocation: {
+      ...commonLocationSelect,
+    },
+    location_capture_release_location_idTolocation: {
+      ...commonLocationSelect,
+    },
+  },
+});
+
+type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
+
+const CaptureIncludeSchema = implement<CaptureIncludeType>().with({
+  ...CaptureBodySchema.shape,
+  location_capture_capture_location_idTolocation:
+    CommonLocationSchema.nullable(),
+  location_capture_release_location_idTolocation:
+    CommonLocationSchema.nullable(),
+});
+
 const CaptureUpdateSchema = implement<
-  Omit<
-    Prisma.captureUncheckedUpdateManyInput,
-    keyof AuditColumns
-  > & {
+  Omit<Prisma.captureUncheckedUpdateManyInput, keyof AuditColumns> & {
     capture_location?: LocationBody;
     release_location?: LocationBody;
     force_create_release?: boolean;
@@ -55,11 +61,13 @@ const CaptureUpdateSchema = implement<
 >().with(
   CaptureBodySchema.omit({
     ...noAudit,
-  }).extend({
-    capture_location: LocationUpdateSchema,
-    release_location: LocationUpdateSchema,
-    force_create_release: z.boolean().optional()
-  }).partial().shape
+  })
+    .extend({
+      capture_location: LocationUpdateSchema,
+      release_location: LocationUpdateSchema,
+      force_create_release: z.boolean().optional(),
+    })
+    .partial().shape
 );
 
 const CaptureCreateSchema = implement<
@@ -117,5 +125,6 @@ export {
   CaptureCreateSchema,
   CaptureUpdateSchema,
   CaptureResponseSchema,
-  CaptureBodySchema
+  CaptureBodySchema,
+  CaptureIncludeSchema,
 };

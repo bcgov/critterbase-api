@@ -43,6 +43,7 @@ export const CritterRouter = (db: ICbDatabase) => {
             taxon_name_common: {
               [taxon_name_commons.negate ? "notIn" : "in"]:
                 taxon_name_commons.body,
+              mode: 'insensitive'
             },
           },
         });
@@ -182,7 +183,7 @@ export const CritterRouter = (db: ICbDatabase) => {
         return res.status(200).json(critter);
       })
     )
-    .put(
+    .patch(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const parsed = CritterUpdateSchema.parse(req.body);

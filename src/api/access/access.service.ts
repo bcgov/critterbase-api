@@ -12,7 +12,7 @@ const loginUser = async (login: LoginCredentials): Promise<user | null> => {
   });
 
   if (!foundUser) {
-    throw apiError.notFound("No user found. Login failed");
+    throw apiError.unauthorized("User not found. Login failed");
   }
   return foundUser;
 };

@@ -496,7 +496,7 @@ describe("API: Bulk", () => {
         expect(res.status).toBe(201);
       });
     });
-    describe("PUT /api/bulk", () => {
+    describe("PATCH /api/bulk", () => {
       it("should return status 200", async () => {
         const body = {
           critters: [CRITTER],
@@ -506,13 +506,13 @@ describe("API: Bulk", () => {
           mortalities: [MORTALITY],
           markings: [MARKING, { ...MARKING, _delete: true }],
         };
-        const res = await request.put("/api/bulk").send(body);
+        const res = await request.patch("/api/bulk").send(body);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
       it("should return status 200", async () => {
         const body = {};
-        const res = await request.put("/api/bulk").send(body);
+        const res = await request.patch("/api/bulk").send(body);
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
@@ -521,37 +521,37 @@ describe("API: Bulk", () => {
         const body = {
           critters: [{ critter_id: 2 }],
         };
-        let res = await request.put("/api/bulk").send(body);
+        let res = await request.patch("/api/bulk").send(body);
         expect(res.status).toBe(400);
 
         const body2 = {
           collections: [{ critter_id: 2 }],
         };
-        res = await request.put("/api/bulk").send(body2);
+        res = await request.patch("/api/bulk").send(body2);
         expect(res.status).toBe(400);
 
         const body3 = {
           locations: [{ location_id: 2 }],
         };
-        res = await request.put("/api/bulk").send(body3);
+        res = await request.patch("/api/bulk").send(body3);
         expect(res.status).toBe(400);
 
         const body4 = {
           captures: [{ capture_id: 2 }],
         };
-        res = await request.put("/api/bulk").send(body4);
+        res = await request.patch("/api/bulk").send(body4);
         expect(res.status).toBe(400);
 
         const body5 = {
           mortalities: [{ mortality_id: 2 }],
         };
-        res = await request.put("/api/bulk").send(body5);
+        res = await request.patch("/api/bulk").send(body5);
         expect(res.status).toBe(400);
 
         const body6 = {
           mortalities: [{ mortality_id: 2 }],
         };
-        res = await request.put("/api/bulk").send(body6);
+        res = await request.patch("/api/bulk").send(body6);
         expect(res.status).toBe(400);
       });
     });

@@ -13,6 +13,7 @@ type ErrorType =
   | "serverIssue"
   | "notFound"
   | "conflict"
+  | "unauthorized"
   | "forbidden";
 
 class apiError extends Error {
@@ -50,6 +51,13 @@ class apiError extends Error {
   static syntaxIssue(message: string) {
     return new apiError(message, 400, "syntaxIssue");
   }
+
+  /**
+   ** Authorization headers are missing or incorrect
+   */
+   static unauthorized(message: string) {
+     return new apiError(message, 401, "unauthorized");
+   }
 
   /**
    ** Internal server issue or problem occurs

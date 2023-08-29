@@ -76,7 +76,8 @@ const markingSchema = implement<marking>().with({
     .refine((value) => typeof value !== "undefined", {
       message: "Value is undefined",
     })
-    .transform((value) => String(value)) as unknown as z.ZodNullable<ZodString>,
+    .transform((value) => String(value))
+    .pipe(z.string().nullable()) as unknown as z.ZodNullable<ZodString>,
   frequency: z.number().nullable(),
   frequency_unit: z.nativeEnum(frequency_unit).nullable(),
   order: z.number().int().nullable(),
@@ -141,6 +142,8 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
   };
 });
 
+
+
 //Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
   Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
@@ -187,7 +190,7 @@ export {
   MarkingCreateWithEnglishSchema,
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
-  MarkingVerificationSchema
+  MarkingVerificationSchema,
 };
 export type {
   MarkingCreateInput,

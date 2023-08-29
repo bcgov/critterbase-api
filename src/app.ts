@@ -18,6 +18,9 @@ import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
 import { auth, errorHandler, errorLogger } from "./utils/middleware";
 import { apiError } from "./utils/types";
+import swaggerUIExperss from "swagger-ui-express";
+import { yaml } from "./swagger";
+import { routes } from "./utils/constants";
 
 export const makeApp = (db: ICbDatabase) => {
   const app = express();
@@ -25,22 +28,29 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(cors());
   app.use(helmet());
   app.use(express.json());
-  app.use("/api/", AccessRouter(db));
+
+  app.use(
+    "/api-docs",
+    swaggerUIExperss.serve,
+    swaggerUIExperss.setup(yaml/*, {swaggerOptions: { supportedSubmitMethods: [ 'get' ] }}*/)
+  );
+
+  app.use(routes.home, AccessRouter(db));
 
   app.use(auth);
-  app.use("/api/critters", CritterRouter(db));
-  app.use("/api/locations", LocationRouter(db));
-  app.use("/api/markings", MarkingRouter(db));
-  app.use("/api/users", UserRouter(db));
-  app.use("/api/collection-units", CollectionUnitRouter(db));
-  app.use("/api/artifacts", ArtifactRouter(db));
-  app.use("/api/family", FamilyRouter(db));
-  app.use("/api/captures", CaptureRouter(db));
-  app.use("/api/mortality", MortalityRouter(db));
-  app.use("/api/measurements", MeasurementRouter(db));
-  app.use("/api/lookups", LookupRouter(db));
-  app.use("/api/bulk", BulkRouter(db));
-  app.use("/api/xref", XrefRouter(db));
+  app.use(routes.critters, CritterRouter(db));
+  app.use(routes.locations, LocationRouter(db));
+  app.use(routes.markings, MarkingRouter(db));
+  app.use(routes.users, UserRouter(db));
+  app.use(routes.collection_units, CollectionUnitRouter(db));
+  app.use(routes.artifacts, ArtifactRouter(db));
+  app.use(routes.family, FamilyRouter(db));
+  app.use(routes.captures, CaptureRouter(db));
+  app.use(routes.mortality, MortalityRouter(db));
+  app.use(routes.measurements, MeasurementRouter(db));
+  app.use(routes.lookups, LookupRouter(db));
+  app.use(routes.bulk, BulkRouter(db));
+  app.use(routes.xref, XrefRouter(db));
 
   app.all("*", (req, res) => {
     throw apiError.notFound(`${req.method} ${req.url} -> route not found`);

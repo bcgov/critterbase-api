@@ -12,6 +12,8 @@ import {
   zodAudit,
   zodID,
 } from "../../utils/zod_helpers";
+import { extendZodWithOpenApi } from 'zod-openapi';
+extendZodWithOpenApi(z);
 
 // Types
 type CollectionUnitIncludes = Prisma.critter_collection_unitGetPayload<
@@ -67,18 +69,44 @@ const critter_collection_unitSchema = implement<critter_collection_unit>().with(
   }
 );
 
-// Extended schema which has both base schema and included fields
-// const critter_collection_unitIncludesSchema =
-//   implement<CollectionUnitIncludes>().with({
-//     ...critter_collection_unitSchema.shape,
-//     xref_collection_unit: XrefCollectionUnitSchema.pick({
-//       unit_name: true,
-//       description: true,
-//     }),
-//   });
+//Extended schema which has both base schema and included fields
+const critter_collection_unitIncludesSchema =
+  implement<CollectionUnitIncludes>().with({
+    ...critter_collection_unitSchema.shape,
+    xref_collection_unit: z.object({
+      unit_name: z.string(),
+      description: z.string().nullable()
+    }),
+  });
+/*
+include: {
+    xref_collection_unit: {
+      select: {
+        collection_unit_id: true,
+        unit_name: true,
+        lk_collection_category: {
+          select: { 
+            collection_category_id: true, 
+            category_name: true
+          },
+        },
+      },
+    },*/
+  const SimpleCollectionUnitIncludesSchema = 
+    implement<SimpleCollectionUnitIncludes>().with({
+      ...critter_collection_unitSchema.shape,
+      xref_collection_unit: z.object({
+        collection_unit_id: zodID,
+        unit_name: z.string(),
+        lk_collection_category: z.object({
+          collection_category_id: zodID,
+          category_name: z.string()
+        })
+      }),
+    })
 
 // Formatted API response schema which omits fields and unpacks nested data
-const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
+const CollectionUnitResponseSchema = critter_collection_unitIncludesSchema.transform((obj) => {
   const {
     // omit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -86,7 +114,7 @@ const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     // include
     xref_collection_unit,
     ...rest
-  } = obj as CollectionUnitIncludes;
+  } = obj;
 
   return {
     ...rest,
@@ -94,6 +122,8 @@ const CollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     unit_description: xref_collection_unit?.description ?? null,
   };
 });
+
+
 
 const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
   const {
@@ -128,7 +158,7 @@ const CollectionUnitCreateBodySchema = implement<
     .omit({ ...noAudit})
     .partial()
     .required({ critter_id: true, collection_unit_id: true }).shape
-);
+).openapi({description: 'For creating collection untis'});
 
 // Validate incoming request body for update critter collection unit
 const CollectionUnitUpdateBodySchema = implement<
@@ -155,7 +185,9 @@ export {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
   CollectionUnitDeleteSchema,
-  CollectionUnitUpsertSchema
+  CollectionUnitUpsertSchema,
+  SimpleCollectionUnitIncludesSchema,
+  critter_collection_unitIncludesSchema
 };
 export type {
   CollectionUnitIncludes,

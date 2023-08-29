@@ -681,11 +681,11 @@ describe("API: Family", () => {
       });
     });
 
-    describe("PUT /api/family/:id", () => {
+    describe("PATCH /api/family/:id", () => {
       it("should update a family", async () => {
         updateFamily.mockResolvedValue(mockFamily);
         const res = await request
-          .put(`/api/family/${ID}`)
+          .patch(`/api/family/${ID}`)
           .send({ family_label: FAMILY_LABEL });
         expect.assertions(3);
         expect(updateFamily).toHaveBeenCalledTimes(1);
@@ -694,7 +694,7 @@ describe("API: Family", () => {
       });
 
       it("should return a 400 error if data is invalid", async () => {
-        const res = await request.put(`/api/family/${ID}`);
+        const res = await request.patch(`/api/family/${ID}`);
         expect.assertions(2);
         expect(updateFamily).toHaveBeenCalledTimes(0);
         expect(res.status).toEqual(400);

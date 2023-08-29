@@ -17,22 +17,6 @@ export const AccessRouter = (db: ICbDatabase) => {
   accessRouter.get("/", (req: Request, res: Response) => {
     return res.status(200).json("Welcome to Critterbase API");
   });
-  /**
-   ** login endpoint
-   * Note: currently accepts, user_id OR keycloak_uuid OR (system_name AND system_user_id)
-   */
-  /*accessRouter.post(
-    "/login",
-    catchErrors(async (req: Request, res: Response) => {
-      const parsedLogin = AuthLoginSchema.parse(req.body);
-      const user = await db.loginUser(parsedLogin);
-      const contextUserId = await db.setUserContext(
-        user.system_user_id,
-        user.system_name
-      );
-      return res.status(200).json({ user_id: contextUserId }).end();
-    })
-  );*/
 
   /**
    ** Signup endpoint
@@ -47,7 +31,7 @@ export const AccessRouter = (db: ICbDatabase) => {
         kc.keycloak_uuid,
         kc.system_name
       );
-      return res.status(201).json({user_id: contextUserId}).end();
+      return res.status(201).json({ user_id: contextUserId }).end();
     })
   );
 

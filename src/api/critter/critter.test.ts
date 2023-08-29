@@ -886,13 +886,13 @@ describe("API: Critter", () => {
         expect(res.status).toBe(404);
       });
     });
-    describe("PUT /api/critters/:id", () => {
+    describe("PATCH /api/critters/:id", () => {
       it("should return status 200, and update the critter", async () => {
         updateCritter.mockImplementation(() => {
           return { ...DEFAULTFORMAT_CRITTER, animal_id: "Banana" };
         });
         const res = await request
-          .put("/api/critters/" + CRITTER_ID)
+          .patch("/api/critters/" + CRITTER_ID)
           .send({ animal_id: "Banana" });
         expect.assertions(2);
         expect(res.status).toBe(200);
@@ -903,7 +903,7 @@ describe("API: Critter", () => {
           throw Error();
         });
         const res = await request
-          .put("/api/critters/" + CRITTER_ID)
+          .patch("/api/critters/" + CRITTER_ID)
           .send({ sex: 1234 });
         expect.assertions(1);
         expect(res.status).toBe(400);
@@ -913,7 +913,7 @@ describe("API: Critter", () => {
           throw apiError.notFound("critter_id");
         });
         const res = await request
-          .put("/api/critters/" + randomUUID())
+          .patch("/api/critters/" + randomUUID())
           .send({ animal_id: "Banana" });
         expect.assertions(1);
         expect(res.status).toBe(404);
