@@ -74,9 +74,12 @@ export const CritterRouter = (db: ICbDatabase) => {
             }
           : undefined,
       };
+      if(Object.values(whereInput).every(a => !a)) {
+        return res.status(200).json([]);
+      }
       const allCritters = await formatParse(
         getFormat(req),
-        db.getAllCritters(QueryFormats.default, whereInput),
+        db.getAllCritters(getFormat(req), whereInput),
         critterFormats
       );
       return res.status(200).json(allCritters);
