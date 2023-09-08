@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { QueryFormats, apiError } from "../../utils/types";
+import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 import {
@@ -74,9 +74,12 @@ export const CritterRouter = (db: ICbDatabase) => {
             }
           : undefined,
       };
+      if(Object.values(whereInput).every(a => !a)) {
+        return res.status(200).json([]);
+      }
       const allCritters = await formatParse(
         getFormat(req),
-        db.getAllCritters(QueryFormats.default, whereInput),
+        db.getAllCritters(getFormat(req), whereInput),
         critterFormats
       );
       return res.status(200).json(allCritters);
