@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { QueryFormats, apiError } from "../../utils/types";
+import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 import {
