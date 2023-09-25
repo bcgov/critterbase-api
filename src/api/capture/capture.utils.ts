@@ -8,6 +8,7 @@ import {
 } from "../location/location.utils";
 import { z } from "zod";
 import {
+  DeleteSchema,
   implement,
   noAudit,
   ResponseSchema,
@@ -67,7 +68,7 @@ const CaptureUpdateSchema = implement<
       release_location: LocationUpdateSchema,
       force_create_release: z.boolean().optional(),
     })
-    .partial().shape
+    .partial().required({critter_id: true}).shape
 );
 
 const CaptureCreateSchema = implement<
@@ -112,6 +113,8 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
+const CaptureDeleteSchema = CaptureBodySchema.pick({capture_id: true}).extend(DeleteSchema.shape);
+
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
 export type {
@@ -127,4 +130,5 @@ export {
   CaptureResponseSchema,
   CaptureBodySchema,
   CaptureIncludeSchema,
+  CaptureDeleteSchema
 };

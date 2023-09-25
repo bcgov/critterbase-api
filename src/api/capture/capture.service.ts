@@ -111,11 +111,27 @@ const updateCapture = async (
 };
 
 const deleteCapture = async (capture_id: string): Promise<capture | null> => {
-  return await prisma.capture.delete({
+  const capture = await prisma.capture.findUniqueOrThrow({
+    where: {
+      capture_id: capture_id
+    }
+  });
+  const captureRes = await prisma.capture.delete({
     where: {
       capture_id: capture_id,
     },
   });
+  if(capture.capture_location_id) {
+    await prisma.location.delete({
+      where: {location_id: capture.capture_location_id}
+    })
+  }
+  if(capture.release_location_id) {
+    await prisma.location.delete({
+      where: {location_id: capture.release_location_id}
+    })
+  }
+  return captureRes;
 };
 
 export {

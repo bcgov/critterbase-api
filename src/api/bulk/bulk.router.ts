@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import {
   CaptureCreateSchema,
+  CaptureDeleteSchema,
   CaptureUpdateSchema,
 } from "../capture/capture.utils";
 import {
@@ -15,13 +16,15 @@ import {
 } from "../marking/marking.utils";
 import {
   MortalityCreateSchema,
+  MortalityDeleteSchema,
   MortalityUpdateSchema,
 } from "../mortality/mortality.utils";
 import {
+  IBulkDelete,
   IBulkMutate,
   bulkErrMap,
 } from "./bulk.service";
-import { BulkCreationSchema } from "./bulk.utils";
+import { BulkCreationSchema, filterAndRemoveDeletes } from "./bulk.utils";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitDeleteSchema,
@@ -31,8 +34,8 @@ import { z } from "zod";
 import { LocationUpdateSchema } from "../location/location.utils";
 import { zodID } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
-import { QualitativeCreateSchema, QuantitativeCreateSchema } from "../measurement/measurement.utils";
-import { FamilyChildCreateBodySchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema } from "../family/family.utils";
+import { QualitativeCreateSchema, QualitativeDeleteSchema, QualitativeUpdateSchema, QuantitativeCreateSchema, QuantitativeDeleteSchema, QuantitativeUpdateSchema } from "../measurement/measurement.utils";
+import { FamilyChildCreateBodySchema, FamilyChildDeleteSchema, FamilyCreateBodySchema, FamilyParentCreateBodySchema, FamilyParentDeleteSchema } from "../family/family.utils";
 
 export const BulkRouter = (db: ICbDatabase) => {
   const bulkRouter = express.Router();
@@ -141,23 +144,21 @@ export const BulkRouter = (db: ICbDatabase) => {
         locations,
         captures,
         mortalities,
+        qualitative_measurements,
+        quantitative_measurements,
+        families
       } = BulkCreationSchema.parse(req.body);
 
-      const markingDeletes = markings?.filter((m, i, arr) => {
-        if (m._delete) {
-          arr.splice(i, 1);
-        }
-        return m._delete;
-      });
+    const markingDeletes = filterAndRemoveDeletes(markings);
+    const collectionDeletes = filterAndRemoveDeletes(collections);
+    const qualDeletes = filterAndRemoveDeletes(qualitative_measurements);
+    const quantDeletes = filterAndRemoveDeletes(quantitative_measurements);
+    const captureDeletes = filterAndRemoveDeletes(captures);
+    const mortalityDeletes = filterAndRemoveDeletes(mortalities);
+    const parentDeletes = filterAndRemoveDeletes(families?.parents);
+    const childDeletes = filterAndRemoveDeletes(families?.children)
 
-    const collectionDeletes = collections?.filter((c, i, arr) => {
-      if(c._delete) {
-        arr.splice(i, 1);
-      }
-      return c._delete;
-    })
-
-    const body: IBulkMutate = {
+    const updateBody: IBulkMutate = {
       critters: critters
         ? z
             .array(CritterUpdateSchema.extend({ critter_id: zodID }))
@@ -182,30 +183,66 @@ export const BulkRouter = (db: ICbDatabase) => {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "locations"),
             })
           : [],
-        captures: captures
-          ? z
-              .array(CaptureUpdateSchema.extend({ capture_id: zodID }))
-              .parse(captures, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "captures"),
-              })
-          : [],
-        mortalities: mortalities
-          ? z
-              .array(MortalityUpdateSchema.extend({ mortality_id: zodID }))
-              .parse(mortalities, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "mortalities"),
-              })
-          : [],
+      captures: captures
+        ? z
+            .array(CaptureUpdateSchema.extend({ capture_id: zodID }))
+            .parse(captures, {
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "captures"),
+            })
+        : [],
+      mortalities: mortalities
+        ? z
+            .array(MortalityUpdateSchema.extend({ mortality_id: zodID }))
+            .parse(mortalities, {
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "mortalities"),
+            })
+        : [],
+      qualitative_measurements: qualitative_measurements
+        ? z
+            .array(QualitativeUpdateSchema.required({ measurement_qualitative_id: true }))
+            .parse(qualitative_measurements, {
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "qualitative_measurements")
+          })
+        : [],
+      quantitative_measurements: quantitative_measurements
+        ? z
+            .array(QuantitativeUpdateSchema.required({measurement_quantitative_id: true}))
+            .parse(quantitative_measurements, {
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "quantitative_measurements")
+          })
+        : []
+      };
+
+      const deleteBody: IBulkDelete = {
         _deleteMarkings: markingDeletes
           ? z.array(MarkingDeleteSchema).parse(markingDeletes)
           : [],
         _deleteUnits: collectionDeletes
         ? z.array(CollectionUnitDeleteSchema).parse(collectionDeletes)
+        : [],
+        _deleteCaptures: captureDeletes 
+        ? z.array(CaptureDeleteSchema).parse(captureDeletes) 
+        : [],
+        _deleteMoralities: mortalityDeletes
+        ? z.array(MortalityDeleteSchema).parse(mortalityDeletes)
+        : [],
+        _deleteQual: qualDeletes
+        ? z.array(QualitativeDeleteSchema).parse(qualDeletes)
+        : [],
+        _deleteQuant: quantDeletes
+        ? z.array(QuantitativeDeleteSchema).parse(quantDeletes)
+        : [],
+        _deleteChildren: childDeletes
+        ? z.array(FamilyChildDeleteSchema).parse(childDeletes)
+        : [],
+        _deleteParents: parentDeletes 
+        ? z.array(FamilyParentDeleteSchema).parse(parentDeletes)
         : []
-      };
+      }
 
-      const r = await db.bulkUpdateData(body, db);
-      return res.status(200).json(r);
+      const updateRes = await db.bulkUpdateData(updateBody, db);
+      const deleteRes = await db.bulkDeleteData(deleteBody, db);
+      return res.status(200).json({...updateRes, ...deleteRes});
     })
   );
 

@@ -205,6 +205,7 @@ describe("API: Critter", () => {
         update.mockResolvedValue({ ...CAPTURE, capture_comment: "banana" });
         const result = await _updateCapture(CAPTURE_ID, {
           capture_comment: "banana",
+          critter_id: ""
         });
         expect.assertions(2);
         expect(prisma.capture.update).toHaveBeenCalled();
@@ -219,6 +220,7 @@ describe("API: Critter", () => {
         const result = await _updateCapture(CAPTURE_ID, {
           capture_location: LOCATION,
           release_location: LOCATION,
+          critter_id: ""
         });
         expect.assertions(3);
         expect(result?.capture_location_id).toBe(
@@ -238,6 +240,7 @@ describe("API: Critter", () => {
         const result = await _updateCapture(CAPTURE_ID, {
           release_location: LOCATION,
           force_create_release: true,
+          critter_id: ""
         });
         expect.assertions(2);
         expect(result?.capture_location_id).not.toBe(

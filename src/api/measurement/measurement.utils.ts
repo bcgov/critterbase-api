@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
+  DeleteSchema,
   implement,
   noAudit,
   nonEmpty,
@@ -107,12 +108,11 @@ const MeasurementQuantitativeIncludeSchema = implement<MeasurementQuantitativeIn
 const QualitativeCreateSchema = implement<
   Omit<
     Prisma.measurement_qualitativeCreateManyInput,
-    "measurement_qualitative_id" | keyof AuditColumns
+    keyof AuditColumns
   >
 >()
   .with(
     QualitativeSchema.omit({
-      measurement_qualitative_id: true,
       ...noAudit,
     })
       .partial()
@@ -124,10 +124,7 @@ const QualitativeCreateSchema = implement<
   )
   .strict();
 
-const QualitativeUpdateSchema = QualitativeCreateSchema.partial().refine(
-  nonEmpty,
-  "body must include at least one property"
-);
+const QualitativeUpdateSchema = QualitativeCreateSchema.partial();
 
 const QualitativeResponseSchema = ResponseSchema.transform((val) => {
   const {
@@ -150,11 +147,11 @@ const QualitativeResponseSchema = ResponseSchema.transform((val) => {
 const QuantitativeCreateSchema = implement<
   Omit<
     Prisma.measurement_quantitativeCreateManyInput,
-    "measurement_quantitative_id" | keyof AuditColumns
+    keyof AuditColumns
   >
 >()
   .with(
-    QuantitativeSchema.omit({ measurement_quantitative_id: true, ...noAudit })
+    QuantitativeSchema.omit({ ...noAudit })
       .partial()
       .required({
         critter_id: true,
@@ -164,10 +161,7 @@ const QuantitativeCreateSchema = implement<
   )
   .strict();
 
-const QuantitativeUpdateSchema = QuantitativeCreateSchema.partial().refine(
-  nonEmpty,
-  "body must include at least one property"
-);
+const QuantitativeUpdateSchema = QuantitativeCreateSchema.partial();
 
 const QuantitativeVerificationSchema = QuantitativeSchema.partial().required({measurement_quantitative_id: true, taxon_measurement_id: true});
 const QualitatitiveVerificationSchema = QualitativeSchema.partial().required({measurement_qualitative_id: true, taxon_measurement_id: true})
@@ -182,6 +176,9 @@ const QuantitativeResponseSchema = ResponseSchema.transform((val) => {
     val as Prisma.PromiseReturnType<typeof getQuantMeasurementOrThrow>;
   return { ...rest, measurement_name: x?.measurement_name ?? null };
 });
+
+const QualitativeDeleteSchema = QualitativeSchema.pick({ measurement_qualitative_id: true}).extend(DeleteSchema.shape);
+const QuantitativeDeleteSchema = QuantitativeSchema.pick({ measurement_quantitative_id: true}).extend(DeleteSchema.shape);
 
 type QualitativeBody = z.infer<typeof QualitativeCreateSchema>;
 type QualitativeUpdateBody = z.infer<typeof QualitativeUpdateSchema>;
@@ -216,4 +213,6 @@ export {
   MeasurementVerificationSchema,
   MeasurementQualitativeIncludeSchema,
   MeasurementQuantitativeIncludeSchema,
+  QualitativeDeleteSchema,
+  QuantitativeDeleteSchema
 };

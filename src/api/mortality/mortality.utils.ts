@@ -3,6 +3,7 @@ import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
 import {
+  DeleteSchema,
   implement,
   noAudit,
   ResponseSchema,
@@ -134,14 +135,16 @@ const MortalityResponseSchema = ResponseSchema.transform((val) => {
 
 type FormattedMortality = z.infer<typeof MortalityResponseSchema>;
 
+const MortalityDeleteSchema = MortalityBodySchema.pick({ mortality_id: true}).extend(DeleteSchema.shape);
+
 export {
   mortalityInclude,
   MortalityCreateSchema,
   MortalityUpdateSchema,
   MortalityResponseSchema,
   MortalityBodySchema,
-  MortalityIncludeSchema
-  
+  MortalityIncludeSchema,
+  MortalityDeleteSchema
 };
 export type {
   MortalityIncludeType,

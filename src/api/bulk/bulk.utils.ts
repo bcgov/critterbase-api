@@ -10,7 +10,20 @@ const BulkCreationSchema = z.object({
     mortalities: z.array(ResponseSchema).optional(),
     quantitative_measurements: z.array(ResponseSchema).optional(),
     qualitative_measurements: z.array(ResponseSchema).optional(),
-    families: ResponseSchema.optional()
+    families: z.object({
+        families: z.array(ResponseSchema).optional(),
+        parents: z.array(ResponseSchema).optional(),
+        children: z.array(ResponseSchema).optional()
+    }).optional()
 });
 
-export { BulkCreationSchema }
+const filterAndRemoveDeletes = <T,>(arr: T & {_delete?: boolean}[] | undefined) => {
+    return arr?.filter((val, idx, arr) => {
+        if (val._delete) {
+            arr.splice(idx, 1);
+        }
+        return val._delete;
+    })
+}
+
+export { BulkCreationSchema, filterAndRemoveDeletes }

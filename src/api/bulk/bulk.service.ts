@@ -7,10 +7,12 @@ import {
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
 } from "../marking/marking.utils"; 
-import { MortalityUpdate } from "../mortality/mortality.utils";
+import { MortalityDeleteSchema, MortalityUpdate } from "../mortality/mortality.utils";
 import { apiError } from "../../utils/types";
 import { ICbDatabase } from "../../utils/database";
-import { CaptureUpdate } from "../capture/capture.utils";
+import { CaptureDeleteSchema, CaptureUpdate } from "../capture/capture.utils";
+import { QualitativeDeleteSchema, QualitativeUpdateBody, QuantitativeDeleteSchema, QuantitativeUpdateBody } from "../measurement/measurement.utils";
+import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from "../family/family.utils";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -33,9 +35,20 @@ interface IBulkMutate {
   locations: Prisma.locationUpdateInput[];
   captures: CaptureUpdate[];
   mortalities: MortalityUpdate[];
+  qualitative_measurements: Prisma.measurement_qualitativeUpdateInput[];
+  quantitative_measurements: Prisma.measurement_quantitativeUpdateInput[];
+}
+
+interface IBulkDelete {
   //Deletes
   _deleteMarkings: z.infer<typeof MarkingDeleteSchema>[];
   _deleteUnits: z.infer<typeof CollectionUnitDeleteSchema>[];
+  _deleteCaptures: z.infer<typeof CaptureDeleteSchema>[];
+  _deleteMoralities: z.infer<typeof MortalityDeleteSchema>[];
+  _deleteQuant: z.infer<typeof QuantitativeDeleteSchema>[];
+  _deleteQual: z.infer<typeof QualitativeDeleteSchema>[];
+  _deleteParents: z.infer<typeof FamilyParentDeleteSchema>[];
+  _deleteChildren: z.infer<typeof FamilyChildDeleteSchema>[];
 }
 
 interface IBulkResCount {
@@ -119,12 +132,11 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     captures,
     mortalities,
     markings,
-    _deleteMarkings,
-    _deleteUnits
+    qualitative_measurements,
+    quantitative_measurements
   } = bulkParams;
-  const counts: Omit<IBulkResCount, "created"> = {
-    updated: {},
-    deleted: {},
+  const counts: Omit<IBulkResCount, "created" | "deleted"> = {
+    updated: {}
   };
     await prisma.$transaction(async (prisma) => {
     for (let i = 0; i < critters.length; i++) {
@@ -190,22 +202,93 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         await prisma.marking.create({
           data: ma
         })
-      }
-      
+      } 
     }
+    for(let i = 0; i < qualitative_measurements.length; i++) {
+      const meas = qualitative_measurements[i];
+      counts.updated.qualitative_measurements = i + 1;
+      if(!meas.measurement_qualitative_id) {
+        throw apiError.requiredProperty("measurement_qualitative_id");
+      }
+      await prisma.measurement_qualitative.update({
+        where: { measurement_qualitative_id: meas.measurement_qualitative_id as string },
+        data: meas
+      })
+    }
+    for(let i = 0; i < quantitative_measurements.length; i++) {
+      const meas = quantitative_measurements[i];
+      counts.updated.quantitative_measurements = i + 1;
+      if(!meas.measurement_quantitative_id) {
+        throw apiError.requiredProperty("measurement_qualitative_id");
+      }
+      await prisma.measurement_quantitative.update({
+        where: { measurement_quantitative_id: meas.measurement_quantitative_id as string },
+        data: meas
+      })
+    }
+    
+  }, {timeout: 90000});
+  return counts;
+};
+
+const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
+  const {
+    _deleteMarkings,
+    _deleteUnits,
+    _deleteCaptures,
+    _deleteMoralities,
+    _deleteQual,
+    _deleteQuant,
+    _deleteParents,
+    _deleteChildren
+  } = bulkParams;
+  const counts: Omit<IBulkResCount, "created" | "updated"> = {
+    deleted: {}
+  };
+  await prisma.$transaction(async (prisma) => {
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
       await db.deleteMarking(_dma.marking_id);
     }
-    for(let i = 0; i < _deleteUnits.length; i++) {
+    for (let i = 0; i < _deleteUnits.length; i++) {
       const _dma = _deleteUnits[i];
       counts.deleted.collections = i + 1;
       await db.deleteCollectionUnit(_dma.critter_collection_unit_id);
     }
-  }, {timeout: 90000});
+    for (let i = 0; i < _deleteCaptures.length; i++) {
+      const _dma = _deleteCaptures[i];
+      counts.deleted.captures = i + 1;
+      await db.deleteCapture(_dma.capture_id);
+    }
+    for (let i = 0; i < _deleteMoralities.length; i++) {
+      const _dma = _deleteMoralities[i];
+      counts.deleted.mortalities = i + 1;
+      await db.deleteMortality(_dma.mortality_id);
+    }
+    for (let i = 0; i < _deleteQual.length; i++) {
+      const _dma = _deleteQual[i];
+      counts.deleted.qualitative_measurements = i + 1;
+      await db.deleteQualMeasurement(_dma.measurement_qualitative_id);
+    }
+    for (let i = 0; i < _deleteQuant.length; i++) {
+      const _dma = _deleteQuant[i];
+      counts.deleted.captures = i + 1;
+      await db.deleteQuantMeasurement(_dma.measurement_quantitative_id);
+    }
+    for (let i = 0; i < _deleteParents.length; i++) {
+      const _dma = _deleteParents[i];
+      counts.deleted.family_parents = i + 1;
+      await db.removeParentOfFamily(_dma.family_id, _dma.parent_critter_id);
+    }
+    for(let i = 0; i < _deleteChildren.length; i++) {
+      const _dma = _deleteChildren[i];
+      counts.deleted.family_children = i + 1;
+      await db.removeChildOfFamily(_dma.family_id, _dma.child_critter_id);
+    }
+  });
   return counts;
-};
+}
 
 const bulkErrMap = (
   issue: z.ZodIssueOptionalMessage,
@@ -215,4 +298,4 @@ const bulkErrMap = (
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`,
 });
 
-export { IBulkCreate, IBulkMutate, bulkCreateData, bulkErrMap, bulkUpdateData };
+export { IBulkCreate, IBulkMutate, IBulkDelete, bulkCreateData, bulkErrMap, bulkUpdateData, bulkDeleteData };
