@@ -128,11 +128,24 @@ const updateMortality = async (
 };
 
 const deleteMortality = async (mortality_id: string) => {
-  return await prisma.mortality.delete({
+  const mortality = await prisma.mortality.findUniqueOrThrow({
+    where: {
+      mortality_id: mortality_id
+    }
+  });
+  const mortalityRes = await prisma.mortality.delete({
     where: {
       mortality_id: mortality_id,
     },
   });
+  if(mortality.location_id) {
+    await prisma.location.delete({
+      where: {
+        location_id: mortality.location_id
+      }
+    })
+  }
+  return mortalityRes;
 };
 
 export {

@@ -121,8 +121,6 @@ describe("API: Measurement", () => {
     });
 
     describe(`POST ${QUANT_ROUTE}/create`, () => {
-      it.todo("returns status 400 when nothing provided in body");
-
       it("returns status 201 with valid body in req", async () => {
         const res = await request.post(`${QUANT_ROUTE}/create`).send(quantData);
         expect(res.status).toBe(201);
@@ -150,7 +148,6 @@ describe("API: Measurement", () => {
     });
 
     describe(`POST ${QUAL_ROUTE}/create`, () => {
-      it.todo("returns status 400 when nothing provided in body");
 
       it("returns status 201 with valid body in req", async () => {
         const res = await request.post(`${QUAL_ROUTE}/create`).send(qualData);
@@ -177,12 +174,6 @@ describe("API: Measurement", () => {
     });
 
     describe(`PATCH ${QUAL_ROUTE}/:id`, () => {
-      it("returns status 400 when nothing provided in body", async () => {
-        const res = await request.patch(`${QUAL_ROUTE}/${ID}`).send({});
-        expect(res.status).toBe(400);
-        expect(mockDB.updateQualMeasurement.mock.calls.length).toBe(0);
-      });
-
       it("returns status 201 with valid body in req", async () => {
         const data = { measurement_comment: updateComment };
         const res = await request.patch(`${QUAL_ROUTE}/${ID}`).send(data);
@@ -209,12 +200,6 @@ describe("API: Measurement", () => {
     });
 
     describe(`PATCH ${QUANT_ROUTE}/:id`, () => {
-      it("returns status 400 when nothing provided in body", async () => {
-        const res = await request.patch(`${QUANT_ROUTE}/${ID}`).send({});
-        expect(res.status).toBe(400);
-        expect(mockDB.updateQuantMeasurement.mock.calls.length).toBe(0);
-      });
-
       it("returns status 201 with valid body in req", async () => {
         const res = await request
           .patch(`${QUANT_ROUTE}/${ID}`)

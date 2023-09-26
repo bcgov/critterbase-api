@@ -1,7 +1,7 @@
 import { critter, family, family_child, family_parent, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../../utils/types";
-import { implement, zodAudit, zodID } from "../../utils/zod_helpers";
+import { DeleteSchema, implement, zodAudit, zodID } from "../../utils/zod_helpers";
 
 interface ImmediateFamily {
   children: critter[];
@@ -53,6 +53,9 @@ const FamilyChildCreateBodySchema = implement<
   child_critter_id: zodID,
 });
 
+const FamilyParentDeleteSchema = FamilyParentSchema.pick({family_id: true, parent_critter_id: true}).extend(DeleteSchema.shape);
+const FamilyChildDeleteSchema = FamilyChildSchema.pick({family_id: true, child_critter_id: true}).extend(DeleteSchema.shape);
+
 type FamilyUpdate = z.infer<typeof FamilyUpdateBodySchema>;
 type FamilyCreate = z.infer<typeof FamilyCreateBodySchema>;
 type FamilyParentCreate = z.infer<typeof FamilyParentCreateBodySchema>;
@@ -65,7 +68,9 @@ export {
   FamilyParentCreateBodySchema,
   FamilyChildCreateBodySchema,
   FamilySchema,
-  FamilyParentSchema
+  FamilyParentSchema,
+  FamilyParentDeleteSchema,
+  FamilyChildDeleteSchema
 };
 export type {
   ImmediateFamily,

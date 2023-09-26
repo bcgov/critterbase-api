@@ -46,6 +46,7 @@ import {
 
 import { extendZodWithOpenApi } from 'zod-openapi';
 import { markingIncludesSchema } from "../marking/marking.utils";
+import { FamilyParentSchema, FamilyChildSchema } from "../family/family.utils";
 extendZodWithOpenApi(z);
 
 enum eCritterStatus {
@@ -66,6 +67,12 @@ const detailedCritterInclude = Prisma.validator<Prisma.critterArgs>()({
     marking: {...markingIncludes, orderBy: { attached_timestamp: 'desc'} },
     measurement_qualitative: measurementQualitativeInclude,
     measurement_quantitative: measurementQuantitativeInclude,
+    family_parent: {
+      select: { family_id: true, parent_critter_id: true}
+    },
+    family_child: {
+      select: { family_id: true, child_critter_id: true}
+    }
   },
 });
 
@@ -199,7 +206,9 @@ const DetailedCritterIncludeSchema = implement<CritterDetailedIncludeResult>().w
   mortality: MortalityIncludeSchema.array(),
   marking: markingIncludesSchema.array(),
   measurement_qualitative: MeasurementQualitativeIncludeSchema.array(),
-  measurement_quantitative: MeasurementQuantitativeIncludeSchema.array()
+  measurement_quantitative: MeasurementQuantitativeIncludeSchema.array(),
+  family_parent: FamilyParentSchema.pick({family_id: true, parent_critter_id: true}).array(),
+  family_child: FamilyChildSchema.pick({family_id: true, child_critter_id: true}).array()
 })
 
 

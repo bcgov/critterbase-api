@@ -2,6 +2,7 @@ import supertest from "supertest";
 import {
   bulkCreateData as _bulkCreateData,
   bulkUpdateData as _bulkUpdateData,
+  bulkDeleteData as _bulkDeleteData,
   bulkErrMap,
 } from "./bulk.service";
 import { makeApp } from "../../app";
@@ -22,6 +23,7 @@ import { PrismaTransactionClient, apiError } from "../../utils/types";
 
 const bulkCreateData = jest.fn();
 const bulkUpdateData = jest.fn();
+const bulkDeleteData = jest.fn();
 const updateCapture = jest.fn();
 const updateMortality = jest.fn();
 const appendEnglishTaxonAsUUID = jest.fn();
@@ -33,6 +35,7 @@ const deleteCollectionUnit = jest.fn();
 const db = {
   bulkCreateData,
   bulkUpdateData,
+  bulkDeleteData,
   updateCapture,
   updateMortality,
   appendEnglishTaxonAsUUID,
@@ -337,8 +340,8 @@ describe("API: Bulk", () => {
             captures: [CAPTURE],
             mortalities: [MORTALITY],
             markings: [MARKING],
-            _deleteMarkings: [],
-            _deleteUnits: [],
+            qualitative_measurements: [],
+            quantitative_measurements: []
           },
           db
         );
@@ -365,8 +368,8 @@ describe("API: Bulk", () => {
                 mortalities: [],
                 markings: [],
                 captures: [{ capture_comment: "a" }],
-                _deleteMarkings: [],
-                _deleteUnits: [],
+                qualitative_measurements: [],
+                quantitative_measurements: []
               },
               db
             )
@@ -384,8 +387,8 @@ describe("API: Bulk", () => {
                 mortalities: [{ mortality_comment: "a" }],
                 markings: [],
                 captures: [],
-                _deleteMarkings: [],
-                _deleteUnits: [],
+                qualitative_measurements: [],
+                quantitative_measurements: []
               },
               db
             )
@@ -403,13 +406,12 @@ describe("API: Bulk", () => {
             markings: [
               {
                 critter_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
-                taxon_marking_body_location_id:
-                  "98f9fede-95fc-4321-9444-7c2742e336fe",
+                taxon_marking_body_location_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
               },
             ],
             captures: [],
-            _deleteMarkings: [],
-            _deleteUnits: [],
+            qualitative_measurements: [],
+            quantitative_measurements: []
           },
           db
         );
@@ -418,14 +420,10 @@ describe("API: Bulk", () => {
       it("should delete marking if included in _deleteMarkings", async () => {
         expect.assertions(2);
         prismaMock.marking.delete.mockResolvedValue(MARKING);
-        await _bulkUpdateData(
+
+
+        await _bulkDeleteData(
           {
-            critters: [],
-            collections: [],
-            locations: [],
-            mortalities: [],
-            markings: [],
-            captures: [],
             _deleteMarkings: [
               {
                 marking_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
@@ -434,11 +432,16 @@ describe("API: Bulk", () => {
             ],
             _deleteUnits: [
               {
-                critter_collection_unit_id:
-                  "98f9fede-95fc-4321-9444-7c2742e336fe",
+                critter_collection_unit_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
                 _delete: true,
               },
             ],
+            _deleteCaptures: [],
+            _deleteMoralities: [],
+            _deleteQuant: [],
+            _deleteQual: [],
+            _deleteParents: [],
+            _deleteChildren: []
           },
           db
         );
@@ -460,8 +463,8 @@ describe("API: Bulk", () => {
             mortalities: [],
             markings: [],
             captures: [],
-            _deleteMarkings: [],
-            _deleteUnits: [],
+            qualitative_measurements: [],
+            quantitative_measurements: []
           },
           db
         );
@@ -529,8 +532,13 @@ describe("API: Bulk", () => {
           captures: [CAPTURE],
           mortalities: [MORTALITY],
           markings: [MARKING, { ...MARKING, _delete: true }],
+          quantitative_measurements: [],
+          qualitative_measurements: [],
+          families: {families: [], parents: [], children: []}
         };
         const res = await request.patch("/api/bulk").send(body);
+
+        console.log(JSON.stringify(res.body))
         expect.assertions(1);
         expect(res.status).toBe(200);
       });
