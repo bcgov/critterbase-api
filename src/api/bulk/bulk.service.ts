@@ -11,7 +11,7 @@ import { MortalityDeleteSchema, MortalityUpdate } from "../mortality/mortality.u
 import { apiError } from "../../utils/types";
 import { ICbDatabase } from "../../utils/database";
 import { CaptureDeleteSchema, CaptureUpdate } from "../capture/capture.utils";
-import { QualitativeDeleteSchema, QualitativeUpdateBody, QuantitativeDeleteSchema, QuantitativeUpdateBody } from "../measurement/measurement.utils";
+import { QualitativeDeleteSchema, QuantitativeDeleteSchema } from "../measurement/measurement.utils";
 import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from "../family/family.utils";
 
 interface IBulkCreate {

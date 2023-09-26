@@ -68,7 +68,7 @@ const CaptureUpdateSchema = implement<
       release_location: LocationUpdateSchema,
       force_create_release: z.boolean().optional(),
     })
-    .partial().required({critter_id: true}).shape
+    .partial().shape
 );
 
 const CaptureCreateSchema = implement<

@@ -156,7 +156,7 @@ export const BulkRouter = (db: ICbDatabase) => {
     const captureDeletes = filterAndRemoveDeletes(captures);
     const mortalityDeletes = filterAndRemoveDeletes(mortalities);
     const parentDeletes = filterAndRemoveDeletes(families?.parents);
-    const childDeletes = filterAndRemoveDeletes(families?.children)
+    const childDeletes = filterAndRemoveDeletes(families?.children);
 
     const updateBody: IBulkMutate = {
       critters: critters
