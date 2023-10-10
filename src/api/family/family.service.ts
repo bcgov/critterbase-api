@@ -9,6 +9,7 @@ import {
   FamilyUpdate,
   ImmediateFamily,
 } from "./family.utils";
+import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllFamilies = async (): Promise<family[]> => {
   return await prisma.family.findMany();
@@ -167,9 +168,11 @@ const makeParentOfFamily = async (
 
 const removeChildOfFamily = async (
   family_id: string,
-  child_critter_id: string
+  child_critter_id: string,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<family_child> => {
-  const result = await prisma.family_child.delete({
+  const client = prismaOverride ?? prisma;
+  const result = await client.family_child.delete({
     where: {
       family_id_child_critter_id: {
         family_id: family_id,
@@ -182,9 +185,11 @@ const removeChildOfFamily = async (
 
 const removeParentOfFamily = async (
   family_id: string,
-  parent_critter_id: string
+  parent_critter_id: string,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<family_parent> => {
-  const result = await prisma.family_parent.delete({
+  const client = prismaOverride ?? prisma;
+  const result = await client.family_parent.delete({
     where: {
       family_id_parent_critter_id: {
         family_id: family_id,

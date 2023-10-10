@@ -1,6 +1,6 @@
-import { marking } from "@prisma/client";
+import { PrismaClient, marking } from "@prisma/client";
 import { prisma } from "../../utils/constants";
-import { ReqBody } from "../../utils/types";
+import { PrismaTransactionClient, ReqBody } from "../../utils/types";
 import {
   getBodyLocationByNameAndTaxonUUID,
   getColourByName,
@@ -91,8 +91,9 @@ const createMarking = async (newMarkingData: MarkingCreateInput) => {
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string): Promise<MarkingIncludes> => {
-  const marking: MarkingIncludes = await prisma.marking.delete({
+const deleteMarking = async (marking_id: string, prismaOverride?: PrismaTransactionClient): Promise<MarkingIncludes> => {
+  const client = prismaOverride ?? prisma;
+  const marking: MarkingIncludes = await client.marking.delete({
     where: {
       marking_id: marking_id,
     },

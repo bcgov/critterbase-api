@@ -110,24 +110,25 @@ const updateCapture = async (
   });
 };
 
-const deleteCapture = async (capture_id: string): Promise<capture | null> => {
-  const capture = await prisma.capture.findUniqueOrThrow({
+const deleteCapture = async (capture_id: string, prismaOverride?: PrismaTransactionClient): Promise<capture | null> => {
+  const client = prismaOverride ?? prisma;
+  const capture = await client.capture.findUniqueOrThrow({
     where: {
       capture_id: capture_id
     }
   });
-  const captureRes = await prisma.capture.delete({
+  const captureRes = await client.capture.delete({
     where: {
       capture_id: capture_id,
     },
   });
   if(capture.capture_location_id) {
-    await prisma.location.delete({
+    await client.location.delete({
       where: {location_id: capture.capture_location_id}
     })
   }
   if(capture.release_location_id) {
-    await prisma.location.delete({
+    await client.location.delete({
       where: {location_id: capture.release_location_id}
     })
   }

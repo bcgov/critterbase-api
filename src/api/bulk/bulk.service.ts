@@ -249,42 +249,42 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
-      await db.deleteMarking(_dma.marking_id);
+      await db.deleteMarking(_dma.marking_id, prisma);
     }
     for (let i = 0; i < _deleteUnits.length; i++) {
       const _dma = _deleteUnits[i];
       counts.deleted.collections = i + 1;
-      await db.deleteCollectionUnit(_dma.critter_collection_unit_id);
+      await db.deleteCollectionUnit(_dma.critter_collection_unit_id, prisma);
     }
     for (let i = 0; i < _deleteCaptures.length; i++) {
       const _dma = _deleteCaptures[i];
       counts.deleted.captures = i + 1;
-      await db.deleteCapture(_dma.capture_id);
+      await db.deleteCapture(_dma.capture_id, prisma);
     }
     for (let i = 0; i < _deleteMoralities.length; i++) {
       const _dma = _deleteMoralities[i];
       counts.deleted.mortalities = i + 1;
-      await db.deleteMortality(_dma.mortality_id);
+      await db.deleteMortality(_dma.mortality_id, prisma);
     }
     for (let i = 0; i < _deleteQual.length; i++) {
       const _dma = _deleteQual[i];
       counts.deleted.qualitative_measurements = i + 1;
-      await db.deleteQualMeasurement(_dma.measurement_qualitative_id);
+      await db.deleteQualMeasurement(_dma.measurement_qualitative_id, prisma);
     }
     for (let i = 0; i < _deleteQuant.length; i++) {
       const _dma = _deleteQuant[i];
       counts.deleted.captures = i + 1;
-      await db.deleteQuantMeasurement(_dma.measurement_quantitative_id);
+      await db.deleteQuantMeasurement(_dma.measurement_quantitative_id, prisma);
     }
     for (let i = 0; i < _deleteParents.length; i++) {
       const _dma = _deleteParents[i];
       counts.deleted.family_parents = i + 1;
-      await db.removeParentOfFamily(_dma.family_id, _dma.parent_critter_id);
+      await db.removeParentOfFamily(_dma.family_id, _dma.parent_critter_id, prisma);
     }
     for(let i = 0; i < _deleteChildren.length; i++) {
       const _dma = _deleteChildren[i];
       counts.deleted.family_children = i + 1;
-      await db.removeChildOfFamily(_dma.family_id, _dma.child_critter_id);
+      await db.removeChildOfFamily(_dma.family_id, _dma.child_critter_id, prisma);
     }
   });
   return counts;
