@@ -1,4 +1,4 @@
-import { PrismaClient, marking } from "@prisma/client";
+import { marking } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { PrismaTransactionClient, ReqBody } from "../../utils/types";
 import {
