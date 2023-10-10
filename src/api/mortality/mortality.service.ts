@@ -127,19 +127,20 @@ const updateMortality = async (
   });
 };
 
-const deleteMortality = async (mortality_id: string) => {
-  const mortality = await prisma.mortality.findUniqueOrThrow({
+const deleteMortality = async (mortality_id: string, prismaOverride?: PrismaTransactionClient) => {
+  const client = prismaOverride ?? prisma;
+  const mortality = await client.mortality.findUniqueOrThrow({
     where: {
       mortality_id: mortality_id
     }
   });
-  const mortalityRes = await prisma.mortality.delete({
+  const mortalityRes = await client.mortality.delete({
     where: {
       mortality_id: mortality_id,
     },
   });
   if(mortality.location_id) {
-    await prisma.location.delete({
+    await client.location.delete({
       where: {
         location_id: mortality.location_id
       }

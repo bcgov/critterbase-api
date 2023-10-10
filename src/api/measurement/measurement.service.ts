@@ -13,6 +13,7 @@ import {
   QuantitativeUpdateBody,
 } from "./measurement.utils";
 import { getParentTaxonIds } from "../../utils/helper_functions";
+import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllQuantMeasurements = async (): Promise<
   measurement_quantitative[]
@@ -113,9 +114,11 @@ const updateQuantMeasurement = async (
 };
 
 const deleteQualMeasurement = async (
-  id: string
+  id: string,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<measurement_qualitative> => {
-  return await prisma.measurement_qualitative.delete({
+  const client = prismaOverride ?? prisma;
+  return await client.measurement_qualitative.delete({
     where: {
       measurement_qualitative_id: id,
     },
@@ -123,9 +126,11 @@ const deleteQualMeasurement = async (
 };
 
 const deleteQuantMeasurement = async (
-  id: string
+  id: string,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<measurement_quantitative> => {
-  return await prisma.measurement_quantitative.delete({
+  const client = prismaOverride ?? prisma;
+  return await client.measurement_quantitative.delete({
     where: {
       measurement_quantitative_id: id,
     },

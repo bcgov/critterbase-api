@@ -1,4 +1,5 @@
 import { prisma } from "../../utils/constants";
+import { PrismaTransactionClient } from "../../utils/types";
 import {
   CollectionUnitCreateInput,
   collectionUnitIncludes,
@@ -89,9 +90,11 @@ const createCollectionUnit = async (
  * @param {string} critter_collection_unit_id
  */
 const deleteCollectionUnit = async (
-  critter_collection_unit_id: string
+  critter_collection_unit_id: string,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<CollectionUnitIncludes> => {
-  const collectionUnit = await prisma.critter_collection_unit.delete({
+  const client = prismaOverride ?? prisma;
+  const collectionUnit = await client.critter_collection_unit.delete({
     where: {
       critter_collection_unit_id: critter_collection_unit_id,
     },
