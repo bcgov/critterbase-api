@@ -11,7 +11,6 @@ RUN apt-get install -y --no-install-recommends postgresql-15-postgis-3-scripts
 
 # install extra packages needed for backup container / pods
 RUN apt-get install curl
-RUN apt-get install dnf
 
 # Set the time zone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
