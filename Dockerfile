@@ -1,15 +1,13 @@
-FROM quay.io/fedora/postgresql-15
+FROM postgres:15
 
 # This is our time zone
 ENV TZ America/Vancouver
 
-USER root
-
 # install PostGIS
-RUN dnf update -y
-RUN dnf install -y --setopt=install_weak_deps=False postgresql-15-postgis-3
-RUN dnf install -y --setopt=install_weak_deps=False postgresql-15-postgis-3-dbgsym
-RUN dnf install -y --setopt=install_weak_deps=False postgresql-15-postgis-3-scripts
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends postgresql-15-postgis-3
+RUN apt-get install -y --no-install-recommends postgresql-15-postgis-3-dbgsym
+RUN apt-get install -y --no-install-recommends postgresql-15-postgis-3-scripts
 
 # Set the time zone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
