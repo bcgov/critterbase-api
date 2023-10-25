@@ -127,7 +127,7 @@ const deleteCapture = async (capture_id: string, prismaOverride?: PrismaTransact
       where: {location_id: capture.capture_location_id}
     })
   }
-  if(capture.release_location_id) {
+  if(capture.release_location_id && capture.capture_location_id !== capture.release_location_id) { //If using same location the row is already deleted by the above call.
     await client.location.delete({
       where: {location_id: capture.release_location_id}
     })
