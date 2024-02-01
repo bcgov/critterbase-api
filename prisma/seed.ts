@@ -6,6 +6,14 @@ import * as fs from "fs";
 import path from "path";
 
 async function main() {
+  const existingUsers = await prisma.user.findMany();
+
+  // Abort the seed if data already exists
+  if (existingUsers.length) {
+    console.log("Previously seeded. Skipping...");
+    return;
+  }
+
   const systemUserUUID = await queryRandomUUID(prisma);
 
   await prisma.$executeRaw`ALTER TABLE critterbase."user" DISABLE TRIGGER all`;
@@ -280,15 +288,18 @@ async function main() {
   for (const sql of sqls) {
     await prisma.$executeRawUnsafe(sql);
   }
+
+  console.log("Successfully seeded the database.");
 }
 
 main()
   .then(async () => {
-    console.log("Successfully seeded the database.");
     await prisma.$disconnect();
   })
   .catch(async (e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

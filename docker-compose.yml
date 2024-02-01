@@ -8,10 +8,10 @@ services:
     image: ${DOCKER_PROJECT_NAME}-db-img
     container_name: ${DOCKER_PROJECT_NAME}-db-container
     build:
-      context: .
+      context: ./
       dockerfile: .docker/Dockerfile.db
     ports:
-      - ${DB_PORT}:5432
+      - ${DB_PORT}:${DB_PORT}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $DB_USER -p 5432 -d $DB_DATABASE"]
       interval: 5s
@@ -19,7 +19,6 @@ services:
       retries: 1
     environment:
       - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_DATABASE}?schema=${DB_SCHEMA}&currentSchema=${DB_SCHEMA},public
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_USER=${DB_USER}
     networks:
@@ -32,8 +31,11 @@ services:
     image: ${DOCKER_PROJECT_NAME}-db-setup-img
     container_name: ${DOCKER_PROJECT_NAME}-db-setup-container
     build:
-      context: .
+      context: ./
       dockerfile: .docker/Dockerfile.api
+      target: db_setup
+      args:
+        - API_PORT=${API_PORT}
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_DATABASE}?schema=${DB_SCHEMA}&currentSchema=${DB_SCHEMA},public
@@ -44,15 +46,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["npm", "run", "dev-db:setup"]
 
   ## Build the API image (generates the prisma client and runs server)
   api:
     image: ${DOCKER_PROJECT_NAME}-api-img
     container_name: ${DOCKER_PROJECT_NAME}-api-container
     build:
-      context: .
+      context: ./
       dockerfile: .docker/Dockerfile.api
+      target: api
+      args:
+        - PORT=${API_PORT}
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:${API_PORT} || exit 1
+      interval: 5m
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    ports:
+      - ${API_PORT}:${API_PORT}
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_DATABASE}?schema=${DB_SCHEMA}&currentSchema=${DB_SCHEMA},public
@@ -70,8 +82,6 @@ services:
     depends_on:
       - db
       - db_setup
-    command: ["npm", "run", "dev"]
-
 
 networks:
   critterbase-network:

@@ -16,13 +16,25 @@ import { setUserContext } from "../api/user/user.service";
 type ExpressHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => Promise<Response> | Promise<void>;
 
 const catchErrors =
   (fn: ExpressHandler) => (req: Request, res: Response, next: NextFunction) => {
     fn(req, res, next).catch(next);
   };
+
+/**
+ * Simple logger middleware.
+ *
+ * @param {Request} req - Express Request
+ * @param {Response} res - Express Response
+ * @param {NextFunction} next - Express Next callback
+ */
+const logger = (req: Request, res: Response, next: NextFunction) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+};
 
 /**
  * * Logs the errors in the express server. Displays issue endpoint
@@ -32,13 +44,13 @@ const errorLogger = (
   err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (!IS_TEST) {
     console.error(
-      `🛑 ${req.method} ${req.originalUrl} -> ${JSON.stringify(err)} -- ${
+      `${req.method} ${req.originalUrl} -> ${JSON.stringify(err)} -- ${
         err.stack ?? "No stack"
-      }`
+      }`,
     );
   }
 
@@ -53,7 +65,7 @@ const errorHandler = (
   err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (err instanceof ZodError) {
     //Removed formErrors from object
@@ -92,22 +104,16 @@ const errorHandler = (
 const auth = catchErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     if (IS_TEST || NO_AUTH) return next();
-    // const headers = AuthHeadersSchema.parse(req.headers);
-    // // validate api key
-    // if (headers[API_KEY_HEADER] != API_KEY) {
-    //   throw new apiError("Invalid API key", 401);
-    // }
-    // await loginUser({
-    //   user_id: headers["user-id"],
-    //   keycloak_uuid: headers["keycloak-uuid"],
-    // });
     const kc = await authenticateRequest(req);
-    const parsed = AuthLoginSchema.parse({keycloak_uuid: kc.keycloak_uuid, system_name: kc.system_name});
+    const parsed = AuthLoginSchema.parse({
+      keycloak_uuid: kc.keycloak_uuid,
+      system_name: kc.system_name,
+    });
     await loginUser(parsed);
     console.log(JSON.stringify(kc));
     await setUserContext(kc.keycloak_uuid, kc.system_name);
     next();
-  }
+  },
 );
 
-export { auth, catchErrors, errorHandler, errorLogger };
+export { auth, catchErrors, errorHandler, errorLogger, logger };

@@ -16,7 +16,7 @@ import { LookupRouter } from "./api/lookup/lookup.router";
 import { UserRouter } from "./api/user/user.router";
 import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
-import { auth, errorHandler, errorLogger } from "./utils/middleware";
+import { auth, errorHandler, errorLogger, logger } from "./utils/middleware";
 import { apiError } from "./utils/types";
 import swaggerUIExperss from "swagger-ui-express";
 import { yaml } from "./swagger";
@@ -32,8 +32,12 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(
     "/api-docs",
     swaggerUIExperss.serve,
-    swaggerUIExperss.setup(yaml/*, {swaggerOptions: { supportedSubmitMethods: [ 'get' ] }}*/)
+    swaggerUIExperss.setup(
+      yaml /*, {swaggerOptions: { supportedSubmitMethods: [ 'get' ] }}*/,
+    ),
   );
+
+  app.use(logger);
 
   app.use(routes.home, AccessRouter(db));
 

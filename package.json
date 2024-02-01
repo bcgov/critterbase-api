@@ -11,11 +11,12 @@
     "build": "rimraf ./dist && tsc",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
-    "dev": "npx prisma generate && nodemon -r dotenv/config ./src/server.ts",
+    "dev": "nodemon -r dotenv/config ./src/server.ts",
     "lint": "npx eslint . --max-warnings=0",
     "dead:code": "ts-prune | (! grep -v 'used in module')",
     "prisma:deploy": "npx prisma migrate deploy",
-    "dev-db:setup": "npx prisma migrate deploy && npx prisma generate && npx prisma db seed"
+    "prisma:generate": "npx prisma generate",
+    "prisma:dev-setup": "npx prisma migrate deploy && npx prisma db seed"
   },
   "author": "",
   "license": "ISC",
