@@ -6,3 +6,5 @@ oc
 dist
 region_data
 prisma/seed_scripts/seed_users.ts
+.npm
+.cache
