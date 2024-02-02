@@ -11,12 +11,12 @@ services:
       context: ./
       dockerfile: .docker/Dockerfile.db
     ports:
-      - ${DB_PORT}:${DB_PORT}
+      - ${DB_PORT}:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $DB_USER -p 5432 -d $DB_DATABASE"]
       interval: 5s
       timeout: 5s
-      retries: 1
+      retries: 3
     environment:
       - NODE_ENV=${NODE_ENV}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -57,12 +57,6 @@ services:
       target: api
       args:
         - PORT=${API_PORT}
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:${API_PORT} || exit 1
-      interval: 5m
-      timeout: 3s
-      retries: 3
-      start_period: 10s
     ports:
       - ${API_PORT}:${API_PORT}
     environment:
