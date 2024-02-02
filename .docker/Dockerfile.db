@@ -6,7 +6,7 @@
 FROM postgres:15 as postgres
 
 # Default to 5432 if PGPORT not defined
-ARG PORT=${PGPORT:+5432}
+ENV PGPORT 5432
 
 # This is our time zone
 ENV TZ America/Vancouver
@@ -23,6 +23,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Load the PostGIS extension into the database
 COPY ./.docker/load_postgis.sql docker-entrypoint-initdb.d/load_postgis.sql
 
-EXPOSE $PORT
+EXPOSE $PGPORT
 
 
