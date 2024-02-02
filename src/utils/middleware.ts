@@ -32,7 +32,9 @@ const catchErrors =
  * @param {NextFunction} next - Express Next callback
  */
 const logger = (req: Request, res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.originalUrl}`);
+  if (!IS_TEST) {
+    console.log(`${req.method} ${req.originalUrl}`);
+  }
   next();
 };
 
@@ -103,7 +105,9 @@ const errorHandler = (
 
 const auth = catchErrors(
   async (req: Request, res: Response, next: NextFunction) => {
-    if (IS_TEST || NO_AUTH) return next();
+    if (IS_TEST || NO_AUTH) {
+      return next();
+    }
     const kc = await authenticateRequest(req);
     const parsed = AuthLoginSchema.parse({
       keycloak_uuid: kc.keycloak_uuid,
