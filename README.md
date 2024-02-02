@@ -48,43 +48,34 @@ This API includes various modules, each with their own endpoints:
 14. Xref:            /api/xref/
 ```
 
-## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+## Running Locally
 
-`PORT`=`<number>`
-
-`API_KEY`=`<uuid>`
-
-`AUTHENTICATE`=`<'true' | 'false'>`
-
-`DATABASE_URL`=`<prisma url string>`
-
-## Run Locally
-
-Clone the project
+1. Clone the project (only once)
 
 ```bash
   git clone https://github.com/bcgov/critterbase-api
 ```
 
-Go to the project directory
+2. Change into Critterbase directory (every time)
 
 ```bash
-  cd critterbase-api
+    cd critterbase-api
 ```
 
-Install dependencies
+3. Generate environment variables (only once)
 
 ```bash
-  npm install
+    make env
 ```
 
-Start the server
+4. Build and run containers (every time)
 
 ```bash
-  npm run start:dev
+    make backend
 ```
+
+Note: See Makefile for additional project commands
 
 Note: `npm run start` is used in the deployment pipeline to start the server and apply pending database migrations.
 

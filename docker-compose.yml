@@ -1,0 +1,87 @@
+version: "3.5"
+
+name: ${DOCKER_PROJECT_NAME}
+
+services:
+  ## Build postgres docker image
+  db:
+    image: ${DOCKER_PROJECT_NAME}-db-img
+    container_name: ${DOCKER_PROJECT_NAME}-db-container
+    build:
+      context: ./
+      dockerfile: .docker/Dockerfile.db
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DB_USER -p $DB_PORT -d $DB_DATABASE"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PGPORT=${DB_PORT}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+    networks:
+      - critterbase-network
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  ## Build the database setup image (runs migrations and seeds)
+  db_setup:
+    image: ${DOCKER_PROJECT_NAME}-db-setup-img
+    container_name: ${DOCKER_PROJECT_NAME}-db-setup-container
+    build:
+      context: ./
+      dockerfile: .docker/Dockerfile.api
+      target: db_setup
+      args:
+        - API_PORT=${API_PORT}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?schema=${DB_SCHEMA}&currentSchema=${DB_SCHEMA},public
+    volumes:
+      - /opt/app-root/src/node_modules # prevents local node_modules overriding container node_modules
+    networks:
+      - critterbase-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  ## Build the API image (generates the prisma client and runs server)
+  api:
+    image: ${DOCKER_PROJECT_NAME}-api-img
+    container_name: ${DOCKER_PROJECT_NAME}-api-container
+    build:
+      context: ./
+      dockerfile: .docker/Dockerfile.api
+      target: api
+      args:
+        - PORT=${API_PORT}
+    ports:
+      - ${API_PORT}:${API_PORT}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?schema=${DB_SCHEMA}&currentSchema=${DB_SCHEMA},public
+      - PORT=${API_PORT}
+      - AUTHENTICATE=${AUTHENTICATE}
+      - ALLOWED_AUD=${ALLOWED_AUD}
+      - QUERY_BATCH_SIZE=${QUERY_BATCH_SIZE}
+      - KEYCLOAK_HOST=${KEYCLOAK_HOST}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+    volumes:
+      - ./:/opt/app-root/src
+      - /opt/app-root/src/node_modules # prevents local node_modules overriding container node_modules
+    networks:
+      - critterbase-network
+    depends_on:
+      - db
+      - db_setup
+
+networks:
+  critterbase-network:
+    driver: bridge
+
+volumes:
+  postgres:
+    name: ${DOCKER_PROJECT_NAME}-db-vol

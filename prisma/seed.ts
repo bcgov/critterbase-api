@@ -4,9 +4,16 @@ import { insertDefaultTaxons } from "./seed_scripts/seed_taxons";
 import { prisma } from "../src/utils/constants";
 import * as fs from "fs";
 import path from "path";
-import { Prisma } from "@prisma/client";
 
 async function main() {
+  const existingUsers = await prisma.user.findMany();
+
+  // Abort the seed if data already exists
+  if (existingUsers.length) {
+    console.log("Previously seeded. Skipping...");
+    return;
+  }
+
   const systemUserUUID = await queryRandomUUID(prisma);
 
   await prisma.$executeRaw`ALTER TABLE critterbase."user" DISABLE TRIGGER all`;
@@ -26,14 +33,13 @@ async function main() {
   await prisma.$executeRaw`ALTER TABLE critterbase."user" ENABLE TRIGGER all`;
 
   const dev_users = await import("./seed_scripts/seed_users");
-  if(dev_users) {
+  if (dev_users) {
     try {
       await prisma.user.createMany({
-        data: dev_users.default as unknown as Prisma.userCreateManyInput[]
-      })
-    }
-    catch (e) {
-      console.log('Failed to create default dev users, skipping.')
+        data: dev_users.default,
+      });
+    } catch (e) {
+      console.log("Failed to create default dev users, skipping.");
     }
   }
 
@@ -57,7 +63,7 @@ async function main() {
             };
       const nrRegionValues = `('${
         region["properties"][
-          struct.jsonRegionName as keyof typeof region["properties"]
+          struct.jsonRegionName as keyof (typeof region)["properties"]
         ]
       }', public.ST_GeomFromGeoJson('${JSON.stringify(geom)}'::jsonb))`;
       nrRegionQuery =
@@ -177,7 +183,7 @@ async function main() {
         rangiferTarandusUUID +
         canisLupusUUID +
         mammaliaUUID +
-        artioUUID
+        artioUUID,
     );
   }
 
@@ -244,7 +250,7 @@ async function main() {
     await prisma.xref_taxon_measurement_qualitative.findMany();
   for (const q of qualitativeMeasures) {
     const uuid = qualitativeResults.find(
-      (a) => a.measurement_name === q.name && a.taxon_id === q.taxon
+      (a) => a.measurement_name === q.name && a.taxon_id === q.taxon,
     )?.taxon_measurement_id;
     if (!uuid) {
       throw Error("Could not find a required measurement id");
@@ -273,7 +279,7 @@ async function main() {
   //Have to do this mess of string manipulation because prisma execute raw will only allow you to run one statement at a time.
   const sqls = fs
     .readFileSync(
-      path.join(__dirname, "./seed_scripts/import_bctw_animal_data.sql")
+      path.join(__dirname, "./seed_scripts/import_bctw_animal_data.sql"),
     )
     .toString()
     .replace(/(\r\n|\n|\r)/gm, " ") // remove newlines
@@ -282,15 +288,18 @@ async function main() {
   for (const sql of sqls) {
     await prisma.$executeRawUnsafe(sql);
   }
+
+  console.log("Successfully seeded the database.");
 }
 
 main()
   .then(async () => {
-    console.log("Successfully seeded the database.");
     await prisma.$disconnect();
   })
   .catch(async (e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
