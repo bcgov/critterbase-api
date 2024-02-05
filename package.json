@@ -8,7 +8,7 @@
   "main": "./src/server.ts",
   "scripts": {
     "start": "npx prisma migrate deploy && npx pm2 --no-daemon start dist/server.js",
-    "build": "./node_modules/rimraf/dist/cjs/src/bin.js ./dist && tsc",
+    "build": "tsc",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
     "dev": "nodemon -r dotenv/config ./src/server.ts",
