@@ -14,7 +14,6 @@ declare global {
     interface ProcessEnv {
       PORT?: string;
       NODE_ENV: "development" | "test" | "production";
-      SESSION_SECRET: string;
       API_KEY: string;
       DB_URL: string;
       AUTHENTICATE: string;
@@ -22,11 +21,11 @@ declare global {
   }
 }
 
-const api = '/api'
+const api = "/api";
 const routes = {
   home: api,
   //routes
-  critters:`${api}/critters`,
+  critters: `${api}/critters`,
   locations: `${api}/locations`,
   markings: `${api}/markings`,
   users: `${api}/users`,
@@ -40,9 +39,9 @@ const routes = {
   bulk: `${api}/bulk`,
   xref: `${api}/xref`,
   //modifiers
-  create: 'create',
-  id: ':id'
-}
+  create: "create",
+  id: ":id",
+};
 
 const oneDay = 60 * 60 * 24 * 1000;
 
@@ -120,5 +119,5 @@ export {
   strings,
   defaultFormat,
   oneDay,
-  routes
+  routes,
 };

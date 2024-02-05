@@ -1,9 +1,10 @@
 ################################################################################
-####                      DEVELOPMENT DOCKERFILE                            ####
-####                      API / DB_SETUP CONTAINERS                         ####
+####                      PRODUCTION DOCKERFILE (NO EDITING)                ####
+####                      OPENSHIFT BUILD DEPENDS ON                        ####
 ################################################################################
 
-FROM node:18-alpine3.18 as base
+# Install slim node 18
+FROM node:18-alpine3.18
 
 ENV HOME=/opt/app-root/src
 
@@ -15,29 +16,12 @@ WORKDIR $HOME
 # A wildcard is used to ensure both package.json AND package-lock.json are copied where available (npm@5+)
 COPY package*.json ./
 
-FROM base as installer
-# If you are building your code for production
-# RUN npm install --only=production
-RUN npm install
+# Install only produciton node modules and copy files into volumne
+RUN npm install --only=production
 
 ENV PATH ${HOME}/node_modules/.bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 # Copy the rest of the files
 COPY . .
 
-FROM installer as prisma
-# Generate the prisma client for api and db_setup containers
-RUN npm run prisma:generate
-
 VOLUME ${HOME}
-
-
-FROM prisma as api
-# Run the dev api server
-CMD npm run dev
-# Expose the api port
-EXPOSE $PORT
-
-FROM prisma as db_setup
-# Run migrations and seeds
-CMD npm run prisma:dev-setup
