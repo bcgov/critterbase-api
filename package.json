@@ -9,6 +9,7 @@
   "scripts": {
     "start": "npx prisma migrate deploy && npx pm2 --no-daemon start dist/server.js",
     "build": "rimraf ./dist && tsc",
+    "rimraf": "./node_modules/rimraf/bin.js",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
     "dev": "nodemon -r dotenv/config ./src/server.ts",
