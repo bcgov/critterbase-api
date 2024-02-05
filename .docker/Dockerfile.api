@@ -25,3 +25,5 @@ ENV PATH ${HOME}/node_modules/.bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/us
 COPY . .
 
 VOLUME ${HOME}
+
+CMD npm run build
