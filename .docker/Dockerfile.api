@@ -17,7 +17,7 @@ WORKDIR $HOME
 COPY package*.json ./
 
 # Install only production node modules and copy files into volumne
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 ENV PATH ${HOME}/node_modules/.bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
@@ -26,8 +26,11 @@ COPY . .
 
 VOLUME ${HOME}
 
+# Generate the prisma client
 RUN npm run prisma:generate
 
+# Build typescript
 RUN npm run build
 
+# Set default start command
 CMD npm run start
