@@ -69,7 +69,7 @@ model capture {
 
 model critter {
   critter_id                     String                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  taxon_id                       String                     @db.Uuid
+  itis_tsn                       Int
   wlh_id                         String?
   animal_id                      String?
   sex                            sex
@@ -82,7 +82,6 @@ model critter {
   artifact                       artifact[]
   capture                        capture[]
   lk_region_nr                   lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
-  lk_taxon                       lk_taxon                   @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_taxon_fk")
   user_critter_create_userTouser user                       @relation("critter_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_create_user")
   user_critter_update_userTouser user                       @relation("critter_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_update_user")
   critter_collection_unit        critter_collection_unit[]
@@ -92,8 +91,6 @@ model critter {
   measurement_qualitative        measurement_qualitative[]
   measurement_quantitative       measurement_quantitative[]
   mortality                      mortality[]
-
-  @@unique([critter_id, taxon_id], map: "critter_un")
 }
 
 model critter_collection_unit {
@@ -260,51 +257,6 @@ model lk_region_nr {
   @@index([region_geom], name: "region_nr_geom_idx", type: Gist)
 }
 
-model lk_taxon {
-  taxon_id                                                     String                                @id(map: "taxon_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  kingdom_id                                                   String?                               @db.Uuid
-  phylum_id                                                    String?                               @db.Uuid
-  class_id                                                     String?                               @db.Uuid
-  order_id                                                     String?                               @db.Uuid
-  family_id                                                    String?                               @db.Uuid
-  genus_id                                                     String?                               @db.Uuid
-  species_id                                                   String?                               @db.Uuid
-  sub_species_id                                               String?                               @db.Uuid
-  taxon_name_common                                            String?
-  taxon_name_latin                                             String
-  spi_taxonomy_id                                              Int                                   @default(-1)
-  taxon_description                                            String?
-  create_user                                                  String                                @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                                                  String                                @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                                             DateTime                              @default(now()) @db.Timestamptz(6)
-  update_timestamp                                             DateTime                              @default(now()) @db.Timestamptz(6)
-  critter                                                      critter[]
-  user_lk_taxon_create_userTouser                              user                                  @relation("lk_taxon_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_taxon_create_user")
-  user_lk_taxon_update_userTouser                              user                                  @relation("lk_taxon_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_taxon_update_user")
-  lk_taxon_lk_taxon_class_idTolk_taxon                         lk_taxon?                             @relation("lk_taxon_class_idTolk_taxon", fields: [class_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_class_idTolk_taxon                   lk_taxon[]                            @relation("lk_taxon_class_idTolk_taxon")
-  lk_taxon_lk_taxon_family_idTolk_taxon                        lk_taxon?                             @relation("lk_taxon_family_idTolk_taxon", fields: [family_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_family_idTolk_taxon                  lk_taxon[]                            @relation("lk_taxon_family_idTolk_taxon")
-  lk_taxon_lk_taxon_genus_idTolk_taxon                         lk_taxon?                             @relation("lk_taxon_genus_idTolk_taxon", fields: [genus_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_genus_idTolk_taxon                   lk_taxon[]                            @relation("lk_taxon_genus_idTolk_taxon")
-  lk_taxon_lk_taxon_kingdom_idTolk_taxon                       lk_taxon?                             @relation("lk_taxon_kingdom_idTolk_taxon", fields: [kingdom_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_kingdom_idTolk_taxon                 lk_taxon[]                            @relation("lk_taxon_kingdom_idTolk_taxon")
-  lk_taxon_lk_taxon_order_idTolk_taxon                         lk_taxon?                             @relation("lk_taxon_order_idTolk_taxon", fields: [order_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_order_idTolk_taxon                   lk_taxon[]                            @relation("lk_taxon_order_idTolk_taxon")
-  lk_taxon_lk_taxon_phylum_idTolk_taxon                        lk_taxon?                             @relation("lk_taxon_phylum_idTolk_taxon", fields: [phylum_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_phylum_idTolk_taxon                  lk_taxon[]                            @relation("lk_taxon_phylum_idTolk_taxon")
-  lk_taxon_lk_taxon_species_idTolk_taxon                       lk_taxon?                             @relation("lk_taxon_species_idTolk_taxon", fields: [species_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_species_idTolk_taxon                 lk_taxon[]                            @relation("lk_taxon_species_idTolk_taxon")
-  lk_taxon_lk_taxon_sub_species_idTolk_taxon                   lk_taxon?                             @relation("lk_taxon_sub_species_idTolk_taxon", fields: [sub_species_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction)
-  other_lk_taxon_lk_taxon_sub_species_idTolk_taxon             lk_taxon[]                            @relation("lk_taxon_sub_species_idTolk_taxon")
-  mortality_mortality_proximate_predated_by_taxon_idTolk_taxon mortality[]                           @relation("mortality_proximate_predated_by_taxon_idTolk_taxon")
-  mortality_mortality_ultimate_predated_by_taxon_idTolk_taxon  mortality[]                           @relation("mortality_ultimate_predated_by_taxon_idTolk_taxon")
-  xref_taxon_collection_category                               xref_taxon_collection_category[]
-  xref_taxon_marking_body_location                             xref_taxon_marking_body_location[]
-  xref_taxon_measurement_qualitative                           xref_taxon_measurement_qualitative[]
-  xref_taxon_measurement_quantitative                          xref_taxon_measurement_quantitative[]
-}
-
 model lk_wildlife_management_unit {
   wmu_id                                             String                                  @id(map: "pk_lk_wildlife_management_unit") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   wmu_name                                           String                                  @unique(map: "lk_wildlife_management_unit_un")
@@ -429,10 +381,10 @@ model mortality {
   mortality_timestamp                                                        DateTime           @db.Timestamptz(6)
   proximate_cause_of_death_id                                                String             @db.Uuid
   proximate_cause_of_death_confidence                                        cod_confidence?
-  proximate_predated_by_taxon_id                                             String?            @db.Uuid
+  proximate_predated_by_itis_tsn                                             Int
   ultimate_cause_of_death_id                                                 String?            @db.Uuid
   ultimate_cause_of_death_confidence                                         cod_confidence?
-  ultimate_predated_by_taxon_id                                              String?            @db.Uuid
+  ultimate_predated_by_itis_tsn                                              Int
   mortality_comment                                                          String?
   create_user                                                                String             @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                                                                String             @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
@@ -443,9 +395,7 @@ model mortality {
   critter                                                                    critter            @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_fk")
   location                                                                   location?          @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_location_fk")
   lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death lk_cause_of_death  @relation("mortality_proximate_cause_of_death_idTolk_cause_of_death", fields: [proximate_cause_of_death_id], references: [cod_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_pcod_fk")
-  lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon                lk_taxon?          @relation("mortality_proximate_predated_by_taxon_idTolk_taxon", fields: [proximate_predated_by_taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_pcod_taxon_fk")
   lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death  lk_cause_of_death? @relation("mortality_ultimate_cause_of_death_idTolk_cause_of_death", fields: [ultimate_cause_of_death_id], references: [cod_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_ucod_fk")
-  lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon                 lk_taxon?          @relation("mortality_ultimate_predated_by_taxon_idTolk_taxon", fields: [ultimate_predated_by_taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_ucod_taxon_fk")
 }
 
 model user {
@@ -480,8 +430,6 @@ model user {
   lk_region_env_lk_region_env_update_userTouser                                                         lk_region_env[]                             @relation("lk_region_env_update_userTouser")
   lk_region_nr_lk_region_nr_create_userTouser                                                           lk_region_nr[]                              @relation("lk_region_nr_create_userTouser")
   lk_region_nr_lk_region_nr_update_userTouser                                                           lk_region_nr[]                              @relation("lk_region_nr_update_userTouser")
-  lk_taxon_lk_taxon_create_userTouser                                                                   lk_taxon[]                                  @relation("lk_taxon_create_userTouser")
-  lk_taxon_lk_taxon_update_userTouser                                                                   lk_taxon[]                                  @relation("lk_taxon_update_userTouser")
   lk_wildlife_management_unit_lk_wildlife_management_unit_create_userTouser                             lk_wildlife_management_unit[]               @relation("lk_wildlife_management_unit_create_userTouser")
   lk_wildlife_management_unit_lk_wildlife_management_unit_update_userTouser                             lk_wildlife_management_unit[]               @relation("lk_wildlife_management_unit_update_userTouser")
   location_location_create_userTouser                                                                   location[]                                  @relation("location_create_userTouser")
@@ -524,21 +472,18 @@ model xref_collection_unit {
 }
 
 model xref_taxon_collection_category {
-  collection_category_id String                 @db.Uuid
-  taxon_id               String                 @db.Uuid
+  collection_category_id String                 @id(map: "xref_taxon_collection_category_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  itis_tsn               Int
   create_user            String                 @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user            String                 @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp       DateTime               @default(now()) @db.Timestamptz(6)
   update_timestamp       String                 @default(dbgenerated("now()")) @db.VarChar
   lk_collection_category lk_collection_category @relation(fields: [collection_category_id], references: [collection_category_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_collection_category_category_fk")
-  lk_taxon               lk_taxon               @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_collection_category_taxon_fk")
-
-  @@id([collection_category_id, taxon_id], map: "xref_taxon_collection_category_pk")
 }
 
 model xref_taxon_marking_body_location {
   taxon_marking_body_location_id                          String    @id(map: "xref_species_marking_location_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  taxon_id                                                String    @db.Uuid
+  itis_tsn                                                Int
   body_location                                           String
   description                                             String?
   create_user                                             String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
@@ -548,14 +493,13 @@ model xref_taxon_marking_body_location {
   marking                                                 marking[]
   user_xref_taxon_marking_body_location_create_userTouser user      @relation("xref_taxon_marking_body_location_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_marking_location_create_user")
   user_xref_taxon_marking_body_location_update_userTouser user      @relation("xref_taxon_marking_body_location_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_marking_location_update_user")
-  lk_taxon                                                lk_taxon  @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_marking_location_taxon_id_fkey")
 
-  @@unique([taxon_id, body_location], map: "xref_species_marking_location_un")
+  @@unique([itis_tsn, body_location], map: "xref_species_marking_location_un")
 }
 
 model xref_taxon_measurement_qualitative {
   taxon_measurement_id                                      String                                      @id(map: "taxon_measurement_qualitative_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  taxon_id                                                  String                                      @db.Uuid
+  itis_tsn                                                  Int?
   measurement_name                                          String                                      @db.VarChar
   measurement_desc                                          String?                                     @db.VarChar
   create_user                                               String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
@@ -563,7 +507,6 @@ model xref_taxon_measurement_qualitative {
   create_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
   update_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
   user_xref_taxon_measurement_qualitative_create_userTouser user                                        @relation("xref_taxon_measurement_qualitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_create_user")
-  lk_taxon                                                  lk_taxon                                    @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_taxon")
   user_xref_taxon_measurement_qualitative_update_userTouser user                                        @relation("xref_taxon_measurement_qualitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_update_user")
   xref_taxon_measurement_qualitative_option                 xref_taxon_measurement_qualitative_option[]
   measurement_qualitative                                   measurement_qualitative[]
@@ -589,7 +532,7 @@ model xref_taxon_measurement_qualitative_option {
 
 model xref_taxon_measurement_quantitative {
   taxon_measurement_id                                       String                     @id(map: "taxon_measurement_empirical_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  taxon_id                                                   String                     @db.Uuid
+  itis_tsn                                                   Int
   measurement_name                                           String
   measurement_desc                                           String?
   min_value                                                  Float?                     @default(0)
@@ -602,7 +545,6 @@ model xref_taxon_measurement_quantitative {
   measurement_quantitative                                   measurement_quantitative[]
   user_xref_taxon_measurement_quantitative_create_userTouser user                       @relation("xref_taxon_measurement_quantitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_create_user")
   user_xref_taxon_measurement_quantitative_update_userTouser user                       @relation("xref_taxon_measurement_quantitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_update_user")
-  lk_taxon                                                   lk_taxon                   @relation(fields: [taxon_id], references: [taxon_id], onDelete: NoAction, onUpdate: NoAction, map: "taxon_measurement_empirical_fk")
 }
 
 enum cod_confidence {
