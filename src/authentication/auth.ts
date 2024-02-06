@@ -30,7 +30,7 @@ interface IUserHeader {
  * @throws {HTTP401} if the bearer token is missing or invalid
  */
 export const authenticateRequest = async function (
-  req: Request
+  req: Request,
 ): Promise<{ keycloak_uuid: string; system_name: string; identifier: string }> {
   try {
     if (!req.headers.authorization) {
@@ -106,18 +106,26 @@ export const authenticateRequest = async function (
       throw apiError.forbidden("Access Denied");
     }
 
-    const user = JSON.parse(req.headers.user as string) as IUserHeader;
-    if (!user.keycloak_guid || !user.username) {
+    if (!req.headers.user) {
+      console.log("Stringified user header is missing");
+      throw apiError.syntaxIssue("User header was not provided");
+    }
+
+    const userParsed = JSON.parse(req.headers.user as string) as IUserHeader;
+
+    if (!userParsed.keycloak_guid || !userParsed.username) {
       throw apiError.syntaxIssue("User header was not provided.");
     }
 
-    console.log(JSON.stringify(bcgovToken, null, 2));
-
-    return {
-      keycloak_uuid: user.keycloak_guid.toUpperCase(),
-      identifier: user.username,
+    const user = {
+      keycloak_uuid: userParsed.keycloak_guid.toUpperCase(),
+      identifier: userParsed.username,
       system_name: String(bcgovToken.clientId),
     };
+
+    console.log(user);
+
+    return user;
   } catch (error) {
     console.log(JSON.stringify(error));
     throw apiError.forbidden("Access Denied");
