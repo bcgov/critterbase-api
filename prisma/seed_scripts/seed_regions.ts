@@ -54,14 +54,15 @@ const regionStructureList: RegionStructure[] = [
 ];
 
 /**
- * Insert all region table values.
- * Need to do this all with raw SQL as the geometry types are not supported by prisma.
+ * Seeds regions from JSON files.
+ * Note: using raw SQL as PostGIS geometry types are not natively supported by prisma.
  * @async
  * @throws
  * @returns {Promise<void>}
  */
 const seedRegions = async () => {
-  console.log("Seeding JSON files regions...");
+  console.log(`Seeding (${regionStructureList.length}) region JSON files...`);
+
   /**
    * Insert all region table values.
    * Need to do this all with raw SQL as the geometry types are not supported by prisma.

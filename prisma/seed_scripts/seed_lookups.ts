@@ -1,5 +1,4 @@
 import { prisma } from "../../src/utils/constants";
-import { queryRandomUUID } from "../prisma_utils";
 /**
  * Seed lookup colours.
  *
@@ -8,19 +7,22 @@ import { queryRandomUUID } from "../prisma_utils";
  * @returns {Promise<void>}
  */
 export const seedColours = async () => {
-  console.log("Seeding lookup colours...");
+  const colours = [
+    "Blue",
+    "Red",
+    "Yellow",
+    "Orange",
+    "Black",
+    "Green",
+    "Pink",
+    "White",
+    "Purple",
+  ];
+
+  console.log(`Seeding (${colours.length}) lookup colours...`);
+
   await prisma.lk_colour.createMany({
-    data: [
-      "Blue",
-      "Red",
-      "Yellow",
-      "Orange",
-      "Black",
-      "Green",
-      "Pink",
-      "White",
-      "Purple",
-    ].map((colour) => ({ colour })),
+    data: colours.map((colour) => ({ colour })),
   });
 };
 
@@ -32,9 +34,12 @@ export const seedColours = async () => {
  * @returns {Promise<void>}
  */
 export const seedMaterials = async () => {
-  console.log("Seeding lookup materials...");
+  const materials = [{ material: "Plastic" }, { material: "Metal" }];
+
+  console.log(`Seeding (${materials.length}) lookup materials...`);
+
   await prisma.lk_marking_material.createMany({
-    data: [{ material: "Plastic" }, { material: "Metal" }],
+    data: materials,
   });
 };
 
@@ -46,15 +51,13 @@ export const seedMaterials = async () => {
  * @returns {Promise<void>}
  */
 export const seedMarkingTypes = async () => {
-  console.log("Seeding lookup marking types...");
-  try {
-    await prisma.lk_marking_type.createMany({
-      data: [{ name: "Ear Tag" }],
-    });
-  } catch (err) {
-    console.log("Failed to seed lookup marking types.");
-    console.log(err);
-  }
+  const markingTypes = [{ name: "Ear Tag" }];
+
+  console.log(`Seeding (${markingTypes.length}) lookup marking types...`);
+
+  await prisma.lk_marking_type.createMany({
+    data: markingTypes,
+  });
 };
 
 /**
@@ -65,8 +68,7 @@ export const seedMarkingTypes = async () => {
  * @returns {Promise<void>}
  */
 export const seedCausesOfDeath = async () => {
-  console.log("Seeding lookup causes of death...");
-  const data = [
+  const causesOfDeath = [
     { cod_category: "Natural Disaster", cod_reason: "Avalanche" },
     { cod_category: "Natural Disaster", cod_reason: "Unknown" },
     { cod_category: "Collision", cod_reason: "Train" },
@@ -82,7 +84,11 @@ export const seedCausesOfDeath = async () => {
     { cod_category: "Purposeful Removal", cod_reason: null },
     { cod_category: "Property/Life Defence", cod_reason: null },
     { cod_category: "Unknown", cod_reason: null },
-  ].map((cod) => ({
+  ];
+
+  console.log(`Seeding (${causesOfDeath.length}) lookup causes of death...`);
+
+  const data = causesOfDeath.map((cod) => ({
     cod_category: cod.cod_category,
     cod_reason: cod.cod_reason,
   }));
@@ -92,8 +98,19 @@ export const seedCausesOfDeath = async () => {
   });
 };
 
+/**
+ * Seeds a single collection unit category.
+ *
+ * @async
+ * @param {string} categoryName
+ * @throws {Error} - throws if prisma requests returns undefined.
+ * @returns {Promise<string>}
+ */
 export const seedCollectionUnitCategory = async (categoryName: string) => {
-  console.log(`Seeding lookup collection unit category: '${categoryName}'...`);
+  console.log(
+    `Seeding (1) lookup collection unit category: '${categoryName}'...`,
+  );
+
   const { collection_category_id } = await prisma.lk_collection_category.create(
     {
       data: {
