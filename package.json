@@ -16,7 +16,7 @@
     "dead:code": "ts-prune | (! grep -v 'used in module')",
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:generate": "npx prisma generate",
-    "prisma:dev-setup": "npx prisma migrate deploy && npx prisma db seed"
+    "prisma:dev-setup": "npx prisma migrate deploy && npx prisma generate && npx prisma db seed"
   },
   "author": "",
   "license": "ISC",

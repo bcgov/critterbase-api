@@ -10,6 +10,6 @@
   "ts-node": {
     "swc": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "prisma/**/*.ts"],
   "exclude": ["src/**/*.test.ts", "dist/*"]
 }
