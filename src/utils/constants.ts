@@ -1,6 +1,4 @@
 import { PrismaClient, user } from "@prisma/client";
-// import { makeApp } from "../server";
-// import { db } from "./database";
 import { QueryFormats } from "./types";
 declare module "express-session" {
   interface SessionData {
@@ -17,6 +15,7 @@ declare global {
       API_KEY: string;
       DB_URL: string;
       AUTHENTICATE: string;
+      ITIS_WEB_SERVICE: string;
     }
   }
 }
