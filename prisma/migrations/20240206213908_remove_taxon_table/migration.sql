@@ -117,3 +117,7 @@ ALTER COLUMN "itis_tsn" SET NOT NULL;
 -- DropTable
 DROP TABLE "lk_taxon";
 
+-- DropFunction
+DROP FUNCTION IF EXISTS get_taxon_ids(text);
+DROP FUNCTION IF EXISTS get_taxon_ids(uuid);
+
