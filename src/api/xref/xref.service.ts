@@ -13,7 +13,7 @@ export class XrefService extends CritterbasePrisma {
   /**
    * Gets 'collection units' from a category id.
    *
-   * Optionally can return as the 'select' format.
+   * Optionally can return as 'select' format.
    *
    * @async
    * @param {string} category_id - uuid primary key of xref_collection_unit.
@@ -37,7 +37,7 @@ export class XrefService extends CritterbasePrisma {
    * Get 'collection unit categories' for a TSN.
    * Includes all 'collection unit categories' for hierarchies above.
    *
-   * Optionally can return as the 'select' format.
+   * Optionally can return as 'select' format.
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.

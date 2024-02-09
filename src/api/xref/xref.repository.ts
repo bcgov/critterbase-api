@@ -31,6 +31,16 @@ export class XrefRepository extends CritterbasePrisma {
     return await this.prisma.$queryRaw``;
   }
 
+  /**
+   * HIERARCHAL
+   *
+   * Get 'marking body locations' for a TSN.
+   * Includes all 'marking body locations' for hierarchies above.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async getTsnMarkingBodyLocations(tsn: number) {
     const itisService = new ItisService();
     const tsns = await itisService.getTsnHierarchy(tsn);
@@ -40,6 +50,18 @@ export class XrefRepository extends CritterbasePrisma {
     });
   }
 
+  /**
+   * HIERARCHAL
+   *
+   * Get 'collection unit categories' for a TSN.
+   * Includes all 'collection unit categories' for hierarchies above.
+   *
+   * Responds as 'select' format useful for frontend components.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async asSelect_getTsnMarkingBodyLocations(tsn: number) {
     const itisService = new ItisService();
     const tsns = await itisService.getTsnHierarchy(tsn);
@@ -53,6 +75,16 @@ export class XrefRepository extends CritterbasePrisma {
       WHERE itis_tsn = ANY(${tsns});`;
   }
 
+  /**
+   * HIERARCHAL REPOSITORY METHOD
+   *
+   * Get 'qualitative measurements' for a TSN.
+   * Includes all 'qualitative measurements' for hierarchies above.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async getTsnQualitativeMeasurements(tsn: number) {
     const itisService = new ItisService();
     const tsns = await itisService.getTsnHierarchy(tsn);
@@ -62,6 +94,18 @@ export class XrefRepository extends CritterbasePrisma {
     });
   }
 
+  /**
+   * HIERARCHAL
+   *
+   * Get 'qualitative measurements' for a TSN.
+   * Includes all 'qualitative measurements' for hierarchies above.
+   *
+   * Responds as 'select' format useful for frontend components.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async asSelect_getTsnQualitativeMeasurements(tsn: number) {
     const itisService = new ItisService();
     const tsns = await itisService.getTsnHierarchy(tsn);
@@ -97,6 +141,16 @@ export class XrefRepository extends CritterbasePrisma {
       WHERE itis_tsn = ANY(${tsns});`;
   }
 
+  /**
+   * HIERARCHAL
+   *
+   * Get 'quantitative measurements' for a TSN.
+   * Includes all 'quantitative measurements' for hierarchies above.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async getTsnQuantitativeMeasurements(tsn: number) {
     const itisService = new ItisService();
     const tsns = await itisService.getTsnHierarchy(tsn);
@@ -106,6 +160,18 @@ export class XrefRepository extends CritterbasePrisma {
     });
   }
 
+  /**
+   * HIERARCHAL
+   *
+   * Get 'qualitative measurements' for a TSN.
+   * Includes all 'qualitative measurements' for hierarchies above.
+   *
+   * Responds as 'select' format useful for frontend components.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async asSelect_getTsnQuantitativeMeasurements(tsn: number) {
     const itisService = new ItisService();
     const tsns = await itisService.getTsnHierarchy(tsn);
