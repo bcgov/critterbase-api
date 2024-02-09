@@ -1,16 +1,13 @@
 import axios from "axios";
-import {
-  IItisGetFullHierarchyResponse,
-  IItisHierarchy,
-} from "./itis-response-types";
+import { IItisGetFullHierarchyResponse } from "./itis-response-types";
 
 /**
  * Service to use ITIS web services.
  *
  * @export
- * @class ItisService
+ * @class Itis
  */
-export class ItisService {
+export class Itis {
   webServiceUrl: string;
 
   constructor() {

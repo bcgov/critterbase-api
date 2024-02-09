@@ -1,8 +1,23 @@
-import { ItisService } from "../../itis/itis-service";
-import { CritterbasePrisma } from "../../utils/base_classes";
+import { Repository } from "../../utils/base_classes";
+import {
+  ICollectionCategoryDef,
+  ICollectionUnitDef,
+  IMarkingBodyLocationDef,
+  IQualitativeMeasurementDef,
+  IQualitativeMeasurementOption,
+} from "./xref.utils";
 
-export class XrefRepository extends CritterbasePrisma {
-  async getCollectionUnitsFromCategoryId(category_id: string) {
+export class XrefRepository extends Repository {
+  /**
+   * Get 'collection units' from category_id.
+   *
+   * @async
+   * @param {string} category_id - primary key of 'xref_collection_unit'.
+   * @returns {Promise<ICollectionUnitDef[]>}
+   */
+  async getCollectionUnitsFromCategoryId(
+    category_id: string,
+  ): Promise<ICollectionUnitDef[]> {
     return await this.prisma.xref_collection_unit.findMany({
       where: {
         collection_category_id: category_id,
@@ -10,177 +25,114 @@ export class XrefRepository extends CritterbasePrisma {
     });
   }
 
-  async asSelect_getCollectionUnitsFromCategoryId(category_id: string) {
-    return await this.prisma.$queryRaw`
-      SELECT collection_unit_id as id, 'collection_unit_id' as key, unit_name as value
-      FROM xref_collection_unit
-      WHERE category_id = ${category_id};`;
+  /**
+   * Get 'collection categories' for a TSN.
+   *
+   * @async
+   * @param {number} tsn - ITIS TSN identifier.
+   * @returns {Promise<ICollectionCategoryDef[]>}
+   */
+  async getTsnCollectionCategories(
+    tsn: number,
+  ): Promise<ICollectionCategoryDef[]> {
+    return this.prisma.$queryRaw`
+      SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
+      FROM lk_collection_category cc
+      INNER JOIN xref_taxon_collection_category x
+      ON x.collection_category_id = cc.collection_category_id
+      AND x.itis_tsn = ${tsn};`;
   }
 
-  async getTsnCollectionCategories(tsn: number) {
-    return await this.prisma.xref_taxon_collection_category.findMany({
-      where: { itis_tsn: tsn },
-      include: {
-        lk_collection_category: { select: { category_name: true } },
+  /**
+   * HIERARCHAL
+   *
+   * Get 'marking body locations' for array of TSNs.
+   *
+   * @async
+   * @param {number[]} tsns - ITIS TSN identifiers.
+   * @returns {Promise<IMarkingBodyLocations>}
+   */
+  async getTsnMarkingBodyLocations(
+    tsns: number[],
+  ): Promise<IMarkingBodyLocationDef[]> {
+    return await this.prisma.xref_taxon_marking_body_location.findMany({
+      where: { itis_tsn: { in: tsns } },
+      select: {
+        taxon_marking_body_location_id: true,
+        itis_tsn: true,
+        body_location: true,
+        description: true,
       },
     });
   }
 
-  // TODO: Add as select request
-  async asSelect_getTsnCollectionCategories(tsn: number) {
-    return await this.prisma.$queryRaw``;
-  }
-
   /**
    * HIERARCHAL
    *
-   * Get 'marking body locations' for a TSN.
-   * Includes all 'marking body locations' for hierarchies above.
+   * Get 'qualitative measurements' for array of TSNs.
    *
    * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @param {number[]} tsns - ITIS TSN identifiers.
+   * @returns {Promise<IQualitativeMeasurementDef>}
    */
-  async getTsnMarkingBodyLocations(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
-    return await this.prisma.xref_taxon_marking_body_location.findMany({
-      where: { itis_tsn: { in: tsns } },
-    });
-  }
-
-  /**
-   * HIERARCHAL
-   *
-   * Get 'collection unit categories' for a TSN.
-   * Includes all 'collection unit categories' for hierarchies above.
-   *
-   * Responds as 'select' format useful for frontend components.
-   *
-   * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
-   */
-  async asSelect_getTsnMarkingBodyLocations(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
-    return this.prisma.$queryRaw`
-      SELECT
-      taxon_marking_body_location_id as id,
-      'taxon_marking_body_location_id' as key,
-      body_location as value
-      FROM xref_taxon_marking_body_location
-      WHERE itis_tsn = ANY(${tsns});`;
-  }
-
-  /**
-   * HIERARCHAL REPOSITORY METHOD
-   *
-   * Get 'qualitative measurements' for a TSN.
-   * Includes all 'qualitative measurements' for hierarchies above.
-   *
-   * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
-   */
-  async getTsnQualitativeMeasurements(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
+  async getTsnQualitativeMeasurements(
+    tsns: number[],
+  ): Promise<IQualitativeMeasurementDef[]> {
     return await this.prisma.xref_taxon_measurement_qualitative.findMany({
       where: { itis_tsn: { in: tsns } },
+      select: {
+        taxon_measurement_id: true,
+        itis_tsn: true,
+        measurement_name: true,
+        measurement_desc: true,
+      },
     });
   }
 
   /**
-   * HIERARCHAL
-   *
-   * Get 'qualitative measurements' for a TSN.
-   * Includes all 'qualitative measurements' for hierarchies above.
-   *
-   * Responds as 'select' format useful for frontend components.
+   * Get 'qualitative measurement options' for taxon_measurement_id
    *
    * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @param {string} taxonMeasurementId - primary key of xref_taxon_measurement_qualitative
+   * @returns {Promise<IQualitativeMeasurementOption>}
    */
-  async asSelect_getTsnQualitativeMeasurements(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
-    return await this.prisma.$queryRaw`
-      SELECT taxon_measurement_id as id,
-      'taxon_measurement_id' as key,
-      measurement_name as value
-      FROM xref_taxon_measurement_qualitative
-      WHERE itis_tsn = ANY(${tsns});`;
-  }
-
-  async getTsnQualitativeMeasurementOptions(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
+  async getQualitativeMeasurementOptions(
+    taxonMeasurementId: string,
+  ): Promise<IQualitativeMeasurementOption[]> {
     return await this.prisma.xref_taxon_measurement_qualitative_option.findMany(
       {
-        where: { itis_tsn: { in: tsns } },
+        where: { taxon_measurement_id: taxonMeasurementId },
+        select: {
+          qualitative_option_id: true,
+          taxon_measurement_id: true,
+          option_value: true,
+          option_label: true,
+          option_desc: true,
+        },
       },
     );
   }
 
-  async asSelect_getTsnQualitativeMeasurementOptions(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
-    return await this.prisma.$queryRaw`
-      SELECT taxon_measurement_id as id,
-      'taxon_measurement_id' as key,
-      measurement_name as value
-      FROM xref_taxon_measurement_qualitative
-      WHERE itis_tsn = ANY(${tsns});`;
-  }
-
   /**
    * HIERARCHAL
    *
-   * Get 'quantitative measurements' for a TSN.
-   * Includes all 'quantitative measurements' for hierarchies above.
+   * Get 'quantitative measurements' definitions for array of TSNs.
    *
    * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @param {number[]} tsns - ITIS TSN identifiers.
+   * @returns {Promise<IQuantiativeMeasurementDef>}
    */
-  async getTsnQuantitativeMeasurements(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
+  async getTsnQuantitativeMeasurements(tsns: number[]) {
     return await this.prisma.xref_taxon_measurement_quantitative.findMany({
       where: { itis_tsn: { in: tsns } },
+      select: {
+        taxon_measurement_id: true,
+        itis_tsn: true,
+        measurement_name: true,
+        min_value: true,
+        max_value: true,
+        unit: true,
+      },
     });
-  }
-
-  /**
-   * HIERARCHAL
-   *
-   * Get 'qualitative measurements' for a TSN.
-   * Includes all 'qualitative measurements' for hierarchies above.
-   *
-   * Responds as 'select' format useful for frontend components.
-   *
-   * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
-   */
-  async asSelect_getTsnQuantitativeMeasurements(tsn: number) {
-    const itisService = new ItisService();
-    const tsns = await itisService.getTsnHierarchy(tsn);
-
-    return await this.prisma.$queryRaw`
-      SELECT taxon_measurement_id as id,
-      'taxon_measurement_id' as key,
-      measurement_name as value
-      FROM xref_taxon_measurement_quantitative
-      WHERE itis_tsn = ANY(${tsns});`;
   }
 }

@@ -82,11 +82,11 @@ class apiError extends Error {
   }
 }
 
-type DateAuditColumns = Pick<critter, "create_timestamp" | "update_timestamp">;
-
-type UserAuditColumns = Pick<critter, "update_user" | "create_user">;
-
-type AuditColumns = DateAuditColumns & UserAuditColumns;
+type AuditColumns =
+  | "create_timestamp"
+  | "update_timestamp"
+  | "update_user"
+  | "create_user";
 
 type Implements<Model> = {
   [key in keyof Model]-?: z.ZodType<Model[key]> extends infer T

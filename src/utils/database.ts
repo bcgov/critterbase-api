@@ -13,7 +13,6 @@ import * as mortality from "../api/mortality/mortality.service";
 import * as user from "../api/user/user.service";
 import { XrefService } from "../api/xref/xref.service";
 
-XrefService;
 export type ICbDatabase = typeof db;
 
 export const db = {

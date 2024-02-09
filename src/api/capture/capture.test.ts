@@ -31,7 +31,7 @@ const request = supertest(
     updateCapture,
     deleteCapture,
     createCapture,
-  } as Record<keyof ICbDatabase, any>)
+  } as Record<keyof ICbDatabase, any>),
 );
 
 const create = jest.spyOn(prisma.capture, "create").mockImplementation();
@@ -168,10 +168,10 @@ describe("API: Critter", () => {
         expect(prisma.capture.create).toHaveBeenCalled();
         expect(CaptureBodySchema.safeParse(result).success).toBe(true);
         expect(result.capture_location_id).toBe(
-          "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+          "4804d622-9539-40e6-a8a5-b7b223c2f09f",
         );
         expect(result.release_location_id).toBe(
-          "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+          "4804d622-9539-40e6-a8a5-b7b223c2f09f",
         );
       });
     });
@@ -205,7 +205,7 @@ describe("API: Critter", () => {
         update.mockResolvedValue({ ...CAPTURE, capture_comment: "banana" });
         const result = await _updateCapture(CAPTURE_ID, {
           capture_comment: "banana",
-          critter_id: ""
+          critter_id: "",
         });
         expect.assertions(2);
         expect(prisma.capture.update).toHaveBeenCalled();
@@ -220,14 +220,14 @@ describe("API: Critter", () => {
         const result = await _updateCapture(CAPTURE_ID, {
           capture_location: LOCATION,
           release_location: LOCATION,
-          critter_id: ""
+          critter_id: "",
         });
         expect.assertions(3);
         expect(result?.capture_location_id).toBe(
-          "3572f49f-4c81-472a-8255-5d390dfdc66b"
+          "3572f49f-4c81-472a-8255-5d390dfdc66b",
         );
         expect(result?.release_location_id).toBe(
-          "3572f49f-4c81-472a-8255-5d390dfdc66b"
+          "3572f49f-4c81-472a-8255-5d390dfdc66b",
         );
         expect(prisma.capture.update).toHaveBeenCalled();
       });
@@ -240,11 +240,11 @@ describe("API: Critter", () => {
         const result = await _updateCapture(CAPTURE_ID, {
           release_location: LOCATION,
           force_create_release: true,
-          critter_id: ""
+          critter_id: "",
         });
         expect.assertions(2);
         expect(result?.capture_location_id).not.toBe(
-          result?.release_location_id
+          result?.release_location_id,
         );
         expect(prisma.capture.update).toHaveBeenCalled();
       });

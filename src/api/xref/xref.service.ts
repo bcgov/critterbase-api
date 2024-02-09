@@ -1,159 +1,106 @@
-import { CritterbasePrisma } from "../../utils/base_classes";
-import { QueryFormats } from "../../utils/types";
+import { Service } from "../../utils/base_classes";
 import { XrefRepository } from "./xref.repository";
 
-export class XrefService extends CritterbasePrisma {
-  format?: QueryFormats;
-
-  constructor(format?: QueryFormats) {
-    super();
-    this.format = format;
+export class XrefService extends Service<XrefRepository> {
+  constructor(repository?: XrefRepository) {
+    super(repository ?? new XrefRepository());
   }
-
   /**
    * Gets 'collection units' from a category id.
    *
-   * Optionally can return as 'select' format.
-   *
    * @async
    * @param {string} category_id - uuid primary key of xref_collection_unit.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<ICollectionUnitDef[]>}
    */
   async getCollectionUnitsFromCategoryId(category_id: string) {
-    const xrefRepository = new XrefRepository();
-
-    if (this.format === QueryFormats.asSelect) {
-      return await xrefRepository.asSelect_getCollectionUnitsFromCategoryId(
-        category_id,
-      );
-    }
-
-    return xrefRepository.getCollectionUnitsFromCategoryId(category_id);
+    return this.repository.getCollectionUnitsFromCategoryId(category_id);
   }
 
   /**
-   * HIERARCHY SERVICE
-   *
    * Get 'collection unit categories' for a TSN.
-   * Includes all 'collection unit categories' for hierarchies above.
    *
-   * Optionally can return as 'select' format.
+   * Includes all 'collection unit categories' for hierarchies above.
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<ICollectionCategoryDef[]>}
    */
   async getTsnCollectionCategories(tsn: number) {
-    const xrefRepository = new XrefRepository();
-
-    if (this.format === QueryFormats.asSelect) {
-      return await xrefRepository.asSelect_getTsnCollectionCategories(tsn);
-    }
-
-    return xrefRepository.getTsnCollectionCategories(tsn);
+    return this.repository.getTsnCollectionCategories(tsn);
   }
 
   /**
    * HIERARCHY SERVICE
    *
    * Get all 'marking body locations' definitions for a TSN.
-   * Includes all 'marking body locations' definitions for hierarchies above.
    *
-   * Optionally can return as 'select' format.
+   * Includes all 'marking body locations' definitions for hierarchies above.
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<IMarkingBodyLocationDef[]>}
    */
   async getTsnMarkingBodyLocations(tsn: number) {
-    const xrefRepository = new XrefRepository();
+    const tsns = await this.itis.getTsnHierarchy(tsn);
 
-    if (this.format === QueryFormats.asSelect) {
-      return await xrefRepository.asSelect_getTsnMarkingBodyLocations(tsn);
-    }
-
-    return xrefRepository.getTsnMarkingBodyLocations(tsn);
+    return this.repository.getTsnMarkingBodyLocations(tsns);
   }
 
   /**
    * HIERARCHY SERVICE
    *
    * Get all 'qualitative measurements' for a TSN.
-   * Includes all 'qualitative measurements' for hierarchies above.
    *
-   * Optionally can return as 'select' format.
+   * Includes all 'qualitative measurements' for hierarchies above.
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<IQualitativeMeasurementDef[]>}
    */
   async getTsnQualitativeMeasurements(tsn: number) {
-    const xrefRepository = new XrefRepository();
+    const tsns = await this.itis.getTsnHierarchy(tsn);
 
-    if (this.format === QueryFormats.asSelect) {
-      return await xrefRepository.asSelect_getTsnQualitativeMeasurements(tsn);
-    }
-
-    return xrefRepository.getTsnQualitativeMeasurements(tsn);
+    return this.repository.getTsnQualitativeMeasurements(tsns);
   }
 
   /**
    * HIERARCHY SERVICE
    *
    * Get all 'quantitative measurements' defintions for a TSN.
-   * Includes all 'quantitative measurements' definitions for hierarchies above.
    *
-   * Optionally can return as 'select' format.
+   * Includes all 'quantitative measurements' definitions for hierarchies above.
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<IQuantitativeMeasurementDef[]>}
    */
   async getTsnQuantitativeMeasurements(tsn: number) {
-    const xrefRepository = new XrefRepository();
+    const tsns = await this.itis.getTsnHierarchy(tsn);
 
-    if (this.format === QueryFormats.asSelect) {
-      return await xrefRepository.asSelect_getTsnQuantitativeMeasurements(tsn);
-    }
-
-    return xrefRepository.getTsnQuantitativeMeasurements(tsn);
+    return this.repository.getTsnQuantitativeMeasurements(tsns);
   }
 
   /**
-   * HIERARCHY SERVICE
-   *
-   * Get all 'quantitative measurement options' for a TSN.
-   * Includes all 'quantitative measurement options' for hierarchies above.
-   *
-   * Optionally can return as 'select' format.
+   * Get all 'qualitative measurement options'
    *
    * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @param {string} taxonMeasurementId - qualitative measurement identifier.
+   * @returns {Promise<IQualitativeMeasurementOption[]>}
    */
-  async getTsnQuantitativeMeasurementOptions(tsn: number) {
-    const xrefRepository = new XrefRepository();
-
-    if (this.format === QueryFormats.asSelect) {
-      return await xrefRepository.asSelect_getTsnQualitativeMeasurementOptions(
-        tsn,
-      );
-    }
-
-    return xrefRepository.getTsnQualitativeMeasurementOptions(tsn);
+  async getQualitativeMeasurementOptions(taxonMeasurementId: string) {
+    return this.repository.getQualitativeMeasurementOptions(taxonMeasurementId);
   }
 
   /**
    * HIERARCHY SERVICE
    *
    * Get all 'measurements' definitions for a TSN. Both qualitative and quantitative.
-   * Includes all 'measurements' definitions for hierarchies above.
    *
-   * Optionally can return as 'select' format.
+   * Includes all 'measurements' definitions for hierarchies above.
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<Array<IQualitativeMeasurementDef | IQuantitativeMeasurementDef>>}
    */
   async getTsnMeasurements(tsn: number) {
     const quant = await this.getTsnQuantitativeMeasurements(tsn);
