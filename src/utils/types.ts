@@ -34,7 +34,7 @@ class apiError extends Error {
     return new apiError(
       `${propertyName} is required and must be provided in request`,
       400,
-      "requiredProperty"
+      "requiredProperty",
     );
   }
 
@@ -55,9 +55,9 @@ class apiError extends Error {
   /**
    ** Authorization headers are missing or incorrect
    */
-   static unauthorized(message: string) {
-     return new apiError(message, 401, "unauthorized");
-   }
+  static unauthorized(message: string) {
+    return new apiError(message, 401, "unauthorized");
+  }
 
   /**
    ** Internal server issue or problem occurs
@@ -93,12 +93,12 @@ type Implements<Model> = {
     ? T extends z.ZodNullableType<z.ZodOptionalType<any>>
       ? z.ZodNullableType<z.ZodOptionalType<z.ZodType<Model[key]>>>
       : T extends z.ZodOptionalType<z.ZodNullableType<any>>
-      ? z.ZodOptionalType<z.ZodNullableType<z.ZodType<Model[key]>>>
-      : T extends z.ZodNullableType<any>
-      ? z.ZodNullableType<z.ZodType<Model[key]>>
-      : T extends z.ZodOptionalType<any>
-      ? z.ZodOptionalType<z.ZodType<Model[key]>>
-      : z.ZodType<Model[key]>
+        ? z.ZodOptionalType<z.ZodNullableType<z.ZodType<Model[key]>>>
+        : T extends z.ZodNullableType<any>
+          ? z.ZodNullableType<z.ZodType<Model[key]>>
+          : T extends z.ZodOptionalType<any>
+            ? z.ZodOptionalType<z.ZodType<Model[key]>>
+            : z.ZodType<Model[key]>
     : never;
 };
 
@@ -108,7 +108,7 @@ interface ISelect {
   value: string;
 }
 
-enum QueryFormats {
+export enum QueryFormats {
   default = "default",
   detailed = "detailed",
   full = "full",
@@ -124,13 +124,20 @@ interface FormatParseBody {
 interface FormatParse {
   [QueryFormats.default]?: FormatParseBody;
   [QueryFormats.detailed]?: FormatParseBody;
-  [QueryFormats.full]?: FormatParseBody
+  [QueryFormats.full]?: FormatParseBody;
   [QueryFormats.asSelect]?: FormatParseBody; //used in UI's for select/dropdowns
 }
 
 type ReqBody<T> = Record<string, unknown> & Partial<T>;
 
-type PrismaTransactionClient = Omit<PrismaClient<Prisma.PrismaClientOptions, never, Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
+type PrismaTransactionClient = Omit<
+  PrismaClient<
+    Prisma.PrismaClientOptions,
+    never,
+    Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+  >,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
 
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 
@@ -138,11 +145,11 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
  * XOR is needed to have a real mutually exclusive union type
  * https://stackoverflow.com/questions/42123407/does-typescript-support-mutually-exclusive-types
  */
-type XOR<T, U> =
-  T extends object ?
-  U extends object ?
-    (Without<T, U> & U) | (Without<U, T> & T)
-  : U : T
+type XOR<T, U> = T extends object
+  ? U extends object
+    ? (Without<T, U> & U) | (Without<U, T> & T)
+    : U
+  : T;
 
 export {
   apiError,
@@ -154,5 +161,5 @@ export {
   FormatParseBody,
   ReqBody,
   PrismaTransactionClient,
-  XOR
+  XOR,
 };

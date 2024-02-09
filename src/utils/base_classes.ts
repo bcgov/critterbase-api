@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { prisma } from "./constants";
 
 /**
  * Base class for services and repositories that require a prisma connection.
@@ -6,10 +7,10 @@ import { PrismaClient } from "@prisma/client";
  * @export
  * @class CritterbaseDb
  */
-export class CritterbaseDb {
+export class CritterbasePrisma {
   prisma: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
+  constructor() {
     this.prisma = prisma;
   }
 }

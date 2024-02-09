@@ -4,6 +4,12 @@ import {
   IItisHierarchy,
 } from "./itis-response-types";
 
+/**
+ * Service to use ITIS web services.
+ *
+ * @export
+ * @class ItisService
+ */
 export class ItisService {
   webServiceUrl: string;
 
@@ -18,7 +24,7 @@ export class ItisService {
    * @template TItisResponse - Generic ITIS response type.
    * @param {string} endpoint - ITIS webservice endpoint.
    * @param {string} [query] - ITIS endpoint query.
-   * @throws {Error} - Error if itis endpoint does not return.
+   * @throws {Error} - Error if itis endpoint does not respond.
    * @returns {Promise<TItisResponse>} - Generic ITIS response.
    */
   async _itisGetRequest<TItisResponse>(
@@ -44,24 +50,23 @@ export class ItisService {
    *
    * @async
    * @param {number} tsn - ITIS TSN primary identifier.
-   * @returns {Promise<IItisHierarchy<number>[]>} - Promise array of ITIS taxon hierarchy objects.
+   * @returns {Promise<number[]>} Promise array of ITIS taxon hierarchy objects and TSNs.
    */
-  async getHierarchy(tsn: number) {
+  async getTsnHierarchy(tsn: number) {
     const data = await this._itisGetRequest<
       IItisGetFullHierarchyResponse<number>
     >("getFullHierarchyFromTSN", `tsn=${tsn}`);
 
-    const hierarchy: IItisHierarchy<number>[] = [];
+    const tsns: number[] = [];
 
     for (const hierarchyTaxon of data.hierarchyList) {
       // Skip adding to hierarchy if the taxon is a child of provided TSN.
       if (Number(hierarchyTaxon.parentTsn) !== tsn) {
-        // Cast the TSN to a number.
-        hierarchyTaxon.tsn = Number(hierarchyTaxon.tsn);
-        hierarchy.push(hierarchyTaxon);
+        // Cast the TSN to a number and push into array.
+        tsns.push(Number(hierarchyTaxon.tsn));
       }
     }
 
-    return hierarchy;
+    return tsns;
   }
 }

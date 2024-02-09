@@ -11,7 +11,9 @@ import * as marking from "../api/marking/marking.service";
 import * as measurement from "../api/measurement/measurement.service";
 import * as mortality from "../api/mortality/mortality.service";
 import * as user from "../api/user/user.service";
-import * as xref from "../api/xref/xref.service";
+import { XrefService } from "../api/xref/xref.service";
+
+XrefService;
 export type ICbDatabase = typeof db;
 
 export const db = {
@@ -28,5 +30,5 @@ export const db = {
   ...measurement,
   ...mortality,
   ...user,
-  ...xref,
+  XrefService,
 };

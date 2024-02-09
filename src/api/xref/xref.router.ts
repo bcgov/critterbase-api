@@ -6,6 +6,7 @@ import { catchErrors } from "../../utils/middleware";
 import {
   taxonIdSchema,
   taxonMeasurementIdSchema,
+  tsnQuerySchema,
 } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
@@ -23,123 +24,111 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/collection-units",
     catchErrors(async (req: Request, res: Response) => {
+      const xrefService = new db.XrefService(getFormat(req));
+
       const { category_id } = CollectionUnitCategoryIdSchema.parse(req.query);
+
       if (category_id) {
-        const response = await formatParse(
-          getFormat(req),
-          db.getCollectionUnitsFromCategoryId(category_id),
-          xrefCollectionUnitFormats
-        );
+        const response =
+          await xrefService.getCollectionUnitsFromCategoryId(category_id);
+
         return res.status(200).json(response);
       }
-      const { category_name, taxon_name_common, taxon_name_latin } =
-        CollectionUnitCategorySchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getCollectionUnitsFromCategory(
-          category_name,
-          taxon_name_common,
-          taxon_name_latin
-        ),
-        xrefCollectionUnitFormats
-      );
-      return res.status(200).json(response);
-    })
+
+      return res.status(404).json({ error: "missing endpoint branch TODO" });
+      // TODO: Need a solution for this part
+      // const { category_name, taxon_name_common, taxon_name_latin } =
+      //   CollectionUnitCategorySchema.parse(req.query);
+      // const response = await formatParse(
+      //   getFormat(req),
+      //   db.getCollectionUnitsFromCategory(
+      //     category_name,
+      //     taxon_name_common,
+      //     taxon_name_latin,
+      //   ),
+      //   xrefCollectionUnitFormats,
+      // );
+      // return res.status(200).json(response);
+    }),
   );
 
   xrefRouter.get(
     "/taxon-collection-categories",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonCollectionCategories(taxon_id),
-        xrefTaxonCollectionCategoryFormats
-      );
+      const xrefService = new db.XrefService(getFormat(req));
+
+      const { tsn } = tsnQuerySchema.parse(req.query);
+
+      const response = await xrefService.getTsnCollectionCategories(tsn);
+
       res.status(200).json(response);
-    })
+    }),
   );
 
   xrefRouter.get(
     "/taxon-marking-body-locations",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonMarkingBodyLocations(taxon_id),
-        xrefTaxonMarkingBodyLocationFormats
-      );
-      res.status(200).json(response);
-    })
-  );
+      const xrefService = new db.XrefService(getFormat(req));
 
-  xrefRouter.get(
-    "/taxon-marking-body-locations",
-    catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonMarkingBodyLocations(taxon_id),
-        xrefTaxonMarkingBodyLocationFormats
-      );
+      const { tsn } = tsnQuerySchema.parse(req.query);
+
+      const response = await xrefService.getTsnMarkingBodyLocations(tsn);
+
       res.status(200).json(response);
-    })
+    }),
   );
 
   xrefRouter.get(
     "/taxon-qualitative-measurements",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonQualitativeMeasurements(taxon_id),
-        xrefTaxonMeasurementSchema
-      );
+      const xrefService = new db.XrefService(getFormat(req));
+
+      const { tsn } = tsnQuerySchema.parse(req.query);
+
+      const response = await xrefService.getTsnQualitativeMeasurements(tsn);
+
       res.status(200).json(response);
-    })
+    }),
   );
 
   xrefRouter.get(
     "/taxon-qualitative-measurement-options",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_measurement_id } = taxonMeasurementIdSchema.parse(
-        req.query
-      );
-      const response = await formatParse(
-        getFormat(req),
-        prisma.xref_taxon_measurement_qualitative_option.findMany({
-          where: { taxon_measurement_id },
-        }),
-        xrefTaxonMeasurementOptionSchema
-      );
+      const xrefService = new db.XrefService(getFormat(req));
+
+      const { tsn } = tsnQuerySchema.parse(req.query);
+
+      const response =
+        await xrefService.getTsnQualitativeMeasurementOptions(tsn);
+
       res.status(200).json(response);
-    })
+    }),
   );
 
   xrefRouter.get(
     "/taxon-quantitative-measurements",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonQuantitativeMeasurements(taxon_id),
-        xrefTaxonMeasurementSchema
-      );
+      const xrefService = new db.XrefService(getFormat(req));
+
+      const { tsn } = tsnQuerySchema.parse(req.query);
+
+      const response = await xrefService.getTsnQuantitativeMeasurements(tsn);
+
       res.status(200).json(response);
-    })
+    }),
   );
 
   xrefRouter.get(
     "/taxon-measurements",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonMeasurements(taxon_id),
-        xrefTaxonMeasurementSchema
-      );
+      const xrefService = new db.XrefService(getFormat(req));
+
+      const { tsn } = tsnQuerySchema.parse(req.query);
+
+      const response = await xrefService.getTsnMeasurements(tsn);
+
       res.status(200).json(response);
-    })
+    }),
   );
 
   return xrefRouter;
