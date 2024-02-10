@@ -90,6 +90,9 @@ const toSelect = <AsType>(
   } satisfies ISelect;
 };
 
+const toSelectFormat = <T>(data: T[], idKey: keyof T, valueKey: keyof T) =>
+  data.map((item) => ({ id: item[idKey], key: idKey, value: item[valueKey] }));
+
 //TODO: Remove this
 const getParentTaxonIds = async (taxon_id: string): Promise<string[]> => {
   const result: { get_taxon_ids: string[] }[] =
@@ -129,4 +132,5 @@ export {
   ServiceReturn,
   getParentTaxonIds,
   isSelectFormat,
+  toSelectFormat,
 };

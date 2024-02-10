@@ -1,6 +1,8 @@
 import { ItisWebService } from "../../itis/itis-service";
 import { Service } from "../../utils/base_classes";
+import { toSelectFormat } from "../../utils/helper_functions";
 import { XrefRepository } from "./xref.repository";
+import { ICollectionCategoryDef, ICollectionUnitDef } from "./xref.utils";
 
 export class XrefService extends Service<XrefRepository> {
   serviceFactory: { itis: ItisWebService };
@@ -13,6 +15,7 @@ export class XrefService extends Service<XrefRepository> {
     super(repository);
     this.serviceFactory = serviceFactory;
   }
+
   /**
    * Gets 'collection units' from a category id.
    *
@@ -99,23 +102,6 @@ export class XrefService extends Service<XrefRepository> {
     return this.repository.getQualitativeMeasurementOptions(taxonMeasurementId);
   }
 
-  /**
-   * HIERARCHY SERVICE
-   *
-   * Get all 'measurements' definitions for a TSN. Both qualitative and quantitative.
-   *
-   * Includes all 'measurements' definitions for hierarchies above.
-   *
-   * @async
-   * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<Array<IQualitativeMeasurementDef | IQuantitativeMeasurementDef>>}
-   */
-  async getTsnMeasurements(tsn: number) {
-    const quant = await this.getTsnQuantitativeMeasurements(tsn);
-    const qual = await this.getTsnQualitativeMeasurements(tsn);
-
-    return [...quant, ...qual];
-  }
   //TODO: find alternative to this endpoint
   // async getCollectionUnitsFromCategory(
   //   category_name: string,
