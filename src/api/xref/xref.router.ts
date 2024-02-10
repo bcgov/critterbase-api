@@ -14,9 +14,9 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/collection-units",
     catchErrors(async (req: Request, res: Response) => {
-      const xrefService = new db.XrefService();
-
       const { category_id } = CollectionUnitCategoryIdSchema.parse(req.query);
+
+      const xrefService = new db.XrefService();
 
       if (category_id) {
         const response =
@@ -53,15 +53,15 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/taxon-collection-categories",
     catchErrors(async (req: Request, res: Response) => {
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
       const xrefService = new db.XrefService();
 
-      const { tsn } = tsnQuerySchema.parse(req.query);
-
-      const data = await xrefService.getTsnCollectionCategories(tsn);
-
-      const response = isSelectFormat(req)
-        ? toSelectFormat(data, "collection_category_id", "category_name")
-        : data;
+      const response = await xrefService.getTsnCollectionCategories(
+        tsn,
+        format,
+      );
 
       res.status(200).json(response);
     }),
@@ -77,19 +77,15 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/taxon-marking-body-locations",
     catchErrors(async (req: Request, res: Response) => {
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
       const xrefService = new db.XrefService();
 
-      const { tsn } = tsnQuerySchema.parse(req.query);
-
-      const data = await xrefService.getTsnMarkingBodyLocations(tsn);
-
-      const response = isSelectFormat(req)
-        ? toSelectFormat(
-            data,
-            "taxon_marking_body_location_id",
-            "body_location",
-          )
-        : data;
+      const response = await xrefService.getTsnMarkingBodyLocations(
+        tsn,
+        format,
+      );
 
       res.status(200).json(response);
     }),
@@ -106,15 +102,15 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/taxon-qualitative-measurements",
     catchErrors(async (req: Request, res: Response) => {
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
       const xrefService = new db.XrefService();
 
-      const { tsn } = tsnQuerySchema.parse(req.query);
-
-      const data = await xrefService.getTsnQualitativeMeasurements(tsn);
-
-      const response = isSelectFormat(req)
-        ? toSelectFormat(data, "taxon_measurement_id", "measurement_name")
-        : data;
+      const response = await xrefService.getTsnQualitativeMeasurements(
+        tsn,
+        format,
+      );
 
       res.status(200).json(response);
     }),
@@ -130,20 +126,15 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/taxon-qualitative-measurement-options",
     catchErrors(async (req: Request, res: Response) => {
+      const query = taxonMeasurementIdSchema.parse(req.query);
+      const format = isSelectFormat(req);
+
       const xrefService = new db.XrefService();
 
-      const { taxon_measurement_id } = taxonMeasurementIdSchema.parse(
-        req.query,
+      const response = await xrefService.getQualitativeMeasurementOptions(
+        query.taxon_measurement_id,
+        format,
       );
-
-      const data =
-        await xrefService.getQualitativeMeasurementOptions(
-          taxon_measurement_id,
-        );
-
-      const response = isSelectFormat(req)
-        ? toSelectFormat(data, "taxon_measurement_id", "option_value")
-        : data;
 
       res.status(200).json(response);
     }),
@@ -159,15 +150,15 @@ export const XrefRouter = (db: ICbDatabase) => {
   xrefRouter.get(
     "/taxon-quantitative-measurements",
     catchErrors(async (req: Request, res: Response) => {
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
       const xrefService = new db.XrefService();
 
-      const { tsn } = tsnQuerySchema.parse(req.query);
-
-      const data = await xrefService.getTsnQuantitativeMeasurements(tsn);
-
-      const response = isSelectFormat(req)
-        ? toSelectFormat(data, "taxon_measurement_id", "measurement_name")
-        : data;
+      const response = await xrefService.getTsnQuantitativeMeasurements(
+        tsn,
+        format,
+      );
 
       res.status(200).json(response);
     }),

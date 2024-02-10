@@ -50,7 +50,7 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {number[]} tsns - ITIS TSN identifiers.
-   * @returns {Promise<IMarkingBodyLocations>}
+   * @returns {Promise<IMarkingBodyLocationDef[]>}
    */
   async getTsnMarkingBodyLocations(
     tsns: number[],

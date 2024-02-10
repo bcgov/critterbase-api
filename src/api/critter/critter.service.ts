@@ -9,6 +9,22 @@ import {
 } from "./critter.utils";
 import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";
+import { Service } from "../../utils/base_classes";
+import { CritterRepository } from "./critter.repository";
+
+export class CritterService extends Service<CritterRepository> {
+  constructor(repository = new CritterRepository()) {
+    super(repository);
+  }
+
+  async getAllCritters() {
+    return this.repository.getAllCritters();
+  }
+
+  async getMultipleCrittersByIds() {
+    return this.repository.getMultipleCrittersByIds();
+  }
+}
 
 const getAllCritters = async (format = defaultFormat, whereFilter = {}) => {
   return await prisma.critter.findMany({
@@ -23,7 +39,7 @@ const getAllCritters = async (format = defaultFormat, whereFilter = {}) => {
  */
 const getMultipleCrittersByIds = async (
   critterIds: CritterIdsRequest,
-  format = defaultFormat
+  format = defaultFormat,
 ) => {
   const results = await prisma.critter.findMany({
     ...critterFormats[format]?.prismaIncludes,
@@ -59,7 +75,7 @@ const getCritterByWlhId = async (wlh_id: string, format = defaultFormat) => {
 const updateCritter = async (
   critter_id: string,
   critter_data: CritterUpdate,
-  format = defaultFormat
+  format = defaultFormat,
 ) => {
   return prisma.critter.update({
     ...critterFormats[format]?.prismaIncludes,
@@ -72,7 +88,7 @@ const updateCritter = async (
 
 const createCritter = async (
   critter_data: CritterCreate,
-  format = defaultFormat
+  format = defaultFormat,
 ) => {
   const critter = await prisma.critter.create({
     ...critterFormats[format]?.prismaIncludes,
@@ -92,7 +108,7 @@ const deleteCritter = async (critter_id: string, format = defaultFormat) => {
 };
 
 const formatLocationNameSearch = (
-  obj: Partial<LocationResponse> | null | undefined
+  obj: Partial<LocationResponse> | null | undefined,
 ):
   | (Prisma.Without<Prisma.LocationRelationFilter, Prisma.locationWhereInput> &
       Prisma.locationWhereInput)
@@ -162,7 +178,7 @@ const appendEnglishTaxonAsUUID = async (body: {
 
 const getSimilarCritters = async (
   body: UniqueCritterQuery,
-  format = defaultFormat
+  format = defaultFormat,
 ): Promise<critter[]> => {
   let critters: critter[] = [];
   if (body.critter) {
@@ -277,25 +293,25 @@ const getSimilarCritters = async (
     new Set([
       ...critters.map((a) => a.critter_id),
       ...markings.map((a) => a.critter_id),
-    ])
+    ]),
   );
 
   if (critters.length && markings.length) {
     overlappingIds = intersect(
       critters.map((c) => c.critter_id),
-      markings.map((m) => m.critter_id)
+      markings.map((m) => m.critter_id),
     );
   }
   if (captures.length) {
     overlappingIds = intersect(
       captures.map((c) => c.critter_id),
-      overlappingIds
+      overlappingIds,
     );
   }
   if (mortality.length) {
     overlappingIds = intersect(
       mortality.map((m) => m.critter_id),
-      overlappingIds
+      overlappingIds,
     );
   }
 

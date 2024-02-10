@@ -23,8 +23,16 @@ export class XrefService extends Service<XrefRepository> {
    * @param {string} category_id - uuid primary key of xref_collection_unit.
    * @returns {Promise<ICollectionUnitDef[]>}
    */
-  async getCollectionUnitsFromCategoryId(category_id: string) {
-    return this.repository.getCollectionUnitsFromCategoryId(category_id);
+  async getCollectionUnitsFromCategoryId(
+    category_id: string,
+    asSelect = false,
+  ) {
+    const data =
+      await this.repository.getCollectionUnitsFromCategoryId(category_id);
+
+    if (asSelect) {
+      return toSelectFormat(data, "collection_unit_id", "unit_name");
+    }
   }
 
   /**
@@ -36,8 +44,14 @@ export class XrefService extends Service<XrefRepository> {
    * @param {number} tsn - ITIS TSN identifier.
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
-  async getTsnCollectionCategories(tsn: number) {
-    return this.repository.getTsnCollectionCategories(tsn);
+  async getTsnCollectionCategories(tsn: number, asSelect = false) {
+    const data = await this.repository.getTsnCollectionCategories(tsn);
+
+    if (asSelect) {
+      return toSelectFormat(data, "collection_category_id", "category_name");
+    }
+
+    return data;
   }
 
   /**
@@ -51,10 +65,20 @@ export class XrefService extends Service<XrefRepository> {
    * @param {number} tsn - ITIS TSN identifier.
    * @returns {Promise<IMarkingBodyLocationDef[]>}
    */
-  async getTsnMarkingBodyLocations(tsn: number) {
+  async getTsnMarkingBodyLocations(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
 
-    return this.repository.getTsnMarkingBodyLocations(tsns);
+    const data = await this.repository.getTsnMarkingBodyLocations(tsns);
+
+    if (asSelect) {
+      return toSelectFormat(
+        data,
+        "taxon_marking_body_location_id",
+        "body_location",
+      );
+    }
+
+    return data;
   }
 
   /**
@@ -68,10 +92,16 @@ export class XrefService extends Service<XrefRepository> {
    * @param {number} tsn - ITIS TSN identifier.
    * @returns {Promise<IQualitativeMeasurementDef[]>}
    */
-  async getTsnQualitativeMeasurements(tsn: number) {
+  async getTsnQualitativeMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
 
-    return this.repository.getTsnQualitativeMeasurements(tsns);
+    const data = await this.repository.getTsnQualitativeMeasurements(tsns);
+
+    if (asSelect) {
+      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+    }
+
+    return data;
   }
 
   /**
@@ -85,10 +115,16 @@ export class XrefService extends Service<XrefRepository> {
    * @param {number} tsn - ITIS TSN identifier.
    * @returns {Promise<IQuantitativeMeasurementDef[]>}
    */
-  async getTsnQuantitativeMeasurements(tsn: number) {
+  async getTsnQuantitativeMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
 
-    return this.repository.getTsnQuantitativeMeasurements(tsns);
+    const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
+
+    if (asSelect) {
+      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+    }
+
+    return data;
   }
 
   /**
@@ -98,8 +134,20 @@ export class XrefService extends Service<XrefRepository> {
    * @param {string} taxonMeasurementId - qualitative measurement identifier.
    * @returns {Promise<IQualitativeMeasurementOption[]>}
    */
-  async getQualitativeMeasurementOptions(taxonMeasurementId: string) {
-    return this.repository.getQualitativeMeasurementOptions(taxonMeasurementId);
+  async getQualitativeMeasurementOptions(
+    taxonMeasurementId: string,
+    asSelect = false,
+  ) {
+    const data =
+      await this.repository.getQualitativeMeasurementOptions(
+        taxonMeasurementId,
+      );
+
+    if (asSelect) {
+      return toSelectFormat(data, "taxon_measurement_id", "option_value");
+    }
+
+    return data;
   }
 
   //TODO: find alternative to this endpoint
