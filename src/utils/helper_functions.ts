@@ -55,6 +55,9 @@ const sessionHours = (hours: number) => hours * 3600000;
 const getFormat = (req: Request): QueryFormats =>
   QueryFormatSchema.parse(req.query).format;
 
+const isSelectFormat = (req: Request) =>
+  getFormat(req) === QueryFormats.asSelect;
+
 type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
 
 //TODO fully type the conditional return. Note: very difficult
@@ -125,4 +128,5 @@ export {
   toSelect,
   ServiceReturn,
   getParentTaxonIds,
+  isSelectFormat,
 };

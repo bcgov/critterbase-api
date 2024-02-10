@@ -7,7 +7,7 @@ import { IItisGetFullHierarchyResponse } from "./itis-response-types";
  * @export
  * @class Itis
  */
-export class Itis {
+export class ItisWebService {
   webServiceUrl: string;
 
   constructor() {

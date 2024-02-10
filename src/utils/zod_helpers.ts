@@ -13,7 +13,6 @@ import {
   xref_taxon_marking_body_location,
   lk_collection_category,
   lk_cause_of_death,
-  lk_taxon,
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements, QueryFormats } from "./types";
@@ -56,6 +55,10 @@ const taxonIdSchema = z.object({
 
 const tsnQuerySchema = z.object({
   tsn: z.preprocess((val) => Number(val), z.number()),
+});
+
+const asSelectSchema = z.object({
+  format: z.literal(QueryFormats.asSelect),
 });
 
 const taxonMeasurementIdSchema = z.object({

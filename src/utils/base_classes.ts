@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { Itis } from "../itis/itis-service";
 import { prisma } from "./constants";
 
 /**
@@ -17,20 +16,16 @@ export class Repository {
 }
 
 /**
- * Base class for services.
- *
- * All services have access to ITIS service.
+ * Base class for Critterbase internal services.
  *
  * @export
  * @class Service
  * @template TRepo - Repository Class
  */
-export class Service<TRepo extends Repository> {
-  repository: TRepo;
-  itis: Itis;
+export class Service<T extends Repository> {
+  repository: T;
 
-  constructor(repository: TRepo, itis?: Itis) {
+  constructor(repository: T) {
     this.repository = repository;
-    this.itis = itis ?? new Itis();
   }
 }

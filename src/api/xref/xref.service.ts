@@ -1,9 +1,17 @@
+import { ItisWebService } from "../../itis/itis-service";
 import { Service } from "../../utils/base_classes";
 import { XrefRepository } from "./xref.repository";
 
 export class XrefService extends Service<XrefRepository> {
-  constructor(repository?: XrefRepository) {
-    super(repository ?? new XrefRepository());
+  serviceFactory: { itis: ItisWebService };
+
+  // Set the default values for the constructor
+  constructor(
+    repository = new XrefRepository(),
+    serviceFactory = { itis: new ItisWebService() },
+  ) {
+    super(repository);
+    this.serviceFactory = serviceFactory;
   }
   /**
    * Gets 'collection units' from a category id.
@@ -41,7 +49,7 @@ export class XrefService extends Service<XrefRepository> {
    * @returns {Promise<IMarkingBodyLocationDef[]>}
    */
   async getTsnMarkingBodyLocations(tsn: number) {
-    const tsns = await this.itis.getTsnHierarchy(tsn);
+    const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
 
     return this.repository.getTsnMarkingBodyLocations(tsns);
   }
@@ -58,7 +66,7 @@ export class XrefService extends Service<XrefRepository> {
    * @returns {Promise<IQualitativeMeasurementDef[]>}
    */
   async getTsnQualitativeMeasurements(tsn: number) {
-    const tsns = await this.itis.getTsnHierarchy(tsn);
+    const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
 
     return this.repository.getTsnQualitativeMeasurements(tsns);
   }
@@ -75,7 +83,7 @@ export class XrefService extends Service<XrefRepository> {
    * @returns {Promise<IQuantitativeMeasurementDef[]>}
    */
   async getTsnQuantitativeMeasurements(tsn: number) {
-    const tsns = await this.itis.getTsnHierarchy(tsn);
+    const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
 
     return this.repository.getTsnQuantitativeMeasurements(tsns);
   }
