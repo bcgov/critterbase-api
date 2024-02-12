@@ -3,7 +3,7 @@ import * as artifact from "../api/artifact/artifact.service";
 import * as bulk from "../api/bulk/bulk.service";
 import * as capture from "../api/capture/capture.service";
 import * as collectionUnit from "../api/collectionUnit/collectionUnit.service";
-import * as critter from "../api/critter/critter.service";
+import { CritterService } from "../api/critter/critter.service";
 import * as family from "../api/family/family.service";
 import * as location from "../api/location/location.service";
 import * as lookup from "../api/lookup/lookup.service";
@@ -16,12 +16,12 @@ import { XrefService } from "../api/xref/xref.service";
 export type ICbDatabase = typeof db;
 
 export const db = {
+  CritterService,
   ...access,
   ...artifact,
   ...bulk,
   ...capture,
   ...collectionUnit,
-  ...critter,
   ...family,
   ...location,
   ...lookup,

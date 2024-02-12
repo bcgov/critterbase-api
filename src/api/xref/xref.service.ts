@@ -2,15 +2,14 @@ import { ItisWebService } from "../../itis/itis-service";
 import { Service } from "../../utils/base_classes";
 import { toSelectFormat } from "../../utils/helper_functions";
 import { XrefRepository } from "./xref.repository";
-import { ICollectionCategoryDef, ICollectionUnitDef } from "./xref.utils";
 
 export class XrefService extends Service<XrefRepository> {
-  serviceFactory: { itis: ItisWebService };
+  serviceFactory: { itisService: ItisWebService };
 
   // Set the default values for the constructor
   constructor(
     repository = new XrefRepository(),
-    serviceFactory = { itis: new ItisWebService() },
+    serviceFactory = { itisService: new ItisWebService() },
   ) {
     super(repository);
     this.serviceFactory = serviceFactory;
@@ -66,7 +65,7 @@ export class XrefService extends Service<XrefRepository> {
    * @returns {Promise<IMarkingBodyLocationDef[]>}
    */
   async getTsnMarkingBodyLocations(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
+    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnMarkingBodyLocations(tsns);
 
@@ -93,7 +92,7 @@ export class XrefService extends Service<XrefRepository> {
    * @returns {Promise<IQualitativeMeasurementDef[]>}
    */
   async getTsnQualitativeMeasurements(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
+    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQualitativeMeasurements(tsns);
 
@@ -116,7 +115,7 @@ export class XrefService extends Service<XrefRepository> {
    * @returns {Promise<IQuantitativeMeasurementDef[]>}
    */
   async getTsnQuantitativeMeasurements(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itis.getTsnHierarchy(tsn);
+    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
@@ -148,6 +147,46 @@ export class XrefService extends Service<XrefRepository> {
     }
 
     return data;
+  }
+
+  /**
+   * HIERARCHY SERVICE
+   *
+   * Get all tsn 'measurements' both qualitative and quantitative.
+   *
+   * @async
+   * @param {string} tsn - ITIS TSN identifier.
+   * @returns {Promise<TODO>}
+   */
+  async getTsnMeasurements(tsn: number, asSelect = false) {
+    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
+
+    const quantitative =
+      await this.repository.getTsnQuantitativeMeasurements(tsns);
+
+    const qualitative =
+      await this.repository.getTsnQuantitativeMeasurements(tsns);
+
+    if (asSelect) {
+      const quantitativeAsSelect = toSelectFormat(
+        quantitative,
+        "taxon_measurement_id",
+        "measurement_name",
+      );
+
+      const qualitativeAsSelect = toSelectFormat(
+        qualitative,
+        "taxon_measurement_id",
+        "measurement_name",
+      );
+
+      return {
+        quantitative: quantitativeAsSelect,
+        qualitative: qualitativeAsSelect,
+      };
+    }
+
+    return { quantitative, qualitative };
   }
 
   //TODO: find alternative to this endpoint

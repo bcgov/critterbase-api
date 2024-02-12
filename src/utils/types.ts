@@ -4,6 +4,7 @@ import { z } from "zod";
 import { IResponseSchema } from "./zod_helpers";
 import { PrismaClient } from "@prisma/client";
 type uuid = string;
+type CustomError = string | unknown;
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
  */
@@ -14,13 +15,19 @@ type ErrorType =
   | "notFound"
   | "conflict"
   | "unauthorized"
-  | "forbidden";
+  | "forbidden"
+  | "sqlIssue";
 
 class apiError extends Error {
   status: number;
   errorType?: ErrorType;
 
-  constructor(message?: string, status?: number, errorType?: ErrorType) {
+  constructor(
+    message?: string,
+    status?: number,
+    errorType?: ErrorType,
+    errors?: CustomError[],
+  ) {
     super(message ?? "Unknown error occurred");
     this.status = status ?? 400;
     this.errorType = errorType;
@@ -64,6 +71,10 @@ class apiError extends Error {
    */
   static serverIssue(message = "Internal Server Error") {
     return new apiError(message, 500, "serverIssue");
+  }
+
+  static sqlIssue(message: string, errors: CustomError[]) {
+    return new apiError(message, undefined, "sqlIssue", errors);
   }
 
   /**

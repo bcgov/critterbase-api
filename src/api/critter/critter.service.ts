@@ -11,80 +11,69 @@ import { intersect } from "../../utils/helper_functions";
 import { LocationResponse } from "../location/location.utils";
 import { Service } from "../../utils/base_classes";
 import { CritterRepository } from "./critter.repository";
+import { QueryFormats } from "../../utils/types";
+import { UUID } from "crypto";
 
 export class CritterService extends Service<CritterRepository> {
   constructor(repository = new CritterRepository()) {
     super(repository);
   }
 
+  /**
+   * Get all critters.
+   *
+   * @async
+   * @returns {Promise<ICritter[]>} critter object.
+   */
   async getAllCritters() {
     return this.repository.getAllCritters();
   }
 
-  async getMultipleCrittersByIds() {
-    return this.repository.getMultipleCrittersByIds();
+  /**
+   * Get multiple critters by critter ids.
+   *
+   * @async
+   * @returns {Promise<ICritter[]>} array of critter objects.
+   */
+  async getMultipleCrittersByIds(critterIds: string[]) {
+    return this.repository.getMultipleCrittersByIds(critterIds);
+  }
+
+  /**
+   * Get critter by critter id.
+   *
+   * @async
+   * @returns {Promise<ICritter | ICritterDetailed>} critter object.
+   */
+  async getCritterById(critterId: string, format = defaultFormat) {
+    if (format === QueryFormats.detailed) {
+      return this.repository.detailed_getCritterById(critterId);
+    }
+    return this.repository.getCritterById(critterId);
+  }
+
+  /**
+   * Get critter by WLH id.
+   * Note: It might seem weird to return array of critters, but it's known that
+   * WLH id is not able to guarantee uniqueness.
+   *
+   * @async
+   * @returns {Promise<ICritter[]>} array of critter objects.
+   */
+  async getCritterByWlhId(wlhId: string) {
+    return this.repository.getCritterByWlhId(wlhId);
+  }
+
+  /**
+   * Update existing critter.
+   *
+   * @async
+   * @returns {Promise<ICritter[]>} critter object.
+   */
+  async updateCritter(critterId: string, critterData: CritterUpdate) {
+    return this.repository.updateCritter(critterId, critterData);
   }
 }
-
-const getAllCritters = async (format = defaultFormat, whereFilter = {}) => {
-  return await prisma.critter.findMany({
-    ...critterFormats[format]?.prismaIncludes,
-    where: whereFilter,
-  });
-};
-
-/**
- * Fetch multiple critters by their IDs
- * Returns minimal required data for faster response
- */
-const getMultipleCrittersByIds = async (
-  critterIds: CritterIdsRequest,
-  format = defaultFormat,
-) => {
-  const results = await prisma.critter.findMany({
-    ...critterFormats[format]?.prismaIncludes,
-    where: {
-      critter_id: {
-        in: critterIds.critter_ids,
-      },
-    },
-  });
-  return results;
-};
-
-const getCritterById = async (critter_id: string, format = defaultFormat) => {
-  return await prisma.critter.findUniqueOrThrow({
-    ...critterFormats[format]?.prismaIncludes,
-    where: { critter_id: critter_id },
-  });
-};
-
-const getCritterByWlhId = async (wlh_id: string, format = defaultFormat) => {
-  // Might seem weird to return critter array here but it's already well known that WLH ID
-  // is not able to guarnatee uniqueness so I think this makes sense.
-  const results = await prisma.critter.findMany({
-    ...critterFormats[format]?.prismaIncludes,
-    where: {
-      wlh_id: wlh_id,
-    },
-  });
-
-  return results;
-};
-
-const updateCritter = async (
-  critter_id: string,
-  critter_data: CritterUpdate,
-  format = defaultFormat,
-) => {
-  return prisma.critter.update({
-    ...critterFormats[format]?.prismaIncludes,
-    where: {
-      critter_id: critter_id,
-    },
-    data: critter_data,
-  });
-};
 
 const createCritter = async (
   critter_data: CritterCreate,
@@ -93,16 +82,6 @@ const createCritter = async (
   const critter = await prisma.critter.create({
     ...critterFormats[format]?.prismaIncludes,
     data: critter_data,
-  });
-  return critter;
-};
-
-const deleteCritter = async (critter_id: string, format = defaultFormat) => {
-  const critter = await prisma.critter.delete({
-    ...critterFormats[format]?.prismaIncludes,
-    where: {
-      critter_id: critter_id,
-    },
   });
   return critter;
 };

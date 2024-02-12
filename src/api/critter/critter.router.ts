@@ -43,7 +43,7 @@ export const CritterRouter = (db: ICbDatabase) => {
             taxon_name_common: {
               [taxon_name_commons.negate ? "notIn" : "in"]:
                 taxon_name_commons.body,
-              mode: 'insensitive'
+              mode: "insensitive",
             },
           },
         });
@@ -74,16 +74,16 @@ export const CritterRouter = (db: ICbDatabase) => {
             }
           : undefined,
       };
-      if(Object.values(whereInput).every(a => !a)) {
+      if (Object.values(whereInput).every((a) => !a)) {
         return res.status(200).json([]);
       }
       const allCritters = await formatParse(
         getFormat(req),
         db.getAllCritters(getFormat(req), whereInput),
-        critterFormats
+        critterFormats,
       );
       return res.status(200).json(allCritters);
-    })
+    }),
   );
 
   critterRouter.get(
@@ -95,13 +95,13 @@ export const CritterRouter = (db: ICbDatabase) => {
         wlh_id
           ? db.getCritterByWlhId(wlh_id, getFormat(req))
           : db.getAllCritters(getFormat(req)),
-        critterFormats
+        critterFormats,
       );
       if (Array.isArray(critters) && !critters.length && wlh_id) {
         throw apiError.notFound(`No critters found with wlh_id=${wlh_id}`);
       }
       return res.status(200).json(critters);
-    })
+    }),
   );
 
   /**
@@ -114,10 +114,10 @@ export const CritterRouter = (db: ICbDatabase) => {
       const critters = await formatParse(
         getFormat(req),
         db.getMultipleCrittersByIds(parsed, getFormat(req)),
-        critterFormats
+        critterFormats,
       );
       return res.status(200).json(critters);
-    })
+    }),
   );
 
   critterRouter.post(
@@ -127,10 +127,10 @@ export const CritterRouter = (db: ICbDatabase) => {
       const unique = await formatParse(
         getFormat(req),
         db.getSimilarCritters(parsed, getFormat(req)),
-        critterFormats
+        critterFormats,
       );
       return res.status(200).json(unique);
-    })
+    }),
   );
 
   /**
@@ -144,10 +144,10 @@ export const CritterRouter = (db: ICbDatabase) => {
       const created = await formatParse(
         getFormat(req),
         db.createCritter(parsed, getFormat(req)),
-        critterFormats
+        critterFormats,
       );
       return res.status(201).send(created);
-    })
+    }),
   );
 
   // critterRouter.route("/wlh/:wlh_id").get(
@@ -171,43 +171,34 @@ export const CritterRouter = (db: ICbDatabase) => {
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
-        res.locals.format = getFormat(req);
         next();
-      })
+      }),
     )
+    //TODO: Swagger Doc
     .get(
       catchErrors(async (req: Request, res: Response) => {
-        const id = req.params.id;
-        const critter = await formatParse(
-          getFormat(req),
-          db.getCritterById(id, getFormat(req)),
-          critterFormats
-        );
-        return res.status(200).json(critter);
-      })
+        const critterId = req.params.id;
+        const format = getFormat(req);
+
+        const service = new db.CritterService();
+
+        const response = await service.getCritterById(critterId, format);
+
+        return res.status(200).json(response);
+      }),
     )
+    // TODO: swagger doc
     .patch(
       catchErrors(async (req: Request, res: Response) => {
-        const id = req.params.id;
-        const parsed = CritterUpdateSchema.parse(req.body);
-        const critter = await formatParse(
-          getFormat(req),
-          db.updateCritter(id, parsed, getFormat(req)),
-          critterFormats
-        );
-        res.status(200).json(critter);
-      })
-    )
-    .delete(
-      catchErrors(async (req: Request, res: Response) => {
-        const id = req.params.id;
-        const critter = await formatParse(
-          getFormat(req),
-          db.deleteCritter(id, getFormat(req)),
-          critterFormats
-        );
-        res.status(200).json(critter);
-      })
+        const critterId = req.params.id;
+        const payload = CritterUpdateSchema.parse(req.body);
+
+        const service = new db.CritterService();
+
+        const response = await service.updateCritter(critterId, payload);
+
+        return res.status(201).json(response);
+      }),
     );
 
   return critterRouter;

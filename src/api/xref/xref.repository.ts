@@ -1,4 +1,5 @@
 import { Repository } from "../../utils/base_classes";
+import { apiError } from "../../utils/types";
 import {
   ICollectionCategoryDef,
   ICollectionUnitDef,
@@ -18,11 +19,20 @@ export class XrefRepository extends Repository {
   async getCollectionUnitsFromCategoryId(
     category_id: string,
   ): Promise<ICollectionUnitDef[]> {
-    return await this.prisma.xref_collection_unit.findMany({
+    const result = await this.prisma.xref_collection_unit.findMany({
       where: {
         collection_category_id: category_id,
       },
     });
+
+    if (!result.length) {
+      throw apiError.sqlIssue("Failed to find collection units.", [
+        "XrefRepository -> getTsnCollectionCategories",
+        "results had length of 0",
+      ]);
+    }
+
+    return result;
   }
 
   /**
@@ -35,17 +45,24 @@ export class XrefRepository extends Repository {
   async getTsnCollectionCategories(
     tsn: number,
   ): Promise<ICollectionCategoryDef[]> {
-    return this.prisma.$queryRaw`
+    const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
       FROM lk_collection_category cc
       INNER JOIN xref_taxon_collection_category x
       ON x.collection_category_id = cc.collection_category_id
       AND x.itis_tsn = ${tsn};`;
+
+    if (!result.length) {
+      throw apiError.sqlIssue(`Failed to find collection categories.`, [
+        "XrefRepository -> getTsnCollectionCategories",
+        "results had length of 0",
+      ]);
+    }
+
+    return result;
   }
 
   /**
-   * HIERARCHAL
-   *
    * Get 'marking body locations' for array of TSNs.
    *
    * @async
@@ -55,7 +72,7 @@ export class XrefRepository extends Repository {
   async getTsnMarkingBodyLocations(
     tsns: number[],
   ): Promise<IMarkingBodyLocationDef[]> {
-    return await this.prisma.xref_taxon_marking_body_location.findMany({
+    const result = await this.prisma.xref_taxon_marking_body_location.findMany({
       where: { itis_tsn: { in: tsns } },
       select: {
         taxon_marking_body_location_id: true,
@@ -64,11 +81,18 @@ export class XrefRepository extends Repository {
         description: true,
       },
     });
+
+    if (!result.length) {
+      throw apiError.sqlIssue(`Failed to find marking body locations.`, [
+        "XrefRepository -> getTsnMarkingBodyLocations",
+        "results had length of 0",
+      ]);
+    }
+
+    return result;
   }
 
   /**
-   * HIERARCHAL
-   *
    * Get 'qualitative measurements' for array of TSNs.
    *
    * @async
@@ -78,15 +102,25 @@ export class XrefRepository extends Repository {
   async getTsnQualitativeMeasurements(
     tsns: number[],
   ): Promise<IQualitativeMeasurementDef[]> {
-    return await this.prisma.xref_taxon_measurement_qualitative.findMany({
-      where: { itis_tsn: { in: tsns } },
-      select: {
-        taxon_measurement_id: true,
-        itis_tsn: true,
-        measurement_name: true,
-        measurement_desc: true,
-      },
-    });
+    const result =
+      await this.prisma.xref_taxon_measurement_qualitative.findMany({
+        where: { itis_tsn: { in: tsns } },
+        select: {
+          taxon_measurement_id: true,
+          itis_tsn: true,
+          measurement_name: true,
+          measurement_desc: true,
+        },
+      });
+
+    if (!result.length) {
+      throw apiError.sqlIssue(`Failed to find qualitative measurements.`, [
+        "XrefRepository -> getTsnQualitativeMeasurements",
+        "results had length of 0",
+      ]);
+    }
+
+    return result;
   }
 
   /**
@@ -99,8 +133,8 @@ export class XrefRepository extends Repository {
   async getQualitativeMeasurementOptions(
     taxonMeasurementId: string,
   ): Promise<IQualitativeMeasurementOption[]> {
-    return await this.prisma.xref_taxon_measurement_qualitative_option.findMany(
-      {
+    const result =
+      await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
         where: { taxon_measurement_id: taxonMeasurementId },
         select: {
           qualitative_option_id: true,
@@ -109,13 +143,22 @@ export class XrefRepository extends Repository {
           option_label: true,
           option_desc: true,
         },
-      },
-    );
+      });
+
+    if (!result.length) {
+      throw apiError.sqlIssue(
+        `Failed to find qualitative measurement options.`,
+        [
+          "XrefRepository -> getTsnQualitativeMeasurements",
+          "results had a length of 0",
+        ],
+      );
+    }
+
+    return result;
   }
 
   /**
-   * HIERARCHAL
-   *
    * Get 'quantitative measurements' definitions for array of TSNs.
    *
    * @async
@@ -123,16 +166,26 @@ export class XrefRepository extends Repository {
    * @returns {Promise<IQuantiativeMeasurementDef>}
    */
   async getTsnQuantitativeMeasurements(tsns: number[]) {
-    return await this.prisma.xref_taxon_measurement_quantitative.findMany({
-      where: { itis_tsn: { in: tsns } },
-      select: {
-        taxon_measurement_id: true,
-        itis_tsn: true,
-        measurement_name: true,
-        min_value: true,
-        max_value: true,
-        unit: true,
-      },
-    });
+    const result =
+      await this.prisma.xref_taxon_measurement_quantitative.findMany({
+        where: { itis_tsn: { in: tsns } },
+        select: {
+          taxon_measurement_id: true,
+          itis_tsn: true,
+          measurement_name: true,
+          min_value: true,
+          max_value: true,
+          unit: true,
+        },
+      });
+
+    if (!result.length) {
+      throw apiError.sqlIssue(`Failed to find quantitative measurement.`, [
+        "XrefRepository -> getTsnQuantitativeMeasurements",
+        "results had a length of 0",
+      ]);
+    }
+
+    return result;
   }
 }

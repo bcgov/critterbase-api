@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { ICbDatabase } from "../../utils/database";
-import { isSelectFormat, toSelectFormat } from "../../utils/helper_functions";
+import { isSelectFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import {
   taxonMeasurementIdSchema,

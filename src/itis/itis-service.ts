@@ -35,7 +35,7 @@ export class ItisWebService {
     const res = await axios.get<TItisResponse>(url);
 
     if (!res.data) {
-      throw new Error(`no response from ITIS endpoint: ${endpoint}`);
+      throw new Error(`No response from ITIS endpoint: ${endpoint}`);
     }
 
     return res.data;
