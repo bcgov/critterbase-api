@@ -65,23 +65,22 @@ export class CritterService extends Service<CritterRepository> {
    * Update existing critter.
    *
    * @async
-   * @returns {Promise<ICritter[]>} critter object.
+   * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
     return this.repository.updateCritter(critterId, critterData);
   }
-}
 
-const createCritter = async (
-  critter_data: CritterCreate,
-  format = defaultFormat,
-) => {
-  const critter = await prisma.critter.create({
-    ...critterFormats[format]?.prismaIncludes,
-    data: critter_data,
-  });
-  return critter;
-};
+  /**
+   * Create a critter.
+   *
+   * @async
+   * @returns {Promise<ICritter>} critter object.
+   */
+  async createCritter(critterData: CritterCreate) {
+    return this.repository.createCritter(critterData);
+  }
+}
 
 const formatLocationNameSearch = (
   obj: Partial<LocationResponse> | null | undefined,
@@ -306,14 +305,7 @@ const getSimilarCritters = async (
 };
 
 export {
-  getAllCritters,
-  getCritterById,
-  getCritterByWlhId,
-  updateCritter,
-  createCritter,
-  deleteCritter,
   getSimilarCritters,
   appendEnglishTaxonAsUUID,
-  getMultipleCrittersByIds,
   formatLocationNameSearch,
 };

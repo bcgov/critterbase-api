@@ -1,4 +1,8 @@
-import { ICritter } from "../schemas/critter-schema";
+import {
+  CritterUpdate,
+  ICritter,
+  CritterCreate,
+} from "../schemas/critter-schema";
 import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
 
@@ -86,6 +90,7 @@ export class CritterRepository extends Repository {
   }
 
   /**
+   * TODO: create full detailed response
    * Get 'detailed' critter by critter id.
    *
    * @async
@@ -127,7 +132,7 @@ export class CritterRepository extends Repository {
    *
    * @async
    * @throws {apiError.sqlIssue} - if query was unable to update critter.
-   * @returns {Promise<ICritter[]>} critter object.
+   * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(
     critterId: string,
@@ -146,6 +151,30 @@ export class CritterRepository extends Repository {
     } catch (err) {
       throw apiError.sqlIssue(`Failed to update critter.`, [
         "CritterRepository -> updateCritter",
+        "prisma threw error",
+        err,
+      ]);
+    }
+  }
+
+  /**
+   * Create a critter.
+   *
+   * @async
+   * @throws {apiError.sqlIssue} - if query was unable to create critter.
+   * @returns {Promise<ICritter>} critter object.
+   */
+  async createCritter(critterData: CritterCreate): Promise<ICritter> {
+    try {
+      const result = await this.prisma.critter.create({
+        data: critterData,
+        select: this.critterProperties,
+      });
+
+      return result;
+    } catch (err) {
+      throw apiError.sqlIssue(`Failed to create critter.`, [
+        "CritterRepository -> createCritter",
         "prisma threw error",
         err,
       ]);

@@ -10,7 +10,18 @@ import { IItisGetFullHierarchyResponse } from "../schemas/itis-schema";
 export class ItisWebService {
   webServiceUrl: string;
 
+  /**
+   * Currently supported ITIS endpoints
+   *
+   */
+  endpoints = {
+    TSN_HIERARCHY: "getFullHierarchyFromTSN",
+  };
+
   constructor() {
+    if (!process.env.ITIS_WEB_SERVICE) {
+      throw new Error("MISSING ENVIRONMENT VARIABLE: 'ITIS_WEB_SERVICE'");
+    }
     this.webServiceUrl = process.env.ITIS_WEB_SERVICE;
   }
 
@@ -52,7 +63,7 @@ export class ItisWebService {
   async getTsnHierarchy(tsn: number) {
     const data = await this._itisGetRequest<
       IItisGetFullHierarchyResponse<number>
-    >("getFullHierarchyFromTSN", `tsn=${tsn}`);
+    >(this.endpoints.TSN_HIERARCHY, `tsn=${tsn}`);
 
     const tsns: number[] = [];
 
