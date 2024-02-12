@@ -1,12 +1,12 @@
-import { Repository } from "../../utils/base_classes";
-import { apiError } from "../../utils/types";
+import { apiError } from "../utils/types";
+import { Repository } from "./base-repository";
 import {
   ICollectionCategoryDef,
   ICollectionUnitDef,
   IMarkingBodyLocationDef,
   IQualitativeMeasurementDef,
   IQualitativeMeasurementOption,
-} from "./xref.utils";
+} from "../schemas/xref-schema";
 
 export class XrefRepository extends Repository {
   /**

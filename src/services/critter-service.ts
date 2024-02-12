@@ -1,18 +1,15 @@
 import { Prisma, critter, mortality } from "@prisma/client";
-import { defaultFormat, oneDay, prisma } from "../../utils/constants";
+import { defaultFormat, oneDay, prisma } from "../utils/constants";
 import {
-  CritterCreate,
-  CritterIdsRequest,
-  CritterUpdate,
   UniqueCritterQuery,
   critterFormats,
-} from "./critter.utils";
-import { intersect } from "../../utils/helper_functions";
-import { LocationResponse } from "../location/location.utils";
-import { Service } from "../../utils/base_classes";
-import { CritterRepository } from "./critter.repository";
-import { QueryFormats } from "../../utils/types";
-import { UUID } from "crypto";
+} from "../api/critter/critter.utils"; //TODO: remove utils here
+import { intersect } from "../utils/helper_functions";
+import { LocationResponse } from "../api/location/location.utils";
+import { CritterRepository } from "../repositories/critter-repository";
+import { Service } from "./base-service";
+import { QueryFormats } from "../utils/types";
+import { CritterCreate, CritterUpdate } from "../schemas/critter-schema";
 
 export class CritterService extends Service<CritterRepository> {
   constructor(repository = new CritterRepository()) {

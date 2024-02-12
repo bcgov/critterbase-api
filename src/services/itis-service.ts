@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IItisGetFullHierarchyResponse } from "./itis-response-types";
+import { IItisGetFullHierarchyResponse } from "../schemas/itis-schema";
 
 /**
  * Service to use ITIS web services.

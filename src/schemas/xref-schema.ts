@@ -7,7 +7,13 @@ import {
   xref_taxon_measurement_quantitative,
 } from "@prisma/client";
 import { z } from "zod";
-import { AuditColumns } from "../../utils/types";
+import { AuditColumns } from "../utils/types";
+
+/**
+ *
+ * Xref schemas and types
+ *
+ */
 
 export type IMarkingBodyLocationDef = Omit<
   xref_taxon_marking_body_location,

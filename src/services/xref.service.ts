@@ -1,7 +1,7 @@
-import { ItisWebService } from "../../itis/itis-service";
-import { Service } from "../../utils/base_classes";
-import { toSelectFormat } from "../../utils/helper_functions";
-import { XrefRepository } from "./xref.repository";
+import { XrefRepository } from "../repositories/xref-repository";
+import { toSelectFormat } from "../utils/helper_functions";
+import { Service } from "./base-service";
+import { ItisWebService } from "./itis-service";
 
 export class XrefService extends Service<XrefRepository> {
   serviceFactory: { itisService: ItisWebService };

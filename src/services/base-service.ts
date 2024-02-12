@@ -1,19 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { prisma } from "./constants";
-
-/**
- * Base class for repositories
- *
- * @export
- * @class Repository
- */
-export class Repository {
-  prisma: PrismaClient;
-
-  constructor() {
-    this.prisma = prisma;
-  }
-}
+import { Repository } from "../repositories/base-repository";
 
 /**
  * Base class for Critterbase internal services.

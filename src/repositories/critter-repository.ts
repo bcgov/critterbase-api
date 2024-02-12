@@ -1,6 +1,6 @@
-import { Repository } from "../../utils/base_classes";
-import { apiError } from "../../utils/types";
-import { CritterUpdate, ICritter } from "./critter.utils";
+import { ICritter } from "../schemas/critter-schema";
+import { apiError } from "../utils/types";
+import { Repository } from "./base-repository";
 
 export class CritterRepository extends Repository {
   /**

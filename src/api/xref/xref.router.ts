@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { CollectionUnitCategoryIdSchema } from "../../schemas/xref-schema";
 import { ICbDatabase } from "../../utils/database";
 import { isSelectFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
@@ -6,7 +7,6 @@ import {
   taxonMeasurementIdSchema,
   tsnQuerySchema,
 } from "../../utils/zod_helpers";
-import { CollectionUnitCategoryIdSchema } from "./xref.utils";
 
 export const XrefRouter = (db: ICbDatabase) => {
   const xrefRouter = express.Router();
