@@ -49,11 +49,7 @@ const errorLogger = (
   next: NextFunction,
 ) => {
   if (!IS_TEST) {
-    console.error(
-      `${req.method} ${req.originalUrl} -> ${JSON.stringify(err)} -- ${
-        err.stack ?? "No stack"
-      }`,
-    );
+    console.error({ method: req.method, url: req.originalUrl, error: err });
   }
 
   next(err);

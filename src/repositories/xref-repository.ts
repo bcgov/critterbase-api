@@ -26,7 +26,7 @@ export class XrefRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue("Failed to find collection units.", [
+      throw apiError.sqlExecuteIssue("Failed to find collection units.", [
         "XrefRepository -> getTsnCollectionCategories",
         "results had length of 0",
       ]);
@@ -53,7 +53,7 @@ export class XrefRepository extends Repository {
       AND x.itis_tsn = ${tsn};`;
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to find collection categories.`, [
+      throw apiError.sqlExecuteIssue(`Failed to find collection categories.`, [
         "XrefRepository -> getTsnCollectionCategories",
         "results had length of 0",
       ]);
@@ -83,7 +83,7 @@ export class XrefRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to find marking body locations.`, [
+      throw apiError.sqlExecuteIssue(`Failed to find marking body locations.`, [
         "XrefRepository -> getTsnMarkingBodyLocations",
         "results had length of 0",
       ]);
@@ -114,10 +114,13 @@ export class XrefRepository extends Repository {
       });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to find qualitative measurements.`, [
-        "XrefRepository -> getTsnQualitativeMeasurements",
-        "results had length of 0",
-      ]);
+      throw apiError.sqlExecuteIssue(
+        `Failed to find qualitative measurements.`,
+        [
+          "XrefRepository -> getTsnQualitativeMeasurements",
+          "results had length of 0",
+        ],
+      );
     }
 
     return result;
@@ -146,7 +149,7 @@ export class XrefRepository extends Repository {
       });
 
     if (!result.length) {
-      throw apiError.sqlIssue(
+      throw apiError.sqlExecuteIssue(
         `Failed to find qualitative measurement options.`,
         [
           "XrefRepository -> getTsnQualitativeMeasurements",
@@ -180,10 +183,13 @@ export class XrefRepository extends Repository {
       });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to find quantitative measurement.`, [
-        "XrefRepository -> getTsnQuantitativeMeasurements",
-        "results had a length of 0",
-      ]);
+      throw apiError.sqlExecuteIssue(
+        `Failed to find quantitative measurement.`,
+        [
+          "XrefRepository -> getTsnQuantitativeMeasurements",
+          "results had a length of 0",
+        ],
+      );
     }
 
     return result;

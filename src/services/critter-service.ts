@@ -8,12 +8,19 @@ import { intersect } from "../utils/helper_functions";
 import { LocationResponse } from "../api/location/location.utils";
 import { CritterRepository } from "../repositories/critter-repository";
 import { Service } from "./base-service";
-import { QueryFormats } from "../utils/types";
+import { apiError, QueryFormats } from "../utils/types";
 import { CritterCreate, CritterUpdate } from "../schemas/critter-schema";
+import { ItisWebService } from "./itis-service";
 
 export class CritterService extends Service<CritterRepository> {
-  constructor(repository = new CritterRepository()) {
+  serviceFactory: { itisService: ItisWebService };
+
+  constructor(
+    repository = new CritterRepository(),
+    serviceFactory = { itisService: new ItisWebService() },
+  ) {
     super(repository);
+    this.serviceFactory = serviceFactory;
   }
 
   /**
@@ -91,6 +98,17 @@ export class CritterService extends Service<CritterRepository> {
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreate) {
+    const isTsn = await this.serviceFactory.itisService.isValueTsn(
+      critterData.itis_tsn,
+    );
+
+    if (!isTsn) {
+      throw apiError.notFound(`Invalid ITIS TSN: ${critterData.itis_tsn}`, [
+        "CritterService -> createCritter",
+        "ITIS has no reference to this TSN",
+      ]);
+    }
+
     return this.repository.createCritter(critterData);
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Prisma, critter } from ".prisma/client";
+import { Prisma } from ".prisma/client";
 import { z } from "zod";
 import { IResponseSchema } from "./zod_helpers";
 import { PrismaClient } from "@prisma/client";
@@ -16,11 +16,13 @@ type ErrorType =
   | "conflict"
   | "unauthorized"
   | "forbidden"
-  | "sqlIssue";
+  | "sqlIssue"
+  | "requestIssue";
 
 class apiError extends Error {
   status: number;
   errorType?: ErrorType;
+  errors?: CustomError[];
 
   constructor(
     message?: string,
@@ -31,6 +33,7 @@ class apiError extends Error {
     super(message ?? "Unknown error occurred");
     this.status = status ?? 400;
     this.errorType = errorType;
+    this.errors = errors;
     Object.setPrototypeOf(this, new.target.prototype);
   }
 
@@ -48,8 +51,8 @@ class apiError extends Error {
   /**
    ** Requested resource / object was not found
    */
-  static notFound(message: string) {
-    return new apiError(message, 404, "notFound");
+  static notFound(message: string, errors?: CustomError[]) {
+    return new apiError(message, 404, "notFound", errors);
   }
 
   /**
@@ -73,7 +76,7 @@ class apiError extends Error {
     return new apiError(message, 500, "serverIssue");
   }
 
-  static sqlIssue(message: string, errors: CustomError[]) {
+  static sqlExecuteIssue(message: string, errors?: CustomError[]) {
     return new apiError(message, undefined, "sqlIssue", errors);
   }
 
@@ -167,7 +170,6 @@ export {
   AuditColumns,
   Implements,
   FormatParse,
-  QueryFormats,
   ISelect,
   FormatParseBody,
   ReqBody,

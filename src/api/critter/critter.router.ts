@@ -36,7 +36,7 @@ export const CritterRouter = (db: ICbDatabase) => {
 
       const service = new db.CritterService();
 
-      const response = service.getAllCrittersOrCrittersWithWlhId(wlh_id);
+      const response = await service.getAllCrittersOrCrittersWithWlhId(wlh_id);
 
       return res.status(200).json(response);
     }),
@@ -54,7 +54,7 @@ export const CritterRouter = (db: ICbDatabase) => {
 
       const service = new db.CritterService();
 
-      const response = service.getMultipleCrittersByIds(critter_ids);
+      const response = await service.getMultipleCrittersByIds(critter_ids);
 
       return res.status(200).json(response);
     }),
@@ -161,6 +161,7 @@ export const CritterRouter = (db: ICbDatabase) => {
     .route("/:id")
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+        console.log("called");
         await uuidParamsSchema.parseAsync(req.params);
         next();
       }),

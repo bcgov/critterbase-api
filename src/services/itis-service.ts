@@ -1,5 +1,8 @@
 import axios from "axios";
-import { IItisGetFullHierarchyResponse } from "../schemas/itis-schema";
+import {
+  IItisGetFullHierarchyResponse,
+  IItisStub,
+} from "../schemas/itis-schema";
 
 /**
  * Service to use ITIS web services.
@@ -16,6 +19,7 @@ export class ItisWebService {
    */
   endpoints = {
     TSN_HIERARCHY: "getFullHierarchyFromTSN",
+    TSN_FULL_RECORD: "getFullRecordFromTSN",
   };
 
   constructor() {
@@ -61,13 +65,13 @@ export class ItisWebService {
    * @returns {Promise<number[]>} Promise array of ITIS taxon hierarchy objects and TSNs.
    */
   async getTsnHierarchy(tsn: number) {
-    const data = await this._itisGetRequest<
+    const result = await this._itisGetRequest<
       IItisGetFullHierarchyResponse<number>
     >(this.endpoints.TSN_HIERARCHY, `tsn=${tsn}`);
 
     const tsns: number[] = [];
 
-    for (const hierarchyTaxon of data.hierarchyList) {
+    for (const hierarchyTaxon of result.hierarchyList) {
       // Skip adding to hierarchy if the taxon is a child of provided TSN.
       if (Number(hierarchyTaxon.parentTsn) !== tsn) {
         // Cast the TSN to a number and push into array.
@@ -76,5 +80,21 @@ export class ItisWebService {
     }
 
     return tsns;
+  }
+
+  /**
+   * Checks if value is an ITIS TSN.
+   *
+   * @async
+   * @param {number | string} tsn - ITIS TSN primary identifier.
+   * @returns {Promise<boolean>} Promise boolean indicator if value is an ITIS TSN.
+   */
+  async isValueTsn(tsn: number | string) {
+    const result = await this._itisGetRequest<IItisStub>(
+      this.endpoints.TSN_FULL_RECORD,
+      `tsn=${tsn}`,
+    );
+
+    return Boolean(result.tsn);
   }
 }

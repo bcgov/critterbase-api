@@ -23,3 +23,7 @@ export interface IItisGetFullHierarchyResponse<
   sciName: string;
   tsn: string;
 }
+
+export interface IItisStub {
+  tsn: string;
+}

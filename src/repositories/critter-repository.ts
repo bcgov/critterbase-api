@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import {
   CritterUpdate,
   ICritter,
@@ -21,11 +22,39 @@ export class CritterRepository extends Repository {
     critter_comment: true,
   };
 
+  _getDetailedCritterSql(critterId: string) {
+    return Prisma.sql`
+      SELECT
+        c.critter_id, c.itis_tsn, c.animal_id, c.sex,
+        c.wlh_id, c.responsible_region_nr_id, c.critter_comment,
+
+        coalesce(json_agg(json_build_object(
+          'marking_id', mark.marking_id,
+          'capture_id', mark.capture_id,
+          'mortality_id', mark.mortality_id,
+          'taxon_marking_body_location_id', mark.taxon_marking_body_location_id,
+          'marking_type_id', mark.marking_type_id
+        )) FILTER (WHERE mark.critter_id IS NOT NULL), '[]') as markings,
+        coalesce(json_agg(cap) FILTER (WHERE cap.critter_id IS NOT NULL), '[]') as captures,
+        coalesce(json_agg(mor) FILTER (WHERE mor.critter_id IS NOT NULL), '[]') as mortality,
+        coalesce(json_agg(qual) FILTER (WHERE qual.critter_id IS NOT NULL), '[]') as qualitative_measurements,
+        coalesce(json_agg(quant) FILTER (WHERE quant.critter_id IS NOT NULL), '[]') as quantitative_measurements
+
+      FROM critter c
+      LEFT JOIN marking mark ON mark.critter_id = c.critter_id
+      LEFT JOIN capture cap ON cap.critter_id = c.critter_id
+      LEFT JOIN mortality mor ON mor.critter_id = c.critter_id
+      LEFT JOIN measurement_qualitative qual ON qual.critter_id = c.critter_id
+      LEFT JOIN measurement_quantitative quant ON quant.critter_id = c.critter_id
+      WHERE c.critter_id = ${critterId}::uuid
+      GROUP BY c.critter_id;`;
+  }
+
   /**
    * Get all critters.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query returns no critters.
+   * @throws {apiError.notFound} - if query returns no critters.
    * @returns {Promise<ICritter[]>} critter object.
    */
   async getAllCritters(): Promise<ICritter[]> {
@@ -34,7 +63,7 @@ export class CritterRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to get critters.`, [
+      throw apiError.notFound(`Failed to find critters.`, [
         "CritterRepository -> getAllCritters",
         "results had a length of 0",
       ]);
@@ -47,7 +76,7 @@ export class CritterRepository extends Repository {
    * Get multiple critters by critter ids.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query returns no critters.
+   * @throws {apiError.notFound} - if query returns no critters.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
   async getMultipleCrittersByIds(critter_ids: string[]): Promise<ICritter[]> {
@@ -57,7 +86,7 @@ export class CritterRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to find critters.`, [
+      throw apiError.notFound(`Failed to find critters.`, [
         `CritterRepository -> getMultipleCrittersByIds`,
         "results had a length of 0",
       ]);
@@ -70,7 +99,7 @@ export class CritterRepository extends Repository {
    * Get critter by critter id.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query returns no critter.
+   * @throws {apiError.notFound} - if query returns no critter.
    * @returns {Promise<ICritter[]>} critter object.
    */
   async getCritterById(critterId: string): Promise<ICritter> {
@@ -80,7 +109,7 @@ export class CritterRepository extends Repository {
     });
 
     if (!result) {
-      throw apiError.sqlIssue(`Failed to find specific critter.`, [
+      throw apiError.notFound(`Failed to find specific critter.`, [
         "CritterRepository -> getCritterById",
         "result was undefined",
       ]);
@@ -94,13 +123,22 @@ export class CritterRepository extends Repository {
    * Get 'detailed' critter by critter id.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query returns no critter.
+   * @throws {apiError.notFound} - if query returns no critter.
    * @returns {Promise<ICritterDetailed>} detailed critter object.
    */
   async detailed_getCritterById(critterId: string) {
-    return this.prisma.critter.findUniqueOrThrow({
-      where: { critter_id: critterId },
-    });
+    const result = await this.prisma.$queryRaw(
+      this._getDetailedCritterSql(critterId),
+    );
+
+    if (!result) {
+      throw apiError.notFound(`Failed to find critters.`, [
+        "CritterRepository -> detailed_getCritterById",
+        "result was undefined",
+      ]);
+    }
+
+    return result;
   }
 
   /**
@@ -109,16 +147,17 @@ export class CritterRepository extends Repository {
    * WLH id is not able to guarantee uniqueness.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query returns no critter.
+   * @throws {apiError.sqlExecuteIssue} - if query returns no critter.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
   async getCrittersByWlhId(wlhId: string) {
     const result = await this.prisma.critter.findMany({
       where: { wlh_id: wlhId },
+      select: this.critterProperties,
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue(
+      throw apiError.notFound(
         `Failed to find critters with wlh-id: ${wlhId}.`,
         ["CritterRepository -> getCritterByWlhId", "results had a length of 0"],
       );
@@ -131,7 +170,7 @@ export class CritterRepository extends Repository {
    * Update existing critter.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query was unable to update critter.
+   * @throws {apiError.sqlExecuteIssue} - if query was unable to update critter.
    * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(
@@ -149,7 +188,7 @@ export class CritterRepository extends Repository {
 
       return result;
     } catch (err) {
-      throw apiError.sqlIssue(`Failed to update critter.`, [
+      throw apiError.sqlExecuteIssue(`Failed to update critter.`, [
         "CritterRepository -> updateCritter",
         "prisma threw error",
         err,
@@ -161,7 +200,7 @@ export class CritterRepository extends Repository {
    * Create a critter.
    *
    * @async
-   * @throws {apiError.sqlIssue} - if query was unable to create critter.
+   * @throws {apiError.sqlExecuteIssue} - if query was unable to create critter.
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreate): Promise<ICritter> {
@@ -173,7 +212,7 @@ export class CritterRepository extends Repository {
 
       return result;
     } catch (err) {
-      throw apiError.sqlIssue(`Failed to create critter.`, [
+      throw apiError.sqlExecuteIssue(`Failed to create critter.`, [
         "CritterRepository -> createCritter",
         "prisma threw error",
         err,
