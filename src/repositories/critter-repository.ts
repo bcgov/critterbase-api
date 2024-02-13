@@ -219,4 +219,44 @@ export class CritterRepository extends Repository {
       ]);
     }
   }
+
+  async getCritterMarkings(critterId: string) {
+    const result = await this.prisma.marking.findMany({
+      where: { critter_id: critterId },
+    });
+
+    return result;
+  }
+
+  async getCritterCaptures(critterId: string) {
+    const result = await this.prisma.capture.findMany({
+      where: { critter_id: critterId },
+    });
+
+    return result;
+  }
+
+  async getCritterMortalities(critterId: string) {
+    const result = await this.prisma.mortality.findMany({
+      where: { critter_id: critterId },
+    });
+
+    return result;
+  }
+
+  async getCritterQualitativeMeasurements(critterId: string) {
+    const result = await this.prisma.measurement_qualitative.findMany({
+      where: { critter_id: critterId },
+    });
+
+    return result;
+  }
+
+  async getCritterQuantitativeMeasurements(critterId: string) {
+    const result = await this.prisma.measurement_qualitative.findMany({
+      where: { critter_id: critterId },
+    });
+
+    return result;
+  }
 }

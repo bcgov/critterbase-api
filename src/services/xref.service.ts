@@ -62,7 +62,7 @@ export class XrefService extends Service<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<IMarkingBodyLocationDef[]>}
+   * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
   async getTsnMarkingBodyLocations(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
@@ -89,7 +89,7 @@ export class XrefService extends Service<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<IQualitativeMeasurementDef[]>}
+   * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
   async getTsnQualitativeMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
@@ -112,7 +112,7 @@ export class XrefService extends Service<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<IQuantitativeMeasurementDef[]>}
+   * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
   async getTsnQuantitativeMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
@@ -131,7 +131,7 @@ export class XrefService extends Service<XrefRepository> {
    *
    * @async
    * @param {string} taxonMeasurementId - qualitative measurement identifier.
-   * @returns {Promise<IQualitativeMeasurementOption[]>}
+   * @returns {Promise<ITsnQualitativeMeasurementOption[]>}
    */
   async getQualitativeMeasurementOptions(
     taxonMeasurementId: string,

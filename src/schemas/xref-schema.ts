@@ -1,5 +1,6 @@
 import {
   lk_collection_category,
+  measurement_unit,
   xref_collection_unit,
   xref_taxon_marking_body_location,
   xref_taxon_measurement_qualitative,
@@ -8,31 +9,68 @@ import {
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns } from "../utils/types";
+import { implement, zodID } from "../utils/zod_helpers";
 
 /**
  *
- * Xref schemas and types
+ * Xref zod schemas.
  *
  */
 
-export type IMarkingBodyLocationDef = Omit<
-  xref_taxon_marking_body_location,
-  AuditColumns
->;
+export const TsnMarkingBodyLocation = implement<
+  Omit<xref_taxon_marking_body_location, AuditColumns>
+>().with({
+  taxon_marking_body_location_id: zodID,
+  itis_tsn: z.number(),
+  body_location: z.string(),
+  description: z.string().nullable(),
+});
 
-export type IQualitativeMeasurementDef = Omit<
-  xref_taxon_measurement_qualitative,
-  AuditColumns
->;
+export const TsnQualitativeMeasurement = implement<
+  Omit<xref_taxon_measurement_qualitative, AuditColumns>
+>().with({
+  taxon_measurement_id: zodID,
+  itis_tsn: z.number().nullable(), // TODO: This shouldnt be nullable
+  measurement_name: z.string(),
+  measurement_desc: z.string().nullable(),
+});
 
-export type IQualitativeMeasurementOption = Omit<
-  xref_taxon_measurement_qualitative_option,
-  AuditColumns
->;
+export const TsnQuantitativeMeasurement = implement<
+  Omit<xref_taxon_measurement_quantitative, AuditColumns>
+>().with({
+  taxon_measurement_id: zodID,
+  itis_tsn: z.number(),
+  measurement_name: z.string(),
+  measurement_desc: z.string().nullable(),
+  min_value: z.number(),
+  max_value: z.number().nullable(),
+  unit: z.nativeEnum(measurement_unit),
+});
 
-export type IQuantitativeMeasurementDef = Omit<
-  xref_taxon_measurement_quantitative,
-  AuditColumns
+export const TsnQualitativeMeasurementOption = implement<
+  Omit<xref_taxon_measurement_qualitative_option, AuditColumns>
+>().with({
+  qualitative_option_id: zodID,
+  taxon_measurement_id: zodID,
+  option_label: z.string().nullable(),
+  option_value: z.number(),
+  option_desc: z.string().nullable(),
+});
+
+/**
+ * Types from zod schemas.
+ *
+ */
+
+export type ITsnMarkingBodyLocation = z.infer<typeof TsnMarkingBodyLocation>;
+export type ITsnQualitativeMeasurement = z.infer<
+  typeof TsnQualitativeMeasurement
+>;
+export type ITsnQuantitativeMeasurement = z.infer<
+  typeof TsnQuantitativeMeasurement
+>;
+export type ITsnQualitativeMeasurementOption = z.infer<
+  typeof TsnQualitativeMeasurementOption
 >;
 
 export type ICollectionCategoryDef = Omit<
