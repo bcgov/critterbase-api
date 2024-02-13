@@ -22,34 +22,6 @@ export class CritterRepository extends Repository {
     critter_comment: true,
   };
 
-  _getDetailedCritterSql(critterId: string) {
-    return Prisma.sql`
-      SELECT
-        c.critter_id, c.itis_tsn, c.animal_id, c.sex,
-        c.wlh_id, c.responsible_region_nr_id, c.critter_comment,
-
-        coalesce(json_agg(json_build_object(
-          'marking_id', mark.marking_id,
-          'capture_id', mark.capture_id,
-          'mortality_id', mark.mortality_id,
-          'taxon_marking_body_location_id', mark.taxon_marking_body_location_id,
-          'marking_type_id', mark.marking_type_id
-        )) FILTER (WHERE mark.critter_id IS NOT NULL), '[]') as markings,
-        coalesce(json_agg(cap) FILTER (WHERE cap.critter_id IS NOT NULL), '[]') as captures,
-        coalesce(json_agg(mor) FILTER (WHERE mor.critter_id IS NOT NULL), '[]') as mortality,
-        coalesce(json_agg(qual) FILTER (WHERE qual.critter_id IS NOT NULL), '[]') as qualitative_measurements,
-        coalesce(json_agg(quant) FILTER (WHERE quant.critter_id IS NOT NULL), '[]') as quantitative_measurements
-
-      FROM critter c
-      LEFT JOIN marking mark ON mark.critter_id = c.critter_id
-      LEFT JOIN capture cap ON cap.critter_id = c.critter_id
-      LEFT JOIN mortality mor ON mor.critter_id = c.critter_id
-      LEFT JOIN measurement_qualitative qual ON qual.critter_id = c.critter_id
-      LEFT JOIN measurement_quantitative quant ON quant.critter_id = c.critter_id
-      WHERE c.critter_id = ${critterId}::uuid
-      GROUP BY c.critter_id;`;
-  }
-
   /**
    * Get all critters.
    *
@@ -111,29 +83,6 @@ export class CritterRepository extends Repository {
     if (!result) {
       throw apiError.notFound(`Failed to find specific critter.`, [
         "CritterRepository -> getCritterById",
-        "result was undefined",
-      ]);
-    }
-
-    return result;
-  }
-
-  /**
-   * TODO: create full detailed response
-   * Get 'detailed' critter by critter id.
-   *
-   * @async
-   * @throws {apiError.notFound} - if query returns no critter.
-   * @returns {Promise<ICritterDetailed>} detailed critter object.
-   */
-  async detailed_getCritterById(critterId: string) {
-    const result = await this.prisma.$queryRaw(
-      this._getDetailedCritterSql(critterId),
-    );
-
-    if (!result) {
-      throw apiError.notFound(`Failed to find critters.`, [
-        "CritterRepository -> detailed_getCritterById",
         "result was undefined",
       ]);
     }
@@ -220,18 +169,61 @@ export class CritterRepository extends Repository {
     }
   }
 
+  // TODO: Move these repository methods to individual repositories once built.
+  // ie: CritterRepository.getCritterMarkings -> MarkingRepository.getCritterMarkings
   async getCritterMarkings(critterId: string) {
-    const result = await this.prisma.marking.findMany({
-      where: { critter_id: critterId },
-    });
+    const result = await this.prisma.$queryRaw`
+      SELECT
+        m.marking_id,
+        m.capture_id,
+        m.mortality_id,
+        b.body_location,
+        t.name as marking_type,
+        mt.material,
+        c1.colour as primary_colour,
+        c2.colour as secondary_colour,
+        c3.colour as text_colour,
+        m.identifier,
+        m.frequency_unit,
+        m.order,
+        m.removed_timestamp
+      FROM marking m
+      LEFT JOIN xref_taxon_marking_body_location b
+        ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
+      LEFT JOIN lk_marking_type t
+        ON t.marking_type_id = m.marking_type_id
+      LEFT JOIN lk_marking_material mt
+        ON mt.marking_material_id = m.marking_material_id
+      LEFT JOIN lk_colour c1
+        ON c1.colour_id = m.primary_colour_id
+      LEFT JOIN lk_colour c2
+        ON c2.colour_id = m.secondary_colour_id
+      LEFT JOIN lk_colour c3
+        ON c3.colour_id = m.text_colour_id
+      WHERE m.critter_id = ${critterId}::uuid
+  `;
 
     return result;
   }
 
   async getCritterCaptures(critterId: string) {
-    const result = await this.prisma.capture.findMany({
-      where: { critter_id: critterId },
-    });
+    const result = await this.prisma.$queryRaw`
+    SELECT
+      c.capture_id,
+      c.capture_timestamp,
+      json_agg(cl) as capture_location,
+      json_agg(rl) as release_location,
+      c.release_timestamp,
+      c.capture_comment,
+      c.release_comment
+    FROM capture c
+    LEFT JOIN location cl
+      ON cl.location_id = c.capture_location_id
+    LEFT JOIN location rl
+      ON rl.location_id = c.release_location_id
+    WHERE c.critter_id = ${critterId}::uuid
+    GROUP BY c.capture_id;
+    `;
 
     return result;
   }
