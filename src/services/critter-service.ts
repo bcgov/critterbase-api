@@ -57,8 +57,21 @@ export class CritterService extends Service<CritterRepository> {
    * @async
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
-  async getCritterByWlhId(wlhId: string) {
-    return this.repository.getCritterByWlhId(wlhId);
+  async getCrittersByWlhId(wlhId: string) {
+    return this.repository.getCrittersByWlhId(wlhId);
+  }
+
+  /**
+   * Get all critters or critters with matching WLH id.
+   *
+   * @async
+   * @returns {Promise<ICritter[]>} array of critter objects.
+   */
+  async getAllCrittersOrCrittersWithWlhId(wlhId?: string) {
+    if (wlhId) {
+      return this.repository.getCrittersByWlhId(wlhId);
+    }
+    return this.repository.getAllCritters();
   }
 
   /**

@@ -57,7 +57,7 @@ export class CritterRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to get critters.`, [
+      throw apiError.sqlIssue(`Failed to find critters.`, [
         `CritterRepository -> getMultipleCrittersByIds`,
         "results had a length of 0",
       ]);
@@ -80,7 +80,7 @@ export class CritterRepository extends Repository {
     });
 
     if (!result) {
-      throw apiError.sqlIssue(`Failed to get critter.`, [
+      throw apiError.sqlIssue(`Failed to find specific critter.`, [
         "CritterRepository -> getCritterById",
         "result was undefined",
       ]);
@@ -112,16 +112,16 @@ export class CritterRepository extends Repository {
    * @throws {apiError.sqlIssue} - if query returns no critter.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
-  async getCritterByWlhId(wlhId: string) {
+  async getCrittersByWlhId(wlhId: string) {
     const result = await this.prisma.critter.findMany({
       where: { wlh_id: wlhId },
     });
 
     if (!result.length) {
-      throw apiError.sqlIssue(`Failed to get critters.`, [
-        "CritterRepository -> getCritterByWlhId",
-        "results had a length of 0",
-      ]);
+      throw apiError.sqlIssue(
+        `Failed to find critters with wlh-id: ${wlhId}.`,
+        ["CritterRepository -> getCritterByWlhId", "results had a length of 0"],
+      );
     }
 
     return result;

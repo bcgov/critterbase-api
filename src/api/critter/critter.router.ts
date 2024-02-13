@@ -4,7 +4,6 @@ import express, { NextFunction, Request, Response } from "express";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { apiError } from "../../utils/types";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 import {
@@ -18,12 +17,49 @@ import {
 } from "./critter.utils";
 import { ICbDatabase } from "../../utils/database";
 
+/**
+ *
+ * Critter Router
+ *
+ */
 export const CritterRouter = (db: ICbDatabase) => {
   const critterRouter = express.Router();
 
   /**
-   ** Critter Router Home
+   * Fetch all critters or all critters with matching WLH id.
+   *
    */
+  critterRouter.get(
+    "/",
+    catchErrors(async (req: Request, res: Response) => {
+      const { wlh_id } = CritterQuerySchema.parse(req.query);
+
+      const service = new db.CritterService();
+
+      const response = service.getAllCrittersOrCrittersWithWlhId(wlh_id);
+
+      return res.status(200).json(response);
+    }),
+  );
+
+  /**
+   * Fetch multiple critters by critter ids.
+   * Note: Post Request.
+   *
+   */
+  critterRouter.post(
+    "/",
+    catchErrors(async (req: Request, res: Response) => {
+      const { critter_ids } = CritterIdsRequestSchema.parse(req.body);
+
+      const service = new db.CritterService();
+
+      const response = service.getMultipleCrittersByIds(critter_ids);
+
+      return res.status(200).json(response);
+    }),
+  );
+
   critterRouter.post(
     "/filter",
     catchErrors(async (req: Request, res: Response) => {
@@ -85,41 +121,6 @@ export const CritterRouter = (db: ICbDatabase) => {
       return res.status(200).json(allCritters);
     }),
   );
-
-  critterRouter.get(
-    "/",
-    catchErrors(async (req: Request, res: Response) => {
-      const { wlh_id } = CritterQuerySchema.parse(req.query);
-      const critters = await formatParse(
-        getFormat(req),
-        wlh_id
-          ? db.getCritterByWlhId(wlh_id, getFormat(req))
-          : db.getAllCritters(getFormat(req)),
-        critterFormats,
-      );
-      if (Array.isArray(critters) && !critters.length && wlh_id) {
-        throw apiError.notFound(`No critters found with wlh_id=${wlh_id}`);
-      }
-      return res.status(200).json(critters);
-    }),
-  );
-
-  /**
-   ** Fetch multiple critters by their IDs
-   */
-  critterRouter.post(
-    "/",
-    catchErrors(async (req: Request, res: Response) => {
-      const parsed = CritterIdsRequestSchema.parse(req.body);
-      const critters = await formatParse(
-        getFormat(req),
-        db.getMultipleCrittersByIds(parsed, getFormat(req)),
-        critterFormats,
-      );
-      return res.status(200).json(critters);
-    }),
-  );
-
   critterRouter.post(
     "/unique",
     catchErrors(async (req: Request, res: Response) => {
@@ -134,7 +135,8 @@ export const CritterRouter = (db: ICbDatabase) => {
   );
 
   /**
-   ** Create new critter
+   * Create a new critter
+   *
    */
   critterRouter.post(
     "/create",
@@ -150,21 +152,10 @@ export const CritterRouter = (db: ICbDatabase) => {
     }),
   );
 
-  // critterRouter.route("/wlh/:wlh_id").get(
-  //   catchErrors(async (req: Request, res: Response) => {
-  //     const critters = await getCritterByWlhId(req.params.wlh_id);
-  //     if (!critters.length) {
-  //       throw apiError.notFound(
-  //         "Could not find any animals with the requested WLH ID"
-  //       );
-  //     }
-  //     const format = critters.map((c) => CritterDetailedResponseSchema.parse(c));
-  //     return res.status(200).json(format);
-  //   })
-  // );
-
   /**
-   * * All critter_id related routes
+   * All critter id related routes
+   * Note: Parsing id at top level.
+   *
    */
   critterRouter
     .route("/:id")
@@ -175,6 +166,10 @@ export const CritterRouter = (db: ICbDatabase) => {
       }),
     )
     //TODO: Swagger Doc
+    /**
+     * Fetch a critter by critter id.
+     *
+     */
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const critterId = req.params.id;
@@ -188,6 +183,10 @@ export const CritterRouter = (db: ICbDatabase) => {
       }),
     )
     // TODO: swagger doc
+    /**
+     * Update a critter by critter id.
+     *
+     */
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const critterId = req.params.id;
