@@ -141,14 +141,15 @@ export const CritterRouter = (db: ICbDatabase) => {
   critterRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
-      await db.appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
-      const parsed = CritterCreateSchema.parse(req.body);
-      const created = await formatParse(
-        getFormat(req),
-        db.createCritter(parsed, getFormat(req)),
-        critterFormats,
-      );
-      return res.status(201).send(created);
+      //TODO: need a solution for english taxon names
+      //await db.appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
+      const payload = CritterCreateSchema.parse(req.body);
+
+      const service = new db.CritterService();
+
+      const response = await service.createCritter(payload);
+
+      return res.status(201).send(response);
     }),
   );
 
@@ -161,7 +162,6 @@ export const CritterRouter = (db: ICbDatabase) => {
     .route("/:id")
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-        console.log("called");
         await uuidParamsSchema.parseAsync(req.params);
         next();
       }),

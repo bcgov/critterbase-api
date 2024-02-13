@@ -3,9 +3,9 @@ import { Repository } from "./base-repository";
 import {
   ICollectionCategoryDef,
   ICollectionUnitDef,
-  IMarkingBodyLocationDef,
-  IQualitativeMeasurementDef,
-  IQualitativeMeasurementOption,
+  ITsnMarkingBodyLocation,
+  ITsnQualitativeMeasurement,
+  ITsnQualitativeMeasurementOption,
 } from "../schemas/xref-schema";
 
 export class XrefRepository extends Repository {
@@ -67,11 +67,11 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {number[]} tsns - ITIS TSN identifiers.
-   * @returns {Promise<IMarkingBodyLocationDef[]>}
+   * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
   async getTsnMarkingBodyLocations(
     tsns: number[],
-  ): Promise<IMarkingBodyLocationDef[]> {
+  ): Promise<ITsnMarkingBodyLocation[]> {
     const result = await this.prisma.xref_taxon_marking_body_location.findMany({
       where: { itis_tsn: { in: tsns } },
       select: {
@@ -97,11 +97,11 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {number[]} tsns - ITIS TSN identifiers.
-   * @returns {Promise<IQualitativeMeasurementDef>}
+   * @returns {Promise<ITsnQualitativeMeasurement>}
    */
   async getTsnQualitativeMeasurements(
     tsns: number[],
-  ): Promise<IQualitativeMeasurementDef[]> {
+  ): Promise<ITsnQualitativeMeasurement[]> {
     const result =
       await this.prisma.xref_taxon_measurement_qualitative.findMany({
         where: { itis_tsn: { in: tsns } },
@@ -131,11 +131,11 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {string} taxonMeasurementId - primary key of xref_taxon_measurement_qualitative
-   * @returns {Promise<IQualitativeMeasurementOption>}
+   * @returns {Promise<ITsnQualitativeMeasurementOption>}
    */
   async getQualitativeMeasurementOptions(
     taxonMeasurementId: string,
-  ): Promise<IQualitativeMeasurementOption[]> {
+  ): Promise<ITsnQualitativeMeasurementOption[]> {
     const result =
       await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
         where: { taxon_measurement_id: taxonMeasurementId },

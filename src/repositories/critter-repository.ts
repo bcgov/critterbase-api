@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import {
   CritterUpdate,
   ICritter,
@@ -48,6 +47,7 @@ export class CritterRepository extends Repository {
    * Get multiple critters by critter ids.
    *
    * @async
+   * @param {string[]} critter_ids - array of critter ids.
    * @throws {apiError.notFound} - if query returns no critters.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
@@ -71,6 +71,7 @@ export class CritterRepository extends Repository {
    * Get critter by critter id.
    *
    * @async
+   * @param {string} critterId - critter id.
    * @throws {apiError.notFound} - if query returns no critter.
    * @returns {Promise<ICritter[]>} critter object.
    */
@@ -96,6 +97,7 @@ export class CritterRepository extends Repository {
    * WLH id is not able to guarantee uniqueness.
    *
    * @async
+   * @param {string} wlhId - wildlife health id.
    * @throws {apiError.sqlExecuteIssue} - if query returns no critter.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
@@ -119,6 +121,8 @@ export class CritterRepository extends Repository {
    * Update existing critter.
    *
    * @async
+   * @param {string} critterId - critter id.
+   * @param {CritterUpdate} critterData - critter update payload.
    * @throws {apiError.sqlExecuteIssue} - if query was unable to update critter.
    * @returns {Promise<ICritter>} critter object.
    */
@@ -149,6 +153,7 @@ export class CritterRepository extends Repository {
    * Create a critter.
    *
    * @async
+   * @param {CritterCreate} critterData - critter create payload.
    * @throws {apiError.sqlExecuteIssue} - if query was unable to create critter.
    * @returns {Promise<ICritter>} critter object.
    */
@@ -172,60 +177,84 @@ export class CritterRepository extends Repository {
   // TODO: Move these repository methods to individual repositories once built.
   // ie: CritterRepository.getCritterMarkings -> MarkingRepository.getCritterMarkings
   async getCritterMarkings(critterId: string) {
-    const result = await this.prisma.$queryRaw`
-      SELECT
-        m.marking_id,
-        m.capture_id,
-        m.mortality_id,
-        b.body_location,
-        t.name as marking_type,
-        mt.material,
-        c1.colour as primary_colour,
-        c2.colour as secondary_colour,
-        c3.colour as text_colour,
-        m.identifier,
-        m.frequency_unit,
-        m.order,
-        m.removed_timestamp
-      FROM marking m
-      LEFT JOIN xref_taxon_marking_body_location b
-        ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
-      LEFT JOIN lk_marking_type t
-        ON t.marking_type_id = m.marking_type_id
-      LEFT JOIN lk_marking_material mt
-        ON mt.marking_material_id = m.marking_material_id
-      LEFT JOIN lk_colour c1
-        ON c1.colour_id = m.primary_colour_id
-      LEFT JOIN lk_colour c2
-        ON c2.colour_id = m.secondary_colour_id
-      LEFT JOIN lk_colour c3
-        ON c3.colour_id = m.text_colour_id
-      WHERE m.critter_id = ${critterId}::uuid
-  `;
+    try {
+      const result = await this.prisma.$queryRaw`
+        SELECT
+          m.marking_id,
+          m.capture_id,
+          m.mortality_id,
+          b.body_location,
+          t.name as marking_type,
+          mt.material,
+          c1.colour as primary_colour,
+          c2.colour as secondary_colour,
+          c3.colour as text_colour,
+          m.identifier,
+          m.frequency_unit,
+          m.order,
+          m.removed_timestamp
+        FROM marking m
+        LEFT JOIN xref_taxon_marking_body_location b
+          ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
+        LEFT JOIN lk_marking_type t
+          ON t.marking_type_id = m.marking_type_id
+        LEFT JOIN lk_marking_material mt
+          ON mt.marking_material_id = m.marking_material_id
+        LEFT JOIN lk_colour c1
+          ON c1.colour_id = m.primary_colour_id
+        LEFT JOIN lk_colour c2
+          ON c2.colour_id = m.secondary_colour_id
+        LEFT JOIN lk_colour c3
+          ON c3.colour_id = m.text_colour_id
+        WHERE m.critter_id = ${critterId}::uuid`;
 
-    return result;
+      return result;
+    } catch (err) {
+      console.log(
+        "Failed to execute raw sql query. CritterService -> getCritterMarkings",
+        { error: err },
+      );
+      return [];
+    }
   }
 
   async getCritterCaptures(critterId: string) {
-    const result = await this.prisma.$queryRaw`
-    SELECT
-      c.capture_id,
-      c.capture_timestamp,
-      json_agg(cl) as capture_location,
-      json_agg(rl) as release_location,
-      c.release_timestamp,
-      c.capture_comment,
-      c.release_comment
-    FROM capture c
-    LEFT JOIN location cl
-      ON cl.location_id = c.capture_location_id
-    LEFT JOIN location rl
-      ON rl.location_id = c.release_location_id
-    WHERE c.critter_id = ${critterId}::uuid
-    GROUP BY c.capture_id;
-    `;
+    try {
+      const result = await this.prisma.$queryRaw`
+        SELECT
+          c.capture_id,
+          c.capture_timestamp,
+          c.release_timestamp,
+          json_agg(cl) as capture_location,
+          json_agg(rl) as release_location,
+          c.capture_comment,
+          c.release_comment
+        FROM capture c
+        LEFT JOIN (
+          SELECT
+            location_id, latitude, longitude, coordinate_uncertainty_unit,
+            elevation, temperature, location_comment
+          FROM location
+        ) as cl
+          ON cl.location_id = c.capture_location_id
+        LEFT JOIN (
+          SELECT
+            location_id, latitude, longitude, coordinate_uncertainty_unit,
+            elevation, temperature, location_comment
+          FROM location
+        ) as rl
+          ON rl.location_id = c.release_location_id
+        WHERE c.critter_id = ${critterId}::uuid
+        GROUP BY c.capture_id;`;
 
-    return result;
+      return result;
+    } catch (err) {
+      console.log(
+        "Failed to execute raw sql query. CritterService -> getCritterCaptures",
+        { error: err },
+      );
+      return [];
+    }
   }
 
   async getCritterMortalities(critterId: string) {
@@ -237,18 +266,62 @@ export class CritterRepository extends Repository {
   }
 
   async getCritterQualitativeMeasurements(critterId: string) {
-    const result = await this.prisma.measurement_qualitative.findMany({
-      where: { critter_id: critterId },
-    });
+    try {
+      const result = await this.prisma.$queryRaw`
+        SELECT
+          m.capture_id,
+          m.mortality_id,
+          x.measurement_name,
+          o.option_label as value,
+          m.measurement_comment,
+          m.measured_timestamp
+        FROM measurement_qualitative m
+        LEFT JOIN xref_taxon_measurement_qualitative x
+          ON x.taxon_measurement_id = m.taxon_measurement_id
+        LEFT JOIN xref_taxon_measurement_qualitative_option o
+          ON o.qualitative_option_id = m.qualitative_option_id
+        WHERE m.critter_id = ${critterId}::uuid;`;
 
-    return result;
+      return result;
+    } catch (err) {
+      console.log(
+        "Failed to execute raw sql query. CritterService -> getCritterQuantitativeMeasurements",
+        { error: err },
+      );
+      return [];
+    }
   }
 
+  /**
+   * Get recorded 'quantitative measurements' of a critter.
+   *
+   * @async
+   * @param {string} critterId - [TODO:description]
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async getCritterQuantitativeMeasurements(critterId: string) {
-    const result = await this.prisma.measurement_qualitative.findMany({
-      where: { critter_id: critterId },
-    });
+    try {
+      const result = await this.prisma.$queryRaw`
+        SELECT
+          m.capture_id,
+          m.mortality_id,
+          m.taxon_measurement_id,
+          x.measurement_name,
+          m.value,
+          m.measurement_comment,
+          m.measured_timestamp
+        FROM measurement_quantitative m
+        LEFT JOIN xref_taxon_measurement_quantitative x
+          ON x.taxon_measurement_id = m.taxon_measurement_id
+        WHERE m.critter_id = ${critterId}::uuid;`;
 
-    return result;
+      return result;
+    } catch (err) {
+      console.log(
+        "Failed to execute raw sql query. CritterService -> getCritterQuantitativeMeasurements",
+        { error: err },
+      );
+      return [];
+    }
   }
 }
