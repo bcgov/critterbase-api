@@ -17,7 +17,7 @@ import { implement, zodID } from "../utils/zod_helpers";
  *
  */
 
-export const TsnMarkingBodyLocation = implement<
+export const TsnMarkingBodyLocationSchema = implement<
   Omit<xref_taxon_marking_body_location, AuditColumns>
 >().with({
   taxon_marking_body_location_id: zodID,
@@ -26,16 +26,29 @@ export const TsnMarkingBodyLocation = implement<
   description: z.string().nullable(),
 });
 
-export const TsnQualitativeMeasurement = implement<
-  Omit<xref_taxon_measurement_qualitative, AuditColumns>
+export const TsnQualitativeMeasurementOptionSchema = implement<
+  Omit<xref_taxon_measurement_qualitative_option, AuditColumns>
+>().with({
+  qualitative_option_id: zodID,
+  taxon_measurement_id: zodID,
+  option_label: z.string().nullable(),
+  option_value: z.number(),
+  option_desc: z.string().nullable(),
+});
+
+export const TsnQualitativeMeasurementSchema = implement<
+  Omit<xref_taxon_measurement_qualitative, AuditColumns> & {
+    options: ITsnQualitativeMeasurementOption[];
+  }
 >().with({
   taxon_measurement_id: zodID,
   itis_tsn: z.number().nullable(), // TODO: This shouldnt be nullable
   measurement_name: z.string(),
   measurement_desc: z.string().nullable(),
+  options: z.array(TsnQualitativeMeasurementOptionSchema),
 });
 
-export const TsnQuantitativeMeasurement = implement<
+export const TsnQuantitativeMeasurementSchema = implement<
   Omit<xref_taxon_measurement_quantitative, AuditColumns>
 >().with({
   taxon_measurement_id: zodID,
@@ -47,30 +60,25 @@ export const TsnQuantitativeMeasurement = implement<
   unit: z.nativeEnum(measurement_unit),
 });
 
-export const TsnQualitativeMeasurementOption = implement<
-  Omit<xref_taxon_measurement_qualitative_option, AuditColumns>
->().with({
-  qualitative_option_id: zodID,
-  taxon_measurement_id: zodID,
-  option_label: z.string().nullable(),
-  option_value: z.number(),
-  option_desc: z.string().nullable(),
-});
-
 /**
  * Types from zod schemas.
  *
  */
 
-export type ITsnMarkingBodyLocation = z.infer<typeof TsnMarkingBodyLocation>;
+export type ITsnMarkingBodyLocation = z.infer<
+  typeof TsnMarkingBodyLocationSchema
+>;
+
 export type ITsnQualitativeMeasurement = z.infer<
-  typeof TsnQualitativeMeasurement
+  typeof TsnQualitativeMeasurementSchema
 >;
+
 export type ITsnQuantitativeMeasurement = z.infer<
-  typeof TsnQuantitativeMeasurement
+  typeof TsnQuantitativeMeasurementSchema
 >;
+
 export type ITsnQualitativeMeasurementOption = z.infer<
-  typeof TsnQualitativeMeasurementOption
+  typeof TsnQualitativeMeasurementOptionSchema
 >;
 
 export type ICollectionCategoryDef = Omit<

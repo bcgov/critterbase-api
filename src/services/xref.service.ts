@@ -6,7 +6,6 @@ import { ItisWebService } from "./itis-service";
 export class XrefService extends Service<XrefRepository> {
   serviceFactory: { itisService: ItisWebService };
 
-  // Set the default values for the constructor
   constructor(
     repository = new XrefRepository(),
     serviceFactory = { itisService: new ItisWebService() },
@@ -165,7 +164,7 @@ export class XrefService extends Service<XrefRepository> {
       await this.repository.getTsnQuantitativeMeasurements(tsns);
 
     const qualitative =
-      await this.repository.getTsnQuantitativeMeasurements(tsns);
+      await this.repository.getTsnQualitativeMeasurements(tsns);
 
     if (asSelect) {
       const quantitativeAsSelect = toSelectFormat(

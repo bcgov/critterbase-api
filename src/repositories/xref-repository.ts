@@ -97,21 +97,31 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {number[]} tsns - ITIS TSN identifiers.
-   * @returns {Promise<ITsnQualitativeMeasurement>}
+   * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
   async getTsnQualitativeMeasurements(
     tsns: number[],
   ): Promise<ITsnQualitativeMeasurement[]> {
-    const result =
-      await this.prisma.xref_taxon_measurement_qualitative.findMany({
-        where: { itis_tsn: { in: tsns } },
-        select: {
-          taxon_measurement_id: true,
-          itis_tsn: true,
-          measurement_name: true,
-          measurement_desc: true,
-        },
-      });
+    const result = await this.prisma.$queryRaw<ITsnQualitativeMeasurement[]>`
+      SELECT
+        q.taxon_measurement_id,
+        q.itis_tsn,
+        q.measurement_name,
+        q.measurement_desc,
+        json_agg(
+          json_build_object(
+            'qualitative_option_id', o.qualitative_option_id,
+            'taxon_measurement_id', o.taxon_measurement_id,
+            'option_label', o.option_label,
+            'option_value', o.option_value,
+            'option_desc', o.option_desc
+          )
+        ) as options
+      FROM xref_taxon_measurement_qualitative q
+      LEFT JOIN xref_taxon_measurement_qualitative_option o
+        ON q.taxon_measurement_id = o.taxon_measurement_id
+      WHERE q.itis_tsn = ANY(${tsns})
+      GROUP BY q.taxon_measurement_id;`;
 
     if (!result.length) {
       throw apiError.sqlExecuteIssue(

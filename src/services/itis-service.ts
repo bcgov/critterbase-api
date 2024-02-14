@@ -13,7 +13,7 @@ import { apiError } from "../utils/types";
  * ITIS Solr Service: https://itis.gov/solr_documentation.html
  *
  * @export
- * @class Itis
+ * @class ItisWebService
  */
 export class ItisWebService {
   webServiceUrl: string;
