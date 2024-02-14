@@ -24,6 +24,13 @@ export interface IItisGetFullHierarchyResponse<
   tsn: string;
 }
 
-export interface IItisStub {
+export interface IItisTsnStub {
   tsn: string;
+}
+
+export interface IItisSolrStub {
+  response: {
+    numFound: number;
+    docs: { tsn: string; nameWOInd: string }[];
+  };
 }

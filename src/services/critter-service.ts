@@ -37,6 +37,7 @@ export class CritterService extends Service<CritterRepository> {
    * Get multiple critters by critter ids.
    *
    * @async
+   * @param {string[]} critterIds - array of critter ids.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
   async getMultipleCrittersByIds(critterIds: string[]) {
@@ -47,6 +48,8 @@ export class CritterService extends Service<CritterRepository> {
    * Get critter by critter id.
    *
    * @async
+   * @param {string} critterId - critter id.
+   * @param {QueryFormats} format - additional response format (supports detailed).
    * @returns {Promise<ICritter | ICritterDetailed>} critter object.
    */
   async getCritterById(critterId: string, format = defaultFormat) {
@@ -75,6 +78,7 @@ export class CritterService extends Service<CritterRepository> {
    * WLH id is not able to guarantee uniqueness.
    *
    * @async
+   * @param {string} wlhId - wildlife health id.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
   async getCrittersByWlhId(wlhId: string) {
@@ -85,6 +89,7 @@ export class CritterService extends Service<CritterRepository> {
    * Get all critters or critters with matching WLH id.
    *
    * @async
+   * @param {string} [wlhId] - wildlife health id.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
   async getAllCrittersOrCrittersWithWlhId(wlhId?: string) {
@@ -98,6 +103,8 @@ export class CritterService extends Service<CritterRepository> {
    * Update existing critter.
    *
    * @async
+   * @param {string} critterId - critter id.
+   * @param {CritterUpdate} critterData - critter update payload.
    * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
@@ -106,20 +113,47 @@ export class CritterService extends Service<CritterRepository> {
 
   /**
    * Create a critter.
+   * Note: ... TODO: update with new ITIS flow.
    *
    * @async
+   * @param {CritterCreate} critterData - create critter payload.
+   * @throws {apiError.notFound} - when invalid tsn.
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreate) {
-    const isTsn = await this.serviceFactory.itisService.isValueTsn(
-      critterData.itis_tsn,
-    );
+    if (critterData.itis_tsn) {
+      const isTsn = await this.serviceFactory.itisService.isValueTsn(
+        critterData.itis_tsn,
+      );
 
-    if (!isTsn) {
-      throw apiError.notFound(`Invalid ITIS TSN: ${critterData.itis_tsn}`, [
-        "CritterService -> createCritter",
-        "ITIS has no reference to this TSN",
-      ]);
+      if (!isTsn) {
+        throw apiError.notFound(`Invalid ITIS TSN: ${critterData.itis_tsn}`, [
+          "CritterService -> createCritter",
+          "ITIS has no reference to this TSN",
+        ]);
+      }
+    }
+
+    if (critterData.itis_scientific_name) {
+      const foundTsn =
+        await this.serviceFactory.itisService.getTsnFromScientificName(
+          critterData.itis_scientific_name,
+        );
+
+      if (!foundTsn) {
+        throw apiError.notFound(
+          `Unable to translate scientific name to ITIS TSN`,
+          [
+            "CritterService -> createCritter",
+            `getTsnFromScientificName(${critterData.itis_scientific_name}) returned undefined`,
+          ],
+        );
+      }
+
+      return this.repository.createCritter({
+        ...critterData,
+        itis_tsn: foundTsn,
+      });
     }
 
     return this.repository.createCritter(critterData);
@@ -161,38 +195,6 @@ const formatLocationNameSearch = (
         }
       : undefined,
   };
-};
-//changed body: any -> lk_taxon
-const appendEnglishTaxonAsUUID = async (body: {
-  taxon_name_common?: string;
-  taxon_name_latin?: string;
-  taxon_id?: string;
-}) => {
-  let taxon = null;
-  if (body.taxon_name_common) {
-    taxon = await prisma.lk_taxon.findFirst({
-      where: {
-        taxon_name_common: {
-          equals: body.taxon_name_common,
-          mode: "insensitive",
-        },
-      },
-    });
-  }
-  if (body.taxon_name_latin) {
-    taxon = await prisma.lk_taxon.findFirst({
-      where: {
-        taxon_name_latin: {
-          equals: body.taxon_name_latin,
-          mode: "insensitive",
-        },
-      },
-    });
-  }
-  if (taxon) {
-    body.taxon_id = taxon.taxon_id;
-  }
-  return body;
 };
 
 const getSimilarCritters = async (

@@ -1,5 +1,6 @@
 -- AlterTable
-ALTER TABLE "critter" ADD COLUMN     "itis_tsn" INTEGER;
+ALTER TABLE "critter" ADD COLUMN     "itis_tsn" INTEGER,
+ADD COLUMN "itis_scientific_name" TEXT;
 
 -- AlterTable
 ALTER TABLE "mortality" ADD COLUMN     "proximate_predated_by_itis_tsn" INTEGER,

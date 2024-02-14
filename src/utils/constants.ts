@@ -16,6 +16,7 @@ declare global {
       DB_URL: string;
       AUTHENTICATE: string;
       ITIS_WEB_SERVICE: string;
+      ITIS_SOLR_SERVICE: string;
     }
   }
 }

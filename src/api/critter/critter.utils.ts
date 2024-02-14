@@ -50,6 +50,7 @@ type ICritter = Omit<critter, AuditColumns>;
 const CritterSchema = implement<ICritter>().with({
   critter_id: zodID,
   itis_tsn: z.number(),
+  itis_scientific_name: z.string(),
   wlh_id: z.string().nullable(),
   animal_id: z.string().nullable(),
   sex: z.nativeEnum(sex),
@@ -57,11 +58,14 @@ const CritterSchema = implement<ICritter>().with({
   critter_comment: z.string().nullable(),
 });
 
-// Update critter schema
-const CritterUpdateSchema = CritterSchema.omit({ critter_id: true }).partial();
-
 // Create critter schema
-const CritterCreateSchema = CritterSchema.omit({ critter_id: true });
+const CritterCreateSchema = CritterSchema.omit({
+  critter_id: true,
+  itis_scientific_name: true,
+}).partial({ itis_tsn: true });
+
+// Update critter schema
+const CritterUpdateSchema = CritterCreateSchema.partial();
 
 enum eCritterStatus {
   alive = "alive",

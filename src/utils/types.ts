@@ -58,8 +58,12 @@ class apiError extends Error {
   /**
    ** Structural or syntax issue with payload or query
    */
-  static syntaxIssue(message: string) {
-    return new apiError(message, 400, "syntaxIssue");
+  static syntaxIssue(message: string, errors?: CustomError[]) {
+    return new apiError(message, 400, "syntaxIssue", errors);
+  }
+
+  static requestIssue(message: string, errors?: CustomError[]) {
+    return new apiError(message, 400, "requestIssue", errors);
   }
 
   /**

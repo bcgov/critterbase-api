@@ -12,6 +12,7 @@ import { implement, zodID } from "../utils/zod_helpers";
 export const CritterSchema = implement<ICritter>().with({
   critter_id: zodID,
   itis_tsn: z.number(),
+  itis_scientific_name: z.string(),
   wlh_id: z.string().nullable(),
   animal_id: z.string().nullable(),
   sex: z.nativeEnum(sex),
