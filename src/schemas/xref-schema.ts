@@ -96,6 +96,6 @@ export const CollectionUnitCategorySchema = z.object({
 
 export const CollectionUnitCategoryIdSchema = z
   .object({
-    category_id: z.string().optional(),
+    category_id: z.string().uuid().optional(),
   })
   .passthrough();

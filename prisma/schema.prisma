@@ -33,13 +33,13 @@ model audit_log {
   audit_log_id                     String   @id(map: "audit_id") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   table_name                       String
   operation                        String
-  system_name                      String
   before_value                     Json?
   after_value                      Json?
   create_user                      String   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                      String   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                 DateTime @default(now()) @db.Timestamptz(6)
   update_timestamp                 DateTime @default(now()) @db.Timestamptz(6)
+  system_name                      String
   user_audit_log_create_userTouser user     @relation("audit_log_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_audit_log_create_user")
   user_audit_log_update_userTouser user     @relation("audit_log_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_audit_log_update_user")
 }
@@ -69,7 +69,6 @@ model capture {
 
 model critter {
   critter_id                     String                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  itis_tsn                       Int
   wlh_id                         String?
   animal_id                      String?
   sex                            sex
@@ -79,6 +78,8 @@ model critter {
   create_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
   update_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
   critter_comment                String?
+  itis_tsn                       Int
+  itis_scientific_name           String
   artifact                       artifact[]
   capture                        capture[]
   lk_region_nr                   lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
@@ -159,17 +160,17 @@ model lk_cause_of_death {
 }
 
 model lk_collection_category {
-  collection_category_id                        String                           @id(map: "xref_taxon_collection_category_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  category_name                                 String                           @unique(map: "xref_taxon_collection_category_category_name_key")
+  collection_category_id                        String                          @id(map: "xref_taxon_collection_category_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  category_name                                 String                          @unique(map: "xref_taxon_collection_category_category_name_key")
   description                                   String?
-  create_user                                   String                           @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                                   String                           @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                              DateTime                         @default(now()) @db.Timestamptz(6)
-  update_timestamp                              DateTime                         @default(now()) @db.Timestamptz(6)
-  user_lk_collection_category_create_userTouser user                             @relation("lk_collection_category_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_create_user")
-  user_lk_collection_category_update_userTouser user                             @relation("lk_collection_category_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_update_user")
+  create_user                                   String                          @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                   String                          @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                              DateTime                        @default(now()) @db.Timestamptz(6)
+  update_timestamp                              DateTime                        @default(now()) @db.Timestamptz(6)
+  user_lk_collection_category_create_userTouser user                            @relation("lk_collection_category_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_create_user")
+  user_lk_collection_category_update_userTouser user                            @relation("lk_collection_category_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_update_user")
   xref_collection_unit                          xref_collection_unit[]
-  xref_taxon_collection_category                xref_taxon_collection_category[]
+  xref_taxon_collection_category                xref_taxon_collection_category?
 }
 
 model lk_colour {
@@ -215,62 +216,60 @@ model lk_marking_type {
 }
 
 model lk_population_unit_temp {
-  population_unit_id String                                       @id(map: "newtable_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  population_unit_id String                   @id(map: "newtable_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   unit_name          String?
-  unit_geom          Unsupported("geometry(multipolygon, 4326)")?
+  unit_geom          Unsupported("geometry")?
 
-  //Index required for post_gis unsupported types
-  //https://freddydumont.com/blog/prisma-postgis
-  @@index([unit_geom], name: "unit_geom_idx", type: Gist)
+  @@index([unit_geom], map: "unit_geom_idx", type: Gist)
 }
 
 model lk_region_env {
-  region_env_id                        String                                       @id(map: "lk_region_env_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  region_env_id                        String                   @id(map: "lk_region_env_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   region_env_name                      String
   description                          String?
-  region_geom                          Unsupported("geometry(multipolygon, 4326)")?
-  create_user                          String                                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                          String                                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                     DateTime                                     @default(now()) @db.Timestamptz(6)
-  update_timestamp                     DateTime                                     @default(now()) @db.Timestamptz(6)
-  user_lk_region_env_create_userTouser user                                         @relation("lk_region_env_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_create_user")
-  user_lk_region_env_update_userTouser user                                         @relation("lk_region_env_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_update_user")
+  region_geom                          Unsupported("geometry")?
+  create_user                          String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                          String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                     DateTime                 @default(now()) @db.Timestamptz(6)
+  update_timestamp                     DateTime                 @default(now()) @db.Timestamptz(6)
+  user_lk_region_env_create_userTouser user                     @relation("lk_region_env_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_create_user")
+  user_lk_region_env_update_userTouser user                     @relation("lk_region_env_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_env_update_user")
   location                             location[]
 
-  @@index([region_geom], name: "region_env_geom_idx", type: Gist)
+  @@index([region_geom], map: "region_env_geom_idx", type: Gist)
 }
 
 model lk_region_nr {
-  region_nr_id                        String                                  @id(map: "lk_region_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  region_nr_id                        String                   @id(map: "lk_region_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   region_nr_name                      String
   description                         String?
-  region_geom                         Unsupported("geometry(polygon, 4326)")?
-  create_user                         String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                         String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                    DateTime                                @default(now()) @db.Timestamptz(6)
-  update_timestamp                    DateTime                                @default(now()) @db.Timestamptz(6)
+  region_geom                         Unsupported("geometry")?
+  create_user                         String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                         String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                    DateTime                 @default(now()) @db.Timestamptz(6)
+  update_timestamp                    DateTime                 @default(now()) @db.Timestamptz(6)
   critter                             critter[]
-  user_lk_region_nr_create_userTouser user                                    @relation("lk_region_nr_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_create_user")
-  user_lk_region_nr_update_userTouser user                                    @relation("lk_region_nr_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_update_user")
+  user_lk_region_nr_create_userTouser user                     @relation("lk_region_nr_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_create_user")
+  user_lk_region_nr_update_userTouser user                     @relation("lk_region_nr_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_region_nr_update_user")
   location                            location[]
 
-  @@index([region_geom], name: "region_nr_geom_idx", type: Gist)
+  @@index([region_geom], map: "region_nr_geom_idx", type: Gist)
 }
 
 model lk_wildlife_management_unit {
-  wmu_id                                             String                                  @id(map: "pk_lk_wildlife_management_unit") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  wmu_name                                           String                                  @unique(map: "lk_wildlife_management_unit_un")
+  wmu_id                                             String                   @id(map: "pk_lk_wildlife_management_unit") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  wmu_name                                           String                   @unique(map: "lk_wildlife_management_unit_un")
   description                                        String?
-  wmu_geom                                           Unsupported("geometry(polygon, 4326)")?
-  create_user                                        String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                                        String                                  @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                                   DateTime                                @default(now()) @db.Timestamptz(6)
-  update_timestamp                                   DateTime                                @default(now()) @db.Timestamptz(6)
-  user_lk_wildlife_management_unit_create_userTouser user                                    @relation("lk_wildlife_management_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_create_user")
-  user_lk_wildlife_management_unit_update_userTouser user                                    @relation("lk_wildlife_management_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_update_user")
+  wmu_geom                                           Unsupported("geometry")?
+  create_user                                        String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                        String                   @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                                   DateTime                 @default(now()) @db.Timestamptz(6)
+  update_timestamp                                   DateTime                 @default(now()) @db.Timestamptz(6)
+  user_lk_wildlife_management_unit_create_userTouser user                     @relation("lk_wildlife_management_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_create_user")
+  user_lk_wildlife_management_unit_update_userTouser user                     @relation("lk_wildlife_management_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lk_wildlife_management_unit_update_user")
   location                                           location[]
 
-  @@index([wmu_geom], name: "wmu_geom_idx", type: Gist)
+  @@index([wmu_geom], map: "wmu_geom_idx", type: Gist)
 }
 
 model location {
@@ -323,6 +322,7 @@ model marking {
   update_timestamp                                 DateTime                         @default(now()) @db.Timestamptz(6)
   user_marking_create_userTouser                   user                             @relation("marking_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_marking_create_user")
   user_marking_update_userTouser                   user                             @relation("marking_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_marking_update_user")
+  capture_idTocapture                              capture?                         @relation(fields: [capture_id], references: [capture_id], onDelete: NoAction, onUpdate: NoAction)
   critter                                          critter                          @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
   lk_marking_material                              lk_marking_material?             @relation(fields: [marking_material_id], references: [marking_material_id], onDelete: NoAction, onUpdate: NoAction)
   lk_marking_type                                  lk_marking_type?                 @relation(fields: [marking_type_id], references: [marking_type_id], onDelete: NoAction, onUpdate: NoAction)
@@ -330,7 +330,6 @@ model marking {
   lk_colour_marking_secondary_colour_idTolk_colour lk_colour?                       @relation("marking_secondary_colour_idTolk_colour", fields: [secondary_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
   xref_taxon_marking_body_location                 xref_taxon_marking_body_location @relation(fields: [taxon_marking_body_location_id], references: [taxon_marking_body_location_id], onDelete: NoAction, onUpdate: NoAction, map: "marking_taxon_marking_location_id_fkey")
   lk_colour_marking_text_colour_idTolk_colour      lk_colour?                       @relation("marking_text_colour_idTolk_colour", fields: [text_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
-  capture_idTocapture                              capture?                         @relation(fields: [capture_id], references: [capture_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model measurement_qualitative {
@@ -351,8 +350,8 @@ model measurement_qualitative {
   user_measurement_qualitative_create_userTouser                     user                                      @relation("measurement_qualitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_measurement_qualitative_create_user")
   user_measurement_qualitative_update_userTouser                     user                                      @relation("measurement_qualitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_measurement_qualitative_update_user")
   xref_taxon_measurement_qualitative                                 xref_taxon_measurement_qualitative        @relation(fields: [taxon_measurement_id], references: [taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_measurement_qualitative_xref_measurement")
-  critter                                                            critter                                   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_qualitative_fk")
   capture_idTocapture                                                capture?                                  @relation(fields: [capture_id], references: [capture_id], onDelete: NoAction, onUpdate: NoAction)
+  critter                                                            critter                                   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_qualitative_fk")
 }
 
 model measurement_quantitative {
@@ -381,15 +380,15 @@ model mortality {
   mortality_timestamp                                                        DateTime           @db.Timestamptz(6)
   proximate_cause_of_death_id                                                String             @db.Uuid
   proximate_cause_of_death_confidence                                        cod_confidence?
-  proximate_predated_by_itis_tsn                                             Int
   ultimate_cause_of_death_id                                                 String?            @db.Uuid
   ultimate_cause_of_death_confidence                                         cod_confidence?
-  ultimate_predated_by_itis_tsn                                              Int
   mortality_comment                                                          String?
   create_user                                                                String             @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                                                                String             @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                                           DateTime           @default(now()) @db.Timestamptz(6)
   update_timestamp                                                           DateTime           @default(now()) @db.Timestamptz(6)
+  proximate_predated_by_itis_tsn                                             Int
+  ultimate_predated_by_itis_tsn                                              Int
   user_mortality_create_userTouser                                           user               @relation("mortality_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mortality_create_user")
   user_mortality_update_userTouser                                           user               @relation("mortality_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mortality_update_user")
   critter                                                                    critter            @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_fk")
@@ -473,43 +472,41 @@ model xref_collection_unit {
 
 model xref_taxon_collection_category {
   collection_category_id String                 @id(map: "xref_taxon_collection_category_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  itis_tsn               Int
   create_user            String                 @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user            String                 @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp       DateTime               @default(now()) @db.Timestamptz(6)
   update_timestamp       String                 @default(dbgenerated("now()")) @db.VarChar
+  itis_tsn               Int
   lk_collection_category lk_collection_category @relation(fields: [collection_category_id], references: [collection_category_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_collection_category_category_fk")
 }
 
 model xref_taxon_marking_body_location {
   taxon_marking_body_location_id                          String    @id(map: "xref_species_marking_location_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  itis_tsn                                                Int
   body_location                                           String
   description                                             String?
   create_user                                             String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                                             String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                        DateTime  @default(now()) @db.Timestamptz(6)
   update_timestamp                                        DateTime  @default(now()) @db.Timestamptz(6)
+  itis_tsn                                                Int
   marking                                                 marking[]
   user_xref_taxon_marking_body_location_create_userTouser user      @relation("xref_taxon_marking_body_location_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_marking_location_create_user")
   user_xref_taxon_marking_body_location_update_userTouser user      @relation("xref_taxon_marking_body_location_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_marking_location_update_user")
-
-  @@unique([itis_tsn, body_location], map: "xref_species_marking_location_un")
 }
 
 model xref_taxon_measurement_qualitative {
   taxon_measurement_id                                      String                                      @id(map: "taxon_measurement_qualitative_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  itis_tsn                                                  Int?
   measurement_name                                          String                                      @db.VarChar
   measurement_desc                                          String?                                     @db.VarChar
   create_user                                               String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                                               String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
   update_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
+  itis_tsn                                                  Int?
+  measurement_qualitative                                   measurement_qualitative[]
   user_xref_taxon_measurement_qualitative_create_userTouser user                                        @relation("xref_taxon_measurement_qualitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_create_user")
   user_xref_taxon_measurement_qualitative_update_userTouser user                                        @relation("xref_taxon_measurement_qualitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_update_user")
   xref_taxon_measurement_qualitative_option                 xref_taxon_measurement_qualitative_option[]
-  measurement_qualitative                                   measurement_qualitative[]
 }
 
 model xref_taxon_measurement_qualitative_option {
@@ -532,7 +529,6 @@ model xref_taxon_measurement_qualitative_option {
 
 model xref_taxon_measurement_quantitative {
   taxon_measurement_id                                       String                     @id(map: "taxon_measurement_empirical_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  itis_tsn                                                   Int
   measurement_name                                           String
   measurement_desc                                           String?
   min_value                                                  Float?                     @default(0)
@@ -542,6 +538,7 @@ model xref_taxon_measurement_quantitative {
   update_user                                                String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                           DateTime                   @default(now()) @db.Timestamptz(6)
   update_timestamp                                           DateTime                   @default(now()) @db.Timestamptz(6)
+  itis_tsn                                                   Int
   measurement_quantitative                                   measurement_quantitative[]
   user_xref_taxon_measurement_quantitative_create_userTouser user                       @relation("xref_taxon_measurement_quantitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_create_user")
   user_xref_taxon_measurement_quantitative_update_userTouser user                       @relation("xref_taxon_measurement_quantitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_update_user")

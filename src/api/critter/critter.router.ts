@@ -7,15 +7,17 @@ import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
 import {
-  CritterCreateSchema,
   CritterFilterSchema,
   CritterIdsRequestSchema,
   CritterQuerySchema,
-  CritterUpdateSchema,
   UniqueCritterQuerySchema,
   critterFormats,
 } from "./critter.utils";
 import { ICbDatabase } from "../../utils/database";
+import {
+  CritterCreateSchema,
+  CritterUpdateSchema,
+} from "../../schemas/critter-schema";
 
 /**
  *
@@ -141,8 +143,6 @@ export const CritterRouter = (db: ICbDatabase) => {
   critterRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
-      //TODO: need a solution for english taxon names
-      //await db.appendEnglishTaxonAsUUID(req.body as Record<string, unknown>);
       const payload = CritterCreateSchema.parse(req.body);
 
       const service = new db.CritterService();

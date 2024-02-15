@@ -8,8 +8,11 @@ import { intersect } from "../utils/helper_functions";
 import { LocationResponse } from "../api/location/location.utils";
 import { CritterRepository } from "../repositories/critter-repository";
 import { Service } from "./base-service";
-import { apiError, QueryFormats } from "../utils/types";
-import { CritterCreate, CritterUpdate } from "../schemas/critter-schema";
+import { QueryFormats } from "../utils/types";
+import {
+  CritterCreateOptionalItis,
+  CritterUpdate,
+} from "../schemas/critter-schema";
 import { ItisWebService } from "./itis-service";
 
 export class CritterService extends Service<CritterRepository> {
@@ -108,55 +111,30 @@ export class CritterService extends Service<CritterRepository> {
    * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
-    return this.repository.updateCritter(critterId, critterData);
+    const itisPatchedCritter =
+      await this.serviceFactory.itisService.patchTsnAndScientificName(
+        critterData,
+      );
+
+    return this.repository.updateCritter(critterId, itisPatchedCritter);
   }
 
   /**
    * Create a critter.
-   * Note: ... TODO: update with new ITIS flow.
+   * Patches itis_tsn + itis_scientific_name with ITIS values.
    *
    * @async
-   * @param {CritterCreate} critterData - create critter payload.
+   * @param {CritterCreateOptionalItis} critterData - create critter payload with optional itis fields.
    * @throws {apiError.notFound} - when invalid tsn.
    * @returns {Promise<ICritter>} critter object.
    */
-  async createCritter(critterData: CritterCreate) {
-    if (critterData.itis_tsn) {
-      const isTsn = await this.serviceFactory.itisService.isValueTsn(
-        critterData.itis_tsn,
+  async createCritter(critterData: CritterCreateOptionalItis) {
+    const itisPatchedCritter =
+      await this.serviceFactory.itisService.patchTsnAndScientificName(
+        critterData,
       );
 
-      if (!isTsn) {
-        throw apiError.notFound(`Invalid ITIS TSN: ${critterData.itis_tsn}`, [
-          "CritterService -> createCritter",
-          "ITIS has no reference to this TSN",
-        ]);
-      }
-    }
-
-    if (critterData.itis_scientific_name) {
-      const foundTsn =
-        await this.serviceFactory.itisService.getTsnFromScientificName(
-          critterData.itis_scientific_name,
-        );
-
-      if (!foundTsn) {
-        throw apiError.notFound(
-          `Unable to translate scientific name to ITIS TSN`,
-          [
-            "CritterService -> createCritter",
-            `getTsnFromScientificName(${critterData.itis_scientific_name}) returned undefined`,
-          ],
-        );
-      }
-
-      return this.repository.createCritter({
-        ...critterData,
-        itis_tsn: foundTsn,
-      });
-    }
-
-    return this.repository.createCritter(critterData);
+    return this.repository.createCritter(itisPatchedCritter);
   }
 }
 
@@ -350,8 +328,4 @@ const getSimilarCritters = async (
   return foundCritters;
 };
 
-export {
-  getSimilarCritters,
-  appendEnglishTaxonAsUUID,
-  formatLocationNameSearch,
-};
+export { getSimilarCritters, formatLocationNameSearch };

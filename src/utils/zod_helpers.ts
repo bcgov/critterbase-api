@@ -57,10 +57,6 @@ const tsnQuerySchema = z.object({
   tsn: z.preprocess((val) => Number(val), z.number()),
 });
 
-const asSelectSchema = z.object({
-  format: z.literal(QueryFormats.asSelect),
-});
-
 const taxonMeasurementIdSchema = z.object({
   taxon_measurement_id: zodID,
 });
@@ -138,23 +134,6 @@ export function implement<Model = never>() {
     ) => z.object(schema),
   };
 }
-
-const LookupTaxonSchema = implement<lk_taxon>().with({
-  taxon_id: zodID,
-  kingdom_id: zodID.nullable(),
-  phylum_id: zodID.nullable(),
-  class_id: zodID.nullable(),
-  order_id: zodID.nullable(),
-  family_id: zodID.nullable(),
-  genus_id: zodID.nullable(),
-  species_id: zodID.nullable(),
-  sub_species_id: zodID.nullable(),
-  spi_taxonomy_id: z.number(),
-  taxon_description: z.string().nullable(),
-  taxon_name_common: z.string().nullable(),
-  taxon_name_latin: z.string(),
-  ...zodAudit,
-});
 
 const LookUpColourSchema = implement<lk_colour>().with({
   colour_id: z.string().uuid(),
@@ -248,7 +227,6 @@ export {
   DeleteSchema,
   LookupCollectionUnitCategorySchema,
   LookupCodSchema,
-  LookupTaxonSchema,
   XrefTaxonCollectionCategorySchema,
   taxonMeasurementIdSchema,
   tsnQuerySchema,

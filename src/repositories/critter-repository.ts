@@ -2,6 +2,7 @@ import {
   CritterUpdate,
   ICritter,
   CritterCreate,
+  CritterCreateRequiredItis,
 } from "../schemas/critter-schema";
 import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
@@ -14,6 +15,7 @@ export class CritterRepository extends Repository {
   private critterProperties = {
     critter_id: true,
     itis_tsn: true,
+    itis_scientific_name: true,
     animal_id: true,
     sex: true,
     wlh_id: true,
@@ -153,11 +155,13 @@ export class CritterRepository extends Repository {
    * Create a critter.
    *
    * @async
-   * @param {CritterCreate} critterData - critter create payload.
+   * @param {CritterCreateRequriedItis} critterData - critter create payload with required itis fields.
    * @throws {apiError.sqlExecuteIssue} - if query was unable to create critter.
    * @returns {Promise<ICritter>} critter object.
    */
-  async createCritter(critterData: CritterCreate): Promise<ICritter> {
+  async createCritter(
+    critterData: CritterCreateRequiredItis,
+  ): Promise<ICritter> {
     try {
       const result = await this.prisma.critter.create({
         data: critterData,

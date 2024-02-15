@@ -34,3 +34,8 @@ export interface IItisSolrStub {
     docs: { tsn: string; nameWOInd: string }[];
   };
 }
+
+export interface IItisProperties {
+  itis_tsn: number;
+  itis_scientific_name: string;
+}

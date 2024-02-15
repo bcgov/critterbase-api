@@ -1,6 +1,7 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {
   IItisGetFullHierarchyResponse,
+  IItisProperties,
   IItisSolrStub,
   IItisTsnStub,
 } from "../schemas/itis-schema";
@@ -51,16 +52,19 @@ export class ItisWebService {
 
     const url = query ? `${baseUrl}?${query}` : baseUrl;
 
-    const res = await axios.get<T>(url);
+    try {
+      const res = await axios.get<T>(url);
 
-    if (!res.data) {
+      return res.data;
+    } catch (err) {
+      const axiosError = err as AxiosError;
+
       throw apiError.requestIssue(`No response from ITIS Web Service`, [
         "ItisWebService -> _itisWebServiceGetRequest",
-        "axios returned no data",
+        `axios error: ${axiosError.message} `,
+        url,
       ]);
     }
-
-    return res.data;
   }
 
   /**
@@ -74,16 +78,19 @@ export class ItisWebService {
   async _itisSolrSearch<T>(solrQuery: string): Promise<T> {
     const url = `${this.solrServiceUrl}/?wt=json&omitHeader=true&q=${solrQuery}`;
 
-    const res = await axios.get<T>(url);
+    try {
+      const res = await axios.get<T>(url);
 
-    if (!res.data) {
+      return res.data;
+    } catch (err) {
+      const axiosError = err as AxiosError;
+
       throw apiError.requestIssue(`No response from ITIS Solr Service`, [
         "ItisWebService -> _itisWebServiceGetRequest",
-        "axios returned no data",
+        `axios error: ${axiosError.message}`,
+        url,
       ]);
     }
-
-    return res.data;
   }
 
   /**
@@ -201,5 +208,69 @@ export class ItisWebService {
     }
 
     return Number(foundTaxon.tsn);
+  }
+
+  /**
+   * Patches an object which contains 'itis_tsn' or 'itis_scientific_name'.
+   * Goal to keep sync with ITIS tsn <-> scientific name relation.
+   *
+   * ie: Object contains property itis_tsn, does lookup for scientific name of
+   * that tsn and patches the object's scientific name. Same for inverse.
+   *
+   * @async
+   * @template T - extends Partial<IItisProperties>
+   * @param {T} objectToPatch - initial object with partial itis properties.
+   * @throws {apiError.syntaxIssue} - missing both itis_tsn and itis_scientific_name
+   * @throws {apiError.syntaxIssue} - missing itis_scientific_name
+   * @returns {Promise<T & Required<IItisProperties>>} new object with properties filled in.
+   */
+  async patchTsnAndScientificName<T extends Partial<IItisProperties>>(
+    objectToPatch: T,
+  ): Promise<T & Required<IItisProperties>> {
+    const missingPropertiesError =
+      "itis_tsn and itis_scientific_name missing in object";
+
+    /**
+     * Throw error if neither tsn nor scientific name provided.
+     */
+    if (!objectToPatch.itis_scientific_name && !objectToPatch.itis_tsn) {
+      throw apiError.syntaxIssue(missingPropertiesError);
+    }
+
+    /**
+     * TSN takes precedence over scientific name
+     * Patch scientific name with found value from provided TSN
+     */
+    if (objectToPatch.itis_tsn) {
+      const scientificName = await this.getScientificNameFromTsn(
+        objectToPatch.itis_tsn,
+      );
+
+      return {
+        ...objectToPatch,
+        itis_tsn: objectToPatch.itis_tsn,
+        itis_scientific_name: scientificName,
+      };
+    }
+
+    /**
+     * Throw error if no scientific name. (nothing to patch object with)
+     */
+    if (!objectToPatch.itis_scientific_name) {
+      throw apiError.syntaxIssue(missingPropertiesError);
+    }
+
+    /**
+     * If no TSN, then patch with TSN found from provided scientific name
+     */
+    const tsn = await this.getTsnFromScientificName(
+      objectToPatch.itis_scientific_name,
+    );
+
+    return {
+      ...objectToPatch,
+      itis_tsn: tsn,
+      itis_scientific_name: objectToPatch.itis_scientific_name,
+    };
   }
 }
