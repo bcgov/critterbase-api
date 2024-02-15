@@ -18,28 +18,28 @@ export const MarkingRouter = (db: ICbDatabase) => {
 
   /**
    ** Marking Router Home
-  */
+   */
   markingRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
       const markings = await db.getAllMarkings();
       const formattedMarkings = array(markingResponseSchema).parse(markings);
       return res.status(200).json(formattedMarkings);
-    })
+    }),
   );
 
   /**
    ** Create new marking
-  */
+   */
   markingRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
       const markingData = await MarkingCreateBodySchema.parseAsync(req.body);
       const newMarking = markingResponseSchema.parse(
-        await db.createMarking(markingData)
+        await db.createMarking(markingData),
       );
       return res.status(201).json(newMarking);
-    })
+    }),
   );
 
   markingRouter.route("/critter/:id").get(
@@ -52,20 +52,29 @@ export const MarkingRouter = (db: ICbDatabase) => {
       const markings = await db.getMarkingsByCritterId(id);
       const formattedMarkings = array(markingResponseSchema).parse(markings);
       return res.status(200).json(formattedMarkings);
-    })
+    }),
   );
 
-  markingRouter.post("/verify",
+  markingRouter.post(
+    "/verify",
     catchErrors(async (req: Request, res: Response) => {
-      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(req.body);
-      const problems = await db.verifyMarkingsAgainstTaxon(parsed.taxon_id, parsed.markings);
-      return res.status(200).json({verified: problems.length === 0, invalid_markings: problems});
-    }
-  ));
+      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(
+        req.body,
+      );
+      // TODO: update to use ITIS
+      const problems = await db.verifyMarkingsAgainstTaxon(
+        parsed.taxon_id,
+        parsed.markings,
+      );
+      return res
+        .status(200)
+        .json({ verified: problems.length === 0, invalid_markings: problems });
+    }),
+  );
 
   /**
    ** All marking_id related routes
-  */
+   */
   markingRouter
     .route("/:id")
     .all(
@@ -73,30 +82,31 @@ export const MarkingRouter = (db: ICbDatabase) => {
         // validate uuid
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const marking = await db.getMarkingById(req.params.id);
         const formattedMarking = markingResponseSchema.parse(marking);
         return res.status(200).json(formattedMarking);
-      })
+      }),
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const markingData = await MarkingUpdateBodySchema.parseAsync(req.body);
         const updatedMarking = markingResponseSchema.parse(
-          await db.updateMarking(req.params.id, markingData)
+          await db.updateMarking(req.params.id, markingData),
         );
         return res.status(200).json(updatedMarking);
-      })
+      }),
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const deleted = await db.deleteMarking(id);
         return res.status(200).json(deleted);
-      })
+      }),
     );
-    return markingRouter;
-}
+  return markingRouter;
+};
+

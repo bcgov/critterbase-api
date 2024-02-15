@@ -64,11 +64,14 @@ export class CritterService extends Service<CritterRepository> {
         await this.repository.getCritterQualitativeMeasurements(critterId);
       const quantitative =
         await this.repository.getCritterQuantitativeMeasurements(critterId);
+      const collection_units =
+        await this.repository.getCritterCollectionUnits(critterId);
 
       return {
         ...critter,
         markings,
         captures,
+        collection_units,
         measurements: { qualitative, quantitative },
       };
     }

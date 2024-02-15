@@ -1,12 +1,18 @@
 import {
   CritterUpdate,
   ICritter,
-  CritterCreate,
   CritterCreateRequiredItis,
 } from "../schemas/critter-schema";
 import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
 
+/**
+ * Critter Service
+ *
+ * @export
+ * @class CritterService
+ * @extends Repository
+ */
 export class CritterRepository extends Repository {
   /**
    * Default critter properties, omitting audit columns.
@@ -289,7 +295,7 @@ export class CritterRepository extends Repository {
       return result;
     } catch (err) {
       console.log(
-        "Failed to execute raw sql query. CritterService -> getCritterQuantitativeMeasurements",
+        "Failed to execute raw sql query. CritterService -> getCritterQualitativeMeasurements",
         { error: err },
       );
       return [];
@@ -323,6 +329,37 @@ export class CritterRepository extends Repository {
     } catch (err) {
       console.log(
         "Failed to execute raw sql query. CritterService -> getCritterQuantitativeMeasurements",
+        { error: err },
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Get recorded 'collection units' of a critter.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
+  async getCritterCollectionUnits(critterId: string) {
+    try {
+      const result = await this.prisma.$queryRaw`
+        SELECT
+          c.critter_collection_unit_id,
+          x.unit_name,
+          l.category_name
+        FROM critter_collection_unit c
+        LEFT JOIN xref_collection_unit x
+          ON x.collection_unit_id = c.collection_unit_id
+        LEFT JOIN lk_collection_category l
+          ON l.collection_category_id = x.collection_category_id
+        WHERE c.critter_id = ${critterId}::uuid;`;
+
+      return result;
+    } catch (err) {
+      console.log(
+        "Failed to execute raw sql query. CritterService -> getCritterCollectionUnits",
         { error: err },
       );
       return [];
