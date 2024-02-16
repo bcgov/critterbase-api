@@ -164,5 +164,26 @@ export const XrefRouter = (db: ICbDatabase) => {
     }),
   );
 
+  /**
+   * Endpoint to retrieve 'measurements' both qualitative and quantitative.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query tsn - ITIS TSN identifier
+   */
+  xrefRouter.get(
+    "/taxon-measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
+      const xrefService = new db.XrefService();
+
+      const response = await xrefService.getTsnMeasurements(tsn, format);
+
+      res.status(200).json(response);
+    }),
+  );
+
   return xrefRouter;
 };

@@ -5,6 +5,7 @@ import {
   seedCausesOfDeath,
   seedCollectionUnitCategory,
   seedColours,
+  seedMarkingTypes,
   seedMaterials,
 } from "./seed_scripts/seed_lookups";
 import {
@@ -18,6 +19,8 @@ import {
   ITIS_TSN,
   CARIBOU_POPULATION_UNITS,
 } from "./seed_scripts/seed_constants";
+
+import { seedCritters } from "./seed_scripts/seed_critters";
 
 async function main() {
   /**
@@ -43,6 +46,7 @@ async function main() {
    * Seed lookup tables.
    */
   await seedColours();
+  await seedMarkingTypes();
   await seedMaterials();
   await seedCausesOfDeath();
 
@@ -78,6 +82,12 @@ async function main() {
   // for (const sql of sqls) {
   //   await prisma.$executeRawUnsafe(sql);
   // }
+
+  /**
+   * Seed a critter with all attributes
+   *
+   */
+  await seedCritters();
 }
 
 main()

@@ -1,68 +1,149 @@
-import { sex } from "@prisma/client";
 import { prisma } from "../../src/utils/constants";
-import { ITIS_TSN } from "./seed_constants";
+import { CRITTER_ONE, ITIS_TSN } from "./seed_constants";
 
 export const seedCritters = async () => {
-  const caribouRegion = await prisma.lk_region_nr.findFirst({
-    where: { region_nr_name: "Cariboo Natural Resource Region" },
-  });
+  console.log("Seeding (1) critter + attributes...");
 
-  if (!caribouRegion) {
-    throw new Error("Cariboo natural resource region not found");
+  const caribouNrRegion = await prisma.lk_region_nr.findMany();
+  const colour = await prisma.lk_colour.findMany();
+  const markingType = await prisma.lk_marking_type.findMany();
+  const markingMaterial = await prisma.lk_marking_material.findMany();
+  const cod = await prisma.lk_cause_of_death.findMany();
+  const collectionUnits = await prisma.xref_collection_unit.findMany();
+
+  const markingBodyLocation =
+    await prisma.xref_taxon_marking_body_location.findFirst({
+      where: { body_location: "Left Ear" },
+    });
+
+  const quantitative =
+    await prisma.xref_taxon_measurement_quantitative.findFirst();
+
+  const qualitative = await prisma.xref_taxon_measurement_qualitative.findFirst(
+    {
+      where: { measurement_name: "Life Stage" },
+      select: {
+        taxon_measurement_id: true,
+        xref_taxon_measurement_qualitative_option: {
+          select: {
+            qualitative_option_id: true,
+          },
+        },
+      },
+    },
+  );
+
+  if (!markingBodyLocation || !quantitative || !qualitative) {
+    console.log("failed to find value for seed lookup");
+    return;
   }
 
-  const carl = await prisma.critter.create({
+  /**
+   * Seed critter and related data
+   *
+   */
+  const critter = await prisma.critter.create({
     data: {
-      wlh_id: "1234-56",
+      critter_id: CRITTER_ONE,
+      wlh_id: "123-45",
       animal_id: "Carl",
-      sex: sex.Male,
+      sex: "Male",
+      critter_comment: "Carl the critter.",
       itis_tsn: ITIS_TSN.CARIBOU,
-      responsible_region_nr_id: caribouRegion.region_nr_id,
+      itis_scientific_name: "Alces alces",
+      responsible_region_nr_id: caribouNrRegion[0].region_nr_id,
     },
   });
 
-  const carlita = await prisma.critter.create({
+  const location = await prisma.location.create({
     data: {
-      wlh_id: "3456-78",
-      animal_id: "Carlita",
-      sex: sex.Female,
-      itis_tsn: ITIS_TSN.CARIBOU,
-      responsible_region_nr_id: caribouRegion.region_nr_id,
+      latitude: 1,
+      longitude: 1,
+      coordinate_uncertainty: 10,
+      coordinate_uncertainty_unit: "m",
+      region_nr_id: caribouNrRegion[0].region_nr_id,
+      elevation: 100,
+      temperature: 20,
+      location_comment: "Capture and Release Location",
     },
   });
 
-  // const locations = await prisma.location.createMany({
-  //   data: [
-  //     {
-  //       latitude: 1,
-  //       longitude: 2,
-  //       coordinate_uncertainty: 10,
-  //       coordinate_uncertainty_unit: "m",
-  //       elevation: 100,
-  //       temperature: 20,
-  //       location_comment: "Animal captured here",
-  //     },
-  //     {
-  //       latitude: 3,
-  //       longitude: 4,
-  //       coordinate_uncertainty: 10,
-  //       coordinate_uncertainty_unit: "m",
-  //       elevation: 100,
-  //       temperature: 20,
-  //       location_comment: "Animal released here",
-  //     },
-  //   ],
-  // });
+  const capture = await prisma.capture.create({
+    data: {
+      critter_id: critter.critter_id,
+      capture_location_id: location.location_id,
+      release_location_id: location.location_id,
+      capture_timestamp: new Date(),
+      release_timestamp: new Date(),
+      capture_comment: "Critter was captured",
+      release_comment: "Critter was released",
+    },
+  });
 
-  // await prisma.capture.create({
-  //   data: {
-  //     critter_id: carl.critter_id,
-  //     capture_timestamp: new Date(),
-  //     release_timestamp: new Date(),
-  //     capture_comment: "Captured Carl",
-  //     release_comment: "Released Carl",
-  //   },
-  // });
+  const mortality = await prisma.mortality.create({
+    data: {
+      critter_id: critter.critter_id,
+      location_id: location.location_id,
+      mortality_timestamp: new Date(),
+      proximate_cause_of_death_id: cod[0].cod_id,
+      proximate_cause_of_death_confidence: "Probable",
+      ultimate_cause_of_death_id: cod[0].cod_id,
+      ultimate_cause_of_death_confidence: "Probable",
+      proximate_predated_by_itis_tsn: ITIS_TSN.CANIS_LUPUS,
+      ultimate_predated_by_itis_tsn: ITIS_TSN.CANIS_LUPUS,
+      mortality_comment: "Critter died.",
+    },
+  });
 
-  // Handle additional attributes
+  await prisma.marking.create({
+    data: {
+      critter_id: critter.critter_id,
+      taxon_marking_body_location_id:
+        markingBodyLocation.taxon_marking_body_location_id,
+      marking_type_id: markingType[0].marking_type_id,
+      marking_material_id: markingMaterial[0].marking_material_id,
+      primary_colour_id: colour[0].colour_id,
+      secondary_colour_id: colour[1].colour_id,
+      text_colour_id: colour[2].colour_id,
+      identifier: "abc",
+      frequency: 100,
+      frequency_unit: "Hz",
+      order: 1,
+      comment: "Marking comment.",
+    },
+  });
+
+  await prisma.measurement_qualitative.create({
+    data: {
+      critter_id: critter.critter_id,
+      taxon_measurement_id: qualitative.taxon_measurement_id,
+      capture_id: capture.capture_id,
+      mortality_id: mortality.mortality_id,
+      qualitative_option_id:
+        qualitative.xref_taxon_measurement_qualitative_option[0]
+          .qualitative_option_id,
+      measurement_comment: "added qualitative measurement",
+      measured_timestamp: new Date(),
+    },
+  });
+
+  await prisma.measurement_quantitative.create({
+    data: {
+      critter_id: critter.critter_id,
+      taxon_measurement_id: quantitative.taxon_measurement_id,
+      capture_id: capture.capture_id,
+      mortality_id: mortality.mortality_id,
+      value: 1,
+      measurement_comment: "quantitative measurement comment",
+      measured_timestamp: new Date(),
+    },
+  });
+
+  await prisma.critter_collection_unit.create({
+    data: {
+      critter_id: critter.critter_id,
+      // This just grabs first colleciton unit. Seed is only Caribou population units.
+      collection_unit_id: collectionUnits[0].collection_unit_id,
+    },
+  });
 };

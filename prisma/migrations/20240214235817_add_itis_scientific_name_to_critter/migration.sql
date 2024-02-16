@@ -6,3 +6,9 @@
 */
 -- AlterTable
 ALTER TABLE "critter" ADD COLUMN     "itis_scientific_name" TEXT NOT NULL;
+
+-- DropTrigger
+DROP TRIGGER IF EXISTS trg_measurement_qualitative_upsert ON measurement_qualitative CASCADE;
+
+DROP TRIGGER IF EXISTS trg_measurement_empirical_tax_upsert ON measurement_quantitative CASCADE;
+

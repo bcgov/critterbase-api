@@ -17,6 +17,11 @@ export enum ITIS_TSN {
   ARTIODACTYLA = 180596,
   MAMMALIA = 180596,
 }
+/**
+ * Static Critter UUID's.
+ *
+ */
+export const CRITTER_ONE = `11111111-1111-1111-1111-111111111111`;
 
 export const CARIBOU_POPULATION_UNITS = [
   "Atlin",
@@ -76,4 +81,3 @@ export const CARIBOU_POPULATION_UNITS = [
   "Scott",
   "Unknown",
 ];
-
