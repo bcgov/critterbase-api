@@ -12,6 +12,7 @@ import { QueryFormats } from "../utils/types";
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
+  SimilarCritterQuery,
 } from "../schemas/critter-schema";
 import { ItisWebService } from "./itis-service";
 
@@ -138,6 +139,10 @@ export class CritterService extends Service<CritterRepository> {
       );
 
     return this.repository.createCritter(itisPatchedCritter);
+  }
+
+  async findSimilarCritters(critterQuery: SimilarCritterQuery) {
+    return this.repository.findSimilarCritters(critterQuery);
   }
 }
 

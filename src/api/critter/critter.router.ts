@@ -1,22 +1,15 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { Prisma } from "@prisma/client";
 import express, { NextFunction, Request, Response } from "express";
-import { prisma } from "../../utils/constants";
-import { formatParse, getFormat } from "../../utils/helper_functions";
+import { getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
-import {
-  CritterFilterSchema,
-  CritterIdsRequestSchema,
-  CritterQuerySchema,
-  UniqueCritterQuerySchema,
-  critterFormats,
-} from "./critter.utils";
+import { CritterIdsRequestSchema, CritterQuerySchema } from "./critter.utils";
 import { ICbDatabase } from "../../utils/database";
 import {
   CritterCreateSchema,
   CritterUpdateSchema,
+  SimilarCritterQuerySchema,
 } from "../../schemas/critter-schema";
 
 /**
@@ -62,77 +55,20 @@ export const CritterRouter = (db: ICbDatabase) => {
     }),
   );
 
-  critterRouter.post(
-    "/filter",
-    catchErrors(async (req: Request, res: Response) => {
-      const parsed = CritterFilterSchema.parse(req.body);
-      const {
-        critter_ids,
-        animal_ids,
-        wlh_ids,
-        collection_units,
-        taxon_name_commons,
-      } = parsed;
-      let { taxon_ids } = parsed;
-
-      if (taxon_name_commons) {
-        const uuids = await prisma.lk_taxon.findMany({
-          where: {
-            taxon_name_common: {
-              [taxon_name_commons.negate ? "notIn" : "in"]:
-                taxon_name_commons.body,
-              mode: "insensitive",
-            },
-          },
-        });
-        taxon_ids = { body: uuids.map((a) => a.taxon_id), negate: false };
-      }
-
-      const whereInput: Prisma.critterWhereInput = {
-        critter_id: critter_ids?.body.length
-          ? { [critter_ids.negate ? "notIn" : "in"]: critter_ids.body }
-          : undefined,
-        animal_id: animal_ids?.body.length
-          ? { [animal_ids.negate ? "notIn" : "in"]: animal_ids.body }
-          : undefined,
-        wlh_id: wlh_ids?.body.length
-          ? { [wlh_ids.negate ? "notIn" : "in"]: wlh_ids.body }
-          : undefined,
-        taxon_id: taxon_ids?.body.length
-          ? { [taxon_ids.negate ? "notIn" : "in"]: taxon_ids.body }
-          : undefined,
-        critter_collection_unit: collection_units?.body.length
-          ? {
-              some: {
-                collection_unit_id: {
-                  [collection_units.negate ? "notIn" : "in"]:
-                    collection_units.body,
-                },
-              },
-            }
-          : undefined,
-      };
-      if (Object.values(whereInput).every((a) => !a)) {
-        return res.status(200).json([]);
-      }
-      const allCritters = await formatParse(
-        getFormat(req),
-        db.getAllCritters(getFormat(req), whereInput),
-        critterFormats,
-      );
-      return res.status(200).json(allCritters);
-    }),
-  );
+  /**
+   * Find critters by semi-unique attributes.
+   *
+   */
   critterRouter.post(
     "/unique",
     catchErrors(async (req: Request, res: Response) => {
-      const parsed = UniqueCritterQuerySchema.parse(req.body);
-      const unique = await formatParse(
-        getFormat(req),
-        db.getSimilarCritters(parsed, getFormat(req)),
-        critterFormats,
-      );
-      return res.status(200).json(unique);
+      const parsed = SimilarCritterQuerySchema.parse(req.body);
+
+      const service = new db.CritterService();
+
+      const response = await service.findSimilarCritters(parsed);
+
+      return res.status(200).json(response);
     }),
   );
 
@@ -155,7 +91,7 @@ export const CritterRouter = (db: ICbDatabase) => {
 
   /**
    * All critter id related routes
-   * Note: Parsing id at top level.
+   * Note: Parsing critter id at top level.
    *
    */
   critterRouter

@@ -2,6 +2,7 @@ import {
   CritterUpdate,
   ICritter,
   CritterCreateRequiredItis,
+  SimilarCritterQuery,
 } from "../schemas/critter-schema";
 import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
@@ -184,8 +185,57 @@ export class CritterRepository extends Repository {
     }
   }
 
-  // TODO: Move these repository methods to individual repositories once built.
-  // ie: CritterRepository.getCritterMarkings -> MarkingRepository.getCritterMarkings
+  /**
+   * Find critters by semi-unique attributes, including markings.
+   *
+   * Matches on:
+   *  wlh id
+   *  animal id (critter alias)
+   *  marking colour + marking body location + marking type
+   *  marking type + marking identifier
+   *
+   * @async
+   * @param {SimilarCritterQuery} query - critter query.
+   * @returns {Promise<ICritter>} critter.
+   */
+  async findSimilarCritters(query: SimilarCritterQuery) {
+    const result = await this.prisma.$queryRaw<ICritter>`
+      SELECT
+        c.critter_id,
+        c.itis_tsn,
+        c.itis_scientific_name,
+        c.wlh_id,
+        c.animal_id,
+        c.sex,
+        c.responsible_region_nr_id
+      FROM critter c
+      LEFT JOIN marking m
+        ON m.critter_id = c.critter_id
+      JOIN lk_colour pc
+        ON pc.colour_id = m.primary_colour_id
+      JOIN xref_taxon_marking_body_location x
+        ON x.taxon_marking_body_location_id = m.taxon_marking_body_location_id
+      JOIN lk_marking_type t
+        ON t.marking_type_id = m.marking_type_id
+      WHERE
+        c.wlh_id = ${query.critter?.wlh_id}
+      OR
+        c.animal_id ILIKE ${query.critter?.animal_id}
+      OR
+        (pc.colour ILIKE ${query.marking?.primary_colour}
+        AND x.body_location ILIKE ${query.marking?.body_location}
+        AND t.name ILIKE ${query.marking?.marking_type})
+      OR
+        (t.name ILIKE ${query.marking?.marking_type}
+        AND m.identifier ILIKE ${query.marking?.identifier});`;
+
+    return result;
+  }
+  /**
+   * TODO: Move these repository methods to individual repositories once built.
+   * ie: CritterRepository.getCritterMarkings -> MarkingRepository.getCritterMarkings
+   */
+
   async getCritterMarkings(critterId: string) {
     try {
       const result = await this.prisma.$queryRaw`
@@ -204,17 +254,17 @@ export class CritterRepository extends Repository {
           m.order,
           m.removed_timestamp
         FROM marking m
-        LEFT JOIN xref_taxon_marking_body_location b
+        JOIN xref_taxon_marking_body_location b
           ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
-        LEFT JOIN lk_marking_type t
+        JOIN lk_marking_type t
           ON t.marking_type_id = m.marking_type_id
-        LEFT JOIN lk_marking_material mt
+        JOIN lk_marking_material mt
           ON mt.marking_material_id = m.marking_material_id
-        LEFT JOIN lk_colour c1
+        JOIN lk_colour c1
           ON c1.colour_id = m.primary_colour_id
-        LEFT JOIN lk_colour c2
+        JOIN lk_colour c2
           ON c2.colour_id = m.secondary_colour_id
-        LEFT JOIN lk_colour c3
+        JOIN lk_colour c3
           ON c3.colour_id = m.text_colour_id
         WHERE m.critter_id = ${critterId}::uuid`;
 
@@ -240,14 +290,14 @@ export class CritterRepository extends Repository {
           c.capture_comment,
           c.release_comment
         FROM capture c
-        LEFT JOIN (
+        JOIN (
           SELECT
             location_id, latitude, longitude, coordinate_uncertainty_unit,
             elevation, temperature, location_comment
           FROM location
         ) as cl
           ON cl.location_id = c.capture_location_id
-        LEFT JOIN (
+        JOIN (
           SELECT
             location_id, latitude, longitude, coordinate_uncertainty_unit,
             elevation, temperature, location_comment
@@ -279,6 +329,8 @@ export class CritterRepository extends Repository {
     try {
       const result = await this.prisma.$queryRaw`
         SELECT
+          m.measurement_qualitative_id,
+          m.taxon_measurement_id,
           m.capture_id,
           m.mortality_id,
           x.measurement_name,
@@ -286,9 +338,9 @@ export class CritterRepository extends Repository {
           m.measurement_comment,
           m.measured_timestamp
         FROM measurement_qualitative m
-        LEFT JOIN xref_taxon_measurement_qualitative x
+        JOIN xref_taxon_measurement_qualitative x
           ON x.taxon_measurement_id = m.taxon_measurement_id
-        LEFT JOIN xref_taxon_measurement_qualitative_option o
+        JOIN xref_taxon_measurement_qualitative_option o
           ON o.qualitative_option_id = m.qualitative_option_id
         WHERE m.critter_id = ${critterId}::uuid;`;
 
@@ -306,13 +358,15 @@ export class CritterRepository extends Repository {
    * Get recorded 'quantitative measurements' of a critter.
    *
    * @async
-   * @param {string} critterId - [TODO:description]
+   * @param {string} critterId - critter id.
    * @returns {Promise<[TODO:type]>} [TODO:description]
    */
   async getCritterQuantitativeMeasurements(critterId: string) {
     try {
       const result = await this.prisma.$queryRaw`
         SELECT
+          m.measurement_quantitative_id,
+          m.taxon_measurement_id,
           m.capture_id,
           m.mortality_id,
           m.taxon_measurement_id,
@@ -321,7 +375,7 @@ export class CritterRepository extends Repository {
           m.measurement_comment,
           m.measured_timestamp
         FROM measurement_quantitative m
-        LEFT JOIN xref_taxon_measurement_quantitative x
+        JOIN xref_taxon_measurement_quantitative x
           ON x.taxon_measurement_id = m.taxon_measurement_id
         WHERE m.critter_id = ${critterId}::uuid;`;
 
@@ -347,12 +401,14 @@ export class CritterRepository extends Repository {
       const result = await this.prisma.$queryRaw`
         SELECT
           c.critter_collection_unit_id,
+          x.collection_unit_id,
+          l.collection_category_id,
           x.unit_name,
           l.category_name
         FROM critter_collection_unit c
-        LEFT JOIN xref_collection_unit x
+        JOIN xref_collection_unit x
           ON x.collection_unit_id = c.collection_unit_id
-        LEFT JOIN lk_collection_category l
+        JOIN lk_collection_category l
           ON l.collection_category_id = x.collection_category_id
         WHERE c.critter_id = ${critterId}::uuid;`;
 
