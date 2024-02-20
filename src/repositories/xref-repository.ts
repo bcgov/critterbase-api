@@ -6,6 +6,7 @@ import {
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
+  ITsnQuantitativeMeasurement,
 } from "../schemas/xref-schema";
 
 export class XrefRepository extends Repository {
@@ -176,7 +177,7 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {number[]} tsns - ITIS TSN identifiers.
-   * @returns {Promise<IQuantiativeMeasurementDef>}
+   * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
   async getTsnQuantitativeMeasurements(tsns: number[]) {
     const result =

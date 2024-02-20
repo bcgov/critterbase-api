@@ -117,30 +117,6 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to retrieve 'taxon qualitative measurement options'.
-   *
-   * Optionally can return as 'select' format.
-   *
-   * @query taxon_measurement_id - xref_qualitative_measurement_options primary key.
-   */
-  xrefRouter.get(
-    "/taxon-qualitative-measurement-options",
-    catchErrors(async (req: Request, res: Response) => {
-      const query = taxonMeasurementIdSchema.parse(req.query);
-      const format = isSelectFormat(req);
-
-      const xrefService = new db.XrefService();
-
-      const response = await xrefService.getQualitativeMeasurementOptions(
-        query.taxon_measurement_id,
-        format,
-      );
-
-      res.status(200).json(response);
-    }),
-  );
-
-  /**
    * Endpoint to retrieve 'taxon quantitative measurements'.
    *
    * Optionally can return as 'select' format.

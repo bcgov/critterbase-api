@@ -8,14 +8,18 @@ import {
 import {
   XrefCollectionUnitSchema,
   XrefTaxonCollectionCategorySchema,
-  XrefTaxonMarkingBodyLocationSchema,
   taxonIdSchema,
 } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
+  TsnMarkingBodyLocationSchema,
+  TsnMeasurementsSchema,
+  TsnQualitativeMeasurementSchema,
+  TsnQuantitativeMeasurementSchema,
 } from "../../schemas/xref-schema";
 import { routes } from "../../utils/constants";
+import { QueryFormats } from "../../utils/types";
 
 const TAG = "Xref";
 
@@ -23,11 +27,15 @@ export const xrefSchemas = {
   xrefCollectionUnitsDefaultSchema: XrefCollectionUnitSchema.array(),
   xrefCollectionTaxonCategoryDefaultSchema:
     XrefTaxonCollectionCategorySchema.array(),
-  xrefTaxonMarkingLocationDefaultSchema:
-    XrefTaxonMarkingBodyLocationSchema.array(),
+  xrefTaxonMarkingLocationDefaultSchema: TsnMarkingBodyLocationSchema.array(),
+  xrefTsnQualitativeMeasurementSchema: TsnQualitativeMeasurementSchema.array(),
+  xrefTsnQuantitativeMeasurementSchema:
+    TsnQuantitativeMeasurementSchema.array(),
+  xrefTsnMeasurementsSchema: TsnMeasurementsSchema,
 };
 
-const formats = z.enum(["asSelect"]).optional();
+const formats = z.enum([QueryFormats.asSelect]).optional();
+
 const getXrefCollectionUnits: ZodOpenApiOperationObject = {
   operationId: "getXrefCollectionUnits",
   summary:
@@ -90,10 +98,14 @@ const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
 
 const getTaxonMarkingBodyLocations: ZodOpenApiOperationObject = {
   operationId: "getTaxonMarkingBodyLocations",
-  summary: "Get all body location to taxon mappings available in the DB.",
+  summary:
+    "Get all marking body locations of a TSN. Includes body locations of parent TSN's. Additional asSelect format available.",
   tags: [TAG],
   requestParams: {
-    query: taxonIdSchema.extend({ format: formats }),
+    query: z.object({
+      tsn: z.number(),
+      format: z.literal(QueryFormats.asSelect).optional(),
+    }),
   },
   responses: {
     "200": {
@@ -116,6 +128,102 @@ const getTaxonMarkingBodyLocations: ZodOpenApiOperationObject = {
   },
 };
 
+const getTsnQualitativeMeasurements: ZodOpenApiOperationObject = {
+  operationId: "getTsnQualitativeMeasurements",
+  summary:
+    "Get all qualitative measurements of a TSN. Includes measurements of parent TSN's. Additional asSelect format available.",
+  tags: [TAG],
+  requestParams: {
+    query: z.object({
+      tsn: z.number(),
+      format: z.literal(QueryFormats.asSelect).optional(),
+    }),
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: {
+            oneOf: [
+              {
+                $ref: "#/components/schemas/xrefTsnQualitativeMeasurementSchema",
+              },
+              { $ref: "#/components/schemas/asSelectSchema" },
+            ],
+          },
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
+
+const getTsnQuantitativeMeasurements: ZodOpenApiOperationObject = {
+  operationId: "getTsnQuantitativeMeasurements",
+  summary:
+    "Get all quantitative measurements of a TSN. Includes measurements of parent TSN's. Additional asSelect format available.",
+  tags: [TAG],
+  requestParams: {
+    query: z.object({
+      tsn: z.number(),
+      format: z.literal(QueryFormats.asSelect).optional(),
+    }),
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: {
+            oneOf: [
+              {
+                $ref: "#/components/schemas/xrefTsnQuantitativeMeasurementSchema",
+              },
+              { $ref: "#/components/schemas/asSelectSchema" },
+            ],
+          },
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
+
+const getTsnMeasurements: ZodOpenApiOperationObject = {
+  operationId: "getTsnMeasurements",
+  summary:
+    "Get all measurements of a TSN. Includes measurements of parent TSN's. Additional asSelect format available.",
+  tags: [TAG],
+  requestParams: {
+    query: z.object({
+      tsn: z.number(),
+      format: z.literal(QueryFormats.asSelect).optional(),
+    }),
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: {
+            oneOf: [
+              {
+                $ref: "#/components/schemas/xrefTsnMeasurementsSchema",
+              },
+              { $ref: "#/components/schemas/asSelectSchema" },
+            ],
+          },
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
+
 export const xrefPaths = {
   [`${routes.xref}/collection-units`]: {
     get: getXrefCollectionUnits,
@@ -126,5 +234,13 @@ export const xrefPaths = {
   [`${routes.xref}/taxon-marking-body-locations`]: {
     get: getTaxonMarkingBodyLocations,
   },
+  [`${routes.xref}/taxon-qualitative-measurements`]: {
+    get: getTsnQualitativeMeasurements,
+  },
+  [`${routes.xref}/taxon-quantitative-measurements`]: {
+    get: getTsnQuantitativeMeasurements,
+  },
+  [`${routes.xref}/taxon-measurements`]: {
+    get: getTsnMeasurements,
+  },
 };
-

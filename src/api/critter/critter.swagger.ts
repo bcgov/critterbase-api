@@ -18,6 +18,7 @@ import {
   CritterUpdateSchema,
   CritterCreateSchema,
 } from "../../schemas/critter-schema";
+import { QueryFormats } from "../../utils/types";
 
 const TAG = "Critter";
 
@@ -283,7 +284,7 @@ export const critterPaths = {
       tags: [TAG],
       requestParams: {
         path: z.object({ id: zodID }),
-        query: z.object({ format: z.enum(["detailed"]).optional() }),
+        query: z.object({ format: z.enum([QueryFormats.detailed]).optional() }),
       },
       responses: {
         "200": {

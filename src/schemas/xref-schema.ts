@@ -60,6 +60,11 @@ export const TsnQuantitativeMeasurementSchema = implement<
   unit: z.nativeEnum(measurement_unit),
 });
 
+export const TsnMeasurementsSchema = z.object({
+  qualitative: TsnQualitativeMeasurementSchema.array(),
+  quantitative: TsnQuantitativeMeasurementSchema.array(),
+});
+
 /**
  * Types from zod schemas.
  *
