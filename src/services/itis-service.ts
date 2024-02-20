@@ -6,6 +6,7 @@ import {
   IItisTsnStub,
 } from "../schemas/itis-schema";
 import { apiError } from "../utils/types";
+import { ExternalService } from "./base-service";
 
 /**
  * Service to use ITIS Web Services (Web Service + Solr).
@@ -16,8 +17,7 @@ import { apiError } from "../utils/types";
  * @export
  * @class ItisWebService
  */
-export class ItisWebService {
-  webServiceUrl: string;
+export class ItisService extends ExternalService {
   solrServiceUrl: string;
 
   /**
@@ -30,7 +30,7 @@ export class ItisWebService {
   };
 
   constructor() {
-    this.webServiceUrl = process.env.ITIS_WEB_SERVICE;
+    super(process.env.ITIS_WEB_SERVICE);
     this.solrServiceUrl = process.env.ITIS_SOLR_SERVICE;
   }
 
@@ -48,7 +48,7 @@ export class ItisWebService {
     endpoint: string,
     query?: string,
   ): Promise<T> {
-    const baseUrl = `${this.webServiceUrl}/${endpoint}`;
+    const baseUrl = `${this.externalServiceUrl}/${endpoint}`;
 
     const url = query ? `${baseUrl}?${query}` : baseUrl;
 

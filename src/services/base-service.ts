@@ -7,10 +7,24 @@ import { Repository } from "../repositories/base-repository";
  * @class Service
  * @template TRepo - Repository Class
  */
-export class Service<T extends Repository> {
+export class InternalService<T extends Repository> {
   repository: T;
 
   constructor(repository: T) {
     this.repository = repository;
+  }
+}
+
+/**
+ * Base class for external services. ie: Itis / Biohub
+ *
+ * @export
+ * @class ExternalService
+ */
+export class ExternalService {
+  externalServiceUrl: string;
+
+  constructor(externalServiceUrl: string) {
+    this.externalServiceUrl = externalServiceUrl;
   }
 }

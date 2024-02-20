@@ -39,7 +39,7 @@ const UserCreateBodySchema = implement<
 >().with(
   UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
-    .required({ user_identifier: true, keycloak_uuid: true }).shape
+    .required({ user_identifier: true, keycloak_uuid: true }).shape,
 );
 
 // Validate incoming request body for update artifact
@@ -53,30 +53,11 @@ const AuthLoginSchema = z.object({
   keycloak_uuid: z.string(),
 });
 
-const AuthHeadersSchema = z
-  .object({
-    [API_KEY_HEADER]: z
-      .string({
-        required_error: `A valid uuid for header: '${API_KEY_HEADER}' must be provided`,
-      })
-      .uuid(),
-    [USER_ID_HEADER]: z
-      .string({
-        required_error: `A valid uuid for header: '${USER_ID_HEADER}' must be provided`,
-      })
-      .uuid(),
-    [KEYCLOAK_UUID_HEADER]: z.string({
-      required_error: `A valid keycloak uuid for header: '${KEYCLOAK_UUID_HEADER}' must be provided`,
-    }),
-  })
-  .passthrough();
-
 export {
   UserCreateBodySchema,
   UserUpdateBodySchema,
   AuthLoginSchema,
   UserSchema,
-  AuthHeadersSchema,
   SwagUserSchema,
 };
 export type { UserCreateInput, UserUpdateInput, LoginCredentials };

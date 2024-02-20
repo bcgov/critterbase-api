@@ -1,15 +1,16 @@
 import { XrefRepository } from "../repositories/xref-repository";
 import { toSelectFormat } from "../utils/helper_functions";
-import { Service } from "./base-service";
-import { ItisWebService } from "./itis-service";
+import { InternalService } from "./base-service";
+import { ItisService } from "./itis-service";
 
-export class XrefService extends Service<XrefRepository> {
-  serviceFactory: { itisService: ItisWebService };
+interface IXrefServiceFactory {
+  itisService: ItisService;
+}
 
-  constructor(
-    repository = new XrefRepository(),
-    serviceFactory = { itisService: new ItisWebService() },
-  ) {
+export class XrefService extends InternalService<XrefRepository> {
+  serviceFactory: IXrefServiceFactory;
+
+  constructor(repository: XrefRepository, serviceFactory: IXrefServiceFactory) {
     super(repository);
     this.serviceFactory = serviceFactory;
   }

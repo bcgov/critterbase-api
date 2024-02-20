@@ -1,8 +1,6 @@
-import { ZodOpenApiOperationObject } from "zod-openapi";
 import { z } from "zod";
 import { zodID } from "../../utils/zod_helpers";
 import {
-  CritterFilterSchema,
   CritterIdsRequestSchema,
   UniqueCritterQuerySchema,
 } from "./critter.utils";
@@ -25,111 +23,9 @@ const TAG = "Critter";
 export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
   defaultCritterResponseArray: CritterSchema.array(),
+  //TODO: update this zod schema
+  detailedCritterResponse: z.string(),
 };
-
-const getFilteredCritters: ZodOpenApiOperationObject = {
-  operationId: "filterCritters",
-  summary:
-    "Filter the entire list of critters by various features. You can also do negative filters, retrieving all critters that do not match certain features.",
-  tags: [TAG],
-  requestParams: {
-    query: z.object({ format: z.enum(["default", "detailed"]) }),
-  },
-  requestBody: {
-    content: {
-      "application/json": {
-        schema: CritterFilterSchema,
-      },
-    },
-  },
-  responses: {
-    "200": {
-      description:
-        "Returned all critters that matched the provided request body criteria.",
-      content: {
-        "application/json": {
-          schema: {
-            oneOf: [
-              { $ref: "#/components/schemas/defaultCritterResponseArray" },
-              { $ref: "#/components/schemas/detailedCritterResponseArray" },
-            ],
-          },
-        },
-      },
-    },
-    ...SwagErr,
-    ...SwagUnauthorized,
-    ...SwagNotFound,
-  },
-};
-
-//TODO: add missing properties to CritterSchema
-// const SwaggerDefaultCritterResponseSchema = DefaultCritterIncludeSchema.omit({
-//   critter_collection_unit: true,
-//   lk_taxon: true,
-//   mortality: true,
-// })
-//   .extend({
-//     taxon: z.string(),
-//     collection_units: SwaggerSimpleCollectionResponseValidation.array(),
-//     mortality_timestamp: z.string().nullable(),
-//   })
-//   .openapi({
-//     example: {
-//       critter_id: "43201d4d-f16f-4f8e-8413-dde5d4a195e6",
-//       wlh_id: "17-1053322",
-//       animal_id: "94",
-//       sex: "Female",
-//       taxon: "Caribou",
-//       collection_units: [
-//         {
-//           critter_collection_unit_id: "c971d7c8-5ddf-44ac-a206-70e3f83d9ce1",
-//           collection_unit_id: "a3218908-8b78-4f76-94dd-ba74273b8c93",
-//           category_name: "Population Unit",
-//           unit_name: "Columbia North",
-//           collection_category_id: "c8e23255-7ed2-4551-b0a4-0d980dba1298",
-//         },
-//       ],
-//       mortality_timestamp: "2021-12-09T10:00:00.000Z",
-//     },
-//   });
-//
-//TODO: update this schema and move to critter-schemas
-// const SwaggerDetailedCritterResponseSchema = DetailedCritterIncludeSchema.omit({
-//   measurement_qualitative: true,
-//   measurement_quantitative: true,
-//   lk_taxon: true,
-//   lk_region_nr: true,
-//   user_critter_create_userTouser: true,
-//   critter_collection_unit: true,
-// }).extend({
-//   taxon: z.string(),
-//   responsible_region: z.string().optional(),
-//   mortality_timestamp: z.date().nullable(),
-//   collection_units: SwaggerSimpleCollectionResponseValidation.array(),
-//   mortality: SwaggerMortalityResponseValidation.omit({
-//     critter_id: true,
-//     ...noAudit,
-//   }).array(),
-//   capture: SwaggerCaptureResponseValidation.omit({
-//     critter_id: true,
-//     ...noAudit,
-//   }).array(),
-//   marking: SwaggerMarkingResponseValidation.omit({
-//     critter_id: true,
-//     ...noAudit,
-//   }).array(),
-//   measurement: z.object({
-//     qualitative: SwaggerQualitativeResponseValidationSchema.omit({
-//       critter_id: true,
-//       ...noAudit,
-//     }).array(),
-//     quantitative: SwaggerQuantitativeResponseValidationSchema.omit({
-//       critter_id: true,
-//       ...noAudit,
-//     }).array(),
-//   }),
-// });
 
 export const critterPaths = {
   [`${routes.critters}`]: {
@@ -152,7 +48,7 @@ export const critterPaths = {
             "Returned all critters successfully, or all critters matching WLH ID if provided.",
           content: {
             "application/json": {
-              schema: CritterSchema,
+              schema: CritterSchema.array(),
             },
           },
         },
@@ -184,7 +80,7 @@ export const critterPaths = {
           description: SwagDesc.get,
           content: {
             "application/json": {
-              schema: CritterSchema,
+              schema: CritterSchema.array(),
             },
           },
         },
@@ -193,9 +89,6 @@ export const critterPaths = {
         ...SwagNotFound,
       },
     },
-  },
-  [`${routes.critters}/filter`]: {
-    post: getFilteredCritters,
   },
   [`${routes.critters}/unique`]: {
     /**
@@ -224,12 +117,7 @@ export const critterPaths = {
             "Returned all critters successfully, or all critters matching WLH ID if provided.",
           content: {
             "application/json": {
-              schema: {
-                oneOf: [
-                  { $ref: "#/components/schemas/defaultCritterResponseArray" },
-                  { $ref: "#/components/schemas/detailedCritterResponseArray" },
-                ],
-              },
+              schema: CritterSchema.array(),
             },
           },
         },

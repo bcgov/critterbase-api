@@ -3,10 +3,7 @@ import { CollectionUnitCategoryIdSchema } from "../../schemas/xref-schema";
 import { ICbDatabase } from "../../utils/database";
 import { isSelectFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import {
-  taxonMeasurementIdSchema,
-  tsnQuerySchema,
-} from "../../utils/zod_helpers";
+import { tsnQuerySchema } from "../../utils/zod_helpers";
 
 export const XrefRouter = (db: ICbDatabase) => {
   const xrefRouter = express.Router();
@@ -16,11 +13,9 @@ export const XrefRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const { category_id } = CollectionUnitCategoryIdSchema.parse(req.query);
 
-      const xrefService = new db.XrefService();
-
       if (category_id) {
         const response =
-          await xrefService.getCollectionUnitsFromCategoryId(category_id);
+          await db.xrefService.getCollectionUnitsFromCategoryId(category_id);
 
         return res.status(200).json(response);
       }
@@ -56,9 +51,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const xrefService = new db.XrefService();
-
-      const response = await xrefService.getTsnCollectionCategories(
+      const response = await db.xrefService.getTsnCollectionCategories(
         tsn,
         format,
       );
@@ -80,9 +73,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const xrefService = new db.XrefService();
-
-      const response = await xrefService.getTsnMarkingBodyLocations(
+      const response = await db.xrefService.getTsnMarkingBodyLocations(
         tsn,
         format,
       );
@@ -105,9 +96,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const xrefService = new db.XrefService();
-
-      const response = await xrefService.getTsnQualitativeMeasurements(
+      const response = await db.xrefService.getTsnQualitativeMeasurements(
         tsn,
         format,
       );
@@ -129,9 +118,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const xrefService = new db.XrefService();
-
-      const response = await xrefService.getTsnQuantitativeMeasurements(
+      const response = await db.xrefService.getTsnQuantitativeMeasurements(
         tsn,
         format,
       );
@@ -141,7 +128,7 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to retrieve 'measurements' both qualitative and quantitative.
+   * Endpoint to retrieve measurements both 'qualitative' and 'quantitative'.
    *
    * Optionally can return as 'select' format.
    *
@@ -153,9 +140,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const xrefService = new db.XrefService();
-
-      const response = await xrefService.getTsnMeasurements(tsn, format);
+      const response = await db.xrefService.getTsnMeasurements(tsn, format);
 
       res.status(200).json(response);
     }),

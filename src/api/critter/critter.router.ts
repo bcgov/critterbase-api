@@ -29,9 +29,8 @@ export const CritterRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const { wlh_id } = CritterQuerySchema.parse(req.query);
 
-      const service = new db.CritterService();
-
-      const response = await service.getAllCrittersOrCrittersWithWlhId(wlh_id);
+      const response =
+        await db.critterService.getAllCrittersOrCrittersWithWlhId(wlh_id);
 
       return res.status(200).json(response);
     }),
@@ -47,9 +46,8 @@ export const CritterRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const { critter_ids } = CritterIdsRequestSchema.parse(req.body);
 
-      const service = new db.CritterService();
-
-      const response = await service.getMultipleCrittersByIds(critter_ids);
+      const response =
+        await db.critterService.getMultipleCrittersByIds(critter_ids);
 
       return res.status(200).json(response);
     }),
@@ -64,9 +62,7 @@ export const CritterRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const parsed = SimilarCritterQuerySchema.parse(req.body);
 
-      const service = new db.CritterService();
-
-      const response = await service.findSimilarCritters(parsed);
+      const response = await db.critterService.findSimilarCritters(parsed);
 
       return res.status(200).json(response);
     }),
@@ -81,9 +77,7 @@ export const CritterRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const payload = CritterCreateSchema.parse(req.body);
 
-      const service = new db.CritterService();
-
-      const response = await service.createCritter(payload);
+      const response = await db.critterService.createCritter(payload);
 
       return res.status(201).send(response);
     }),
@@ -112,9 +106,10 @@ export const CritterRouter = (db: ICbDatabase) => {
         const critterId = req.params.id;
         const format = getFormat(req);
 
-        const service = new db.CritterService();
-
-        const response = await service.getCritterById(critterId, format);
+        const response = await db.critterService.getCritterById(
+          critterId,
+          format,
+        );
 
         return res.status(200).json(response);
       }),
@@ -129,9 +124,10 @@ export const CritterRouter = (db: ICbDatabase) => {
         const critterId = req.params.id;
         const payload = CritterUpdateSchema.parse(req.body);
 
-        const service = new db.CritterService();
-
-        const response = await service.updateCritter(critterId, payload);
+        const response = await db.critterService.updateCritter(
+          critterId,
+          payload,
+        );
 
         return res.status(201).json(response);
       }),

@@ -10,13 +10,28 @@ import * as marking from "../api/marking/marking.service";
 import * as measurement from "../api/measurement/measurement.service";
 import * as mortality from "../api/mortality/mortality.service";
 import * as user from "../api/user/user.service";
+import { CritterRepository } from "../repositories/critter-repository";
+import { XrefRepository } from "../repositories/xref-repository";
 import { CritterService } from "../services/critter-service";
+import { ItisService } from "../services/itis-service";
 import { XrefService } from "../services/xref.service";
 
-export type ICbDatabase = typeof db;
+/**
+ * Instantiating Services
+ *
+ */
+
+const itisService = new ItisService();
+
+const critterService = new CritterService(new CritterRepository(), {
+  itisService,
+});
+
+const xrefService = new XrefService(new XrefRepository(), {
+  itisService,
+});
 
 export const db = {
-  CritterService,
   ...access,
   ...artifact,
   ...bulk,
@@ -29,5 +44,8 @@ export const db = {
   ...measurement,
   ...mortality,
   ...user,
-  XrefService,
+  critterService,
+  xrefService,
 };
+
+export type ICbDatabase = typeof db;

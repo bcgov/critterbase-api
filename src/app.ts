@@ -18,8 +18,6 @@ import { XrefRouter } from "./api/xref/xref.router";
 import { ICbDatabase } from "./utils/database";
 import { auth, errorHandler, errorLogger, logger } from "./utils/middleware";
 import { apiError } from "./utils/types";
-import swaggerUIExperss from "swagger-ui-express";
-import { yaml } from "./swagger";
 import { routes } from "./utils/constants";
 
 export const makeApp = (db: ICbDatabase) => {
@@ -28,14 +26,6 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(cors());
   app.use(helmet());
   app.use(express.json());
-
-  app.use(
-    "/api-docs",
-    swaggerUIExperss.serve,
-    swaggerUIExperss.setup(
-      yaml /*, {swaggerOptions: { supportedSubmitMethods: [ 'get' ] }}*/,
-    ),
-  );
 
   app.use(logger);
 
