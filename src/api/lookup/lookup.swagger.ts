@@ -8,7 +8,6 @@ import {
   sex,
 } from "@prisma/client";
 import { routes } from "../../utils/constants";
-import { eCritterStatus } from "../critter/critter.utils";
 import {
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -25,6 +24,7 @@ import {
   SwagServerError,
   SwagUnauthorized,
 } from "../../utils/swagger_helpers";
+import { eCritterStatus } from "../../schemas/critter-schema";
 
 const availValues = "Available values for this enumerated type.";
 const availRows =
@@ -392,4 +392,3 @@ export const enumPaths = {
     get: lookupCollectionUnitCategories,
   },
 };
-

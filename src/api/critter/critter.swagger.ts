@@ -1,9 +1,5 @@
 import { z } from "zod";
 import { zodID } from "../../utils/zod_helpers";
-import {
-  CritterIdsRequestSchema,
-  UniqueCritterQuerySchema,
-} from "./critter.utils";
 import { routes } from "../../utils/constants";
 import {
   SwagDesc,
@@ -16,6 +12,8 @@ import {
   CritterUpdateSchema,
   CritterCreateSchema,
   DetailedCritterSchema,
+  SimilarCritterQuerySchema,
+  CritterIdsRequestSchema,
 } from "../../schemas/critter-schema";
 import { QueryFormats } from "../../utils/types";
 
@@ -103,7 +101,7 @@ export const critterPaths = {
       requestBody: {
         content: {
           "application/json": {
-            schema: UniqueCritterQuerySchema,
+            schema: SimilarCritterQuerySchema,
           },
         },
       },

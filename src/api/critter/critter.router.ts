@@ -92,7 +92,7 @@ export const CritterRouter = (db: ICbDatabase) => {
   critterRouter
     .route("/:id")
     .all(
-      catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+      catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
       }),

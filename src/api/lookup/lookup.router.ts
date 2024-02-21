@@ -11,9 +11,9 @@ import { Request, Response } from "express-serve-static-core";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { eCritterStatus } from "../critter/critter.utils";
 import {
   codFormats,
+  collectionUnitCategoriesFormats,
   colourFormats,
   markingMaterialsFormats,
   markingTypesFormats,
@@ -22,6 +22,7 @@ import {
   wmuFormats,
 } from "./lookup.utils";
 import { ICbDatabase } from "../../utils/database";
+import { eCritterStatus } from "../../schemas/critter-schema";
 
 export const LookupRouter = (_db: ICbDatabase) => {
   const lookupRouter = express.Router();
