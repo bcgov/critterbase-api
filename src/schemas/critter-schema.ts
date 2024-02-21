@@ -86,7 +86,7 @@ export enum eCritterStatus {
 }
 
 /**
- * TODO: Move these schemas to the correct files once additional
+ * TODO: Move these schemas / types to the correct files once additional
  * schema files are created for each service/repo/router
  *
  */
@@ -123,18 +123,77 @@ export const DetailedCritterMarkingSchema = z.object({
   comment: z.string().nullable(),
 });
 
+export const DetailedCritterCaptureSchema = z.object({
+  capture_id: zodID,
+  capture_timestamp: z.coerce.date(),
+  release_timestamp: z.coerce.date().nullable(),
+  capture_location: DetailedCritterLocationSchema,
+  release_location: DetailedCritterLocationSchema,
+  capture_comment: z.string().nullable(),
+  release_comment: z.string().nullable(),
+});
+
 export const DetailedCritterMortalitySchema = z.object({
   mortality_id: zodID,
   mortality_timestamp: z.coerce.date(),
-  mortality_location: DetailedCritterLocationSchema.array(),
-  proximate_cause_of_death: z.string().nullable(),
+  mortality_location: DetailedCritterLocationSchema,
+  proximate_cause_of_death_category: z.string().nullable(),
+  proximate_cause_of_death_reason: z.string().nullable(),
   proximate_cause_of_death_confidence: z.string().nullable(),
-  ultimate_cause_of_death: z.string().nullable(),
+  ultimate_cause_of_death_category: z.string().nullable(),
+  ultimate_cause_of_death_reason: z.string().nullable(),
   mortality_comment: z.string().nullable(),
   proximate_predated_by_itis_tsn: z.number().nullable(),
   ultimate_predated_by_itis_tsn: z.number().nullable(),
 });
 
+export const DetailedCritterQualitativeMeasurementSchema = z.object({
+  measurement_qualitative_id: zodID,
+  taxon_measurement_id: zodID,
+  capture_id: zodID.nullable(),
+  mortality_id: zodID.nullable(),
+  measurement_name: z.string(),
+  value: z.string(),
+  measurement_comment: z.string(),
+  measured_timestamp: z.coerce.date(),
+});
+
+export const DetailedCritterQuantitativeMeasurementSchema =
+  DetailedCritterQualitativeMeasurementSchema.omit({
+    measurement_qualitative_id: true,
+    value: true,
+  }).extend({ measurement_quantitative_id: zodID, value: z.number() });
+
+export const DetailedCritterCollectionUnit = z.object({
+  critter_collection_unit_id: zodID,
+  unit_name: z.string(),
+  category_name: z.string(),
+});
+
+export type IDetailedCritterLocation = z.infer<
+  typeof DetailedCritterLocationSchema
+>;
+
 export type IDetailedCritterMarking = z.infer<
   typeof DetailedCritterMarkingSchema
+>;
+
+export type IDetailedCritterCapture = z.infer<
+  typeof DetailedCritterCaptureSchema
+>;
+
+export type IDetailedCritterMortality = z.infer<
+  typeof DetailedCritterMortalitySchema
+>;
+
+export type IDetailedCritterQualitativeMeasurement = z.infer<
+  typeof DetailedCritterQualitativeMeasurementSchema
+>;
+
+export type IDetailedCritterQuantitativeMeasurement = z.infer<
+  typeof DetailedCritterQuantitativeMeasurementSchema
+>;
+
+export type IDetailedCritterCollectionUnit = z.infer<
+  typeof DetailedCritterCollectionUnit
 >;

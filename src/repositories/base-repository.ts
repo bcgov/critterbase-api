@@ -41,9 +41,10 @@ export class Repository {
     const parsed = schema.safeParse(result);
 
     if (!parsed.success) {
+      console.log(parsed.error.errors);
+
       throw apiError.sqlExecuteIssue(
         "Failed to parse raw sql with provided Zod schema.",
-        [JSON.stringify(parsed.error.errors)],
       );
     }
 
