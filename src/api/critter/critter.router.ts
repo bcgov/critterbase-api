@@ -96,7 +96,6 @@ export const CritterRouter = (db: ICbDatabase) => {
         next();
       }),
     )
-    //TODO: Swagger Doc
     /**
      * Fetch a critter by critter id.
      *
@@ -114,7 +113,6 @@ export const CritterRouter = (db: ICbDatabase) => {
         return res.status(200).json(response);
       }),
     )
-    // TODO: swagger doc
     /**
      * Update a critter by critter id.
      *

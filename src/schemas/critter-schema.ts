@@ -1,41 +1,31 @@
-import { critter, sex } from "@prisma/client";
+import {
+  coordinate_uncertainty_unit,
+  critter,
+  frequency_unit,
+  location,
+  sex,
+} from "@prisma/client";
 import { z } from "zod";
-import { extendZodWithOpenApi } from "zod-openapi";
 import { AuditColumns } from "../utils/types";
 import { implement, zodID } from "../utils/zod_helpers";
 
-extendZodWithOpenApi(z);
-
 /**
- * Critter schema and types
- *
+ * @table critter
  *
  * Base Critter schema omitting audit columns.
  * Using 'implement' to keep zod schema in sync with prisma type.
+ *
  */
-export const CritterSchema = implement<ICritter>()
-  .with({
-    critter_id: zodID,
-    itis_tsn: z.number(),
-    itis_scientific_name: z.string(),
-    wlh_id: z.string().nullable(),
-    animal_id: z.string().nullable(),
-    sex: z.nativeEnum(sex),
-    responsible_region_nr_id: zodID.nullable(),
-    critter_comment: z.string().nullable(),
-  })
-  .openapi({
-    example: {
-      critter_id: "43201d4d-f16f-4f8e-8413-dde5d4a195e6",
-      wlh_id: "17-1053",
-      animal_id: "Caribou-99",
-      sex: "Female",
-      itis_tsn: 180701,
-      itis_scientific_name: "Alces alces",
-      responsible_region_nr_id: "22734fe6-09af-47e9-936b-7dc9f1b40449",
-      critter_comment: "open api example critter",
-    },
-  });
+export const CritterSchema = implement<ICritter>().with({
+  critter_id: zodID,
+  itis_tsn: z.number(),
+  itis_scientific_name: z.string(),
+  wlh_id: z.string().nullable(),
+  animal_id: z.string().nullable(),
+  sex: z.nativeEnum(sex),
+  responsible_region_nr_id: zodID.nullable(),
+  critter_comment: z.string().nullable(),
+});
 
 /**
  * Create critter schema used in post requests
@@ -59,6 +49,10 @@ export const CritterUpdateSchema = CritterSchema.omit({
   critter_id: true,
 }).partial();
 
+/**
+ * Similar critter query schema used in /critters/unique
+ *
+ */
 export const SimilarCritterQuerySchema = z.object({
   critter: CritterSchema.partial().optional(),
   marking: z
@@ -90,3 +84,57 @@ export enum eCritterStatus {
   alive = "alive",
   mortality = "mortality",
 }
+
+/**
+ * TODO: Move these schemas to the correct files once additional
+ * schema files are created for each service/repo/router
+ *
+ */
+export const DetailedCritterLocationSchema = implement<
+  Omit<location, AuditColumns | "region_nr_id" | "region_env_id" | "wmu_id">
+>().with({
+  location_id: zodID,
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  coordinate_uncertainty: z.number().nullable(),
+  coordinate_uncertainty_unit: z
+    .nativeEnum(coordinate_uncertainty_unit)
+    .nullable(),
+  elevation: z.number().nullable(),
+  temperature: z.number().nullable(),
+  location_comment: z.string().nullable(),
+});
+
+export const DetailedCritterMarkingSchema = z.object({
+  marking_id: zodID,
+  capture_id: zodID.nullable(),
+  mortality_id: zodID.nullable(),
+  body_location: z.string(),
+  material: z.string(),
+  primary_colour: z.string().nullable(),
+  secondary_colour: z.string().nullable(),
+  text_colour: z.string().nullable(),
+  identifier: z.string().nullable(),
+  frequency: z.number().nullable(),
+  frequency_unit: z.nativeEnum(frequency_unit).nullable(),
+  order: z.number().nullable(),
+  attached_timestamp: z.coerce.date(),
+  removed_timestamp: z.coerce.date().nullable(),
+  comment: z.string().nullable(),
+});
+
+export const DetailedCritterMortalitySchema = z.object({
+  mortality_id: zodID,
+  mortality_timestamp: z.coerce.date(),
+  mortality_location: DetailedCritterLocationSchema.array(),
+  proximate_cause_of_death: z.string().nullable(),
+  proximate_cause_of_death_confidence: z.string().nullable(),
+  ultimate_cause_of_death: z.string().nullable(),
+  mortality_comment: z.string().nullable(),
+  proximate_predated_by_itis_tsn: z.number().nullable(),
+  ultimate_predated_by_itis_tsn: z.number().nullable(),
+});
+
+export type IDetailedCritterMarking = z.infer<
+  typeof DetailedCritterMarkingSchema
+>;

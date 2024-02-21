@@ -12,11 +12,9 @@ import { AuditColumns } from "../utils/types";
 import { implement, zodID } from "../utils/zod_helpers";
 
 /**
- *
- * Xref zod schemas.
+ * @table xref_taxon_marking_body_location
  *
  */
-
 export const TsnMarkingBodyLocationSchema = implement<
   Omit<xref_taxon_marking_body_location, AuditColumns>
 >().with({
@@ -26,6 +24,10 @@ export const TsnMarkingBodyLocationSchema = implement<
   description: z.string().nullable(),
 });
 
+/**
+ * @table xref_taxon_measurement_qualitative_option
+ *
+ */
 export const TsnQualitativeMeasurementOptionSchema = implement<
   Omit<xref_taxon_measurement_qualitative_option, AuditColumns>
 >().with({
@@ -36,6 +38,10 @@ export const TsnQualitativeMeasurementOptionSchema = implement<
   option_desc: z.string().nullable(),
 });
 
+/**
+ * @table xref_taxon_measurement_qualitative
+ *
+ */
 export const TsnQualitativeMeasurementSchema = implement<
   Omit<xref_taxon_measurement_qualitative, AuditColumns> & {
     options: ITsnQualitativeMeasurementOption[];
@@ -48,6 +54,10 @@ export const TsnQualitativeMeasurementSchema = implement<
   options: z.array(TsnQualitativeMeasurementOptionSchema),
 });
 
+/**
+ * @table xref_taxon_measurement_quantitative
+ *
+ */
 export const TsnQuantitativeMeasurementSchema = implement<
   Omit<xref_taxon_measurement_quantitative, AuditColumns>
 >().with({
@@ -85,6 +95,8 @@ export type ITsnQuantitativeMeasurement = z.infer<
 export type ITsnQualitativeMeasurementOption = z.infer<
   typeof TsnQualitativeMeasurementOptionSchema
 >;
+
+export type ITsnMeasurements = z.infer<typeof TsnMeasurementsSchema>;
 
 export type ICollectionCategoryDef = Omit<
   lk_collection_category,

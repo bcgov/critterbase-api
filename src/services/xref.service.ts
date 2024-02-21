@@ -156,7 +156,7 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {string} tsn - ITIS TSN identifier.
-   * @returns {Promise<TODO>}
+   * @returns {Promise<{ITsnMeasurements}>}
    */
   async getTsnMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);

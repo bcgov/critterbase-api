@@ -62,14 +62,15 @@ export class CritterService extends InternalService<CritterRepository> {
   async getCritterById(critterId: string, format = defaultFormat) {
     if (format === QueryFormats.detailed) {
       const critter = await this.repository.getCritterById(critterId);
-      const markings = await this.repository.getCritterMarkings(critterId);
-      const captures = await this.repository.getCritterCaptures(critterId);
+      const markings = await this.repository.findCritterMarkings(critterId);
+      const captures = await this.repository.findCritterCaptures(critterId);
       const qualitative =
-        await this.repository.getCritterQualitativeMeasurements(critterId);
+        await this.repository.findCritterQualitativeMeasurements(critterId);
       const quantitative =
-        await this.repository.getCritterQuantitativeMeasurements(critterId);
+        await this.repository.findCritterQuantitativeMeasurements(critterId);
       const collection_units =
-        await this.repository.getCritterCollectionUnits(critterId);
+        await this.repository.findCritterCollectionUnits(critterId);
+      const mortality = await this.repository.findCritterMortalities(critterId);
 
       return {
         ...critter,
@@ -77,6 +78,7 @@ export class CritterService extends InternalService<CritterRepository> {
         captures,
         collection_units,
         measurements: { qualitative, quantitative },
+        mortality,
       };
     }
     return this.repository.getCritterById(critterId);
