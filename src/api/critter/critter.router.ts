@@ -4,12 +4,13 @@ import { getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 
-import { CritterIdsRequestSchema, CritterQuerySchema } from "./critter.utils";
 import { ICbDatabase } from "../../utils/database";
 import {
   CritterCreateSchema,
   CritterUpdateSchema,
   SimilarCritterQuerySchema,
+  CritterIdsRequestSchema,
+  WlhIdQuerySchema,
 } from "../../schemas/critter-schema";
 
 /**
@@ -27,7 +28,7 @@ export const CritterRouter = (db: ICbDatabase) => {
   critterRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
-      const { wlh_id } = CritterQuerySchema.parse(req.query);
+      const { wlh_id } = WlhIdQuerySchema.parse(req.query);
 
       const response =
         await db.critterService.getAllCrittersOrCrittersWithWlhId(wlh_id);

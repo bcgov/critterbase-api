@@ -66,6 +66,12 @@ export const SimilarCritterQuerySchema = z.object({
     .optional(),
 });
 
+export const CritterIdsRequestSchema = z.object({
+  critter_ids: z.array(zodID),
+});
+
+export const WlhIdQuerySchema = z.object({ wlh_id: z.string().optional() }); //Add additional properties as needed
+
 /**
  * Inferred types from zod schemas.
  */
