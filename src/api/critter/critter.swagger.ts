@@ -15,6 +15,7 @@ import {
   CritterSchema,
   CritterUpdateSchema,
   CritterCreateSchema,
+  DetailedCritterSchema,
 } from "../../schemas/critter-schema";
 import { QueryFormats } from "../../utils/types";
 
@@ -22,9 +23,7 @@ const TAG = "Critter";
 
 export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
-  defaultCritterResponseArray: CritterSchema.array(),
-  //TODO: update this zod schema
-  detailedCritterResponse: z.string(),
+  detailedCritterResponse: DetailedCritterSchema,
 };
 
 export const critterPaths = {
@@ -101,9 +100,6 @@ export const critterPaths = {
     This endpoint will return an array of critters that may be partial matches to the info provided.
     Note that providing WLH ID will override the rest of the search and filter critters by WLH ID alone.`,
       tags: [TAG],
-      requestParams: {
-        query: z.object({ format: z.enum(["default", "detailed"]) }),
-      },
       requestBody: {
         content: {
           "application/json": {

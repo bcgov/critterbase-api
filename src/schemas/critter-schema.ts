@@ -170,6 +170,19 @@ export const DetailedCritterCollectionUnit = z.object({
   category_name: z.string(),
 });
 
+export const DetailedCritterSchema = CritterSchema.extend({
+  markings: DetailedCritterMarkingSchema.array(),
+  captures: DetailedCritterCaptureSchema.array(),
+  collection_units: DetailedCritterCollectionUnit.array(),
+  mortality: DetailedCritterMortalitySchema.array(),
+  measurements: z.object({
+    qualitative: DetailedCritterQualitativeMeasurementSchema.array(),
+    quantitative: DetailedCritterQuantitativeMeasurementSchema.array(),
+  }),
+});
+
+export type IDetailedCritter = z.infer<typeof DetailedCritterSchema>;
+
 export type IDetailedCritterLocation = z.infer<
   typeof DetailedCritterLocationSchema
 >;

@@ -6,8 +6,9 @@ import {
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
-  ITsnQuantitativeMeasurement,
+  TsnQualitativeMeasurementSchema,
 } from "../schemas/xref-schema";
+import { Prisma } from "@prisma/client";
 
 export class XrefRepository extends Repository {
   /**
@@ -103,7 +104,8 @@ export class XrefRepository extends Repository {
   async getTsnQualitativeMeasurements(
     tsns: number[],
   ): Promise<ITsnQualitativeMeasurement[]> {
-    const result = await this.prisma.$queryRaw<ITsnQualitativeMeasurement[]>`
+    const result = await this.safeQuery(
+      Prisma.sql`
       SELECT
         q.taxon_measurement_id,
         q.itis_tsn,
@@ -122,7 +124,9 @@ export class XrefRepository extends Repository {
       LEFT JOIN xref_taxon_measurement_qualitative_option o
         ON q.taxon_measurement_id = o.taxon_measurement_id
       WHERE q.itis_tsn = ANY(${tsns})
-      GROUP BY q.taxon_measurement_id;`;
+      GROUP BY q.taxon_measurement_id;`,
+      TsnQualitativeMeasurementSchema.array(),
+    );
 
     if (!result.length) {
       throw apiError.sqlExecuteIssue(
