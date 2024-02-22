@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {
-  Prisma,
   lk_collection_category,
   lk_colour,
   lk_marking_material,
   lk_marking_type,
   lk_region_env,
   lk_region_nr,
-  lk_taxon,
   lk_wildlife_management_unit,
 } from "@prisma/client";
 import { z } from "zod";
@@ -19,7 +17,7 @@ import { ResponseSchema } from "../../utils/zod_helpers";
 const colourFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_colour>(val, "colour_id", "colour")
+      toSelect<lk_colour>(val, "colour_id", "colour"),
     ),
   },
 };
@@ -27,7 +25,7 @@ const colourFormats: FormatParse = {
 const regionEnvFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_region_env>(val, "region_env_id", "region_env_name")
+      toSelect<lk_region_env>(val, "region_env_id", "region_env_name"),
     ),
   },
 };
@@ -35,7 +33,7 @@ const regionEnvFormats: FormatParse = {
 const regionNrFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_region_nr>(val, "region_nr_id", "region_nr_name")
+      toSelect<lk_region_nr>(val, "region_nr_id", "region_nr_name"),
     ),
   },
 };
@@ -43,7 +41,7 @@ const regionNrFormats: FormatParse = {
 const wmuFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_wildlife_management_unit>(val, "wmu_id", "wmu_name")
+      toSelect<lk_wildlife_management_unit>(val, "wmu_id", "wmu_name"),
     ),
   },
 };
@@ -70,7 +68,7 @@ const codFormats: FormatParse = {
 const markingMaterialsFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_marking_material>(val, "marking_material_id", "material")
+      toSelect<lk_marking_material>(val, "marking_material_id", "material"),
     ),
   },
 };
@@ -78,7 +76,7 @@ const markingMaterialsFormats: FormatParse = {
 const markingTypesFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_marking_type>(val, "marking_type_id", "name")
+      toSelect<lk_marking_type>(val, "marking_type_id", "name"),
     ),
   },
 };
@@ -89,22 +87,9 @@ const collectionUnitCategoriesFormats: FormatParse = {
       toSelect<lk_collection_category>(
         val,
         "collection_category_id",
-        "category_name"
-      )
+        "category_name",
+      ),
     ),
-  },
-};
-
-const taxonFormats: FormatParse = {
-  asSelect: {
-    schema: ResponseSchema.transform((val) => {
-      const { taxon_id, taxon_name_common, taxon_name_latin } = val as lk_taxon;
-      return {
-        key: Object.keys({ taxon_id })[0], //This helps to ensure the key is correctly named with schema
-        id: taxon_id,
-        value: taxon_name_common ?? taxon_name_latin,
-      };
-    }),
   },
 };
 
@@ -114,25 +99,6 @@ const CollectionCategoriesByTaxonIdSchema = z
   })
   .passthrough();
 
-//Prisma includes/selects/wheres
-const taxonSpeciesAndSubsWhere = {
-  where: {
-    OR: [
-      {
-        genus_id: {
-          not: null,
-        },
-        species_id: null,
-      },
-      {
-        species_id: {
-          not: null,
-        },
-        sub_species_id: null,
-      },
-    ],
-  } satisfies Prisma.lk_taxonWhereInput,
-};
 export {
   regionEnvFormats,
   regionNrFormats,
@@ -141,8 +107,6 @@ export {
   markingMaterialsFormats,
   markingTypesFormats,
   collectionUnitCategoriesFormats,
-  taxonFormats,
-  taxonSpeciesAndSubsWhere,
   CollectionCategoriesByTaxonIdSchema,
   colourFormats,
 };
