@@ -88,6 +88,14 @@ export class ItisService extends ExternalService {
     }
   }
 
+  /**
+   * Search ITIS Solr service for reference of TSN. Parse commonly used values from response.
+   *
+   * @async
+   * @param {number} searchTsn - ITIS TSN.
+   * @throws {apiError.notFound} - If unable to find ITIS TSN.
+   * @returns {Promise<{tsn: number, tsnHierarchy: number[], scientificName: string}>}
+   */
   async searchSolrByTsn(searchTsn: number) {
     const result = await this._itisSolrSearch(`tsn:${searchTsn}`);
     // This is almost certaintly one value in docs array when searching for tsn.
@@ -122,10 +130,9 @@ export class ItisService extends ExternalService {
     const { tsnHierarchy } = await this.searchSolrByTsn(searchTsn);
 
     if (tsnHierarchy[tsnHierarchy.length - 1] !== searchTsn) {
-      throw apiError.requestIssue(
-        `ITIS hierarchy invalid. Last result does not equal provided TSN.`,
-        ["ItisWebService -> getTsnHierarchy"],
-      );
+      throw apiError.requestIssue(`ITIS TSN produced invalid hierarchy.`, [
+        "ItisWebService -> getTsnHierarchy",
+      ]);
     }
 
     return tsnHierarchy;
