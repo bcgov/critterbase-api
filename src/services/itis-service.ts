@@ -139,19 +139,6 @@ export class ItisService extends ExternalService {
   }
 
   /**
-   * Checks if value is an ITIS TSN.
-   *
-   * @async
-   * @param {number} searchTsn - ITIS TSN primary identifier.
-   * @returns {Promise<boolean>} Promise boolean indicator if value is an ITIS TSN.
-   */
-  async isValueTsn(searchTsn: number) {
-    const { tsn } = await this.searchSolrByTsn(searchTsn);
-
-    return Boolean(tsn);
-  }
-
-  /**
    * Get taxon scientific name from ITIS TSN.
    *
    * Using Solr service for efficiency.

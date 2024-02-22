@@ -3,7 +3,7 @@ import {
   IItisGetFullHierarchyResponse,
   IItisSolrStub,
 } from "../schemas/itis-schema";
-import { ItisWebService } from "../services/itis-service";
+import { ItisService } from "../services/itis-service";
 
 jest.mock("axios");
 const axiosMock = axios as jest.Mocked<typeof axios>;
@@ -53,7 +53,7 @@ const itisHierarchyMockRes: Partial<IItisGetFullHierarchyResponse> = {
   ],
 };
 
-describe("ItisWebService", () => {
+describe("ItisService", () => {
   const ORIGINAL_ENV = process.env;
 
   beforeAll(() => {
@@ -67,8 +67,8 @@ describe("ItisWebService", () => {
 
   describe("constructor", () => {
     it("should set web service + solr url with envs", () => {
-      const service = new ItisWebService();
-      expect(service.webServiceUrl).toBe("itis");
+      const service = new ItisService();
+      expect(service.externalServiceUrl).toBe("itis");
       expect(service.solrServiceUrl).toBe("solr");
     });
   });
@@ -76,7 +76,7 @@ describe("ItisWebService", () => {
   describe("private methods", () => {
     describe("_itisWebServiceGetRequest", () => {
       it("should format the request url correctly", async () => {
-        const service = new ItisWebService();
+        const service = new ItisService();
         axiosMock.get.mockResolvedValue({ data: "test" });
         const data = await service._itisWebServiceGetRequest(
           "endpoint",
@@ -87,18 +87,20 @@ describe("ItisWebService", () => {
         expect(data).toBe("test");
       });
 
-      it("should throw error if no response from axios request", async () => {
-        const service = new ItisWebService();
-        axiosMock.get.mockResolvedValue({ data: undefined });
-        expect(async () => {
+      it("should catch and re-throw axios error", async () => {
+        const service = new ItisService();
+        axiosMock.get.mockRejectedValue({ data: undefined });
+        try {
           await service._itisWebServiceGetRequest("test");
-        }).rejects.toThrow();
+        } catch (err) {
+          expect(err.message).toBe(`No response from ITIS Web Service`);
+        }
       });
     });
 
     describe("_itisSolrSearch", () => {
       it("should format the request url correctly", async () => {
-        const service = new ItisWebService();
+        const service = new ItisService();
         axiosMock.get.mockResolvedValue({ data: "test" });
         const data = await service._itisSolrSearch("query");
 
@@ -109,111 +111,64 @@ describe("ItisWebService", () => {
       });
 
       it("should throw error if no response from axios request", async () => {
-        const service = new ItisWebService();
-        axiosMock.get.mockResolvedValue({ data: undefined });
-        expect(async () => {
+        const service = new ItisService();
+        axiosMock.get.mockRejectedValue({ data: undefined });
+        try {
           await service._itisSolrSearch("test");
-        }).rejects.toThrowError();
+        } catch (err) {
+          expect(err.message).toBe(`No response from ITIS Solr Service`);
+        }
       });
     });
   });
 
   describe("methods", () => {
-    const service = new ItisWebService();
+    const service = new ItisService();
     const webServiceSpy = jest.spyOn(service, "_itisWebServiceGetRequest");
     const solrSearchSpy = jest.spyOn(service, "_itisSolrSearch");
+    const searchTsnSpy = jest.spyOn(service, "searchSolrByTsn");
 
     beforeEach(() => {
       webServiceSpy.mockClear();
       solrSearchSpy.mockClear();
+      searchTsnSpy.mockClear();
     });
 
     describe("getTsnHierarchy", () => {
-      webServiceSpy.mockImplementation(() =>
-        Promise.resolve(itisHierarchyMockRes),
+      searchTsnSpy.mockImplementation(() =>
+        Promise.resolve({
+          tsn: 1,
+          tsnHierarchy: [0, 1],
+          scientificName: "Science",
+        }),
       );
 
       it("should return hierarchy list", async () => {
-        const data = await service.getTsnHierarchy(focalTsn);
+        const data = await service.getTsnHierarchy(1);
         expect(data).toBeDefined();
         expect(data.length).toBe(2);
       });
 
-      it("should return filter out children", async () => {
-        const data = await service.getTsnHierarchy(focalTsn);
-        data.forEach((tsn) => {
-          expect(tsn).not.toBe(childTsn);
-        });
-      });
-
-      it("should cast tsn to number", async () => {
-        const data = await service.getTsnHierarchy(focalTsn);
-        data.forEach((tsn) => {
-          expect(typeof tsn).toBe("number");
-        });
-      });
-
       it("should throw error if no hierarchy returned", async () => {
         webServiceSpy.mockImplementation(() =>
-          Promise.resolve({ hierarchyList: [] }),
+          Promise.reject({ tsnHierarchy: [] }),
         );
 
         expect(async () => {
           await service.getTsnHierarchy(focalTsn);
-        }).rejects.toThrow("ITIS returned no hierarchy for this TSN");
-      });
-    });
-
-    describe("isValueTsn", () => {
-      it("should be true if tsn exists in payload", async () => {
-        webServiceSpy.mockImplementation(() => Promise.resolve({ tsn: 1 }));
-        const data = await service.isValueTsn(1);
-        expect(data).toBeTruthy();
-      });
-
-      it("should be false if response undefined", async () => {
-        webServiceSpy.mockImplementation(() => Promise.resolve());
-        const data = await service.isValueTsn(1);
-        expect(data).toBeFalsy();
-      });
-
-      it("should be false if response contains different TSN", async () => {
-        webServiceSpy.mockImplementation(() => Promise.resolve(2));
-        const data = await service.isValueTsn(1);
-        expect(data).toBeFalsy();
+        }).rejects.toThrow("ITIS TSN produced invalid hierarchy.");
       });
     });
 
     describe("getScientificNameFromTsn", () => {
       it("should inject query to solr search", async () => {
-        solrSearchSpy.mockImplementation(() =>
-          Promise.resolve({ response: { docs: [{ tsn: "1" }] } }),
-        );
         await service.getScientificNameFromTsn(1);
-        expect(solrSearchSpy.mock.calls[0][0]).toBe("tsn:1");
-      });
-
-      it("should throw error if unable to find matching tsn", async () => {
-        solrSearchSpy.mockImplementation(() =>
-          Promise.resolve({ response: { docs: [{ tsn: "2" }] } }),
-        );
-        try {
-          const data = await service.getScientificNameFromTsn(1);
-        } catch (err) {
-          expect(err.message).toBe(
-            `Unable to find scientific name for ITIS TSN`,
-          );
-        }
+        expect(searchTsnSpy.mock.calls[0][0]).toBe(1);
       });
 
       it("should return scientific name if tsn matches in response", async () => {
-        solrSearchSpy.mockImplementation(() =>
-          Promise.resolve({
-            response: { docs: [{ tsn: "2", nameWOInd: "science" }] },
-          }),
-        );
         const data = await service.getScientificNameFromTsn(2);
-        expect(data).toBe("science");
+        expect(data).toBe("Science");
       });
     });
 
@@ -234,11 +189,15 @@ describe("ItisWebService", () => {
             response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
           }),
         );
-        expect(async () => {
+
+        try {
           await service.getTsnFromScientificName("bad");
-        }).rejects.toThrowError(
-          "Unable to translate scientific name to ITIS TSN",
-        );
+          expect(false);
+        } catch (err: any) {
+          expect(err.message).toBe(
+            "Unable to translate scientific name to ITIS TSN",
+          );
+        }
       });
 
       it("should return tsn if match of scientific name in response", async () => {

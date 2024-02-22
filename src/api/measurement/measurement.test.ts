@@ -17,16 +17,11 @@ import {
   getQuantMeasurementsByCritterId,
   updateQualMeasurement,
   updateQuantMeasurement,
-  verifyQualitativeMeasurementsAgainstTaxon,
-  verifyQuantitativeMeasurementsAgainstTaxon,
 } from "./measurement.service";
 import {
   QualitativeResponseSchema,
-  QualitativeSchema,
   QuantitativeResponseSchema,
-  QuantitativeSchema,
 } from "./measurement.utils";
-import { ICbDatabase } from "../../utils/database";
 import supertest from "supertest";
 import {
   measurement_qualitative,
@@ -135,7 +130,7 @@ describe("API: Measurement", () => {
           .post(`${QUANT_ROUTE}/create`)
           .send({ ...quantData, value: "3" });
         expect(res.status).toBe(400);
-        expect(res.body.errors).toBeDefined();
+        expect(res.body.error).toBeDefined();
         expect(mockDB.createQuantMeasurement.mock.calls.length).toBe(0);
       });
       it("returns status 400 with extra property", async () => {
@@ -160,7 +155,7 @@ describe("API: Measurement", () => {
           .post(`${QUAL_ROUTE}/create`)
           .send({ ...qualData, critter_id: 1 });
         expect(res.status).toBe(400);
-        expect(res.body.errors).toBeDefined();
+        expect(res.body.error).toBeDefined();
         expect(mockDB.createQualMeasurement.mock.calls.length).toBe(0);
       });
       it("returns status 400 with extra property", async () => {
@@ -186,7 +181,7 @@ describe("API: Measurement", () => {
           .post(`${QUAL_ROUTE}/create`)
           .send({ ...qualData, critter_id: 1 });
         expect(res.status).toBe(400);
-        expect(res.body.errors).toBeDefined();
+        expect(res.body.error).toBeDefined();
         expect(mockDB.updateQualMeasurement.mock.calls.length).toBe(0);
       });
       it("returns status 400 with extra property", async () => {
@@ -213,7 +208,7 @@ describe("API: Measurement", () => {
           .post(`${QUANT_ROUTE}/create`)
           .send({ ...qualData, critter_id: 1 });
         expect(res.status).toBe(400);
-        expect(res.body.errors).toBeDefined();
+        expect(res.body.error).toBeDefined();
         expect(mockDB.updateQuantMeasurement.mock.calls.length).toBe(0);
       });
       it("returns status 400 with extra property", async () => {
@@ -306,38 +301,6 @@ describe("API: Measurement", () => {
   });
   describe("SERVICES", () => {
     describe("measurement.service.ts", () => {
-      const a = jest
-        .spyOn(helpers, "getParentTaxonIds")
-        .mockImplementation()
-        .mockResolvedValue([ID]);
-      describe(verifyQuantitativeMeasurementsAgainstTaxon.name, () => {
-        it("should return no problem ids if measurement taxon id is in parent ids", async () => {
-          const b = prisMock("measurement_quantitative", "findMany", [
-            { xref_taxon_measurement_quantitative: { taxon_id: ID } },
-          ]);
-          const data = await verifyQuantitativeMeasurementsAgainstTaxon(ID, []);
-          expect(a.mock.calls.length).toBe(1);
-          expect(a.mock.calls[0][0]).toBe(ID);
-          expect(b.mock.calls.length).toBe(1);
-          //No problem ids means passes validation
-          expect(data.length).toBe(0);
-        });
-        it("should return array of problem ids if measurement taxon id is not in parent ids", async () => {
-          const b = prisMock("measurement_quantitative", "findMany", [
-            {
-              xref_taxon_measurement_quantitative: { taxon_id: "BAD-ID" },
-              measurement_quantitative_id: "GOOD-ID",
-            },
-          ]);
-          const data = await verifyQuantitativeMeasurementsAgainstTaxon(ID, []);
-          expect(a.mock.calls.length).toBe(1);
-          expect(a.mock.calls[0][0]).toBe(ID);
-          expect(b.mock.calls.length).toBe(1);
-          //No problem ids means passes validation
-          expect(data.length).toBe(1);
-          expect(data[0]).toBe("GOOD-ID");
-        });
-      });
       describe(getAllQualMeasurements.name, () => {
         it("should return array of qual measurements", async () => {
           const p = prisMock("measurement_qualitative", "findMany", [true]);
