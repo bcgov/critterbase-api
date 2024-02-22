@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  frequency_unit,
-  marking,
-  Prisma
-} from "@prisma/client";
+import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z, ZodString } from "zod";
 import {
   DeleteSchema,
@@ -28,8 +24,6 @@ type MarkingCreateInput = z.infer<typeof MarkingCreateBodySchema>;
 type MarkingUpdateInput = z.infer<typeof MarkingUpdateBodySchema>;
 
 type FormattedMarking = z.infer<typeof markingResponseSchema>;
-
-type MarkingVerificationType = z.infer<typeof MarkingVerificationSchema>;
 
 // Constants
 
@@ -142,8 +136,6 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
   };
 });
 
-
-
 //Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
   Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
@@ -151,13 +143,13 @@ const MarkingCreateBodySchema = implement<
   markingSchema
     .omit({ ...noAudit, marking_id: true })
     .partial()
-    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
+    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape,
 );
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
   nonEmpty,
-  "no new data was provided or the format was invalid"
+  "no new data was provided or the format was invalid",
 );
 
 const MarkingUpdateByIdSchema = MarkingCreateBodySchema.extend({
@@ -176,11 +168,6 @@ const MarkingDeleteSchema = markingSchema
   .pick({ marking_id: true })
   .extend(DeleteSchema.shape);
 
-const MarkingVerificationSchema = z.object({
-  taxon_id: zodID,
-  markings: z.array(markingSchema.partial().required({marking_id: true, taxon_marking_body_location_id: true}))
-});
-
 export {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
@@ -190,12 +177,10 @@ export {
   MarkingCreateWithEnglishSchema,
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
-  MarkingVerificationSchema,
 };
 export type {
   MarkingCreateInput,
   MarkingUpdateInput,
   MarkingIncludes,
   FormattedMarking,
-  MarkingVerificationType
 };

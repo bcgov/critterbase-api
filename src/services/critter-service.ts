@@ -7,11 +7,6 @@ import {
   CritterUpdate,
   SimilarCritterQuery,
 } from "../schemas/critter-schema";
-import { ItisService } from "./itis-service";
-
-interface ICritterServiceFactory {
-  itisService: ItisService;
-}
 
 /**
  * Critter Service
@@ -20,16 +15,6 @@ interface ICritterServiceFactory {
  * @extends Service<CritterRepository>
  */
 export class CritterService extends InternalService<CritterRepository> {
-  serviceFactory: ICritterServiceFactory;
-
-  constructor(
-    repository: CritterRepository,
-    serviceFactory: ICritterServiceFactory,
-  ) {
-    super(repository);
-    this.serviceFactory = serviceFactory;
-  }
-
   /**
    * Get all critters.
    *
@@ -121,9 +106,7 @@ export class CritterService extends InternalService<CritterRepository> {
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
     const itisPatchedCritter =
-      await this.serviceFactory.itisService.patchTsnAndScientificName(
-        critterData,
-      );
+      await this.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.updateCritter(critterId, itisPatchedCritter);
   }
@@ -139,13 +122,18 @@ export class CritterService extends InternalService<CritterRepository> {
    */
   async createCritter(critterData: CritterCreateOptionalItis) {
     const itisPatchedCritter =
-      await this.serviceFactory.itisService.patchTsnAndScientificName(
-        critterData,
-      );
+      await this.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.createCritter(itisPatchedCritter);
   }
 
+  /**
+   * Find similar critters from common semi-unique attributes, including markings.
+   *
+   * @async
+   * @param {SimilarCritterQuery} critterQuery - attributes to query.
+   * @returns {Promise<ICritter[]>} array of critters.
+   */
   async findSimilarCritters(critterQuery: SimilarCritterQuery) {
     return this.repository.findSimilarCritters(critterQuery);
   }

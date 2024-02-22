@@ -46,7 +46,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(routes.bulk, BulkRouter(db));
   app.use(routes.xref, XrefRouter(db));
 
-  app.all("*", (req, res) => {
+  app.all("*", (req, _res) => {
     throw apiError.notFound(`${req.method} ${req.url} -> route not found`);
   });
 

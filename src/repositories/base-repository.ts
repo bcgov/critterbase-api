@@ -14,8 +14,8 @@ import { apiError } from "../utils/types";
 export class Repository {
   prisma: PrismaClient;
 
-  constructor() {
-    this.prisma = prisma;
+  constructor(prismaClient: PrismaClient = prisma) {
+    this.prisma = prismaClient;
   }
 
   /**
@@ -41,7 +41,7 @@ export class Repository {
     const parsed = schema.safeParse(result);
 
     if (!parsed.success) {
-      console.log(parsed.error.errors);
+      console.log(parsed.error.errors, { result });
 
       throw apiError.sqlExecuteIssue(
         "Failed to parse raw sql with provided Zod schema.",

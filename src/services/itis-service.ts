@@ -1,10 +1,5 @@
 import axios, { AxiosError } from "axios";
-import {
-  IItisGetFullHierarchyResponse,
-  IItisProperties,
-  IItisSolrStub,
-  IItisTsnStub,
-} from "../schemas/itis-schema";
+import { IItisProperties, IItisSolrStub } from "../schemas/itis-schema";
 import { apiError } from "../utils/types";
 import { ExternalService } from "./base-service";
 
@@ -75,7 +70,7 @@ export class ItisService extends ExternalService {
    * @param {string} solrQuery - query to pass to request.
    * @returns {Promise<T>} Generic ITIS Solr response.
    */
-  async _itisSolrSearch<T>(solrQuery: string): Promise<T> {
+  async _itisSolrSearch<T = IItisSolrStub>(solrQuery: string): Promise<T> {
     const url = `${this.solrServiceUrl}/?wt=json&omitHeader=true&q=${solrQuery}`;
 
     try {
@@ -93,54 +88,60 @@ export class ItisService extends ExternalService {
     }
   }
 
+  async searchSolrByTsn(searchTsn: number) {
+    const result = await this._itisSolrSearch(`tsn:${searchTsn}`);
+    // This is almost certaintly one value in docs array when searching for tsn.
+    // To be safe searching for the tsn in the docs array.
+    const solrTaxon = result.response.docs.find(
+      (taxon) => taxon.tsn === String(searchTsn),
+    );
+
+    if (!solrTaxon) {
+      throw apiError.notFound(`ITIS was unable to find TSN.`, [
+        "ItisWebService -> searchSolrForTsn",
+        "probably invalid TSN",
+      ]);
+    }
+
+    const { tsn, hierarchyTSN, nameWOInd } = solrTaxon;
+
+    const tsnHierarchy = hierarchyTSN[0].split("$").filter(Number).map(Number);
+
+    return { tsn: Number(tsn), tsnHierarchy, scientificName: nameWOInd };
+  }
+
   /**
    * Retrieves the taxon hierarchy ABOVE the provided TSN (includes provied TSN taxon).
    * Will not return children below TSN. ie: A species does not return sub-species.
    *
    * @async
-   * @param {number} tsn - ITIS TSN primary identifier.
+   * @param {number} searchTsn - ITIS TSN primary identifier.
    * @returns {Promise<number[]>} Promise array of ITIS taxon hierarchy objects and TSNs.
    */
-  async getTsnHierarchy(tsn: number) {
-    const result = await this._itisWebServiceGetRequest<
-      IItisGetFullHierarchyResponse<number>
-    >(this.webServiceEndpoints.TSN_HIERARCHY, `tsn=${tsn}`);
+  async getTsnHierarchy(searchTsn: number) {
+    const { tsnHierarchy } = await this.searchSolrByTsn(searchTsn);
 
-    if (!result.hierarchyList[0]) {
-      throw apiError.notFound(`ITIS returned no hierarchy for this TSN`, [
-        "ItisWebService -> getTsnHierarchy",
-        "probably invalid TSN",
-      ]);
+    if (tsnHierarchy[tsnHierarchy.length - 1] !== searchTsn) {
+      throw apiError.requestIssue(
+        `ITIS hierarchy invalid. Last result does not equal provided TSN.`,
+        ["ItisWebService -> getTsnHierarchy"],
+      );
     }
 
-    const tsns: number[] = [];
-
-    for (const hierarchyTaxon of result.hierarchyList) {
-      // Skip adding to hierarchy if the taxon is a child of provided TSN.
-      if (Number(hierarchyTaxon.parentTsn) !== tsn) {
-        // Cast the TSN to a number and push into array.
-        tsns.push(Number(hierarchyTaxon.tsn));
-      }
-    }
-
-    return tsns;
+    return tsnHierarchy;
   }
 
   /**
    * Checks if value is an ITIS TSN.
    *
-   * Note: if value is not a TSN, ITIS returns nothing in response payload.
-   *
    * @async
-   * @param {number} tsn - ITIS TSN primary identifier.
+   * @param {number} searchTsn - ITIS TSN primary identifier.
    * @returns {Promise<boolean>} Promise boolean indicator if value is an ITIS TSN.
    */
-  async isValueTsn(tsn: number) {
-    const result = await this._itisWebServiceGetRequest<
-      IItisTsnStub | undefined
-    >(this.webServiceEndpoints.TSN_FULL_RECORD, `tsn=${tsn}`);
+  async isValueTsn(searchTsn: number) {
+    const { tsn } = await this.searchSolrByTsn(searchTsn);
 
-    return Number(result?.tsn) === tsn;
+    return Boolean(tsn);
   }
 
   /**
@@ -150,27 +151,14 @@ export class ItisService extends ExternalService {
    * Regular web service will timeout if unable to find resource.
    *
    * @async
-   * @param {string} tsn - ITIS TSN identifier.
+   * @param {string} searchTsn - ITIS TSN identifier.
    * @throws {apiError.notFound} - if ITIS is unable to find scientific name.
    * @returns {Promise<number>} ITIS scientific taxon name.
    */
-  async getScientificNameFromTsn(tsn: number) {
-    const solrQuery = `tsn:${tsn}`;
+  async getScientificNameFromTsn(searchTsn: number) {
+    const { scientificName } = await this.searchSolrByTsn(searchTsn);
 
-    const result = await this._itisSolrSearch<IItisSolrStub>(solrQuery);
-
-    const foundTaxon = result.response.docs.find(
-      (itisTaxon) => itisTaxon.tsn === String(tsn),
-    );
-
-    if (!foundTaxon) {
-      throw apiError.notFound(`Unable to find scientific name for ITIS TSN`, [
-        "ItisWebService -> getScientificNameFromTsn",
-        `tsn: ${tsn} returned undefined`,
-      ]);
-    }
-
-    return foundTaxon.nameWOInd;
+    return scientificName;
   }
 
   /**
@@ -190,7 +178,7 @@ export class ItisService extends ExternalService {
     const encodedScientificName = scientificName.replace(" ", `\\%20`);
     const solrQuery = `nameWOInd:${encodedScientificName}`;
 
-    const result = await this._itisSolrSearch<IItisSolrStub>(solrQuery);
+    const result = await this._itisSolrSearch(solrQuery);
 
     const foundTaxon = result.response.docs.find(
       (itisTaxon) =>

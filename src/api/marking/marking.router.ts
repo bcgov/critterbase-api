@@ -7,8 +7,6 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
-  MarkingVerificationSchema,
-  MarkingVerificationType,
   markingResponseSchema,
 } from "./marking.utils";
 import { ICbDatabase } from "../../utils/database";
@@ -55,23 +53,6 @@ export const MarkingRouter = (db: ICbDatabase) => {
     }),
   );
 
-  markingRouter.post(
-    "/verify",
-    catchErrors(async (req: Request, res: Response) => {
-      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(
-        req.body,
-      );
-      // TODO: update to use ITIS
-      const problems = await db.verifyMarkingsAgainstTaxon(
-        parsed.taxon_id,
-        parsed.markings,
-      );
-      return res
-        .status(200)
-        .json({ verified: problems.length === 0, invalid_markings: problems });
-    }),
-  );
-
   /**
    ** All marking_id related routes
    */
@@ -109,4 +90,3 @@ export const MarkingRouter = (db: ICbDatabase) => {
     );
   return markingRouter;
 };
-

@@ -66,25 +66,7 @@ const errorHandler = (
   next: NextFunction,
 ) => {
   if (err instanceof ZodError) {
-    //Removed formErrors from object
-    const fieldErrors = err.flatten().fieldErrors;
-    const fieldKeys = Object.keys(fieldErrors);
-    const customErrs: Record<string, string> = {};
-    //Bulk router can throw a custom formatted error.
-    //Splitting them apart to better structure the error response
-    err.errors.forEach((e) => {
-      const t = e.message.split("~");
-      if (t.length === 2) {
-        customErrs[t[0]] = t[1];
-      }
-    });
-    if (!fieldKeys.length) {
-      return res.status(400).json({ error: err.format()._errors.join(", ") });
-    }
-
-    return res.status(400).json({
-      errors: Object.keys(customErrs).length ? customErrs : fieldErrors,
-    });
+    return res.status(400).json({ error: err });
   }
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message });

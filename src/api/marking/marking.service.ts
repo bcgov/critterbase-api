@@ -41,10 +41,10 @@ const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
 
 /**
  * * Gets all markings that reference a critter_id
- * @param {string} marking_id
+ * @param {string} critter_id
  */
 const getMarkingsByCritterId = async (
-  critter_id: string
+  critter_id: string,
 ): Promise<MarkingIncludes[]> => {
   const markings: MarkingIncludes[] = await prisma.marking.findMany({
     where: {
@@ -62,7 +62,7 @@ const getMarkingsByCritterId = async (
  */
 const updateMarking = async (
   marking_id: string,
-  marking_data: MarkingUpdateInput
+  marking_data: MarkingUpdateInput,
 ): Promise<MarkingIncludes> => {
   const marking: MarkingIncludes = await prisma.marking.update({
     where: {
@@ -91,7 +91,10 @@ const createMarking = async (newMarkingData: MarkingCreateInput) => {
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string, prismaOverride?: PrismaTransactionClient): Promise<MarkingIncludes> => {
+const deleteMarking = async (
+  marking_id: string,
+  prismaOverride?: PrismaTransactionClient,
+): Promise<MarkingIncludes> => {
   const client = prismaOverride ?? prisma;
   const marking: MarkingIncludes = await client.marking.delete({
     where: {
@@ -109,7 +112,7 @@ const appendEnglishMarkingsAsUUID = async (
     body_location: string;
     marking_type: string;
   }>,
-  taxon_id: string
+  taxon_id: string,
 ) => {
   if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);
@@ -123,11 +126,11 @@ const appendEnglishMarkingsAsUUID = async (
     const taxon_uuid = taxon_id;
     const loc = await getBodyLocationByNameAndTaxonUUID(
       body.body_location,
-      taxon_uuid
+      taxon_uuid,
     );
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
   }
-  if(body.marking_type) {
+  if (body.marking_type) {
     const marking_type = await getMarkingTypeByName(body.marking_type);
     body.marking_type_id = marking_type?.marking_type_id;
   }
@@ -137,7 +140,7 @@ const appendEnglishMarkingsAsUUID = async (
 const verifyMarkingsAgainstTaxon = async (
   taxon_id: string,
   body: (Partial<marking> &
-    Pick<marking, "marking_id" | "taxon_marking_body_location_id">)[]
+    Pick<marking, "marking_id" | "taxon_marking_body_location_id">)[],
 ): Promise<string[]> => {
   const hier: string[] = await getParentTaxonIds(taxon_id);
   const marking_ids: string[] = body.map((a) => a.marking_id);

@@ -1,20 +1,8 @@
 import { XrefRepository } from "../repositories/xref-repository";
 import { toSelectFormat } from "../utils/helper_functions";
 import { InternalService } from "./base-service";
-import { ItisService } from "./itis-service";
-
-interface IXrefServiceFactory {
-  itisService: ItisService;
-}
 
 export class XrefService extends InternalService<XrefRepository> {
-  serviceFactory: IXrefServiceFactory;
-
-  constructor(repository: XrefRepository, serviceFactory: IXrefServiceFactory) {
-    super(repository);
-    this.serviceFactory = serviceFactory;
-  }
-
   /**
    * Gets 'collection units' from a category id.
    *
@@ -65,7 +53,7 @@ export class XrefService extends InternalService<XrefRepository> {
    * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
   async getTsnMarkingBodyLocations(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnMarkingBodyLocations(tsns);
 
@@ -92,7 +80,7 @@ export class XrefService extends InternalService<XrefRepository> {
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
   async getTsnQualitativeMeasurements(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQualitativeMeasurements(tsns);
 
@@ -115,7 +103,7 @@ export class XrefService extends InternalService<XrefRepository> {
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
   async getTsnQuantitativeMeasurements(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
@@ -159,7 +147,7 @@ export class XrefService extends InternalService<XrefRepository> {
    * @returns {Promise<{ITsnMeasurements}>}
    */
   async getTsnMeasurements(tsn: number, asSelect = false) {
-    const tsns = await this.serviceFactory.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const quantitative =
       await this.repository.getTsnQuantitativeMeasurements(tsns);

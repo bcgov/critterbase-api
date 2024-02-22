@@ -9,6 +9,11 @@ import { z } from "zod";
 import { AuditColumns } from "../utils/types";
 import { implement, zodID } from "../utils/zod_helpers";
 
+export enum eCritterStatus {
+  alive = "alive",
+  mortality = "mortality",
+}
+
 /**
  * @table critter
  *
@@ -66,6 +71,10 @@ export const SimilarCritterQuerySchema = z.object({
     .optional(),
 });
 
+/**
+ * Critter ids request schema. Used in post requests which accept array of critter_ids.
+ *
+ */
 export const CritterIdsRequestSchema = z.object({
   critter_ids: z.array(zodID),
 });
@@ -85,11 +94,6 @@ export type SimilarCritterQuery = z.infer<typeof SimilarCritterQuerySchema>;
 
 export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
   Pick<ICritter, "itis_scientific_name" | "itis_tsn">;
-
-export enum eCritterStatus {
-  alive = "alive",
-  mortality = "mortality",
-}
 
 /**
  * TODO: Move these schemas / types to the correct files once additional

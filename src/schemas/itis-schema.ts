@@ -28,10 +28,10 @@ export interface IItisTsnStub {
   tsn: string;
 }
 
-export interface IItisSolrStub {
+export interface IItisSolrStub<TsnType extends string | number = string> {
   response: {
     numFound: number;
-    docs: { tsn: string; nameWOInd: string }[];
+    docs: { tsn: TsnType; nameWOInd: string; hierarchyTSN: string[] }[];
   };
 }
 

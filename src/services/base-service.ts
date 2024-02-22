@@ -1,4 +1,5 @@
 import { Repository } from "../repositories/base-repository";
+import { ItisService } from "./itis-service";
 
 /**
  * Base class for Critterbase internal services.
@@ -9,9 +10,11 @@ import { Repository } from "../repositories/base-repository";
  */
 export class InternalService<T extends Repository> {
   repository: T;
+  itisService: ItisService;
 
-  constructor(repository: T) {
+  constructor(repository: T, itisService: ItisService) {
     this.repository = repository;
+    this.itisService = itisService;
   }
 }
 

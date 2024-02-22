@@ -39,7 +39,7 @@ export const TsnQualitativeMeasurementOptionSchema = implement<
 });
 
 /**
- * @table xref_taxon_measurement_qualitative
+ * @table xref_taxon_measurement_qualitative + xref_taxon_measurement_qualitative_option
  *
  */
 export const TsnQualitativeMeasurementSchema = implement<
