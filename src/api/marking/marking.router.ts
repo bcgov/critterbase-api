@@ -7,6 +7,8 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
+  MarkingVerificationSchema,
+  MarkingVerificationType,
   markingResponseSchema,
 } from "./marking.utils";
 import { ICbDatabase } from "../../utils/database";
@@ -50,6 +52,19 @@ export const MarkingRouter = (db: ICbDatabase) => {
       const markings = await db.getMarkingsByCritterId(id);
       const formattedMarkings = array(markingResponseSchema).parse(markings);
       return res.status(200).json(formattedMarkings);
+    }),
+  );
+
+  markingRouter.post(
+    "/verify",
+    catchErrors(async (req: Request, res: Response) => {
+      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(
+        req.body,
+      );
+      const response =
+        await db.markingService.verifyMarkingsCanBeAssignedToTsn(parsed);
+
+      return res.status(200).json(response);
     }),
   );
 

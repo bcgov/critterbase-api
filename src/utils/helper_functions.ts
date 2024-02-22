@@ -41,7 +41,6 @@ const prismaErrorMsg = (
         status: 404,
       };
   }
-  console.log(`NEW PRISMA ERROR: ${JSON.stringify(err)}`);
   return { error: `unsupported prisma error: "${code}"`, status: 400 };
 };
 

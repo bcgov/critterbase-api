@@ -9,29 +9,30 @@ import { apiError } from "./types";
 import { authenticateRequest } from "../authentication/auth";
 import { setUserContext } from "../api/user/user.service";
 
-/**
- * * Catches errors on API routes. Used instead of wrapping try/catch on every endpoint
- * @param fn function that accepts express params
- */
 type ExpressHandler = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => Promise<Response> | Promise<void>;
 
+/**
+ * Catches errors on API routes. Used instead of wrapping try / catch on every endpoint.
+ *
+ * @param {ExpressHandler} fn - Express Handler callback.
+ */
 const catchErrors =
   (fn: ExpressHandler) => (req: Request, res: Response, next: NextFunction) => {
     fn(req, res, next).catch(next);
   };
 
 /**
- * Simple logger middleware.
+ * Middleware: Logs the incoming requests.
  *
- * @param {Request} req - Express Request
- * @param {Response} res - Express Response
- * @param {NextFunction} next - Express Next callback
+ * @param {Request} req - Express Request.
+ * @param {Response} _res - Express Response.
+ * @param {NextFunction} next - Express Next callback.
  */
-const logger = (req: Request, res: Response, next: NextFunction) => {
+const logger = (req: Request, _res: Response, next: NextFunction) => {
   if (!IS_TEST) {
     console.log(`${req.method} ${req.originalUrl}`);
   }
@@ -39,13 +40,17 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
- * * Logs the errors in the express server. Displays issue endpoint
- * @params All four express params.
+ * Middleware: Logs server errors.
+ *
+ * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - [TODO:description]
+ * @param {Request} req - Express Request.
+ * @param {Response} _res - Express Response.
+ * @param {NextFunction} next - Express Next callback.
  */
 const errorLogger = (
   err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ) => {
   if (!IS_TEST) {
@@ -56,12 +61,17 @@ const errorLogger = (
 };
 
 /**
- * * Generic express error handler. Will handle any errors catchErrors catches
- * @params All four express params.
+ * Middleware: Generic express error handler. Will handle any errors catchErrors catches.
+ *
+ * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - supported errors.
+ * @param {Request} _req - Express Request.
+ * @param {Response} res - Express Response.
+ * @param {NextFunction} next - Express Next callback.
+ * @returns {Response} Express Response.
  */
 const errorHandler = (
   err: apiError | ZodError | Error | PrismaClientKnownRequestError,
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -81,8 +91,17 @@ const errorHandler = (
   next(err);
 };
 
+/**
+ * Middleware: Authorization.
+ * Authorizes a user into Critterbase and sets the user context in DB.
+ *
+ * Note: Will bypass auth if NODE_ENV=TEST or AUTHENTICATE=NO_AUTH useful for development.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 const auth = catchErrors(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, _res: Response, next: NextFunction) => {
     if (IS_TEST || NO_AUTH) {
       return next();
     }

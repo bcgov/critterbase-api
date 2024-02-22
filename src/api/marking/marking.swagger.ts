@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   MarkingCreateBodySchema,
+  MarkingVerificationSchema,
   markingIncludesSchema,
 } from "./marking.utils";
 import { ZodOpenApiOperationObject } from "zod-openapi";
@@ -129,6 +130,36 @@ const getMarkingsByCritterId: ZodOpenApiOperationObject = {
   },
 };
 
+const verifyMarkings: ZodOpenApiOperationObject = {
+  operationId: "verifyMarkings",
+  tags: [TAG],
+  summary: `Verify whether the supplied markings can be attached to a specific tsn.
+  If all markings pass, verified is true.
+  If not, verified is false and invalid_markings contains primary id of problematic markings.`,
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: MarkingVerificationSchema,
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: z.object({
+            verified: z.boolean(),
+            invalid_marking: zodID.array(),
+          }),
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
+
 const createMarking: ZodOpenApiOperationObject = {
   operationId: "createMarking",
   tags: [TAG],
@@ -151,7 +182,6 @@ const createMarking: ZodOpenApiOperationObject = {
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound,
   },
 };
 
@@ -180,6 +210,9 @@ export const markingPaths = {
   [`${routes.markings}/create`]: {
     post: createMarking,
   },
+  [`${routes.markings}/verify`]: {
+    get: verifyMarkings,
+  },
   [`${routes.markings}/critter/{id}`]: {
     post: getMarkingsByCritterId,
   },
@@ -189,4 +222,3 @@ export const markingPaths = {
     delete: deleteMarkingById,
   },
 };
-
