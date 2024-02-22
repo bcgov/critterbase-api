@@ -12,7 +12,6 @@ import {
   MarkingUpdateInput,
   markingIncludes,
 } from "./marking.utils";
-import { getParentTaxonIds } from "../../utils/helper_functions";
 
 /**
  * * Returns all existing markings from the database

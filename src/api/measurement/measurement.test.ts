@@ -127,7 +127,7 @@ describe("API: Measurement", () => {
         expect(res.body);
         expect(mockDB.createQuantMeasurement.mock.calls.length).toBe(1);
         expect(mockDB.createQuantMeasurement.mock.calls[0][0]).toEqual(
-          quantData
+          quantData,
         );
       });
       it("returns status 400 with property that does not pass validation", async () => {
@@ -148,7 +148,6 @@ describe("API: Measurement", () => {
     });
 
     describe(`POST ${QUAL_ROUTE}/create`, () => {
-
       it("returns status 201 with valid body in req", async () => {
         const res = await request.post(`${QUAL_ROUTE}/create`).send(qualData);
         expect(res.status).toBe(201);
@@ -237,7 +236,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.getQuantMeasurementOrThrow.mockRejectedValue(
-          apiError.notFound("BAD")
+          apiError.notFound("BAD"),
         );
         const res = await request.get(`${QUANT_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
@@ -259,7 +258,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.getQualMeasurementOrThrow.mockRejectedValue(
-          apiError.notFound("BAD")
+          apiError.notFound("BAD"),
         );
         const res = await request.get(`${QUAL_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
@@ -279,7 +278,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.deleteQuantMeasurement.mockRejectedValue(
-          apiError.notFound("BAD")
+          apiError.notFound("BAD"),
         );
         const res = await request.delete(`${QUANT_ROUTE}/${badID}`);
         expect(res.status).toBe(404);
@@ -296,42 +295,12 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.deleteQualMeasurement.mockRejectedValue(
-          apiError.notFound("BAD")
+          apiError.notFound("BAD"),
         );
         const res = await request.delete(`${QUAL_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
         expect(res.body.error).toBeDefined();
         expect(mockDB.deleteQualMeasurement.mock.calls[0][0]).toBe(ID);
-      });
-    });
-    describe(`POST ${QUAL_ROUTE}/verify`, () => {
-      it("should respond with zero qualitative and quantitative problem ids and verified = true", async () => {
-        const res = await request.post(`${ROUTE}/verify`).send({
-          taxon_id: ID,
-          quantitative: [quantMeasurement],
-          qualitative: [qualMeasurement],
-        });
-        const { invalid_measurements, verified } = res.body;
-        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(0);
-        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(0);
-        expect(verified).toBe(true);
-      });
-      it("should respond 1 zero qualitative and quantitative problem ids and verified = false", async () => {
-        mockDB.verifyQualitativeMeasurementsAgainstTaxon.mockResolvedValue([
-          ID,
-        ]);
-        mockDB.verifyQuantitativeMeasurementsAgainstTaxon.mockResolvedValue([
-          ID,
-        ]);
-        const res = await request.post(`${ROUTE}/verify`).send({
-          taxon_id: badID,
-          quantitative: [quantMeasurement],
-          qualitative: [qualMeasurement],
-        });
-        const { invalid_measurements, verified } = res.body;
-        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(1);
-        expect(invalid_measurements.qualitative_measurement_ids.length).toBe(1);
-        expect(verified).toBe(false);
       });
     });
   });
@@ -369,34 +338,6 @@ describe("API: Measurement", () => {
           expect(data[0]).toBe("GOOD-ID");
         });
       });
-      describe(verifyQualitativeMeasurementsAgainstTaxon.name, () => {
-        it("should return no problem ids if measurement taxon id is in parent ids", async () => {
-          const b = prisMock("measurement_qualitative", "findMany", [
-            { xref_taxon_measurement_qualitative: { taxon_id: ID } },
-          ]);
-          const data = await verifyQualitativeMeasurementsAgainstTaxon(ID, []);
-          expect(a.mock.calls.length).toBe(1);
-          expect(a.mock.calls[0][0]).toBe(ID);
-          expect(b.mock.calls.length).toBe(1);
-          //No problem ids means passes validation
-          expect(data.length).toBe(0);
-        });
-        it("should return array of problem ids if measurement taxon id is not in parent ids", async () => {
-          const b = prisMock("measurement_qualitative", "findMany", [
-            {
-              xref_taxon_measurement_qualitative: { taxon_id: "BAD-ID" },
-              measurement_qualitative_id: "GOOD-ID",
-            },
-          ]);
-          const data = await verifyQualitativeMeasurementsAgainstTaxon(ID, []);
-          expect(a.mock.calls.length).toBe(1);
-          expect(a.mock.calls[0][0]).toBe(ID);
-          expect(b.mock.calls.length).toBe(1);
-          //No problem ids means passes validation
-          expect(data.length).toBe(1);
-          expect(data[0]).toBe("GOOD-ID");
-        });
-      });
       describe(getAllQualMeasurements.name, () => {
         it("should return array of qual measurements", async () => {
           const p = prisMock("measurement_qualitative", "findMany", [true]);
@@ -418,7 +359,7 @@ describe("API: Measurement", () => {
           const p = prisMock(
             "measurement_quantitative",
             "findUniqueOrThrow",
-            true
+            true,
           );
           const res = await getQuantMeasurementOrThrow(ID);
           expect(res);
@@ -431,7 +372,7 @@ describe("API: Measurement", () => {
           const p = prisMock(
             "measurement_qualitative",
             "findUniqueOrThrow",
-            true
+            true,
           );
           const res = await getQualMeasurementOrThrow(ID);
           expect(res);

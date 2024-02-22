@@ -6,9 +6,9 @@ import {
   SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 import {
+  tsnQuerySchema,
   XrefCollectionUnitSchema,
   XrefTaxonCollectionCategorySchema,
-  taxonIdSchema,
 } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
@@ -73,7 +73,9 @@ const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
     "Get all collection to taxon category mappings available in the DB. A single taxon may have multiple different types of collection units available to them.",
   tags: [TAG],
   requestParams: {
-    query: taxonIdSchema.extend({ format: formats }),
+    query: tsnQuerySchema.extend({
+      format: z.enum([QueryFormats.asSelect]).optional(),
+    }),
   },
   responses: {
     "200": {

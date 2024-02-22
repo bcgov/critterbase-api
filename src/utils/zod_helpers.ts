@@ -49,10 +49,6 @@ const critterIdSchema = z.object({
   critter_id: zodID,
 });
 
-const taxonIdSchema = z.object({
-  taxon_id: zodID.optional(),
-});
-
 const tsnQuerySchema = z.object({
   tsn: z.preprocess((val) => Number(val), z.number()),
 });
@@ -85,7 +81,7 @@ const LookupRegionEnvSchema = implement<lk_region_env>().with({
 const XrefTaxonMeasurementQuantitativeSchema =
   implement<xref_taxon_measurement_quantitative>().with({
     taxon_measurement_id: zodID,
-    taxon_id: zodID,
+    itis_tsn: z.number(),
     measurement_name: z.string(),
     measurement_desc: z.string().nullable(),
     min_value: z.number().nullable(),
@@ -97,7 +93,7 @@ const XrefTaxonMeasurementQuantitativeSchema =
 const XrefTaxonMeasurementQualitativeSchema =
   implement<xref_taxon_measurement_qualitative>().with({
     taxon_measurement_id: zodID,
-    taxon_id: zodID,
+    itis_tsn: z.number(),
     measurement_name: z.string(),
     measurement_desc: z.string().nullable(),
     ...zodAudit,
@@ -116,7 +112,7 @@ const XrefTaxonMeasurementQualitativeOptionSchema =
 const nonEmpty = (obj: Record<string | number | symbol, unknown>) =>
   Object.values(obj).some((v) => v !== undefined);
 
-const noAudit: Record<keyof AuditColumns, true> = {
+const noAudit: Record<AuditColumns, true> = {
   create_user: true,
   update_user: true,
   create_timestamp: true,
@@ -175,7 +171,7 @@ const LookupCodSchema = implement<lk_cause_of_death>().with({
 const XrefTaxonMarkingBodyLocationSchema =
   implement<xref_taxon_marking_body_location>().with({
     taxon_marking_body_location_id: z.string().uuid(),
-    taxon_id: z.string().uuid(),
+    itis_tsn: z.number(),
     body_location: z.string(),
     description: z.string().nullable(),
     ...zodAudit,
@@ -198,7 +194,6 @@ const XrefTaxonCollectionCategorySchema =
     ...zodAudit,
   });
 
-//const TransformResponseSchema = ResponseSchema.transform((val) => val); //This is used as a base for a type.
 type IResponseSchema = z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny> | z.ZodTypeAny;
 export type { IResponseSchema };
 
@@ -223,7 +218,6 @@ export {
   zodAudit,
   NumberToString,
   QueryFormatSchema,
-  taxonIdSchema,
   DeleteSchema,
   LookupCollectionUnitCategorySchema,
   LookupCodSchema,
