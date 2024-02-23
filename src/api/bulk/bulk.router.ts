@@ -42,6 +42,7 @@ import {
   FamilyParentDeleteSchema,
 } from "../family/family.utils";
 import {
+  BulkCritterCreateSchema,
   CritterCreateSchema,
   CritterUpdateSchema,
 } from "../../schemas/critter-schema";
@@ -66,28 +67,31 @@ export const BulkRouter = (db: ICbDatabase) => {
 
       const crittersAppend = critters
         ? await Promise.all(
-            critters.map((c: Record<string, unknown>) => {
-              //TODO: add itis patch step here
-              //await db.appendEnglishTaxonAsUUID(c);
-              return CritterCreateSchema.parse(c);
+            critters.map(async (critter: Record<string, unknown>) => {
+              CritterCreateSchema.parse(critter);
+              const patchedCritter =
+                await db.itisService.patchTsnAndScientificName(critter);
+              return BulkCritterCreateSchema.parse(patchedCritter);
             }),
           )
         : [];
-      const taxonLookup: Record<string, string> = {};
+
+      const critterTsnLookup: Record<string, number> = {};
+
       if (crittersAppend.length) {
-        for (const c of crittersAppend) {
-          if (c.critter_id) {
-            taxonLookup[c.critter_id] = c.taxon_id;
+        for (const critter of crittersAppend) {
+          if (critter.critter_id) {
+            critterTsnLookup[critter.critter_id] = critter.itis_tsn;
           }
         }
       }
 
       const markingsAppend = markings
         ? await Promise.all(
-            markings.map(async (m: Record<string, unknown>) => {
-              const taxon_id = taxonLookup[m.critter_id as string];
-              await db.appendEnglishMarkingsAsUUID(m, taxon_id);
-              return MarkingCreateBodySchema.parseAsync(m);
+            markings.map(async (marking: Record<string, unknown>) => {
+              const itis_tsn = critterTsnLookup[marking.critter_id as string];
+              await db.appendEnglishMarkingsAsUUID(marking, itis_tsn);
+              return MarkingCreateBodySchema.parseAsync(marking);
             }),
           )
         : [];

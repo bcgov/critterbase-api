@@ -37,8 +37,7 @@ export const CritterSchema = implement<ICritter>().with({
  * should only include itis_tsn or itis_scientific_name to prevent
  * tsn and scientific name from becoming out of sync
  */
-export const CritterCreateSchema = CritterSchema.omit({ critter_id: true })
-  .partial()
+export const CritterCreateSchema = CritterSchema.partial()
   .required({ sex: true })
   .refine(
     (schema) =>
@@ -46,6 +45,13 @@ export const CritterCreateSchema = CritterSchema.omit({ critter_id: true })
       (!schema.itis_tsn && schema.itis_scientific_name),
     "must include itis_tsn or itis_scientific_name but not both",
   );
+
+export const BulkCritterCreateSchema = CritterSchema.partial().required({
+  critter_id: true,
+  sex: true,
+  itis_tsn: true,
+  itis_scientific_name: true,
+});
 
 /**
  * Update critter schema used in update / patch requests

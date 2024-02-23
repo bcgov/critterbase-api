@@ -5,6 +5,7 @@ import { FormatParse, ISelect, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./constants";
+
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -17,6 +18,7 @@ const prismaErrorMsg = (
   err: PrismaClientKnownRequestError,
 ): { error: string; status: number } => {
   const { meta, message, code } = err;
+
   switch (code) {
     case "P2025":
       return {
@@ -25,22 +27,16 @@ const prismaErrorMsg = (
       };
     case "P2002":
       return {
-        error: `unique constraint failed on the fields: ${
-          typeof meta?.target === "string" ? meta.target : "unknown fields..."
-        }`,
+        error: `unique constraint failed`,
         status: 400,
       };
     case "P2003":
       return {
-        error: `foreign key constraint failed on the field: ${
-          typeof meta?.fieldName === "string"
-            ? meta.fieldName
-            : "unknown field name..."
-        }`,
+        error: `foreign key constraint failed`,
         status: 404,
       };
   }
-  return { error: `unsupported prisma error: "${code}"`, status: 400 };
+  return { error: `request failed at database: "${code}"`, status: 400 };
 };
 
 const intersect = <T>(A: T[], B: T[]): T[] => {

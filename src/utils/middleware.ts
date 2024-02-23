@@ -76,14 +76,18 @@ const errorHandler = (
   next: NextFunction,
 ) => {
   if (err instanceof ZodError) {
-    return res.status(400).json({ error: err });
+    return res
+      .status(400)
+      .json({ error: "Zod validation failed.", issues: err.issues });
   }
   if (err instanceof apiError) {
-    return res.status(err.status).json({ error: err.message });
+    return res
+      .status(err.status)
+      .json({ error: err.message, issues: err.errors });
   }
   if (err instanceof PrismaClientKnownRequestError) {
     const { status, error } = prismaErrorMsg(err);
-    return res.status(status).json({ error });
+    return res.status(status).json({ error, issues: [err.meta] });
   }
   if (err instanceof Error) {
     return res.status(400).json({ error: err.message || "unknown error" });
