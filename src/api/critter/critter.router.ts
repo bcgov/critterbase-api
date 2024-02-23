@@ -80,7 +80,7 @@ export const CritterRouter = (db: ICbDatabase) => {
 
       const response = await db.critterService.createCritter(payload);
 
-      return res.status(201).send(response);
+      return res.status(201).json(response);
     }),
   );
 

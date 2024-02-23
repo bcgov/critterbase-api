@@ -47,6 +47,7 @@ export const db = {
   critterService,
   xrefService,
   markingService,
+  itisService,
 };
 
 export type ICbDatabase = typeof db;

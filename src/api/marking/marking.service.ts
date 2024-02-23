@@ -1,8 +1,7 @@
-import { marking } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { PrismaTransactionClient, ReqBody } from "../../utils/types";
 import {
-  getBodyLocationByNameAndTaxonUUID,
+  getBodyLocationByNameAndTsn,
   getColourByName,
   getMarkingTypeByName,
 } from "../lookup/lookup.service";
@@ -111,7 +110,7 @@ const appendEnglishMarkingsAsUUID = async (
     body_location: string;
     marking_type: string;
   }>,
-  taxon_id: string,
+  itis_tsn: number,
 ) => {
   if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);
@@ -122,11 +121,7 @@ const appendEnglishMarkingsAsUUID = async (
     body.secondary_colour_id = col?.colour_id;
   }
   if (body.body_location) {
-    const taxon_uuid = taxon_id;
-    const loc = await getBodyLocationByNameAndTaxonUUID(
-      body.body_location,
-      taxon_uuid,
-    );
+    const loc = await getBodyLocationByNameAndTsn(body.body_location, itis_tsn);
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
   }
   if (body.marking_type) {
@@ -134,33 +129,6 @@ const appendEnglishMarkingsAsUUID = async (
     body.marking_type_id = marking_type?.marking_type_id;
   }
   return body;
-};
-
-const verifyMarkingsAgainstTaxon = async (
-  taxon_id: string,
-  body: (Partial<marking> &
-    Pick<marking, "marking_id" | "taxon_marking_body_location_id">)[],
-): Promise<string[]> => {
-  const hier: string[] = await getParentTaxonIds(taxon_id);
-  const marking_ids: string[] = body.map((a) => a.marking_id);
-  const markings = await prisma.marking.findMany({
-    include: {
-      xref_taxon_marking_body_location: {
-        select: {
-          taxon_id: true,
-        },
-      },
-    },
-    where: { marking_id: { in: marking_ids } },
-  });
-  const problemIds = [];
-  for (const m of markings) {
-    const curr_id = m.xref_taxon_marking_body_location.taxon_id;
-    if (!hier.includes(curr_id) && taxon_id != curr_id) {
-      problemIds.push(m.marking_id);
-    }
-  }
-  return problemIds;
 };
 
 export {
@@ -171,5 +139,4 @@ export {
   createMarking,
   deleteMarking,
   appendEnglishMarkingsAsUUID,
-  verifyMarkingsAgainstTaxon,
 };

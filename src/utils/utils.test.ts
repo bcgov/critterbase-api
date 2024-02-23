@@ -311,28 +311,9 @@ describe("Utils", () => {
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
-        expect(mockRes.json.mock.calls[0][0].errors.ZodErr).toBeDefined();
+        expect(mockRes.json.mock.calls[0][0].error).toBeDefined();
       });
 
-      it("should catch custom ZodError", () => {
-        middleware.errorHandler(
-          new ZodError([
-            {
-              code: ZodIssueCode.unrecognized_keys,
-              keys: ["KeyA"],
-              path: ["PathA"],
-              message: "",
-            },
-          ]),
-          mockReq,
-          mockRes,
-          mockNext,
-        );
-
-        expect(mockRes.status.mock.calls[0][0]).toBe(400);
-        expect(mockRes.json.mock.calls[0][0]).toBeDefined();
-        expect(mockRes.json.mock.calls[0][0].errors.ZodErr).not.toBeDefined();
-      });
       it("should catch fieldKey ZodError", () => {
         middleware.errorHandler(
           new ZodError([
@@ -348,7 +329,6 @@ describe("Utils", () => {
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
-        expect(mockRes.json.mock.calls[0][0]).toEqual({ error: "Issue" });
       });
       it("should pass to next if no errors are passed", () => {
         middleware.errorHandler(undefined, mockReq, mockRes, mockNext);

@@ -273,4 +273,3 @@ export const BulkRouter = (db: ICbDatabase) => {
 
   return bulkRouter;
 };
-
