@@ -78,8 +78,8 @@ model critter {
   create_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
   update_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
   critter_comment                String?
-  itis_tsn                       Int
   itis_scientific_name           String
+  itis_tsn                       Int
   artifact                       artifact[]
   capture                        capture[]
   lk_region_nr                   lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
