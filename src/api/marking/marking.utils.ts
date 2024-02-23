@@ -140,7 +140,7 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
 
 //Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
-  Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
+  Omit<Prisma.markingCreateManyInput, "marking_id" | AuditColumns>
 >().with(
   markingSchema
     .omit({ ...noAudit, marking_id: true })

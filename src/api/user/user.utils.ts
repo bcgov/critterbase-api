@@ -30,7 +30,7 @@ const SwagUserSchema = UserSchema.extend({ system_user_id: z.string() });
 
 // Validate incoming request body for create user
 const UserCreateBodySchema = implement<
-  Omit<Prisma.userCreateManyInput, "user_id" | keyof AuditColumns>
+  Omit<Prisma.userCreateManyInput, "user_id" | AuditColumns>
 >().with(
   UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
@@ -39,7 +39,7 @@ const UserCreateBodySchema = implement<
 
 // Validate incoming request body for update artifact
 const UserUpdateBodySchema = implement<
-  Omit<Prisma.userUncheckedUpdateManyInput, "user_id" | keyof AuditColumns>
+  Omit<Prisma.userUncheckedUpdateManyInput, "user_id" | AuditColumns>
 >()
   .with(UserCreateBodySchema.partial().shape)
   .refine(nonEmpty, "no new data was provided or the format was invalid");

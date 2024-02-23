@@ -485,4 +485,6 @@ export class CritterRepository extends Repository {
 
     return result;
   }
+
+  async findCriterFamilies(critterId) {}
 }

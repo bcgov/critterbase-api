@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../utils/constants";
-import { CritterUpdate } from "../critter/critter.utils";
 import {
   CollectionUnitDeleteSchema,
   CollectionUnitUpsertType,
@@ -25,6 +24,7 @@ import {
   FamilyChildDeleteSchema,
   FamilyParentDeleteSchema,
 } from "../family/family.utils";
+import { CritterUpdate } from "../../schemas/critter-schema";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
