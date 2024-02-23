@@ -57,16 +57,12 @@ const createMortality = async (
     location,
     proximate_cause_of_death_id,
     ultimate_cause_of_death_id,
-    proximate_predated_by_itis_tsn,
-    ultimate_predated_by_itis_tsn,
     ...rest
   } = mortality_data;
 
   return await prisma.mortality.create({
     data: {
       critter: { connect: { critter_id } },
-      proximate_predated_by_itis_tsn: proximate_predated_by_itis_tsn ?? null,
-      ultimate_predated_by_itis_tsn: ultimate_predated_by_itis_tsn ?? null,
       location: location_id
         ? {
             connect: { location_id: location_id },

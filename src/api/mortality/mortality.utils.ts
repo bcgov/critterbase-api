@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { cod_confidence, mortality, Prisma } from "@prisma/client";
 import { z } from "zod";
+import { AuditColumns } from "../../utils/types";
 import {
   DeleteSchema,
   implement,
@@ -12,6 +13,7 @@ import {
   CommonFormattedLocationSchema,
   CommonLocationSchema,
   commonLocationSelect,
+  LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema,
 } from "../location/location.utils";
@@ -65,20 +67,32 @@ const MortalityIncludeSchema = implement<MortalityIncludeType>().with({
     .nullable(),
 });
 
-const MortalityUpdateSchema = MortalityBodySchema.omit({
-  ...noAudit,
-})
-  .extend({ location: LocationUpdateSchema })
-  .partial();
+const MortalityUpdateSchema = implement<
+  Omit<Prisma.mortalityUncheckedUpdateManyInput, AuditColumns> & {
+    location?: LocationBody;
+  }
+>().with(
+  MortalityBodySchema.omit({
+    ...noAudit,
+  })
+    .extend({ location: LocationUpdateSchema })
+    .partial().shape,
+);
 
-const MortalityCreateSchema = MortalityBodySchema.omit({ ...noAudit })
-  .extend({ location: LocationCreateSchema })
-  .partial()
-  .required({
-    critter_id: true,
-    mortality_timestamp: true,
-    proximate_cause_of_death_id: true,
-  });
+const MortalityCreateSchema = implement<
+  Omit<Prisma.mortalityCreateManyInput, AuditColumns> & {
+    location?: LocationBody;
+  }
+>().with(
+  MortalityBodySchema.omit({ ...noAudit })
+    .extend({ location: LocationCreateSchema })
+    .partial()
+    .required({
+      critter_id: true,
+      mortality_timestamp: true,
+      proximate_cause_of_death_id: true,
+    }).shape,
+);
 
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
 type MortalityUpdate = z.infer<typeof MortalityUpdateSchema>;
