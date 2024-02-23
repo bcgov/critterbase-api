@@ -1,10 +1,5 @@
 import { Prisma, user } from ".prisma/client";
 import { z } from "zod";
-import {
-  API_KEY_HEADER,
-  KEYCLOAK_UUID_HEADER,
-  USER_ID_HEADER,
-} from "../../utils/constants";
 import { AuditColumns } from "../../utils/types";
 import {
   implement,

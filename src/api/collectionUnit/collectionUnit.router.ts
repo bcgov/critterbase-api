@@ -39,8 +39,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
-      //TODO: update to use critter service
-      await db.getCritterById(id);
+      await db.critterService.getCritterById(id);
       const collectionUnits = await db.getCollectionUnitsByCritterId(id);
       const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
         collectionUnits,

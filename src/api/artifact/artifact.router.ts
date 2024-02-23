@@ -9,7 +9,6 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
 import { upload } from "../../utils/object_store";
 
-
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
 
@@ -21,7 +20,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const artifacts = await db.getAllArtifacts();
       return res.status(200).json(artifacts);
-    })
+    }),
   );
 
   /**
@@ -37,7 +36,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
       const artifactData = ArtifactCreateBodySchema.parse(req.body);
       const newArtifact = await db.createArtifact(artifactData, req.file);
       return res.status(201).json(newArtifact);
-    })
+    }),
   );
 
   /**
@@ -47,10 +46,10 @@ export const ArtifactRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
-      await db.getCritterById(id);
+      await db.critterService.getCritterById(id);
       const artifacts = await db.getArtifactsByCritterId(id);
       return res.status(200).json(artifacts);
-    })
+    }),
   );
 
   /**
@@ -63,29 +62,29 @@ export const ArtifactRouter = (db: ICbDatabase) => {
         // validate uuid
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const artifact = await db.getArtifactById(req.params.id);
         return res.status(200).json(artifact);
-      })
+      }),
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const artifactData = await ArtifactUpdateBodySchema.parseAsync(
-          req.body
+          req.body,
         );
         const artifact = await db.updateArtifact(req.params.id, artifactData);
         return res.status(200).json(artifact);
-      })
+      }),
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         await db.deleteArtifact(id);
         return res.status(200).json(`Artifact ${id} has been deleted`);
-      })
+      }),
     );
 
   return artifactRouter;
