@@ -28,6 +28,10 @@ COPY . .
 
 VOLUME ${HOME}
 
+# Generate the prisma client and types
+
+RUN npx prisma generate
+
 
 ################################################################################
 ####                      DEVELOPMENT CONTAINERS                            ####
