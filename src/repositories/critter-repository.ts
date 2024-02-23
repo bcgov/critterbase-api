@@ -17,6 +17,10 @@ import {
   IDetailedCritterCollectionUnit,
   DetailedCritterCaptureSchema,
   IDetailedCritterCapture,
+  DetailedCritterParentSchema,
+  DetailedCritterChildSchema,
+  IDetailedCritterParent,
+  IDetailedCritterChild,
 } from "../schemas/critter-schema";
 import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
@@ -486,5 +490,63 @@ export class CritterRepository extends Repository {
     return result;
   }
 
-  async findCriterFamilies(critterId) {}
+  /**
+   * Find a critter's parents.
+   *
+   * A child critter that shares the same family as a parent critter.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<IDetailedCritterParent[]>}
+   */
+  async findCritterParents(
+    critterId: string,
+  ): Promise<IDetailedCritterParent[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+        SELECT
+          p.family_id,
+          f.family_label,
+          p.parent_critter_id
+        FROM family_parent p
+        JOIN family_child c
+          ON p.family_id = c.family_id
+        JOIN family f
+          ON p.family_id = f.family_id
+        WHERE c.child_critter_id = ${critterId}::uuid;`,
+      DetailedCritterParentSchema.array(),
+    );
+
+    return result;
+  }
+
+  /**
+   * Find a critter's children.
+   *
+   * A parent critter that shares the same family as a child critter.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<IDetailedCritterChild[]>}
+   */
+  async findCritterChildren(
+    critterId: string,
+  ): Promise<IDetailedCritterChild[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+        SELECT
+          c.family_id,
+          f.family_label,
+          c.child_critter_id
+        FROM family_child c
+        JOIN family_parent p
+          ON c.family_id = p.family_id
+        JOIN family f
+          ON c.family_id = f.family_id
+        WHERE p.parent_critter_id = ${critterId}::uuid;`,
+      DetailedCritterChildSchema.array(),
+    );
+
+    return result;
+  }
 }
