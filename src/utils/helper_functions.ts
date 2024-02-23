@@ -1,5 +1,4 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import console from "console";
 import type { Request } from "express";
 import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
 import { FormatParse, ISelect, QueryFormats } from "./types";
