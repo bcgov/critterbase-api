@@ -93,8 +93,8 @@ ALTER COLUMN "itis_tsn" SET NOT NULL;
 -- AlterTable
 ALTER TABLE "mortality" DROP COLUMN "proximate_predated_by_taxon_id",
 DROP COLUMN "ultimate_predated_by_taxon_id",
-ALTER COLUMN "proximate_predated_by_itis_tsn" SET NOT NULL,
-ALTER COLUMN "ultimate_predated_by_itis_tsn" SET NOT NULL;
+ALTER COLUMN "proximate_predated_by_itis_tsn",
+ALTER COLUMN "ultimate_predated_by_itis_tsn";
 
 -- AlterTable
 ALTER TABLE "xref_taxon_collection_category" DROP CONSTRAINT "xref_taxon_collection_category_pk",
