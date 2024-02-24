@@ -78,8 +78,8 @@ model critter {
   create_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
   update_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
   critter_comment                String?
-  itis_tsn                       Int
   itis_scientific_name           String
+  itis_tsn                       Int
   artifact                       artifact[]
   capture                        capture[]
   lk_region_nr                   lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
@@ -387,8 +387,8 @@ model mortality {
   update_user                                                                String             @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                                           DateTime           @default(now()) @db.Timestamptz(6)
   update_timestamp                                                           DateTime           @default(now()) @db.Timestamptz(6)
-  proximate_predated_by_itis_tsn                                             Int
-  ultimate_predated_by_itis_tsn                                              Int
+  proximate_predated_by_itis_tsn                                             Int?
+  ultimate_predated_by_itis_tsn                                              Int?
   user_mortality_create_userTouser                                           user               @relation("mortality_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mortality_create_user")
   user_mortality_update_userTouser                                           user               @relation("mortality_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mortality_update_user")
   critter                                                                    critter            @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_fk")

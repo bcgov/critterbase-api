@@ -180,6 +180,16 @@ export const DetailedCritterCollectionUnit = z.object({
   category_name: z.string(),
 });
 
+export const DetailedCritterParentSchema = z.object({
+  family_id: zodID,
+  parent_critter_id: zodID,
+});
+
+export const DetailedCritterChildSchema = z.object({
+  family_id: zodID,
+  child_critter_id: zodID,
+});
+
 export const DetailedCritterSchema = CritterSchema.extend({
   markings: DetailedCritterMarkingSchema.array(),
   captures: DetailedCritterCaptureSchema.array(),
@@ -189,9 +199,17 @@ export const DetailedCritterSchema = CritterSchema.extend({
     qualitative: DetailedCritterQualitativeMeasurementSchema.array(),
     quantitative: DetailedCritterQuantitativeMeasurementSchema.array(),
   }),
+  family_parent: DetailedCritterParentSchema.array(),
+  family_child: DetailedCritterChildSchema.array(),
 });
 
 export type IDetailedCritter = z.infer<typeof DetailedCritterSchema>;
+
+export type IDetailedCritterParent = z.infer<
+  typeof DetailedCritterParentSchema
+>;
+
+export type IDetailedCritterChild = z.infer<typeof DetailedCritterChildSchema>;
 
 export type IDetailedCritterLocation = z.infer<
   typeof DetailedCritterLocationSchema

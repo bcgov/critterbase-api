@@ -56,6 +56,8 @@ export class CritterService extends InternalService<CritterRepository> {
       const collection_units =
         await this.repository.findCritterCollectionUnits(critterId);
       const mortality = await this.repository.findCritterMortalities(critterId);
+      const family_parent = await this.repository.findCritterParents(critterId);
+      const family_child = await this.repository.findCritterChildren(critterId);
 
       return {
         ...critter,
@@ -64,6 +66,8 @@ export class CritterService extends InternalService<CritterRepository> {
         collection_units,
         measurements: { qualitative, quantitative },
         mortality,
+        family_parent,
+        family_child,
       };
     }
     return this.repository.getCritterById(critterId);

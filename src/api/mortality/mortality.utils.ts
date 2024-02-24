@@ -25,10 +25,10 @@ const MortalityBodySchema = implement<mortality>().with({
   mortality_timestamp: z.coerce.date(),
   proximate_cause_of_death_id: zodID,
   proximate_cause_of_death_confidence: z.nativeEnum(cod_confidence).nullable(),
-  proximate_predated_by_itis_tsn: z.number(),
+  proximate_predated_by_itis_tsn: z.number().nullable(),
   ultimate_cause_of_death_id: zodID.nullable(),
   ultimate_cause_of_death_confidence: z.nativeEnum(cod_confidence).nullable(),
-  ultimate_predated_by_itis_tsn: z.number(),
+  ultimate_predated_by_itis_tsn: z.number().nullable(),
   mortality_comment: z.string().nullable(),
   create_user: zodID,
   update_user: zodID,
@@ -67,20 +67,32 @@ const MortalityIncludeSchema = implement<MortalityIncludeType>().with({
     .nullable(),
 });
 
-const MortalityUpdateSchema = MortalityBodySchema.omit({
-  ...noAudit,
-})
-  .extend({ location: LocationUpdateSchema })
-  .partial();
+const MortalityUpdateSchema = implement<
+  Omit<Prisma.mortalityUncheckedUpdateManyInput, AuditColumns> & {
+    location?: LocationBody;
+  }
+>().with(
+  MortalityBodySchema.omit({
+    ...noAudit,
+  })
+    .extend({ location: LocationUpdateSchema })
+    .partial().shape,
+);
 
-const MortalityCreateSchema = MortalityBodySchema.omit({ ...noAudit })
-  .extend({ location: LocationCreateSchema })
-  .partial()
-  .required({
-    critter_id: true,
-    mortality_timestamp: true,
-    proximate_cause_of_death_id: true,
-  });
+const MortalityCreateSchema = implement<
+  Omit<Prisma.mortalityCreateManyInput, AuditColumns> & {
+    location?: LocationBody;
+  }
+>().with(
+  MortalityBodySchema.omit({ ...noAudit })
+    .extend({ location: LocationCreateSchema })
+    .partial()
+    .required({
+      critter_id: true,
+      mortality_timestamp: true,
+      proximate_cause_of_death_id: true,
+    }).shape,
+);
 
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
 type MortalityUpdate = z.infer<typeof MortalityUpdateSchema>;
