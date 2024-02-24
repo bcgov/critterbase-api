@@ -24,7 +24,8 @@ export const SwagErr: ZodOpenApiOperationObject["responses"] = {
     content: {
       "application/json": {
         schema: z.object({
-          error: z.string().optional(), //update to include zodErrors
+          error: z.string(),
+          issues: z.unknown().array(), // object array
         }),
       },
     },
