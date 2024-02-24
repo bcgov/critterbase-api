@@ -60,6 +60,13 @@ export const CritterUpdateSchema = CritterSchema.omit({
   critter_id: true,
 }).partial();
 
+export const BulkCritterUpdateSchema = CritterSchema.partial().refine(
+  (schema) =>
+    (schema.itis_tsn && !schema.itis_scientific_name) ||
+    (!schema.itis_tsn && schema.itis_scientific_name),
+  "must include itis_tsn or itis_scientific_name but not both",
+);
+
 /**
  * Similar critter query schema used in /critters/unique
  *
@@ -93,6 +100,10 @@ export const WlhIdQuerySchema = z.object({ wlh_id: z.string().optional() }); //A
 export type ICritter = Omit<critter, AuditColumns>; // Omitting audit columns.
 
 export type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
+
+export type BulkCritterUpdateSchema = z.infer<typeof BulkCritterUpdateSchema>;
+
+export type BulkCritterCreateSchema = z.infer<typeof BulkCritterCreateSchema>;
 
 export type CritterCreateOptionalItis = z.infer<typeof CritterCreateSchema>;
 

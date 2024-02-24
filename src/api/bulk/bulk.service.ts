@@ -24,7 +24,7 @@ import {
   FamilyChildDeleteSchema,
   FamilyParentDeleteSchema,
 } from "../family/family.utils";
-import { CritterUpdate } from "../../schemas/critter-schema";
+import { BulkCritterUpdateSchema } from "../../schemas/critter-schema";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -41,7 +41,7 @@ interface IBulkCreate {
 }
 
 interface IBulkMutate {
-  critters: CritterUpdate[];
+  critters: BulkCritterUpdateSchema[];
   collections: CollectionUnitUpsertType[];
   markings: z.infer<typeof MarkingUpdateByIdSchema>[];
   locations: Prisma.locationUpdateInput[];
