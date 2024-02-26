@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { Repository } from "./base-repository";
 import { z } from "zod";
-import * as constants from "../utils/constants";
 import { apiError } from "../utils/types";
 
 jest.mock("../utils/constants", () => ({

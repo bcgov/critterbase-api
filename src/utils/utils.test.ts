@@ -71,7 +71,7 @@ describe("Utils", () => {
       });
     });
     describe(prismaErrorMsg.name, () => {
-      const defaultMsg = `unsupported prisma error: "BADCODE"`;
+      const defaultMsg = `request failed at database: "BADCODE"`;
       const supportedErrorCodes = ["P2025", "P2002", "P2003"];
       let ops: any = {
         code: undefined,
@@ -85,7 +85,7 @@ describe("Utils", () => {
       it("should return default error message on unsupported code", () => {
         ops.code = "BADCODE";
         const { error, status } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("1", { ...ops, code: "BADCODE" }),
+          new PrismaClientKnownRequestError("1", { ...ops, code: "BADCODE" })
         );
         expect(error).toBe(defaultMsg);
         expect(status).toBe(400);
@@ -93,34 +93,37 @@ describe("Utils", () => {
       it("should create new error message for supported codes", () => {
         ops.code = supportedErrorCodes[2];
         const { error: err1, status: status1 } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("test 1", { ...ops }),
+          new PrismaClientKnownRequestError("test 1", { ...ops })
         );
         ops.meta.fieldName = "ERROR";
         const { error: err2, status: status2 } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("test 1", { ...ops }),
+          new PrismaClientKnownRequestError("test 1", { ...ops })
         );
-        expect(err1).not.toEqual(err2);
+
+        expect(err1).toEqual(err2);
         expect(status1).toBe(404);
         expect(status2).toBe(404);
         ops.code = supportedErrorCodes[1];
         const { error: err3, status: status3 } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("test 1", { ...ops }),
+          new PrismaClientKnownRequestError("test 1", { ...ops })
         );
         ops.meta.target = "ERROR";
         const { error: err4, status: status4 } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("test 1", { ...ops }),
+          new PrismaClientKnownRequestError("test 1", { ...ops })
         );
-        expect(err3).not.toEqual(err4);
+
+        expect(err3).toEqual(err4);
         expect(status3).toBe(400);
         expect(status4).toBe(400);
         ops.code = supportedErrorCodes[0];
         const { error: err5, status: status5 } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("test 1", { ...ops }),
+          new PrismaClientKnownRequestError("test 1", { ...ops })
         );
         ops.meta.cause = "ERROR";
         const { error: err6, status: status6 } = prismaErrorMsg(
-          new PrismaClientKnownRequestError("test 1", { ...ops }),
+          new PrismaClientKnownRequestError("test 1", { ...ops })
         );
+
         expect(err5).not.toEqual(err6);
         expect(status5).toBe(404);
         expect(status6).toBe(404);
@@ -144,7 +147,7 @@ describe("Utils", () => {
         const data = await formatParse(
           QueryFormats.detailed,
           service(),
-          parser,
+          parser
         );
         expect(data).toEqual({ b: 1 });
       });
@@ -152,7 +155,7 @@ describe("Utils", () => {
         const data = await formatParse(
           QueryFormats.detailed,
           service(),
-          parser,
+          parser
         );
         expect(data).toEqual({ b: 1 });
         expect(data.length).not.toBeDefined();
@@ -162,7 +165,7 @@ describe("Utils", () => {
         const arrData = await formatParse(
           QueryFormats.detailed,
           arrService(),
-          parser,
+          parser
         );
         expect(arrData.length);
       });
@@ -274,24 +277,25 @@ describe("Utils", () => {
           new apiError("apiError"),
           mockReq,
           mockRes,
-          mockNext,
+          mockNext
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toEqual({ error: "apiError" });
       });
 
-      it("should catch PrismaKnownClinentError", () => {
+      it("should catch PrismaKnownClientError", () => {
         middleware.errorHandler(
           new PrismaClientKnownRequestError("Prisma", {
             code: "Prisma",
           } as any),
           mockReq,
           mockRes,
-          mockNext,
+          mockNext
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toEqual({
-          error: `unsupported prisma error: "Prisma"`,
+          error: `request failed at database: "Prisma"`,
+          issues: [undefined],
         });
       });
 
@@ -307,7 +311,7 @@ describe("Utils", () => {
           ]),
           mockReq,
           mockRes,
-          mockNext,
+          mockNext
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
@@ -325,7 +329,7 @@ describe("Utils", () => {
           ]),
           mockReq,
           mockRes,
-          mockNext,
+          mockNext
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
