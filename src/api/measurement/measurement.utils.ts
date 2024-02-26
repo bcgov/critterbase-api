@@ -74,7 +74,7 @@ const MeasurementQualitativeIncludeSchema =
     ...QualitativeSchema.shape,
     xref_taxon_measurement_qualitative: z.object({
       taxon_measurement_id: zodID,
-      taxon_id: zodID,
+      itis_tsn: z.number(),
       measurement_name: z.string(),
       measurement_desc: z.string().nullable(),
       ...zodAudit,
@@ -97,7 +97,7 @@ const MeasurementQuantitativeIncludeSchema =
     ...QuantitativeSchema.shape,
     xref_taxon_measurement_quantitative: z.object({
       taxon_measurement_id: zodID,
-      taxon_id: zodID,
+      itis_tsn: z.number(),
       measurement_name: z.string(),
       measurement_desc: z.string().nullable(),
       min_value: z.number().nullable(),

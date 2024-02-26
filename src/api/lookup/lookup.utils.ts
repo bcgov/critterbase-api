@@ -93,12 +93,6 @@ const collectionUnitCategoriesFormats: FormatParse = {
   },
 };
 
-const CollectionCategoriesByTaxonIdSchema = z
-  .object({
-    taxon_id: z.string().optional(),
-  })
-  .passthrough();
-
 export {
   regionEnvFormats,
   regionNrFormats,
@@ -107,6 +101,5 @@ export {
   markingMaterialsFormats,
   markingTypesFormats,
   collectionUnitCategoriesFormats,
-  CollectionCategoriesByTaxonIdSchema,
   colourFormats,
 };
