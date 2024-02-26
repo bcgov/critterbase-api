@@ -1,119 +1,114 @@
 import supertest from "supertest";
 import { makeApp } from "../../app";
+import { XrefService } from "../../services/xref-service";
 
 const tsn = 1;
 
 const mockXrefService = {
-  getTsnMarkingBodyLocations: jest.fn(),
-  getTaxonCollectionCategories: jest.fn(),
-  // getCollectionUnitsFromCategory: jest.fn(),
-  // getCollectionUnitsFromCategoryId: jest.fn(),
-};
+  getTsnMarkingBodyLocations: jest.fn().mockResolvedValue(true),
+  getTsnCollectionCategories: jest.fn().mockResolvedValue(true),
+  getTsnMeasurements: jest.fn().mockResolvedValue(true),
+  getTsnQualitativeMeasurements: jest.fn().mockResolvedValue(true),
+  getTsnQuantitativeMeasurements: jest.fn().mockResolvedValue(true),
+} satisfies Partial<Record<keyof Partial<XrefService>, jest.Mock>>;
 
 const request = supertest(makeApp({ xrefService: mockXrefService } as any));
 
-describe("ROUTERS", () => {
-  describe("GET /taxon-marking-body-locations", () => {
-    it("should respond status 200 and pass query to service", async () => {
+describe("ROUTER", () => {
+  describe("GET taxon-collection-categories - get collection categories by tsn", () => {
+    it("should respond with status 200 and return response", async () => {
       const res = await request
-        .get(`/api/xref/taxon-marking-body-locations`)
-        .query({ tsn: 1 });
+        .get("/api/xref/taxon-collection-categories")
+        .query({ tsn });
       expect(res.status).toBe(200);
-      expect(mockXrefService.getTsnMarkingBodyLocations.mock.calls[0][0]).toBe(
-        1,
-      );
       expect(res.body).toBe(true);
+      expect(mockXrefService.getTsnCollectionCategories.mock.calls[0][0]).toBe(
+        tsn,
+      );
+    });
+    it("should format the response asSelect", async () => {
+      const res = await request
+        .get("/api/xref/taxon-collection-categories")
+        .query({ tsn, format: "asSelect" });
+      expect(mockXrefService.getTsnCollectionCategories.mock.calls[0][1]).toBe(
+        true,
+      );
     });
   });
-  describe("GET /taxon-collection-categories", () => {
-    it("should parse taxon_id from schema and pass to service", async () => {
-      const res = await request.get(
-        `/api/xref/taxon-collection-categories?taxon_id=${tsn}`,
-      );
+  describe("GET taxon-marking-body-locations - get marking body locations by tsn", () => {
+    it("should respond with status 200 and return response", async () => {
+      const res = await request
+        .get("/api/xref/taxon-marking-body-locations")
+        .query({ tsn });
       expect(res.status).toBe(200);
+      expect(res.body).toBe(true);
+      expect(mockXrefService.getTsnMarkingBodyLocations.mock.calls[0][0]).toBe(
+        tsn,
+      );
+    });
+    it("should format the response asSelect", async () => {
+      const res = await request
+        .get("/api/xref/taxon-marking-body-locations")
+        .query({ tsn, format: "asSelect" });
+      expect(mockXrefService.getTsnMarkingBodyLocations.mock.calls[0][1]).toBe(
+        true,
+      );
+    });
+  });
+  describe("GET taxon-qualitative-measurements - get qualitative measurements by tsn", () => {
+    it("should respond with status 200 and return response", async () => {
+      const res = await request
+        .get("/api/xref/taxon-qualitative-measurements")
+        .query({ tsn });
+      expect(res.status).toBe(200);
+      expect(res.body).toBe(true);
       expect(
-        mockXrefService.getTaxonCollectionCategories.mock.calls[0][0],
+        mockXrefService.getTsnQualitativeMeasurements.mock.calls[0][0],
       ).toBe(tsn);
-      expect(
-        mockXrefService.getTaxonCollectionCategories.mock.calls.length,
-      ).toBe(1);
     });
-    it("can format response 'asSelect'", async () => {
-      const res = await request.get(
-        `/api/xref/taxon-collection-categories?taxon_id=${tmbl.taxon_id}&format=asSelect`,
-      );
-      expect(res.status).toBe(200);
-      expect(mockDB.getTaxonCollectionCategories.mock.calls[0][0]).toBe(
-        tcc.taxon_id,
-      );
-      expect(mockDB.getTaxonCollectionCategories.mock.calls.length).toBe(1);
-      expect(res.body).toEqual({
-        id: tcc.collection_category_id,
-        key: "collection_category_id",
-        value: tcc.lk_collection_category.category_name,
-      });
+    it("should format the response asSelect", async () => {
+      const res = await request
+        .get("/api/xref/taxon-qualitative-measurements")
+        .query({ tsn, format: "asSelect" });
+      expect(
+        mockXrefService.getTsnQualitativeMeasurements.mock.calls[0][1],
+      ).toBe(true);
     });
   });
-  describe("GET /collection-units", () => {
-    it("should parse category_id if provided", async () => {
-      const res = await request.get(
-        `/api/xref/collection-units?category_id=${cu.collection_category_id}`,
-      );
+  describe("GET taxon-quantitative-measurements - get quantitative measurements by tsn", () => {
+    it("should respond with status 200 and return response", async () => {
+      const res = await request
+        .get("/api/xref/taxon-quantitative-measurements")
+        .query({ tsn });
       expect(res.status).toBe(200);
-      expect(mockDB.getCollectionUnitsFromCategoryId.mock.calls[0][0]).toBe(
-        cu.collection_category_id,
-      );
-      expect(mockDB.getCollectionUnitsFromCategoryId.mock.calls.length).toBe(1);
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls.length).toBe(0);
+      expect(res.body).toBe(true);
+      expect(
+        mockXrefService.getTsnQuantitativeMeasurements.mock.calls[0][0],
+      ).toBe(tsn);
     });
-    it("should respond with error if no query params provided", async () => {
-      const res = await request.get(`/api/xref/collection-units`);
-      expect(res.status).toBe(400);
-      expect(res.body.errors).toBeDefined();
+    it("should format the response asSelect", async () => {
+      const res = await request
+        .get("/api/xref/taxon-quantitative-measurements")
+        .query({ tsn, format: "asSelect" });
+      expect(
+        mockXrefService.getTsnQuantitativeMeasurements.mock.calls[0][1],
+      ).toBe(true);
     });
-    it("should pass category_name if provided", async () => {
-      const res = await request.get(
-        `/api/xref/collection-units?category_name=${cu.unit_name}`,
-      );
+  });
+  describe("GET taxon-measurements - get quantitative/qualitative measurements by tsn", () => {
+    it("should respond with status 200 and return response", async () => {
+      const res = await request
+        .get("/api/xref/taxon-measurements")
+        .query({ tsn });
       expect(res.status).toBe(200);
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls[0][0]).toBe(
-        cu.unit_name,
-      );
-      expect(mockDB.getCollectionUnitsFromCategoryId.mock.calls.length).toBe(0);
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls.length).toBe(1);
+      expect(res.body).toBe(true);
+      expect(mockXrefService.getTsnMeasurements.mock.calls[0][0]).toBe(tsn);
     });
-    it("should pass category_name, taxon_name_common and taxon_name_lating if provided", async () => {
-      const common = "common";
-      const latin = "latin";
-      const res = await request.get(
-        `/api/xref/collection-units?category_name=${cu.unit_name}&taxon_name_common=${common}&taxon_name_latin=${latin}`,
-      );
-      expect(res.status).toBe(200);
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls[0][0]).toBe(
-        cu.unit_name,
-      );
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls[0][1]).toBe(
-        common,
-      );
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls[0][2]).toBe(
-        latin,
-      );
-      expect(mockDB.getCollectionUnitsFromCategoryId.mock.calls.length).toBe(0);
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls.length).toBe(1);
-    });
-    it("can format response 'asSelect'", async () => {
-      const res = await request.get(
-        `/api/xref/collection-units?category_name=${cu.unit_name}&format=asSelect`,
-      );
-      expect(res.status).toBe(200);
-      expect(mockDB.getCollectionUnitsFromCategory.mock.calls[0][0]).toBe(
-        cu.unit_name,
-      );
-      expect(res.body).toEqual({
-        id: cu.collection_unit_id,
-        key: "collection_unit_id",
-        value: cu.unit_name,
-      });
+    it("should format the response asSelect", async () => {
+      const res = await request
+        .get("/api/xref/taxon-measurements")
+        .query({ tsn, format: "asSelect" });
+      expect(mockXrefService.getTsnMeasurements.mock.calls[0][1]).toBe(true);
     });
   });
 });
