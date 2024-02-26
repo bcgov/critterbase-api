@@ -29,6 +29,7 @@ const deleteMarking = jest.fn();
 const getMarkingById = jest.fn();
 const getMarkingsByCritterId = jest.fn();
 const verifyMarkingsAgainstTaxon = jest.fn();
+const verifyMarkingsCanBeAssignedToTsn = jest.fn();
 
 const request = supertest(
   makeApp({
@@ -39,6 +40,7 @@ const request = supertest(
     getMarkingById,
     getMarkingsByCritterId,
     verifyMarkingsAgainstTaxon,
+    markingService: { verifyMarkingsCanBeAssignedToTsn },
   } as unknown as ICbDatabase),
 );
 
@@ -210,14 +212,11 @@ describe("API: Marking", () => {
           body_location: "Left Ear",
         };
         getColourByName.mockResolvedValue(COLOUR);
-        getBodyLocationByNameAndTaxonUUID.mockResolvedValue(XREF_TAX_LOC);
-        const new_body = await _appendEnglishMarkingsAsUUID(
-          body,
-          "f91ae2d3-4f5b-4502-aceb-264351709695",
-        );
+        getBodyLocationByNameAndTsn.mockResolvedValue(XREF_TAX_LOC);
+        const new_body = await _appendEnglishMarkingsAsUUID(body, 1);
         expect.assertions(5);
         expect(getColourByName.mock.calls.length).toBe(2);
-        expect(getBodyLocationByNameAndTaxonUUID.mock.calls.length).toBe(1);
+        expect(getBodyLocationByNameAndTsn.mock.calls.length).toBe(1);
         expect(new_body).toHaveProperty("primary_colour_id");
         expect(new_body).toHaveProperty("secondary_colour_id");
         expect(new_body).toHaveProperty("taxon_marking_body_location_id");
@@ -227,14 +226,11 @@ describe("API: Marking", () => {
           foo: "bar",
         };
         getColourByName.mockResolvedValue(COLOUR);
-        getBodyLocationByNameAndTaxonUUID.mockResolvedValue(XREF_TAX_LOC);
-        const new_body = await _appendEnglishMarkingsAsUUID(
-          body,
-          "f91ae2d3-4f5b-4502-aceb-264351709695",
-        );
+        getBodyLocationByNameAndTsn.mockResolvedValue(XREF_TAX_LOC);
+        const new_body = await _appendEnglishMarkingsAsUUID(body, 1);
         expect.assertions(5);
         expect(getColourByName.mock.calls.length).toBe(0);
-        expect(getBodyLocationByNameAndTaxonUUID.mock.calls.length).toBe(0);
+        expect(getBodyLocationByNameAndTsn.mock.calls.length).toBe(0);
         expect(new_body).not.toHaveProperty("primary_colour_id");
         expect(new_body).not.toHaveProperty("secondary_colour_id");
         expect(new_body).not.toHaveProperty("taxon_marking_body_location_id");
@@ -246,14 +242,11 @@ describe("API: Marking", () => {
           body_location: "foo",
         };
         getColourByName.mockResolvedValue(null);
-        getBodyLocationByNameAndTaxonUUID.mockResolvedValue(null);
-        const new_body = await _appendEnglishMarkingsAsUUID(
-          body,
-          "f91ae2d3-4f5b-4502-aceb-264351709695",
-        );
+        getBodyLocationByNameAndTsn.mockResolvedValue(null);
+        const new_body = await _appendEnglishMarkingsAsUUID(body, 1);
         expect.assertions(5);
         expect(getColourByName.mock.calls.length).toBe(2);
-        expect(getBodyLocationByNameAndTaxonUUID.mock.calls.length).toBe(1);
+        expect(getBodyLocationByNameAndTsn.mock.calls.length).toBe(1);
         expect(new_body.primary_colour_id).toBeUndefined();
         expect(new_body.secondary_colour_id).toBeUndefined();
         expect(new_body.taxon_marking_body_location_id).toBeUndefined();
@@ -308,33 +301,6 @@ describe("API: Marking", () => {
         expect(prisma.marking.delete).toHaveBeenCalled();
       });
     });
-
-    describe("verifyMarkingAgainstTaxon()", () => {
-      it("returns an array of ids that can't be matched to the provided taxon", async () => {
-        type markingWithInclude = marking & {
-          xref_taxon_marking_body_location: { taxon_id: string };
-        };
-        db_getTaxonIds.mockResolvedValue([
-          "32f9fede-32fc-4321-3232-1c2142e336fe",
-        ]);
-        findMany.mockResolvedValue([
-          {
-            ...MARKING,
-            xref_taxon_marking_body_location: {
-              taxon_id: "12f9fede-12fc-4321-1212-1c2142e336fe",
-            },
-          },
-        ] as markingWithInclude[]);
-        const failed_ids = await _verifyMarkingsAgainstTaxon(
-          "98f9fede-95fc-4321-9444-7c2742e336fe",
-          [MARKING],
-        );
-        expect.assertions(3);
-        expect(db_getTaxonIds.mock.calls.length).toBe(1);
-        expect(failed_ids.length).toBe(1);
-        expect(failed_ids[0]).toBe(MARKING_ID);
-      });
-    });
   });
 
   describe("ROUTERS", () => {
@@ -353,13 +319,16 @@ describe("API: Marking", () => {
     describe("POST /api/markings/verify", () => {
       it("should return status 200", async () => {
         expect.assertions(5);
-        verifyMarkingsAgainstTaxon.mockResolvedValue([MARKING_ID]);
+        verifyMarkingsCanBeAssignedToTsn.mockResolvedValue({
+          verified: false,
+          invalid_markings: [MARKING.marking_id],
+        });
         const res = await request.post("/api/markings/verify").send({
-          taxon_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
-          markings: [MARKING],
+          itis_tsn: 1,
+          markings: [{ marking_id: MARKING.marking_id }],
         });
         expect(res.status).toBe(200);
-        expect(verifyMarkingsAgainstTaxon.mock.calls.length).toBe(1);
+        expect(verifyMarkingsCanBeAssignedToTsn.mock.calls.length).toBe(1);
         expect(res.body.verified).toBe(false);
         expect(res.body.invalid_markings.length).toBe(1);
         expect(res.body.invalid_markings[0]).toBe(MARKING_ID);
