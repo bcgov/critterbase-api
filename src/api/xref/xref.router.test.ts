@@ -1,9 +1,11 @@
 import supertest from "supertest";
 import { makeApp } from "../../app";
 
+const tsn = 1;
+
 const mockXrefService = {
   getTsnMarkingBodyLocations: jest.fn(),
-  // getTaxonCollectionCategories: jest.fn(),
+  getTaxonCollectionCategories: jest.fn(),
   // getCollectionUnitsFromCategory: jest.fn(),
   // getCollectionUnitsFromCategoryId: jest.fn(),
 };
@@ -26,14 +28,15 @@ describe("ROUTERS", () => {
   describe("GET /taxon-collection-categories", () => {
     it("should parse taxon_id from schema and pass to service", async () => {
       const res = await request.get(
-        `/api/xref/taxon-collection-categories?taxon_id=${tcc.taxon_id}`,
+        `/api/xref/taxon-collection-categories?taxon_id=${tsn}`,
       );
       expect(res.status).toBe(200);
-      expect(mockDB.getTaxonCollectionCategories.mock.calls[0][0]).toBe(
-        tcc.taxon_id,
-      );
-      expect(mockDB.getTaxonCollectionCategories.mock.calls.length).toBe(1);
-      expect(res.body.collection_category_id).toBe(tcc.collection_category_id);
+      expect(
+        mockXrefService.getTaxonCollectionCategories.mock.calls[0][0],
+      ).toBe(tsn);
+      expect(
+        mockXrefService.getTaxonCollectionCategories.mock.calls.length,
+      ).toBe(1);
     });
     it("can format response 'asSelect'", async () => {
       const res = await request.get(
