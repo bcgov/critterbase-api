@@ -30,7 +30,7 @@ export class Repository {
    */
   async safeQuery<TSchema extends z.ZodTypeAny>(
     sql: Prisma.Sql,
-    schema: TSchema,
+    schema: TSchema
   ) {
     const result = await this.prisma.$queryRaw<z.infer<TSchema>>(sql);
 
@@ -44,7 +44,7 @@ export class Repository {
       console.log(parsed.error.errors, { result });
 
       throw apiError.sqlExecuteIssue(
-        "Failed to parse raw sql with provided Zod schema.",
+        "Failed to parse raw sql with provided Zod schema."
       );
     }
 
