@@ -58,14 +58,12 @@ export const BulkCritterCreateSchema = CritterSchema.partial().required({
  */
 export const CritterUpdateSchema = CritterSchema.omit({
   critter_id: true,
+  itis_scientific_name: true,
 }).partial();
 
-export const BulkCritterUpdateSchema = CritterSchema.partial().refine(
-  (schema) =>
-    (schema.itis_tsn && !schema.itis_scientific_name) ||
-    (!schema.itis_tsn && schema.itis_scientific_name),
-  "must include itis_tsn or itis_scientific_name but not both",
-);
+export const BulkCritterUpdateSchema = CritterSchema.partial().omit({
+  itis_scientific_name: true,
+});
 
 /**
  * Similar critter query schema used in /critters/unique
