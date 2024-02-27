@@ -162,11 +162,16 @@ export class XrefService extends InternalService<XrefRepository> {
         "measurement_name",
       );
 
-      const qualitativeAsSelect = toSelectFormat(
-        qualitative,
-        "taxon_measurement_id",
-        "measurement_name",
-      );
+      const qualitativeAsSelect = qualitative.map((measurement) => ({
+        id: measurement.taxon_measurement_id,
+        key: "taxon_measurement_id",
+        value: measurement.measurement_name,
+        children: measurement.options.map((option) => ({
+          id: option.qualitative_option_id,
+          key: "qualitative_option_id",
+          value: option.option_label,
+        })),
+      }));
 
       return {
         quantitative: quantitativeAsSelect,

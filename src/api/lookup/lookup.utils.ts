@@ -8,7 +8,6 @@ import {
   lk_region_nr,
   lk_wildlife_management_unit,
 } from "@prisma/client";
-import { z } from "zod";
 import { toSelect } from "../../utils/helper_functions";
 import { FormatParse } from "../../utils/types";
 import { ResponseSchema } from "../../utils/zod_helpers";

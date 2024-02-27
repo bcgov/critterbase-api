@@ -215,7 +215,7 @@ const getTsnMeasurements: ZodOpenApiOperationObject = {
               {
                 $ref: "#/components/schemas/xrefTsnMeasurementsSchema",
               },
-              { $ref: "#/components/schemas/asSelectSchema" },
+              { $ref: "#/components/schemas/asSelectSchemaWithChildren" },
             ],
           },
         },

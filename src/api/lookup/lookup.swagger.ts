@@ -159,6 +159,10 @@ const asSelectSchema = z.object({
   value: z.string(),
 });
 
+const asSelectSchemaWithChildren = asSelectSchema.extend({
+  children: asSelectSchema.array().optional(),
+});
+
 const lookupColours: ZodOpenApiOperationObject = {
   operationId: "lookupColours",
   ...lookupCommon,
@@ -337,6 +341,7 @@ const lookupCollectionUnitCategories: ZodOpenApiOperationObject = {
 
 export const lookupSchemas = {
   asSelectSchema: asSelectSchema.array(),
+  asSelectSchemaWithChildren: asSelectSchemaWithChildren.array(),
   colourDefaultSchema: LookUpColourSchema.array(),
   regionEnvDefaultSchema: LookupRegionEnvSchema.array(),
   regionNrDefaultSchema: LookupRegionNrSchema.array(),
