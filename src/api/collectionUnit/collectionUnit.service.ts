@@ -1,16 +1,18 @@
-import { prisma } from '../../utils/constants';
-import { PrismaTransactionClient } from '../../utils/types';
+import { prisma } from "../../utils/constants";
+import { PrismaTransactionClient } from "../../utils/types";
 import {
   CollectionUnitCreateInput,
   collectionUnitIncludes,
   CollectionUnitIncludes,
   CollectionUnitUpdateInput
-} from './collectionUnit.utils';
+} from "./collectionUnit.utils";
 /**
  * * Returns all existing critter collection units from the database
  */
 const getAllCollectionUnits = async (): Promise<CollectionUnitIncludes[]> => {
-  const collectionUnits = await prisma.critter_collection_unit.findMany(collectionUnitIncludes);
+  const collectionUnits = await prisma.critter_collection_unit.findMany(
+    collectionUnitIncludes
+  );
   return collectionUnits;
 };
 
@@ -19,13 +21,17 @@ const getAllCollectionUnits = async (): Promise<CollectionUnitIncludes[]> => {
  * * Throws 404 error if non-existent
  * @param {string} critter_collection_unit_id
  */
-const getCollectionUnitById = async (critter_collection_unit_id: string): Promise<CollectionUnitIncludes> => {
-  const collectionUnit = await prisma.critter_collection_unit.findUniqueOrThrow({
-    where: {
-      critter_collection_unit_id: critter_collection_unit_id
-    },
-    ...collectionUnitIncludes
-  });
+const getCollectionUnitById = async (
+  critter_collection_unit_id: string
+): Promise<CollectionUnitIncludes> => {
+  const collectionUnit = await prisma.critter_collection_unit.findUniqueOrThrow(
+    {
+      where: {
+        critter_collection_unit_id: critter_collection_unit_id
+      },
+      ...collectionUnitIncludes
+    }
+  );
   return collectionUnit;
 };
 
@@ -33,7 +39,9 @@ const getCollectionUnitById = async (critter_collection_unit_id: string): Promis
  * * Gets an array of critter collection units by the critter_id (one critter can belong to many)
  * @param {string} critter_id
  */
-const getCollectionUnitsByCritterId = async (critter_id: string): Promise<CollectionUnitIncludes[]> => {
+const getCollectionUnitsByCritterId = async (
+  critter_id: string
+): Promise<CollectionUnitIncludes[]> => {
   const collectionUnits = await prisma.critter_collection_unit.findMany({
     where: {
       critter_id: critter_id

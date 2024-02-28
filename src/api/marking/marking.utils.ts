@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { frequency_unit, marking, Prisma } from '@prisma/client';
-import { z, ZodString } from 'zod';
+import { frequency_unit, marking, Prisma } from "@prisma/client";
+import { z, ZodString } from "zod";
 import {
   DeleteSchema,
   implement,
@@ -14,8 +14,8 @@ import {
   XrefTaxonMarkingBodyLocationSchema,
   zodAudit,
   zodID
-} from '../../utils/zod_helpers';
-import { AuditColumns } from '../../utils/types';
+} from "../../utils/zod_helpers";
+import { AuditColumns } from "../../utils/types";
 // Types
 type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
@@ -69,8 +69,8 @@ const markingSchema = implement<marking>().with({
   text_colour_id: zodID.nullable(),
   identifier: z
     .union([z.string(), z.number(), z.null()])
-    .refine((value) => typeof value !== 'undefined', {
-      message: 'Value is undefined'
+    .refine((value) => typeof value !== "undefined", {
+      message: "Value is undefined"
     })
     .transform((value) => String(value))
     .pipe(z.string().nullable()) as unknown as z.ZodNullable<ZodString>,
@@ -130,14 +130,18 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
     body_location: xref_taxon_marking_body_location?.body_location ?? null,
     marking_type: lk_marking_type?.name ?? null,
     marking_material: lk_marking_material?.material ?? null,
-    primary_colour: lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
-    secondary_colour: lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
+    primary_colour:
+      lk_colour_marking_primary_colour_idTolk_colour?.colour ?? null,
+    secondary_colour:
+      lk_colour_marking_secondary_colour_idTolk_colour?.colour ?? null,
     text_colour: lk_colour_marking_text_colour_idTolk_colour?.colour ?? null
   };
 });
 
 //Validate incoming request body for create marking
-const MarkingCreateBodySchema = implement<Omit<Prisma.markingCreateManyInput, 'marking_id' | AuditColumns>>().with(
+const MarkingCreateBodySchema = implement<
+  Omit<Prisma.markingCreateManyInput, "marking_id" | AuditColumns>
+>().with(
   markingSchema
     .omit({ ...noAudit, marking_id: true })
     .partial()
@@ -147,12 +151,12 @@ const MarkingCreateBodySchema = implement<Omit<Prisma.markingCreateManyInput, 'm
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
   nonEmpty,
-  'no new data was provided or the format was invalid'
+  "no new data was provided or the format was invalid"
 );
 
 const MarkingUpdateByIdSchema = MarkingCreateBodySchema.extend({
   marking_id: zodID.optional()
-}).refine(nonEmpty, 'no new data was provided or the format was invalid');
+}).refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const MarkingCreateWithEnglishSchema = z
   .object({
@@ -162,7 +166,9 @@ const MarkingCreateWithEnglishSchema = z
   })
   .passthrough();
 
-const MarkingDeleteSchema = markingSchema.pick({ marking_id: true }).extend(DeleteSchema.shape);
+const MarkingDeleteSchema = markingSchema
+  .pick({ marking_id: true })
+  .extend(DeleteSchema.shape);
 
 const MarkingVerificationSchema = z.object({
   itis_tsn: z.number(),
@@ -180,4 +186,10 @@ export {
   MarkingUpdateByIdSchema,
   MarkingVerificationSchema
 };
-export type { MarkingCreateInput, MarkingUpdateInput, MarkingIncludes, FormattedMarking, MarkingVerificationType };
+export type {
+  MarkingCreateInput,
+  MarkingUpdateInput,
+  MarkingIncludes,
+  FormattedMarking,
+  MarkingVerificationType
+};

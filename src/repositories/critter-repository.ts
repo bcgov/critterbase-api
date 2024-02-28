@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 import {
   CritterUpdate,
   ICritter,
@@ -21,9 +21,9 @@ import {
   DetailedCritterChildSchema,
   IDetailedCritterParent,
   IDetailedCritterChild
-} from '../schemas/critter-schema';
-import { apiError } from '../utils/types';
-import { Repository } from './base-repository';
+} from "../schemas/critter-schema";
+import { apiError } from "../utils/types";
+import { Repository } from "./base-repository";
 
 /**
  * Critter Service
@@ -62,8 +62,8 @@ export class CritterRepository extends Repository {
 
     if (!result.length) {
       throw apiError.notFound(`Failed to find critters.`, [
-        'CritterRepository -> getAllCritters',
-        'results had a length of 0'
+        "CritterRepository -> getAllCritters",
+        "results had a length of 0"
       ]);
     }
 
@@ -87,7 +87,7 @@ export class CritterRepository extends Repository {
     if (!result.length) {
       throw apiError.notFound(`Failed to find critters.`, [
         `CritterRepository -> getMultipleCrittersByIds`,
-        'results had a length of 0'
+        "results had a length of 0"
       ]);
     }
 
@@ -110,8 +110,8 @@ export class CritterRepository extends Repository {
 
     if (!result) {
       throw apiError.notFound(`Failed to find specific critter.`, [
-        'CritterRepository -> getCritterById',
-        'result was undefined'
+        "CritterRepository -> getCritterById",
+        "result was undefined"
       ]);
     }
 
@@ -135,10 +135,10 @@ export class CritterRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.notFound(`Failed to find critters with wlh-id: ${wlhId}.`, [
-        'CritterRepository -> getCritterByWlhId',
-        'results had a length of 0'
-      ]);
+      throw apiError.notFound(
+        `Failed to find critters with wlh-id: ${wlhId}.`,
+        ["CritterRepository -> getCritterByWlhId", "results had a length of 0"]
+      );
     }
 
     return result;
@@ -153,7 +153,10 @@ export class CritterRepository extends Repository {
    * @throws {apiError.sqlExecuteIssue} - if query was unable to update critter.
    * @returns {Promise<ICritter>} critter object.
    */
-  async updateCritter(critterId: string, critterData: CritterUpdate): Promise<ICritter> {
+  async updateCritter(
+    critterId: string,
+    critterData: CritterUpdate
+  ): Promise<ICritter> {
     try {
       const result = await this.prisma.critter.update({
         where: {
@@ -166,8 +169,8 @@ export class CritterRepository extends Repository {
       return result;
     } catch (err) {
       throw apiError.sqlExecuteIssue(`Failed to update critter.`, [
-        'CritterRepository -> updateCritter',
-        'prisma threw error',
+        "CritterRepository -> updateCritter",
+        "prisma threw error",
         err
       ]);
     }
@@ -181,7 +184,9 @@ export class CritterRepository extends Repository {
    * @throws {apiError.sqlExecuteIssue} - if query was unable to create critter.
    * @returns {Promise<ICritter>} critter object.
    */
-  async createCritter(critterData: CritterCreateRequiredItis): Promise<ICritter> {
+  async createCritter(
+    critterData: CritterCreateRequiredItis
+  ): Promise<ICritter> {
     try {
       const result = await this.prisma.critter.create({
         data: critterData,
@@ -191,8 +196,8 @@ export class CritterRepository extends Repository {
       return result;
     } catch (err) {
       throw apiError.sqlExecuteIssue(`Failed to create critter.`, [
-        'CritterRepository -> createCritter',
-        'prisma threw error',
+        "CritterRepository -> createCritter",
+        "prisma threw error",
         err
       ]);
     }
@@ -260,7 +265,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterMarking[]>} markings.
    */
-  async findCritterMarkings(critterId: string): Promise<IDetailedCritterMarking[]> {
+  async findCritterMarkings(
+    critterId: string
+  ): Promise<IDetailedCritterMarking[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -308,7 +315,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterCapture[]>} captures.
    */
-  async findCritterCaptures(critterId: string): Promise<IDetailedCritterCapture[]> {
+  async findCritterCaptures(
+    critterId: string
+  ): Promise<IDetailedCritterCapture[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -350,7 +359,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterMortality[]>} mortalities.
    */
-  async findCritterMortalities(critterId: string): Promise<IDetailedCritterMortality[]> {
+  async findCritterMortalities(
+    critterId: string
+  ): Promise<IDetailedCritterMortality[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -393,7 +404,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterQualitativeMeasurement>} qualitative measurements.
    */
-  async findCritterQualitativeMeasurements(critterId: string): Promise<IDetailedCritterQualitativeMeasurement[]> {
+  async findCritterQualitativeMeasurements(
+    critterId: string
+  ): Promise<IDetailedCritterQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -424,7 +437,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterQuantitativeMeasurement[]>} quantitative measurements.
    */
-  async findCritterQuantitativeMeasurements(critterId: string): Promise<IDetailedCritterQuantitativeMeasurement[]> {
+  async findCritterQuantitativeMeasurements(
+    critterId: string
+  ): Promise<IDetailedCritterQuantitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -454,7 +469,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterCollectionUnit[]>} collection units.
    */
-  async findCritterCollectionUnits(critterId: string): Promise<IDetailedCritterCollectionUnit[]> {
+  async findCritterCollectionUnits(
+    critterId: string
+  ): Promise<IDetailedCritterCollectionUnit[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -482,7 +499,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterParent[]>}
    */
-  async findCritterParents(critterId: string): Promise<IDetailedCritterParent[]> {
+  async findCritterParents(
+    critterId: string
+  ): Promise<IDetailedCritterParent[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -510,7 +529,9 @@ export class CritterRepository extends Repository {
    * @param {string} critterId - critter id.
    * @returns {Promise<IDetailedCritterChild[]>}
    */
-  async findCritterChildren(critterId: string): Promise<IDetailedCritterChild[]> {
+  async findCritterChildren(
+    critterId: string
+  ): Promise<IDetailedCritterChild[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT

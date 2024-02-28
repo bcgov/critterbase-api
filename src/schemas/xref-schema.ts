@@ -6,16 +6,18 @@ import {
   xref_taxon_measurement_qualitative,
   xref_taxon_measurement_qualitative_option,
   xref_taxon_measurement_quantitative
-} from '@prisma/client';
-import { z } from 'zod';
-import { AuditColumns } from '../utils/types';
-import { implement, zodID } from '../utils/zod_helpers';
+} from "@prisma/client";
+import { z } from "zod";
+import { AuditColumns } from "../utils/types";
+import { implement, zodID } from "../utils/zod_helpers";
 
 /**
  * @table xref_taxon_marking_body_location
  *
  */
-export const TsnMarkingBodyLocationSchema = implement<Omit<xref_taxon_marking_body_location, AuditColumns>>().with({
+export const TsnMarkingBodyLocationSchema = implement<
+  Omit<xref_taxon_marking_body_location, AuditColumns>
+>().with({
   taxon_marking_body_location_id: zodID,
   itis_tsn: z.number(),
   body_location: z.string(),
@@ -78,17 +80,28 @@ export const TsnMeasurementsSchema = z.object({
  *
  */
 
-export type ITsnMarkingBodyLocation = z.infer<typeof TsnMarkingBodyLocationSchema>;
+export type ITsnMarkingBodyLocation = z.infer<
+  typeof TsnMarkingBodyLocationSchema
+>;
 
-export type ITsnQualitativeMeasurement = z.infer<typeof TsnQualitativeMeasurementSchema>;
+export type ITsnQualitativeMeasurement = z.infer<
+  typeof TsnQualitativeMeasurementSchema
+>;
 
-export type ITsnQuantitativeMeasurement = z.infer<typeof TsnQuantitativeMeasurementSchema>;
+export type ITsnQuantitativeMeasurement = z.infer<
+  typeof TsnQuantitativeMeasurementSchema
+>;
 
-export type ITsnQualitativeMeasurementOption = z.infer<typeof TsnQualitativeMeasurementOptionSchema>;
+export type ITsnQualitativeMeasurementOption = z.infer<
+  typeof TsnQualitativeMeasurementOptionSchema
+>;
 
 export type ITsnMeasurements = z.infer<typeof TsnMeasurementsSchema>;
 
-export type ICollectionCategoryDef = Omit<lk_collection_category, AuditColumns> & { itis_tsn: number };
+export type ICollectionCategoryDef = Omit<
+  lk_collection_category,
+  AuditColumns
+> & { itis_tsn: number };
 
 export type ICollectionUnitDef = Omit<xref_collection_unit, AuditColumns>;
 

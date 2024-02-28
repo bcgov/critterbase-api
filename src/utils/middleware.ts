@@ -1,24 +1,29 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import type { NextFunction, Request, Response } from 'express';
-import { ZodError } from 'zod';
-import { loginUser } from '../api/access/access.service';
-import { AuthLoginSchema } from '../api/user/user.utils';
-import { IS_TEST, NO_AUTH } from './constants';
-import { prismaErrorMsg } from './helper_functions';
-import { apiError } from './types';
-import { authenticateRequest } from '../authentication/auth';
-import { setUserContext } from '../api/user/user.service';
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import type { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
+import { loginUser } from "../api/access/access.service";
+import { AuthLoginSchema } from "../api/user/user.utils";
+import { IS_TEST, NO_AUTH } from "./constants";
+import { prismaErrorMsg } from "./helper_functions";
+import { apiError } from "./types";
+import { authenticateRequest } from "../authentication/auth";
+import { setUserContext } from "../api/user/user.service";
 
-type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
+type ExpressHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<Response> | Promise<void>;
 
 /**
  * Catches errors on API routes. Used instead of wrapping try / catch on every endpoint.
  *
  * @param {ExpressHandler} fn - Express Handler callback.
  */
-const catchErrors = (fn: ExpressHandler) => (req: Request, res: Response, next: NextFunction) => {
-  fn(req, res, next).catch(next);
-};
+const catchErrors =
+  (fn: ExpressHandler) => (req: Request, res: Response, next: NextFunction) => {
+    fn(req, res, next).catch(next);
+  };
 
 /**
  * Middleware: Logs the incoming requests.
@@ -71,17 +76,21 @@ const errorHandler = (
   next: NextFunction
 ) => {
   if (err instanceof ZodError) {
-    return res.status(400).json({ error: 'Zod validation failed.', issues: err.issues });
+    return res
+      .status(400)
+      .json({ error: "Zod validation failed.", issues: err.issues });
   }
   if (err instanceof apiError) {
-    return res.status(err.status).json({ error: err.message, issues: err.errors });
+    return res
+      .status(err.status)
+      .json({ error: err.message, issues: err.errors });
   }
   if (err instanceof PrismaClientKnownRequestError) {
     const { status, error } = prismaErrorMsg(err);
     return res.status(status).json({ error, issues: [err.meta] });
   }
   if (err instanceof Error) {
-    return res.status(400).json({ error: err.message || 'unknown error' });
+    return res.status(400).json({ error: err.message || "unknown error" });
   }
   next(err);
 };
@@ -95,19 +104,21 @@ const errorHandler = (
  * @async
  * @returns {Promise<void>}
  */
-const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
-  if (IS_TEST || NO_AUTH) {
-    return next();
+const auth = catchErrors(
+  async (req: Request, _res: Response, next: NextFunction) => {
+    if (IS_TEST || NO_AUTH) {
+      return next();
+    }
+    const kc = await authenticateRequest(req);
+    const parsed = AuthLoginSchema.parse({
+      keycloak_uuid: kc.keycloak_uuid,
+      system_name: kc.system_name
+    });
+    await loginUser(parsed);
+    console.log(JSON.stringify(kc));
+    await setUserContext(kc.keycloak_uuid, kc.system_name);
+    next();
   }
-  const kc = await authenticateRequest(req);
-  const parsed = AuthLoginSchema.parse({
-    keycloak_uuid: kc.keycloak_uuid,
-    system_name: kc.system_name
-  });
-  await loginUser(parsed);
-  console.log(JSON.stringify(kc));
-  await setUserContext(kc.keycloak_uuid, kc.system_name);
-  next();
-});
+);
 
 export { auth, catchErrors, errorHandler, errorLogger, logger };

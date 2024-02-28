@@ -1,10 +1,10 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import type { Request } from 'express';
-import { ZodRawShape, ZodTypeAny, array, objectOutputType } from 'zod';
-import { FormatParse, ISelect, QueryFormats } from './types';
-import { QueryFormatSchema } from './zod_helpers';
-import { Prisma } from '@prisma/client';
-import { prisma } from './constants';
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import type { Request } from "express";
+import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
+import { FormatParse, ISelect, QueryFormats } from "./types";
+import { QueryFormatSchema } from "./zod_helpers";
+import { Prisma } from "@prisma/client";
+import { prisma } from "./constants";
 
 /**
  ** Formats a prisma error messsage based on the prisma error code
@@ -14,21 +14,23 @@ import { prisma } from './constants';
  * Note: as unsupported error messages occur, add support using this function
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
-const prismaErrorMsg = (err: PrismaClientKnownRequestError): { error: string; status: number } => {
+const prismaErrorMsg = (
+  err: PrismaClientKnownRequestError
+): { error: string; status: number } => {
   const { meta, message, code } = err;
 
   switch (code) {
-    case 'P2025':
+    case "P2025":
       return {
-        error: typeof meta?.cause === 'string' ? meta.cause : message,
+        error: typeof meta?.cause === "string" ? meta.cause : message,
         status: 404
       };
-    case 'P2002':
+    case "P2002":
       return {
         error: `unique constraint failed`,
         status: 400
       };
-    case 'P2003':
+    case "P2003":
       return {
         error: `foreign key constraint failed`,
         status: 404
@@ -44,9 +46,11 @@ const intersect = <T>(A: T[], B: T[]): T[] => {
 
 const sessionHours = (hours: number) => hours * 3600000;
 
-const getFormat = (req: Request): QueryFormats => QueryFormatSchema.parse(req.query).format;
+const getFormat = (req: Request): QueryFormats =>
+  QueryFormatSchema.parse(req.query).format;
 
-const isSelectFormat = (req: Request) => getFormat(req) === QueryFormats.asSelect;
+const isSelectFormat = (req: Request) =>
+  getFormat(req) === QueryFormats.asSelect;
 
 type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
 
@@ -68,7 +72,7 @@ const formatParse = async (
 };
 
 const toSelect = <AsType>(
-  val: objectOutputType<ZodRawShape, ZodTypeAny, 'passthrough'>,
+  val: objectOutputType<ZodRawShape, ZodTypeAny, "passthrough">,
   key: keyof AsType & string,
   valueKey: keyof AsType & string
 ) => {
@@ -86,7 +90,13 @@ const toSelectFormat = <T>(data: T[], idKey: keyof T, valueKey: keyof T) =>
 //Putting the function here so tests dont run utils each time
 export const prisMock = (
   model: Prisma.ModelName,
-  method: 'findMany' | 'findFirst' | 'findUniqueOrThrow' | 'update' | 'delete' | 'create' = 'findMany',
+  method:
+    | "findMany"
+    | "findFirst"
+    | "findUniqueOrThrow"
+    | "update"
+    | "delete"
+    | "create" = "findMany",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   returns: any
 ) =>

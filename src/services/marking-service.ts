@@ -1,6 +1,6 @@
-import { MarkingVerificationType } from '../api/marking/marking.utils';
-import { MarkingRepository } from '../repositories/marking-repository';
-import { InternalService } from './base-service';
+import { MarkingVerificationType } from "../api/marking/marking.utils";
+import { MarkingRepository } from "../repositories/marking-repository";
+import { InternalService } from "./base-service";
 
 export class MarkingService extends InternalService<MarkingRepository> {
   /**
@@ -15,7 +15,11 @@ export class MarkingService extends InternalService<MarkingRepository> {
 
     const markingIds = body.markings.map((marking) => marking.marking_id);
 
-    const invalidMarkingIds = await this.repository.findInvalidMarkingIdsFromTsnHierarchy(markingIds, tsnHierarchy);
+    const invalidMarkingIds =
+      await this.repository.findInvalidMarkingIdsFromTsnHierarchy(
+        markingIds,
+        tsnHierarchy
+      );
 
     const allVerified = invalidMarkingIds.length === 0;
 

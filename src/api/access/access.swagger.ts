@@ -1,23 +1,23 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { UserCreateBodySchema } from '../user/user.utils';
-import { SwagDesc, SwagErr, SwagNotFound } from '../../utils/swagger_helpers';
-import { routes } from '../../utils/constants';
-import { SwagUnauthorized } from '../../utils/swagger_helpers';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { z } from "zod";
+import { zodID } from "../../utils/zod_helpers";
+import { UserCreateBodySchema } from "../user/user.utils";
+import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import { routes } from "../../utils/constants";
+import { SwagUnauthorized } from "../../utils/swagger_helpers";
 
-const TAG = 'Access';
+const TAG = "Access";
 
 const getAccess: ZodOpenApiOperationObject = {
-  operationId: 'getAccess',
-  summary: 'Welcomes users to the API',
+  operationId: "getAccess",
+  summary: "Welcomes users to the API",
   security: [],
   tags: [TAG],
   responses: {
     200: {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z.object({
             message: z.string()
           })
@@ -28,13 +28,13 @@ const getAccess: ZodOpenApiOperationObject = {
 };
 
 const signup: ZodOpenApiOperationObject = {
-  operationId: 'signup',
-  summary: 'Registers a new user account',
+  operationId: "signup",
+  summary: "Registers a new user account",
   security: [],
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: UserCreateBodySchema
       }
     }
@@ -43,7 +43,7 @@ const signup: ZodOpenApiOperationObject = {
     201: {
       description: SwagDesc.create,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z.object({ user_id: zodID })
         }
       }
@@ -54,8 +54,8 @@ const signup: ZodOpenApiOperationObject = {
 };
 
 const getTypes: ZodOpenApiOperationObject = {
-  operationId: 'getTypes',
-  summary: 'Gets types of all supported routes',
+  operationId: "getTypes",
+  summary: "Gets types of all supported routes",
   security: [],
   tags: [TAG],
   requestParams: {
@@ -66,7 +66,7 @@ const getTypes: ZodOpenApiOperationObject = {
     200: {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {}
         }
       }
@@ -80,10 +80,10 @@ export const accessPaths = {
   [routes.home]: {
     get: getAccess
   },
-  [routes.home + '/types/{model}']: {
+  [routes.home + "/types/{model}"]: {
     get: getTypes
   },
-  [routes.home + '/signup']: {
+  [routes.home + "/signup"]: {
     post: signup
   }
 };

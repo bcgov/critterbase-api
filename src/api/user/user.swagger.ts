@@ -1,21 +1,30 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { UserCreateBodySchema, UserUpdateBodySchema, SwagUserSchema } from './user.utils';
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { routes } from '../../utils/constants';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { z } from "zod";
+import { zodID } from "../../utils/zod_helpers";
+import {
+  UserCreateBodySchema,
+  UserUpdateBodySchema,
+  SwagUserSchema
+} from "./user.utils";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized
+} from "../../utils/swagger_helpers";
+import { routes } from "../../utils/constants";
 
-const TAG = 'User';
+const TAG = "User";
 
 const getUsers: ZodOpenApiOperationObject = {
-  operationId: 'getUsers',
-  summary: 'Gets all users',
+  operationId: "getUsers",
+  summary: "Gets all users",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwagUserSchema.array()
         }
       }
@@ -25,21 +34,21 @@ const getUsers: ZodOpenApiOperationObject = {
 };
 
 const createUser: ZodOpenApiOperationObject = {
-  operationId: 'createUser',
-  summary: 'Creates a new user',
+  operationId: "createUser",
+  summary: "Creates a new user",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: UserCreateBodySchema
       }
     }
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.create,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwagUserSchema
         }
       }
@@ -51,17 +60,17 @@ const createUser: ZodOpenApiOperationObject = {
 };
 
 const getUser: ZodOpenApiOperationObject = {
-  operationId: 'getUser',
-  summary: 'Gets a specific user by their id',
+  operationId: "getUser",
+  summary: "Gets a specific user by their id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwagUserSchema
         }
       }
@@ -72,24 +81,24 @@ const getUser: ZodOpenApiOperationObject = {
 };
 
 const updateUser: ZodOpenApiOperationObject = {
-  operationId: 'updateUser',
-  summary: 'Updates a specific user',
+  operationId: "updateUser",
+  summary: "Updates a specific user",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: UserUpdateBodySchema
       }
     }
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwagUserSchema
         }
       }
@@ -101,17 +110,17 @@ const updateUser: ZodOpenApiOperationObject = {
 };
 
 const deleteUser: ZodOpenApiOperationObject = {
-  operationId: 'deleteUser',
-  summary: 'Deletes a specific user',
+  operationId: "deleteUser",
+  summary: "Deletes a specific user",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.delete,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwagUserSchema
         }
       }
@@ -126,10 +135,10 @@ export const userPaths = {
   [routes.users]: {
     get: getUsers
   },
-  [routes.users + '/create']: {
+  [routes.users + "/create"]: {
     post: createUser
   },
-  [routes.users + '/{id}']: {
+  [routes.users + "/{id}"]: {
     get: getUser,
     patch: updateUser,
     delete: deleteUser

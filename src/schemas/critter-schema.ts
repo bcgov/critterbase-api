@@ -1,11 +1,17 @@
-import { coordinate_uncertainty_unit, critter, frequency_unit, location, sex } from '@prisma/client';
-import { z } from 'zod';
-import { AuditColumns } from '../utils/types';
-import { implement, zodID } from '../utils/zod_helpers';
+import {
+  coordinate_uncertainty_unit,
+  critter,
+  frequency_unit,
+  location,
+  sex
+} from "@prisma/client";
+import { z } from "zod";
+import { AuditColumns } from "../utils/types";
+import { implement, zodID } from "../utils/zod_helpers";
 
 export enum eCritterStatus {
-  alive = 'alive',
-  mortality = 'mortality'
+  alive = "alive",
+  mortality = "mortality"
 }
 
 /**
@@ -34,8 +40,10 @@ export const CritterSchema = implement<ICritter>().with({
 export const CritterCreateSchema = CritterSchema.partial()
   .required({ sex: true })
   .refine(
-    (schema) => (schema.itis_tsn && !schema.itis_scientific_name) || (!schema.itis_tsn && schema.itis_scientific_name),
-    'must include itis_tsn or itis_scientific_name but not both'
+    (schema) =>
+      (schema.itis_tsn && !schema.itis_scientific_name) ||
+      (!schema.itis_tsn && schema.itis_scientific_name),
+    "must include itis_tsn or itis_scientific_name but not both"
   );
 
 export const BulkCritterCreateSchema = CritterSchema.partial().required({
@@ -100,7 +108,7 @@ export type CritterCreateOptionalItis = z.infer<typeof CritterCreateSchema>;
 export type SimilarCritterQuery = z.infer<typeof SimilarCritterQuerySchema>;
 
 export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
-  Pick<ICritter, 'itis_scientific_name' | 'itis_tsn'>;
+  Pick<ICritter, "itis_scientific_name" | "itis_tsn">;
 
 /**
  * TODO: Move these schemas / types to the correct files once additional
@@ -108,13 +116,15 @@ export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
  *
  */
 export const DetailedCritterLocationSchema = implement<
-  Omit<location, AuditColumns | 'region_nr_id' | 'region_env_id' | 'wmu_id'>
+  Omit<location, AuditColumns | "region_nr_id" | "region_env_id" | "wmu_id">
 >().with({
   location_id: zodID,
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
   coordinate_uncertainty: z.number().nullable(),
-  coordinate_uncertainty_unit: z.nativeEnum(coordinate_uncertainty_unit).nullable(),
+  coordinate_uncertainty_unit: z
+    .nativeEnum(coordinate_uncertainty_unit)
+    .nullable(),
   elevation: z.number().nullable(),
   temperature: z.number().nullable(),
   location_comment: z.string().nullable()
@@ -173,10 +183,11 @@ export const DetailedCritterQualitativeMeasurementSchema = z.object({
   measured_timestamp: z.coerce.date()
 });
 
-export const DetailedCritterQuantitativeMeasurementSchema = DetailedCritterQualitativeMeasurementSchema.omit({
-  measurement_qualitative_id: true,
-  value: true
-}).extend({ measurement_quantitative_id: zodID, value: z.number() });
+export const DetailedCritterQuantitativeMeasurementSchema =
+  DetailedCritterQualitativeMeasurementSchema.omit({
+    measurement_qualitative_id: true,
+    value: true
+  }).extend({ measurement_quantitative_id: zodID, value: z.number() });
 
 export const DetailedCritterCollectionUnit = z.object({
   critter_collection_unit_id: zodID,
@@ -209,20 +220,36 @@ export const DetailedCritterSchema = CritterSchema.extend({
 
 export type IDetailedCritter = z.infer<typeof DetailedCritterSchema>;
 
-export type IDetailedCritterParent = z.infer<typeof DetailedCritterParentSchema>;
+export type IDetailedCritterParent = z.infer<
+  typeof DetailedCritterParentSchema
+>;
 
 export type IDetailedCritterChild = z.infer<typeof DetailedCritterChildSchema>;
 
-export type IDetailedCritterLocation = z.infer<typeof DetailedCritterLocationSchema>;
+export type IDetailedCritterLocation = z.infer<
+  typeof DetailedCritterLocationSchema
+>;
 
-export type IDetailedCritterMarking = z.infer<typeof DetailedCritterMarkingSchema>;
+export type IDetailedCritterMarking = z.infer<
+  typeof DetailedCritterMarkingSchema
+>;
 
-export type IDetailedCritterCapture = z.infer<typeof DetailedCritterCaptureSchema>;
+export type IDetailedCritterCapture = z.infer<
+  typeof DetailedCritterCaptureSchema
+>;
 
-export type IDetailedCritterMortality = z.infer<typeof DetailedCritterMortalitySchema>;
+export type IDetailedCritterMortality = z.infer<
+  typeof DetailedCritterMortalitySchema
+>;
 
-export type IDetailedCritterQualitativeMeasurement = z.infer<typeof DetailedCritterQualitativeMeasurementSchema>;
+export type IDetailedCritterQualitativeMeasurement = z.infer<
+  typeof DetailedCritterQualitativeMeasurementSchema
+>;
 
-export type IDetailedCritterQuantitativeMeasurement = z.infer<typeof DetailedCritterQuantitativeMeasurementSchema>;
+export type IDetailedCritterQuantitativeMeasurement = z.infer<
+  typeof DetailedCritterQuantitativeMeasurementSchema
+>;
 
-export type IDetailedCritterCollectionUnit = z.infer<typeof DetailedCritterCollectionUnit>;
+export type IDetailedCritterCollectionUnit = z.infer<
+  typeof DetailedCritterCollectionUnit
+>;

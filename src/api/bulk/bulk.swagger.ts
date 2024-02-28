@@ -1,23 +1,43 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { MarkingCreateBodySchema } from '../marking/marking.utils';
-import { CaptureCreateSchema, CaptureUpdateSchema } from '../capture/capture.utils';
-import { routes } from '../../utils/constants';
-import { MortalityCreateSchema, MortalityUpdateSchema } from '../mortality/mortality.utils';
-import { CollectionUnitCreateBodySchema, CollectionUnitUpsertSchema } from '../collectionUnit/collectionUnit.utils';
-import { LocationCreateSchema, LocationUpdateSchema } from '../location/location.utils';
-import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { z } from "zod";
+import { zodID } from "../../utils/zod_helpers";
+import { MarkingCreateBodySchema } from "../marking/marking.utils";
+import {
+  CaptureCreateSchema,
+  CaptureUpdateSchema
+} from "../capture/capture.utils";
+import { routes } from "../../utils/constants";
+import {
+  MortalityCreateSchema,
+  MortalityUpdateSchema
+} from "../mortality/mortality.utils";
+import {
+  CollectionUnitCreateBodySchema,
+  CollectionUnitUpsertSchema
+} from "../collectionUnit/collectionUnit.utils";
+import {
+  LocationCreateSchema,
+  LocationUpdateSchema
+} from "../location/location.utils";
+import {
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized
+} from "../../utils/swagger_helpers";
+import {
+  CritterCreateSchema,
+  CritterUpdateSchema
+} from "../../schemas/critter-schema";
 
-const TAG = 'Bulk';
+const TAG = "Bulk";
 const bulkCreation: ZodOpenApiOperationObject = {
-  operationId: 'bulkCreate',
-  summary: 'Create multiple records in one batch, and rollback changes if any one entry fails.',
+  operationId: "bulkCreate",
+  summary:
+    "Create multiple records in one batch, and rollback changes if any one entry fails.",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: z.object({
           critters: CritterCreateSchema.array(),
           markings: MarkingCreateBodySchema.extend({
@@ -36,8 +56,8 @@ const bulkCreation: ZodOpenApiOperationObject = {
     }
   },
   responses: {
-    '200': {
-      description: 'Successfully inserted all records.'
+    "200": {
+      description: "Successfully inserted all records."
     },
     ...SwagErr,
     ...SwagUnauthorized,
@@ -46,13 +66,13 @@ const bulkCreation: ZodOpenApiOperationObject = {
 };
 
 const bulkUpdate: ZodOpenApiOperationObject = {
-  operationId: 'bulkUpdate',
+  operationId: "bulkUpdate",
   summary:
-    'Update multiple records in one batch, and rollback changes if any one entry fails. You can also nest location updates inside capture entries, and delete rows for supported types.',
+    "Update multiple records in one batch, and rollback changes if any one entry fails. You can also nest location updates inside capture entries, and delete rows for supported types.",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: z.object({
           critters: CritterUpdateSchema.extend({ critter_id: zodID }).array(),
           markings: MarkingCreateBodySchema.extend({
@@ -72,10 +92,10 @@ const bulkUpdate: ZodOpenApiOperationObject = {
     }
   },
   responses: {
-    '200': {
-      description: 'Successfully inserted all records.',
+    "200": {
+      description: "Successfully inserted all records.",
       content: {
-        'application/json': {
+        "application/json": {
           schema: z.object({
             updated: z.object({
               critters: z.number().optional(),

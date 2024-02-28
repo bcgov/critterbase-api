@@ -1,7 +1,18 @@
-import { critter, family, family_child, family_parent, Prisma } from '@prisma/client';
-import { z } from 'zod';
-import { AuditColumns } from '../../utils/types';
-import { DeleteSchema, implement, zodAudit, zodID } from '../../utils/zod_helpers';
+import {
+  critter,
+  family,
+  family_child,
+  family_parent,
+  Prisma
+} from "@prisma/client";
+import { z } from "zod";
+import { AuditColumns } from "../../utils/types";
+import {
+  DeleteSchema,
+  implement,
+  zodAudit,
+  zodID
+} from "../../utils/zod_helpers";
 
 interface ImmediateFamily {
   children: critter[];
@@ -30,19 +41,25 @@ const FamilyParentSchema = implement<family_parent>().with({
   parent_critter_id: zodID
 });
 
-const FamilyCreateBodySchema = implement<Omit<Prisma.familyCreateManyInput, AuditColumns>>().with({
+const FamilyCreateBodySchema = implement<
+  Omit<Prisma.familyCreateManyInput, AuditColumns>
+>().with({
   family_id: zodID,
   family_label: z.string()
 });
 
 const FamilyUpdateBodySchema = FamilyCreateBodySchema.omit({ family_id: true });
 
-const FamilyParentCreateBodySchema = implement<Omit<Prisma.family_parentCreateManyInput, AuditColumns>>().with({
+const FamilyParentCreateBodySchema = implement<
+  Omit<Prisma.family_parentCreateManyInput, AuditColumns>
+>().with({
   family_id: zodID,
   parent_critter_id: zodID
 });
 
-const FamilyChildCreateBodySchema = implement<Omit<Prisma.family_childCreateManyInput, AuditColumns>>().with({
+const FamilyChildCreateBodySchema = implement<
+  Omit<Prisma.family_childCreateManyInput, AuditColumns>
+>().with({
   family_id: zodID,
   child_critter_id: zodID
 });

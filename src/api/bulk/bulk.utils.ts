@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { ResponseSchema } from '../../utils/zod_helpers';
+import { z } from "zod";
+import { ResponseSchema } from "../../utils/zod_helpers";
 
 const BulkCreationSchema = z.object({
   critters: z.array(ResponseSchema).optional(),
@@ -19,7 +19,9 @@ const BulkCreationSchema = z.object({
     .optional()
 });
 
-const filterAndRemoveDeletes = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
+const filterAndRemoveDeletes = <T>(
+  arr: (T & { _delete?: boolean }[]) | undefined
+) => {
   return arr?.filter((val, idx, arr) => {
     if (val._delete) {
       arr.splice(idx, 1);

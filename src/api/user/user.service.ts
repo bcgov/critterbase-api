@@ -1,7 +1,7 @@
-import { prisma } from '../../utils/constants';
-import type { user } from '@prisma/client';
-import { UserCreateInput, UserUpdateInput } from './user.utils';
-import { apiError } from '../../utils/types';
+import { prisma } from "../../utils/constants";
+import type { user } from "@prisma/client";
+import { UserCreateInput, UserUpdateInput } from "./user.utils";
+import { apiError } from "../../utils/types";
 
 /**
  * * Adds a user to the database
@@ -27,7 +27,7 @@ const createUser = async (newUserData: UserCreateInput): Promise<user> => {
  */
 const upsertUser = async (newUserData: UserCreateInput): Promise<user> => {
   if (!newUserData.keycloak_uuid) {
-    throw apiError.requiredProperty('keycloak_uuid');
+    throw apiError.requiredProperty("keycloak_uuid");
   }
   const newUser = await prisma.user.upsert({
     where: {
@@ -65,7 +65,10 @@ const getUser = async (user_id: string): Promise<user> => {
  * @param {string} user_id - The uuid / primary key for the user
  * @param {UserUpdateInput} data - The new data that the record should be updated
  */
-const updateUser = async (user_id: string, data: UserUpdateInput): Promise<user> => {
+const updateUser = async (
+  user_id: string,
+  data: UserUpdateInput
+): Promise<user> => {
   const updatedUser = await prisma.user.update({
     where: {
       user_id: user_id
@@ -94,4 +97,12 @@ const setUserContext = async (keycloak_uuid: string, system_name: string) => {
   return result[0].api_set_context;
 };
 
-export { createUser, upsertUser, getUsers, getUser, updateUser, deleteUser, setUserContext };
+export {
+  createUser,
+  upsertUser,
+  getUsers,
+  getUser,
+  updateUser,
+  deleteUser,
+  setUserContext
+};

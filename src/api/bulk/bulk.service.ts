@@ -1,15 +1,30 @@
-import { Prisma } from '@prisma/client';
-import { z } from 'zod';
-import { prisma } from '../../utils/constants';
-import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from '../collectionUnit/collectionUnit.utils';
-import { MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
-import { MortalityDeleteSchema, MortalityUpdate } from '../mortality/mortality.utils';
-import { apiError } from '../../utils/types';
-import { ICbDatabase } from '../../utils/database';
-import { CaptureDeleteSchema, CaptureUpdate } from '../capture/capture.utils';
-import { QualitativeDeleteSchema, QuantitativeDeleteSchema } from '../measurement/measurement.utils';
-import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from '../family/family.utils';
-import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
+import { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { prisma } from "../../utils/constants";
+import {
+  CollectionUnitDeleteSchema,
+  CollectionUnitUpsertType
+} from "../collectionUnit/collectionUnit.utils";
+import {
+  MarkingDeleteSchema,
+  MarkingUpdateByIdSchema
+} from "../marking/marking.utils";
+import {
+  MortalityDeleteSchema,
+  MortalityUpdate
+} from "../mortality/mortality.utils";
+import { apiError } from "../../utils/types";
+import { ICbDatabase } from "../../utils/database";
+import { CaptureDeleteSchema, CaptureUpdate } from "../capture/capture.utils";
+import {
+  QualitativeDeleteSchema,
+  QuantitativeDeleteSchema
+} from "../measurement/measurement.utils";
+import {
+  FamilyChildDeleteSchema,
+  FamilyParentDeleteSchema
+} from "../family/family.utils";
+import { BulkCritterUpdateSchema } from "../../schemas/critter-schema";
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -68,7 +83,7 @@ const bulkCreateData = async (bulkParams: IBulkCreate) => {
     family_children,
     family_parents
   } = bulkParams;
-  const counts: Omit<IBulkResCount, 'updated' | 'deleted'> = {
+  const counts: Omit<IBulkResCount, "updated" | "deleted"> = {
     created: {}
   };
   await prisma.$transaction(async (prisma) => {
@@ -142,7 +157,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
     qualitative_measurements,
     quantitative_measurements
   } = bulkParams;
-  const counts: Omit<IBulkResCount, 'created' | 'deleted'> = {
+  const counts: Omit<IBulkResCount, "created" | "deleted"> = {
     updated: {}
   };
   await prisma.$transaction(
@@ -187,7 +202,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         const c = captures[i];
         counts.updated.captures = i + 1;
         if (!c.capture_id) {
-          throw apiError.requiredProperty('capture_id');
+          throw apiError.requiredProperty("capture_id");
         }
         await db.updateCapture(c.capture_id, c, prisma);
       }
@@ -195,7 +210,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         const m = mortalities[i];
         counts.updated.mortalities = i + 1;
         if (!m.mortality_id) {
-          throw apiError.requiredProperty('mortality_id');
+          throw apiError.requiredProperty("mortality_id");
         }
         await db.updateMortality(m.mortality_id, m, prisma);
       }
@@ -217,11 +232,12 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         const meas = qualitative_measurements[i];
         counts.updated.qualitative_measurements = i + 1;
         if (!meas.measurement_qualitative_id) {
-          throw apiError.requiredProperty('measurement_qualitative_id');
+          throw apiError.requiredProperty("measurement_qualitative_id");
         }
         await prisma.measurement_qualitative.update({
           where: {
-            measurement_qualitative_id: meas.measurement_qualitative_id as string
+            measurement_qualitative_id:
+              meas.measurement_qualitative_id as string
           },
           data: meas
         });
@@ -230,11 +246,12 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         const meas = quantitative_measurements[i];
         counts.updated.quantitative_measurements = i + 1;
         if (!meas.measurement_quantitative_id) {
-          throw apiError.requiredProperty('measurement_qualitative_id');
+          throw apiError.requiredProperty("measurement_qualitative_id");
         }
         await prisma.measurement_quantitative.update({
           where: {
-            measurement_quantitative_id: meas.measurement_quantitative_id as string
+            measurement_quantitative_id:
+              meas.measurement_quantitative_id as string
           },
           data: meas
         });
@@ -256,7 +273,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     _deleteParents,
     _deleteChildren
   } = bulkParams;
-  const counts: Omit<IBulkResCount, 'created' | 'updated'> = {
+  const counts: Omit<IBulkResCount, "created" | "updated"> = {
     deleted: {}
   };
   await prisma.$transaction(async (prisma) => {
@@ -293,19 +310,39 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     for (let i = 0; i < _deleteParents.length; i++) {
       const _dma = _deleteParents[i];
       counts.deleted.family_parents = i + 1;
-      await db.removeParentOfFamily(_dma.family_id, _dma.parent_critter_id, prisma);
+      await db.removeParentOfFamily(
+        _dma.family_id,
+        _dma.parent_critter_id,
+        prisma
+      );
     }
     for (let i = 0; i < _deleteChildren.length; i++) {
       const _dma = _deleteChildren[i];
       counts.deleted.family_children = i + 1;
-      await db.removeChildOfFamily(_dma.family_id, _dma.child_critter_id, prisma);
+      await db.removeChildOfFamily(
+        _dma.family_id,
+        _dma.child_critter_id,
+        prisma
+      );
     }
   });
   return counts;
 };
 
-const bulkErrMap = (issue: z.ZodIssueOptionalMessage, ctx: z.ErrorMapCtx, objKey: keyof IBulkMutate) => ({
+const bulkErrMap = (
+  issue: z.ZodIssueOptionalMessage,
+  ctx: z.ErrorMapCtx,
+  objKey: keyof IBulkMutate
+) => ({
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`
 });
 
-export { IBulkCreate, IBulkMutate, IBulkDelete, bulkCreateData, bulkErrMap, bulkUpdateData, bulkDeleteData };
+export {
+  IBulkCreate,
+  IBulkMutate,
+  IBulkDelete,
+  bulkCreateData,
+  bulkErrMap,
+  bulkUpdateData,
+  bulkDeleteData
+};

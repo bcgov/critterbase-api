@@ -1,7 +1,15 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
-import { SwagDesc, SwagErr, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { tsnQuerySchema, XrefCollectionUnitSchema, XrefTaxonCollectionCategorySchema } from '../../utils/zod_helpers';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { z } from "zod";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagUnauthorized
+} from "../../utils/swagger_helpers";
+import {
+  tsnQuerySchema,
+  XrefCollectionUnitSchema,
+  XrefTaxonCollectionCategorySchema
+} from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategorySchema,
@@ -9,27 +17,29 @@ import {
   TsnMeasurementsSchema,
   TsnQualitativeMeasurementSchema,
   TsnQuantitativeMeasurementSchema
-} from '../../schemas/xref-schema';
-import { routes } from '../../utils/constants';
-import { QueryFormats } from '../../utils/types';
+} from "../../schemas/xref-schema";
+import { routes } from "../../utils/constants";
+import { QueryFormats } from "../../utils/types";
 
-const TAG = 'Xref';
+const TAG = "Xref";
 
 export const xrefSchemas = {
   xrefCollectionUnitsDefaultSchema: XrefCollectionUnitSchema.array(),
-  xrefCollectionTaxonCategoryDefaultSchema: XrefTaxonCollectionCategorySchema.array(),
+  xrefCollectionTaxonCategoryDefaultSchema:
+    XrefTaxonCollectionCategorySchema.array(),
   xrefTaxonMarkingLocationDefaultSchema: TsnMarkingBodyLocationSchema.array(),
   xrefTsnQualitativeMeasurementSchema: TsnQualitativeMeasurementSchema.array(),
-  xrefTsnQuantitativeMeasurementSchema: TsnQuantitativeMeasurementSchema.array(),
+  xrefTsnQuantitativeMeasurementSchema:
+    TsnQuantitativeMeasurementSchema.array(),
   xrefTsnMeasurementsSchema: TsnMeasurementsSchema
 };
 
 const formats = z.enum([QueryFormats.asSelect]).optional();
 
 const getXrefCollectionUnits: ZodOpenApiOperationObject = {
-  operationId: 'getXrefCollectionUnits',
+  operationId: "getXrefCollectionUnits",
   summary:
-    'Get all collection units available in the DB. To filter by category, provide either just a category_id, or provide a category name plus a taxon_name_latin or taxon_name_common.',
+    "Get all collection units available in the DB. To filter by category, provide either just a category_id, or provide a category name plus a taxon_name_latin or taxon_name_common.",
   tags: [TAG],
   requestParams: {
     query: CollectionUnitCategorySchema.extend({
@@ -39,14 +49,14 @@ const getXrefCollectionUnits: ZodOpenApiOperationObject = {
     })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/xrefCollectionUnitsDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/xrefCollectionUnitsDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -58,9 +68,9 @@ const getXrefCollectionUnits: ZodOpenApiOperationObject = {
 };
 
 const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
-  operationId: 'getCollectionTaxonCategories',
+  operationId: "getCollectionTaxonCategories",
   summary:
-    'Get all collection to taxon category mappings available in the DB. A single taxon may have multiple different types of collection units available to them.',
+    "Get all collection to taxon category mappings available in the DB. A single taxon may have multiple different types of collection units available to them.",
   tags: [TAG],
   requestParams: {
     query: tsnQuerySchema.extend({
@@ -68,16 +78,16 @@ const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
     })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
               {
-                $ref: '#/components/schemas/xrefCollectionTaxonCategoryDefaultSchema'
+                $ref: "#/components/schemas/xrefCollectionTaxonCategoryDefaultSchema"
               },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -89,7 +99,7 @@ const getCollectionTaxonCategories: ZodOpenApiOperationObject = {
 };
 
 const getTaxonMarkingBodyLocations: ZodOpenApiOperationObject = {
-  operationId: 'getTaxonMarkingBodyLocations',
+  operationId: "getTaxonMarkingBodyLocations",
   summary:
     "Get all marking body locations of a TSN. Includes body locations of parent TSN's. Additional asSelect format available.",
   tags: [TAG],
@@ -100,16 +110,16 @@ const getTaxonMarkingBodyLocations: ZodOpenApiOperationObject = {
     })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
               {
-                $ref: '#/components/schemas/xrefTaxonMarkingLocationDefaultSchema'
+                $ref: "#/components/schemas/xrefTaxonMarkingLocationDefaultSchema"
               },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -121,7 +131,7 @@ const getTaxonMarkingBodyLocations: ZodOpenApiOperationObject = {
 };
 
 const getTsnQualitativeMeasurements: ZodOpenApiOperationObject = {
-  operationId: 'getTsnQualitativeMeasurements',
+  operationId: "getTsnQualitativeMeasurements",
   summary:
     "Get all qualitative measurements of a TSN. Includes measurements of parent TSN's. Additional asSelect format available.",
   tags: [TAG],
@@ -132,16 +142,16 @@ const getTsnQualitativeMeasurements: ZodOpenApiOperationObject = {
     })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
               {
-                $ref: '#/components/schemas/xrefTsnQualitativeMeasurementSchema'
+                $ref: "#/components/schemas/xrefTsnQualitativeMeasurementSchema"
               },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -153,7 +163,7 @@ const getTsnQualitativeMeasurements: ZodOpenApiOperationObject = {
 };
 
 const getTsnQuantitativeMeasurements: ZodOpenApiOperationObject = {
-  operationId: 'getTsnQuantitativeMeasurements',
+  operationId: "getTsnQuantitativeMeasurements",
   summary:
     "Get all quantitative measurements of a TSN. Includes measurements of parent TSN's. Additional asSelect format available.",
   tags: [TAG],
@@ -164,16 +174,16 @@ const getTsnQuantitativeMeasurements: ZodOpenApiOperationObject = {
     })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
               {
-                $ref: '#/components/schemas/xrefTsnQuantitativeMeasurementSchema'
+                $ref: "#/components/schemas/xrefTsnQuantitativeMeasurementSchema"
               },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -185,7 +195,7 @@ const getTsnQuantitativeMeasurements: ZodOpenApiOperationObject = {
 };
 
 const getTsnMeasurements: ZodOpenApiOperationObject = {
-  operationId: 'getTsnMeasurements',
+  operationId: "getTsnMeasurements",
   summary:
     "Get all measurements of a TSN. Includes measurements of parent TSN's. Additional asSelect format available.",
   tags: [TAG],
@@ -196,16 +206,16 @@ const getTsnMeasurements: ZodOpenApiOperationObject = {
     })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
               {
-                $ref: '#/components/schemas/xrefTsnMeasurementsSchema'
+                $ref: "#/components/schemas/xrefTsnMeasurementsSchema"
               },
-              { $ref: '#/components/schemas/asSelectSchemaWithChildren' }
+              { $ref: "#/components/schemas/asSelectSchemaWithChildren" }
             ]
           }
         }

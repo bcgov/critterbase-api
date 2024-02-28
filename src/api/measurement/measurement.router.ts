@@ -1,7 +1,7 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { ICbDatabase } from '../../utils/database';
-import { catchErrors } from '../../utils/middleware';
-import { uuidParamsSchema } from '../../utils/zod_helpers';
+import express, { NextFunction, Request, Response } from "express";
+import { ICbDatabase } from "../../utils/database";
+import { catchErrors } from "../../utils/middleware";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   QualitativeCreateSchema,
   QualitativeResponseSchema,
@@ -9,7 +9,7 @@ import {
   QuantitativeCreateSchema,
   QuantitativeResponseSchema,
   QuantitativeUpdateSchema
-} from './measurement.utils';
+} from "./measurement.utils";
 export const MeasurementRouter = (db: ICbDatabase) => {
   const measurementRouter = express.Router();
 
@@ -19,7 +19,7 @@ export const MeasurementRouter = (db: ICbDatabase) => {
    ** Get all measurements
    */
   measurementRouter.get(
-    '/',
+    "/",
     catchErrors(async (req: Request, res: Response) => {
       const [qualitative, quantitative] = await Promise.all([
         db.getAllQualMeasurements(),
@@ -86,7 +86,10 @@ export const MeasurementRouter = (db: ICbDatabase) => {
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const updateBody = QualitativeUpdateSchema.parse(req.body);
-        const measurement = await db.updateQualMeasurement(req.params.id, updateBody);
+        const measurement = await db.updateQualMeasurement(
+          req.params.id,
+          updateBody
+        );
         res.status(201).json(measurement);
       })
     );
@@ -117,7 +120,10 @@ export const MeasurementRouter = (db: ICbDatabase) => {
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const updateBody = QuantitativeUpdateSchema.parse(req.body);
-        const measurement = await db.updateQuantMeasurement(req.params.id, updateBody);
+        const measurement = await db.updateQuantMeasurement(
+          req.params.id,
+          updateBody
+        );
         res.status(201).json(measurement);
       })
     );

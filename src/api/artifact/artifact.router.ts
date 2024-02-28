@@ -1,10 +1,13 @@
-import express, { NextFunction } from 'express';
-import type { Request, Response } from 'express';
-import { catchErrors } from '../../utils/middleware';
-import { ArtifactCreateBodySchema, ArtifactUpdateBodySchema } from './artifact.utils';
-import { uuidParamsSchema } from '../../utils/zod_helpers';
-import { ICbDatabase } from '../../utils/database';
-import { upload } from '../../utils/object_store';
+import express, { NextFunction } from "express";
+import type { Request, Response } from "express";
+import { catchErrors } from "../../utils/middleware";
+import {
+  ArtifactCreateBodySchema,
+  ArtifactUpdateBodySchema
+} from "./artifact.utils";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
+import { ICbDatabase } from "../../utils/database";
+import { upload } from "../../utils/object_store";
 
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
@@ -13,7 +16,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
    ** Artifact Router Home
    */
   artifactRouter.get(
-    '/',
+    "/",
     catchErrors(async (req: Request, res: Response) => {
       const artifacts = await db.getAllArtifacts();
       return res.status(200).json(artifacts);
@@ -24,11 +27,11 @@ export const ArtifactRouter = (db: ICbDatabase) => {
    ** Create new artifact
    */
   artifactRouter.post(
-    '/create',
-    upload.single('artifact'), // 'artifact' should match the 'name' attribute in your form input
+    "/create",
+    upload.single("artifact"), // 'artifact' should match the 'name' attribute in your form input
     catchErrors(async (req: Request, res: Response) => {
       if (!req.file) {
-        return res.status(400).send('No file uploaded');
+        return res.status(400).send("No file uploaded");
       }
       const artifactData = ArtifactCreateBodySchema.parse(req.body);
       const newArtifact = await db.createArtifact(artifactData, req.file);
@@ -39,7 +42,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
   /**
    ** Get artifacts with a critter_id
    */
-  artifactRouter.route('/critter/:id').get(
+  artifactRouter.route("/critter/:id").get(
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
@@ -53,7 +56,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
    ** All artifact_id related routes
    */
   artifactRouter
-    .route('/:id')
+    .route("/:id")
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         // validate uuid
@@ -69,7 +72,9 @@ export const ArtifactRouter = (db: ICbDatabase) => {
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
-        const artifactData = await ArtifactUpdateBodySchema.parseAsync(req.body);
+        const artifactData = await ArtifactUpdateBodySchema.parseAsync(
+          req.body
+        );
         const artifact = await db.updateArtifact(req.params.id, artifactData);
         return res.status(200).json(artifact);
       })

@@ -1,7 +1,16 @@
-import { prisma } from '../../utils/constants';
-import { PrismaTransactionClient, ReqBody } from '../../utils/types';
-import { getBodyLocationByNameAndTsn, getColourByName, getMarkingTypeByName } from '../lookup/lookup.service';
-import { MarkingCreateInput, MarkingIncludes, MarkingUpdateInput, markingIncludes } from './marking.utils';
+import { prisma } from "../../utils/constants";
+import { PrismaTransactionClient, ReqBody } from "../../utils/types";
+import {
+  getBodyLocationByNameAndTsn,
+  getColourByName,
+  getMarkingTypeByName
+} from "../lookup/lookup.service";
+import {
+  MarkingCreateInput,
+  MarkingIncludes,
+  MarkingUpdateInput,
+  markingIncludes
+} from "./marking.utils";
 
 /**
  * * Returns all existing markings from the database
@@ -32,7 +41,9 @@ const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
  * * Gets all markings that reference a critter_id
  * @param {string} critter_id
  */
-const getMarkingsByCritterId = async (critter_id: string): Promise<MarkingIncludes[]> => {
+const getMarkingsByCritterId = async (
+  critter_id: string
+): Promise<MarkingIncludes[]> => {
   const markings: MarkingIncludes[] = await prisma.marking.findMany({
     where: {
       critter_id: critter_id
@@ -47,7 +58,10 @@ const getMarkingsByCritterId = async (critter_id: string): Promise<MarkingInclud
  * @param {string} marking_id
  * @param {MarkingUpdateInput} marking_data
  */
-const updateMarking = async (marking_id: string, marking_data: MarkingUpdateInput): Promise<MarkingIncludes> => {
+const updateMarking = async (
+  marking_id: string,
+  marking_data: MarkingUpdateInput
+): Promise<MarkingIncludes> => {
   const marking: MarkingIncludes = await prisma.marking.update({
     where: {
       marking_id: marking_id

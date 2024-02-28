@@ -1,7 +1,13 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
-import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex } from '@prisma/client';
-import { routes } from '../../utils/constants';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { z } from "zod";
+import {
+  cod_confidence,
+  coordinate_uncertainty_unit,
+  frequency_unit,
+  measurement_unit,
+  sex
+} from "@prisma/client";
+import { routes } from "../../utils/constants";
 import {
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -12,30 +18,35 @@ import {
   LookupRegionNrSchema,
   LookupWmuSchema,
   zodID
-} from '../../utils/zod_helpers';
-import { SwagErr, SwagServerError, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { eCritterStatus } from '../../schemas/critter-schema';
+} from "../../utils/zod_helpers";
+import {
+  SwagErr,
+  SwagServerError,
+  SwagUnauthorized
+} from "../../utils/swagger_helpers";
+import { eCritterStatus } from "../../schemas/critter-schema";
 
-const availValues = 'Available values for this enumerated type.';
-const availRows = 'Available rows for this type of data as specified in a lookup table.';
-const TAG = 'Lookup';
+const availValues = "Available values for this enumerated type.";
+const availRows =
+  "Available rows for this type of data as specified in a lookup table.";
+const TAG = "Lookup";
 const lookupCommon = {
   requestParams: {
-    query: z.object({ format: z.enum(['asSelect']).optional() })
+    query: z.object({ format: z.enum(["asSelect"]).optional() })
   },
   tags: [TAG]
 };
 const enumSex: ZodOpenApiOperationObject = {
-  operationId: 'enumSex',
+  operationId: "enumSex",
   requestParams: {
-    query: z.object({ format: z.enum(['asSelect']).optional() })
+    query: z.object({ format: z.enum(["asSelect"]).optional() })
   },
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: availValues,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z
             .string()
             .array()
@@ -48,13 +59,13 @@ const enumSex: ZodOpenApiOperationObject = {
 };
 
 const enumCritterStatus: ZodOpenApiOperationObject = {
-  operationId: 'enumCritterStatus',
+  operationId: "enumCritterStatus",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: availValues,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z
             .string()
             .array()
@@ -67,13 +78,13 @@ const enumCritterStatus: ZodOpenApiOperationObject = {
 };
 
 const enumCodConfidence: ZodOpenApiOperationObject = {
-  operationId: 'enumCodConf',
+  operationId: "enumCodConf",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: availValues,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z
             .string()
             .array()
@@ -86,13 +97,13 @@ const enumCodConfidence: ZodOpenApiOperationObject = {
 };
 
 const enumCoordinateUncertainty: ZodOpenApiOperationObject = {
-  operationId: 'enumCoordUncertain',
+  operationId: "enumCoordUncertain",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: availValues,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z
             .string()
             .array()
@@ -105,13 +116,13 @@ const enumCoordinateUncertainty: ZodOpenApiOperationObject = {
 };
 
 const enumFrequencyUnits: ZodOpenApiOperationObject = {
-  operationId: 'enumFreqUnits',
+  operationId: "enumFreqUnits",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: availValues,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z
             .string()
             .array()
@@ -124,13 +135,13 @@ const enumFrequencyUnits: ZodOpenApiOperationObject = {
 };
 
 const enumMeasurementUnit: ZodOpenApiOperationObject = {
-  operationId: 'enumMeasurementUnit',
+  operationId: "enumMeasurementUnit",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: availValues,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z
             .string()
             .array()
@@ -153,17 +164,17 @@ const asSelectSchemaWithChildren = asSelectSchema.extend({
 });
 
 const lookupColours: ZodOpenApiOperationObject = {
-  operationId: 'lookupColours',
+  operationId: "lookupColours",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/colourDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/colourDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -175,17 +186,17 @@ const lookupColours: ZodOpenApiOperationObject = {
 };
 
 const lookupRegionEnvs: ZodOpenApiOperationObject = {
-  operationId: 'lookupRegionEnv',
+  operationId: "lookupRegionEnv",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/regionEnvDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/regionEnvDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -197,17 +208,17 @@ const lookupRegionEnvs: ZodOpenApiOperationObject = {
 };
 
 const lookupRegionNRs: ZodOpenApiOperationObject = {
-  operationId: 'lookupRegionNr',
+  operationId: "lookupRegionNr",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/regionNrDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/regionNrDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -219,15 +230,18 @@ const lookupRegionNRs: ZodOpenApiOperationObject = {
 };
 
 const lookupWMUs: ZodOpenApiOperationObject = {
-  operationId: 'lookupWmus',
+  operationId: "lookupWmus",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
-            oneOf: [{ $ref: '#/components/schemas/wmuDefaultSchema' }, { $ref: '#/components/schemas/asSelectSchema' }]
+            oneOf: [
+              { $ref: "#/components/schemas/wmuDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
+            ]
           }
         }
       }
@@ -238,15 +252,18 @@ const lookupWMUs: ZodOpenApiOperationObject = {
 };
 
 const lookupCods: ZodOpenApiOperationObject = {
-  operationId: 'lookupCods',
+  operationId: "lookupCods",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
-            oneOf: [{ $ref: '#/components/schemas/codDefaultSchema' }, { $ref: '#/components/schemas/asSelectSchema' }]
+            oneOf: [
+              { $ref: "#/components/schemas/codDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
+            ]
           }
         }
       }
@@ -257,17 +274,17 @@ const lookupCods: ZodOpenApiOperationObject = {
 };
 
 const lookupMarkingMaterials: ZodOpenApiOperationObject = {
-  operationId: 'lookupMarkingMaterials',
+  operationId: "lookupMarkingMaterials",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/markingMaterialDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/markingMaterialDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -279,17 +296,17 @@ const lookupMarkingMaterials: ZodOpenApiOperationObject = {
 };
 
 const lookupMarkingTypes: ZodOpenApiOperationObject = {
-  operationId: 'lookupMarkingTypes',
+  operationId: "lookupMarkingTypes",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/markingTypeDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/markingTypeDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }
@@ -301,17 +318,17 @@ const lookupMarkingTypes: ZodOpenApiOperationObject = {
 };
 
 const lookupCollectionUnitCategories: ZodOpenApiOperationObject = {
-  operationId: 'lookupCollectionUnitCategories',
+  operationId: "lookupCollectionUnitCategories",
   ...lookupCommon,
   responses: {
-    '200': {
+    "200": {
       description: availRows,
       content: {
-        'application/json': {
+        "application/json": {
           schema: {
             oneOf: [
-              { $ref: '#/components/schemas/collectionCategoryDefaultSchema' },
-              { $ref: '#/components/schemas/asSelectSchema' }
+              { $ref: "#/components/schemas/collectionCategoryDefaultSchema" },
+              { $ref: "#/components/schemas/asSelectSchema" }
             ]
           }
         }

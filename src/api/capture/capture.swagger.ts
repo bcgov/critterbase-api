@@ -1,8 +1,12 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { CaptureCreateSchema, CaptureIncludeSchema, CaptureUpdateSchema } from './capture.utils';
-import { CommonLocationValidation } from '../location/location.utils';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { z } from "zod";
+import { zodID } from "../../utils/zod_helpers";
+import {
+  CaptureCreateSchema,
+  CaptureIncludeSchema,
+  CaptureUpdateSchema
+} from "./capture.utils";
+import { CommonLocationValidation } from "../location/location.utils";
 
 export const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
   location_capture_capture_location_idTolocation: true,
@@ -11,20 +15,25 @@ export const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
   capture_location: CommonLocationValidation.nullable(),
   release_location: CommonLocationValidation.nullable()
 });
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { routes } from '../../utils/constants';
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized
+} from "../../utils/swagger_helpers";
+import { routes } from "../../utils/constants";
 
-const TAG = 'Capture';
+const TAG = "Capture";
 
 const getCaptures: ZodOpenApiOperationObject = {
-  operationId: 'getCaptures',
-  summary: 'Gets all capture events',
+  operationId: "getCaptures",
+  summary: "Gets all capture events",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z.array(SwaggerCaptureResponseValidation)
         }
       }
@@ -35,22 +44,22 @@ const getCaptures: ZodOpenApiOperationObject = {
 };
 
 const createCapture: ZodOpenApiOperationObject = {
-  operationId: 'createCapture',
+  operationId: "createCapture",
   summary:
-    'Creates a new capture event. Note that it is possible to nest location creation data here, which will automatically create and link location rows to this capture.',
+    "Creates a new capture event. Note that it is possible to nest location creation data here, which will automatically create and link location rows to this capture.",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: CaptureCreateSchema
       }
     }
   },
   responses: {
-    '201': {
+    "201": {
       description: SwagDesc.create,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerCaptureResponseValidation
         }
       }
@@ -62,17 +71,17 @@ const createCapture: ZodOpenApiOperationObject = {
 };
 
 const getCaptureByCritterId: ZodOpenApiOperationObject = {
-  operationId: 'getCaptureByCritterId',
-  summary: 'Gets all captures with a specific critter id',
+  operationId: "getCaptureByCritterId",
+  summary: "Gets all captures with a specific critter id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z.array(SwaggerCaptureResponseValidation)
         }
       }
@@ -84,17 +93,17 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
 };
 
 const getCaptureById: ZodOpenApiOperationObject = {
-  operationId: 'getCaptureById',
-  summary: 'Gets a specifc capture event by its id',
+  operationId: "getCaptureById",
+  summary: "Gets a specifc capture event by its id",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerCaptureResponseValidation
         }
       }
@@ -106,7 +115,7 @@ const getCaptureById: ZodOpenApiOperationObject = {
 };
 
 const updateCapture: ZodOpenApiOperationObject = {
-  operationId: 'updateCapture',
+  operationId: "updateCapture",
   summary: `Updates a specific capture event. 
   Note that it is possible to nest capture data, which will update the associated location data, or create new data if none is present.
   You can also force the creation of release data, useful in the case where capture event currently uses the same location record for both capture and release, but you wish to separate them.`,
@@ -116,16 +125,16 @@ const updateCapture: ZodOpenApiOperationObject = {
   },
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: CaptureUpdateSchema
       }
     }
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerCaptureResponseValidation
         }
       }
@@ -137,17 +146,17 @@ const updateCapture: ZodOpenApiOperationObject = {
 };
 
 const deleteCapture: ZodOpenApiOperationObject = {
-  operationId: 'deleteCapture',
-  summary: 'Delete a specific capture event',
+  operationId: "deleteCapture",
+  summary: "Delete a specific capture event",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.delete,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerCaptureResponseValidation
         }
       }

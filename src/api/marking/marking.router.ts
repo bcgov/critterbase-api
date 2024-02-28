@@ -1,17 +1,17 @@
-import type { Request, Response } from 'express';
-import express, { NextFunction } from 'express';
-import { array } from 'zod';
-import { prisma } from '../../utils/constants';
-import { catchErrors } from '../../utils/middleware';
-import { uuidParamsSchema } from '../../utils/zod_helpers';
+import type { Request, Response } from "express";
+import express, { NextFunction } from "express";
+import { array } from "zod";
+import { prisma } from "../../utils/constants";
+import { catchErrors } from "../../utils/middleware";
+import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
   MarkingCreateBodySchema,
   MarkingUpdateBodySchema,
   MarkingVerificationSchema,
   MarkingVerificationType,
   markingResponseSchema
-} from './marking.utils';
-import { ICbDatabase } from '../../utils/database';
+} from "./marking.utils";
+import { ICbDatabase } from "../../utils/database";
 
 export const MarkingRouter = (db: ICbDatabase) => {
   const markingRouter = express.Router();
@@ -20,7 +20,7 @@ export const MarkingRouter = (db: ICbDatabase) => {
    ** Marking Router Home
    */
   markingRouter.get(
-    '/',
+    "/",
     catchErrors(async (req: Request, res: Response) => {
       const markings = await db.getAllMarkings();
       const formattedMarkings = array(markingResponseSchema).parse(markings);
@@ -32,15 +32,17 @@ export const MarkingRouter = (db: ICbDatabase) => {
    ** Create new marking
    */
   markingRouter.post(
-    '/create',
+    "/create",
     catchErrors(async (req: Request, res: Response) => {
       const markingData = await MarkingCreateBodySchema.parseAsync(req.body);
-      const newMarking = markingResponseSchema.parse(await db.createMarking(markingData));
+      const newMarking = markingResponseSchema.parse(
+        await db.createMarking(markingData)
+      );
       return res.status(201).json(newMarking);
     })
   );
 
-  markingRouter.route('/critter/:id').get(
+  markingRouter.route("/critter/:id").get(
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
@@ -54,10 +56,13 @@ export const MarkingRouter = (db: ICbDatabase) => {
   );
 
   markingRouter.post(
-    '/verify',
+    "/verify",
     catchErrors(async (req: Request, res: Response) => {
-      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(req.body);
-      const response = await db.markingService.verifyMarkingsCanBeAssignedToTsn(parsed);
+      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(
+        req.body
+      );
+      const response =
+        await db.markingService.verifyMarkingsCanBeAssignedToTsn(parsed);
 
       return res.status(200).json(response);
     })
@@ -67,7 +72,7 @@ export const MarkingRouter = (db: ICbDatabase) => {
    ** All marking_id related routes
    */
   markingRouter
-    .route('/:id')
+    .route("/:id")
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         // validate uuid
@@ -85,7 +90,9 @@ export const MarkingRouter = (db: ICbDatabase) => {
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const markingData = await MarkingUpdateBodySchema.parseAsync(req.body);
-        const updatedMarking = markingResponseSchema.parse(await db.updateMarking(req.params.id, markingData));
+        const updatedMarking = markingResponseSchema.parse(
+          await db.updateMarking(req.params.id, markingData)
+        );
         return res.status(200).json(updatedMarking);
       })
     )

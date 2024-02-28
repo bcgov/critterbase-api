@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { routes } from '../../utils/constants';
-import { SwagDesc, SwagErr, SwagNotFound } from '../../utils/swagger_helpers';
-import { zodID } from '../../utils/zod_helpers';
+import { z } from "zod";
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { routes } from "../../utils/constants";
+import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
+import { zodID } from "../../utils/zod_helpers";
 import {
   MeasurementQualitativeIncludeSchema,
   MeasurementQuantitativeIncludeSchema,
@@ -11,9 +11,9 @@ import {
   QuantitativeCreateSchema,
   QuantitativeSchema,
   QuantitativeUpdateSchema
-} from './measurement.utils';
+} from "./measurement.utils";
 
-const TAG = 'Measurement';
+const TAG = "Measurement";
 const reqIdParam = {
   requestParams: {
     path: z.object({ id: zodID })
@@ -32,14 +32,14 @@ const QuantitativeResponseSchema = QuantitativeSchema.extend({
 
 //ALl Measurements
 const GetAllMeasurements: ZodOpenApiOperationObject = {
-  operationId: 'getAllMeasurements',
-  summary: 'Gets all Measurements, both Qualitative and Quantitative',
+  operationId: "getAllMeasurements",
+  summary: "Gets all Measurements, both Qualitative and Quantitative",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: z.object({
             measurements: z.object({
               qualitative: QualitativeSchema.array(),
@@ -54,15 +54,15 @@ const GetAllMeasurements: ZodOpenApiOperationObject = {
 };
 
 const GetQualMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'getQualMeasurementById',
-  summary: 'Get Qualitative Measurement by measurement id.',
+  operationId: "getQualMeasurementById",
+  summary: "Get Qualitative Measurement by measurement id.",
   tags: [TAG],
   ...reqIdParam,
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QualitativeResponseSchema
         }
       }
@@ -73,15 +73,15 @@ const GetQualMeasurement: ZodOpenApiOperationObject = {
 };
 
 const DeleteQualMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'getQualMeasurementById',
-  summary: 'Delete Qualitative Measurement by measurement id.',
+  operationId: "getQualMeasurementById",
+  summary: "Delete Qualitative Measurement by measurement id.",
   tags: [TAG],
   ...reqIdParam,
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.delete,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QualitativeSchema
         }
       }
@@ -92,22 +92,22 @@ const DeleteQualMeasurement: ZodOpenApiOperationObject = {
 };
 
 const UpdateQualMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'updateQualMeasurementById',
-  summary: 'Update Qualitative Measurement by measurement id.',
+  operationId: "updateQualMeasurementById",
+  summary: "Update Qualitative Measurement by measurement id.",
   tags: [TAG],
   ...reqIdParam,
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: QualitativeCreateSchema
       }
     }
   },
   responses: {
-    '201': {
+    "201": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QualitativeSchema
         }
       }
@@ -118,15 +118,15 @@ const UpdateQualMeasurement: ZodOpenApiOperationObject = {
 };
 
 const GetQuantMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'getQuantMeasurementById',
-  summary: 'Get Quantitative Measurement by measurement id.',
+  operationId: "getQuantMeasurementById",
+  summary: "Get Quantitative Measurement by measurement id.",
   tags: [TAG],
   ...reqIdParam,
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QuantitativeResponseSchema
         }
       }
@@ -137,15 +137,15 @@ const GetQuantMeasurement: ZodOpenApiOperationObject = {
 };
 
 const DeleteQuantMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'getQuantMeasurementById',
-  summary: 'Delete Quantitative Measurement by measurement id.',
+  operationId: "getQuantMeasurementById",
+  summary: "Delete Quantitative Measurement by measurement id.",
   tags: [TAG],
   ...reqIdParam,
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.delete,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QuantitativeSchema
         }
       }
@@ -156,22 +156,22 @@ const DeleteQuantMeasurement: ZodOpenApiOperationObject = {
 };
 
 const UpdateQuantMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'updateQuantMeasurementById',
-  summary: 'Update Quantitative Measurement by measurement id.',
+  operationId: "updateQuantMeasurementById",
+  summary: "Update Quantitative Measurement by measurement id.",
   tags: [TAG],
   ...reqIdParam,
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: QuantitativeUpdateSchema
       }
     }
   },
   responses: {
-    '201': {
+    "201": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QuantitativeSchema
         }
       }
@@ -182,21 +182,21 @@ const UpdateQuantMeasurement: ZodOpenApiOperationObject = {
 };
 
 const CreateQuantMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'createQuantMeasurementById',
-  summary: 'Create Quantitative Measurement',
+  operationId: "createQuantMeasurementById",
+  summary: "Create Quantitative Measurement",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: QuantitativeCreateSchema
       }
     }
   },
   responses: {
-    '201': {
+    "201": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QuantitativeSchema
         }
       }
@@ -207,21 +207,21 @@ const CreateQuantMeasurement: ZodOpenApiOperationObject = {
 };
 
 const CreateQualMeasurement: ZodOpenApiOperationObject = {
-  operationId: 'createQualMeasurementById',
-  summary: 'Create Qualitative Measurement',
+  operationId: "createQualMeasurementById",
+  summary: "Create Qualitative Measurement",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: QualitativeCreateSchema
       }
     }
   },
   responses: {
-    '201': {
+    "201": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: QualitativeSchema
         }
       }
@@ -255,17 +255,19 @@ export const measurementPaths = {
   }
 };
 
-export const SwaggerQualitativeResponseValidationSchema = MeasurementQualitativeIncludeSchema.omit({
-  xref_taxon_measurement_qualitative: true,
-  xref_taxon_measurement_qualitative_option: true
-}).extend({
-  measurement_name: z.string().nullable(),
-  option_label: z.string().nullable(),
-  option_value: z.number().nullable()
-});
+export const SwaggerQualitativeResponseValidationSchema =
+  MeasurementQualitativeIncludeSchema.omit({
+    xref_taxon_measurement_qualitative: true,
+    xref_taxon_measurement_qualitative_option: true
+  }).extend({
+    measurement_name: z.string().nullable(),
+    option_label: z.string().nullable(),
+    option_value: z.number().nullable()
+  });
 
-export const SwaggerQuantitativeResponseValidationSchema = MeasurementQuantitativeIncludeSchema.omit({
-  xref_taxon_measurement_quantitative: true
-}).extend({
-  measurement_name: z.string().nullable()
-});
+export const SwaggerQuantitativeResponseValidationSchema =
+  MeasurementQuantitativeIncludeSchema.omit({
+    xref_taxon_measurement_quantitative: true
+  }).extend({
+    measurement_name: z.string().nullable()
+  });

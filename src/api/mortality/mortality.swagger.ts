@@ -1,35 +1,55 @@
-import { z } from 'zod';
-import { CommonLocationValidation } from '../location/location.utils';
-import { MortalityCreateSchema, MortalityIncludeSchema, MortalityUpdateSchema } from './mortality.utils';
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { zodID } from '../../utils/zod_helpers';
-import { routes } from '../../utils/constants';
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { z } from "zod";
+import { CommonLocationValidation } from "../location/location.utils";
+import {
+  MortalityCreateSchema,
+  MortalityIncludeSchema,
+  MortalityUpdateSchema
+} from "./mortality.utils";
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import { zodID } from "../../utils/zod_helpers";
+import { routes } from "../../utils/constants";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized
+} from "../../utils/swagger_helpers";
 
 export const SwaggerMortalityResponseValidation = MortalityIncludeSchema.omit({
-  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: true,
-  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: true,
+  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death:
+    true,
+  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death:
+    true,
   lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: true,
   lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: true
 }).extend({
   location: CommonLocationValidation.nullable(),
-  proximate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string().nullable() }),
-  ultimate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string().nullable() }).nullable(),
-  proximate_cause_of_death_taxon: z.object({ taxon_id: z.string(), taxon_name_latin: z.string() }).nullable(),
-  ultimate_cause_of_death_taxon: z.object({ taxon_id: z.string(), taxon_name_latin: z.string() }).nullable()
+  proximate_cause_of_death: z.object({
+    cod_category: z.string(),
+    cod_reason: z.string().nullable()
+  }),
+  ultimate_cause_of_death: z
+    .object({ cod_category: z.string(), cod_reason: z.string().nullable() })
+    .nullable(),
+  proximate_cause_of_death_taxon: z
+    .object({ taxon_id: z.string(), taxon_name_latin: z.string() })
+    .nullable(),
+  ultimate_cause_of_death_taxon: z
+    .object({ taxon_id: z.string(), taxon_name_latin: z.string() })
+    .nullable()
 });
 
-const TAG = 'Mortalities';
+const TAG = "Mortalities";
 
 const getAllMortalities: ZodOpenApiOperationObject = {
-  operationId: 'getAllMortalities',
-  summary: 'Get all mortalities available in the DB.',
+  operationId: "getAllMortalities",
+  summary: "Get all mortalities available in the DB.",
   tags: [TAG],
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerMortalityResponseValidation.array()
         }
       }
@@ -40,22 +60,22 @@ const getAllMortalities: ZodOpenApiOperationObject = {
 };
 
 const createMortality: ZodOpenApiOperationObject = {
-  operationId: 'createMortality',
+  operationId: "createMortality",
   summary:
-    'Create a new mortality. Note that you may also nest location data, which will automatically create and link a location row.',
+    "Create a new mortality. Note that you may also nest location data, which will automatically create and link a location row.",
   tags: [TAG],
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: MortalityCreateSchema
       }
     }
   },
   responses: {
-    '201': {
+    "201": {
       description: SwagDesc.create,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerMortalityResponseValidation
         }
       }
@@ -67,17 +87,18 @@ const createMortality: ZodOpenApiOperationObject = {
 };
 
 const getMortalityByCritter: ZodOpenApiOperationObject = {
-  operationId: 'getMortalityByCritter',
-  summary: 'Get all mortalities associated with the provided critter id.',
+  operationId: "getMortalityByCritter",
+  summary: "Get all mortalities associated with the provided critter id.",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
-      description: 'Retrieved all mortalities for this critter. Should only be one in most cases.',
+    "200": {
+      description:
+        "Retrieved all mortalities for this critter. Should only be one in most cases.",
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerMortalityResponseValidation.array()
         }
       }
@@ -89,17 +110,17 @@ const getMortalityByCritter: ZodOpenApiOperationObject = {
 };
 
 const getMortalityById: ZodOpenApiOperationObject = {
-  operationId: 'getMortalityById',
-  summary: 'Get a mortality by ID.',
+  operationId: "getMortalityById",
+  summary: "Get a mortality by ID.",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.get,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerMortalityResponseValidation
         }
       }
@@ -111,25 +132,25 @@ const getMortalityById: ZodOpenApiOperationObject = {
 };
 
 const updateMortality: ZodOpenApiOperationObject = {
-  operationId: 'updateMortality',
+  operationId: "updateMortality",
   summary:
-    'Update a mortality by ID. Note that you may also nest location data, which will update an existing associated location row, or create one if it does not exist.',
+    "Update a mortality by ID. Note that you may also nest location data, which will update an existing associated location row, or create one if it does not exist.",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   requestBody: {
     content: {
-      'application/json': {
+      "application/json": {
         schema: MortalityUpdateSchema
       }
     }
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.update,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerMortalityResponseValidation
         }
       }
@@ -141,17 +162,17 @@ const updateMortality: ZodOpenApiOperationObject = {
 };
 
 const deleteMortality: ZodOpenApiOperationObject = {
-  operationId: 'deleteMortality',
-  summary: 'Delete a mortality by ID.',
+  operationId: "deleteMortality",
+  summary: "Delete a mortality by ID.",
   tags: [TAG],
   requestParams: {
     path: z.object({ id: zodID })
   },
   responses: {
-    '200': {
+    "200": {
       description: SwagDesc.delete,
       content: {
-        'application/json': {
+        "application/json": {
           schema: SwaggerMortalityResponseValidation
         }
       }

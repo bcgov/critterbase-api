@@ -1,15 +1,25 @@
-import { prisma } from '../../utils/constants';
-import { artifact } from '@prisma/client';
-import { ArtifactCreate, ArtifactResponse, ArtifactUpdate } from './artifact.utils';
-import { randomUUID } from 'crypto';
-import { Metadata, getFileDownloadUrl, uploadFileToS3 } from '../../utils/object_store';
+import { prisma } from "../../utils/constants";
+import { artifact } from "@prisma/client";
+import {
+  ArtifactCreate,
+  ArtifactResponse,
+  ArtifactUpdate
+} from "./artifact.utils";
+import { randomUUID } from "crypto";
+import {
+  Metadata,
+  getFileDownloadUrl,
+  uploadFileToS3
+} from "../../utils/object_store";
 
 /**
  * * Gets an artifact by the artifact_id
  * * Returns null if non-existent
  * @param {string} artifact_id
  */
-const getArtifactById = async (artifact_id: string): Promise<ArtifactResponse> => {
+const getArtifactById = async (
+  artifact_id: string
+): Promise<ArtifactResponse> => {
   const artifact = await prisma.artifact.findUniqueOrThrow({
     where: {
       artifact_id: artifact_id
@@ -22,7 +32,9 @@ const getArtifactById = async (artifact_id: string): Promise<ArtifactResponse> =
  * * Gets an array of artifacts by the critter_id
  * @param {string} critter_id
  */
-const getArtifactsByCritterId = async (critter_id: string): Promise<ArtifactResponse[]> => {
+const getArtifactsByCritterId = async (
+  critter_id: string
+): Promise<ArtifactResponse[]> => {
   const artifacts = await prisma.artifact.findMany({
     where: {
       critter_id: critter_id
@@ -44,7 +56,10 @@ const getAllArtifacts = async (): Promise<ArtifactResponse[]> => {
  * @param {string} artifact_id
  * @param {ArtifactUpdate} artifact_data
  */
-const updateArtifact = async (artifact_id: string, artifact_data: ArtifactUpdate): Promise<ArtifactResponse> => {
+const updateArtifact = async (
+  artifact_id: string,
+  artifact_data: ArtifactUpdate
+): Promise<ArtifactResponse> => {
   const artifact = await prisma.artifact.update({
     where: {
       artifact_id: artifact_id
@@ -62,7 +77,10 @@ const updateArtifact = async (artifact_id: string, artifact_data: ArtifactUpdate
  * * Because the files are stored in the root of the bucket, the artifact_url is simply the file name
  * @param {ArtifactCreate} artifact_data
  */
-const createArtifact = async (artifact_data: ArtifactCreate, file: Express.Multer.File): Promise<ArtifactResponse> => {
+const createArtifact = async (
+  artifact_data: ArtifactCreate,
+  file: Express.Multer.File
+): Promise<ArtifactResponse> => {
   const metadata: Metadata = {
     filename: file.originalname
   };
@@ -91,7 +109,9 @@ const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
  * * Adds a signed URL to an artifact
  * @param {artifact} artifact
  */
-const addSignedUrlToArtifact = async (artifact: artifact): Promise<ArtifactResponse> => {
+const addSignedUrlToArtifact = async (
+  artifact: artifact
+): Promise<ArtifactResponse> => {
   const signed_url = await getFileDownloadUrl(artifact.artifact_url);
   return { ...artifact, signed_url };
 };
@@ -100,7 +120,16 @@ const addSignedUrlToArtifact = async (artifact: artifact): Promise<ArtifactRespo
  * * Maps over an array of artifacts and adds a signed URL to each one
  * @param {artifact[]} artifacts
  */
-const addSignedUrlToArtifacts = async (artifacts: artifact[]): Promise<ArtifactResponse[]> =>
+const addSignedUrlToArtifacts = async (
+  artifacts: artifact[]
+): Promise<ArtifactResponse[]> =>
   Promise.all(artifacts.map(addSignedUrlToArtifact));
 
-export { getArtifactById, getArtifactsByCritterId, getAllArtifacts, updateArtifact, createArtifact, deleteArtifact };
+export {
+  getArtifactById,
+  getArtifactsByCritterId,
+  getAllArtifacts,
+  updateArtifact,
+  createArtifact,
+  deleteArtifact
+};

@@ -1,15 +1,21 @@
-import { capture, Prisma } from '@prisma/client';
+import { capture, Prisma } from "@prisma/client";
 import {
   CommonFormattedLocationSchema,
   commonLocationSelect,
   LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema
-} from '../location/location.utils';
-import { z } from 'zod';
-import { DeleteSchema, implement, noAudit, ResponseSchema, zodID } from '../../utils/zod_helpers';
-import { AuditColumns } from '../../utils/types';
-import { CommonLocationSchema } from '../location/location.utils';
+} from "../location/location.utils";
+import { z } from "zod";
+import {
+  DeleteSchema,
+  implement,
+  noAudit,
+  ResponseSchema,
+  zodID
+} from "../../utils/zod_helpers";
+import { AuditColumns } from "../../utils/types";
+import { CommonLocationSchema } from "../location/location.utils";
 
 const CaptureBodySchema = implement<capture>().with({
   capture_id: zodID,
@@ -41,8 +47,10 @@ type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
 
 const CaptureIncludeSchema = implement<CaptureIncludeType>().with({
   ...CaptureBodySchema.shape,
-  location_capture_capture_location_idTolocation: CommonLocationSchema.nullable(),
-  location_capture_release_location_idTolocation: CommonLocationSchema.nullable()
+  location_capture_capture_location_idTolocation:
+    CommonLocationSchema.nullable(),
+  location_capture_release_location_idTolocation:
+    CommonLocationSchema.nullable()
 });
 
 const CaptureUpdateSchema = implement<
@@ -96,16 +104,27 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
   } = val as CaptureIncludeType;
   return {
     ...rest,
-    capture_location: c_location ? CommonFormattedLocationSchema.parse(c_location) : null,
-    release_location: r_location ? CommonFormattedLocationSchema.parse(r_location) : null
+    capture_location: c_location
+      ? CommonFormattedLocationSchema.parse(c_location)
+      : null,
+    release_location: r_location
+      ? CommonFormattedLocationSchema.parse(r_location)
+      : null
   };
 });
 
-const CaptureDeleteSchema = CaptureBodySchema.pick({ capture_id: true }).extend(DeleteSchema.shape);
+const CaptureDeleteSchema = CaptureBodySchema.pick({ capture_id: true }).extend(
+  DeleteSchema.shape
+);
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
-export type { CaptureIncludeType, FormattedCapture, CaptureCreate, CaptureUpdate };
+export type {
+  CaptureIncludeType,
+  FormattedCapture,
+  CaptureCreate,
+  CaptureUpdate
+};
 export {
   captureInclude,
   CaptureCreateSchema,

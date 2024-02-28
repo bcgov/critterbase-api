@@ -1,7 +1,7 @@
-import { capture } from '@prisma/client';
-import { prisma } from '../../utils/constants';
-import { CaptureCreate, captureInclude, CaptureUpdate } from './capture.utils';
-import { PrismaTransactionClient } from '../../utils/types';
+import { capture } from "@prisma/client";
+import { prisma } from "../../utils/constants";
+import { CaptureCreate, captureInclude, CaptureUpdate } from "./capture.utils";
+import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllCaptures = async (): Promise<capture[]> => {
   return await prisma.capture.findMany({
@@ -37,8 +37,14 @@ const getCaptureByCritter = async (critter_id: string): Promise<capture[]> => {
 };
 
 const createCapture = async (capture_data: CaptureCreate) => {
-  const { critter_id, capture_location_id, release_location_id, capture_location, release_location, ...rest } =
-    capture_data;
+  const {
+    critter_id,
+    capture_location_id,
+    release_location_id,
+    capture_location,
+    release_location,
+    ...rest
+  } = capture_data;
 
   return await prisma.capture.create({
     data: {
@@ -113,7 +119,10 @@ const updateCapture = async (
   });
 };
 
-const deleteCapture = async (capture_id: string, prismaOverride?: PrismaTransactionClient): Promise<capture | null> => {
+const deleteCapture = async (
+  capture_id: string,
+  prismaOverride?: PrismaTransactionClient
+): Promise<capture | null> => {
   const client = prismaOverride ?? prisma;
   const capture = await client.capture.findUniqueOrThrow({
     where: {
@@ -130,7 +139,10 @@ const deleteCapture = async (capture_id: string, prismaOverride?: PrismaTransact
       where: { location_id: capture.capture_location_id }
     });
   }
-  if (capture.release_location_id && capture.capture_location_id !== capture.release_location_id) {
+  if (
+    capture.release_location_id &&
+    capture.capture_location_id !== capture.release_location_id
+  ) {
     //If using same location the row is already deleted by the above call.
     await client.location.delete({
       where: { location_id: capture.release_location_id }
@@ -139,4 +151,11 @@ const deleteCapture = async (capture_id: string, prismaOverride?: PrismaTransact
   return captureRes;
 };
 
-export { getAllCaptures, getCaptureById, getCaptureByCritter, updateCapture, createCapture, deleteCapture };
+export {
+  getAllCaptures,
+  getCaptureById,
+  getCaptureByCritter,
+  updateCapture,
+  createCapture,
+  deleteCapture
+};

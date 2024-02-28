@@ -1,5 +1,5 @@
-import { apiError } from '../utils/types';
-import { Repository } from './base-repository';
+import { apiError } from "../utils/types";
+import { Repository } from "./base-repository";
 import {
   ICollectionCategoryDef,
   ICollectionUnitDef,
@@ -7,8 +7,8 @@ import {
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
   TsnQualitativeMeasurementSchema
-} from '../schemas/xref-schema';
-import { Prisma } from '@prisma/client';
+} from "../schemas/xref-schema";
+import { Prisma } from "@prisma/client";
 
 export class XrefRepository extends Repository {
   /**
@@ -18,7 +18,9 @@ export class XrefRepository extends Repository {
    * @param {string} category_id - primary key of 'xref_collection_unit'.
    * @returns {Promise<ICollectionUnitDef[]>}
    */
-  async getCollectionUnitsFromCategoryId(category_id: string): Promise<ICollectionUnitDef[]> {
+  async getCollectionUnitsFromCategoryId(
+    category_id: string
+  ): Promise<ICollectionUnitDef[]> {
     const result = await this.prisma.xref_collection_unit.findMany({
       where: {
         collection_category_id: category_id
@@ -26,9 +28,9 @@ export class XrefRepository extends Repository {
     });
 
     if (!result.length) {
-      throw apiError.sqlExecuteIssue('Failed to find collection units.', [
-        'XrefRepository -> getTsnCollectionCategories',
-        'results had length of 0'
+      throw apiError.sqlExecuteIssue("Failed to find collection units.", [
+        "XrefRepository -> getTsnCollectionCategories",
+        "results had length of 0"
       ]);
     }
 
@@ -42,7 +44,9 @@ export class XrefRepository extends Repository {
    * @param {number} tsn - ITIS TSN identifier.
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
-  async getTsnCollectionCategories(tsn: number): Promise<ICollectionCategoryDef[]> {
+  async getTsnCollectionCategories(
+    tsn: number
+  ): Promise<ICollectionCategoryDef[]> {
     const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
       FROM lk_collection_category cc
@@ -52,8 +56,8 @@ export class XrefRepository extends Repository {
 
     if (!result.length) {
       throw apiError.sqlExecuteIssue(`Failed to find collection categories.`, [
-        'XrefRepository -> getTsnCollectionCategories',
-        'results had length of 0'
+        "XrefRepository -> getTsnCollectionCategories",
+        "results had length of 0"
       ]);
     }
 
@@ -67,7 +71,9 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - ITIS TSN identifiers.
    * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
-  async getTsnMarkingBodyLocations(tsns: number[]): Promise<ITsnMarkingBodyLocation[]> {
+  async getTsnMarkingBodyLocations(
+    tsns: number[]
+  ): Promise<ITsnMarkingBodyLocation[]> {
     const result = await this.prisma.xref_taxon_marking_body_location.findMany({
       where: { itis_tsn: { in: tsns } },
       select: {
@@ -80,8 +86,8 @@ export class XrefRepository extends Repository {
 
     if (!result.length) {
       throw apiError.sqlExecuteIssue(`Failed to find marking body locations.`, [
-        'XrefRepository -> getTsnMarkingBodyLocations',
-        'results had length of 0'
+        "XrefRepository -> getTsnMarkingBodyLocations",
+        "results had length of 0"
       ]);
     }
 
@@ -95,7 +101,9 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - ITIS TSN identifiers.
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
-  async getTsnQualitativeMeasurements(tsns: number[]): Promise<ITsnQualitativeMeasurement[]> {
+  async getTsnQualitativeMeasurements(
+    tsns: number[]
+  ): Promise<ITsnQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
       SELECT
@@ -121,10 +129,13 @@ export class XrefRepository extends Repository {
     );
 
     if (!result.length) {
-      throw apiError.sqlExecuteIssue(`Failed to find qualitative measurements.`, [
-        'XrefRepository -> getTsnQualitativeMeasurements',
-        'results had length of 0'
-      ]);
+      throw apiError.sqlExecuteIssue(
+        `Failed to find qualitative measurements.`,
+        [
+          "XrefRepository -> getTsnQualitativeMeasurements",
+          "results had length of 0"
+        ]
+      );
     }
 
     return result;
@@ -137,23 +148,29 @@ export class XrefRepository extends Repository {
    * @param {string} taxonMeasurementId - primary key of xref_taxon_measurement_qualitative
    * @returns {Promise<ITsnQualitativeMeasurementOption>}
    */
-  async getQualitativeMeasurementOptions(taxonMeasurementId: string): Promise<ITsnQualitativeMeasurementOption[]> {
-    const result = await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
-      where: { taxon_measurement_id: taxonMeasurementId },
-      select: {
-        qualitative_option_id: true,
-        taxon_measurement_id: true,
-        option_value: true,
-        option_label: true,
-        option_desc: true
-      }
-    });
+  async getQualitativeMeasurementOptions(
+    taxonMeasurementId: string
+  ): Promise<ITsnQualitativeMeasurementOption[]> {
+    const result =
+      await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
+        where: { taxon_measurement_id: taxonMeasurementId },
+        select: {
+          qualitative_option_id: true,
+          taxon_measurement_id: true,
+          option_value: true,
+          option_label: true,
+          option_desc: true
+        }
+      });
 
     if (!result.length) {
-      throw apiError.sqlExecuteIssue(`Failed to find qualitative measurement options.`, [
-        'XrefRepository -> getTsnQualitativeMeasurements',
-        'results had a length of 0'
-      ]);
+      throw apiError.sqlExecuteIssue(
+        `Failed to find qualitative measurement options.`,
+        [
+          "XrefRepository -> getTsnQualitativeMeasurements",
+          "results had a length of 0"
+        ]
+      );
     }
 
     return result;
@@ -167,23 +184,27 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
   async getTsnQuantitativeMeasurements(tsns: number[]) {
-    const result = await this.prisma.xref_taxon_measurement_quantitative.findMany({
-      where: { itis_tsn: { in: tsns } },
-      select: {
-        taxon_measurement_id: true,
-        itis_tsn: true,
-        measurement_name: true,
-        min_value: true,
-        max_value: true,
-        unit: true
-      }
-    });
+    const result =
+      await this.prisma.xref_taxon_measurement_quantitative.findMany({
+        where: { itis_tsn: { in: tsns } },
+        select: {
+          taxon_measurement_id: true,
+          itis_tsn: true,
+          measurement_name: true,
+          min_value: true,
+          max_value: true,
+          unit: true
+        }
+      });
 
     if (!result.length) {
-      throw apiError.sqlExecuteIssue(`Failed to find quantitative measurement.`, [
-        'XrefRepository -> getTsnQuantitativeMeasurements',
-        'results had a length of 0'
-      ]);
+      throw apiError.sqlExecuteIssue(
+        `Failed to find quantitative measurement.`,
+        [
+          "XrefRepository -> getTsnQuantitativeMeasurements",
+          "results had a length of 0"
+        ]
+      );
     }
 
     return result;

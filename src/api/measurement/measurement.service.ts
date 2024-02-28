@@ -1,5 +1,8 @@
-import { measurement_qualitative, measurement_quantitative } from '@prisma/client';
-import { prisma } from '../../utils/constants';
+import {
+  measurement_qualitative,
+  measurement_quantitative
+} from "@prisma/client";
+import { prisma } from "../../utils/constants";
 import {
   measurementQualitativeInclude,
   measurementQuantitativeInclude,
@@ -8,10 +11,12 @@ import {
   QualitativeUpdateBody,
   QuantitativeBody,
   QuantitativeUpdateBody
-} from './measurement.utils';
-import { PrismaTransactionClient } from '../../utils/types';
+} from "./measurement.utils";
+import { PrismaTransactionClient } from "../../utils/types";
 
-const getAllQuantMeasurements = async (): Promise<measurement_quantitative[]> => {
+const getAllQuantMeasurements = async (): Promise<
+  measurement_quantitative[]
+> => {
   const quantMeasurement = await prisma.measurement_quantitative.findMany();
   return quantMeasurement;
 };
@@ -22,30 +27,36 @@ const getAllQualMeasurements = async (): Promise<measurement_qualitative[]> => {
 };
 
 const getQuantMeasurementOrThrow = async (id: string) => {
-  const quantMeasurement = await prisma.measurement_quantitative.findUniqueOrThrow({
-    where: {
-      measurement_quantitative_id: id
-    },
-    ...measurementQuantitativeInclude
-  });
+  const quantMeasurement =
+    await prisma.measurement_quantitative.findUniqueOrThrow({
+      where: {
+        measurement_quantitative_id: id
+      },
+      ...measurementQuantitativeInclude
+    });
   return quantMeasurement;
 };
 
 const getQualMeasurementOrThrow = async (id: string) => {
-  const qualMeasurement = await prisma.measurement_qualitative.findUniqueOrThrow({
-    where: {
-      measurement_qualitative_id: id
-    },
-    ...measurementQualitativeInclude
-  });
+  const qualMeasurement =
+    await prisma.measurement_qualitative.findUniqueOrThrow({
+      where: {
+        measurement_qualitative_id: id
+      },
+      ...measurementQualitativeInclude
+    });
   return qualMeasurement;
 };
 
-const createQuantMeasurement = async (data: QuantitativeBody): Promise<measurement_quantitative> => {
+const createQuantMeasurement = async (
+  data: QuantitativeBody
+): Promise<measurement_quantitative> => {
   return await prisma.measurement_quantitative.create({ data });
 };
 
-const createQualMeasurement = async (data: QualitativeBody): Promise<measurement_qualitative> => {
+const createQualMeasurement = async (
+  data: QualitativeBody
+): Promise<measurement_qualitative> => {
   return await prisma.measurement_qualitative.create({ data });
 };
 
@@ -67,7 +78,9 @@ const getQualMeasurementsByCritterId = async (critter_id: string) => {
   });
 };
 
-const getMeasurementsByCritterId = async (critter_id: string): Promise<Measurements> => {
+const getMeasurementsByCritterId = async (
+  critter_id: string
+): Promise<Measurements> => {
   const [quantitative, qualitative] = await Promise.all([
     getQuantMeasurementsByCritterId(critter_id),
     getQualMeasurementsByCritterId(critter_id)
@@ -75,7 +88,10 @@ const getMeasurementsByCritterId = async (critter_id: string): Promise<Measureme
   return { quantitative, qualitative };
 };
 
-const updateQualMeasurement = async (id: string, data: QualitativeUpdateBody) => {
+const updateQualMeasurement = async (
+  id: string,
+  data: QualitativeUpdateBody
+) => {
   return await prisma.measurement_qualitative.update({
     where: {
       measurement_qualitative_id: id
@@ -84,7 +100,10 @@ const updateQualMeasurement = async (id: string, data: QualitativeUpdateBody) =>
   });
 };
 
-const updateQuantMeasurement = async (id: string, data: QuantitativeUpdateBody) => {
+const updateQuantMeasurement = async (
+  id: string,
+  data: QuantitativeUpdateBody
+) => {
   return await prisma.measurement_quantitative.update({
     where: {
       measurement_quantitative_id: id

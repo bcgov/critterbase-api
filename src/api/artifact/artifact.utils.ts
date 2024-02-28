@@ -1,7 +1,13 @@
-import { artifact, Prisma } from '.prisma/client';
-import { z } from 'zod';
-import { AuditColumns } from '../../utils/types';
-import { implement, noAudit, nonEmpty, zodAudit, zodID } from '../../utils/zod_helpers';
+import { artifact, Prisma } from ".prisma/client";
+import { z } from "zod";
+import { AuditColumns } from "../../utils/types";
+import {
+  implement,
+  noAudit,
+  nonEmpty,
+  zodAudit,
+  zodID
+} from "../../utils/zod_helpers";
 
 // Types
 type ArtifactCreate = z.infer<typeof ArtifactCreateBodySchema>;
@@ -33,7 +39,10 @@ const SwagArtifactResponseSchema = implement<ArtifactResponse>().with({
 
 // Validate incoming request body for create artifact
 const ArtifactCreateBodySchema = implement<
-  Omit<Prisma.artifactCreateManyInput, AuditColumns | 'artifact_id' | 'artifact_url'>
+  Omit<
+    Prisma.artifactCreateManyInput,
+    AuditColumns | "artifact_id" | "artifact_url"
+  >
 >().with(
   artifactSchema
     .omit({ ...noAudit, artifact_id: true, artifact_url: true })
@@ -44,10 +53,18 @@ const ArtifactCreateBodySchema = implement<
 // Validate incoming request body for update artifact
 // * Note: artifact_url and artifact_id are not allowed to be updated
 const ArtifactUpdateBodySchema = implement<
-  Omit<Prisma.artifactUncheckedUpdateManyInput, 'artifact_url' | 'artifact_id' | AuditColumns>
+  Omit<
+    Prisma.artifactUncheckedUpdateManyInput,
+    "artifact_url" | "artifact_id" | AuditColumns
+  >
 >()
   .with(ArtifactCreateBodySchema.partial().shape)
-  .refine(nonEmpty, 'no new data was provided or the format was invalid');
+  .refine(nonEmpty, "no new data was provided or the format was invalid");
 
-export { artifactSchema, ArtifactCreateBodySchema, ArtifactUpdateBodySchema, SwagArtifactResponseSchema };
+export {
+  artifactSchema,
+  ArtifactCreateBodySchema,
+  ArtifactUpdateBodySchema,
+  SwagArtifactResponseSchema
+};
 export type { ArtifactCreate, ArtifactUpdate, ArtifactResponse };
