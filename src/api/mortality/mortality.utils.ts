@@ -1,22 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { cod_confidence, mortality, Prisma } from "@prisma/client";
-import { z } from "zod";
-import { AuditColumns } from "../../utils/types";
-import {
-  DeleteSchema,
-  implement,
-  noAudit,
-  ResponseSchema,
-  zodID,
-} from "../../utils/zod_helpers";
+import { cod_confidence, mortality, Prisma } from '@prisma/client';
+import { z } from 'zod';
+import { AuditColumns } from '../../utils/types';
+import { DeleteSchema, implement, noAudit, ResponseSchema, zodID } from '../../utils/zod_helpers';
 import {
   CommonFormattedLocationSchema,
   CommonLocationSchema,
   commonLocationSelect,
   LocationBody,
   LocationCreateSchema,
-  LocationUpdateSchema,
-} from "../location/location.utils";
+  LocationUpdateSchema
+} from '../location/location.utils';
 
 const MortalityBodySchema = implement<mortality>().with({
   mortality_id: zodID,
@@ -33,38 +27,39 @@ const MortalityBodySchema = implement<mortality>().with({
   create_user: zodID,
   update_user: zodID,
   create_timestamp: z.coerce.date(),
-  update_timestamp: z.coerce.date(),
+  update_timestamp: z.coerce.date()
 });
 
 const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
   include: {
     location: {
-      ...commonLocationSelect,
+      ...commonLocationSelect
     },
-    lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death:
-      {
-        select: {
-          cod_category: true,
-          cod_reason: true,
-        },
-      },
+    lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: {
+      select: {
+        cod_category: true,
+        cod_reason: true
+      }
+    },
     lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: {
       select: {
         cod_category: true,
-        cod_reason: true,
-      },
-    },
-  },
+        cod_reason: true
+      }
+    }
+  }
 });
 
 const MortalityIncludeSchema = implement<MortalityIncludeType>().with({
   ...MortalityBodySchema.shape,
   location: CommonLocationSchema,
-  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death:
-    z.object({ cod_category: z.string(), cod_reason: z.string().nullable() }),
+  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: z.object({
+    cod_category: z.string(),
+    cod_reason: z.string().nullable()
+  }),
   lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: z
     .object({ cod_category: z.string(), cod_reason: z.string().nullable() })
-    .nullable(),
+    .nullable()
 });
 
 const MortalityUpdateSchema = implement<
@@ -73,10 +68,10 @@ const MortalityUpdateSchema = implement<
   }
 >().with(
   MortalityBodySchema.omit({
-    ...noAudit,
+    ...noAudit
   })
     .extend({ location: LocationUpdateSchema })
-    .partial().shape,
+    .partial().shape
 );
 
 const MortalityCreateSchema = implement<
@@ -90,8 +85,8 @@ const MortalityCreateSchema = implement<
     .required({
       critter_id: true,
       mortality_timestamp: true,
-      proximate_cause_of_death_id: true,
-    }).shape,
+      proximate_cause_of_death_id: true
+    }).shape
 );
 
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
@@ -109,19 +104,15 @@ const MortalityResponseSchema = ResponseSchema.transform((val) => {
   return {
     ...rest,
     location: location ? CommonFormattedLocationSchema.parse(location) : null,
-    proximate_cause_of_death:
-      lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death ??
-      null,
-    ultimate_cause_of_death:
-      lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death ??
-      null,
+    proximate_cause_of_death: lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death ?? null,
+    ultimate_cause_of_death: lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death ?? null
   };
 });
 
 type FormattedMortality = z.infer<typeof MortalityResponseSchema>;
 
 const MortalityDeleteSchema = MortalityBodySchema.pick({
-  mortality_id: true,
+  mortality_id: true
 }).extend(DeleteSchema.shape);
 
 export {
@@ -131,11 +122,6 @@ export {
   MortalityResponseSchema,
   MortalityBodySchema,
   MortalityIncludeSchema,
-  MortalityDeleteSchema,
+  MortalityDeleteSchema
 };
-export type {
-  MortalityIncludeType,
-  FormattedMortality,
-  MortalityCreate,
-  MortalityUpdate,
-};
+export type { MortalityIncludeType, FormattedMortality, MortalityCreate, MortalityUpdate };

@@ -1,6 +1,6 @@
-import { PrismaClient, user } from "@prisma/client";
-import { QueryFormats } from "./types";
-declare module "express-session" {
+import { PrismaClient, user } from '@prisma/client';
+import { QueryFormats } from './types';
+declare module 'express-session' {
   interface SessionData {
     user?: user;
   }
@@ -11,7 +11,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       PORT?: string;
-      NODE_ENV: "development" | "test" | "production";
+      NODE_ENV: 'development' | 'test' | 'production';
       API_KEY: string;
       DB_URL: string;
       AUTHENTICATE: string;
@@ -21,7 +21,7 @@ declare global {
   }
 }
 
-const api = "/api";
+const api = '/api';
 const routes = {
   home: api,
   //routes
@@ -39,21 +39,21 @@ const routes = {
   bulk: `${api}/bulk`,
   xref: `${api}/xref`,
   //modifiers
-  create: "create",
-  id: ":id",
+  create: 'create',
+  id: ':id'
 };
 
 const oneDay = 60 * 60 * 24 * 1000;
 
 const PORT = process.env.PORT;
 
-const IS_DEV = process.env.NODE_ENV === "development";
+const IS_DEV = process.env.NODE_ENV === 'development';
 
-const IS_PROD = process.env.NODE_ENV === "production";
+const IS_PROD = process.env.NODE_ENV === 'production';
 
-const IS_TEST = process.env.NODE_ENV === "test";
+const IS_TEST = process.env.NODE_ENV === 'test';
 
-const NO_AUTH = process.env.AUTHENTICATE === "false";
+const NO_AUTH = process.env.AUTHENTICATE === 'false';
 
 /**
  * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
@@ -71,26 +71,26 @@ const strings = {
   app: {
     invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
     idRequired: `id is required`,
-    emptyBody: `body must include at least one property`,
+    emptyBody: `body must include at least one property`
   },
   location: {
-    notFoundMulti: "no locations found",
-    notFound: "location not found",
+    notFoundMulti: 'no locations found',
+    notFound: 'location not found',
     //noID: "id was not provided in params",
-    deleted: (id: string): string => `Deleted location ${id}`,
+    deleted: (id: string): string => `Deleted location ${id}`
     // updated: (id: string): string => `Updated location ${id}`,
   },
   user: {
-    notFound: "user not found",
-    noData: "no new data was provided or the format was invalid",
-    systemUserIdExists: "system_user_id already exists",
+    notFound: 'user not found',
+    noData: 'no new data was provided or the format was invalid',
+    systemUserIdExists: 'system_user_id already exists'
   },
   marking: {
-    notFound: "marking not found",
+    notFound: 'marking not found'
   },
   artifact: {
-    notFound: "artifact not found",
-  },
+    notFound: 'artifact not found'
+  }
 };
 const defaultFormat = QueryFormats.default;
 
@@ -105,5 +105,5 @@ export {
   strings,
   defaultFormat,
   oneDay,
-  routes,
+  routes
 };

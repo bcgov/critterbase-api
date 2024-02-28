@@ -1,23 +1,14 @@
-import { prisma } from "../../utils/constants";
-import { PrismaTransactionClient, ReqBody } from "../../utils/types";
-import {
-  getBodyLocationByNameAndTsn,
-  getColourByName,
-  getMarkingTypeByName,
-} from "../lookup/lookup.service";
-import {
-  MarkingCreateInput,
-  MarkingIncludes,
-  MarkingUpdateInput,
-  markingIncludes,
-} from "./marking.utils";
+import { prisma } from '../../utils/constants';
+import { PrismaTransactionClient, ReqBody } from '../../utils/types';
+import { getBodyLocationByNameAndTsn, getColourByName, getMarkingTypeByName } from '../lookup/lookup.service';
+import { MarkingCreateInput, MarkingIncludes, MarkingUpdateInput, markingIncludes } from './marking.utils';
 
 /**
  * * Returns all existing markings from the database
  */
 const getAllMarkings = async (): Promise<MarkingIncludes[]> => {
   const markings: MarkingIncludes[] = await prisma.marking.findMany({
-    ...markingIncludes,
+    ...markingIncludes
   });
   return markings;
 };
@@ -30,9 +21,9 @@ const getAllMarkings = async (): Promise<MarkingIncludes[]> => {
 const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
   const marking: MarkingIncludes = await prisma.marking.findUniqueOrThrow({
     where: {
-      marking_id: marking_id,
+      marking_id: marking_id
     },
-    ...markingIncludes,
+    ...markingIncludes
   });
   return marking;
 };
@@ -41,14 +32,12 @@ const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
  * * Gets all markings that reference a critter_id
  * @param {string} critter_id
  */
-const getMarkingsByCritterId = async (
-  critter_id: string,
-): Promise<MarkingIncludes[]> => {
+const getMarkingsByCritterId = async (critter_id: string): Promise<MarkingIncludes[]> => {
   const markings: MarkingIncludes[] = await prisma.marking.findMany({
     where: {
-      critter_id: critter_id,
+      critter_id: critter_id
     },
-    ...markingIncludes,
+    ...markingIncludes
   });
   return markings;
 };
@@ -58,16 +47,13 @@ const getMarkingsByCritterId = async (
  * @param {string} marking_id
  * @param {MarkingUpdateInput} marking_data
  */
-const updateMarking = async (
-  marking_id: string,
-  marking_data: MarkingUpdateInput,
-): Promise<MarkingIncludes> => {
+const updateMarking = async (marking_id: string, marking_data: MarkingUpdateInput): Promise<MarkingIncludes> => {
   const marking: MarkingIncludes = await prisma.marking.update({
     where: {
-      marking_id: marking_id,
+      marking_id: marking_id
     },
     data: marking_data,
-    ...markingIncludes,
+    ...markingIncludes
   });
   return marking;
 };
@@ -80,7 +66,7 @@ const updateMarking = async (
 const createMarking = async (newMarkingData: MarkingCreateInput) => {
   const marking = await prisma.marking.create({
     data: newMarkingData,
-    ...markingIncludes,
+    ...markingIncludes
   });
   return marking;
 };
@@ -91,14 +77,14 @@ const createMarking = async (newMarkingData: MarkingCreateInput) => {
  */
 const deleteMarking = async (
   marking_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<MarkingIncludes> => {
   const client = prismaOverride ?? prisma;
   const marking: MarkingIncludes = await client.marking.delete({
     where: {
-      marking_id: marking_id,
+      marking_id: marking_id
     },
-    ...markingIncludes,
+    ...markingIncludes
   });
   return marking;
 };
@@ -110,7 +96,7 @@ const appendEnglishMarkingsAsUUID = async (
     body_location: string;
     marking_type: string;
   }>,
-  itis_tsn: number,
+  itis_tsn: number
 ) => {
   if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);
@@ -138,5 +124,5 @@ export {
   updateMarking,
   createMarking,
   deleteMarking,
-  appendEnglishMarkingsAsUUID,
+  appendEnglishMarkingsAsUUID
 };

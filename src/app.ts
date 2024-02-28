@@ -1,24 +1,24 @@
-import cors from "cors";
-import express from "express";
-import helmet from "helmet";
-import { AccessRouter } from "./api/access/access.router";
-import { ArtifactRouter } from "./api/artifact/artifact.router";
-import { BulkRouter } from "./api/bulk/bulk.router";
-import { CaptureRouter } from "./api/capture/capture.router";
-import { CollectionUnitRouter } from "./api/collectionUnit/collectionUnit.router";
-import { CritterRouter } from "./api/critter/critter.router";
-import { FamilyRouter } from "./api/family/family.router";
-import { LocationRouter } from "./api/location/location.router";
-import { MarkingRouter } from "./api/marking/marking.router";
-import { MeasurementRouter } from "./api/measurement/measurement.router";
-import { MortalityRouter } from "./api/mortality/mortality.router";
-import { LookupRouter } from "./api/lookup/lookup.router";
-import { UserRouter } from "./api/user/user.router";
-import { XrefRouter } from "./api/xref/xref.router";
-import { ICbDatabase } from "./utils/database";
-import { auth, errorHandler, errorLogger, logger } from "./utils/middleware";
-import { apiError } from "./utils/types";
-import { routes } from "./utils/constants";
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+import { AccessRouter } from './api/access/access.router';
+import { ArtifactRouter } from './api/artifact/artifact.router';
+import { BulkRouter } from './api/bulk/bulk.router';
+import { CaptureRouter } from './api/capture/capture.router';
+import { CollectionUnitRouter } from './api/collectionUnit/collectionUnit.router';
+import { CritterRouter } from './api/critter/critter.router';
+import { FamilyRouter } from './api/family/family.router';
+import { LocationRouter } from './api/location/location.router';
+import { MarkingRouter } from './api/marking/marking.router';
+import { MeasurementRouter } from './api/measurement/measurement.router';
+import { MortalityRouter } from './api/mortality/mortality.router';
+import { LookupRouter } from './api/lookup/lookup.router';
+import { UserRouter } from './api/user/user.router';
+import { XrefRouter } from './api/xref/xref.router';
+import { ICbDatabase } from './utils/database';
+import { auth, errorHandler, errorLogger, logger } from './utils/middleware';
+import { apiError } from './utils/types';
+import { routes } from './utils/constants';
 
 export const makeApp = (db: ICbDatabase) => {
   const app = express();
@@ -46,7 +46,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(routes.bulk, BulkRouter(db));
   app.use(routes.xref, XrefRouter(db));
 
-  app.all("*", (req, _res) => {
+  app.all('*', (req, _res) => {
     throw apiError.notFound(`${req.method} ${req.url} -> route not found`);
   });
 

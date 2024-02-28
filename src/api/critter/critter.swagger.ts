@@ -1,27 +1,22 @@
-import { z } from "zod";
-import { zodID } from "../../utils/zod_helpers";
-import { routes } from "../../utils/constants";
-import {
-  SwagDesc,
-  SwagErr,
-  SwagNotFound,
-  SwagUnauthorized,
-} from "../../utils/swagger_helpers";
+import { z } from 'zod';
+import { zodID } from '../../utils/zod_helpers';
+import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 import {
   CritterSchema,
   CritterUpdateSchema,
   CritterCreateSchema,
   DetailedCritterSchema,
   SimilarCritterQuerySchema,
-  CritterIdsRequestSchema,
-} from "../../schemas/critter-schema";
-import { QueryFormats } from "../../utils/types";
+  CritterIdsRequestSchema
+} from '../../schemas/critter-schema';
+import { QueryFormats } from '../../utils/types';
 
-const TAG = "Critter";
+const TAG = 'Critter';
 
 export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
-  detailedCritterResponse: DetailedCritterSchema,
+  detailedCritterResponse: DetailedCritterSchema
 };
 
 export const critterPaths = {
@@ -31,61 +26,59 @@ export const critterPaths = {
      *
      */
     get: {
-      operationId: "getAllCritters",
-      summary: "Fetch all critters available in critterbase",
+      operationId: 'getAllCritters',
+      summary: 'Fetch all critters available in critterbase',
       tags: [TAG],
       requestParams: {
         query: z.object({
-          wlh_id: z.string().optional(),
-        }),
+          wlh_id: z.string().optional()
+        })
       },
       responses: {
-        "200": {
-          description:
-            "Returned all critters successfully, or all critters matching WLH ID if provided.",
+        '200': {
+          description: 'Returned all critters successfully, or all critters matching WLH ID if provided.',
           content: {
-            "application/json": {
-              schema: CritterSchema.array(),
-            },
-          },
+            'application/json': {
+              schema: CritterSchema.array()
+            }
+          }
         },
-        "404": {
-          description:
-            "Will return 404 if there were no critters matching a provided WLH ID",
+        '404': {
+          description: 'Will return 404 if there were no critters matching a provided WLH ID'
         },
         ...SwagErr,
-        ...SwagUnauthorized,
-      },
+        ...SwagUnauthorized
+      }
     },
     /**
      * Get all critters by list of critter ids.
      *
      */
     post: {
-      operationId: "crittersByIds",
-      summary: "Retrieve specific critters by a list of IDs",
+      operationId: 'crittersByIds',
+      summary: 'Retrieve specific critters by a list of IDs',
       tags: [TAG],
       requestBody: {
         content: {
-          "application/json": {
-            schema: CritterIdsRequestSchema, //TODO: move to critter-schema
-          },
-        },
+          'application/json': {
+            schema: CritterIdsRequestSchema //TODO: move to critter-schema
+          }
+        }
       },
       responses: {
-        "200": {
+        '200': {
           description: SwagDesc.get,
           content: {
-            "application/json": {
-              schema: CritterSchema.array(),
-            },
-          },
+            'application/json': {
+              schema: CritterSchema.array()
+            }
+          }
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound,
-      },
-    },
+        ...SwagNotFound
+      }
+    }
   },
   [`${routes.critters}/unique`]: {
     /**
@@ -93,33 +86,32 @@ export const critterPaths = {
      *
      */
     post: {
-      operationId: "getUniqueCritters",
+      operationId: 'getUniqueCritters',
       summary: `Determine whether a critter is unique or not through various identifiable features.
     This endpoint will return an array of critters that may be partial matches to the info provided.
     Note that providing WLH ID will override the rest of the search and filter critters by WLH ID alone.`,
       tags: [TAG],
       requestBody: {
         content: {
-          "application/json": {
-            schema: SimilarCritterQuerySchema,
-          },
-        },
+          'application/json': {
+            schema: SimilarCritterQuerySchema
+          }
+        }
       },
       responses: {
-        "200": {
-          description:
-            "Returned all critters successfully, or all critters matching WLH ID if provided.",
+        '200': {
+          description: 'Returned all critters successfully, or all critters matching WLH ID if provided.',
           content: {
-            "application/json": {
-              schema: CritterSchema.array(),
-            },
-          },
+            'application/json': {
+              schema: CritterSchema.array()
+            }
+          }
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound,
-      },
-    },
+        ...SwagNotFound
+      }
+    }
   },
   [`${routes.critters}/create`]: {
     /**
@@ -127,33 +119,33 @@ export const critterPaths = {
      *
      */
     post: {
-      operationId: "createCritter",
-      summary: "Create a new critter",
+      operationId: 'createCritter',
+      summary: 'Create a new critter',
       tags: [TAG],
       requestParams: {
-        path: z.object({ id: zodID }),
+        path: z.object({ id: zodID })
       },
       requestBody: {
         content: {
-          "application/json": {
-            schema: CritterCreateSchema,
-          },
-        },
+          'application/json': {
+            schema: CritterCreateSchema
+          }
+        }
       },
       responses: {
-        "201": {
+        '201': {
           description: SwagDesc.create,
           content: {
-            "application/json": {
-              schema: CritterSchema,
-            },
-          },
+            'application/json': {
+              schema: CritterSchema
+            }
+          }
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound,
-      },
-    },
+        ...SwagNotFound
+      }
+    }
   },
   [`${routes.critters}/{id}`]: {
     /**
@@ -161,63 +153,63 @@ export const critterPaths = {
      *
      */
     get: {
-      operationId: "getCritterById",
-      summary: "Get a critter by id (critter_id)",
+      operationId: 'getCritterById',
+      summary: 'Get a critter by id (critter_id)',
       tags: [TAG],
       requestParams: {
         path: z.object({ id: zodID }),
-        query: z.object({ format: z.enum([QueryFormats.detailed]).optional() }),
+        query: z.object({ format: z.enum([QueryFormats.detailed]).optional() })
       },
       responses: {
-        "200": {
-          description: "Successfully returned critter",
+        '200': {
+          description: 'Successfully returned critter',
           content: {
-            "application/json": {
+            'application/json': {
               schema: {
                 oneOf: [
-                  { $ref: "#/components/schemas/defaultCritterResponse" },
-                  { $ref: "#/components/schemas/detailedCritterResponse" },
-                ],
-              },
-            },
-          },
+                  { $ref: '#/components/schemas/defaultCritterResponse' },
+                  { $ref: '#/components/schemas/detailedCritterResponse' }
+                ]
+              }
+            }
+          }
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound,
-      },
+        ...SwagNotFound
+      }
     },
     /**
      * Update a critter.
      *
      */
     patch: {
-      operationId: "updateCritterById",
-      summary: "Update a critter by id",
+      operationId: 'updateCritterById',
+      summary: 'Update a critter by id',
       tags: [TAG],
       requestParams: {
-        path: z.object({ id: zodID }),
+        path: z.object({ id: zodID })
       },
       requestBody: {
         content: {
-          "application/json": {
-            schema: CritterUpdateSchema,
-          },
-        },
+          'application/json': {
+            schema: CritterUpdateSchema
+          }
+        }
       },
       responses: {
-        "200": {
+        '200': {
           description: SwagDesc.update,
           content: {
-            "application/json": {
-              schema: CritterSchema,
-            },
-          },
+            'application/json': {
+              schema: CritterSchema
+            }
+          }
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound,
-      },
-    },
-  },
+        ...SwagNotFound
+      }
+    }
+  }
 };

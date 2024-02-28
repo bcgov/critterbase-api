@@ -1,15 +1,15 @@
-import express, { NextFunction } from "express";
-import type { Request, Response } from "express";
-import { catchErrors } from "../../utils/middleware";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { UserCreateBodySchema, UserUpdateBodySchema } from "./user.utils";
-import { ICbDatabase } from "../../utils/database";
+import express, { NextFunction } from 'express';
+import type { Request, Response } from 'express';
+import { catchErrors } from '../../utils/middleware';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
+import { UserCreateBodySchema, UserUpdateBodySchema } from './user.utils';
+import { ICbDatabase } from '../../utils/database';
 
 export const UserRouter = (db: ICbDatabase) => {
   const userRouter = express.Router();
 
   userRouter.get(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const users = await db.getUsers();
       return res.status(200).json(users);
@@ -17,7 +17,7 @@ export const UserRouter = (db: ICbDatabase) => {
   );
 
   userRouter.post(
-    "/create",
+    '/create',
     catchErrors(async (req: Request, res: Response) => {
       const userData = UserCreateBodySchema.parse(req.body);
       const newUser = await db.createUser(userData);
@@ -26,7 +26,7 @@ export const UserRouter = (db: ICbDatabase) => {
   );
 
   userRouter
-    .route("/:id")
+    .route('/:id')
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);

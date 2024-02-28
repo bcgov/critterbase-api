@@ -1,18 +1,18 @@
-import { Prisma, user } from "@prisma/client";
-import { prisma } from "../../utils/constants";
-import { apiError } from "../../utils/types";
-import { LoginCredentials } from "../user/user.utils";
+import { Prisma, user } from '@prisma/client';
+import { prisma } from '../../utils/constants';
+import { apiError } from '../../utils/types';
+import { LoginCredentials } from '../user/user.utils';
 
 const loginUser = async (login: LoginCredentials): Promise<user | null> => {
   // Find a user that matches both `user_id` and `keycloak_uuid`
   const foundUser = await prisma.user.findFirst({
     where: {
       keycloak_uuid: login.keycloak_uuid
-    },
+    }
   });
 
   if (!foundUser) {
-    throw apiError.unauthorized("User not found. Login failed");
+    throw apiError.unauthorized('User not found. Login failed');
   }
   return foundUser;
 };

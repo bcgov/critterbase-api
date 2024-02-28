@@ -1,6 +1,6 @@
-import { XrefRepository } from "../repositories/xref-repository";
-import { toSelectFormat } from "../utils/helper_functions";
-import { InternalService } from "./base-service";
+import { XrefRepository } from '../repositories/xref-repository';
+import { toSelectFormat } from '../utils/helper_functions';
+import { InternalService } from './base-service';
 
 export class XrefService extends InternalService<XrefRepository> {
   /**
@@ -10,15 +10,11 @@ export class XrefService extends InternalService<XrefRepository> {
    * @param {string} category_id - uuid primary key of xref_collection_unit.
    * @returns {Promise<ICollectionUnitDef[]>}
    */
-  async getCollectionUnitsFromCategoryId(
-    category_id: string,
-    asSelect = false,
-  ) {
-    const data =
-      await this.repository.getCollectionUnitsFromCategoryId(category_id);
+  async getCollectionUnitsFromCategoryId(category_id: string, asSelect = false) {
+    const data = await this.repository.getCollectionUnitsFromCategoryId(category_id);
 
     if (asSelect) {
-      return toSelectFormat(data, "collection_unit_id", "unit_name");
+      return toSelectFormat(data, 'collection_unit_id', 'unit_name');
     }
   }
 
@@ -35,7 +31,7 @@ export class XrefService extends InternalService<XrefRepository> {
     const data = await this.repository.getTsnCollectionCategories(tsn);
 
     if (asSelect) {
-      return toSelectFormat(data, "collection_category_id", "category_name");
+      return toSelectFormat(data, 'collection_category_id', 'category_name');
     }
 
     return data;
@@ -58,11 +54,7 @@ export class XrefService extends InternalService<XrefRepository> {
     const data = await this.repository.getTsnMarkingBodyLocations(tsns);
 
     if (asSelect) {
-      return toSelectFormat(
-        data,
-        "taxon_marking_body_location_id",
-        "body_location",
-      );
+      return toSelectFormat(data, 'taxon_marking_body_location_id', 'body_location');
     }
 
     return data;
@@ -85,7 +77,7 @@ export class XrefService extends InternalService<XrefRepository> {
     const data = await this.repository.getTsnQualitativeMeasurements(tsns);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+      return toSelectFormat(data, 'taxon_measurement_id', 'measurement_name');
     }
 
     return data;
@@ -108,7 +100,7 @@ export class XrefService extends InternalService<XrefRepository> {
     const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+      return toSelectFormat(data, 'taxon_measurement_id', 'measurement_name');
     }
 
     return data;
@@ -121,17 +113,11 @@ export class XrefService extends InternalService<XrefRepository> {
    * @param {string} taxonMeasurementId - qualitative measurement identifier.
    * @returns {Promise<ITsnQualitativeMeasurementOption[]>}
    */
-  async getQualitativeMeasurementOptions(
-    taxonMeasurementId: string,
-    asSelect = false,
-  ) {
-    const data =
-      await this.repository.getQualitativeMeasurementOptions(
-        taxonMeasurementId,
-      );
+  async getQualitativeMeasurementOptions(taxonMeasurementId: string, asSelect = false) {
+    const data = await this.repository.getQualitativeMeasurementOptions(taxonMeasurementId);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "option_value");
+      return toSelectFormat(data, 'taxon_measurement_id', 'option_value');
     }
 
     return data;
@@ -149,33 +135,27 @@ export class XrefService extends InternalService<XrefRepository> {
   async getTsnMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
-    const quantitative =
-      await this.repository.getTsnQuantitativeMeasurements(tsns);
+    const quantitative = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
-    const qualitative =
-      await this.repository.getTsnQualitativeMeasurements(tsns);
+    const qualitative = await this.repository.getTsnQualitativeMeasurements(tsns);
 
     if (asSelect) {
-      const quantitativeAsSelect = toSelectFormat(
-        quantitative,
-        "taxon_measurement_id",
-        "measurement_name",
-      );
+      const quantitativeAsSelect = toSelectFormat(quantitative, 'taxon_measurement_id', 'measurement_name');
 
       const qualitativeAsSelect = qualitative.map((measurement) => ({
         id: measurement.taxon_measurement_id,
-        key: "taxon_measurement_id",
+        key: 'taxon_measurement_id',
         value: measurement.measurement_name,
         children: measurement.options.map((option) => ({
           id: option.qualitative_option_id,
-          key: "qualitative_option_id",
-          value: option.option_label,
-        })),
+          key: 'qualitative_option_id',
+          value: option.option_label
+        }))
       }));
 
       return {
         quantitative: quantitativeAsSelect,
-        qualitative: qualitativeAsSelect,
+        qualitative: qualitativeAsSelect
       };
     }
 

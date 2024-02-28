@@ -1,11 +1,7 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import multer from "multer";
-import { apiError } from "./types";
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import multer from 'multer';
+import { apiError } from './types';
 
 export type Metadata = Record<string, string>;
 
@@ -23,7 +19,7 @@ const _getS3Client = (): S3Client => {
   const secretAccessKey = process.env.OBJECT_STORE_SECRET_KEY_ID;
 
   if (!accessKeyId || !secretAccessKey) {
-    throw apiError.serverIssue("Object store credentials are not defined");
+    throw apiError.serverIssue('Object store credentials are not defined');
   }
 
   const url = _getObjectStoreUrl();
@@ -32,10 +28,10 @@ const _getS3Client = (): S3Client => {
     endpoint: url,
     credentials: {
       accessKeyId: accessKeyId,
-      secretAccessKey: secretAccessKey,
+      secretAccessKey: secretAccessKey
     },
-    region: "ca-central-1",
-    forcePathStyle: true,
+    region: 'ca-central-1',
+    forcePathStyle: true
   });
 };
 
@@ -49,7 +45,7 @@ const _getObjectStoreUrl = (): string => {
   const url = process.env.OBJECT_STORE_URL;
 
   if (!url) {
-    throw apiError.serverIssue("Object store URL is not defined");
+    throw apiError.serverIssue('Object store URL is not defined');
   }
 
   return url;
@@ -65,7 +61,7 @@ const _getObjectStoreBucketName = (): string => {
   const bucketName = process.env.OBJECT_STORE_BUCKET_NAME;
 
   if (!bucketName) {
-    throw apiError.serverIssue("Object store bucket name is not defined");
+    throw apiError.serverIssue('Object store bucket name is not defined');
   }
 
   return bucketName;
@@ -81,9 +77,7 @@ const _getObjectStoreBucketName = (): string => {
  */
 const getS3HostUrl = (key?: string): string => {
   // Appends the given S3 object key, trimming between 0 and 2 trailing '/' characters
-  return `${_getObjectStoreUrl()}/${_getObjectStoreBucketName()}/${
-    key ?? ""
-  }`.replace(/\/{0,2}$/, "");
+  return `${_getObjectStoreUrl()}/${_getObjectStoreBucketName()}/${key ?? ''}`.replace(/\/{0,2}$/, '');
 };
 
 const uploadFileToS3 = async (
@@ -98,7 +92,7 @@ const uploadFileToS3 = async (
     Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,
-    Metadata: metadata,
+    Metadata: metadata
   };
   const s3Client = _getS3Client();
   // Uploading files to the bucket
@@ -111,7 +105,7 @@ const getFileDownloadUrl = async (fileName: string): Promise<string> => {
   // Setting up S3 download parameters
   const params = {
     Bucket: _getObjectStoreBucketName(),
-    Key: fileName,
+    Key: fileName
   };
   const s3Client = _getS3Client();
 
@@ -126,5 +120,5 @@ export {
   _getObjectStoreBucketName,
   getS3HostUrl,
   uploadFileToS3,
-  getFileDownloadUrl,
+  getFileDownloadUrl
 };

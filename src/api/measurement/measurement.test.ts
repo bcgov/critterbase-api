@@ -1,8 +1,8 @@
-import { array } from "zod";
-import { prisma } from "../../utils/constants";
-import { makeApp } from "../../app";
-import { ResponseSchema } from "../../utils/zod_helpers";
-import * as helpers from "../../utils/helper_functions";
+import { array } from 'zod';
+import { prisma } from '../../utils/constants';
+import { makeApp } from '../../app';
+import { ResponseSchema } from '../../utils/zod_helpers';
+import * as helpers from '../../utils/helper_functions';
 import {
   createQualMeasurement,
   createQuantMeasurement,
@@ -16,25 +16,19 @@ import {
   getQuantMeasurementOrThrow,
   getQuantMeasurementsByCritterId,
   updateQualMeasurement,
-  updateQuantMeasurement,
-} from "./measurement.service";
-import {
-  QualitativeResponseSchema,
-  QuantitativeResponseSchema,
-} from "./measurement.utils";
-import supertest from "supertest";
-import {
-  measurement_qualitative,
-  measurement_quantitative,
-} from "@prisma/client";
-import { apiError } from "../../utils/types";
-import { prisMock } from "../../utils/helper_functions";
+  updateQuantMeasurement
+} from './measurement.service';
+import { QualitativeResponseSchema, QuantitativeResponseSchema } from './measurement.utils';
+import supertest from 'supertest';
+import { measurement_qualitative, measurement_quantitative } from '@prisma/client';
+import { apiError } from '../../utils/types';
+import { prisMock } from '../../utils/helper_functions';
 
-const badID = "52cfb108-99a5-4631-8385-1b43248ac502";
-const ID = "52cfb108-99a5-4631-8385-1b43248ac502";
-const comment = "TEST";
-const updateComment = "UPDATE_COMMENT";
-const ROUTE = "/api/measurements";
+const badID = '52cfb108-99a5-4631-8385-1b43248ac502';
+const ID = '52cfb108-99a5-4631-8385-1b43248ac502';
+const comment = 'TEST';
+const updateComment = 'UPDATE_COMMENT';
+const ROUTE = '/api/measurements';
 const QUANT_ROUTE = `${ROUTE}/quantitative`;
 const QUAL_ROUTE = `${ROUTE}/qualitative`;
 
@@ -42,13 +36,13 @@ const qualData = {
   critter_id: ID,
   taxon_measurement_id: ID,
   qualitative_option_id: ID,
-  measurement_comment: comment,
+  measurement_comment: comment
 };
 const quantData = {
   critter_id: ID,
   value: 2,
   taxon_measurement_id: ID,
-  measurement_comment: comment,
+  measurement_comment: comment
 };
 const quantMeasurement: measurement_quantitative = {
   measurement_quantitative_id: ID,
@@ -62,7 +56,7 @@ const quantMeasurement: measurement_quantitative = {
   create_user: ID,
   update_user: ID,
   create_timestamp: new Date(),
-  update_timestamp: new Date(),
+  update_timestamp: new Date()
 };
 const qualMeasurement: measurement_qualitative = {
   measurement_qualitative_id: ID,
@@ -76,7 +70,7 @@ const qualMeasurement: measurement_qualitative = {
   create_user: ID,
   update_user: ID,
   create_timestamp: new Date(),
-  update_timestamp: new Date(),
+  update_timestamp: new Date()
 };
 
 const mockDB = {
@@ -91,21 +85,21 @@ const mockDB = {
   updateQuantMeasurement: jest.fn().mockResolvedValue(true),
   updateQualMeasurement: jest.fn().mockResolvedValue(true),
   verifyQualitativeMeasurementsAgainstTaxon: jest.fn().mockResolvedValue([]),
-  verifyQuantitativeMeasurementsAgainstTaxon: jest.fn().mockResolvedValue([]),
+  verifyQuantitativeMeasurementsAgainstTaxon: jest.fn().mockResolvedValue([])
 };
 const request = supertest(makeApp(mockDB as any));
 
-describe("API: Measurement", () => {
-  describe("ROUTERS", () => {
+describe('API: Measurement', () => {
+  describe('ROUTERS', () => {
     describe(`GET ${ROUTE}`, () => {
-      it("should return status 200 ", async () => {
+      it('should return status 200 ', async () => {
         const res = await request.get(ROUTE);
         expect(res.status).toBe(200);
         expect(res.body.measurements).toBeDefined();
         expect(mockDB.getAllQuantMeasurements.mock.calls.length).toBe(1);
         expect(mockDB.getAllQualMeasurements.mock.calls.length).toBe(1);
       });
-      it("should return object with an array of qual / quant measurements ", async () => {
+      it('should return object with an array of qual / quant measurements ', async () => {
         const res = await request.get(ROUTE);
         const { quantitative, qualitative } = res.body.measurements;
         expect(quantitative).toBeInstanceOf(Array);
@@ -116,59 +110,49 @@ describe("API: Measurement", () => {
     });
 
     describe(`POST ${QUANT_ROUTE}/create`, () => {
-      it("returns status 201 with valid body in req", async () => {
+      it('returns status 201 with valid body in req', async () => {
         const res = await request.post(`${QUANT_ROUTE}/create`).send(quantData);
         expect(res.status).toBe(201);
         expect(res.body);
         expect(mockDB.createQuantMeasurement.mock.calls.length).toBe(1);
-        expect(mockDB.createQuantMeasurement.mock.calls[0][0]).toEqual(
-          quantData,
-        );
+        expect(mockDB.createQuantMeasurement.mock.calls[0][0]).toEqual(quantData);
       });
-      it("returns status 400 with property that does not pass validation", async () => {
-        const res = await request
-          .post(`${QUANT_ROUTE}/create`)
-          .send({ ...quantData, value: "3" });
+      it('returns status 400 with property that does not pass validation', async () => {
+        const res = await request.post(`${QUANT_ROUTE}/create`).send({ ...quantData, value: '3' });
         expect(res.status).toBe(400);
         expect(res.body.error).toBeDefined();
         expect(mockDB.createQuantMeasurement.mock.calls.length).toBe(0);
       });
-      it("returns status 400 with extra property", async () => {
-        const res = await request
-          .post(`${QUANT_ROUTE}/create`)
-          .send({ extra_property: "extra" });
+      it('returns status 400 with extra property', async () => {
+        const res = await request.post(`${QUANT_ROUTE}/create`).send({ extra_property: 'extra' });
         expect(res.status).toBe(400);
         expect(mockDB.createQuantMeasurement.mock.calls.length).toBe(0);
       });
     });
 
     describe(`POST ${QUAL_ROUTE}/create`, () => {
-      it("returns status 201 with valid body in req", async () => {
+      it('returns status 201 with valid body in req', async () => {
         const res = await request.post(`${QUAL_ROUTE}/create`).send(qualData);
         expect(res.status).toBe(201);
         expect(res.body);
         expect(mockDB.createQualMeasurement.mock.calls[0][0]).toEqual(qualData);
         expect(mockDB.createQualMeasurement.mock.calls.length).toBe(1);
       });
-      it("returns status 400 with property that does not pass validation", async () => {
-        const res = await request
-          .post(`${QUAL_ROUTE}/create`)
-          .send({ ...qualData, critter_id: 1 });
+      it('returns status 400 with property that does not pass validation', async () => {
+        const res = await request.post(`${QUAL_ROUTE}/create`).send({ ...qualData, critter_id: 1 });
         expect(res.status).toBe(400);
         expect(res.body.error).toBeDefined();
         expect(mockDB.createQualMeasurement.mock.calls.length).toBe(0);
       });
-      it("returns status 400 with extra property", async () => {
-        const res = await request
-          .post(`${QUAL_ROUTE}/create`)
-          .send({ extra_property: "extra" });
+      it('returns status 400 with extra property', async () => {
+        const res = await request.post(`${QUAL_ROUTE}/create`).send({ extra_property: 'extra' });
         expect(res.status).toBe(400);
         expect(mockDB.createQualMeasurement.mock.calls.length).toBe(0);
       });
     });
 
     describe(`PATCH ${QUAL_ROUTE}/:id`, () => {
-      it("returns status 201 with valid body in req", async () => {
+      it('returns status 201 with valid body in req', async () => {
         const data = { measurement_comment: updateComment };
         const res = await request.patch(`${QUAL_ROUTE}/${ID}`).send(data);
         expect(res.status).toBe(201);
@@ -176,52 +160,42 @@ describe("API: Measurement", () => {
         expect(mockDB.updateQualMeasurement.mock.calls[0][0]).toBe(ID);
         expect(mockDB.updateQualMeasurement.mock.calls[0][1]).toEqual(data);
       });
-      it("returns status 400 with property that does not pass validation", async () => {
-        const res = await request
-          .post(`${QUAL_ROUTE}/create`)
-          .send({ ...qualData, critter_id: 1 });
+      it('returns status 400 with property that does not pass validation', async () => {
+        const res = await request.post(`${QUAL_ROUTE}/create`).send({ ...qualData, critter_id: 1 });
         expect(res.status).toBe(400);
         expect(res.body.error).toBeDefined();
         expect(mockDB.updateQualMeasurement.mock.calls.length).toBe(0);
       });
-      it("returns status 400 with extra property", async () => {
-        const res = await request
-          .post(`${QUAL_ROUTE}/create`)
-          .send({ extra_property: "extra" });
+      it('returns status 400 with extra property', async () => {
+        const res = await request.post(`${QUAL_ROUTE}/create`).send({ extra_property: 'extra' });
         expect(res.status).toBe(400);
         expect(mockDB.updateQualMeasurement.mock.calls.length).toBe(0);
       });
     });
 
     describe(`PATCH ${QUANT_ROUTE}/:id`, () => {
-      it("returns status 201 with valid body in req", async () => {
-        const res = await request
-          .patch(`${QUANT_ROUTE}/${ID}`)
-          .send({ measurement_comment: updateComment });
+      it('returns status 201 with valid body in req', async () => {
+        const res = await request.patch(`${QUANT_ROUTE}/${ID}`).send({ measurement_comment: updateComment });
         expect(res.status).toBe(201);
         expect(res.body);
         expect(mockDB.updateQuantMeasurement.mock.calls.length).toBe(1);
         expect(mockDB.updateQuantMeasurement.mock.calls[0][0]).toBeDefined();
       });
-      it("returns status 400 with property that does not pass validation", async () => {
-        const res = await request
-          .post(`${QUANT_ROUTE}/create`)
-          .send({ ...qualData, critter_id: 1 });
+      it('returns status 400 with property that does not pass validation', async () => {
+        const res = await request.post(`${QUANT_ROUTE}/create`).send({ ...qualData, critter_id: 1 });
         expect(res.status).toBe(400);
         expect(res.body.error).toBeDefined();
         expect(mockDB.updateQuantMeasurement.mock.calls.length).toBe(0);
       });
-      it("returns status 400 with extra property", async () => {
-        const res = await request
-          .post(`${QUANT_ROUTE}/create`)
-          .send({ extra_property: "extra" });
+      it('returns status 400 with extra property', async () => {
+        const res = await request.post(`${QUANT_ROUTE}/create`).send({ extra_property: 'extra' });
         expect(res.status).toBe(400);
         expect(mockDB.updateQuantMeasurement.mock.calls.length).toBe(0);
       });
     });
 
     describe(`GET ${QUANT_ROUTE}/:id`, () => {
-      it("should return status 200 and a formatted quant measurement", async () => {
+      it('should return status 200 and a formatted quant measurement', async () => {
         const res = await request.get(`${QUANT_ROUTE}/${ID}`);
         expect(res.body).toBeDefined();
         expect(res.status).toBe(200);
@@ -229,10 +203,8 @@ describe("API: Measurement", () => {
         expect(mockDB.getQuantMeasurementOrThrow.mock.calls.length).toBe(1);
         expect(mockDB.getQuantMeasurementOrThrow.mock.calls[0][0]).toBe(ID);
       });
-      it("with non existant id, should return status 404 and have error in body", async () => {
-        mockDB.getQuantMeasurementOrThrow.mockRejectedValue(
-          apiError.notFound("BAD"),
-        );
+      it('with non existant id, should return status 404 and have error in body', async () => {
+        mockDB.getQuantMeasurementOrThrow.mockRejectedValue(apiError.notFound('BAD'));
         const res = await request.get(`${QUANT_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
         expect(res.body.error).toBeDefined();
@@ -242,7 +214,7 @@ describe("API: Measurement", () => {
     });
 
     describe(`GET ${QUAL_ROUTE}/:id`, () => {
-      it("should return status 200 and a formatted qual measurement", async () => {
+      it('should return status 200 and a formatted qual measurement', async () => {
         const res = await request.get(`${QUAL_ROUTE}/${ID}`);
         expect(res.body).toBeDefined();
         expect(res.status).toBe(200);
@@ -251,10 +223,8 @@ describe("API: Measurement", () => {
 
         expect(mockDB.getQualMeasurementOrThrow.mock.calls[0][0]).toBe(ID);
       });
-      it("with non existant id, should return status 404 and have error in body", async () => {
-        mockDB.getQualMeasurementOrThrow.mockRejectedValue(
-          apiError.notFound("BAD"),
-        );
+      it('with non existant id, should return status 404 and have error in body', async () => {
+        mockDB.getQualMeasurementOrThrow.mockRejectedValue(apiError.notFound('BAD'));
         const res = await request.get(`${QUAL_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
         expect(res.body.error).toBeDefined();
@@ -264,17 +234,15 @@ describe("API: Measurement", () => {
     });
 
     describe(`DELETE ${QUANT_ROUTE}/:id`, () => {
-      it("should return status 200", async () => {
+      it('should return status 200', async () => {
         const res = await request.delete(`${QUANT_ROUTE}/${ID}`);
         expect(res.body).toBeDefined();
         expect(res.status).toBe(200);
         expect(mockDB.deleteQuantMeasurement.mock.calls[0][0]).toBe(ID);
         expect(mockDB.deleteQuantMeasurement.mock.calls.length).toBe(1);
       });
-      it("with non existant id, should return status 404 and have error in body", async () => {
-        mockDB.deleteQuantMeasurement.mockRejectedValue(
-          apiError.notFound("BAD"),
-        );
+      it('with non existant id, should return status 404 and have error in body', async () => {
+        mockDB.deleteQuantMeasurement.mockRejectedValue(apiError.notFound('BAD'));
         const res = await request.delete(`${QUANT_ROUTE}/${badID}`);
         expect(res.status).toBe(404);
         expect(res.body.error).toBeDefined();
@@ -282,16 +250,14 @@ describe("API: Measurement", () => {
       });
     });
     describe(`DELETE ${QUAL_ROUTE}/:id`, () => {
-      it("should return status 200", async () => {
+      it('should return status 200', async () => {
         const res = await request.delete(`${QUAL_ROUTE}/${ID}`);
         expect(res.body).toBeDefined();
         expect(res.status).toBe(200);
         expect(mockDB.deleteQualMeasurement.mock.calls[0][0]).toBe(ID);
       });
-      it("with non existant id, should return status 404 and have error in body", async () => {
-        mockDB.deleteQualMeasurement.mockRejectedValue(
-          apiError.notFound("BAD"),
-        );
+      it('with non existant id, should return status 404 and have error in body', async () => {
+        mockDB.deleteQualMeasurement.mockRejectedValue(apiError.notFound('BAD'));
         const res = await request.delete(`${QUAL_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
         expect(res.body.error).toBeDefined();
@@ -299,31 +265,27 @@ describe("API: Measurement", () => {
       });
     });
   });
-  describe("SERVICES", () => {
-    describe("measurement.service.ts", () => {
+  describe('SERVICES', () => {
+    describe('measurement.service.ts', () => {
       describe(getAllQualMeasurements.name, () => {
-        it("should return array of qual measurements", async () => {
-          const p = prisMock("measurement_qualitative", "findMany", [true]);
+        it('should return array of qual measurements', async () => {
+          const p = prisMock('measurement_qualitative', 'findMany', [true]);
           const res = await getAllQualMeasurements();
           expect(res[0]).toBe(true);
           expect(p.mock.calls.length).toBe(1);
         });
       });
       describe(getAllQuantMeasurements.name, () => {
-        it("should return array of quant measurements", async () => {
-          const p = prisMock("measurement_quantitative", "findMany", [true]);
+        it('should return array of quant measurements', async () => {
+          const p = prisMock('measurement_quantitative', 'findMany', [true]);
           const res = await getAllQuantMeasurements();
           expect(res[0]).toBe(true);
           expect(p.mock.calls.length).toBe(1);
         });
       });
       describe(getQuantMeasurementOrThrow.name, () => {
-        it("should return a quant measurement", async () => {
-          const p = prisMock(
-            "measurement_quantitative",
-            "findUniqueOrThrow",
-            true,
-          );
+        it('should return a quant measurement', async () => {
+          const p = prisMock('measurement_quantitative', 'findUniqueOrThrow', true);
           const res = await getQuantMeasurementOrThrow(ID);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -331,12 +293,8 @@ describe("API: Measurement", () => {
         });
       });
       describe(getQualMeasurementOrThrow.name, () => {
-        it("should return a qual measurement", async () => {
-          const p = prisMock(
-            "measurement_qualitative",
-            "findUniqueOrThrow",
-            true,
-          );
+        it('should return a qual measurement', async () => {
+          const p = prisMock('measurement_qualitative', 'findUniqueOrThrow', true);
           const res = await getQualMeasurementOrThrow(ID);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -344,8 +302,8 @@ describe("API: Measurement", () => {
         });
       });
       describe(createQuantMeasurement.name, () => {
-        it("should return a quant measurement", async () => {
-          const p = prisMock("measurement_quantitative", "create", true);
+        it('should return a quant measurement', async () => {
+          const p = prisMock('measurement_quantitative', 'create', true);
           const res = await createQuantMeasurement({ test: 1 } as any);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -353,8 +311,8 @@ describe("API: Measurement", () => {
         });
       });
       describe(createQualMeasurement.name, () => {
-        it("should return a qual measurement", async () => {
-          const p = prisMock("measurement_qualitative", "create", true);
+        it('should return a qual measurement', async () => {
+          const p = prisMock('measurement_qualitative', 'create', true);
           const res = await createQualMeasurement({ test: 1 } as any);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -362,9 +320,9 @@ describe("API: Measurement", () => {
         });
       });
       describe(getQuantMeasurementsByCritterId.name, () => {
-        it("should return a quant measurement by critter_id", async () => {
-          const p = prisMock("critter", "findUniqueOrThrow", "uuid");
-          const b = prisMock("measurement_quantitative", "findMany", [true]);
+        it('should return a quant measurement by critter_id', async () => {
+          const p = prisMock('critter', 'findUniqueOrThrow', 'uuid');
+          const b = prisMock('measurement_quantitative', 'findMany', [true]);
           const res = await getQuantMeasurementsByCritterId(ID);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -374,9 +332,9 @@ describe("API: Measurement", () => {
         });
       });
       describe(getQualMeasurementOrThrow.name, () => {
-        it("should return a qual measurement by critter_id", async () => {
-          const p = prisMock("critter", "findUniqueOrThrow", "uuid");
-          const b = prisMock("measurement_qualitative", "findMany", [true]);
+        it('should return a qual measurement by critter_id', async () => {
+          const p = prisMock('critter', 'findUniqueOrThrow', 'uuid');
+          const b = prisMock('measurement_qualitative', 'findMany', [true]);
           const res = await getQualMeasurementsByCritterId(ID);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -386,8 +344,8 @@ describe("API: Measurement", () => {
         });
       });
       describe(updateQualMeasurement.name, () => {
-        it("should update and return a qual measurement", async () => {
-          const p = prisMock("measurement_qualitative", "update", true);
+        it('should update and return a qual measurement', async () => {
+          const p = prisMock('measurement_qualitative', 'update', true);
           const res = await updateQualMeasurement(ID, {});
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -395,8 +353,8 @@ describe("API: Measurement", () => {
         });
       });
       describe(updateQuantMeasurement.name, () => {
-        it("should update and return a quant measurement", async () => {
-          const p = prisMock("measurement_quantitative", "update", true);
+        it('should update and return a quant measurement', async () => {
+          const p = prisMock('measurement_quantitative', 'update', true);
           const res = await updateQuantMeasurement(ID, {});
           expect(res);
           expect(p.mock.calls.length).toBe(1);
@@ -404,45 +362,45 @@ describe("API: Measurement", () => {
         });
       });
       describe(deleteQualMeasurement.name, () => {
-        it("should delete and return a qual measurement", async () => {
-          const p = prisMock("measurement_qualitative", "delete", true);
+        it('should delete and return a qual measurement', async () => {
+          const p = prisMock('measurement_qualitative', 'delete', true);
           const res = await deleteQualMeasurement(ID);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
           expect(p.mock.calls[0][0]).toEqual({
-            where: { measurement_qualitative_id: ID },
+            where: { measurement_qualitative_id: ID }
           });
         });
       });
       describe(deleteQuantMeasurement.name, () => {
-        it("should delete and return a quant measurement", async () => {
-          const p = prisMock("measurement_quantitative", "delete", true);
+        it('should delete and return a quant measurement', async () => {
+          const p = prisMock('measurement_quantitative', 'delete', true);
           const res = await deleteQuantMeasurement(ID);
           expect(res);
           expect(p.mock.calls.length).toBe(1);
           expect(p.mock.calls[0][0]).toEqual({
-            where: { measurement_quantitative_id: ID },
+            where: { measurement_quantitative_id: ID }
           });
         });
         describe(getMeasurementsByCritterId.name, () => {
-          it("should return qual and quant measurements for a critter_id", async () => {
+          it('should return qual and quant measurements for a critter_id', async () => {
             const res = await getMeasurementsByCritterId(ID);
             expect(res);
-            expect(res).toHaveProperty("quantitative");
-            expect(res).toHaveProperty("qualitative");
+            expect(res).toHaveProperty('quantitative');
+            expect(res).toHaveProperty('qualitative');
           });
         });
       });
     });
   });
 
-  describe("ZOD SCHEMA", () => {
-    describe("QualitativeResponseSchema", () => {
-      it("should correctly format data", () => {
+  describe('ZOD SCHEMA', () => {
+    describe('QualitativeResponseSchema', () => {
+      it('should correctly format data', () => {
         const parsed = QualitativeResponseSchema.parse({
-          temp: "hello world",
+          temp: 'hello world',
           xref_taxon_measurement_qualitative: 1,
-          xref_taxon_measurement_qualitative_option: 2,
+          xref_taxon_measurement_qualitative_option: 2
         });
         const {
           temp,
@@ -450,7 +408,7 @@ describe("API: Measurement", () => {
           option_label,
           option_value,
           xref_taxon_measurement_qualitative,
-          xref_taxon_measurement_qualitative_option,
+          xref_taxon_measurement_qualitative_option
         } = parsed as any;
         expect(temp).toBeDefined();
         expect(xref_taxon_measurement_qualitative).not.toBeDefined();
@@ -460,19 +418,18 @@ describe("API: Measurement", () => {
         expect(option_label).toBeNull();
       });
     });
-    describe("QuantitativeResponseSchema", () => {
-      it("should correctly format data", () => {
+    describe('QuantitativeResponseSchema', () => {
+      it('should correctly format data', () => {
         const parsed = QuantitativeResponseSchema.parse({
-          temp: "hello world",
+          temp: 'hello world'
         });
-        const { measurement_name, temp, xref_taxon_measurement_quantitative } =
-          parsed as any;
+        const { measurement_name, temp, xref_taxon_measurement_quantitative } = parsed as any;
         expect(measurement_name).toBeNull();
         expect(temp).toBeDefined();
         const parsed2 = QuantitativeResponseSchema.parse({
-          xref_taxon_measurement_quantitative: { measurement_name: "TEST" },
+          xref_taxon_measurement_quantitative: { measurement_name: 'TEST' }
         });
-        expect(parsed2.measurement_name).toBe("TEST");
+        expect(parsed2.measurement_name).toBe('TEST');
       });
     });
   });

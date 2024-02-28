@@ -1,9 +1,9 @@
-import express, { NextFunction, Request, Response } from "express";
-import { array } from "zod";
-import { catchErrors } from "../../utils/middleware";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
-import { LocationCreateSchema, LocationResponseSchema } from "./location.utils";
-import { ICbDatabase } from "../../utils/database";
+import express, { NextFunction, Request, Response } from 'express';
+import { array } from 'zod';
+import { catchErrors } from '../../utils/middleware';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
+import { LocationCreateSchema, LocationResponseSchema } from './location.utils';
+import { ICbDatabase } from '../../utils/database';
 
 export const LocationRouter = (db: ICbDatabase) => {
   const locationRouter = express.Router();
@@ -12,7 +12,7 @@ export const LocationRouter = (db: ICbDatabase) => {
    ** Get all locations
    */
   locationRouter.get(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const locations = await db.getAllLocations();
       const formattedLocations = array(LocationResponseSchema).parse(locations);
@@ -24,7 +24,7 @@ export const LocationRouter = (db: ICbDatabase) => {
    ** Create new location
    */
   locationRouter.post(
-    "/create",
+    '/create',
     catchErrors(async (req: Request, res: Response) => {
       const parsed = LocationCreateSchema.parse(req.body);
       const location = await db.createLocation(parsed);
@@ -36,7 +36,7 @@ export const LocationRouter = (db: ICbDatabase) => {
    * * All location_id related routes
    */
   locationRouter
-    .route("/:id")
+    .route('/:id')
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);

@@ -1,7 +1,7 @@
-import axios, { AxiosError } from "axios";
-import { IItisProperties, IItisSolrStub } from "../schemas/itis-schema";
-import { apiError } from "../utils/types";
-import { ExternalService } from "./base-service";
+import axios, { AxiosError } from 'axios';
+import { IItisProperties, IItisSolrStub } from '../schemas/itis-schema';
+import { apiError } from '../utils/types';
+import { ExternalService } from './base-service';
 
 /**
  * Service to use ITIS Web Services (Web Service + Solr).
@@ -20,8 +20,8 @@ export class ItisService extends ExternalService {
    *
    */
   webServiceEndpoints = {
-    TSN_HIERARCHY: "getFullHierarchyFromTSN",
-    TSN_FULL_RECORD: "getFullRecordFromTSN",
+    TSN_HIERARCHY: 'getFullHierarchyFromTSN',
+    TSN_FULL_RECORD: 'getFullRecordFromTSN'
   };
 
   constructor() {
@@ -39,10 +39,7 @@ export class ItisService extends ExternalService {
    * @throws {Error} - Error if itis endpoint does not respond.
    * @returns {Promise<T>} - Generic ITIS response.
    */
-  async _itisWebServiceGetRequest<T>(
-    endpoint: string,
-    query?: string,
-  ): Promise<T> {
+  async _itisWebServiceGetRequest<T>(endpoint: string, query?: string): Promise<T> {
     const baseUrl = `${this.externalServiceUrl}/${endpoint}`;
 
     const url = query ? `${baseUrl}?${query}` : baseUrl;
@@ -55,9 +52,9 @@ export class ItisService extends ExternalService {
       const axiosError = err as AxiosError;
 
       throw apiError.requestIssue(`No response from ITIS Web Service`, [
-        "ItisWebService -> _itisWebServiceGetRequest",
+        'ItisWebService -> _itisWebServiceGetRequest',
         `axios error: ${axiosError.message} `,
-        url,
+        url
       ]);
     }
   }
@@ -81,9 +78,9 @@ export class ItisService extends ExternalService {
       const axiosError = err as AxiosError;
 
       throw apiError.requestIssue(`No response from ITIS Solr Service`, [
-        "ItisWebService -> _itisWebServiceGetRequest",
+        'ItisWebService -> _itisWebServiceGetRequest',
         `axios error: ${axiosError.message}`,
-        url,
+        url
       ]);
     }
   }
@@ -100,20 +97,18 @@ export class ItisService extends ExternalService {
     const result = await this._itisSolrSearch(`tsn:${searchTsn}`);
     // This is almost certaintly one value in docs array when searching for tsn.
     // To be safe searching for the tsn in the docs array.
-    const solrTaxon = result.response.docs.find(
-      (taxon) => taxon.tsn === String(searchTsn),
-    );
+    const solrTaxon = result.response.docs.find((taxon) => taxon.tsn === String(searchTsn));
 
     if (!solrTaxon) {
       throw apiError.notFound(`ITIS was unable to find TSN.`, [
-        "ItisWebService -> searchSolrForTsn",
-        "probably invalid TSN",
+        'ItisWebService -> searchSolrForTsn',
+        'probably invalid TSN'
       ]);
     }
 
     const { tsn, hierarchyTSN, nameWOInd } = solrTaxon;
 
-    const tsnHierarchy = hierarchyTSN[0].split("$").filter(Number).map(Number);
+    const tsnHierarchy = hierarchyTSN[0].split('$').filter(Number).map(Number);
 
     return { tsn: Number(tsn), tsnHierarchy, scientificName: nameWOInd };
   }
@@ -130,9 +125,7 @@ export class ItisService extends ExternalService {
     const { tsnHierarchy } = await this.searchSolrByTsn(searchTsn);
 
     if (tsnHierarchy[tsnHierarchy.length - 1] !== searchTsn) {
-      throw apiError.requestIssue(`ITIS TSN produced invalid hierarchy.`, [
-        "ItisWebService -> getTsnHierarchy",
-      ]);
+      throw apiError.requestIssue(`ITIS TSN produced invalid hierarchy.`, ['ItisWebService -> getTsnHierarchy']);
     }
 
     return tsnHierarchy;
@@ -169,24 +162,20 @@ export class ItisService extends ExternalService {
    * @returns {Promise<number>} ITIS TSN identifier.
    */
   async getTsnFromScientificName(scientificName: string) {
-    const encodedScientificName = scientificName.replace(" ", `\\%20`);
+    const encodedScientificName = scientificName.replace(' ', `\\%20`);
     const solrQuery = `nameWOInd:${encodedScientificName}`;
 
     const result = await this._itisSolrSearch(solrQuery);
 
     const foundTaxon = result.response.docs.find(
-      (itisTaxon) =>
-        itisTaxon.nameWOInd.toUpperCase() === scientificName.toUpperCase(),
+      (itisTaxon) => itisTaxon.nameWOInd.toUpperCase() === scientificName.toUpperCase()
     );
 
     if (!foundTaxon) {
-      throw apiError.notFound(
-        `Unable to translate scientific name to ITIS TSN`,
-        [
-          "ItisWebService -> getTsnFromScientificName",
-          `'${scientificName}' returned undefined`,
-        ],
-      );
+      throw apiError.notFound(`Unable to translate scientific name to ITIS TSN`, [
+        'ItisWebService -> getTsnFromScientificName',
+        `'${scientificName}' returned undefined`
+      ]);
     }
 
     return Number(foundTaxon.tsn);
@@ -207,10 +196,9 @@ export class ItisService extends ExternalService {
    * @returns {Promise<T & Required<IItisProperties>>} new object with properties filled in.
    */
   async patchTsnAndScientificName<T extends Partial<IItisProperties>>(
-    objectToPatch: T,
+    objectToPatch: T
   ): Promise<T & Required<IItisProperties>> {
-    const missingPropertiesError =
-      "itis_tsn and itis_scientific_name missing in object";
+    const missingPropertiesError = 'itis_tsn and itis_scientific_name missing in object';
 
     /**
      * Throw error if neither tsn nor scientific name provided.
@@ -224,14 +212,12 @@ export class ItisService extends ExternalService {
      * Patch scientific name with found value from provided TSN
      */
     if (objectToPatch.itis_tsn) {
-      const scientificName = await this.getScientificNameFromTsn(
-        objectToPatch.itis_tsn,
-      );
+      const scientificName = await this.getScientificNameFromTsn(objectToPatch.itis_tsn);
 
       return {
         ...objectToPatch,
         itis_tsn: objectToPatch.itis_tsn,
-        itis_scientific_name: scientificName,
+        itis_scientific_name: scientificName
       };
     }
 
@@ -245,14 +231,12 @@ export class ItisService extends ExternalService {
     /**
      * If no TSN, then patch with TSN found from provided scientific name
      */
-    const tsn = await this.getTsnFromScientificName(
-      objectToPatch.itis_scientific_name,
-    );
+    const tsn = await this.getTsnFromScientificName(objectToPatch.itis_scientific_name);
 
     return {
       ...objectToPatch,
       itis_tsn: tsn,
-      itis_scientific_name: objectToPatch.itis_scientific_name,
+      itis_scientific_name: objectToPatch.itis_scientific_name
     };
   }
 }

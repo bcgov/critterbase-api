@@ -1,13 +1,7 @@
-import { ZodOpenApiOperationObject } from "zod-openapi";
-import { z } from "zod";
-import {
-  cod_confidence,
-  coordinate_uncertainty_unit,
-  frequency_unit,
-  measurement_unit,
-  sex,
-} from "@prisma/client";
-import { routes } from "../../utils/constants";
+import { ZodOpenApiOperationObject } from 'zod-openapi';
+import { z } from 'zod';
+import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex } from '@prisma/client';
+import { routes } from '../../utils/constants';
 import {
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -17,326 +11,315 @@ import {
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
   LookupWmuSchema,
-  zodID,
-} from "../../utils/zod_helpers";
-import {
-  SwagErr,
-  SwagServerError,
-  SwagUnauthorized,
-} from "../../utils/swagger_helpers";
-import { eCritterStatus } from "../../schemas/critter-schema";
+  zodID
+} from '../../utils/zod_helpers';
+import { SwagErr, SwagServerError, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { eCritterStatus } from '../../schemas/critter-schema';
 
-const availValues = "Available values for this enumerated type.";
-const availRows =
-  "Available rows for this type of data as specified in a lookup table.";
-const TAG = "Lookup";
+const availValues = 'Available values for this enumerated type.';
+const availRows = 'Available rows for this type of data as specified in a lookup table.';
+const TAG = 'Lookup';
 const lookupCommon = {
   requestParams: {
-    query: z.object({ format: z.enum(["asSelect"]).optional() }),
+    query: z.object({ format: z.enum(['asSelect']).optional() })
   },
-  tags: [TAG],
+  tags: [TAG]
 };
 const enumSex: ZodOpenApiOperationObject = {
-  operationId: "enumSex",
+  operationId: 'enumSex',
   requestParams: {
-    query: z.object({ format: z.enum(["asSelect"]).optional() }),
+    query: z.object({ format: z.enum(['asSelect']).optional() })
   },
   tags: [TAG],
   responses: {
-    "200": {
+    '200': {
       description: availValues,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z
             .string()
             .array()
-            .openapi({ example: Object.keys(sex) }),
-        },
-      },
+            .openapi({ example: Object.keys(sex) })
+        }
+      }
     },
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const enumCritterStatus: ZodOpenApiOperationObject = {
-  operationId: "enumCritterStatus",
+  operationId: 'enumCritterStatus',
   tags: [TAG],
   responses: {
-    "200": {
+    '200': {
       description: availValues,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z
             .string()
             .array()
-            .openapi({ example: Object.keys(eCritterStatus) }),
-        },
-      },
+            .openapi({ example: Object.keys(eCritterStatus) })
+        }
+      }
     },
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const enumCodConfidence: ZodOpenApiOperationObject = {
-  operationId: "enumCodConf",
+  operationId: 'enumCodConf',
   tags: [TAG],
   responses: {
-    "200": {
+    '200': {
       description: availValues,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z
             .string()
             .array()
-            .openapi({ example: Object.keys(cod_confidence) }),
-        },
-      },
+            .openapi({ example: Object.keys(cod_confidence) })
+        }
+      }
     },
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const enumCoordinateUncertainty: ZodOpenApiOperationObject = {
-  operationId: "enumCoordUncertain",
+  operationId: 'enumCoordUncertain',
   tags: [TAG],
   responses: {
-    "200": {
+    '200': {
       description: availValues,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z
             .string()
             .array()
-            .openapi({ example: Object.keys(coordinate_uncertainty_unit) }),
-        },
-      },
+            .openapi({ example: Object.keys(coordinate_uncertainty_unit) })
+        }
+      }
     },
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const enumFrequencyUnits: ZodOpenApiOperationObject = {
-  operationId: "enumFreqUnits",
+  operationId: 'enumFreqUnits',
   tags: [TAG],
   responses: {
-    "200": {
+    '200': {
       description: availValues,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z
             .string()
             .array()
-            .openapi({ example: Object.keys(frequency_unit) }),
-        },
-      },
+            .openapi({ example: Object.keys(frequency_unit) })
+        }
+      }
     },
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const enumMeasurementUnit: ZodOpenApiOperationObject = {
-  operationId: "enumMeasurementUnit",
+  operationId: 'enumMeasurementUnit',
   tags: [TAG],
   responses: {
-    "200": {
+    '200': {
       description: availValues,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z
             .string()
             .array()
-            .openapi({ example: Object.keys(measurement_unit) }),
-        },
-      },
+            .openapi({ example: Object.keys(measurement_unit) })
+        }
+      }
     },
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const asSelectSchema = z.object({
   key: z.string(),
   id: zodID,
-  value: z.string(),
+  value: z.string()
 });
 
 const asSelectSchemaWithChildren = asSelectSchema.extend({
-  children: asSelectSchema.array().optional(),
+  children: asSelectSchema.array().optional()
 });
 
 const lookupColours: ZodOpenApiOperationObject = {
-  operationId: "lookupColours",
+  operationId: 'lookupColours',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
             oneOf: [
-              { $ref: "#/components/schemas/colourDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+              { $ref: '#/components/schemas/colourDefaultSchema' },
+              { $ref: '#/components/schemas/asSelectSchema' }
+            ]
+          }
+        }
+      }
     },
     ...SwagServerError,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupRegionEnvs: ZodOpenApiOperationObject = {
-  operationId: "lookupRegionEnv",
+  operationId: 'lookupRegionEnv',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
             oneOf: [
-              { $ref: "#/components/schemas/regionEnvDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+              { $ref: '#/components/schemas/regionEnvDefaultSchema' },
+              { $ref: '#/components/schemas/asSelectSchema' }
+            ]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupRegionNRs: ZodOpenApiOperationObject = {
-  operationId: "lookupRegionNr",
+  operationId: 'lookupRegionNr',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
             oneOf: [
-              { $ref: "#/components/schemas/regionNrDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+              { $ref: '#/components/schemas/regionNrDefaultSchema' },
+              { $ref: '#/components/schemas/asSelectSchema' }
+            ]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupWMUs: ZodOpenApiOperationObject = {
-  operationId: "lookupWmus",
+  operationId: 'lookupWmus',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
-            oneOf: [
-              { $ref: "#/components/schemas/wmuDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+            oneOf: [{ $ref: '#/components/schemas/wmuDefaultSchema' }, { $ref: '#/components/schemas/asSelectSchema' }]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupCods: ZodOpenApiOperationObject = {
-  operationId: "lookupCods",
+  operationId: 'lookupCods',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
-            oneOf: [
-              { $ref: "#/components/schemas/codDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+            oneOf: [{ $ref: '#/components/schemas/codDefaultSchema' }, { $ref: '#/components/schemas/asSelectSchema' }]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupMarkingMaterials: ZodOpenApiOperationObject = {
-  operationId: "lookupMarkingMaterials",
+  operationId: 'lookupMarkingMaterials',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
             oneOf: [
-              { $ref: "#/components/schemas/markingMaterialDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+              { $ref: '#/components/schemas/markingMaterialDefaultSchema' },
+              { $ref: '#/components/schemas/asSelectSchema' }
+            ]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupMarkingTypes: ZodOpenApiOperationObject = {
-  operationId: "lookupMarkingTypes",
+  operationId: 'lookupMarkingTypes',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
             oneOf: [
-              { $ref: "#/components/schemas/markingTypeDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+              { $ref: '#/components/schemas/markingTypeDefaultSchema' },
+              { $ref: '#/components/schemas/asSelectSchema' }
+            ]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const lookupCollectionUnitCategories: ZodOpenApiOperationObject = {
-  operationId: "lookupCollectionUnitCategories",
+  operationId: 'lookupCollectionUnitCategories',
   ...lookupCommon,
   responses: {
-    "200": {
+    '200': {
       description: availRows,
       content: {
-        "application/json": {
+        'application/json': {
           schema: {
             oneOf: [
-              { $ref: "#/components/schemas/collectionCategoryDefaultSchema" },
-              { $ref: "#/components/schemas/asSelectSchema" },
-            ],
-          },
-        },
-      },
+              { $ref: '#/components/schemas/collectionCategoryDefaultSchema' },
+              { $ref: '#/components/schemas/asSelectSchema' }
+            ]
+          }
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 export const lookupSchemas = {
@@ -349,51 +332,51 @@ export const lookupSchemas = {
   collectionCategoryDefaultSchema: LookupCollectionUnitCategorySchema.array(),
   codDefaultSchema: LookupCodSchema.array(),
   markingMaterialDefaultSchema: LookUpMaterialSchema.array(),
-  markingTypeDefaultSchema: LookUpMarkingTypeSchema.array(),
+  markingTypeDefaultSchema: LookUpMarkingTypeSchema.array()
   //taxonDefaultSchema: LookupTaxonSchema.array()
 };
 
 export const enumPaths = {
   [`${routes.lookups}/enum/sex`]: {
-    get: enumSex,
+    get: enumSex
   },
   [`${routes.lookups}/enum/critter-status`]: {
-    get: enumCritterStatus,
+    get: enumCritterStatus
   },
   [`${routes.lookups}/enum/cod-confidence`]: {
-    get: enumCodConfidence,
+    get: enumCodConfidence
   },
   [`${routes.lookups}/enum/coordinate-uncertainty-unit`]: {
-    get: enumCoordinateUncertainty,
+    get: enumCoordinateUncertainty
   },
   [`${routes.lookups}/enum/frequency-unit`]: {
-    get: enumFrequencyUnits,
+    get: enumFrequencyUnits
   },
   [`${routes.lookups}/enum/measurement-unit`]: {
-    get: enumMeasurementUnit,
+    get: enumMeasurementUnit
   },
   [`${routes.lookups}/colours`]: {
-    get: lookupColours,
+    get: lookupColours
   },
   [`${routes.lookups}/region-envs`]: {
-    get: lookupRegionEnvs,
+    get: lookupRegionEnvs
   },
   [`${routes.lookups}/region-nrs`]: {
-    get: lookupRegionNRs,
+    get: lookupRegionNRs
   },
   [`${routes.lookups}/wmus`]: {
-    get: lookupWMUs,
+    get: lookupWMUs
   },
   [`${routes.lookups}/cods`]: {
-    get: lookupCods,
+    get: lookupCods
   },
   [`${routes.lookups}/marking-materials`]: {
-    get: lookupMarkingMaterials,
+    get: lookupMarkingMaterials
   },
   [`${routes.lookups}/marking-types`]: {
-    get: lookupMarkingTypes,
+    get: lookupMarkingTypes
   },
   [`${routes.lookups}/collection-unit-categories`]: {
-    get: lookupCollectionUnitCategories,
-  },
+    get: lookupCollectionUnitCategories
+  }
 };
