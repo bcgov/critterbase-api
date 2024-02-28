@@ -14,13 +14,13 @@ const BulkCreationSchema = z.object({
     .object({
       families: z.array(ResponseSchema).optional(),
       parents: z.array(ResponseSchema).optional(),
-      children: z.array(ResponseSchema).optional()
+      children: z.array(ResponseSchema).optional(),
     })
-    .optional()
+    .optional(),
 });
 
 const filterAndRemoveDeletes = <T>(
-  arr: (T & { _delete?: boolean }[]) | undefined
+  arr: (T & { _delete?: boolean }[]) | undefined,
 ) => {
   return arr?.filter((val, idx, arr) => {
     if (val._delete) {

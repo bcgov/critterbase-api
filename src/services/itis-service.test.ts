@@ -1,7 +1,7 @@
 import axios from "axios";
 import {
   IItisGetFullHierarchyResponse,
-  IItisSolrStub
+  IItisSolrStub,
 } from "../schemas/itis-schema";
 import { ItisService } from "../services/itis-service";
 
@@ -16,9 +16,9 @@ const itisSolrMockRes: IItisSolrStub = {
     numFound: 2,
     docs: [
       { tsn: String(focalTsn), nameWOInd: "Taxon A" },
-      { tsn: String(childTsn), nameWOInd: "Taxon B" }
-    ]
-  }
+      { tsn: String(childTsn), nameWOInd: "Taxon B" },
+    ],
+  },
 };
 
 const itisHierarchyMockRes: Partial<IItisGetFullHierarchyResponse> = {
@@ -30,7 +30,7 @@ const itisHierarchyMockRes: Partial<IItisGetFullHierarchyResponse> = {
       parentTsn: "552369",
       rankName: "Genus",
       taxonName: "Alces",
-      tsn: "180702"
+      tsn: "180702",
     },
     {
       author: "(Linnaeus, 1758)",
@@ -39,7 +39,7 @@ const itisHierarchyMockRes: Partial<IItisGetFullHierarchyResponse> = {
       parentTsn: "180702",
       rankName: "Species",
       taxonName: "Alces alces",
-      tsn: `${focalTsn}`
+      tsn: `${focalTsn}`,
     },
     {
       author: "(Linnaeus, 1758)",
@@ -48,9 +48,9 @@ const itisHierarchyMockRes: Partial<IItisGetFullHierarchyResponse> = {
       parentTsn: "180703",
       rankName: "Subspecies",
       taxonName: "Alces alces alces",
-      tsn: `${childTsn}`
-    }
-  ]
+      tsn: `${childTsn}`,
+    },
+  ],
 };
 
 describe("ItisService", () => {
@@ -80,7 +80,7 @@ describe("ItisService", () => {
         axiosMock.get.mockResolvedValue({ data: "test" });
         const data = await service._itisWebServiceGetRequest(
           "endpoint",
-          "query"
+          "query",
         );
 
         expect(axiosMock.get.mock.calls[0][0]).toBe("itis/endpoint?query");
@@ -105,7 +105,7 @@ describe("ItisService", () => {
         const data = await service._itisSolrSearch("query");
 
         expect(axiosMock.get.mock.calls[0][0]).toBe(
-          "solr/?wt=json&omitHeader=true&q=query"
+          "solr/?wt=json&omitHeader=true&q=query",
         );
         expect(data).toBe("test");
       });
@@ -139,8 +139,8 @@ describe("ItisService", () => {
         Promise.resolve({
           tsn: 1,
           tsnHierarchy: [0, 1],
-          scientificName: "Science"
-        })
+          scientificName: "Science",
+        }),
       );
 
       it("should return hierarchy list", async () => {
@@ -151,7 +151,7 @@ describe("ItisService", () => {
 
       it("should throw error if no hierarchy returned", async () => {
         webServiceSpy.mockImplementation(() =>
-          Promise.reject({ tsnHierarchy: [] })
+          Promise.reject({ tsnHierarchy: [] }),
         );
 
         expect(async () => {
@@ -176,8 +176,8 @@ describe("ItisService", () => {
       it("should inject query to solr search with encoded space characters", async () => {
         solrSearchSpy.mockImplementation(() =>
           Promise.resolve({
-            response: { docs: [{ tsn: "1", nameWOInd: "test test" }] }
-          })
+            response: { docs: [{ tsn: "1", nameWOInd: "test test" }] },
+          }),
         );
         await service.getTsnFromScientificName("test test");
         expect(solrSearchSpy.mock.calls[0][0]).toBe("nameWOInd:test\\%20test");
@@ -186,8 +186,8 @@ describe("ItisService", () => {
       it("should throw error if unable to find scientific name", async () => {
         solrSearchSpy.mockImplementation(() =>
           Promise.resolve({
-            response: { docs: [{ tsn: "2", nameWOInd: "test" }] }
-          })
+            response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
+          }),
         );
 
         try {
@@ -195,7 +195,7 @@ describe("ItisService", () => {
           expect(false);
         } catch (err: any) {
           expect(err.message).toBe(
-            "Unable to translate scientific name to ITIS TSN"
+            "Unable to translate scientific name to ITIS TSN",
           );
         }
       });
@@ -203,8 +203,8 @@ describe("ItisService", () => {
       it("should return tsn if match of scientific name in response", async () => {
         solrSearchSpy.mockImplementation(() =>
           Promise.resolve({
-            response: { docs: [{ tsn: "2", nameWOInd: "test" }] }
-          })
+            response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
+          }),
         );
         const response = await service.getTsnFromScientificName("test");
         expect(response).toBe(2);

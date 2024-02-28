@@ -4,7 +4,7 @@ import { catchErrors } from "../../utils/middleware";
 import {
   CaptureCreateSchema,
   CaptureResponseSchema,
-  CaptureUpdateSchema
+  CaptureUpdateSchema,
 } from "./capture.utils";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
@@ -21,7 +21,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
       const allCaptures = await db.getAllCaptures();
       const result = allCaptures.map((c) => CaptureResponseSchema.parse(c));
       return res.status(200).json(result);
-    })
+    }),
   );
 
   /**
@@ -33,7 +33,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
       const parsed = CaptureCreateSchema.parse(req.body);
       const result = await db.createCapture(parsed);
       return res.status(201).json(result);
-    })
+    }),
   );
 
   captureRouter.get(
@@ -43,7 +43,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
       const result = await db.getCaptureByCritter(parsed.id);
       const format = result.map((c) => CaptureResponseSchema.parse(c));
       res.status(200).json(format);
-    })
+    }),
   );
 
   /**
@@ -55,7 +55,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
@@ -63,7 +63,7 @@ export const CaptureRouter = (db: ICbDatabase) => {
         const result = await db.getCaptureById(id);
         const format = CaptureResponseSchema.parse(result);
         return res.status(200).json(format);
-      })
+      }),
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
@@ -71,14 +71,14 @@ export const CaptureRouter = (db: ICbDatabase) => {
         const parsed = CaptureUpdateSchema.parse(req.body);
         const result = await db.updateCapture(id, parsed);
         res.status(200).json(result);
-      })
+      }),
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const result = await db.deleteCapture(id);
         res.status(200).json(result);
-      })
+      }),
     );
 
   return captureRouter;

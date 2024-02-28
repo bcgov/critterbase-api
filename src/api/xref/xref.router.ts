@@ -34,7 +34,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       //   xrefCollectionUnitFormats,
       // );
       // return res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -53,11 +53,11 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnCollectionCategories(
         tsn,
-        format
+        format,
       );
 
       res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -75,11 +75,11 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnMarkingBodyLocations(
         tsn,
-        format
+        format,
       );
 
       res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -98,11 +98,11 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnQualitativeMeasurements(
         tsn,
-        format
+        format,
       );
 
       res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -120,11 +120,11 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnQuantitativeMeasurements(
         tsn,
-        format
+        format,
       );
 
       res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -143,7 +143,7 @@ export const XrefRouter = (db: ICbDatabase) => {
       const response = await db.xrefService.getTsnMeasurements(tsn, format);
 
       res.status(200).json(response);
-    })
+    }),
   );
 
   return xrefRouter;

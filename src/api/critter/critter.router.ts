@@ -10,7 +10,7 @@ import {
   CritterUpdateSchema,
   SimilarCritterQuerySchema,
   CritterIdsRequestSchema,
-  WlhIdQuerySchema
+  WlhIdQuerySchema,
 } from "../../schemas/critter-schema";
 
 /**
@@ -34,7 +34,7 @@ export const CritterRouter = (db: ICbDatabase) => {
         await db.critterService.getAllCrittersOrCrittersWithWlhId(wlh_id);
 
       return res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -51,7 +51,7 @@ export const CritterRouter = (db: ICbDatabase) => {
         await db.critterService.getMultipleCrittersByIds(critter_ids);
 
       return res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -66,7 +66,7 @@ export const CritterRouter = (db: ICbDatabase) => {
       const response = await db.critterService.findSimilarCritters(parsed);
 
       return res.status(200).json(response);
-    })
+    }),
   );
 
   /**
@@ -81,7 +81,7 @@ export const CritterRouter = (db: ICbDatabase) => {
       const response = await db.critterService.createCritter(payload);
 
       return res.status(201).json(response);
-    })
+    }),
   );
 
   /**
@@ -95,7 +95,7 @@ export const CritterRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     /**
      * Fetch a critter by critter id.
@@ -108,11 +108,11 @@ export const CritterRouter = (db: ICbDatabase) => {
 
         const response = await db.critterService.getCritterById(
           critterId,
-          format
+          format,
         );
 
         return res.status(200).json(response);
-      })
+      }),
     )
     /**
      * Update a critter by critter id.
@@ -125,11 +125,11 @@ export const CritterRouter = (db: ICbDatabase) => {
 
         const response = await db.critterService.updateCritter(
           critterId,
-          payload
+          payload,
         );
 
         return res.status(201).json(response);
-      })
+      }),
     );
 
   return critterRouter;

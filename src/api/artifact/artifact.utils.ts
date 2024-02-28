@@ -6,7 +6,7 @@ import {
   noAudit,
   nonEmpty,
   zodAudit,
-  zodID
+  zodID,
 } from "../../utils/zod_helpers";
 
 // Types
@@ -28,13 +28,13 @@ const artifactSchema = implement<artifact>().with({
   mortality_id: zodID.nullable(),
   measurement_qualitative: zodID.nullable(),
   measurement_quantitative: zodID.nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 // Validate outgoing response for artifacts
 const SwagArtifactResponseSchema = implement<ArtifactResponse>().with({
   ...artifactSchema.shape,
-  signed_url: z.string()
+  signed_url: z.string(),
 });
 
 // Validate incoming request body for create artifact
@@ -47,7 +47,7 @@ const ArtifactCreateBodySchema = implement<
   artifactSchema
     .omit({ ...noAudit, artifact_id: true, artifact_url: true })
     .partial()
-    .required({ critter_id: true }).shape
+    .required({ critter_id: true }).shape,
 );
 
 // Validate incoming request body for update artifact
@@ -65,6 +65,6 @@ export {
   artifactSchema,
   ArtifactCreateBodySchema,
   ArtifactUpdateBodySchema,
-  SwagArtifactResponseSchema
+  SwagArtifactResponseSchema,
 };
 export type { ArtifactCreate, ArtifactUpdate, ArtifactResponse };

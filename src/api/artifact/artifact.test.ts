@@ -6,7 +6,7 @@ import {
   ArtifactCreate,
   ArtifactResponse,
   ArtifactUpdate,
-  artifactSchema
+  artifactSchema,
 } from "./artifact.utils";
 import {
   createArtifact as _createArtifact,
@@ -14,7 +14,7 @@ import {
   getAllArtifacts as _getAllArtifacts,
   getArtifactById as _getArtifactById,
   getArtifactsByCritterId as _getArtifactsByCritterId,
-  updateArtifact as _updateArtifact
+  updateArtifact as _updateArtifact,
 } from "./artifact.service";
 import { apiError } from "../../utils/types";
 import { makeApp } from "../../app";
@@ -27,7 +27,7 @@ const CRITTER_ID = randomUUID();
 const URL = "https://example.com/artifact";
 
 const NEW_ARTIFACT: ArtifactCreate = {
-  critter_id: CRITTER_ID
+  critter_id: CRITTER_ID,
 };
 
 const PRISMA_ARTIFACT: artifact = {
@@ -42,12 +42,12 @@ const PRISMA_ARTIFACT: artifact = {
   create_user: ID,
   update_user: ID,
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const RETURN_ARTIFACT: ArtifactResponse = {
   ...PRISMA_ARTIFACT,
-  signed_url: URL
+  signed_url: URL,
 };
 
 const MOCK_FILE = Buffer.from("This is a mock file");
@@ -86,8 +86,8 @@ const request = supertest(
     createArtifact,
     deleteArtifact,
     getCritterById,
-    critterService: { getCritterById }
-  } as unknown as Record<keyof ICbDatabase, any>)
+    critterService: { getCritterById },
+  } as unknown as Record<keyof ICbDatabase, any>),
 );
 
 beforeEach(() => {
@@ -115,7 +115,7 @@ describe("API: Artifact", () => {
         create.mockResolvedValue(PRISMA_ARTIFACT);
         const returnedArtifact = await _createArtifact(
           NEW_ARTIFACT,
-          MOCK_FILE as unknown as Express.Multer.File
+          MOCK_FILE as unknown as Express.Multer.File,
         );
         expect.assertions(4);
         expect(uploadFileToS3).toHaveBeenCalledTimes(1);
@@ -163,7 +163,7 @@ describe("API: Artifact", () => {
     describe("updateArtifact()", () => {
       it("returns an updated artifact", async () => {
         const UPDATED_ARTIFACT: ArtifactUpdate = {
-          critter_id: ID
+          critter_id: ID,
         };
         update.mockResolvedValue({ ...PRISMA_ARTIFACT, ...UPDATED_ARTIFACT });
         const returnedArtifact = await _updateArtifact(ID, UPDATED_ARTIFACT);
@@ -172,7 +172,7 @@ describe("API: Artifact", () => {
         expect(prisma.artifact.update).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.update).toHaveBeenCalledWith({
           where: { artifact_id: ID },
-          data: UPDATED_ARTIFACT
+          data: UPDATED_ARTIFACT,
         });
         expect(artifactSchema.safeParse(returnedArtifact).success).toBe(true);
       });
@@ -185,7 +185,7 @@ describe("API: Artifact", () => {
         expect.assertions(3);
         expect(prisma.artifact.delete).toHaveBeenCalledTimes(1);
         expect(prisma.artifact.delete).toHaveBeenCalledWith({
-          where: { artifact_id: ID }
+          where: { artifact_id: ID },
         });
         expect(artifactSchema.safeParse(deletedArtifact).success).toBe(true);
       });
@@ -245,7 +245,7 @@ describe("API: Artifact", () => {
 
       it("returns status 400 when data is missing attached file", async () => {
         const res = await request.post("/api/artifacts/create").send({
-          CRITTER_ID: ID
+          CRITTER_ID: ID,
         });
         expect.assertions(3);
         expect(createArtifact.mock.calls.length).toBe(0);

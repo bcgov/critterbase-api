@@ -6,7 +6,7 @@ import {
   SwagDesc,
   SwagErr,
   SwagNotFound,
-  SwagUnauthorized
+  SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 import { zodID } from "../../utils/zod_helpers";
 import {
@@ -15,7 +15,7 @@ import {
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema,
   FamilyParentSchema,
-  FamilySchema
+  FamilySchema,
 } from "./family.utils";
 
 const TAG = "Family";
@@ -24,15 +24,15 @@ const critterArr = CritterSchema.array();
 const defaultFamilyContent = {
   content: {
     "application/json": {
-      schema: FamilySchema
-    }
-  }
+      schema: FamilySchema,
+    },
+  },
 };
 
 const reqIdParam = {
   requestParams: {
-    path: z.object({ id: zodID })
-  }
+    path: z.object({ id: zodID }),
+  },
 };
 
 const SwagGetAllFamilies: ZodOpenApiOperationObject = {
@@ -44,14 +44,14 @@ const SwagGetAllFamilies: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: FamilySchema.array()
-        }
-      }
+          schema: FamilySchema.array(),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagCreateFamily: ZodOpenApiOperationObject = {
@@ -61,19 +61,19 @@ const SwagCreateFamily: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: FamilyCreateBodySchema
-      }
-    }
+        schema: FamilyCreateBodySchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.create,
-      ...defaultFamilyContent
+      ...defaultFamilyContent,
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 const SwagGetFamilyChildren: ZodOpenApiOperationObject = {
   operationId: "getFamilyChildren",
@@ -84,14 +84,14 @@ const SwagGetFamilyChildren: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: FamilyChildSchema.array()
-        }
-      }
+          schema: FamilyChildSchema.array(),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 const SwagGetFamilyParents: ZodOpenApiOperationObject = {
   operationId: "getFamilyParents",
@@ -102,14 +102,14 @@ const SwagGetFamilyParents: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "appliaction/json": {
-          schema: FamilyParentSchema.array()
-        }
-      }
+          schema: FamilyParentSchema.array(),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 const SwagGetCritterParents: ZodOpenApiOperationObject = {
   operationId: "getParentsOfCritterId",
@@ -121,14 +121,14 @@ const SwagGetCritterParents: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "appliaction/json": {
-          schema: critterArr
-        }
-      }
+          schema: critterArr,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagGetCritterChildren: ZodOpenApiOperationObject = {
@@ -141,14 +141,14 @@ const SwagGetCritterChildren: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "appliaction/json": {
-          schema: critterArr
-        }
-      }
+          schema: critterArr,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagParentsCreate: ZodOpenApiOperationObject = {
@@ -158,23 +158,23 @@ const SwagParentsCreate: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: FamilyParentCreateBodySchema
-      }
-    }
+        schema: FamilyParentCreateBodySchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: FamilyParentSchema
-        }
-      }
+          schema: FamilyParentSchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagDeleteParents: ZodOpenApiOperationObject = {
@@ -184,23 +184,23 @@ const SwagDeleteParents: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: FamilyParentCreateBodySchema
-      }
-    }
+        schema: FamilyParentCreateBodySchema,
+      },
+    },
   },
   responses: {
     "200": {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: FamilyParentSchema
-        }
-      }
+          schema: FamilyParentSchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagCreateChildOfFamily: ZodOpenApiOperationObject = {
@@ -210,23 +210,23 @@ const SwagCreateChildOfFamily: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: FamilyChildCreateBodySchema
-      }
-    }
+        schema: FamilyChildCreateBodySchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: FamilyChildSchema
-        }
-      }
+          schema: FamilyChildSchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
@@ -236,23 +236,23 @@ const SwagDeleteChildOfFamily: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: FamilyChildCreateBodySchema
-      }
-    }
+        schema: FamilyChildCreateBodySchema,
+      },
+    },
   },
   responses: {
     "200": {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: FamilyChildSchema
-        }
-      }
+          schema: FamilyChildSchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
@@ -268,15 +268,15 @@ const SwagGetImmediateFamilyOfCritter: ZodOpenApiOperationObject = {
           schema: z.object({
             children: critterArr,
             siblings: critterArr,
-            parents: critterArr
-          })
-        }
-      }
+            parents: critterArr,
+          }),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagGetParentsChildrenFromFamily: ZodOpenApiOperationObject = {
@@ -290,14 +290,14 @@ const SwagGetParentsChildrenFromFamily: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: z.object({ children: critterArr, parents: critterArr })
-        }
-      }
+          schema: z.object({ children: critterArr, parents: critterArr }),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagUpdateFamily: ZodOpenApiOperationObject = {
@@ -308,23 +308,23 @@ const SwagUpdateFamily: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: FamilyCreateBodySchema
-      }
-    }
+        schema: FamilyCreateBodySchema,
+      },
+    },
   },
   responses: {
     "200": {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: FamilySchema
-        }
-      }
+          schema: FamilySchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagDeleteFamily: ZodOpenApiOperationObject = {
@@ -338,14 +338,14 @@ const SwagDeleteFamily: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         "application/json": {
-          schema: FamilySchema
-        }
-      }
+          schema: FamilySchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const SwagGetFamilyByLabel: ZodOpenApiOperationObject = {
@@ -358,48 +358,48 @@ const SwagGetFamilyByLabel: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: FamilySchema
-        }
-      }
+          schema: FamilySchema,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 export const familyPaths = {
   [routes.family]: {
-    get: SwagGetAllFamilies
+    get: SwagGetAllFamilies,
   },
   [`${routes.family}/${routes.create}`]: {
-    post: SwagCreateFamily
+    post: SwagCreateFamily,
   },
   [`${routes.family}/{id}`]: {
     get: SwagGetParentsChildrenFromFamily,
     patch: SwagUpdateFamily,
-    delete: SwagDeleteFamily
+    delete: SwagDeleteFamily,
   },
   [`${routes.family}/immediate/{id}`]: {
-    get: SwagGetImmediateFamilyOfCritter
+    get: SwagGetImmediateFamilyOfCritter,
   },
   [`${routes.family}/children`]: {
     get: SwagGetFamilyChildren,
     delete: SwagDeleteChildOfFamily,
-    post: SwagCreateChildOfFamily
+    post: SwagCreateChildOfFamily,
   },
   [`${routes.family}/children/{id}`]: {
-    get: SwagGetCritterChildren
+    get: SwagGetCritterChildren,
   },
   [`${routes.family}/parents/{id}`]: {
-    get: SwagGetCritterParents
+    get: SwagGetCritterParents,
   },
   [`${routes.family}/parents`]: {
     get: SwagGetFamilyParents,
     delete: SwagDeleteParents,
-    post: SwagParentsCreate
+    post: SwagParentsCreate,
   },
   [`${routes.family}/label/{label}`]: {
-    get: SwagGetFamilyByLabel
-  }
+    get: SwagGetFamilyByLabel,
+  },
 };

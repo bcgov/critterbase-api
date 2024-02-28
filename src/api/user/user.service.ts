@@ -11,8 +11,8 @@ import { apiError } from "../../utils/types";
 const createUser = async (newUserData: UserCreateInput): Promise<user> => {
   const existingUser = await prisma.user.findFirst({
     where: {
-      keycloak_uuid: newUserData.keycloak_uuid
-    }
+      keycloak_uuid: newUserData.keycloak_uuid,
+    },
   });
   if (existingUser) {
     return existingUser;
@@ -31,10 +31,10 @@ const upsertUser = async (newUserData: UserCreateInput): Promise<user> => {
   }
   const newUser = await prisma.user.upsert({
     where: {
-      keycloak_uuid: newUserData.keycloak_uuid
+      keycloak_uuid: newUserData.keycloak_uuid,
     },
     update: newUserData,
-    create: newUserData
+    create: newUserData,
   });
   return newUser;
 };
@@ -54,8 +54,8 @@ const getUsers = async (): Promise<user[]> => {
 const getUser = async (user_id: string): Promise<user> => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
-      user_id: user_id
-    }
+      user_id: user_id,
+    },
   });
   return user;
 };
@@ -67,13 +67,13 @@ const getUser = async (user_id: string): Promise<user> => {
  */
 const updateUser = async (
   user_id: string,
-  data: UserUpdateInput
+  data: UserUpdateInput,
 ): Promise<user> => {
   const updatedUser = await prisma.user.update({
     where: {
-      user_id: user_id
+      user_id: user_id,
     },
-    data: data
+    data: data,
   });
   return updatedUser;
 };
@@ -85,8 +85,8 @@ const updateUser = async (
 const deleteUser = async (user_id: string): Promise<user> => {
   const deletedUser = await prisma.user.delete({
     where: {
-      user_id: user_id
-    }
+      user_id: user_id,
+    },
   });
   return deletedUser;
 };
@@ -104,5 +104,5 @@ export {
   getUser,
   updateUser,
   deleteUser,
-  setUserContext
+  setUserContext,
 };

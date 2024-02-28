@@ -14,7 +14,7 @@ export interface IItisHierarchy<TsnType extends string | number = string> {
 }
 
 export interface IItisGetFullHierarchyResponse<
-  TsnType extends string | number = string
+  TsnType extends string | number = string,
 > {
   author: string;
   class: string;

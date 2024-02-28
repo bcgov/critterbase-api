@@ -7,7 +7,7 @@ import {
   getAllCaptures as _getAllCaptures,
   getCaptureByCritter as _getCaptureByCritter,
   getCaptureById as _getCaptureById,
-  updateCapture as _updateCapture
+  updateCapture as _updateCapture,
 } from "./capture.service";
 import { CaptureBodySchema, CaptureResponseSchema } from "./capture.utils";
 import { makeApp } from "../../app";
@@ -30,8 +30,8 @@ const request = supertest(
     getCaptureById,
     updateCapture,
     deleteCapture,
-    createCapture
-  } as Record<keyof ICbDatabase, any>)
+    createCapture,
+  } as Record<keyof ICbDatabase, any>),
 );
 
 const create = jest.spyOn(prisma.capture, "create").mockImplementation();
@@ -59,7 +59,7 @@ const CAPTURE: capture = {
   create_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   update_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const CRITTER: critter = {
@@ -73,18 +73,18 @@ const CRITTER: critter = {
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
   update_timestamp: new Date(),
-  critter_comment: "Hi :)"
+  critter_comment: "Hi :)",
 };
 
 const LOCATION = {
   latitude: 2,
-  longitude: 2
+  longitude: 2,
 };
 
 const CAPTURE_WITH_LOCATION = {
   ...CAPTURE,
   capture_location: LOCATION,
-  release_location: LOCATION
+  release_location: LOCATION,
 };
 
 beforeEach(() => {
@@ -114,7 +114,7 @@ describe("API: Critter", () => {
       it("should parse the data correctly", async () => {
         const obj = {
           location_capture_capture_location_idTolocation: mockCommonLocation,
-          location_capture_release_location_idTolocation: mockCommonLocation
+          location_capture_release_location_idTolocation: mockCommonLocation,
         };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
@@ -124,7 +124,7 @@ describe("API: Critter", () => {
       it("should parse the data correctly", async () => {
         const obj = {
           location_capture_capture_location_idTolocation: null,
-          location_capture_release_location_idTolocation: null
+          location_capture_release_location_idTolocation: null,
         };
         const res = CaptureResponseSchema.parse(obj);
         expect.assertions(2);
@@ -140,7 +140,7 @@ describe("API: Critter", () => {
         const result = await _createCapture({
           ...CAPTURE,
           capture_timestamp: new Date(),
-          release_timestamp: new Date()
+          release_timestamp: new Date(),
         });
         expect.assertions(2);
         expect(prisma.capture.create).toHaveBeenCalled();
@@ -157,21 +157,21 @@ describe("API: Critter", () => {
         create.mockResolvedValue({
           ...CAPTURE,
           capture_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
-          release_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+          release_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
         });
         const result = await _createCapture({
           ...CAPTURE,
           capture_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
-          release_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+          release_location_id: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
         });
         expect.assertions(4);
         expect(prisma.capture.create).toHaveBeenCalled();
         expect(CaptureBodySchema.safeParse(result).success).toBe(true);
         expect(result.capture_location_id).toBe(
-          "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+          "4804d622-9539-40e6-a8a5-b7b223c2f09f",
         );
         expect(result.release_location_id).toBe(
-          "4804d622-9539-40e6-a8a5-b7b223c2f09f"
+          "4804d622-9539-40e6-a8a5-b7b223c2f09f",
         );
       });
     });
@@ -205,7 +205,7 @@ describe("API: Critter", () => {
         update.mockResolvedValue({ ...CAPTURE, capture_comment: "banana" });
         const result = await _updateCapture(CAPTURE_ID, {
           capture_comment: "banana",
-          critter_id: ""
+          critter_id: "",
         });
         expect.assertions(2);
         expect(prisma.capture.update).toHaveBeenCalled();
@@ -215,19 +215,19 @@ describe("API: Critter", () => {
         update.mockResolvedValue({
           ...CAPTURE,
           capture_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b",
-          release_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b"
+          release_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b",
         });
         const result = await _updateCapture(CAPTURE_ID, {
           capture_location: LOCATION,
           release_location: LOCATION,
-          critter_id: ""
+          critter_id: "",
         });
         expect.assertions(3);
         expect(result?.capture_location_id).toBe(
-          "3572f49f-4c81-472a-8255-5d390dfdc66b"
+          "3572f49f-4c81-472a-8255-5d390dfdc66b",
         );
         expect(result?.release_location_id).toBe(
-          "3572f49f-4c81-472a-8255-5d390dfdc66b"
+          "3572f49f-4c81-472a-8255-5d390dfdc66b",
         );
         expect(prisma.capture.update).toHaveBeenCalled();
       });
@@ -235,16 +235,16 @@ describe("API: Critter", () => {
         update.mockResolvedValue({
           ...CAPTURE,
           capture_location_id: "3572f49f-4c81-472a-8255-5d390dfdc66b",
-          release_location_id: "be8d11b4-e638-4b22-a10a-9a5bdcc1fbcc"
+          release_location_id: "be8d11b4-e638-4b22-a10a-9a5bdcc1fbcc",
         });
         const result = await _updateCapture(CAPTURE_ID, {
           release_location: LOCATION,
           force_create_release: true,
-          critter_id: ""
+          critter_id: "",
         });
         expect.assertions(2);
         expect(result?.capture_location_id).not.toBe(
-          result?.release_location_id
+          result?.release_location_id,
         );
         expect(prisma.capture.update).toHaveBeenCalled();
       });

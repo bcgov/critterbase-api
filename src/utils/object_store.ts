@@ -1,7 +1,7 @@
 import {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import multer from "multer";
@@ -32,10 +32,10 @@ const _getS3Client = (): S3Client => {
     endpoint: url,
     credentials: {
       accessKeyId: accessKeyId,
-      secretAccessKey: secretAccessKey
+      secretAccessKey: secretAccessKey,
     },
     region: "ca-central-1",
-    forcePathStyle: true
+    forcePathStyle: true,
   });
 };
 
@@ -83,14 +83,14 @@ const getS3HostUrl = (key?: string): string => {
   // Appends the given S3 object key, trimming between 0 and 2 trailing '/' characters
   return `${_getObjectStoreUrl()}/${_getObjectStoreBucketName()}/${key ?? ""}`.replace(
     /\/{0,2}$/,
-    ""
+    "",
   );
 };
 
 const uploadFileToS3 = async (
   file: Express.Multer.File,
   artifact_id: string,
-  metadata: Metadata = {}
+  metadata: Metadata = {},
 ): Promise<string> => {
   // Setting up S3 upload parameters
   const key = `${artifact_id}_${file.originalname}`;
@@ -99,7 +99,7 @@ const uploadFileToS3 = async (
     Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,
-    Metadata: metadata
+    Metadata: metadata,
   };
   const s3Client = _getS3Client();
   // Uploading files to the bucket
@@ -112,7 +112,7 @@ const getFileDownloadUrl = async (fileName: string): Promise<string> => {
   // Setting up S3 download parameters
   const params = {
     Bucket: _getObjectStoreBucketName(),
-    Key: fileName
+    Key: fileName,
   };
   const s3Client = _getS3Client();
 
@@ -127,5 +127,5 @@ export {
   _getObjectStoreBucketName,
   getS3HostUrl,
   uploadFileToS3,
-  getFileDownloadUrl
+  getFileDownloadUrl,
 };

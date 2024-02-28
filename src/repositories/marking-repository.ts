@@ -6,7 +6,7 @@ import { Repository } from "./base-repository";
 export class MarkingRepository extends Repository {
   async findInvalidMarkingIdsFromTsnHierarchy(
     markingIds: string[],
-    tsnHierarchy: number[]
+    tsnHierarchy: number[],
   ) {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -16,7 +16,7 @@ export class MarkingRepository extends Repository {
           ON m.taxon_marking_body_location_id = x.taxon_marking_body_location_id
         WHERE m.marking_id = ANY(${markingIds}::uuid[])
         AND x.itis_tsn != ALL (${tsnHierarchy});`,
-      z.object({ marking_id: zodID }).array()
+      z.object({ marking_id: zodID }).array(),
     );
 
     return result;

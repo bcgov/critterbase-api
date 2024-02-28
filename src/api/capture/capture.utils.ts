@@ -4,7 +4,7 @@ import {
   commonLocationSelect,
   LocationBody,
   LocationCreateSchema,
-  LocationUpdateSchema
+  LocationUpdateSchema,
 } from "../location/location.utils";
 import { z } from "zod";
 import {
@@ -12,7 +12,7 @@ import {
   implement,
   noAudit,
   ResponseSchema,
-  zodID
+  zodID,
 } from "../../utils/zod_helpers";
 import { AuditColumns } from "../../utils/types";
 import { CommonLocationSchema } from "../location/location.utils";
@@ -29,18 +29,18 @@ const CaptureBodySchema = implement<capture>().with({
   create_user: zodID,
   update_user: zodID,
   create_timestamp: z.coerce.date(),
-  update_timestamp: z.coerce.date()
+  update_timestamp: z.coerce.date(),
 });
 
 const captureInclude = Prisma.validator<Prisma.captureArgs>()({
   include: {
     location_capture_capture_location_idTolocation: {
-      ...commonLocationSelect
+      ...commonLocationSelect,
     },
     location_capture_release_location_idTolocation: {
-      ...commonLocationSelect
-    }
-  }
+      ...commonLocationSelect,
+    },
+  },
 });
 
 type CaptureIncludeType = Prisma.captureGetPayload<typeof captureInclude>;
@@ -50,7 +50,7 @@ const CaptureIncludeSchema = implement<CaptureIncludeType>().with({
   location_capture_capture_location_idTolocation:
     CommonLocationSchema.nullable(),
   location_capture_release_location_idTolocation:
-    CommonLocationSchema.nullable()
+    CommonLocationSchema.nullable(),
 });
 
 const CaptureUpdateSchema = implement<
@@ -61,14 +61,14 @@ const CaptureUpdateSchema = implement<
   }
 >().with(
   CaptureBodySchema.omit({
-    ...noAudit
+    ...noAudit,
   })
     .extend({
       capture_location: LocationUpdateSchema,
       release_location: LocationUpdateSchema,
-      force_create_release: z.boolean().optional()
+      force_create_release: z.boolean().optional(),
     })
-    .partial().shape
+    .partial().shape,
 );
 
 const CaptureCreateSchema = implement<
@@ -82,15 +82,15 @@ const CaptureCreateSchema = implement<
   CaptureBodySchema.omit({ ...noAudit })
     .extend({
       capture_location: LocationCreateSchema,
-      release_location: LocationCreateSchema
+      release_location: LocationCreateSchema,
       // capture_mortality: z.boolean().optional(),
       // release_mortality: z.boolean().optional(),
     })
     .partial()
     .required({
       critter_id: true,
-      capture_timestamp: true
-    }).shape
+      capture_timestamp: true,
+    }).shape,
 );
 
 type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
@@ -109,12 +109,12 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
       : null,
     release_location: r_location
       ? CommonFormattedLocationSchema.parse(r_location)
-      : null
+      : null,
   };
 });
 
 const CaptureDeleteSchema = CaptureBodySchema.pick({ capture_id: true }).extend(
-  DeleteSchema.shape
+  DeleteSchema.shape,
 );
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
@@ -123,7 +123,7 @@ export type {
   CaptureIncludeType,
   FormattedCapture,
   CaptureCreate,
-  CaptureUpdate
+  CaptureUpdate,
 };
 export {
   captureInclude,
@@ -132,5 +132,5 @@ export {
   CaptureResponseSchema,
   CaptureBodySchema,
   CaptureIncludeSchema,
-  CaptureDeleteSchema
+  CaptureDeleteSchema,
 };

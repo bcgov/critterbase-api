@@ -6,7 +6,7 @@ import {
   lk_marking_type,
   lk_region_env,
   lk_region_nr,
-  lk_wildlife_management_unit
+  lk_wildlife_management_unit,
 } from "@prisma/client";
 import { toSelect } from "../../utils/helper_functions";
 import { FormatParse } from "../../utils/types";
@@ -16,33 +16,33 @@ import { ResponseSchema } from "../../utils/zod_helpers";
 const colourFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_colour>(val, "colour_id", "colour")
-    )
-  }
+      toSelect<lk_colour>(val, "colour_id", "colour"),
+    ),
+  },
 };
 
 const regionEnvFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_region_env>(val, "region_env_id", "region_env_name")
-    )
-  }
+      toSelect<lk_region_env>(val, "region_env_id", "region_env_name"),
+    ),
+  },
 };
 
 const regionNrFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_region_nr>(val, "region_nr_id", "region_nr_name")
-    )
-  }
+      toSelect<lk_region_nr>(val, "region_nr_id", "region_nr_name"),
+    ),
+  },
 };
 
 const wmuFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_wildlife_management_unit>(val, "wmu_id", "wmu_name")
-    )
-  }
+      toSelect<lk_wildlife_management_unit>(val, "wmu_id", "wmu_name"),
+    ),
+  },
 };
 
 const codFormats: FormatParse = {
@@ -58,26 +58,26 @@ const codFormats: FormatParse = {
         id: val.cod_id,
         value:
           String(val.cod_category) +
-          (val.cod_reason ? " | " + String(val.cod_reason) : "")
+          (val.cod_reason ? " | " + String(val.cod_reason) : ""),
       };
-    })
-  }
+    }),
+  },
 };
 
 const markingMaterialsFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_marking_material>(val, "marking_material_id", "material")
-    )
-  }
+      toSelect<lk_marking_material>(val, "marking_material_id", "material"),
+    ),
+  },
 };
 
 const markingTypesFormats: FormatParse = {
   asSelect: {
     schema: ResponseSchema.transform((val) =>
-      toSelect<lk_marking_type>(val, "marking_type_id", "name")
-    )
-  }
+      toSelect<lk_marking_type>(val, "marking_type_id", "name"),
+    ),
+  },
 };
 
 const collectionUnitCategoriesFormats: FormatParse = {
@@ -86,10 +86,10 @@ const collectionUnitCategoriesFormats: FormatParse = {
       toSelect<lk_collection_category>(
         val,
         "collection_category_id",
-        "category_name"
-      )
-    )
-  }
+        "category_name",
+      ),
+    ),
+  },
 };
 
 export {
@@ -100,5 +100,5 @@ export {
   markingMaterialsFormats,
   markingTypesFormats,
   collectionUnitCategoriesFormats,
-  colourFormats
+  colourFormats,
 };

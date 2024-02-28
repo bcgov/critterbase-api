@@ -6,7 +6,7 @@ import {
   noAudit,
   nonEmpty,
   zodAudit,
-  zodID
+  zodID,
 } from "../../utils/zod_helpers";
 
 // Types
@@ -23,7 +23,7 @@ const UserSchema = implement<user>().with({
   user_id: zodID,
   user_identifier: z.string(),
   keycloak_uuid: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const SwagUserSchema = UserSchema.extend({ system_user_id: z.string() });
@@ -34,7 +34,7 @@ const UserCreateBodySchema = implement<
 >().with(
   UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
-    .required({ user_identifier: true, keycloak_uuid: true }).shape
+    .required({ user_identifier: true, keycloak_uuid: true }).shape,
 );
 
 // Validate incoming request body for update artifact
@@ -45,7 +45,7 @@ const UserUpdateBodySchema = implement<
   .refine(nonEmpty, "no new data was provided or the format was invalid");
 
 const AuthLoginSchema = z.object({
-  keycloak_uuid: z.string()
+  keycloak_uuid: z.string(),
 });
 
 export {
@@ -53,6 +53,6 @@ export {
   UserUpdateBodySchema,
   AuthLoginSchema,
   UserSchema,
-  SwagUserSchema
+  SwagUserSchema,
 };
 export type { UserCreateInput, UserUpdateInput, LoginCredentials };

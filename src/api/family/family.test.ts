@@ -19,7 +19,7 @@ import {
   removeParentOfFamily as _removeParentOfFamily,
   makeChildOfFamily as _makeChildOfFamily,
   makeParentOfFamily as _makeParentOfFamily,
-  getImmediateFamily as _getImmediateFamily
+  getImmediateFamily as _getImmediateFamily,
 } from "./family.service";
 import {
   FamilyChildCreateBodySchema,
@@ -30,7 +30,7 @@ import {
   FamilyUpdate,
   FamilyCreate,
   FamilyChildCreate,
-  FamilyParentCreate
+  FamilyParentCreate,
 } from "./family.utils";
 
 import { randomUUID } from "crypto";
@@ -39,7 +39,7 @@ import {
   family,
   family_child,
   family_parent,
-  sex
+  sex,
 } from ".prisma/client";
 
 // Mock Location Objects
@@ -51,7 +51,7 @@ const mockAuditColumns = {
   create_timestamp: DATE,
   update_timestamp: DATE,
   create_user: ID,
-  update_user: ID
+  update_user: ID,
 };
 
 const mockCritter: critter = {
@@ -62,69 +62,69 @@ const mockCritter: critter = {
   sex: sex.Male,
   responsible_region_nr_id: ID,
   critter_comment: "test",
-  ...mockAuditColumns
+  ...mockAuditColumns,
 };
 
 const mockCritterResponse = {
   ...mockCritter,
   create_timestamp: DATE.toISOString(),
-  update_timestamp: DATE.toISOString()
+  update_timestamp: DATE.toISOString(),
 };
 
 const mockFamily: family = {
   family_id: ID,
   family_label: "test",
-  ...mockAuditColumns
+  ...mockAuditColumns,
 };
 
 const mockFamilyResponse = {
   ...mockFamily,
   create_timestamp: DATE.toISOString(),
-  update_timestamp: DATE.toISOString()
+  update_timestamp: DATE.toISOString(),
 };
 
 const mockFamilyChild: family_child = {
   family_id: ID,
   child_critter_id: ID,
-  ...mockAuditColumns
+  ...mockAuditColumns,
 };
 
 const mockFamilyChildResponse = {
   ...mockFamilyChild,
   create_timestamp: DATE.toISOString(),
-  update_timestamp: DATE.toISOString()
+  update_timestamp: DATE.toISOString(),
 };
 
 const mockFamilyParent: family_parent = {
   family_id: ID,
   parent_critter_id: ID,
-  ...mockAuditColumns
+  ...mockAuditColumns,
 };
 
 const mockFamilyParentResponse = {
   ...mockFamilyParent,
   create_timestamp: DATE.toISOString(),
-  update_timestamp: DATE.toISOString()
+  update_timestamp: DATE.toISOString(),
 };
 
 const mockImmediateFamily: ImmediateFamily = {
   parents: [mockCritter],
-  children: [mockCritter]
+  children: [mockCritter],
 };
 
 const mockImmediateFamilyResponse = {
   parents: [mockCritterResponse],
-  children: [mockCritterResponse]
+  children: [mockCritterResponse],
 };
 
 const mockImmediateFamilyCritter: ImmediateFamilyCritter = {
   ...mockImmediateFamily,
-  siblings: [mockCritter]
+  siblings: [mockCritter],
 };
 
 const mockImmediateFamilyCritterResponse = {
   ...mockImmediateFamilyResponse,
-  siblings: [mockCritterResponse]
+  siblings: [mockCritterResponse],
 };
 
 // TODO: finish mocking objects
@@ -218,8 +218,8 @@ const request = supertest(
     removeParentOfFamily,
     makeChildOfFamily,
     makeParentOfFamily,
-    getImmediateFamily
-  } as Record<keyof ICbDatabase, any>)
+    getImmediateFamily,
+  } as Record<keyof ICbDatabase, any>),
 );
 
 beforeEach(() => {

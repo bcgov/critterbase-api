@@ -28,7 +28,7 @@ class apiError extends Error {
     message?: string,
     status?: number,
     errorType?: ErrorType,
-    errors?: CustomError[]
+    errors?: CustomError[],
   ) {
     super(message ?? "Unknown error occurred");
     this.status = status ?? 400;
@@ -44,7 +44,7 @@ class apiError extends Error {
     return new apiError(
       `${propertyName} is required and must be provided in request`,
       400,
-      "requiredProperty"
+      "requiredProperty",
     );
   }
 
@@ -130,7 +130,7 @@ export enum QueryFormats {
   default = "default",
   detailed = "detailed",
   full = "full",
-  asSelect = "asSelect"
+  asSelect = "asSelect",
 }
 
 type PrismaIncludes = Prisma.HasInclude | Prisma.HasSelect;
@@ -178,5 +178,5 @@ export {
   FormatParseBody,
   ReqBody,
   PrismaTransactionClient,
-  XOR
+  XOR,
 };

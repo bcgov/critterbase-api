@@ -8,7 +8,7 @@ import {
   QualitativeUpdateSchema,
   QuantitativeCreateSchema,
   QuantitativeResponseSchema,
-  QuantitativeUpdateSchema
+  QuantitativeUpdateSchema,
 } from "./measurement.utils";
 export const MeasurementRouter = (db: ICbDatabase) => {
   const measurementRouter = express.Router();
@@ -23,15 +23,15 @@ export const MeasurementRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const [qualitative, quantitative] = await Promise.all([
         db.getAllQualMeasurements(),
-        db.getAllQuantMeasurements()
+        db.getAllQuantMeasurements(),
       ]);
       return res.status(200).json({
         measurements: {
           qualitative,
-          quantitative
-        }
+          quantitative,
+        },
       });
-    })
+    }),
   );
 
   /**
@@ -43,7 +43,7 @@ export const MeasurementRouter = (db: ICbDatabase) => {
       const parsed = QualitativeCreateSchema.parse(req.body);
       const measurement = await db.createQualMeasurement(parsed);
       return res.status(201).json(measurement);
-    })
+    }),
   );
 
   /**
@@ -55,7 +55,7 @@ export const MeasurementRouter = (db: ICbDatabase) => {
       const parsed = QuantitativeCreateSchema.parse(req.body);
       const measurement = await db.createQuantMeasurement(parsed);
       return res.status(201).json(measurement);
-    })
+    }),
   );
 
   /**
@@ -67,31 +67,31 @@ export const MeasurementRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const qual = await db.getQualMeasurementOrThrow(req.params.id);
         const formattedQual = QualitativeResponseSchema.parse(qual);
         return res.status(200).json(formattedQual);
-      })
+      }),
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const deleted = await db.deleteQualMeasurement(id);
         res.status(200).json(deleted);
-      })
+      }),
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const updateBody = QualitativeUpdateSchema.parse(req.body);
         const measurement = await db.updateQualMeasurement(
           req.params.id,
-          updateBody
+          updateBody,
         );
         res.status(201).json(measurement);
-      })
+      }),
     );
   /**
    * * All quantitative measurement id related routes
@@ -102,30 +102,30 @@ export const MeasurementRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const quant = await db.getQuantMeasurementOrThrow(req.params.id);
         const formattedQuant = QuantitativeResponseSchema.parse(quant);
         return res.status(200).json(formattedQuant);
-      })
+      }),
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const deleted = await db.deleteQuantMeasurement(req.params.id);
         res.status(200).json(deleted);
-      })
+      }),
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const updateBody = QuantitativeUpdateSchema.parse(req.body);
         const measurement = await db.updateQuantMeasurement(
           req.params.id,
-          updateBody
+          updateBody,
         );
         res.status(201).json(measurement);
-      })
+      }),
     );
   return measurementRouter;
 };

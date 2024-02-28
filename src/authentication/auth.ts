@@ -30,7 +30,7 @@ interface IUserHeader {
  * @throws {HTTP401} if the bearer token is missing or invalid
  */
 export const authenticateRequest = async function (
-  req: Request
+  req: Request,
 ): Promise<{ keycloak_uuid: string; system_name: string; identifier: string }> {
   try {
     if (!req.headers.authorization) {
@@ -87,7 +87,7 @@ export const authenticateRequest = async function (
 
     // Verify token using public signing key
     const verifiedToken = verify(tokenString, signingKey, {
-      issuer: [KEYCLOAK_ISSUER]
+      issuer: [KEYCLOAK_ISSUER],
     });
 
     if (!verifiedToken || typeof verifiedToken === "string") {
@@ -120,7 +120,7 @@ export const authenticateRequest = async function (
     const user = {
       keycloak_uuid: userParsed.keycloak_guid.toUpperCase(),
       identifier: userParsed.username,
-      system_name: String(bcgovToken.clientId)
+      system_name: String(bcgovToken.clientId),
     };
 
     console.log(user);

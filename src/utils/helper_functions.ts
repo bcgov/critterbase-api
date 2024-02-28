@@ -15,7 +15,7 @@ import { prisma } from "./constants";
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
 const prismaErrorMsg = (
-  err: PrismaClientKnownRequestError
+  err: PrismaClientKnownRequestError,
 ): { error: string; status: number } => {
   const { meta, message, code } = err;
 
@@ -23,17 +23,17 @@ const prismaErrorMsg = (
     case "P2025":
       return {
         error: typeof meta?.cause === "string" ? meta.cause : message,
-        status: 404
+        status: 404,
       };
     case "P2002":
       return {
         error: `unique constraint failed`,
-        status: 400
+        status: 400,
       };
     case "P2003":
       return {
         error: `foreign key constraint failed`,
-        status: 404
+        status: 404,
       };
   }
   return { error: `request failed at database: "${code}"`, status: 400 };
@@ -58,7 +58,7 @@ type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
 const formatParse = async (
   format: QueryFormats,
   service: Promise<ServiceReturn>,
-  formatParse: FormatParse
+  formatParse: FormatParse,
 ): Promise<Record<string, unknown> | Record<string, unknown>[]> => {
   const serviceData = await service;
   const isArray = Array.isArray(serviceData);
@@ -74,13 +74,13 @@ const formatParse = async (
 const toSelect = <AsType>(
   val: objectOutputType<ZodRawShape, ZodTypeAny, "passthrough">,
   key: keyof AsType & string,
-  valueKey: keyof AsType & string
+  valueKey: keyof AsType & string,
 ) => {
   const castVal = val as AsType;
   return {
     key,
     id: String(castVal[key]),
-    value: String(castVal[valueKey])
+    value: String(castVal[valueKey]),
   } satisfies ISelect;
 };
 
@@ -98,7 +98,7 @@ export const prisMock = (
     | "delete"
     | "create" = "findMany",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  returns: any
+  returns: any,
 ) =>
   jest
     .spyOn(prisma[model], method)
@@ -115,5 +115,5 @@ export {
   toSelect,
   ServiceReturn,
   isSelectFormat,
-  toSelectFormat
+  toSelectFormat,
 };

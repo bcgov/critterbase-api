@@ -10,7 +10,7 @@ import {
   nonEmpty,
   ResponseSchema,
   zodAudit,
-  zodID
+  zodID,
 } from "../../utils/zod_helpers";
 import { extendZodWithOpenApi } from "zod-openapi";
 extendZodWithOpenApi(z);
@@ -36,9 +36,9 @@ type CollectionUnitResponse = z.TypeOf<typeof CollectionUnitResponseSchema>;
 const collectionUnitIncludes = {
   include: {
     xref_collection_unit: {
-      select: { unit_name: true, description: true }
-    }
-  } satisfies Prisma.critter_collection_unitInclude
+      select: { unit_name: true, description: true },
+    },
+  } satisfies Prisma.critter_collection_unitInclude,
 };
 
 const simpleCollectionUnitIncludes = {
@@ -50,12 +50,12 @@ const simpleCollectionUnitIncludes = {
         lk_collection_category: {
           select: {
             collection_category_id: true,
-            category_name: true
-          }
-        }
-      }
-    }
-  } satisfies Prisma.critter_collection_unitInclude
+            category_name: true,
+          },
+        },
+      },
+    },
+  } satisfies Prisma.critter_collection_unitInclude,
 };
 // Schemas
 
@@ -65,8 +65,8 @@ const critter_collection_unitSchema = implement<critter_collection_unit>().with(
     critter_collection_unit_id: zodID,
     critter_id: zodID,
     collection_unit_id: zodID,
-    ...zodAudit
-  }
+    ...zodAudit,
+  },
 );
 
 //Extended schema which has both base schema and included fields
@@ -75,8 +75,8 @@ const critter_collection_unitIncludesSchema =
     ...critter_collection_unitSchema.shape,
     xref_collection_unit: z.object({
       unit_name: z.string(),
-      description: z.string().nullable()
-    })
+      description: z.string().nullable(),
+    }),
   });
 /*
 include: {
@@ -100,9 +100,9 @@ const SimpleCollectionUnitIncludesSchema =
       unit_name: z.string(),
       lk_collection_category: z.object({
         collection_category_id: zodID,
-        category_name: z.string()
-      })
-    })
+        category_name: z.string(),
+      }),
+    }),
   });
 
 // Formatted API response schema which omits fields and unpacks nested data
@@ -120,7 +120,7 @@ const CollectionUnitResponseSchema =
     return {
       ...rest,
       unit_name: xref_collection_unit?.unit_name ?? null,
-      unit_description: xref_collection_unit?.description ?? null
+      unit_description: xref_collection_unit?.description ?? null,
     };
   });
 
@@ -129,16 +129,16 @@ const SimpleCollectionUnitResponseSchema = ResponseSchema.transform((obj) => {
     xref_collection_unit: {
       lk_collection_category: { category_name, collection_category_id },
       unit_name,
-      collection_unit_id
+      collection_unit_id,
     },
-    critter_collection_unit_id
+    critter_collection_unit_id,
   } = obj as SimpleCollectionUnitIncludes;
   return {
     critter_collection_unit_id,
     category_name,
     unit_name,
     collection_unit_id,
-    collection_category_id
+    collection_category_id,
   };
 });
 
@@ -154,7 +154,7 @@ const CollectionUnitCreateBodySchema = implement<
     critter_collection_unitSchema
       .omit({ ...noAudit })
       .partial()
-      .required({ critter_id: true, collection_unit_id: true }).shape
+      .required({ critter_id: true, collection_unit_id: true }).shape,
   )
   .openapi({ description: "For creating collection untis" });
 
@@ -172,7 +172,7 @@ const CollectionUnitUpsertSchema = critter_collection_unitSchema
   .omit(noAudit)
   .extend({
     critter_id: zodID.optional(),
-    critter_collection_unit_id: zodID.optional()
+    critter_collection_unit_id: zodID.optional(),
   });
 
 type CollectionUnitUpsertType = z.infer<typeof CollectionUnitUpsertSchema>;
@@ -187,12 +187,12 @@ export {
   CollectionUnitDeleteSchema,
   CollectionUnitUpsertSchema,
   SimpleCollectionUnitIncludesSchema,
-  critter_collection_unitIncludesSchema
+  critter_collection_unitIncludesSchema,
 };
 export type {
   CollectionUnitIncludes,
   CollectionUnitCreateInput,
   CollectionUnitUpdateInput,
   CollectionUnitResponse,
-  CollectionUnitUpsertType
+  CollectionUnitUpsertType,
 };

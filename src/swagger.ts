@@ -21,7 +21,7 @@ const document = createDocument({
     schemas: {
       ...critterSchemas,
       ...lookupSchemas,
-      ...xrefSchemas
+      ...xrefSchemas,
     },
     //TODO: add keycloak authentication into securitySchemes for service accounts.
     securitySchemes: {
@@ -31,17 +31,17 @@ const document = createDocument({
         name: "user",
         description: `
           Key value pair for keycloak_guid and username.This header is used to identify specific users from external systems that authenticate with keycloak service account.
-          example: {"keycloak_guid":"0000ABC0000CBD0000EFG","username":"John Smith"}`
-      }
-    }
+          example: {"keycloak_guid":"0000ABC0000CBD0000EFG","username":"John Smith"}`,
+      },
+    },
   },
   info: {
     title: "Critterbase API",
     version: "1.0.0",
     description: "BCGov Critterbase API",
     license: {
-      name: "MIT"
-    }
+      name: "MIT",
+    },
   },
   paths: {
     ...critterPaths,
@@ -57,31 +57,31 @@ const document = createDocument({
     ...enumPaths,
     ...xrefPaths,
     ...familyPaths,
-    ...measurementPaths
+    ...measurementPaths,
   },
   servers: [
     {
       url: PORT ? `http://localhost:${PORT}` : "http://localhost:9000",
-      description: "local api via node"
+      description: "local api via node",
     },
     {
       url: "https://moe-critterbase-api-dev.apps.silver.devops.gov.bc.ca",
-      description: "deployed api in dev environment"
+      description: "deployed api in dev environment",
     },
     {
       url: "https://moe-critterbase-api-test.apps.silver.devops.gov.bc.ca",
-      description: "deployed api in test environment"
+      description: "deployed api in test environment",
     },
     {
       url: "https://moe-critterbase-api-prod.apps.silver.devops.gov.bc.ca",
-      description: "deployed api in prod environment"
-    }
+      description: "deployed api in prod environment",
+    },
   ],
   security: [
     {
-      userAuth: []
-    }
-  ]
+      userAuth: [],
+    },
+  ],
 });
 
 export const yaml = document;

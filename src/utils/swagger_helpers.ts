@@ -3,8 +3,8 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 
 const SwagMsg = {
   "application/json": {
-    schema: z.object({ error: z.string() })
-  }
+    schema: z.object({ error: z.string() }),
+  },
 };
 
 export const SwagDesc = {
@@ -15,7 +15,7 @@ export const SwagDesc = {
   error: "Error occurred",
   error_unauthorized: "Unauthorized",
   error_not_found: "Requested resource was not found",
-  error_server: "Internal server error"
+  error_server: "Internal server error",
 };
 
 export const SwagErr: ZodOpenApiOperationObject["responses"] = {
@@ -25,30 +25,30 @@ export const SwagErr: ZodOpenApiOperationObject["responses"] = {
       "application/json": {
         schema: z.object({
           error: z.string(),
-          issues: z.unknown().array() // object array
-        })
-      }
-    }
-  }
+          issues: z.unknown().array(), // object array
+        }),
+      },
+    },
+  },
 };
 
 export const SwagUnauthorized: ZodOpenApiOperationObject["responses"] = {
   "401": {
     description: SwagDesc.error_unauthorized,
-    content: SwagMsg
-  }
+    content: SwagMsg,
+  },
 };
 
 export const SwagNotFound: ZodOpenApiOperationObject["responses"] = {
   "404": {
     description: SwagDesc.error_not_found,
-    content: SwagMsg
-  }
+    content: SwagMsg,
+  },
 };
 
 export const SwagServerError: ZodOpenApiOperationObject["responses"] = {
   "500": {
     description: SwagDesc.error_server,
-    content: SwagMsg
-  }
+    content: SwagMsg,
+  },
 };

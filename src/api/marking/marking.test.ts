@@ -8,7 +8,7 @@ import {
   getMarkingById as _getMarkingById,
   getMarkingsByCritterId as _getMarkingsByCritterId,
   updateMarking as _updateMarking,
-  appendEnglishMarkingsAsUUID as _appendEnglishMarkingsAsUUID
+  appendEnglishMarkingsAsUUID as _appendEnglishMarkingsAsUUID,
 } from "./marking.service";
 import { makeApp } from "../../app";
 import supertest from "supertest";
@@ -17,7 +17,7 @@ import {
   critter,
   lk_colour,
   marking,
-  xref_taxon_marking_body_location
+  xref_taxon_marking_body_location,
 } from "@prisma/client";
 import { apiError } from "../../utils/types";
 import * as lookups from "../lookup/lookup.service";
@@ -40,8 +40,8 @@ const request = supertest(
     getMarkingById,
     getMarkingsByCritterId,
     verifyMarkingsAgainstTaxon,
-    markingService: { verifyMarkingsCanBeAssignedToTsn }
-  } as unknown as ICbDatabase)
+    markingService: { verifyMarkingsCanBeAssignedToTsn },
+  } as unknown as ICbDatabase),
 );
 
 const create = jest.spyOn(prisma.marking, "create").mockImplementation();
@@ -84,7 +84,7 @@ const MARKING: marking = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 const CRITTER: critter = {
   critter_id: CRITTER_ID,
@@ -98,7 +98,7 @@ const CRITTER: critter = {
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
   update_timestamp: new Date(),
-  critter_comment: "Hi :)"
+  critter_comment: "Hi :)",
 };
 
 const COLOUR: lk_colour = {
@@ -109,7 +109,7 @@ const COLOUR: lk_colour = {
   create_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   update_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const XREF_TAX_LOC: xref_taxon_marking_body_location = {
@@ -120,7 +120,7 @@ const XREF_TAX_LOC: xref_taxon_marking_body_location = {
   create_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   update_user: "4804d622-9539-40e6-a8a5-b7b223c2f09f",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 beforeEach(() => {
@@ -160,7 +160,7 @@ describe("API: Marking", () => {
           lk_marking_material: { material: 1 },
           lk_colour_marking_primary_colour_idTolk_colour: { colour: 1 },
           lk_colour_marking_secondary_colour_idTolk_colour: { colour: 1 },
-          lk_colour_marking_text_colour_idTolk_colour: { colour: 1 }
+          lk_colour_marking_text_colour_idTolk_colour: { colour: 1 },
         });
         expect(parsed2.body_location).toBeDefined();
         expect(parsed2.marking_type).toBeDefined();
@@ -209,7 +209,7 @@ describe("API: Marking", () => {
         const body = {
           primary_colour: "Red",
           secondary_colour: "Red",
-          body_location: "Left Ear"
+          body_location: "Left Ear",
         };
         getColourByName.mockResolvedValue(COLOUR);
         getBodyLocationByNameAndTsn.mockResolvedValue(XREF_TAX_LOC);
@@ -223,7 +223,7 @@ describe("API: Marking", () => {
       });
       it("should not append any extra fields", async () => {
         const body = {
-          foo: "bar"
+          foo: "bar",
         };
         getColourByName.mockResolvedValue(COLOUR);
         getBodyLocationByNameAndTsn.mockResolvedValue(XREF_TAX_LOC);
@@ -239,7 +239,7 @@ describe("API: Marking", () => {
         const body = {
           primary_colour: "foo",
           secondary_colour: "foo",
-          body_location: "foo"
+          body_location: "foo",
         };
         getColourByName.mockResolvedValue(null);
         getBodyLocationByNameAndTsn.mockResolvedValue(null);
@@ -311,7 +311,7 @@ describe("API: Marking", () => {
         expect(res.status).toBe(200);
         expect(getAllMarkings.mock.calls.length).toBe(1);
         expect(getAllMarkings.mock.results[0].value[0].marking_id).toBe(
-          MARKING_ID
+          MARKING_ID,
         );
       });
     });
@@ -321,11 +321,11 @@ describe("API: Marking", () => {
         expect.assertions(5);
         verifyMarkingsCanBeAssignedToTsn.mockResolvedValue({
           verified: false,
-          invalid_markings: [MARKING.marking_id]
+          invalid_markings: [MARKING.marking_id],
         });
         const res = await request.post("/api/markings/verify").send({
           itis_tsn: 1,
-          markings: [{ marking_id: MARKING.marking_id }]
+          markings: [{ marking_id: MARKING.marking_id }],
         });
         expect(res.status).toBe(200);
         expect(verifyMarkingsCanBeAssignedToTsn.mock.calls.length).toBe(1);
@@ -358,7 +358,7 @@ describe("API: Marking", () => {
         const res = await request.post("/api/markings/create").send({
           // left out required marking taxon information
           critter_id: CRITTER_ID,
-          identifier: "010101"
+          identifier: "010101",
         });
         expect.assertions(1);
         expect(res.status).toBe(400);
@@ -411,7 +411,7 @@ describe("API: Marking", () => {
       it("strips invalid fields from data", async () => {
         const res = await request.patch(`/api/markings/${MARKING_ID}`).send({
           ...MARKING,
-          invalidField: "qwerty123"
+          invalidField: "qwerty123",
         });
         expect.assertions(2);
         expect(res.status).toBe(200);
@@ -455,7 +455,7 @@ describe("API: Marking", () => {
         expect(res.status).toBe(200);
         expect(getMarkingsByCritterId.mock.calls.length).toBe(1);
         expect(getMarkingsByCritterId.mock.results[0].value[0].marking_id).toBe(
-          MARKING_ID
+          MARKING_ID,
         );
       });
     });

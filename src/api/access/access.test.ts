@@ -8,7 +8,7 @@ import { prisma } from "../../utils/constants";
 import { ICbDatabase } from "../../utils/database";
 import {
   loginUser as _loginUser,
-  getTableDataTypes as _getTableDataTypes
+  getTableDataTypes as _getTableDataTypes,
 } from "./access.service";
 import { LoginCredentials } from "../user/user.utils";
 import * as auth from "../../authentication/auth";
@@ -20,7 +20,7 @@ const USER: user = {
   create_user: ID,
   update_user: ID,
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const findUnique = jest.spyOn(prisma.user, "findUnique").mockImplementation();
@@ -40,8 +40,8 @@ const request = supertest(
     loginUser,
     createUser,
     setUserContext,
-    getTableDataTypes
-  } as Record<keyof ICbDatabase, any>)
+    getTableDataTypes,
+  } as Record<keyof ICbDatabase, any>),
 );
 
 beforeEach(() => {
@@ -52,7 +52,7 @@ beforeEach(() => {
   loginUser.mockResolvedValue({ user_id: ID });
   createUser.mockResolvedValue({
     system_user_id: ID,
-    system_name: "CRITTERBASE"
+    system_name: "CRITTERBASE",
   });
   getTableDataTypes.mockResolvedValue(true);
   //prisma functions
@@ -62,7 +62,7 @@ beforeEach(() => {
   authRequest.mockResolvedValue({
     keycloak_uuid: ID,
     system_name: "system_string",
-    identifier: "jimbob"
+    identifier: "jimbob",
   });
 });
 
@@ -76,14 +76,14 @@ describe("SERVICES", () => {
     it("user_id: login fails with non existant user_id", async () => {
       findFirst.mockResolvedValue(null);
       await expect(
-        _loginUser({ keycloak_uuid: "d39846870e85412694e522a0eb0b5569" })
+        _loginUser({ keycloak_uuid: "d39846870e85412694e522a0eb0b5569" }),
       ).rejects.toThrowError(apiError);
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });
     it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
       findFirst.mockResolvedValue(null);
       await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
-        apiError
+        apiError,
       );
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });

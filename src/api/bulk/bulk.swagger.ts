@@ -4,29 +4,29 @@ import { zodID } from "../../utils/zod_helpers";
 import { MarkingCreateBodySchema } from "../marking/marking.utils";
 import {
   CaptureCreateSchema,
-  CaptureUpdateSchema
+  CaptureUpdateSchema,
 } from "../capture/capture.utils";
 import { routes } from "../../utils/constants";
 import {
   MortalityCreateSchema,
-  MortalityUpdateSchema
+  MortalityUpdateSchema,
 } from "../mortality/mortality.utils";
 import {
   CollectionUnitCreateBodySchema,
-  CollectionUnitUpsertSchema
+  CollectionUnitUpsertSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import {
   LocationCreateSchema,
-  LocationUpdateSchema
+  LocationUpdateSchema,
 } from "../location/location.utils";
 import {
   SwagErr,
   SwagNotFound,
-  SwagUnauthorized
+  SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 import {
   CritterCreateSchema,
-  CritterUpdateSchema
+  CritterUpdateSchema,
 } from "../../schemas/critter-schema";
 
 const TAG = "Bulk";
@@ -43,26 +43,26 @@ const bulkCreation: ZodOpenApiOperationObject = {
           markings: MarkingCreateBodySchema.extend({
             primary_colour: z.string().optional(),
             secondary_colour: z.string().optional(),
-            body_location: z.string().optional()
+            body_location: z.string().optional(),
           }).array(),
           captures: CaptureCreateSchema.array(),
           locations: LocationCreateSchema.array(),
           mortalities: MortalityCreateSchema.extend({
-            proximate_cause_of_death_id: zodID.optional()
+            proximate_cause_of_death_id: zodID.optional(),
           }).array(),
-          collections: CollectionUnitCreateBodySchema.array()
-        })
-      }
-    }
+          collections: CollectionUnitCreateBodySchema.array(),
+        }),
+      },
+    },
   },
   responses: {
     "200": {
-      description: "Successfully inserted all records."
+      description: "Successfully inserted all records.",
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const bulkUpdate: ZodOpenApiOperationObject = {
@@ -77,19 +77,19 @@ const bulkUpdate: ZodOpenApiOperationObject = {
           critters: CritterUpdateSchema.extend({ critter_id: zodID }).array(),
           markings: MarkingCreateBodySchema.extend({
             marking_id: zodID.optional(),
-            _delete: z.boolean().optional()
+            _delete: z.boolean().optional(),
           }).array(),
           captures: CaptureUpdateSchema.array(),
           locations: LocationUpdateSchema.array(),
           mortalities: MortalityUpdateSchema.extend({
-            proximate_cause_of_death_id: zodID.optional()
+            proximate_cause_of_death_id: zodID.optional(),
           }).array(),
           collections: CollectionUnitUpsertSchema.extend({
-            _delete: z.boolean().optional()
-          }).array()
-        })
-      }
-    }
+            _delete: z.boolean().optional(),
+          }).array(),
+        }),
+      },
+    },
   },
   responses: {
     "200": {
@@ -103,25 +103,25 @@ const bulkUpdate: ZodOpenApiOperationObject = {
               captures: z.number().optional(),
               locations: z.number().optional(),
               mortalities: z.number().optional(),
-              collections: z.number().optional()
+              collections: z.number().optional(),
             }),
             deleted: z.object({
               markings: z.number().optional(),
-              collections: z.number().optional()
-            })
-          })
-        }
-      }
+              collections: z.number().optional(),
+            }),
+          }),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 export const bulkPaths = {
   [`${routes.bulk}`]: {
     post: bulkCreation,
-    patch: bulkUpdate
-  }
+    patch: bulkUpdate,
+  },
 };

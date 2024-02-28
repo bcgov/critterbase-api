@@ -3,24 +3,24 @@ import { catchErrors } from "../../utils/middleware";
 import {
   CaptureCreateSchema,
   CaptureDeleteSchema,
-  CaptureUpdateSchema
+  CaptureUpdateSchema,
 } from "../capture/capture.utils";
 import {
   MarkingCreateBodySchema,
   MarkingDeleteSchema,
-  MarkingUpdateByIdSchema
+  MarkingUpdateByIdSchema,
 } from "../marking/marking.utils";
 import {
   MortalityCreateSchema,
   MortalityDeleteSchema,
-  MortalityUpdateSchema
+  MortalityUpdateSchema,
 } from "../mortality/mortality.utils";
 import { IBulkDelete, IBulkMutate, bulkErrMap } from "./bulk.service";
 import { BulkCreationSchema, filterAndRemoveDeletes } from "./bulk.utils";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitDeleteSchema,
-  CollectionUnitUpsertSchema
+  CollectionUnitUpsertSchema,
 } from "../collectionUnit/collectionUnit.utils";
 import { z } from "zod";
 import { LocationUpdateSchema } from "../location/location.utils";
@@ -32,19 +32,19 @@ import {
   QualitativeUpdateSchema,
   QuantitativeCreateSchema,
   QuantitativeDeleteSchema,
-  QuantitativeUpdateSchema
+  QuantitativeUpdateSchema,
 } from "../measurement/measurement.utils";
 import {
   FamilyChildCreateBodySchema,
   FamilyChildDeleteSchema,
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema,
-  FamilyParentDeleteSchema
+  FamilyParentDeleteSchema,
 } from "../family/family.utils";
 import {
   BulkCritterCreateSchema,
   CritterCreateSchema,
-  CritterUpdateSchema
+  CritterUpdateSchema,
 } from "../../schemas/critter-schema";
 
 export const BulkRouter = (db: ICbDatabase) => {
@@ -62,7 +62,7 @@ export const BulkRouter = (db: ICbDatabase) => {
         mortalities,
         qualitative_measurements,
         quantitative_measurements,
-        families
+        families,
       } = await BulkCreationSchema.parseAsync(req.body);
 
       const crittersAppend = critters
@@ -72,7 +72,7 @@ export const BulkRouter = (db: ICbDatabase) => {
               const patchedCritter =
                 await db.itisService.patchTsnAndScientificName(critter);
               return BulkCritterCreateSchema.parse(patchedCritter);
-            })
+            }),
           )
         : [];
 
@@ -92,13 +92,13 @@ export const BulkRouter = (db: ICbDatabase) => {
               const itis_tsn = critterTsnLookup[marking.critter_id as string];
               await db.appendEnglishMarkingsAsUUID(marking, itis_tsn);
               return MarkingCreateBodySchema.parseAsync(marking);
-            })
+            }),
           )
         : [];
 
       const parsedCaptures = captures
         ? captures.map((c: Record<string, unknown>) =>
-            CaptureCreateSchema.parse(c)
+            CaptureCreateSchema.parse(c),
           )
         : [];
 
@@ -107,7 +107,7 @@ export const BulkRouter = (db: ICbDatabase) => {
             mortalities.map(async (m: Record<string, unknown>) => {
               await db.appendDefaultCOD(m);
               return MortalityCreateSchema.parse(m);
-            })
+            }),
           )
         : [];
 
@@ -147,10 +147,10 @@ export const BulkRouter = (db: ICbDatabase) => {
         quantitative_measurements: parsedQuantitativeMeasurements,
         families: familyUnits,
         family_children: familyChildren,
-        family_parents: familyParents
+        family_parents: familyParents,
       });
       return res.status(201).json(results);
-    })
+    }),
   );
 
   bulkRouter.patch(
@@ -165,7 +165,7 @@ export const BulkRouter = (db: ICbDatabase) => {
         mortalities,
         qualitative_measurements,
         quantitative_measurements,
-        families
+        families,
       } = BulkCreationSchema.parse(req.body);
 
       const markingDeletes = filterAndRemoveDeletes(markings);
@@ -182,64 +182,64 @@ export const BulkRouter = (db: ICbDatabase) => {
           ? z
               .array(CritterUpdateSchema.extend({ critter_id: zodID }))
               .parse(critters, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "critters")
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "critters"),
               })
           : [],
         collections: collections
           ? z.array(CollectionUnitUpsertSchema).parse(collections, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "collections")
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "collections"),
             })
           : [],
         markings: markings
           ? z.array(MarkingUpdateByIdSchema).parse(markings, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "markings")
+              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "markings"),
             })
           : [],
         locations: locations
           ? z
               .array(LocationUpdateSchema.extend({ location_id: zodID }))
               .parse(locations, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "locations")
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "locations"),
               })
           : [],
         captures: captures
           ? z
               .array(CaptureUpdateSchema.extend({ capture_id: zodID }))
               .parse(captures, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "captures")
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "captures"),
               })
           : [],
         mortalities: mortalities
           ? z
               .array(MortalityUpdateSchema.extend({ mortality_id: zodID }))
               .parse(mortalities, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "mortalities")
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, "mortalities"),
               })
           : [],
         qualitative_measurements: qualitative_measurements
           ? z
               .array(
                 QualitativeUpdateSchema.required({
-                  measurement_qualitative_id: true
-                })
+                  measurement_qualitative_id: true,
+                }),
               )
               .parse(qualitative_measurements, {
                 errorMap: (issue, ctx) =>
-                  bulkErrMap(issue, ctx, "qualitative_measurements")
+                  bulkErrMap(issue, ctx, "qualitative_measurements"),
               })
           : [],
         quantitative_measurements: quantitative_measurements
           ? z
               .array(
                 QuantitativeUpdateSchema.required({
-                  measurement_quantitative_id: true
-                })
+                  measurement_quantitative_id: true,
+                }),
               )
               .parse(quantitative_measurements, {
                 errorMap: (issue, ctx) =>
-                  bulkErrMap(issue, ctx, "quantitative_measurements")
+                  bulkErrMap(issue, ctx, "quantitative_measurements"),
               })
-          : []
+          : [],
       };
 
       const deleteBody: IBulkDelete = {
@@ -266,13 +266,13 @@ export const BulkRouter = (db: ICbDatabase) => {
           : [],
         _deleteParents: parentDeletes
           ? z.array(FamilyParentDeleteSchema).parse(parentDeletes)
-          : []
+          : [],
       };
 
       const updateRes = await db.bulkUpdateData(updateBody, db);
       const deleteRes = await db.bulkDeleteData(deleteBody, db);
       return res.status(200).json({ ...updateRes, ...deleteRes });
-    })
+    }),
   );
 
   return bulkRouter;

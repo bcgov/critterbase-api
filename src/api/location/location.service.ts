@@ -12,9 +12,9 @@ import { LocationBody, locationIncludes } from "./location.utils";
 const getLocationOrThrow = async (id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
-      location_id: id
+      location_id: id,
     },
-    include: locationIncludes
+    include: locationIncludes,
   });
   return location;
 };
@@ -25,7 +25,7 @@ const getLocationOrThrow = async (id: string) => {
  */
 const getAllLocations = async (): Promise<location[]> => {
   const locations = await prisma.location.findMany({
-    include: locationIncludes
+    include: locationIncludes,
   });
   return locations;
 };
@@ -38,8 +38,8 @@ const getAllLocations = async (): Promise<location[]> => {
 const deleteLocation = async (id: string): Promise<location> => {
   return await prisma.location.delete({
     where: {
-      location_id: id
-    }
+      location_id: id,
+    },
   });
 };
 
@@ -60,13 +60,13 @@ const createLocation = async (data: LocationBody): Promise<location> => {
  */
 const updateLocation = async (
   data: LocationBody,
-  id: string
+  id: string,
 ): Promise<location> => {
   return await prisma.location.update({
     where: {
-      location_id: id
+      location_id: id,
     },
-    data
+    data,
   });
 };
 
@@ -75,5 +75,5 @@ export {
   getLocationOrThrow,
   deleteLocation,
   createLocation,
-  updateLocation
+  updateLocation,
 };

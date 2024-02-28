@@ -7,13 +7,13 @@ import {
   cod_confidence,
   coordinate_uncertainty_unit as cuu,
   frequency_unit,
-  measurement_unit
+  measurement_unit,
 } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import {
   getBodyLocationByNameAndTsn,
   getColourByName,
-  getMarkingTypeByName
+  getMarkingTypeByName,
 } from "./lookup.service";
 import { codFormats } from "./lookup.utils";
 import { eCritterStatus } from "../../schemas/critter-schema";
@@ -23,7 +23,7 @@ const request = supertest(makeApp(mockDB as any));
 const mockVal: any = { value: true };
 const prismaMock = (
   model: Prisma.ModelName,
-  method: "findMany" | "findFirst" = "findMany"
+  method: "findMany" | "findFirst" = "findMany",
 ) =>
   jest
     .spyOn(prisma[model], method)
@@ -38,7 +38,7 @@ describe("API: Lookup", () => {
         const parsed = parser.parse({
           cod_id: "ID",
           cod_category: "A",
-          cod_reason: "REASON"
+          cod_reason: "REASON",
         });
         expect(parsed.value).toEqual("A | REASON");
       });
@@ -72,7 +72,7 @@ describe("API: Lookup", () => {
         { route: "cod-confidence", enum: Object.keys(cod_confidence) },
         { route: "coordinate-uncertainty-unit", enum: Object.keys(cuu) },
         { route: "frequency-units", enum: Object.keys(frequency_unit) },
-        { route: "measurement-units", enum: Object.keys(measurement_unit) }
+        { route: "measurement-units", enum: Object.keys(measurement_unit) },
         //{ route: "supported-systems", enum: Object.keys(system) },
       ];
       it("all enum routes should respond with enum values and status 200", async () => {
@@ -92,23 +92,23 @@ describe("API: Lookup", () => {
           mock: jest
             .spyOn(prisma, "$queryRaw")
             .mockImplementation()
-            .mockResolvedValue(mockVal)
+            .mockResolvedValue(mockVal),
         },
         { route: "/cods", mock: prismaMock("lk_cause_of_death") },
         {
           route: "/marking-materials",
-          mock: prismaMock("lk_marking_material")
+          mock: prismaMock("lk_marking_material"),
         },
         { route: "/marking-types", mock: prismaMock("lk_marking_type") },
         {
           route: "/collection-unit-categories",
-          mock: prismaMock("lk_collection_category")
-        }
+          mock: prismaMock("lk_collection_category"),
+        },
       ];
       it("should return status 200 and a value for each lookup route optionally formatted asSelect", async () => {
         for (const req of l) {
           const res = await request.get(
-            `/api/lookups${req.route}?format=asSelect`
+            `/api/lookups${req.route}?format=asSelect`,
           );
           expect(res.status).toBe(200);
           expect(res.body).toHaveProperty("key");

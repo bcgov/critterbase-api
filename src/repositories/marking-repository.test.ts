@@ -4,7 +4,7 @@ describe("marking-repository", () => {
   let mockPrismaClient;
   beforeEach(() => {
     mockPrismaClient = {
-      $queryRaw: jest.fn()
+      $queryRaw: jest.fn(),
     };
   });
   it("returns array of marking ids", async () => {
@@ -14,7 +14,7 @@ describe("marking-repository", () => {
 
     const result = await repo.findInvalidMarkingIdsFromTsnHierarchy(
       ["my-uuid"],
-      [1]
+      [1],
     );
     expect(result).toEqual(mockResponse);
   });

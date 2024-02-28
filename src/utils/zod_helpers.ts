@@ -12,7 +12,7 @@ import {
   lk_marking_type,
   xref_taxon_marking_body_location,
   lk_collection_category,
-  lk_cause_of_death
+  lk_cause_of_death,
 } from "@prisma/client";
 import { z } from "zod";
 import { AuditColumns, Implements, QueryFormats } from "./types";
@@ -24,58 +24,58 @@ const zodAudit = {
   create_user: z.string().uuid(),
   update_user: z.string().uuid(),
   create_timestamp: z.coerce.date(),
-  update_timestamp: z.coerce.date()
+  update_timestamp: z.coerce.date(),
 };
 
 const DeleteSchema = z.object({ _delete: z.boolean() });
 
 const QueryFormatSchema = z.object({
-  format: z.nativeEnum(QueryFormats).catch(QueryFormats.default)
+  format: z.nativeEnum(QueryFormats).catch(QueryFormats.default),
 });
 
 const NumberToString = z
   .union([z.string(), z.number()])
   .transform((val) =>
-    typeof val === "number" ? String(val) : val
+    typeof val === "number" ? String(val) : val,
   ) as unknown as z.ZodString;
 
 const ResponseSchema = z.object({}).passthrough();
 
 const uuidParamsSchema = z.object({
-  id: z.string().uuid("query param is an invalid UUID")
+  id: z.string().uuid("query param is an invalid UUID"),
 });
 
 const critterIdSchema = z.object({
-  critter_id: zodID
+  critter_id: zodID,
 });
 
 const tsnQuerySchema = z.object({
-  tsn: z.preprocess((val) => Number(val), z.number())
+  tsn: z.preprocess((val) => Number(val), z.number()),
 });
 
 const taxonMeasurementIdSchema = z.object({
-  taxon_measurement_id: zodID
+  taxon_measurement_id: zodID,
 });
 
 const LookupWmuSchema = implement<lk_wildlife_management_unit>().with({
   wmu_id: zodID,
   wmu_name: z.string(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const LookupRegionNrSchema = implement<lk_region_nr>().with({
   region_nr_id: zodID,
   region_nr_name: z.string(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const LookupRegionEnvSchema = implement<lk_region_env>().with({
   region_env_id: zodID,
   region_env_name: z.string(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const XrefTaxonMeasurementQuantitativeSchema =
@@ -87,7 +87,7 @@ const XrefTaxonMeasurementQuantitativeSchema =
     min_value: z.number().nullable(),
     max_value: z.number().nullable(),
     unit: z.nativeEnum(measurement_unit).nullable(),
-    ...zodAudit
+    ...zodAudit,
   });
 
 const XrefTaxonMeasurementQualitativeSchema =
@@ -96,7 +96,7 @@ const XrefTaxonMeasurementQualitativeSchema =
     itis_tsn: z.number(),
     measurement_name: z.string(),
     measurement_desc: z.string().nullable(),
-    ...zodAudit
+    ...zodAudit,
   });
 
 const XrefTaxonMeasurementQualitativeOptionSchema =
@@ -106,7 +106,7 @@ const XrefTaxonMeasurementQualitativeOptionSchema =
     option_label: z.string(),
     option_value: z.number(),
     option_desc: z.string().nullable(),
-    ...zodAudit
+    ...zodAudit,
   });
 
 const nonEmpty = (obj: Record<string | number | symbol, unknown>) =>
@@ -116,7 +116,7 @@ const noAudit: Record<AuditColumns, true> = {
   create_user: true,
   update_user: true,
   create_timestamp: true,
-  update_timestamp: true
+  update_timestamp: true,
 };
 
 export function implement<Model = never>() {
@@ -124,10 +124,10 @@ export function implement<Model = never>() {
     with: <
       Schema extends Implements<Model> & {
         [unknownKey in Exclude<keyof Schema, keyof Model>]: never;
-      }
+      },
     >(
-      schema: Schema
-    ) => z.object(schema)
+      schema: Schema,
+    ) => z.object(schema),
   };
 }
 
@@ -136,21 +136,21 @@ const LookUpColourSchema = implement<lk_colour>().with({
   colour: z.string(),
   hex_code: z.string().nullable(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const LookUpMarkingTypeSchema = implement<lk_marking_type>().with({
   marking_type_id: z.string().uuid(),
   name: z.string(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const LookUpMaterialSchema = implement<lk_marking_material>().with({
   marking_material_id: z.string().uuid(),
   material: z.string().nullable(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const LookupCollectionUnitCategorySchema =
@@ -158,14 +158,14 @@ const LookupCollectionUnitCategorySchema =
     collection_category_id: zodID,
     category_name: z.string(),
     description: z.string().nullable(),
-    ...zodAudit
+    ...zodAudit,
   });
 
 const LookupCodSchema = implement<lk_cause_of_death>().with({
   cod_id: zodID,
   cod_category: z.string(),
   cod_reason: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const XrefTaxonMarkingBodyLocationSchema =
@@ -174,7 +174,7 @@ const XrefTaxonMarkingBodyLocationSchema =
     itis_tsn: z.number(),
     body_location: z.string(),
     description: z.string().nullable(),
-    ...zodAudit
+    ...zodAudit,
   });
 
 const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
@@ -182,7 +182,7 @@ const XrefCollectionUnitSchema = implement<xref_collection_unit>().with({
   collection_category_id: z.string().uuid(),
   unit_name: z.string(),
   description: z.string().nullable(),
-  ...zodAudit
+  ...zodAudit,
 });
 
 const XrefTaxonCollectionCategorySchema =
@@ -191,7 +191,7 @@ const XrefTaxonCollectionCategorySchema =
     collection_category_id: zodID,
     unit_name: z.string(),
     description: z.string().nullable(),
-    ...zodAudit
+    ...zodAudit,
   });
 
 type IResponseSchema = z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny> | z.ZodTypeAny;
@@ -223,5 +223,5 @@ export {
   LookupCodSchema,
   XrefTaxonCollectionCategorySchema,
   taxonMeasurementIdSchema,
-  tsnQuerySchema
+  tsnQuerySchema,
 };

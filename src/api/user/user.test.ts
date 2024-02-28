@@ -12,7 +12,7 @@ import {
   getUser as _getUser,
   updateUser as _updateUser,
   deleteUser as _deleteUser,
-  setUserContext as _setUserContext
+  setUserContext as _setUserContext,
 } from "./user.service";
 import { zodID } from "../../utils/zod_helpers";
 
@@ -21,7 +21,7 @@ const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 
 const NEW_USER: UserCreateInput = {
   user_identifier: "MOCK_USER",
-  keycloak_uuid: ID
+  keycloak_uuid: ID,
 };
 
 const RETURN_USER: user = {
@@ -31,7 +31,7 @@ const RETURN_USER: user = {
   create_user: ID,
   update_user: ID,
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 // Mocked Prisma Calls
@@ -63,8 +63,8 @@ const request = supertest(
     getUser,
     updateUser,
     deleteUser,
-    setUserContext
-  } as Record<keyof ICbDatabase, any>)
+    setUserContext,
+  } as Record<keyof ICbDatabase, any>),
 );
 
 beforeEach(() => {
@@ -157,7 +157,7 @@ describe("API: User", () => {
         expect.assertions(3);
         expect(prisma.user.delete).toHaveBeenCalledTimes(1);
         expect(prisma.user.delete).toHaveBeenCalledWith({
-          where: { user_id: ID }
+          where: { user_id: ID },
         });
         expect(UserSchema.safeParse(deletedUser).success).toBe(true);
       });
@@ -230,7 +230,7 @@ describe("API: User", () => {
 
       it("returns status 400 when data is missing required fields", async () => {
         const res = await request.post("/api/users/create").send({
-          keycloak_uuid: ID
+          keycloak_uuid: ID,
         });
         expect.assertions(2);
         expect(createUser.mock.calls.length).toBe(0);

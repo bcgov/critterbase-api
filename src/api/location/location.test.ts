@@ -8,14 +8,14 @@ import {
   getAllLocations as _getAllLocations,
   deleteLocation as _deleteLocation,
   createLocation as _createLocation,
-  updateLocation as _updateLocation
+  updateLocation as _updateLocation,
 } from "./location.service";
 import {
   CommonFormattedLocationSchema,
   LocationResponse,
   LocationBody,
   CommonLocationType,
-  LocationResponseSchema
+  LocationResponseSchema,
 } from "./location.utils";
 import { randomUUID } from "crypto";
 import { location } from "@prisma/client";
@@ -34,7 +34,7 @@ const mockLocationBody: LocationBody = {
   region_env_id: ID,
   elevation: 1,
   temperature: 1,
-  location_comment: "test"
+  location_comment: "test",
 };
 
 const mockLocation: location = {
@@ -52,14 +52,14 @@ const mockLocation: location = {
   create_user: ID,
   update_user: ID,
   create_timestamp: DATE,
-  update_timestamp: DATE
+  update_timestamp: DATE,
 };
 
 export const mockCommonLocation: CommonLocationType & location = {
   ...mockLocation,
   lk_region_env: { region_env_id: ID, region_env_name: "test" },
   lk_region_nr: { region_nr_id: ID, region_nr_name: "test" },
-  lk_wildlife_management_unit: { wmu_id: ID, wmu_name: "test" }
+  lk_wildlife_management_unit: { wmu_id: ID, wmu_name: "test" },
 };
 
 const mockLocationResponse: LocationResponse = {
@@ -77,7 +77,7 @@ const mockLocationResponse: LocationResponse = {
   create_user: ID,
   update_user: ID,
   create_timestamp: DATE.toISOString() as unknown as Date,
-  update_timestamp: DATE.toISOString() as unknown as Date
+  update_timestamp: DATE.toISOString() as unknown as Date,
 };
 
 const mockFormattedLocation = {
@@ -88,7 +88,7 @@ const mockFormattedLocation = {
   temperature: 1,
   ...mockCommonLocation.lk_region_env,
   ...mockCommonLocation.lk_region_nr,
-  ...mockCommonLocation.lk_wildlife_management_unit
+  ...mockCommonLocation.lk_wildlife_management_unit,
 };
 
 // Mock Prisma Calls
@@ -113,8 +113,8 @@ const request = supertest(
     getAllLocations,
     deleteLocation,
     createLocation,
-    updateLocation
-  } as Record<keyof ICbDatabase, any>)
+    updateLocation,
+  } as Record<keyof ICbDatabase, any>),
 );
 
 beforeEach(() => {
@@ -137,7 +137,7 @@ describe("API: Location", () => {
       it("should return a formatted location", () => {
         expect.assertions(1);
         expect(CommonFormattedLocationSchema.parse(mockCommonLocation)).toEqual(
-          mockFormattedLocation
+          mockFormattedLocation,
         );
       });
       it("should return a formatted location", () => {
@@ -145,7 +145,7 @@ describe("API: Location", () => {
           ...mockLocation,
           lk_region_env: null,
           lk_region_nr: null,
-          lk_wildlife_management_unit: null
+          lk_wildlife_management_unit: null,
         };
         expect.assertions(1);
         expect(CommonFormattedLocationSchema.parse(location)).toEqual({
@@ -155,7 +155,7 @@ describe("API: Location", () => {
           wmu_name: undefined,
           region_nr_id: undefined,
           region_env_id: undefined,
-          wmu_id: undefined
+          wmu_id: undefined,
         });
       });
     });
@@ -170,13 +170,13 @@ describe("API: Location", () => {
             update_timestamp: mockLocation.update_timestamp.toISOString(),
             lk_region_env: null,
             lk_region_nr: null,
-            lk_wildlife_management_unit: null
-          })
+            lk_wildlife_management_unit: null,
+          }),
         ).toEqual({
           ...mockLocationResponse,
           region_env_name: null,
           region_nr_name: null,
-          wmu_name: null
+          wmu_name: null,
         });
       });
     });
@@ -286,7 +286,7 @@ describe("API: Location", () => {
       expect(res.body).toEqual({
         ...mockLocation,
         create_timestamp: mockLocation.create_timestamp.toISOString(),
-        update_timestamp: mockLocation.update_timestamp.toISOString()
+        update_timestamp: mockLocation.update_timestamp.toISOString(),
       });
     });
 
@@ -315,7 +315,7 @@ describe("API: Location", () => {
       expect(res.body).toEqual({
         ...mockLocation,
         create_timestamp: mockLocation.create_timestamp.toISOString(),
-        update_timestamp: mockLocation.update_timestamp.toISOString()
+        update_timestamp: mockLocation.update_timestamp.toISOString(),
       });
     });
 

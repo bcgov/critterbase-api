@@ -4,7 +4,7 @@ import {
   _getS3Client,
   getS3HostUrl,
   uploadFileToS3,
-  getFileDownloadUrl
+  getFileDownloadUrl,
 } from "./object_store";
 import { apiError } from "./types";
 
@@ -20,22 +20,22 @@ jest.mock("@aws-sdk/client-s3", () => {
         } else if (command instanceof GetObjectCommandMock) {
           return Promise.resolve();
         }
-      })
+      }),
     })),
     PutObjectCommand: PutObjectCommandMock,
-    GetObjectCommand: GetObjectCommandMock
+    GetObjectCommand: GetObjectCommandMock,
   };
 });
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({
-  getSignedUrl: jest.fn().mockReturnValue("mockSignedUrl")
+  getSignedUrl: jest.fn().mockReturnValue("mockSignedUrl"),
 }));
 
 // Import after mocking
 import {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -128,7 +128,7 @@ describe("File: object_store.ts", () => {
       const mockFile = {
         originalname: "testFile",
         buffer: Buffer.from("test buffer"),
-        mimetype: "text/plain"
+        mimetype: "text/plain",
       } as Express.Multer.File;
 
       const result = await uploadFileToS3(mockFile, "id");

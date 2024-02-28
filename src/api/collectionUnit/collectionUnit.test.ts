@@ -9,7 +9,7 @@ import {
   getCollectionUnitsByCritterId as _getCollectionUnitsByCritterId,
   updateCollectionUnit as _updateCollectionUnit,
   createCollectionUnit as _createCollectionUnit,
-  deleteCollectionUnit as _deleteCollectionUnit
+  deleteCollectionUnit as _deleteCollectionUnit,
 } from "./collectionUnit.service";
 import {
   CollectionUnitCreateInput,
@@ -17,7 +17,7 @@ import {
   CollectionUnitResponse,
   CollectionUnitResponseSchema,
   CollectionUnitUpdateInput,
-  SimpleCollectionUnitResponseSchema
+  SimpleCollectionUnitResponseSchema,
 } from "./collectionUnit.utils";
 import { randomUUID } from "crypto";
 
@@ -27,16 +27,16 @@ const DATE = new Date();
 
 const mockCollectionUnitCreateInput: CollectionUnitCreateInput = {
   critter_id: ID,
-  collection_unit_id: ID
+  collection_unit_id: ID,
 };
 
 const mockCollectionUnitUpdateInput: CollectionUnitUpdateInput = {
-  collection_unit_id: ID
+  collection_unit_id: ID,
 };
 
 const mockXrefUnit = {
   unit_name: "unit_name",
-  description: "description"
+  description: "description",
 };
 
 const mockCollectionUnitIncludes: CollectionUnitIncludes = {
@@ -47,7 +47,7 @@ const mockCollectionUnitIncludes: CollectionUnitIncludes = {
   create_user: ID,
   update_user: ID,
   create_timestamp: DATE,
-  update_timestamp: DATE
+  update_timestamp: DATE,
 };
 
 const mockCollectionUnitResponse: CollectionUnitResponse = {
@@ -58,7 +58,7 @@ const mockCollectionUnitResponse: CollectionUnitResponse = {
   create_user: ID,
   update_user: ID,
   create_timestamp: DATE.toISOString() as unknown as Date,
-  update_timestamp: DATE.toISOString() as unknown as Date
+  update_timestamp: DATE.toISOString() as unknown as Date,
 };
 
 const mockSimpleCollectionUnitResponse = {
@@ -66,7 +66,7 @@ const mockSimpleCollectionUnitResponse = {
   unit_name: "unit_name",
   collection_unit_id: ID,
   collection_category_id: ID,
-  critter_collection_unit_id: ID
+  critter_collection_unit_id: ID,
 };
 
 // Mock Prisma Calls
@@ -107,8 +107,8 @@ const request = supertest(
     updateCollectionUnit,
     createCollectionUnit,
     deleteCollectionUnit,
-    getCritterById
-  } as Record<keyof ICbDatabase, any>)
+    getCritterById,
+  } as Record<keyof ICbDatabase, any>),
 );
 
 beforeEach(() => {
@@ -138,9 +138,9 @@ describe("API: CollectionUnit", () => {
             collection_unit_id: ID,
             lk_collection_category: {
               category_name: "category_name",
-              collection_category_id: ID
-            }
-          }
+              collection_category_id: ID,
+            },
+          },
         });
         expect.assertions(1);
         expect(simpleCollectionUnit).toEqual(mockSimpleCollectionUnitResponse);
@@ -155,7 +155,7 @@ describe("API: CollectionUnit", () => {
         const collectionUnits = await _getAllCollectionUnits();
         expect.assertions(3);
         expect(prisma.critter_collection_unit.findMany).toHaveBeenCalledTimes(
-          1
+          1,
         );
         expect(collectionUnits).toBeInstanceOf(Array);
         expect(collectionUnits.length).toBe(1);
@@ -168,7 +168,7 @@ describe("API: CollectionUnit", () => {
         const returnedCollectionUnit = await _getCollectionUnitById(ID);
         expect.assertions(2);
         expect(
-          prisma.critter_collection_unit.findUniqueOrThrow
+          prisma.critter_collection_unit.findUniqueOrThrow,
         ).toHaveBeenCalledTimes(1);
         expect(returnedCollectionUnit).toEqual(mockCollectionUnitIncludes);
       });
@@ -185,7 +185,7 @@ describe("API: CollectionUnit", () => {
         const collectionUnits = await _getCollectionUnitsByCritterId(ID);
         expect.assertions(3);
         expect(prisma.critter_collection_unit.findMany).toHaveBeenCalledTimes(
-          1
+          1,
         );
         expect(collectionUnits).toBeInstanceOf(Array);
         expect(collectionUnits.length).toBe(1);
@@ -197,7 +197,7 @@ describe("API: CollectionUnit", () => {
         update.mockResolvedValue(mockCollectionUnitIncludes);
         const returnedCollectionUnit = await _updateCollectionUnit(
           ID,
-          mockCollectionUnitUpdateInput
+          mockCollectionUnitUpdateInput,
         );
         expect.assertions(2);
         expect(prisma.critter_collection_unit.update).toHaveBeenCalledTimes(1);
@@ -209,7 +209,7 @@ describe("API: CollectionUnit", () => {
       it("returns a newly created collection unit", async () => {
         create.mockResolvedValue(mockCollectionUnitIncludes);
         const returnedCollectionUnit = await _createCollectionUnit(
-          mockCollectionUnitCreateInput
+          mockCollectionUnitCreateInput,
         );
         expect.assertions(2);
         expect(prisma.critter_collection_unit.create).toHaveBeenCalledTimes(1);
@@ -265,10 +265,10 @@ describe("API: CollectionUnit", () => {
     describe("GET /api/collection-units/critter/:id", () => {
       it("returns collection units associated with the given critter ID", async () => {
         getCollectionUnitsByCritterId.mockResolvedValue([
-          mockCollectionUnitIncludes
+          mockCollectionUnitIncludes,
         ]);
         const response = await request.get(
-          `/api/collection-units/critter/${ID}`
+          `/api/collection-units/critter/${ID}`,
         );
         expect.assertions(4);
         expect(getCollectionUnitsByCritterId.mock.calls.length).toBe(1);
@@ -279,7 +279,7 @@ describe("API: CollectionUnit", () => {
 
       it("returns 404 when given an invalid critter ID", async () => {
         const response = await request.get(
-          `/api/collection-units/critter/${ID}`
+          `/api/collection-units/critter/${ID}`,
         );
         expect.assertions(2);
         expect(getCollectionUnitsByCritterId).toBeCalled();

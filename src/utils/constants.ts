@@ -40,7 +40,7 @@ const routes = {
   xref: `${api}/xref`,
   //modifiers
   create: "create",
-  id: ":id"
+  id: ":id",
 };
 
 const oneDay = 60 * 60 * 24 * 1000;
@@ -71,26 +71,26 @@ const strings = {
   app: {
     invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
     idRequired: `id is required`,
-    emptyBody: `body must include at least one property`
+    emptyBody: `body must include at least one property`,
   },
   location: {
     notFoundMulti: "no locations found",
     notFound: "location not found",
     //noID: "id was not provided in params",
-    deleted: (id: string): string => `Deleted location ${id}`
+    deleted: (id: string): string => `Deleted location ${id}`,
     // updated: (id: string): string => `Updated location ${id}`,
   },
   user: {
     notFound: "user not found",
     noData: "no new data was provided or the format was invalid",
-    systemUserIdExists: "system_user_id already exists"
+    systemUserIdExists: "system_user_id already exists",
   },
   marking: {
-    notFound: "marking not found"
+    notFound: "marking not found",
   },
   artifact: {
-    notFound: "artifact not found"
-  }
+    notFound: "artifact not found",
+  },
 };
 const defaultFormat = QueryFormats.default;
 
@@ -105,5 +105,5 @@ export {
   strings,
   defaultFormat,
   oneDay,
-  routes
+  routes,
 };

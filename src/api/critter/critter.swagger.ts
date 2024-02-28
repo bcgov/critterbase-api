@@ -5,7 +5,7 @@ import {
   SwagDesc,
   SwagErr,
   SwagNotFound,
-  SwagUnauthorized
+  SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 import {
   CritterSchema,
@@ -13,7 +13,7 @@ import {
   CritterCreateSchema,
   DetailedCritterSchema,
   SimilarCritterQuerySchema,
-  CritterIdsRequestSchema
+  CritterIdsRequestSchema,
 } from "../../schemas/critter-schema";
 import { QueryFormats } from "../../utils/types";
 
@@ -21,7 +21,7 @@ const TAG = "Critter";
 
 export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
-  detailedCritterResponse: DetailedCritterSchema
+  detailedCritterResponse: DetailedCritterSchema,
 };
 
 export const critterPaths = {
@@ -36,8 +36,8 @@ export const critterPaths = {
       tags: [TAG],
       requestParams: {
         query: z.object({
-          wlh_id: z.string().optional()
-        })
+          wlh_id: z.string().optional(),
+        }),
       },
       responses: {
         "200": {
@@ -45,17 +45,17 @@ export const critterPaths = {
             "Returned all critters successfully, or all critters matching WLH ID if provided.",
           content: {
             "application/json": {
-              schema: CritterSchema.array()
-            }
-          }
+              schema: CritterSchema.array(),
+            },
+          },
         },
         "404": {
           description:
-            "Will return 404 if there were no critters matching a provided WLH ID"
+            "Will return 404 if there were no critters matching a provided WLH ID",
         },
         ...SwagErr,
-        ...SwagUnauthorized
-      }
+        ...SwagUnauthorized,
+      },
     },
     /**
      * Get all critters by list of critter ids.
@@ -68,24 +68,24 @@ export const critterPaths = {
       requestBody: {
         content: {
           "application/json": {
-            schema: CritterIdsRequestSchema //TODO: move to critter-schema
-          }
-        }
+            schema: CritterIdsRequestSchema, //TODO: move to critter-schema
+          },
+        },
       },
       responses: {
         "200": {
           description: SwagDesc.get,
           content: {
             "application/json": {
-              schema: CritterSchema.array()
-            }
-          }
+              schema: CritterSchema.array(),
+            },
+          },
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound
-      }
-    }
+        ...SwagNotFound,
+      },
+    },
   },
   [`${routes.critters}/unique`]: {
     /**
@@ -101,9 +101,9 @@ export const critterPaths = {
       requestBody: {
         content: {
           "application/json": {
-            schema: SimilarCritterQuerySchema
-          }
-        }
+            schema: SimilarCritterQuerySchema,
+          },
+        },
       },
       responses: {
         "200": {
@@ -111,15 +111,15 @@ export const critterPaths = {
             "Returned all critters successfully, or all critters matching WLH ID if provided.",
           content: {
             "application/json": {
-              schema: CritterSchema.array()
-            }
-          }
+              schema: CritterSchema.array(),
+            },
+          },
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound
-      }
-    }
+        ...SwagNotFound,
+      },
+    },
   },
   [`${routes.critters}/create`]: {
     /**
@@ -131,29 +131,29 @@ export const critterPaths = {
       summary: "Create a new critter",
       tags: [TAG],
       requestParams: {
-        path: z.object({ id: zodID })
+        path: z.object({ id: zodID }),
       },
       requestBody: {
         content: {
           "application/json": {
-            schema: CritterCreateSchema
-          }
-        }
+            schema: CritterCreateSchema,
+          },
+        },
       },
       responses: {
         "201": {
           description: SwagDesc.create,
           content: {
             "application/json": {
-              schema: CritterSchema
-            }
-          }
+              schema: CritterSchema,
+            },
+          },
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound
-      }
-    }
+        ...SwagNotFound,
+      },
+    },
   },
   [`${routes.critters}/{id}`]: {
     /**
@@ -166,7 +166,7 @@ export const critterPaths = {
       tags: [TAG],
       requestParams: {
         path: z.object({ id: zodID }),
-        query: z.object({ format: z.enum([QueryFormats.detailed]).optional() })
+        query: z.object({ format: z.enum([QueryFormats.detailed]).optional() }),
       },
       responses: {
         "200": {
@@ -176,16 +176,16 @@ export const critterPaths = {
               schema: {
                 oneOf: [
                   { $ref: "#/components/schemas/defaultCritterResponse" },
-                  { $ref: "#/components/schemas/detailedCritterResponse" }
-                ]
-              }
-            }
-          }
+                  { $ref: "#/components/schemas/detailedCritterResponse" },
+                ],
+              },
+            },
+          },
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound
-      }
+        ...SwagNotFound,
+      },
     },
     /**
      * Update a critter.
@@ -196,28 +196,28 @@ export const critterPaths = {
       summary: "Update a critter by id",
       tags: [TAG],
       requestParams: {
-        path: z.object({ id: zodID })
+        path: z.object({ id: zodID }),
       },
       requestBody: {
         content: {
           "application/json": {
-            schema: CritterUpdateSchema
-          }
-        }
+            schema: CritterUpdateSchema,
+          },
+        },
       },
       responses: {
         "200": {
           description: SwagDesc.update,
           content: {
             "application/json": {
-              schema: CritterSchema
-            }
-          }
+              schema: CritterSchema,
+            },
+          },
         },
         ...SwagErr,
         ...SwagUnauthorized,
-        ...SwagNotFound
-      }
-    }
-  }
+        ...SwagNotFound,
+      },
+    },
+  },
 };

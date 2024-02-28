@@ -10,18 +10,18 @@ const mockCritterService = {
   getAllCrittersOrCrittersWithWlhId: jest.fn(),
   updateCritter: jest.fn(),
   createCritter: jest.fn(),
-  findSimilarCritters: jest.fn()
+  findSimilarCritters: jest.fn(),
 };
 
 const request = supertest(
-  makeApp({ critterService: mockCritterService } as any)
+  makeApp({ critterService: mockCritterService } as any),
 );
 
 describe("Critter Router", () => {
   describe("GET critter/ - get all critters or critters with matching wlh_id", () => {
     it("should respond with status 200 and return response", async () => {
       mockCritterService.getAllCrittersOrCrittersWithWlhId.mockResolvedValueOnce(
-        true
+        true,
       );
       const res = await request.get("/api/critters");
 
@@ -31,12 +31,12 @@ describe("Critter Router", () => {
 
     it("should respond 200 and pass wlh_id to service function", async () => {
       mockCritterService.getAllCrittersOrCrittersWithWlhId.mockResolvedValueOnce(
-        true
+        true,
       );
       const res = await request.get("/api/critters").query({ wlh_id: "wlhid" });
 
       expect(
-        mockCritterService.getAllCrittersOrCrittersWithWlhId.mock.calls[0][0]
+        mockCritterService.getAllCrittersOrCrittersWithWlhId.mock.calls[0][0],
       ).toBe("wlhid");
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
@@ -53,7 +53,7 @@ describe("Critter Router", () => {
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
       expect(
-        mockCritterService.getMultipleCrittersByIds.mock.calls[0][0]
+        mockCritterService.getMultipleCrittersByIds.mock.calls[0][0],
       ).toStrictEqual([id]);
     });
 
@@ -64,7 +64,7 @@ describe("Critter Router", () => {
         const res = await request.post("/api/critters/create").send(payload);
 
         expect(mockCritterService.createCritter.mock.calls[0][0]).toStrictEqual(
-          payload
+          payload,
         );
         expect(res.status).toBe(201);
         expect(res.body).toBe(true);
@@ -79,10 +79,10 @@ describe("Critter Router", () => {
           .query({ format: "asSelect" });
 
         expect(
-          mockCritterService.getCritterById.mock.calls[0][0]
+          mockCritterService.getCritterById.mock.calls[0][0],
         ).toStrictEqual(id);
         expect(
-          mockCritterService.getCritterById.mock.calls[0][1]
+          mockCritterService.getCritterById.mock.calls[0][1],
         ).toStrictEqual("asSelect");
         expect(res.status).toBe(200);
         expect(res.body).toBe(true);
@@ -95,7 +95,7 @@ describe("Critter Router", () => {
         const res = await request.patch(`/api/critters/${id}`);
 
         expect(mockCritterService.updateCritter.mock.calls[0][0]).toStrictEqual(
-          id
+          id,
         );
         expect(res.status).toBe(201);
         expect(res.body).toBe(true);
@@ -109,7 +109,7 @@ describe("Critter Router", () => {
         const res = await request.post(`/api/critters/unique`).send(payload);
 
         expect(
-          mockCritterService.findSimilarCritters.mock.calls[0][0]
+          mockCritterService.findSimilarCritters.mock.calls[0][0],
         ).toStrictEqual(payload);
         expect(res.status).toBe(200);
         expect(res.body).toBe(true);

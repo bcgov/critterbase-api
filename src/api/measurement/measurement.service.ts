@@ -1,6 +1,6 @@
 import {
   measurement_qualitative,
-  measurement_quantitative
+  measurement_quantitative,
 } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import {
@@ -10,7 +10,7 @@ import {
   QualitativeBody,
   QualitativeUpdateBody,
   QuantitativeBody,
-  QuantitativeUpdateBody
+  QuantitativeUpdateBody,
 } from "./measurement.utils";
 import { PrismaTransactionClient } from "../../utils/types";
 
@@ -30,9 +30,9 @@ const getQuantMeasurementOrThrow = async (id: string) => {
   const quantMeasurement =
     await prisma.measurement_quantitative.findUniqueOrThrow({
       where: {
-        measurement_quantitative_id: id
+        measurement_quantitative_id: id,
       },
-      ...measurementQuantitativeInclude
+      ...measurementQuantitativeInclude,
     });
   return quantMeasurement;
 };
@@ -41,21 +41,21 @@ const getQualMeasurementOrThrow = async (id: string) => {
   const qualMeasurement =
     await prisma.measurement_qualitative.findUniqueOrThrow({
       where: {
-        measurement_qualitative_id: id
+        measurement_qualitative_id: id,
       },
-      ...measurementQualitativeInclude
+      ...measurementQualitativeInclude,
     });
   return qualMeasurement;
 };
 
 const createQuantMeasurement = async (
-  data: QuantitativeBody
+  data: QuantitativeBody,
 ): Promise<measurement_quantitative> => {
   return await prisma.measurement_quantitative.create({ data });
 };
 
 const createQualMeasurement = async (
-  data: QualitativeBody
+  data: QualitativeBody,
 ): Promise<measurement_qualitative> => {
   return await prisma.measurement_qualitative.create({ data });
 };
@@ -64,8 +64,8 @@ const getQuantMeasurementsByCritterId = async (critter_id: string) => {
   await prisma.critter.findUniqueOrThrow({ where: { critter_id } });
   return await prisma.measurement_quantitative.findMany({
     where: {
-      critter_id
-    }
+      critter_id,
+    },
   });
 };
 
@@ -73,66 +73,66 @@ const getQualMeasurementsByCritterId = async (critter_id: string) => {
   await prisma.critter.findUniqueOrThrow({ where: { critter_id } });
   return await prisma.measurement_qualitative.findMany({
     where: {
-      critter_id
-    }
+      critter_id,
+    },
   });
 };
 
 const getMeasurementsByCritterId = async (
-  critter_id: string
+  critter_id: string,
 ): Promise<Measurements> => {
   const [quantitative, qualitative] = await Promise.all([
     getQuantMeasurementsByCritterId(critter_id),
-    getQualMeasurementsByCritterId(critter_id)
+    getQualMeasurementsByCritterId(critter_id),
   ]);
   return { quantitative, qualitative };
 };
 
 const updateQualMeasurement = async (
   id: string,
-  data: QualitativeUpdateBody
+  data: QualitativeUpdateBody,
 ) => {
   return await prisma.measurement_qualitative.update({
     where: {
-      measurement_qualitative_id: id
+      measurement_qualitative_id: id,
     },
-    data
+    data,
   });
 };
 
 const updateQuantMeasurement = async (
   id: string,
-  data: QuantitativeUpdateBody
+  data: QuantitativeUpdateBody,
 ) => {
   return await prisma.measurement_quantitative.update({
     where: {
-      measurement_quantitative_id: id
+      measurement_quantitative_id: id,
     },
-    data
+    data,
   });
 };
 
 const deleteQualMeasurement = async (
   id: string,
-  prismaOverride?: PrismaTransactionClient
+  prismaOverride?: PrismaTransactionClient,
 ): Promise<measurement_qualitative> => {
   const client = prismaOverride ?? prisma;
   return await client.measurement_qualitative.delete({
     where: {
-      measurement_qualitative_id: id
-    }
+      measurement_qualitative_id: id,
+    },
   });
 };
 
 const deleteQuantMeasurement = async (
   id: string,
-  prismaOverride?: PrismaTransactionClient
+  prismaOverride?: PrismaTransactionClient,
 ): Promise<measurement_quantitative> => {
   const client = prismaOverride ?? prisma;
   return await client.measurement_quantitative.delete({
     where: {
-      measurement_quantitative_id: id
-    }
+      measurement_quantitative_id: id,
+    },
   });
 };
 
@@ -149,5 +149,5 @@ export {
   getAllQuantMeasurements,
   getMeasurementsByCritterId,
   updateQuantMeasurement,
-  updateQualMeasurement
+  updateQualMeasurement,
 };

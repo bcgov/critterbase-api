@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   MarkingCreateBodySchema,
   MarkingVerificationSchema,
-  markingIncludesSchema
+  markingIncludesSchema,
 } from "./marking.utils";
 import { ZodOpenApiOperationObject } from "zod-openapi";
 import { zodID } from "../../utils/zod_helpers";
@@ -12,7 +12,7 @@ import {
   SwagDesc,
   SwagErr,
   SwagNotFound,
-  SwagUnauthorized
+  SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 
 const TAG = "Markings";
@@ -23,7 +23,7 @@ export const SwaggerMarkingResponseValidation = markingIncludesSchema
     lk_colour_marking_text_colour_idTolk_colour: true,
     lk_marking_type: true,
     lk_marking_material: true,
-    xref_taxon_marking_body_location: true
+    xref_taxon_marking_body_location: true,
   })
   .extend({
     body_location: z.string().nullable(),
@@ -31,7 +31,7 @@ export const SwaggerMarkingResponseValidation = markingIncludesSchema
     marking_material: z.string().nullable(),
     primary_colour: z.string().nullable(),
     secondary_colour: z.string().nullable(),
-    text_colour: z.string().nullable()
+    text_colour: z.string().nullable(),
   });
 
 const getMarkingById: ZodOpenApiOperationObject = {
@@ -39,21 +39,21 @@ const getMarkingById: ZodOpenApiOperationObject = {
   summary: "Get a marking by id",
   tags: [TAG],
   requestParams: {
-    path: z.object({ id: zodID })
+    path: z.object({ id: zodID }),
   },
   responses: {
     "200": {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: SwaggerMarkingResponseValidation
-        }
-      }
+          schema: SwaggerMarkingResponseValidation,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const updateMarkingById: ZodOpenApiOperationObject = {
@@ -61,28 +61,28 @@ const updateMarkingById: ZodOpenApiOperationObject = {
   summary: "Update a marking by id",
   tags: [TAG],
   requestParams: {
-    path: z.object({ id: zodID })
+    path: z.object({ id: zodID }),
   },
   requestBody: {
     content: {
       "application/json": {
-        schema: MarkingUpdateBodySchema
-      }
-    }
+        schema: MarkingUpdateBodySchema,
+      },
+    },
   },
   responses: {
     "200": {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: SwaggerMarkingResponseValidation
-        }
-      }
+          schema: SwaggerMarkingResponseValidation,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const deleteMarkingById: ZodOpenApiOperationObject = {
@@ -90,21 +90,21 @@ const deleteMarkingById: ZodOpenApiOperationObject = {
   summary: "Delete a marking by id",
   tags: [TAG],
   requestParams: {
-    path: z.object({ id: zodID })
+    path: z.object({ id: zodID }),
   },
   responses: {
     "200": {
       description: SwagDesc.delete,
       content: {
         "application/json": {
-          schema: SwaggerMarkingResponseValidation
-        }
-      }
+          schema: SwaggerMarkingResponseValidation,
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const getMarkingsByCritterId: ZodOpenApiOperationObject = {
@@ -113,21 +113,21 @@ const getMarkingsByCritterId: ZodOpenApiOperationObject = {
   summary:
     "Get all markings attached to the critter using the provided critter id.",
   requestParams: {
-    path: z.object({ id: zodID })
+    path: z.object({ id: zodID }),
   },
   responses: {
     "200": {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: SwaggerMarkingResponseValidation.array()
-        }
-      }
+          schema: SwaggerMarkingResponseValidation.array(),
+        },
+      },
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 const verifyMarkings: ZodOpenApiOperationObject = {
@@ -139,9 +139,9 @@ const verifyMarkings: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: MarkingVerificationSchema
-      }
-    }
+        schema: MarkingVerificationSchema,
+      },
+    },
   },
   responses: {
     "200": {
@@ -150,14 +150,14 @@ const verifyMarkings: ZodOpenApiOperationObject = {
         "application/json": {
           schema: z.object({
             verified: z.boolean(),
-            invalid_marking: zodID.array()
-          })
-        }
-      }
+            invalid_marking: zodID.array(),
+          }),
+        },
+      },
     },
     ...SwagErr,
-    ...SwagUnauthorized
-  }
+    ...SwagUnauthorized,
+  },
 };
 
 const createMarking: ZodOpenApiOperationObject = {
@@ -167,22 +167,22 @@ const createMarking: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: MarkingCreateBodySchema
-      }
-    }
+        schema: MarkingCreateBodySchema,
+      },
+    },
   },
   responses: {
     "200": {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: SwaggerMarkingResponseValidation
-        }
-      }
+          schema: SwaggerMarkingResponseValidation,
+        },
+      },
     },
     ...SwagErr,
-    ...SwagUnauthorized
-  }
+    ...SwagUnauthorized,
+  },
 };
 
 const getAllMarkings: ZodOpenApiOperationObject = {
@@ -194,31 +194,31 @@ const getAllMarkings: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: SwaggerMarkingResponseValidation.array()
-        }
-      }
+          schema: SwaggerMarkingResponseValidation.array(),
+        },
+      },
     },
     ...SwagErr,
-    ...SwagUnauthorized
-  }
+    ...SwagUnauthorized,
+  },
 };
 
 export const markingPaths = {
   [`${routes.markings}`]: {
-    get: getAllMarkings
+    get: getAllMarkings,
   },
   [`${routes.markings}/create`]: {
-    post: createMarking
+    post: createMarking,
   },
   [`${routes.markings}/verify`]: {
-    get: verifyMarkings
+    get: verifyMarkings,
   },
   [`${routes.markings}/critter/{id}`]: {
-    post: getMarkingsByCritterId
+    post: getMarkingsByCritterId,
   },
   [`${routes.markings}/{id}`]: {
     get: getMarkingById,
     patch: updateMarkingById,
-    delete: deleteMarkingById
-  }
+    delete: deleteMarkingById,
+  },
 };

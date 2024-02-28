@@ -3,7 +3,7 @@ import {
   bulkCreateData as _bulkCreateData,
   bulkUpdateData as _bulkUpdateData,
   bulkDeleteData as _bulkDeleteData,
-  bulkErrMap
+  bulkErrMap,
 } from "./bulk.service";
 import { makeApp } from "../../app";
 import { ICbDatabase } from "../../utils/database";
@@ -17,7 +17,7 @@ import {
   measurement_qualitative,
   measurement_quantitative,
   mortality,
-  location
+  location,
 } from "@prisma/client";
 import { PrismaTransactionClient, apiError } from "../../utils/types";
 
@@ -44,7 +44,7 @@ const db = {
   appendDefaultCOD,
   deleteMarking,
   deleteCollectionUnit,
-  itisService: { patchTsnAndScientificName }
+  itisService: { patchTsnAndScientificName },
 } as Record<keyof ICbDatabase, any>;
 
 const request = supertest(makeApp(db));
@@ -64,7 +64,7 @@ const CRITTER: critter = {
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
   update_timestamp: new Date(),
-  critter_comment: "Hi :)"
+  critter_comment: "Hi :)",
 };
 
 const TAXON: lk_taxon = {
@@ -84,12 +84,12 @@ const TAXON: lk_taxon = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const OTHER_CRITTER: critter = {
   ...CRITTER,
-  critter_id: OTHER_CRITTER_ID
+  critter_id: OTHER_CRITTER_ID,
 };
 
 const MARKING: marking = {
@@ -113,7 +113,7 @@ const MARKING: marking = {
   create_user: "",
   update_user: "",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const CAPTURE: capture = {
@@ -128,7 +128,7 @@ const CAPTURE: capture = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const MORTALITY: mortality = {
@@ -146,7 +146,7 @@ const MORTALITY: mortality = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const QUALITATIVE: measurement_qualitative = {
@@ -161,7 +161,7 @@ const QUALITATIVE: measurement_qualitative = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const QUANTITATIVE: measurement_quantitative = {
@@ -176,31 +176,31 @@ const QUANTITATIVE: measurement_quantitative = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const DEFAULTFORMAT_CRITTER = {
   ...CRITTER,
   lk_taxon: {
     taxon_name_common: "Caribou",
-    taxon_name_latin: "Rangifer tarandus"
+    taxon_name_latin: "Rangifer tarandus",
   },
   lk_region_nr: {
-    region_nr_name: "Somewhere"
+    region_nr_name: "Somewhere",
   },
   critter_collection_unit: [
     {
       xref_collection_unit: {
         lk_collection_category: {
           category_name: "name",
-          collection_category_id: "1af85263-6a7e-4b76-8ca6-118fd3c43f50"
+          collection_category_id: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
         },
         unit_name: "name",
-        unit_description: "desc"
-      }
-    }
+        unit_description: "desc",
+      },
+    },
   ],
-  mortality: [MORTALITY]
+  mortality: [MORTALITY],
 };
 
 const COLLECTION: critter_collection_unit = {
@@ -210,7 +210,7 @@ const COLLECTION: critter_collection_unit = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const LOCATION: location = {
@@ -228,25 +228,25 @@ const LOCATION: location = {
   create_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   update_user: "1af85263-6a7e-4b76-8ca6-118fd3c43f50",
   create_timestamp: new Date(),
-  update_timestamp: new Date()
+  update_timestamp: new Date(),
 };
 
 const DETAILEDFORMAT_CRITTER = {
   ...DEFAULTFORMAT_CRITTER,
   user_critter_create_userTouser: {
-    system_name: "CRITTERBASE"
+    system_name: "CRITTERBASE",
   },
   capture: [CAPTURE],
   mortality: [MORTALITY],
   marking: [MARKING],
   measurement_qualitative: [QUALITATIVE],
-  measurement_quantitative: [QUANTITATIVE]
+  measurement_quantitative: [QUANTITATIVE],
 };
 
 const prismaMock = {
   critter: {
     createMany: jest.fn().mockResolvedValue({ count: 1 }),
-    update: jest.fn()
+    update: jest.fn(),
   },
   capture: { createMany: jest.fn().mockResolvedValue({ count: 1 }) },
   mortality: { createMany: jest.fn().mockResolvedValue({ count: 1 }) },
@@ -254,38 +254,38 @@ const prismaMock = {
     createMany: jest.fn().mockResolvedValue({ count: 1 }),
     delete: jest.fn(),
     update: jest.fn(),
-    create: jest.fn()
+    create: jest.fn(),
   },
   location: {
     createMany: jest.fn().mockResolvedValue({ count: 1 }),
     delete: jest.fn(),
-    update: jest.fn()
+    update: jest.fn(),
   },
   critter_collection_unit: {
     createMany: jest.fn().mockResolvedValue({ count: 1 }),
     create: jest.fn(),
-    update: jest.fn()
+    update: jest.fn(),
   },
   measurement_quantitative: {
-    createMany: jest.fn().mockResolvedValue({ count: 1 })
+    createMany: jest.fn().mockResolvedValue({ count: 1 }),
   },
   measurement_qualitative: {
-    createMany: jest.fn().mockResolvedValue({ count: 1 })
+    createMany: jest.fn().mockResolvedValue({ count: 1 }),
   },
   family: {
-    createMany: jest.fn().mockResolvedValue({ count: 1 })
+    createMany: jest.fn().mockResolvedValue({ count: 1 }),
   },
   family_child: {
-    createMany: jest.fn().mockResolvedValue({ count: 1 })
+    createMany: jest.fn().mockResolvedValue({ count: 1 }),
   },
   family_parent: {
-    createMany: jest.fn().mockResolvedValue({ count: 1 })
-  }
+    createMany: jest.fn().mockResolvedValue({ count: 1 }),
+  },
 };
 jest
   .spyOn(prisma, "$transaction")
   .mockImplementation((callback) =>
-    callback(prismaMock as unknown as PrismaTransactionClient)
+    callback(prismaMock as unknown as PrismaTransactionClient),
   );
 
 describe("API: Bulk", () => {
@@ -298,10 +298,10 @@ describe("API: Bulk", () => {
         prismaMock.location.createMany.mockResolvedValue({ count: 1 });
         prismaMock.marking.createMany.mockResolvedValue({ count: 1 });
         prismaMock.critter_collection_unit.createMany.mockResolvedValue({
-          count: 1
+          count: 1,
         });
         prismaMock.measurement_qualitative.createMany.mockResolvedValue({
-          count: 1
+          count: 1,
         });
         const result = await _bulkCreateData({
           critters: [CRITTER],
@@ -314,7 +314,7 @@ describe("API: Bulk", () => {
           qualitative_measurements: [],
           families: [],
           family_parents: [],
-          family_children: []
+          family_children: [],
         });
         expect.assertions(6);
         expect(prismaMock.critter.createMany.mock.calls.length).toBe(1);
@@ -323,7 +323,7 @@ describe("API: Bulk", () => {
         expect(prismaMock.location.createMany.mock.calls.length).toBe(1);
         expect(prismaMock.marking.createMany.mock.calls.length).toBe(1);
         expect(
-          prismaMock.critter_collection_unit.createMany.mock.calls.length
+          prismaMock.critter_collection_unit.createMany.mock.calls.length,
         ).toBe(1);
       });
     });
@@ -346,9 +346,9 @@ describe("API: Bulk", () => {
             mortalities: [MORTALITY],
             markings: [MARKING],
             qualitative_measurements: [],
-            quantitative_measurements: []
+            quantitative_measurements: [],
           },
-          db
+          db,
         );
 
         expect.assertions(6);
@@ -356,7 +356,7 @@ describe("API: Bulk", () => {
         expect(prismaMock.marking.update.mock.calls.length).toBe(1);
         expect(prismaMock.location.update.mock.calls.length).toBe(1);
         expect(
-          prismaMock.critter_collection_unit.update.mock.calls.length
+          prismaMock.critter_collection_unit.update.mock.calls.length,
         ).toBe(1);
         expect(updateCapture.mock.calls.length).toBe(1);
         expect(updateMortality.mock.calls.length).toBe(1);
@@ -374,10 +374,10 @@ describe("API: Bulk", () => {
                 markings: [],
                 captures: [{ capture_comment: "a" }],
                 qualitative_measurements: [],
-                quantitative_measurements: []
+                quantitative_measurements: [],
               },
-              db
-            )
+              db,
+            ),
         ).rejects.toThrow(apiError.requiredProperty("capture_id"));
       });
       it("should error out on missing mortality id", async () => {
@@ -393,10 +393,10 @@ describe("API: Bulk", () => {
                 markings: [],
                 captures: [],
                 qualitative_measurements: [],
-                quantitative_measurements: []
+                quantitative_measurements: [],
               },
-              db
-            )
+              db,
+            ),
         ).rejects.toThrow(apiError.requiredProperty("mortality_id"));
       });
       it("should create marking instead of update marking if id is missing", async () => {
@@ -412,14 +412,14 @@ describe("API: Bulk", () => {
               {
                 critter_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
                 taxon_marking_body_location_id:
-                  "98f9fede-95fc-4321-9444-7c2742e336fe"
-              }
+                  "98f9fede-95fc-4321-9444-7c2742e336fe",
+              },
             ],
             captures: [],
             qualitative_measurements: [],
-            quantitative_measurements: []
+            quantitative_measurements: [],
           },
-          db
+          db,
         );
         expect(prismaMock.marking.create.mock.calls.length).toBe(1);
       });
@@ -432,24 +432,24 @@ describe("API: Bulk", () => {
             _deleteMarkings: [
               {
                 marking_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
-                _delete: true
-              }
+                _delete: true,
+              },
             ],
             _deleteUnits: [
               {
                 critter_collection_unit_id:
                   "98f9fede-95fc-4321-9444-7c2742e336fe",
-                _delete: true
-              }
+                _delete: true,
+              },
             ],
             _deleteCaptures: [],
             _deleteMoralities: [],
             _deleteQuant: [],
             _deleteQual: [],
             _deleteParents: [],
-            _deleteChildren: []
+            _deleteChildren: [],
           },
-          db
+          db,
         );
         expect(deleteMarking.mock.calls.length).toBe(1);
         expect(deleteCollectionUnit.mock.calls.length).toBe(1);
@@ -462,20 +462,20 @@ describe("API: Bulk", () => {
             collections: [
               {
                 critter_id: CRITTER_ID,
-                collection_unit_id: "98f9fede-95fc-4321-9444-7c2742e336fe"
-              }
+                collection_unit_id: "98f9fede-95fc-4321-9444-7c2742e336fe",
+              },
             ],
             locations: [],
             mortalities: [],
             markings: [],
             captures: [],
             qualitative_measurements: [],
-            quantitative_measurements: []
+            quantitative_measurements: [],
           },
-          db
+          db,
         );
         expect(
-          prismaMock.critter_collection_unit.create.mock.calls.length
+          prismaMock.critter_collection_unit.create.mock.calls.length,
         ).toBe(1);
       });
     });
@@ -487,13 +487,13 @@ describe("API: Bulk", () => {
             code: "invalid_type",
             path: ["string"],
             expected: "string",
-            received: "number"
+            received: "number",
           },
           {
             defaultError: "",
-            data: undefined
+            data: undefined,
           },
-          "critters"
+          "critters",
         );
         expect.assertions(1);
         expect(typeof msg.message).toBe("string");
@@ -509,7 +509,7 @@ describe("API: Bulk", () => {
         appendDefaultCOD.mockResolvedValue({ ...MORTALITY });
         patchTsnAndScientificName.mockResolvedValue({
           ...CRITTER,
-          itis_scientific_name: "Biggus Moosus"
+          itis_scientific_name: "Biggus Moosus",
         });
         const body = {
           critters: [CRITTER],
@@ -520,7 +520,7 @@ describe("API: Bulk", () => {
           markings: [MARKING],
           quantitative_measurements: [],
           qualitative_measurements: [],
-          families: { families: [], parents: [], children: [] }
+          families: { families: [], parents: [], children: [] },
         };
         const res = await request.post("/api/bulk").send(body);
         expect.assertions(1);
@@ -544,7 +544,7 @@ describe("API: Bulk", () => {
           markings: [MARKING, { ...MARKING, _delete: true }],
           quantitative_measurements: [],
           qualitative_measurements: [],
-          families: { families: [], parents: [], children: [] }
+          families: { families: [], parents: [], children: [] },
         };
         const res = await request.patch("/api/bulk").send(body);
 
@@ -560,37 +560,37 @@ describe("API: Bulk", () => {
       it("should return status 400, trigger errors", async () => {
         expect.assertions(6);
         const body = {
-          critters: [{ critter_id: 2 }]
+          critters: [{ critter_id: 2 }],
         };
         let res = await request.patch("/api/bulk").send(body);
         expect(res.status).toBe(400);
 
         const body2 = {
-          collections: [{ critter_id: 2 }]
+          collections: [{ critter_id: 2 }],
         };
         res = await request.patch("/api/bulk").send(body2);
         expect(res.status).toBe(400);
 
         const body3 = {
-          locations: [{ location_id: 2 }]
+          locations: [{ location_id: 2 }],
         };
         res = await request.patch("/api/bulk").send(body3);
         expect(res.status).toBe(400);
 
         const body4 = {
-          captures: [{ capture_id: 2 }]
+          captures: [{ capture_id: 2 }],
         };
         res = await request.patch("/api/bulk").send(body4);
         expect(res.status).toBe(400);
 
         const body5 = {
-          mortalities: [{ mortality_id: 2 }]
+          mortalities: [{ mortality_id: 2 }],
         };
         res = await request.patch("/api/bulk").send(body5);
         expect(res.status).toBe(400);
 
         const body6 = {
-          mortalities: [{ mortality_id: 2 }]
+          mortalities: [{ mortality_id: 2 }],
         };
         res = await request.patch("/api/bulk").send(body6);
         expect(res.status).toBe(400);

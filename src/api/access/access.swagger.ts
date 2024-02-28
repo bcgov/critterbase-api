@@ -19,12 +19,12 @@ const getAccess: ZodOpenApiOperationObject = {
       content: {
         "application/json": {
           schema: z.object({
-            message: z.string()
-          })
-        }
-      }
-    }
-  }
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
 };
 
 const signup: ZodOpenApiOperationObject = {
@@ -35,22 +35,22 @@ const signup: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: UserCreateBodySchema
-      }
-    }
+        schema: UserCreateBodySchema,
+      },
+    },
   },
   responses: {
     201: {
       description: SwagDesc.create,
       content: {
         "application/json": {
-          schema: z.object({ user_id: zodID })
-        }
-      }
+          schema: z.object({ user_id: zodID }),
+        },
+      },
     },
     ...SwagErr,
-    ...SwagUnauthorized
-  }
+    ...SwagUnauthorized,
+  },
 };
 
 const getTypes: ZodOpenApiOperationObject = {
@@ -59,7 +59,7 @@ const getTypes: ZodOpenApiOperationObject = {
   security: [],
   tags: [TAG],
   requestParams: {
-    path: z.object({ model: z.string() })
+    path: z.object({ model: z.string() }),
   },
 
   responses: {
@@ -67,23 +67,23 @@ const getTypes: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: {}
-        }
-      }
+          schema: {},
+        },
+      },
     },
     ...SwagErr,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 export const accessPaths = {
   [routes.home]: {
-    get: getAccess
+    get: getAccess,
   },
   [routes.home + "/types/{model}"]: {
-    get: getTypes
+    get: getTypes,
   },
   [routes.home + "/signup"]: {
-    post: signup
-  }
+    post: signup,
+  },
 };

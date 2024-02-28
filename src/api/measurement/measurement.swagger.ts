@@ -10,24 +10,24 @@ import {
   QualitativeSchema,
   QuantitativeCreateSchema,
   QuantitativeSchema,
-  QuantitativeUpdateSchema
+  QuantitativeUpdateSchema,
 } from "./measurement.utils";
 
 const TAG = "Measurement";
 const reqIdParam = {
   requestParams: {
-    path: z.object({ id: zodID })
-  }
+    path: z.object({ id: zodID }),
+  },
 };
 
 const QualitativeResponseSchema = QualitativeSchema.extend({
   measurement_name: z.string().nullable(),
   option_label: z.string().nullable(),
-  option_value: z.string().nullable()
+  option_value: z.string().nullable(),
 });
 
 const QuantitativeResponseSchema = QuantitativeSchema.extend({
-  measurement: z.string().nullable()
+  measurement: z.string().nullable(),
 });
 
 //ALl Measurements
@@ -43,14 +43,14 @@ const GetAllMeasurements: ZodOpenApiOperationObject = {
           schema: z.object({
             measurements: z.object({
               qualitative: QualitativeSchema.array(),
-              quantitative: QuantitativeSchema.array()
-            })
-          })
-        }
-      }
+              quantitative: QuantitativeSchema.array(),
+            }),
+          }),
+        },
+      },
     },
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const GetQualMeasurement: ZodOpenApiOperationObject = {
@@ -63,13 +63,13 @@ const GetQualMeasurement: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: QualitativeResponseSchema
-        }
-      }
+          schema: QualitativeResponseSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const DeleteQualMeasurement: ZodOpenApiOperationObject = {
@@ -82,13 +82,13 @@ const DeleteQualMeasurement: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         "application/json": {
-          schema: QualitativeSchema
-        }
-      }
+          schema: QualitativeSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const UpdateQualMeasurement: ZodOpenApiOperationObject = {
@@ -99,22 +99,22 @@ const UpdateQualMeasurement: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: QualitativeCreateSchema
-      }
-    }
+        schema: QualitativeCreateSchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: QualitativeSchema
-        }
-      }
+          schema: QualitativeSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const GetQuantMeasurement: ZodOpenApiOperationObject = {
@@ -127,13 +127,13 @@ const GetQuantMeasurement: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: QuantitativeResponseSchema
-        }
-      }
+          schema: QuantitativeResponseSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const DeleteQuantMeasurement: ZodOpenApiOperationObject = {
@@ -146,13 +146,13 @@ const DeleteQuantMeasurement: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         "application/json": {
-          schema: QuantitativeSchema
-        }
-      }
+          schema: QuantitativeSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const UpdateQuantMeasurement: ZodOpenApiOperationObject = {
@@ -163,22 +163,22 @@ const UpdateQuantMeasurement: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: QuantitativeUpdateSchema
-      }
-    }
+        schema: QuantitativeUpdateSchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: QuantitativeSchema
-        }
-      }
+          schema: QuantitativeSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const CreateQuantMeasurement: ZodOpenApiOperationObject = {
@@ -188,22 +188,22 @@ const CreateQuantMeasurement: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: QuantitativeCreateSchema
-      }
-    }
+        schema: QuantitativeCreateSchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: QuantitativeSchema
-        }
-      }
+          schema: QuantitativeSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 const CreateQualMeasurement: ZodOpenApiOperationObject = {
@@ -213,61 +213,61 @@ const CreateQualMeasurement: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: QualitativeCreateSchema
-      }
-    }
+        schema: QualitativeCreateSchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.update,
       content: {
         "application/json": {
-          schema: QualitativeSchema
-        }
-      }
+          schema: QualitativeSchema,
+        },
+      },
     },
     ...SwagNotFound,
-    ...SwagErr
-  }
+    ...SwagErr,
+  },
 };
 
 //Qualitative Measurements
 
 export const measurementPaths = {
   [routes.measurements]: {
-    get: GetAllMeasurements
+    get: GetAllMeasurements,
   },
   [`${routes.measurements}/qualitative/{id}`]: {
     get: GetQualMeasurement,
     delete: DeleteQualMeasurement,
-    patch: UpdateQualMeasurement
+    patch: UpdateQualMeasurement,
   },
   [`${routes.measurements}/qualitative/${routes.create}`]: {
-    post: CreateQualMeasurement
+    post: CreateQualMeasurement,
   },
   [`${routes.measurements}/quantitative/{id}`]: {
     get: GetQuantMeasurement,
     delete: DeleteQuantMeasurement,
-    patch: UpdateQuantMeasurement
+    patch: UpdateQuantMeasurement,
   },
   [`${routes.measurements}/quantitative/${routes.create}`]: {
-    post: CreateQuantMeasurement
-  }
+    post: CreateQuantMeasurement,
+  },
 };
 
 export const SwaggerQualitativeResponseValidationSchema =
   MeasurementQualitativeIncludeSchema.omit({
     xref_taxon_measurement_qualitative: true,
-    xref_taxon_measurement_qualitative_option: true
+    xref_taxon_measurement_qualitative_option: true,
   }).extend({
     measurement_name: z.string().nullable(),
     option_label: z.string().nullable(),
-    option_value: z.number().nullable()
+    option_value: z.number().nullable(),
   });
 
 export const SwaggerQuantitativeResponseValidationSchema =
   MeasurementQuantitativeIncludeSchema.omit({
-    xref_taxon_measurement_quantitative: true
+    xref_taxon_measurement_quantitative: true,
   }).extend({
-    measurement_name: z.string().nullable()
+    measurement_name: z.string().nullable(),
   });

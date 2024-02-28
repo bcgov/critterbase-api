@@ -5,7 +5,7 @@ import { QueryFormats } from "../utils/types";
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
-  SimilarCritterQuery
+  SimilarCritterQuery,
 } from "../schemas/critter-schema";
 
 /**
@@ -67,7 +67,7 @@ export class CritterService extends InternalService<CritterRepository> {
         measurements: { qualitative, quantitative },
         mortality,
         family_parent,
-        family_child
+        family_child,
       };
     }
     return this.repository.getCritterById(critterId);

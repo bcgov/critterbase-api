@@ -6,7 +6,7 @@ import {
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
-  TsnQualitativeMeasurementSchema
+  TsnQualitativeMeasurementSchema,
 } from "../schemas/xref-schema";
 import { Prisma } from "@prisma/client";
 
@@ -19,18 +19,18 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ICollectionUnitDef[]>}
    */
   async getCollectionUnitsFromCategoryId(
-    category_id: string
+    category_id: string,
   ): Promise<ICollectionUnitDef[]> {
     const result = await this.prisma.xref_collection_unit.findMany({
       where: {
-        collection_category_id: category_id
-      }
+        collection_category_id: category_id,
+      },
     });
 
     if (!result.length) {
       throw apiError.sqlExecuteIssue("Failed to find collection units.", [
         "XrefRepository -> getTsnCollectionCategories",
-        "results had length of 0"
+        "results had length of 0",
       ]);
     }
 
@@ -45,7 +45,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
   async getTsnCollectionCategories(
-    tsn: number
+    tsn: number,
   ): Promise<ICollectionCategoryDef[]> {
     const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
@@ -57,7 +57,7 @@ export class XrefRepository extends Repository {
     if (!result.length) {
       throw apiError.sqlExecuteIssue(`Failed to find collection categories.`, [
         "XrefRepository -> getTsnCollectionCategories",
-        "results had length of 0"
+        "results had length of 0",
       ]);
     }
 
@@ -72,7 +72,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
   async getTsnMarkingBodyLocations(
-    tsns: number[]
+    tsns: number[],
   ): Promise<ITsnMarkingBodyLocation[]> {
     const result = await this.prisma.xref_taxon_marking_body_location.findMany({
       where: { itis_tsn: { in: tsns } },
@@ -80,14 +80,14 @@ export class XrefRepository extends Repository {
         taxon_marking_body_location_id: true,
         itis_tsn: true,
         body_location: true,
-        description: true
-      }
+        description: true,
+      },
     });
 
     if (!result.length) {
       throw apiError.sqlExecuteIssue(`Failed to find marking body locations.`, [
         "XrefRepository -> getTsnMarkingBodyLocations",
-        "results had length of 0"
+        "results had length of 0",
       ]);
     }
 
@@ -102,7 +102,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
   async getTsnQualitativeMeasurements(
-    tsns: number[]
+    tsns: number[],
   ): Promise<ITsnQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -125,7 +125,7 @@ export class XrefRepository extends Repository {
         ON q.taxon_measurement_id = o.taxon_measurement_id
       WHERE q.itis_tsn = ANY(${tsns})
       GROUP BY q.taxon_measurement_id;`,
-      TsnQualitativeMeasurementSchema.array()
+      TsnQualitativeMeasurementSchema.array(),
     );
 
     if (!result.length) {
@@ -133,8 +133,8 @@ export class XrefRepository extends Repository {
         `Failed to find qualitative measurements.`,
         [
           "XrefRepository -> getTsnQualitativeMeasurements",
-          "results had length of 0"
-        ]
+          "results had length of 0",
+        ],
       );
     }
 
@@ -149,7 +149,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnQualitativeMeasurementOption>}
    */
   async getQualitativeMeasurementOptions(
-    taxonMeasurementId: string
+    taxonMeasurementId: string,
   ): Promise<ITsnQualitativeMeasurementOption[]> {
     const result =
       await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
@@ -159,8 +159,8 @@ export class XrefRepository extends Repository {
           taxon_measurement_id: true,
           option_value: true,
           option_label: true,
-          option_desc: true
-        }
+          option_desc: true,
+        },
       });
 
     if (!result.length) {
@@ -168,8 +168,8 @@ export class XrefRepository extends Repository {
         `Failed to find qualitative measurement options.`,
         [
           "XrefRepository -> getTsnQualitativeMeasurements",
-          "results had a length of 0"
-        ]
+          "results had a length of 0",
+        ],
       );
     }
 
@@ -193,8 +193,8 @@ export class XrefRepository extends Repository {
           measurement_name: true,
           min_value: true,
           max_value: true,
-          unit: true
-        }
+          unit: true,
+        },
       });
 
     if (!result.length) {
@@ -202,8 +202,8 @@ export class XrefRepository extends Repository {
         `Failed to find quantitative measurement.`,
         [
           "XrefRepository -> getTsnQuantitativeMeasurements",
-          "results had a length of 0"
-        ]
+          "results had a length of 0",
+        ],
       );
     }
 

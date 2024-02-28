@@ -13,7 +13,7 @@ export const UserRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const users = await db.getUsers();
       return res.status(200).json(users);
-    })
+    }),
   );
 
   userRouter.post(
@@ -22,7 +22,7 @@ export const UserRouter = (db: ICbDatabase) => {
       const userData = UserCreateBodySchema.parse(req.body);
       const newUser = await db.createUser(userData);
       return res.status(201).json(newUser);
-    })
+    }),
   );
 
   userRouter
@@ -31,26 +31,26 @@ export const UserRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      })
+      }),
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const user = await db.getUser(req.params.id);
         return res.status(200).json(user);
-      })
+      }),
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const userData = UserUpdateBodySchema.parse(req.body);
         const user = await db.updateUser(req.params.id, userData);
         return res.status(200).json(user);
-      })
+      }),
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const deleted = await db.deleteUser(req.params.id);
         return res.status(200).json(deleted);
-      })
+      }),
     );
 
   return userRouter;

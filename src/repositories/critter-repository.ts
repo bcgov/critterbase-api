@@ -20,7 +20,7 @@ import {
   DetailedCritterParentSchema,
   DetailedCritterChildSchema,
   IDetailedCritterParent,
-  IDetailedCritterChild
+  IDetailedCritterChild,
 } from "../schemas/critter-schema";
 import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
@@ -45,7 +45,7 @@ export class CritterRepository extends Repository {
     sex: true,
     wlh_id: true,
     responsible_region_nr_id: true,
-    critter_comment: true
+    critter_comment: true,
   };
 
   /**
@@ -57,13 +57,13 @@ export class CritterRepository extends Repository {
    */
   async getAllCritters(): Promise<ICritter[]> {
     const result = await this.prisma.critter.findMany({
-      select: this._critterProperties
+      select: this._critterProperties,
     });
 
     if (!result.length) {
       throw apiError.notFound(`Failed to find critters.`, [
         "CritterRepository -> getAllCritters",
-        "results had a length of 0"
+        "results had a length of 0",
       ]);
     }
 
@@ -81,13 +81,13 @@ export class CritterRepository extends Repository {
   async getMultipleCrittersByIds(critter_ids: string[]): Promise<ICritter[]> {
     const result = await this.prisma.critter.findMany({
       where: { critter_id: { in: critter_ids } },
-      select: this._critterProperties
+      select: this._critterProperties,
     });
 
     if (!result.length) {
       throw apiError.notFound(`Failed to find critters.`, [
         `CritterRepository -> getMultipleCrittersByIds`,
-        "results had a length of 0"
+        "results had a length of 0",
       ]);
     }
 
@@ -105,13 +105,13 @@ export class CritterRepository extends Repository {
   async getCritterById(critterId: string): Promise<ICritter> {
     const result = await this.prisma.critter.findUnique({
       where: { critter_id: critterId },
-      select: this._critterProperties
+      select: this._critterProperties,
     });
 
     if (!result) {
       throw apiError.notFound(`Failed to find specific critter.`, [
         "CritterRepository -> getCritterById",
-        "result was undefined"
+        "result was undefined",
       ]);
     }
 
@@ -131,13 +131,13 @@ export class CritterRepository extends Repository {
   async getCrittersByWlhId(wlhId: string): Promise<ICritter[]> {
     const result = await this.prisma.critter.findMany({
       where: { wlh_id: wlhId },
-      select: this._critterProperties
+      select: this._critterProperties,
     });
 
     if (!result.length) {
       throw apiError.notFound(
         `Failed to find critters with wlh-id: ${wlhId}.`,
-        ["CritterRepository -> getCritterByWlhId", "results had a length of 0"]
+        ["CritterRepository -> getCritterByWlhId", "results had a length of 0"],
       );
     }
 
@@ -155,15 +155,15 @@ export class CritterRepository extends Repository {
    */
   async updateCritter(
     critterId: string,
-    critterData: CritterUpdate
+    critterData: CritterUpdate,
   ): Promise<ICritter> {
     try {
       const result = await this.prisma.critter.update({
         where: {
-          critter_id: critterId
+          critter_id: critterId,
         },
         data: critterData,
-        select: this._critterProperties
+        select: this._critterProperties,
       });
 
       return result;
@@ -171,7 +171,7 @@ export class CritterRepository extends Repository {
       throw apiError.sqlExecuteIssue(`Failed to update critter.`, [
         "CritterRepository -> updateCritter",
         "prisma threw error",
-        err
+        err,
       ]);
     }
   }
@@ -185,12 +185,12 @@ export class CritterRepository extends Repository {
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(
-    critterData: CritterCreateRequiredItis
+    critterData: CritterCreateRequiredItis,
   ): Promise<ICritter> {
     try {
       const result = await this.prisma.critter.create({
         data: critterData,
-        select: this._critterProperties
+        select: this._critterProperties,
       });
 
       return result;
@@ -198,7 +198,7 @@ export class CritterRepository extends Repository {
       throw apiError.sqlExecuteIssue(`Failed to create critter.`, [
         "CritterRepository -> createCritter",
         "prisma threw error",
-        err
+        err,
       ]);
     }
   }
@@ -248,7 +248,7 @@ export class CritterRepository extends Repository {
         OR
           (t.name ILIKE ${query.marking?.marking_type}
           AND m.identifier ILIKE ${query.marking?.identifier});`,
-      CritterSchema.array()
+      CritterSchema.array(),
     );
 
     return result;
@@ -266,7 +266,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterMarking[]>} markings.
    */
   async findCritterMarkings(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterMarking[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -302,7 +302,7 @@ export class CritterRepository extends Repository {
           ON c3.colour_id = m.text_colour_id
         WHERE m.critter_id = ${critterId}::uuid
         `,
-      DetailedCritterMarkingSchema.array()
+      DetailedCritterMarkingSchema.array(),
     );
 
     return result;
@@ -316,7 +316,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterCapture[]>} captures.
    */
   async findCritterCaptures(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterCapture[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -345,7 +345,7 @@ export class CritterRepository extends Repository {
           ON rl.location_id = c.release_location_id
         WHERE c.critter_id = ${critterId}::uuid
         GROUP BY c.capture_id, cl.*, rl.*;`,
-      DetailedCritterCaptureSchema.array()
+      DetailedCritterCaptureSchema.array(),
     );
 
     return result;
@@ -360,7 +360,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterMortality[]>} mortalities.
    */
   async findCritterMortalities(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterMortality[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -391,7 +391,7 @@ export class CritterRepository extends Repository {
           ON m.proximate_cause_of_death_id = ud.cod_id
         WHERE m.critter_id = ${critterId}::uuid
         GROUP BY m.mortality_id, pd.cod_category, ud.cod_category, pd.cod_reason, ud.cod_reason, ml.*;`,
-      DetailedCritterMortalitySchema.array()
+      DetailedCritterMortalitySchema.array(),
     );
 
     return result;
@@ -405,7 +405,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterQualitativeMeasurement>} qualitative measurements.
    */
   async findCritterQualitativeMeasurements(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -424,7 +424,7 @@ export class CritterRepository extends Repository {
         JOIN xref_taxon_measurement_qualitative_option o
           ON o.qualitative_option_id = m.qualitative_option_id
         WHERE m.critter_id = ${critterId}::uuid;`,
-      DetailedCritterQualitativeMeasurementSchema.array()
+      DetailedCritterQualitativeMeasurementSchema.array(),
     );
 
     return result;
@@ -438,7 +438,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterQuantitativeMeasurement[]>} quantitative measurements.
    */
   async findCritterQuantitativeMeasurements(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterQuantitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -456,7 +456,7 @@ export class CritterRepository extends Repository {
         JOIN xref_taxon_measurement_quantitative x
           ON x.taxon_measurement_id = m.taxon_measurement_id
         WHERE m.critter_id = ${critterId}::uuid;`,
-      DetailedCritterQuantitativeMeasurementSchema.array()
+      DetailedCritterQuantitativeMeasurementSchema.array(),
     );
 
     return result;
@@ -470,7 +470,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterCollectionUnit[]>} collection units.
    */
   async findCritterCollectionUnits(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterCollectionUnit[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -484,7 +484,7 @@ export class CritterRepository extends Repository {
         JOIN lk_collection_category l
           ON l.collection_category_id = x.collection_category_id
         WHERE c.critter_id = ${critterId}::uuid;`,
-      DetailedCritterCollectionUnit.array()
+      DetailedCritterCollectionUnit.array(),
     );
 
     return result;
@@ -500,7 +500,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterParent[]>}
    */
   async findCritterParents(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterParent[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -514,7 +514,7 @@ export class CritterRepository extends Repository {
         JOIN family f
           ON p.family_id = f.family_id
         WHERE c.child_critter_id = ${critterId}::uuid;`,
-      DetailedCritterParentSchema.array()
+      DetailedCritterParentSchema.array(),
     );
 
     return result;
@@ -530,7 +530,7 @@ export class CritterRepository extends Repository {
    * @returns {Promise<IDetailedCritterChild[]>}
    */
   async findCritterChildren(
-    critterId: string
+    critterId: string,
   ): Promise<IDetailedCritterChild[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -544,7 +544,7 @@ export class CritterRepository extends Repository {
         JOIN family f
           ON c.family_id = f.family_id
         WHERE p.parent_critter_id = ${critterId}::uuid;`,
-      DetailedCritterChildSchema.array()
+      DetailedCritterChildSchema.array(),
     );
 
     return result;

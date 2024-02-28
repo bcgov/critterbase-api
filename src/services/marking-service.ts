@@ -18,14 +18,14 @@ export class MarkingService extends InternalService<MarkingRepository> {
     const invalidMarkingIds =
       await this.repository.findInvalidMarkingIdsFromTsnHierarchy(
         markingIds,
-        tsnHierarchy
+        tsnHierarchy,
       );
 
     const allVerified = invalidMarkingIds.length === 0;
 
     return {
       verified: allVerified,
-      invalid_markings: invalidMarkingIds
+      invalid_markings: invalidMarkingIds,
     };
   }
 }

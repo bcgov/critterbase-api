@@ -5,13 +5,13 @@ import {
   SwagDesc,
   SwagErr,
   SwagNotFound,
-  SwagUnauthorized
+  SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 import { zodID } from "../../utils/zod_helpers";
 import {
   LocationCreateSchema,
   LocationSchema,
-  LocationUpdateSchema
+  LocationUpdateSchema,
 } from "./location.utils";
 
 const TAG = "Location";
@@ -19,29 +19,29 @@ const SN = z.string().nullable();
 const SwagLocationResponseSchema = LocationSchema.omit({
   wmu_id: true,
   region_nr_id: true,
-  region_env_id: true
+  region_env_id: true,
 }).extend({ wmu_name: SN, region_nr_name: SN, region_env_name: SN });
 
 const defaultLocationContent = {
   content: {
     "application/json": {
-      schema: LocationSchema
-    }
-  }
+      schema: LocationSchema,
+    },
+  },
 };
 
 const formattedLocationContent = {
   content: {
     "application/json": {
-      schema: SwagLocationResponseSchema
-    }
-  }
+      schema: SwagLocationResponseSchema,
+    },
+  },
 };
 
 const reqIdParam = {
   requestParams: {
-    path: z.object({ id: zodID })
-  }
+    path: z.object({ id: zodID }),
+  },
 };
 
 const SwagGetAllLocations: ZodOpenApiOperationObject = {
@@ -53,13 +53,13 @@ const SwagGetAllLocations: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: SwagLocationResponseSchema.array()
-        }
-      }
+          schema: SwagLocationResponseSchema.array(),
+        },
+      },
     },
     ...SwagErr,
-    ...SwagUnauthorized
-  }
+    ...SwagUnauthorized,
+  },
 };
 
 const SwagCreateLocation: ZodOpenApiOperationObject = {
@@ -70,19 +70,19 @@ const SwagCreateLocation: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: LocationCreateSchema
-      }
-    }
+        schema: LocationCreateSchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.create,
-      ...defaultLocationContent
+      ...defaultLocationContent,
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 const SwagUpdateLocation: ZodOpenApiOperationObject = {
   operationId: "updateLocation",
@@ -93,19 +93,19 @@ const SwagUpdateLocation: ZodOpenApiOperationObject = {
   requestBody: {
     content: {
       "application/json": {
-        schema: LocationUpdateSchema
-      }
-    }
+        schema: LocationUpdateSchema,
+      },
+    },
   },
   responses: {
     "201": {
       description: SwagDesc.update,
-      ...defaultLocationContent
+      ...defaultLocationContent,
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 const SwagGetLocation: ZodOpenApiOperationObject = {
   operationId: "getLocation",
@@ -115,12 +115,12 @@ const SwagGetLocation: ZodOpenApiOperationObject = {
   responses: {
     "200": {
       description: SwagDesc.get,
-      ...formattedLocationContent
+      ...formattedLocationContent,
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 const SwagDeleteLocation: ZodOpenApiOperationObject = {
   operationId: "deleteLocation",
@@ -130,24 +130,24 @@ const SwagDeleteLocation: ZodOpenApiOperationObject = {
   responses: {
     "200": {
       description: SwagDesc.delete,
-      ...defaultLocationContent
+      ...defaultLocationContent,
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound
-  }
+    ...SwagNotFound,
+  },
 };
 
 export const locationPaths = {
   [routes.locations]: {
-    get: SwagGetAllLocations
+    get: SwagGetAllLocations,
   },
   [`${routes.locations}/${routes.id}`]: {
     get: SwagGetLocation,
     patch: SwagUpdateLocation,
-    delete: SwagDeleteLocation
+    delete: SwagDeleteLocation,
   },
   [`${routes.locations}/${routes.create}`]: {
-    post: SwagCreateLocation
-  }
+    post: SwagCreateLocation,
+  },
 };
