@@ -15,7 +15,7 @@ import { prisma } from "./constants";
  * https://www.prisma.io/docs/reference/api-reference/error-reference
  */
 const prismaErrorMsg = (
-  err: PrismaClientKnownRequestError,
+  err: PrismaClientKnownRequestError
 ): { error: string; status: number } => {
   const { meta, message, code } = err;
 
@@ -58,7 +58,7 @@ type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
 const formatParse = async (
   format: QueryFormats,
   service: Promise<ServiceReturn>,
-  formatParse: FormatParse,
+  formatParse: FormatParse
 ): Promise<Record<string, unknown> | Record<string, unknown>[]> => {
   const serviceData = await service;
   const isArray = Array.isArray(serviceData);
@@ -74,7 +74,7 @@ const formatParse = async (
 const toSelect = <AsType>(
   val: objectOutputType<ZodRawShape, ZodTypeAny, "passthrough">,
   key: keyof AsType & string,
-  valueKey: keyof AsType & string,
+  valueKey: keyof AsType & string
 ) => {
   const castVal = val as AsType;
   return {
@@ -98,7 +98,7 @@ export const prisMock = (
     | "delete"
     | "create" = "findMany",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  returns: any,
+  returns: any
 ) =>
   jest
     .spyOn(prisma[model], method)

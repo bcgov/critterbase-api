@@ -14,7 +14,7 @@ const getColourByName = async (name: string): Promise<lk_colour | null> => {
 //TODO: update this
 const getBodyLocationByNameAndTsn = async (
   body_name: string,
-  itis_tsn: number,
+  itis_tsn: number
 ): Promise<xref_taxon_marking_body_location | null> => {
   return prisma.xref_taxon_marking_body_location.findFirst({
     where: {
@@ -25,7 +25,7 @@ const getBodyLocationByNameAndTsn = async (
 };
 
 const getMarkingTypeByName = async (
-  marking_name: string,
+  marking_name: string
 ): Promise<lk_marking_type | null> => {
   return prisma.lk_marking_type.findFirst({
     where: {

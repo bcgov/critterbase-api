@@ -23,7 +23,7 @@ const request = supertest(makeApp(mockDB as any));
 const mockVal: any = { value: true };
 const prismaMock = (
   model: Prisma.ModelName,
-  method: "findMany" | "findFirst" = "findMany",
+  method: "findMany" | "findFirst" = "findMany"
 ) =>
   jest
     .spyOn(prisma[model], method)
@@ -108,7 +108,7 @@ describe("API: Lookup", () => {
       it("should return status 200 and a value for each lookup route optionally formatted asSelect", async () => {
         for (const req of l) {
           const res = await request.get(
-            `/api/lookups${req.route}?format=asSelect`,
+            `/api/lookups${req.route}?format=asSelect`
           );
           expect(res.status).toBe(200);
           expect(res.body).toHaveProperty("key");

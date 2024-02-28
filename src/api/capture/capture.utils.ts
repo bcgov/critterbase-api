@@ -68,7 +68,7 @@ const CaptureUpdateSchema = implement<
       release_location: LocationUpdateSchema,
       force_create_release: z.boolean().optional(),
     })
-    .partial().shape,
+    .partial().shape
 );
 
 const CaptureCreateSchema = implement<
@@ -90,7 +90,7 @@ const CaptureCreateSchema = implement<
     .required({
       critter_id: true,
       capture_timestamp: true,
-    }).shape,
+    }).shape
 );
 
 type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
@@ -114,7 +114,7 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
 });
 
 const CaptureDeleteSchema = CaptureBodySchema.pick({ capture_id: true }).extend(
-  DeleteSchema.shape,
+  DeleteSchema.shape
 );
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;

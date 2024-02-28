@@ -219,7 +219,7 @@ const request = supertest(
     makeChildOfFamily,
     makeParentOfFamily,
     getImmediateFamily,
-  } as Record<keyof ICbDatabase, any>),
+  } as Record<keyof ICbDatabase, any>)
 );
 
 beforeEach(() => {

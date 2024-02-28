@@ -23,7 +23,7 @@ describe("ROUTER", () => {
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
       expect(mockXrefService.getTsnCollectionCategories.mock.calls[0][0]).toBe(
-        tsn,
+        tsn
       );
     });
     it("should format the response asSelect", async () => {
@@ -31,7 +31,7 @@ describe("ROUTER", () => {
         .get("/api/xref/taxon-collection-categories")
         .query({ tsn, format: "asSelect" });
       expect(mockXrefService.getTsnCollectionCategories.mock.calls[0][1]).toBe(
-        true,
+        true
       );
     });
   });
@@ -43,7 +43,7 @@ describe("ROUTER", () => {
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
       expect(mockXrefService.getTsnMarkingBodyLocations.mock.calls[0][0]).toBe(
-        tsn,
+        tsn
       );
     });
     it("should format the response asSelect", async () => {
@@ -51,7 +51,7 @@ describe("ROUTER", () => {
         .get("/api/xref/taxon-marking-body-locations")
         .query({ tsn, format: "asSelect" });
       expect(mockXrefService.getTsnMarkingBodyLocations.mock.calls[0][1]).toBe(
-        true,
+        true
       );
     });
   });
@@ -63,7 +63,7 @@ describe("ROUTER", () => {
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
       expect(
-        mockXrefService.getTsnQualitativeMeasurements.mock.calls[0][0],
+        mockXrefService.getTsnQualitativeMeasurements.mock.calls[0][0]
       ).toBe(tsn);
     });
     it("should format the response asSelect", async () => {
@@ -71,7 +71,7 @@ describe("ROUTER", () => {
         .get("/api/xref/taxon-qualitative-measurements")
         .query({ tsn, format: "asSelect" });
       expect(
-        mockXrefService.getTsnQualitativeMeasurements.mock.calls[0][1],
+        mockXrefService.getTsnQualitativeMeasurements.mock.calls[0][1]
       ).toBe(true);
     });
   });
@@ -83,7 +83,7 @@ describe("ROUTER", () => {
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
       expect(
-        mockXrefService.getTsnQuantitativeMeasurements.mock.calls[0][0],
+        mockXrefService.getTsnQuantitativeMeasurements.mock.calls[0][0]
       ).toBe(tsn);
     });
     it("should format the response asSelect", async () => {
@@ -91,7 +91,7 @@ describe("ROUTER", () => {
         .get("/api/xref/taxon-quantitative-measurements")
         .query({ tsn, format: "asSelect" });
       expect(
-        mockXrefService.getTsnQuantitativeMeasurements.mock.calls[0][1],
+        mockXrefService.getTsnQuantitativeMeasurements.mock.calls[0][1]
       ).toBe(true);
     });
   });

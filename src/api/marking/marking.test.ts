@@ -41,7 +41,7 @@ const request = supertest(
     getMarkingsByCritterId,
     verifyMarkingsAgainstTaxon,
     markingService: { verifyMarkingsCanBeAssignedToTsn },
-  } as unknown as ICbDatabase),
+  } as unknown as ICbDatabase)
 );
 
 const create = jest.spyOn(prisma.marking, "create").mockImplementation();
@@ -311,7 +311,7 @@ describe("API: Marking", () => {
         expect(res.status).toBe(200);
         expect(getAllMarkings.mock.calls.length).toBe(1);
         expect(getAllMarkings.mock.results[0].value[0].marking_id).toBe(
-          MARKING_ID,
+          MARKING_ID
         );
       });
     });
@@ -455,7 +455,7 @@ describe("API: Marking", () => {
         expect(res.status).toBe(200);
         expect(getMarkingsByCritterId.mock.calls.length).toBe(1);
         expect(getMarkingsByCritterId.mock.results[0].value[0].marking_id).toBe(
-          MARKING_ID,
+          MARKING_ID
         );
       });
     });

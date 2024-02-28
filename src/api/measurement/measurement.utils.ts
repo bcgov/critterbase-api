@@ -121,7 +121,7 @@ const QualitativeCreateSchema = implement<
         critter_id: true,
         taxon_measurement_id: true,
         qualitative_option_id: true,
-      }).shape,
+      }).shape
   )
   .strict();
 
@@ -153,7 +153,7 @@ const QuantitativeCreateSchema = implement<
         critter_id: true,
         taxon_measurement_id: true,
         value: true,
-      }).shape,
+      }).shape
   )
   .strict();
 

@@ -71,7 +71,7 @@ const createCapture = async (capture_data: CaptureCreate) => {
 const updateCapture = async (
   capture_id: string,
   capture_data: CaptureUpdate,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<capture | null> => {
   const {
     capture_location,
@@ -121,7 +121,7 @@ const updateCapture = async (
 
 const deleteCapture = async (
   capture_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<capture | null> => {
   const client = prismaOverride ?? prisma;
   const capture = await client.capture.findUniqueOrThrow({

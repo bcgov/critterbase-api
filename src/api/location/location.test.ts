@@ -114,7 +114,7 @@ const request = supertest(
     deleteLocation,
     createLocation,
     updateLocation,
-  } as Record<keyof ICbDatabase, any>),
+  } as Record<keyof ICbDatabase, any>)
 );
 
 beforeEach(() => {
@@ -137,7 +137,7 @@ describe("API: Location", () => {
       it("should return a formatted location", () => {
         expect.assertions(1);
         expect(CommonFormattedLocationSchema.parse(mockCommonLocation)).toEqual(
-          mockFormattedLocation,
+          mockFormattedLocation
         );
       });
       it("should return a formatted location", () => {
@@ -171,7 +171,7 @@ describe("API: Location", () => {
             lk_region_env: null,
             lk_region_nr: null,
             lk_wildlife_management_unit: null,
-          }),
+          })
         ).toEqual({
           ...mockLocationResponse,
           region_env_name: null,

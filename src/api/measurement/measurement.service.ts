@@ -49,13 +49,13 @@ const getQualMeasurementOrThrow = async (id: string) => {
 };
 
 const createQuantMeasurement = async (
-  data: QuantitativeBody,
+  data: QuantitativeBody
 ): Promise<measurement_quantitative> => {
   return await prisma.measurement_quantitative.create({ data });
 };
 
 const createQualMeasurement = async (
-  data: QualitativeBody,
+  data: QualitativeBody
 ): Promise<measurement_qualitative> => {
   return await prisma.measurement_qualitative.create({ data });
 };
@@ -79,7 +79,7 @@ const getQualMeasurementsByCritterId = async (critter_id: string) => {
 };
 
 const getMeasurementsByCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<Measurements> => {
   const [quantitative, qualitative] = await Promise.all([
     getQuantMeasurementsByCritterId(critter_id),
@@ -90,7 +90,7 @@ const getMeasurementsByCritterId = async (
 
 const updateQualMeasurement = async (
   id: string,
-  data: QualitativeUpdateBody,
+  data: QualitativeUpdateBody
 ) => {
   return await prisma.measurement_qualitative.update({
     where: {
@@ -102,7 +102,7 @@ const updateQualMeasurement = async (
 
 const updateQuantMeasurement = async (
   id: string,
-  data: QuantitativeUpdateBody,
+  data: QuantitativeUpdateBody
 ) => {
   return await prisma.measurement_quantitative.update({
     where: {
@@ -114,7 +114,7 @@ const updateQuantMeasurement = async (
 
 const deleteQualMeasurement = async (
   id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<measurement_qualitative> => {
   const client = prismaOverride ?? prisma;
   return await client.measurement_qualitative.delete({
@@ -126,7 +126,7 @@ const deleteQualMeasurement = async (
 
 const deleteQuantMeasurement = async (
   id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<measurement_quantitative> => {
   const client = prismaOverride ?? prisma;
   return await client.measurement_quantitative.delete({

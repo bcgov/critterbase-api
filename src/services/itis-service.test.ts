@@ -80,7 +80,7 @@ describe("ItisService", () => {
         axiosMock.get.mockResolvedValue({ data: "test" });
         const data = await service._itisWebServiceGetRequest(
           "endpoint",
-          "query",
+          "query"
         );
 
         expect(axiosMock.get.mock.calls[0][0]).toBe("itis/endpoint?query");
@@ -105,7 +105,7 @@ describe("ItisService", () => {
         const data = await service._itisSolrSearch("query");
 
         expect(axiosMock.get.mock.calls[0][0]).toBe(
-          "solr/?wt=json&omitHeader=true&q=query",
+          "solr/?wt=json&omitHeader=true&q=query"
         );
         expect(data).toBe("test");
       });
@@ -140,7 +140,7 @@ describe("ItisService", () => {
           tsn: 1,
           tsnHierarchy: [0, 1],
           scientificName: "Science",
-        }),
+        })
       );
 
       it("should return hierarchy list", async () => {
@@ -151,7 +151,7 @@ describe("ItisService", () => {
 
       it("should throw error if no hierarchy returned", async () => {
         webServiceSpy.mockImplementation(() =>
-          Promise.reject({ tsnHierarchy: [] }),
+          Promise.reject({ tsnHierarchy: [] })
         );
 
         expect(async () => {
@@ -177,7 +177,7 @@ describe("ItisService", () => {
         solrSearchSpy.mockImplementation(() =>
           Promise.resolve({
             response: { docs: [{ tsn: "1", nameWOInd: "test test" }] },
-          }),
+          })
         );
         await service.getTsnFromScientificName("test test");
         expect(solrSearchSpy.mock.calls[0][0]).toBe("nameWOInd:test\\%20test");
@@ -187,7 +187,7 @@ describe("ItisService", () => {
         solrSearchSpy.mockImplementation(() =>
           Promise.resolve({
             response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
-          }),
+          })
         );
 
         try {
@@ -195,7 +195,7 @@ describe("ItisService", () => {
           expect(false);
         } catch (err: any) {
           expect(err.message).toBe(
-            "Unable to translate scientific name to ITIS TSN",
+            "Unable to translate scientific name to ITIS TSN"
           );
         }
       });
@@ -204,7 +204,7 @@ describe("ItisService", () => {
         solrSearchSpy.mockImplementation(() =>
           Promise.resolve({
             response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
-          }),
+          })
         );
         const response = await service.getTsnFromScientificName("test");
         expect(response).toBe(2);

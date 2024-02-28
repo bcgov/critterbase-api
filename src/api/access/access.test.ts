@@ -41,7 +41,7 @@ const request = supertest(
     createUser,
     setUserContext,
     getTableDataTypes,
-  } as Record<keyof ICbDatabase, any>),
+  } as Record<keyof ICbDatabase, any>)
 );
 
 beforeEach(() => {
@@ -76,14 +76,14 @@ describe("SERVICES", () => {
     it("user_id: login fails with non existant user_id", async () => {
       findFirst.mockResolvedValue(null);
       await expect(
-        _loginUser({ keycloak_uuid: "d39846870e85412694e522a0eb0b5569" }),
+        _loginUser({ keycloak_uuid: "d39846870e85412694e522a0eb0b5569" })
       ).rejects.toThrowError(apiError);
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });
     it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
       findFirst.mockResolvedValue(null);
       await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
-        apiError,
+        apiError
       );
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });

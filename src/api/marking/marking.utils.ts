@@ -145,13 +145,13 @@ const MarkingCreateBodySchema = implement<
   markingSchema
     .omit({ ...noAudit, marking_id: true })
     .partial()
-    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape,
+    .required({ critter_id: true, taxon_marking_body_location_id: true }).shape
 );
 
 // Validate incoming request body for update marking
 const MarkingUpdateBodySchema = MarkingCreateBodySchema.partial().refine(
   nonEmpty,
-  "no new data was provided or the format was invalid",
+  "no new data was provided or the format was invalid"
 );
 
 const MarkingUpdateByIdSchema = MarkingCreateBodySchema.extend({

@@ -60,7 +60,7 @@ const createLocation = async (data: LocationBody): Promise<location> => {
  */
 const updateLocation = async (
   data: LocationBody,
-  id: string,
+  id: string
 ): Promise<location> => {
   return await prisma.location.update({
     where: {

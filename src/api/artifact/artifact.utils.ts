@@ -47,7 +47,7 @@ const ArtifactCreateBodySchema = implement<
   artifactSchema
     .omit({ ...noAudit, artifact_id: true, artifact_url: true })
     .partial()
-    .required({ critter_id: true }).shape,
+    .required({ critter_id: true }).shape
 );
 
 // Validate incoming request body for update artifact

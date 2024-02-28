@@ -43,7 +43,7 @@ export const CritterCreateSchema = CritterSchema.partial()
     (schema) =>
       (schema.itis_tsn && !schema.itis_scientific_name) ||
       (!schema.itis_tsn && schema.itis_scientific_name),
-    "must include itis_tsn or itis_scientific_name but not both",
+    "must include itis_tsn or itis_scientific_name but not both"
   );
 
 export const BulkCritterCreateSchema = CritterSchema.partial().required({

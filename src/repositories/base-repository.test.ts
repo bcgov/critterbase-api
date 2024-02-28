@@ -25,7 +25,7 @@ describe("base-repository", () => {
       const repo = new Repository(mockPrismaClient);
       const response = await repo.safeQuery(
         Prisma.sql`select 1 as id;`,
-        schema,
+        schema
       );
 
       expect(response).toEqual({ id: 1 });
@@ -46,7 +46,7 @@ describe("base-repository", () => {
       } catch (error) {
         expect(schema.safeParse).toBeCalledWith(mockResponse);
         expect((error as apiError).message).toContain(
-          "Failed to parse raw sql with provided Zod schema",
+          "Failed to parse raw sql with provided Zod schema"
         );
       }
     });
@@ -59,7 +59,7 @@ describe("base-repository", () => {
       const repo = new Repository(mockPrismaClient);
       const response = await repo.safeQuery(
         Prisma.sql`select 1 as id;`,
-        schema,
+        schema
       );
 
       expect(response).toEqual({ id: 1 });

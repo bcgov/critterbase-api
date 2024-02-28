@@ -34,39 +34,39 @@ export const LookupRouter = (_db: ICbDatabase) => {
   lookupRouter.get(
     "/enum/sex",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(sex)),
-    ),
+      res.status(200).json(Object.keys(sex))
+    )
   );
   lookupRouter.get(
     "/enum/critter-status",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(eCritterStatus)),
-    ),
+      res.status(200).json(Object.keys(eCritterStatus))
+    )
   );
   lookupRouter.get(
     "/enum/cod-confidence",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(cod_confidence)),
-    ),
+      res.status(200).json(Object.keys(cod_confidence))
+    )
   );
 
   lookupRouter.get(
     "/enum/coordinate-uncertainty-unit",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(coordinate_uncertainty_unit)),
-    ),
+      res.status(200).json(Object.keys(coordinate_uncertainty_unit))
+    )
   );
   lookupRouter.get(
     "/enum/frequency-units",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(frequency_unit)),
-    ),
+      res.status(200).json(Object.keys(frequency_unit))
+    )
   );
   lookupRouter.get(
     "/enum/measurement-units",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(measurement_unit)),
-    ),
+      res.status(200).json(Object.keys(measurement_unit))
+    )
   );
 
   /**
@@ -78,10 +78,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       const colours = await formatParse(
         getFormat(req),
         prisma.lk_colour.findMany(),
-        colourFormats,
+        colourFormats
       );
       res.status(200).json(colours);
-    }),
+    })
   );
   lookupRouter.get(
     "/region-envs",
@@ -89,10 +89,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       const envs = await formatParse(
         getFormat(req),
         prisma.lk_region_env.findMany(),
-        regionEnvFormats,
+        regionEnvFormats
       );
       res.status(200).json(envs);
-    }),
+    })
   );
   lookupRouter.get(
     "/region-nrs",
@@ -100,10 +100,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       const nr = await formatParse(
         getFormat(req),
         prisma.lk_region_nr.findMany({ orderBy: { region_nr_name: order } }),
-        regionNrFormats,
+        regionNrFormats
       );
       res.status(200).json(nr);
-    }),
+    })
   );
   lookupRouter.get(
     "/wmus",
@@ -114,10 +114,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
         prisma.$queryRaw`SELECT wmu_id, wmu_name, description, create_user, update_user, create_timestamp, update_timestamp FROM "critterbase"."lk_wildlife_management_unit" lwmu
         ORDER BY (regexp_matches(lwmu.wmu_name, ${rgx}))[1]::int,
           (regexp_matches(lwmu.wmu_name, ${rgx}))[2]::int;`,
-        wmuFormats,
+        wmuFormats
       );
       res.status(200).json(wmu);
-    }),
+    })
   );
   lookupRouter.get(
     "/cods",
@@ -125,10 +125,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       const cod = await formatParse(
         getFormat(req),
         prisma.lk_cause_of_death.findMany({ orderBy: { cod_reason: order } }),
-        codFormats,
+        codFormats
       );
       res.status(200).json(cod);
-    }),
+    })
   );
   lookupRouter.get(
     "/marking-materials",
@@ -136,10 +136,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       const materials = await formatParse(
         getFormat(req),
         prisma.lk_marking_material.findMany({ orderBy: { material: order } }),
-        markingMaterialsFormats,
+        markingMaterialsFormats
       );
       res.status(200).json(materials);
-    }),
+    })
   );
   lookupRouter.get(
     "/marking-types",
@@ -147,10 +147,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       const materials = await formatParse(
         getFormat(req),
         prisma.lk_marking_type.findMany({ orderBy: { name: order } }),
-        markingTypesFormats,
+        markingTypesFormats
       );
       res.status(200).json(materials);
-    }),
+    })
   );
   lookupRouter.get(
     "/collection-unit-categories",
@@ -160,10 +160,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
         prisma.lk_collection_category.findMany({
           orderBy: { category_name: order },
         }),
-        collectionUnitCategoriesFormats,
+        collectionUnitCategoriesFormats
       );
       res.status(200).json(materials);
-    }),
+    })
   );
 
   return lookupRouter;

@@ -122,7 +122,7 @@ describe("API: Measurement", () => {
         expect(res.body);
         expect(mockDB.createQuantMeasurement.mock.calls.length).toBe(1);
         expect(mockDB.createQuantMeasurement.mock.calls[0][0]).toEqual(
-          quantData,
+          quantData
         );
       });
       it("returns status 400 with property that does not pass validation", async () => {
@@ -231,7 +231,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.getQuantMeasurementOrThrow.mockRejectedValue(
-          apiError.notFound("BAD"),
+          apiError.notFound("BAD")
         );
         const res = await request.get(`${QUANT_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
@@ -253,7 +253,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.getQualMeasurementOrThrow.mockRejectedValue(
-          apiError.notFound("BAD"),
+          apiError.notFound("BAD")
         );
         const res = await request.get(`${QUAL_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
@@ -273,7 +273,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.deleteQuantMeasurement.mockRejectedValue(
-          apiError.notFound("BAD"),
+          apiError.notFound("BAD")
         );
         const res = await request.delete(`${QUANT_ROUTE}/${badID}`);
         expect(res.status).toBe(404);
@@ -290,7 +290,7 @@ describe("API: Measurement", () => {
       });
       it("with non existant id, should return status 404 and have error in body", async () => {
         mockDB.deleteQualMeasurement.mockRejectedValue(
-          apiError.notFound("BAD"),
+          apiError.notFound("BAD")
         );
         const res = await request.delete(`${QUAL_ROUTE}/${ID}`);
         expect(res.status).toBe(404);
@@ -322,7 +322,7 @@ describe("API: Measurement", () => {
           const p = prisMock(
             "measurement_quantitative",
             "findUniqueOrThrow",
-            true,
+            true
           );
           const res = await getQuantMeasurementOrThrow(ID);
           expect(res);
@@ -335,7 +335,7 @@ describe("API: Measurement", () => {
           const p = prisMock(
             "measurement_qualitative",
             "findUniqueOrThrow",
-            true,
+            true
           );
           const res = await getQualMeasurementOrThrow(ID);
           expect(res);

@@ -19,7 +19,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ICollectionUnitDef[]>}
    */
   async getCollectionUnitsFromCategoryId(
-    category_id: string,
+    category_id: string
   ): Promise<ICollectionUnitDef[]> {
     const result = await this.prisma.xref_collection_unit.findMany({
       where: {
@@ -45,7 +45,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
   async getTsnCollectionCategories(
-    tsn: number,
+    tsn: number
   ): Promise<ICollectionCategoryDef[]> {
     const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
@@ -72,7 +72,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
   async getTsnMarkingBodyLocations(
-    tsns: number[],
+    tsns: number[]
   ): Promise<ITsnMarkingBodyLocation[]> {
     const result = await this.prisma.xref_taxon_marking_body_location.findMany({
       where: { itis_tsn: { in: tsns } },
@@ -102,7 +102,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
   async getTsnQualitativeMeasurements(
-    tsns: number[],
+    tsns: number[]
   ): Promise<ITsnQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
@@ -125,7 +125,7 @@ export class XrefRepository extends Repository {
         ON q.taxon_measurement_id = o.taxon_measurement_id
       WHERE q.itis_tsn = ANY(${tsns})
       GROUP BY q.taxon_measurement_id;`,
-      TsnQualitativeMeasurementSchema.array(),
+      TsnQualitativeMeasurementSchema.array()
     );
 
     if (!result.length) {
@@ -134,7 +134,7 @@ export class XrefRepository extends Repository {
         [
           "XrefRepository -> getTsnQualitativeMeasurements",
           "results had length of 0",
-        ],
+        ]
       );
     }
 
@@ -149,7 +149,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ITsnQualitativeMeasurementOption>}
    */
   async getQualitativeMeasurementOptions(
-    taxonMeasurementId: string,
+    taxonMeasurementId: string
   ): Promise<ITsnQualitativeMeasurementOption[]> {
     const result =
       await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
@@ -169,7 +169,7 @@ export class XrefRepository extends Repository {
         [
           "XrefRepository -> getTsnQualitativeMeasurements",
           "results had a length of 0",
-        ],
+        ]
       );
     }
 
@@ -203,7 +203,7 @@ export class XrefRepository extends Repository {
         [
           "XrefRepository -> getTsnQuantitativeMeasurements",
           "results had a length of 0",
-        ],
+        ]
       );
     }
 

@@ -18,7 +18,7 @@ import {
  * @param {string} artifact_id
  */
 const getArtifactById = async (
-  artifact_id: string,
+  artifact_id: string
 ): Promise<ArtifactResponse> => {
   const artifact = await prisma.artifact.findUniqueOrThrow({
     where: {
@@ -33,7 +33,7 @@ const getArtifactById = async (
  * @param {string} critter_id
  */
 const getArtifactsByCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<ArtifactResponse[]> => {
   const artifacts = await prisma.artifact.findMany({
     where: {
@@ -58,7 +58,7 @@ const getAllArtifacts = async (): Promise<ArtifactResponse[]> => {
  */
 const updateArtifact = async (
   artifact_id: string,
-  artifact_data: ArtifactUpdate,
+  artifact_data: ArtifactUpdate
 ): Promise<ArtifactResponse> => {
   const artifact = await prisma.artifact.update({
     where: {
@@ -79,7 +79,7 @@ const updateArtifact = async (
  */
 const createArtifact = async (
   artifact_data: ArtifactCreate,
-  file: Express.Multer.File,
+  file: Express.Multer.File
 ): Promise<ArtifactResponse> => {
   const metadata: Metadata = {
     filename: file.originalname,
@@ -110,7 +110,7 @@ const deleteArtifact = async (artifact_id: string): Promise<artifact> => {
  * @param {artifact} artifact
  */
 const addSignedUrlToArtifact = async (
-  artifact: artifact,
+  artifact: artifact
 ): Promise<ArtifactResponse> => {
   const signed_url = await getFileDownloadUrl(artifact.artifact_url);
   return { ...artifact, signed_url };
@@ -121,7 +121,7 @@ const addSignedUrlToArtifact = async (
  * @param {artifact[]} artifacts
  */
 const addSignedUrlToArtifacts = async (
-  artifacts: artifact[],
+  artifacts: artifact[]
 ): Promise<ArtifactResponse[]> =>
   Promise.all(artifacts.map(addSignedUrlToArtifact));
 

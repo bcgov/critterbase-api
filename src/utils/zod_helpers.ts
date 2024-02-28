@@ -36,7 +36,7 @@ const QueryFormatSchema = z.object({
 const NumberToString = z
   .union([z.string(), z.number()])
   .transform((val) =>
-    typeof val === "number" ? String(val) : val,
+    typeof val === "number" ? String(val) : val
   ) as unknown as z.ZodString;
 
 const ResponseSchema = z.object({}).passthrough();
@@ -126,7 +126,7 @@ export function implement<Model = never>() {
         [unknownKey in Exclude<keyof Schema, keyof Model>]: never;
       },
     >(
-      schema: Schema,
+      schema: Schema
     ) => z.object(schema),
   };
 }

@@ -64,7 +64,7 @@ const request = supertest(
     updateUser,
     deleteUser,
     setUserContext,
-  } as Record<keyof ICbDatabase, any>),
+  } as Record<keyof ICbDatabase, any>)
 );
 
 beforeEach(() => {

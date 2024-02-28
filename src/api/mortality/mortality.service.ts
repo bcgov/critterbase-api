@@ -12,7 +12,7 @@ const getAllMortalities = async (): Promise<mortality[]> => {
 };
 
 const getMortalityById = async (
-  mortality_id: string,
+  mortality_id: string
 ): Promise<mortality | null> => {
   const mort = await prisma.mortality.findUniqueOrThrow({
     ...mortalityInclude,
@@ -37,7 +37,7 @@ const appendDefaultCOD = async (body: {
 };
 
 const getMortalityByCritter = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<mortality[]> => {
   const mortalities = await prisma.mortality.findMany({
     ...mortalityInclude,
@@ -49,7 +49,7 @@ const getMortalityByCritter = async (
 };
 
 const createMortality = async (
-  mortality_data: MortalityCreate,
+  mortality_data: MortalityCreate
 ): Promise<mortality> => {
   const {
     critter_id,
@@ -86,7 +86,7 @@ const createMortality = async (
 const updateMortality = async (
   mortality_id: string,
   mortality_data: MortalityUpdate,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ) => {
   const client = prismaOverride ?? prisma;
   const {
@@ -128,7 +128,7 @@ const updateMortality = async (
 
 const deleteMortality = async (
   mortality_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ) => {
   const client = prismaOverride ?? prisma;
   const mortality = await client.mortality.findUniqueOrThrow({

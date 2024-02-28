@@ -34,7 +34,7 @@ const UserCreateBodySchema = implement<
 >().with(
   UserSchema.omit({ ...noAudit, user_id: true })
     .partial()
-    .required({ user_identifier: true, keycloak_uuid: true }).shape,
+    .required({ user_identifier: true, keycloak_uuid: true }).shape
 );
 
 // Validate incoming request body for update artifact

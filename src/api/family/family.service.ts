@@ -30,7 +30,7 @@ const getFamilyById = async (family_id: string): Promise<family> => {
 
 const updateFamily = async (
   family_id: string,
-  family_data: FamilyUpdate,
+  family_data: FamilyUpdate
 ): Promise<family> => {
   return await prisma.family.update({
     data: family_data,
@@ -49,7 +49,7 @@ const deleteFamily = async (family_id: string): Promise<family> => {
 };
 
 const getFamilyByLabel = async (
-  family_label: string,
+  family_label: string
 ): Promise<family | null> => {
   return await prisma.family.findFirst({
     where: {
@@ -59,7 +59,7 @@ const getFamilyByLabel = async (
 };
 
 const getParentsOfCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<critter[]> => {
   const child = await prisma.family_child.findFirstOrThrow({
     where: {
@@ -82,7 +82,7 @@ const getParentsOfCritterId = async (
 };
 
 const getSiblingsOfCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<critter[]> => {
   const family = await prisma.family_child.findFirstOrThrow({
     where: {
@@ -106,7 +106,7 @@ const getSiblingsOfCritterId = async (
 };
 
 const getChildrenOfCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<critter[]> => {
   const parent = await prisma.family_parent.findFirstOrThrow({
     where: {
@@ -139,7 +139,7 @@ const createNewFamily = async (family_label: string): Promise<family> => {
 
 const makeChildOfFamily = async (
   family_id: string,
-  child_critter_id: string,
+  child_critter_id: string
 ): Promise<family_child> => {
   const result = await prisma.family_child.create({
     data: {
@@ -152,7 +152,7 @@ const makeChildOfFamily = async (
 
 const makeParentOfFamily = async (
   family_id: string,
-  parent_critter_id: string,
+  parent_critter_id: string
 ): Promise<family_parent> => {
   const result = await prisma.family_parent.create({
     data: {
@@ -166,7 +166,7 @@ const makeParentOfFamily = async (
 const removeChildOfFamily = async (
   family_id: string,
   child_critter_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<family_child> => {
   const client = prismaOverride ?? prisma;
   const result = await client.family_child.delete({
@@ -183,7 +183,7 @@ const removeChildOfFamily = async (
 const removeParentOfFamily = async (
   family_id: string,
   parent_critter_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<family_parent> => {
   const client = prismaOverride ?? prisma;
   const result = await client.family_parent.delete({
@@ -198,7 +198,7 @@ const removeParentOfFamily = async (
 };
 
 const getImmediateFamily = async (
-  family_id: string,
+  family_id: string
 ): Promise<ImmediateFamily> => {
   const parents = await prisma.family_parent.findMany({
     where: { family_id: family_id },

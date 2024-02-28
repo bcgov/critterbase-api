@@ -11,7 +11,7 @@ import {
  */
 const getAllCollectionUnits = async (): Promise<CollectionUnitIncludes[]> => {
   const collectionUnits = await prisma.critter_collection_unit.findMany(
-    collectionUnitIncludes,
+    collectionUnitIncludes
   );
   return collectionUnits;
 };
@@ -22,7 +22,7 @@ const getAllCollectionUnits = async (): Promise<CollectionUnitIncludes[]> => {
  * @param {string} critter_collection_unit_id
  */
 const getCollectionUnitById = async (
-  critter_collection_unit_id: string,
+  critter_collection_unit_id: string
 ): Promise<CollectionUnitIncludes> => {
   const collectionUnit = await prisma.critter_collection_unit.findUniqueOrThrow(
     {
@@ -30,7 +30,7 @@ const getCollectionUnitById = async (
         critter_collection_unit_id: critter_collection_unit_id,
       },
       ...collectionUnitIncludes,
-    },
+    }
   );
   return collectionUnit;
 };
@@ -40,7 +40,7 @@ const getCollectionUnitById = async (
  * @param {string} critter_id
  */
 const getCollectionUnitsByCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<CollectionUnitIncludes[]> => {
   const collectionUnits = await prisma.critter_collection_unit.findMany({
     where: {
@@ -58,7 +58,7 @@ const getCollectionUnitsByCritterId = async (
  */
 const updateCollectionUnit = async (
   critter_collection_unit_id: string,
-  critter_collection_unit_data: CollectionUnitUpdateInput,
+  critter_collection_unit_data: CollectionUnitUpdateInput
 ): Promise<CollectionUnitIncludes> => {
   const collectionUnit = await prisma.critter_collection_unit.update({
     where: {
@@ -76,7 +76,7 @@ const updateCollectionUnit = async (
  * @param {CollectionUnitCreateInput} critter_collection_unit_data
  */
 const createCollectionUnit = async (
-  critter_collection_unit_data: CollectionUnitCreateInput,
+  critter_collection_unit_data: CollectionUnitCreateInput
 ): Promise<CollectionUnitIncludes> => {
   const collectionUnit = await prisma.critter_collection_unit.create({
     data: critter_collection_unit_data,
@@ -91,7 +91,7 @@ const createCollectionUnit = async (
  */
 const deleteCollectionUnit = async (
   critter_collection_unit_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<CollectionUnitIncludes> => {
   const client = prismaOverride ?? prisma;
   const collectionUnit = await client.critter_collection_unit.delete({

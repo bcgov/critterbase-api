@@ -34,7 +34,7 @@ const request = supertest(
     getMortalityById,
     updateMortality,
     getMortalityByCritter,
-  } as Record<keyof ICbDatabase, any>),
+  } as Record<keyof ICbDatabase, any>)
 );
 
 const create = jest.spyOn(prisma.mortality, "create").mockImplementation();
@@ -287,7 +287,7 @@ describe("API: Critter", () => {
         const res = await request.get("/api/mortality");
         expect(getAllMortalities.mock.calls.length).toBe(1);
         expect(getAllMortalities.mock.results[0].value[0].mortality_id).toBe(
-          MORTALITY_ID,
+          MORTALITY_ID
         );
         expect(res.status).toBe(200);
       });

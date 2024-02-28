@@ -42,7 +42,7 @@ const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
  * @param {string} critter_id
  */
 const getMarkingsByCritterId = async (
-  critter_id: string,
+  critter_id: string
 ): Promise<MarkingIncludes[]> => {
   const markings: MarkingIncludes[] = await prisma.marking.findMany({
     where: {
@@ -60,7 +60,7 @@ const getMarkingsByCritterId = async (
  */
 const updateMarking = async (
   marking_id: string,
-  marking_data: MarkingUpdateInput,
+  marking_data: MarkingUpdateInput
 ): Promise<MarkingIncludes> => {
   const marking: MarkingIncludes = await prisma.marking.update({
     where: {
@@ -91,7 +91,7 @@ const createMarking = async (newMarkingData: MarkingCreateInput) => {
  */
 const deleteMarking = async (
   marking_id: string,
-  prismaOverride?: PrismaTransactionClient,
+  prismaOverride?: PrismaTransactionClient
 ): Promise<MarkingIncludes> => {
   const client = prismaOverride ?? prisma;
   const marking: MarkingIncludes = await client.marking.delete({
@@ -110,7 +110,7 @@ const appendEnglishMarkingsAsUUID = async (
     body_location: string;
     marking_type: string;
   }>,
-  itis_tsn: number,
+  itis_tsn: number
 ) => {
   if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);

@@ -30,7 +30,7 @@ interface IUserHeader {
  * @throws {HTTP401} if the bearer token is missing or invalid
  */
 export const authenticateRequest = async function (
-  req: Request,
+  req: Request
 ): Promise<{ keycloak_uuid: string; system_name: string; identifier: string }> {
   try {
     if (!req.headers.authorization) {

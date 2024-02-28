@@ -22,7 +22,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       const families = await db.getAllFamilies();
       return res.status(200).json(families);
-    }),
+    })
   );
 
   /**
@@ -34,7 +34,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       const parsed = FamilyCreateBodySchema.parse(req.body);
       const result = await db.createNewFamily(parsed.family_label);
       return res.status(201).json(result);
-    }),
+    })
   );
 
   familyRouter.get(
@@ -43,7 +43,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       const { id } = uuidParamsSchema.parse(req.params);
       const parents = await db.getParentsOfCritterId(id);
       return res.status(200).json(parents);
-    }),
+    })
   );
 
   familyRouter
@@ -52,7 +52,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response) => {
         const parents = await db.getAllParents();
         return res.status(200).json(parents);
-      }),
+      })
     )
     .post(
       catchErrors(async (req: Request, res: Response) => {
@@ -61,7 +61,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
         const family_id = parsed.family_id;
         const result = await db.makeParentOfFamily(family_id, parent_id);
         return res.status(201).json(result);
-      }),
+      })
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
@@ -70,7 +70,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
         const family_id = parsed.family_id;
         const result = await db.removeParentOfFamily(family_id, parent_id);
         return res.status(200).json(result);
-      }),
+      })
     );
 
   familyRouter.get(
@@ -79,7 +79,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       const { id } = uuidParamsSchema.parse(req.params);
       const children = await db.getChildrenOfCritterId(id);
       return res.status(200).json(children);
-    }),
+    })
   );
 
   familyRouter
@@ -88,7 +88,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response) => {
         const children = await db.getAllChildren();
         return res.status(200).json(children);
-      }),
+      })
     )
     .post(
       catchErrors(async (req: Request, res: Response) => {
@@ -97,7 +97,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
         const family_id = parsed.family_id;
         const result = await db.makeChildOfFamily(family_id, child_id);
         return res.status(201).json(result);
-      }),
+      })
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
@@ -106,7 +106,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
         const family_id = parsed.family_id;
         const result = await db.removeChildOfFamily(family_id, child_id);
         return res.status(200).json(result);
-      }),
+      })
     );
 
   /**
@@ -125,7 +125,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
         parents: parents,
       };
       return res.status(200).json(result);
-    }),
+    })
   );
 
   familyRouter
@@ -139,14 +139,14 @@ export const FamilyRouter = (db: ICbDatabase) => {
           },
         });
         next();
-      }),
+      })
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const family = await db.getImmediateFamily(id);
         return res.status(200).json(family);
-      }),
+      })
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
@@ -154,14 +154,14 @@ export const FamilyRouter = (db: ICbDatabase) => {
         const parsed = FamilyUpdateBodySchema.parse(req.body);
         const family = await db.updateFamily(id, parsed);
         return res.status(200).json(family);
-      }),
+      })
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const id = req.params.id;
         const family = await db.deleteFamily(id);
         return res.status(200).json(family);
-      }),
+      })
     );
 
   familyRouter.get(
@@ -170,7 +170,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
       const label = req.params.label;
       const result = await db.getFamilyByLabel(label);
       res.status(200).json(result);
-    }),
+    })
   );
 
   return familyRouter;

@@ -41,7 +41,7 @@ export class ItisService extends ExternalService {
    */
   async _itisWebServiceGetRequest<T>(
     endpoint: string,
-    query?: string,
+    query?: string
   ): Promise<T> {
     const baseUrl = `${this.externalServiceUrl}/${endpoint}`;
 
@@ -101,7 +101,7 @@ export class ItisService extends ExternalService {
     // This is almost certaintly one value in docs array when searching for tsn.
     // To be safe searching for the tsn in the docs array.
     const solrTaxon = result.response.docs.find(
-      (taxon) => taxon.tsn === String(searchTsn),
+      (taxon) => taxon.tsn === String(searchTsn)
     );
 
     if (!solrTaxon) {
@@ -176,7 +176,7 @@ export class ItisService extends ExternalService {
 
     const foundTaxon = result.response.docs.find(
       (itisTaxon) =>
-        itisTaxon.nameWOInd.toUpperCase() === scientificName.toUpperCase(),
+        itisTaxon.nameWOInd.toUpperCase() === scientificName.toUpperCase()
     );
 
     if (!foundTaxon) {
@@ -185,7 +185,7 @@ export class ItisService extends ExternalService {
         [
           "ItisWebService -> getTsnFromScientificName",
           `'${scientificName}' returned undefined`,
-        ],
+        ]
       );
     }
 
@@ -207,7 +207,7 @@ export class ItisService extends ExternalService {
    * @returns {Promise<T & Required<IItisProperties>>} new object with properties filled in.
    */
   async patchTsnAndScientificName<T extends Partial<IItisProperties>>(
-    objectToPatch: T,
+    objectToPatch: T
   ): Promise<T & Required<IItisProperties>> {
     const missingPropertiesError =
       "itis_tsn and itis_scientific_name missing in object";
@@ -225,7 +225,7 @@ export class ItisService extends ExternalService {
      */
     if (objectToPatch.itis_tsn) {
       const scientificName = await this.getScientificNameFromTsn(
-        objectToPatch.itis_tsn,
+        objectToPatch.itis_tsn
       );
 
       return {
@@ -246,7 +246,7 @@ export class ItisService extends ExternalService {
      * If no TSN, then patch with TSN found from provided scientific name
      */
     const tsn = await this.getTsnFromScientificName(
-      objectToPatch.itis_scientific_name,
+      objectToPatch.itis_scientific_name
     );
 
     return {

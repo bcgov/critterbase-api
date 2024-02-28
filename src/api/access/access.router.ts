@@ -18,7 +18,7 @@ export const AccessRouter = (db: ICbDatabase) => {
   accessRouter.use(
     "/swagger",
     swaggerUIExpress.serve,
-    swaggerUIExpress.setup(yaml),
+    swaggerUIExpress.setup(yaml)
   );
 
   /**
@@ -44,20 +44,20 @@ export const AccessRouter = (db: ICbDatabase) => {
       await db.createUser(parsedUser);
       const contextUserId = await db.setUserContext(
         kc.keycloak_uuid,
-        kc.system_name,
+        kc.system_name
       );
       return res.status(201).json({ user_id: contextUserId }).end();
-    }),
+    })
   );
 
   accessRouter.get(
     "/types/:model",
     catchErrors(async (req: Request, res: Response) => {
       const types = await db.getTableDataTypes(
-        req.params.model as Prisma.ModelName,
+        req.params.model as Prisma.ModelName
       );
       return res.status(200).json(types);
-    }),
+    })
   );
 
   return accessRouter;

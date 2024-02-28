@@ -42,7 +42,7 @@ const LocationCreateSchema = implement<
   .with(
     LocationSchema.omit({ location_id: true, ...noAudit })
       .strict()
-      .partial().shape,
+      .partial().shape
   )
   .openapi({ description: "Responds with created location" });
 

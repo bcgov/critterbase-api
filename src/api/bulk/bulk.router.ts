@@ -72,7 +72,7 @@ export const BulkRouter = (db: ICbDatabase) => {
               const patchedCritter =
                 await db.itisService.patchTsnAndScientificName(critter);
               return BulkCritterCreateSchema.parse(patchedCritter);
-            }),
+            })
           )
         : [];
 
@@ -92,13 +92,13 @@ export const BulkRouter = (db: ICbDatabase) => {
               const itis_tsn = critterTsnLookup[marking.critter_id as string];
               await db.appendEnglishMarkingsAsUUID(marking, itis_tsn);
               return MarkingCreateBodySchema.parseAsync(marking);
-            }),
+            })
           )
         : [];
 
       const parsedCaptures = captures
         ? captures.map((c: Record<string, unknown>) =>
-            CaptureCreateSchema.parse(c),
+            CaptureCreateSchema.parse(c)
           )
         : [];
 
@@ -107,7 +107,7 @@ export const BulkRouter = (db: ICbDatabase) => {
             mortalities.map(async (m: Record<string, unknown>) => {
               await db.appendDefaultCOD(m);
               return MortalityCreateSchema.parse(m);
-            }),
+            })
           )
         : [];
 
@@ -150,7 +150,7 @@ export const BulkRouter = (db: ICbDatabase) => {
         family_parents: familyParents,
       });
       return res.status(201).json(results);
-    }),
+    })
   );
 
   bulkRouter.patch(
@@ -221,7 +221,7 @@ export const BulkRouter = (db: ICbDatabase) => {
               .array(
                 QualitativeUpdateSchema.required({
                   measurement_qualitative_id: true,
-                }),
+                })
               )
               .parse(qualitative_measurements, {
                 errorMap: (issue, ctx) =>
@@ -233,7 +233,7 @@ export const BulkRouter = (db: ICbDatabase) => {
               .array(
                 QuantitativeUpdateSchema.required({
                   measurement_quantitative_id: true,
-                }),
+                })
               )
               .parse(quantitative_measurements, {
                 errorMap: (issue, ctx) =>
@@ -272,7 +272,7 @@ export const BulkRouter = (db: ICbDatabase) => {
       const updateRes = await db.bulkUpdateData(updateBody, db);
       const deleteRes = await db.bulkDeleteData(deleteBody, db);
       return res.status(200).json({ ...updateRes, ...deleteRes });
-    }),
+    })
   );
 
   return bulkRouter;

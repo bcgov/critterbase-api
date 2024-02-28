@@ -12,7 +12,7 @@ export class XrefService extends InternalService<XrefRepository> {
    */
   async getCollectionUnitsFromCategoryId(
     category_id: string,
-    asSelect = false,
+    asSelect = false
   ) {
     const data =
       await this.repository.getCollectionUnitsFromCategoryId(category_id);
@@ -61,7 +61,7 @@ export class XrefService extends InternalService<XrefRepository> {
       return toSelectFormat(
         data,
         "taxon_marking_body_location_id",
-        "body_location",
+        "body_location"
       );
     }
 
@@ -123,11 +123,11 @@ export class XrefService extends InternalService<XrefRepository> {
    */
   async getQualitativeMeasurementOptions(
     taxonMeasurementId: string,
-    asSelect = false,
+    asSelect = false
   ) {
     const data =
       await this.repository.getQualitativeMeasurementOptions(
-        taxonMeasurementId,
+        taxonMeasurementId
       );
 
     if (asSelect) {
@@ -159,7 +159,7 @@ export class XrefService extends InternalService<XrefRepository> {
       const quantitativeAsSelect = toSelectFormat(
         quantitative,
         "taxon_measurement_id",
-        "measurement_name",
+        "measurement_name"
       );
 
       const qualitativeAsSelect = qualitative.map((measurement) => ({

@@ -14,7 +14,7 @@ describe("marking-repository", () => {
 
     const result = await repo.findInvalidMarkingIdsFromTsnHierarchy(
       ["my-uuid"],
-      [1],
+      [1]
     );
     expect(result).toEqual(mockResponse);
   });

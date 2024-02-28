@@ -257,7 +257,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         });
       }
     },
-    { timeout: 90000 },
+    { timeout: 90000 }
   );
   return counts;
 };
@@ -313,7 +313,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
       await db.removeParentOfFamily(
         _dma.family_id,
         _dma.parent_critter_id,
-        prisma,
+        prisma
       );
     }
     for (let i = 0; i < _deleteChildren.length; i++) {
@@ -322,7 +322,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
       await db.removeChildOfFamily(
         _dma.family_id,
         _dma.child_critter_id,
-        prisma,
+        prisma
       );
     }
   });
@@ -332,7 +332,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
 const bulkErrMap = (
   issue: z.ZodIssueOptionalMessage,
   ctx: z.ErrorMapCtx,
-  objKey: keyof IBulkMutate,
+  objKey: keyof IBulkMutate
 ) => ({
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`,
 });

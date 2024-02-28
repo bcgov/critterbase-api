@@ -285,7 +285,7 @@ const prismaMock = {
 jest
   .spyOn(prisma, "$transaction")
   .mockImplementation((callback) =>
-    callback(prismaMock as unknown as PrismaTransactionClient),
+    callback(prismaMock as unknown as PrismaTransactionClient)
   );
 
 describe("API: Bulk", () => {
@@ -323,7 +323,7 @@ describe("API: Bulk", () => {
         expect(prismaMock.location.createMany.mock.calls.length).toBe(1);
         expect(prismaMock.marking.createMany.mock.calls.length).toBe(1);
         expect(
-          prismaMock.critter_collection_unit.createMany.mock.calls.length,
+          prismaMock.critter_collection_unit.createMany.mock.calls.length
         ).toBe(1);
       });
     });
@@ -348,7 +348,7 @@ describe("API: Bulk", () => {
             qualitative_measurements: [],
             quantitative_measurements: [],
           },
-          db,
+          db
         );
 
         expect.assertions(6);
@@ -356,7 +356,7 @@ describe("API: Bulk", () => {
         expect(prismaMock.marking.update.mock.calls.length).toBe(1);
         expect(prismaMock.location.update.mock.calls.length).toBe(1);
         expect(
-          prismaMock.critter_collection_unit.update.mock.calls.length,
+          prismaMock.critter_collection_unit.update.mock.calls.length
         ).toBe(1);
         expect(updateCapture.mock.calls.length).toBe(1);
         expect(updateMortality.mock.calls.length).toBe(1);
@@ -376,8 +376,8 @@ describe("API: Bulk", () => {
                 qualitative_measurements: [],
                 quantitative_measurements: [],
               },
-              db,
-            ),
+              db
+            )
         ).rejects.toThrow(apiError.requiredProperty("capture_id"));
       });
       it("should error out on missing mortality id", async () => {
@@ -395,8 +395,8 @@ describe("API: Bulk", () => {
                 qualitative_measurements: [],
                 quantitative_measurements: [],
               },
-              db,
-            ),
+              db
+            )
         ).rejects.toThrow(apiError.requiredProperty("mortality_id"));
       });
       it("should create marking instead of update marking if id is missing", async () => {
@@ -419,7 +419,7 @@ describe("API: Bulk", () => {
             qualitative_measurements: [],
             quantitative_measurements: [],
           },
-          db,
+          db
         );
         expect(prismaMock.marking.create.mock.calls.length).toBe(1);
       });
@@ -449,7 +449,7 @@ describe("API: Bulk", () => {
             _deleteParents: [],
             _deleteChildren: [],
           },
-          db,
+          db
         );
         expect(deleteMarking.mock.calls.length).toBe(1);
         expect(deleteCollectionUnit.mock.calls.length).toBe(1);
@@ -472,10 +472,10 @@ describe("API: Bulk", () => {
             qualitative_measurements: [],
             quantitative_measurements: [],
           },
-          db,
+          db
         );
         expect(
-          prismaMock.critter_collection_unit.create.mock.calls.length,
+          prismaMock.critter_collection_unit.create.mock.calls.length
         ).toBe(1);
       });
     });
@@ -493,7 +493,7 @@ describe("API: Bulk", () => {
             defaultError: "",
             data: undefined,
           },
-          "critters",
+          "critters"
         );
         expect.assertions(1);
         expect(typeof msg.message).toBe("string");

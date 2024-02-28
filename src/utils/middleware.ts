@@ -12,7 +12,7 @@ import { setUserContext } from "../api/user/user.service";
 type ExpressHandler = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => Promise<Response> | Promise<void>;
 
 /**
@@ -51,7 +51,7 @@ const errorLogger = (
   err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   req: Request,
   _res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   if (!IS_TEST) {
     console.error({ method: req.method, url: req.originalUrl, error: err });
@@ -73,7 +73,7 @@ const errorHandler = (
   err: apiError | ZodError | Error | PrismaClientKnownRequestError,
   _req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   if (err instanceof ZodError) {
     return res
@@ -118,7 +118,7 @@ const auth = catchErrors(
     console.log(JSON.stringify(kc));
     await setUserContext(kc.keycloak_uuid, kc.system_name);
     next();
-  },
+  }
 );
 
 export { auth, catchErrors, errorHandler, errorLogger, logger };

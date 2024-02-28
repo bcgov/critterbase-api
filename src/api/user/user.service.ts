@@ -67,7 +67,7 @@ const getUser = async (user_id: string): Promise<user> => {
  */
 const updateUser = async (
   user_id: string,
-  data: UserUpdateInput,
+  data: UserUpdateInput
 ): Promise<user> => {
   const updatedUser = await prisma.user.update({
     where: {

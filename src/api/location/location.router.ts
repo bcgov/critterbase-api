@@ -17,7 +17,7 @@ export const LocationRouter = (db: ICbDatabase) => {
       const locations = await db.getAllLocations();
       const formattedLocations = array(LocationResponseSchema).parse(locations);
       return res.status(200).json(formattedLocations);
-    }),
+    })
   );
 
   /**
@@ -29,7 +29,7 @@ export const LocationRouter = (db: ICbDatabase) => {
       const parsed = LocationCreateSchema.parse(req.body);
       const location = await db.createLocation(parsed);
       return res.status(201).json(location);
-    }),
+    })
   );
 
   /**
@@ -41,27 +41,27 @@ export const LocationRouter = (db: ICbDatabase) => {
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
         next();
-      }),
+      })
     )
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const location = await db.getLocationOrThrow(req.params.id);
         const formattedLocation = LocationResponseSchema.parse(location);
         return res.status(200).json(formattedLocation);
-      }),
+      })
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const parsedBody = LocationCreateSchema.parse(req.body);
         const location = await db.updateLocation(parsedBody, req.params.id);
         res.status(201).json(location);
-      }),
+      })
     )
     .delete(
       catchErrors(async (req: Request, res: Response) => {
         const location = await db.deleteLocation(req.params.id);
         res.status(200).json(location);
-      }),
+      })
     );
 
   return locationRouter;

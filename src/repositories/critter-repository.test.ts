@@ -83,7 +83,7 @@ describe("xref-repository", () => {
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(critterRepository.getAllCritters()).rejects.toThrow(
-        "Failed to find critters.",
+        "Failed to find critters."
       );
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
@@ -163,7 +163,7 @@ describe("xref-repository", () => {
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(
-        critterRepository.getMultipleCrittersByIds(["cccc", "dddd"]),
+        critterRepository.getMultipleCrittersByIds(["cccc", "dddd"])
       ).rejects.toThrow("Failed to find critters.");
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
@@ -229,7 +229,7 @@ describe("xref-repository", () => {
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(critterRepository.getCritterById("cccc")).rejects.toThrow(
-        "Failed to find specific critter.",
+        "Failed to find specific critter."
       );
 
       expect(mockPrismaClient.critter.findUnique).toHaveBeenCalledWith({
@@ -297,7 +297,7 @@ describe("xref-repository", () => {
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(
-        critterRepository.getCrittersByWlhId("cccc"),
+        critterRepository.getCrittersByWlhId("cccc")
       ).rejects.toThrow("Failed to find critters with wlh-id: cccc.");
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
@@ -371,12 +371,12 @@ describe("xref-repository", () => {
 
     it("should catch and re-throw an error", async () => {
       mockPrismaClient.critter.update.mockRejectedValueOnce(
-        new Error("Mock error"),
+        new Error("Mock error")
       );
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(critterRepository.updateCritter("aaaa", {})).rejects.toThrow(
-        "Failed to update critter.",
+        "Failed to update critter."
       );
 
       expect(mockPrismaClient.critter.update).toHaveBeenCalledWith({
@@ -450,12 +450,12 @@ describe("xref-repository", () => {
 
     it("should catch and re-throw an error", async () => {
       mockPrismaClient.critter.create.mockRejectedValueOnce(
-        new Error("Mock error"),
+        new Error("Mock error")
       );
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(
-        critterRepository.createCritter({} as CritterCreateRequiredItis),
+        critterRepository.createCritter({} as CritterCreateRequiredItis)
       ).rejects.toThrow("Failed to create critter.");
 
       expect(mockPrismaClient.critter.create).toHaveBeenCalledWith({

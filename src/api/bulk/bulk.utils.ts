@@ -20,7 +20,7 @@ const BulkCreationSchema = z.object({
 });
 
 const filterAndRemoveDeletes = <T>(
-  arr: (T & { _delete?: boolean }[]) | undefined,
+  arr: (T & { _delete?: boolean }[]) | undefined
 ) => {
   return arr?.filter((val, idx, arr) => {
     if (val._delete) {

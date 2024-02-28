@@ -87,7 +87,7 @@ const request = supertest(
     deleteArtifact,
     getCritterById,
     critterService: { getCritterById },
-  } as unknown as Record<keyof ICbDatabase, any>),
+  } as unknown as Record<keyof ICbDatabase, any>)
 );
 
 beforeEach(() => {
@@ -115,7 +115,7 @@ describe("API: Artifact", () => {
         create.mockResolvedValue(PRISMA_ARTIFACT);
         const returnedArtifact = await _createArtifact(
           NEW_ARTIFACT,
-          MOCK_FILE as unknown as Express.Multer.File,
+          MOCK_FILE as unknown as Express.Multer.File
         );
         expect.assertions(4);
         expect(uploadFileToS3).toHaveBeenCalledTimes(1);

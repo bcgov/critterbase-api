@@ -66,7 +66,7 @@ const critter_collection_unitSchema = implement<critter_collection_unit>().with(
     critter_id: zodID,
     collection_unit_id: zodID,
     ...zodAudit,
-  },
+  }
 );
 
 //Extended schema which has both base schema and included fields
@@ -154,7 +154,7 @@ const CollectionUnitCreateBodySchema = implement<
     critter_collection_unitSchema
       .omit({ ...noAudit })
       .partial()
-      .required({ critter_id: true, collection_unit_id: true }).shape,
+      .required({ critter_id: true, collection_unit_id: true }).shape
   )
   .openapi({ description: "For creating collection untis" });
 

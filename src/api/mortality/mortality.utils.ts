@@ -79,7 +79,7 @@ const MortalityUpdateSchema = implement<
     ...noAudit,
   })
     .extend({ location: LocationUpdateSchema })
-    .partial().shape,
+    .partial().shape
 );
 
 const MortalityCreateSchema = implement<
@@ -94,7 +94,7 @@ const MortalityCreateSchema = implement<
       critter_id: true,
       mortality_timestamp: true,
       proximate_cause_of_death_id: true,
-    }).shape,
+    }).shape
 );
 
 type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
