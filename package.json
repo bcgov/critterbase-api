@@ -13,6 +13,7 @@
     "test:watch": "jest --watchAll --forceExit",
     "dev": "npx prisma generate && nodemon -r dotenv/config ./src/server.ts",
     "lint": "npx eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix --ignore-pattern 'node_modules' --ext .ts",
     "format:fix":"prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss}\"",
     "format:check": "prettier --check \"./src/**/*.{js,jsx,ts,tsx,css,scss}\"",
     "dead:code": "ts-prune | (! grep -v 'used in module')",
