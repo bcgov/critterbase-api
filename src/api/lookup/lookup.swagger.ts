@@ -366,10 +366,10 @@ export const enumPaths = {
   [`${routes.lookups}/enum/coordinate-uncertainty-unit`]: {
     get: enumCoordinateUncertainty,
   },
-  [`${routes.lookups}/enum/frequency-unit`]: {
+  [`${routes.lookups}/enum/frequency-units`]: {
     get: enumFrequencyUnits,
   },
-  [`${routes.lookups}/enum/measurement-unit`]: {
+  [`${routes.lookups}/enum/measurement-units`]: {
     get: enumMeasurementUnit,
   },
   [`${routes.lookups}/colours`]: {

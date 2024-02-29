@@ -32,7 +32,9 @@ export class XrefService extends InternalService<XrefRepository> {
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
   async getTsnCollectionCategories(tsn: number, asSelect = false) {
-    const data = await this.repository.getTsnCollectionCategories(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
+
+    const data = await this.repository.getTsnCollectionCategories(tsns);
 
     if (asSelect) {
       return toSelectFormat(data, "collection_category_id", "category_name");

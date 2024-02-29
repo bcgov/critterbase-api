@@ -18,9 +18,7 @@ const getAccess: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: z.object({
-            message: z.string(),
-          }),
+          schema: z.string(),
         },
       },
     },
@@ -67,7 +65,13 @@ const getTypes: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         "application/json": {
-          schema: {},
+          schema: z
+            .object({
+              column_name: z.string(),
+              udt_name: z.string(),
+              enum_vals: z.string().array(),
+            })
+            .array(),
         },
       },
     },

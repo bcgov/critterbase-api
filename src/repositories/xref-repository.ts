@@ -1,4 +1,3 @@
-import { apiError } from "../utils/types";
 import { Repository } from "./base-repository";
 import {
   ICollectionCategoryDef,
@@ -27,13 +26,6 @@ export class XrefRepository extends Repository {
       },
     });
 
-    if (!result.length) {
-      throw apiError.sqlExecuteIssue("Failed to find collection units.", [
-        "XrefRepository -> getTsnCollectionCategories",
-        "results had length of 0",
-      ]);
-    }
-
     return result;
   }
 
@@ -41,25 +33,18 @@ export class XrefRepository extends Repository {
    * Get 'collection categories' for a TSN.
    *
    * @async
-   * @param {number} tsn - ITIS TSN identifier.
+   * @param {number} tsns - ITIS TSN identifiers.
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
   async getTsnCollectionCategories(
-    tsn: number
+    tsns: number[]
   ): Promise<ICollectionCategoryDef[]> {
     const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
       FROM lk_collection_category cc
       INNER JOIN xref_taxon_collection_category x
       ON x.collection_category_id = cc.collection_category_id
-      AND x.itis_tsn = ${tsn};`;
-
-    if (!result.length) {
-      throw apiError.sqlExecuteIssue(`Failed to find collection categories.`, [
-        "XrefRepository -> getTsnCollectionCategories",
-        "results had length of 0",
-      ]);
-    }
+      AND x.itis_tsn = ANY(${tsns});`;
 
     return result;
   }
@@ -83,13 +68,6 @@ export class XrefRepository extends Repository {
         description: true,
       },
     });
-
-    if (!result.length) {
-      throw apiError.sqlExecuteIssue(`Failed to find marking body locations.`, [
-        "XrefRepository -> getTsnMarkingBodyLocations",
-        "results had length of 0",
-      ]);
-    }
 
     return result;
   }
@@ -128,16 +106,6 @@ export class XrefRepository extends Repository {
       TsnQualitativeMeasurementSchema.array()
     );
 
-    if (!result.length) {
-      throw apiError.sqlExecuteIssue(
-        `Failed to find qualitative measurements.`,
-        [
-          "XrefRepository -> getTsnQualitativeMeasurements",
-          "results had length of 0",
-        ]
-      );
-    }
-
     return result;
   }
 
@@ -163,16 +131,6 @@ export class XrefRepository extends Repository {
         },
       });
 
-    if (!result.length) {
-      throw apiError.sqlExecuteIssue(
-        `Failed to find qualitative measurement options.`,
-        [
-          "XrefRepository -> getTsnQualitativeMeasurements",
-          "results had a length of 0",
-        ]
-      );
-    }
-
     return result;
   }
 
@@ -196,16 +154,6 @@ export class XrefRepository extends Repository {
           unit: true,
         },
       });
-
-    if (!result.length) {
-      throw apiError.sqlExecuteIssue(
-        `Failed to find quantitative measurement.`,
-        [
-          "XrefRepository -> getTsnQuantitativeMeasurements",
-          "results had a length of 0",
-        ]
-      );
-    }
 
     return result;
   }

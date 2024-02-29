@@ -130,9 +130,6 @@ export const critterPaths = {
       operationId: "createCritter",
       summary: "Create a new critter",
       tags: [TAG],
-      requestParams: {
-        path: z.object({ id: zodID }),
-      },
       requestBody: {
         content: {
           "application/json": {
