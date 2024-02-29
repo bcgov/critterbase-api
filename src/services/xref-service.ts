@@ -1,5 +1,15 @@
 import { XrefRepository } from "../repositories/xref-repository";
+import {
+  ICollectionCategoryDef,
+  ICollectionUnit,
+  ITsnMarkingBodyLocation,
+  ITsnMeasurements,
+  ITsnQualitativeMeasurement,
+  ITsnQualitativeMeasurementOption,
+  ITsnQuantitativeMeasurement,
+} from "../schemas/xref-schema";
 import { toSelectFormat } from "../utils/helper_functions";
+import { ISelect, ISelectChildren } from "../utils/types";
 import { InternalService } from "./base-service";
 
 export class XrefService extends InternalService<XrefRepository> {
@@ -8,18 +18,54 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {string} category_id - uuid primary key of xref_collection_unit.
-   * @returns {Promise<ICollectionUnitDef[]>}
+   * @param {boolean} [asSelect] - Optional UI format indicator.
+   * @returns {Promise<ICollectionUnitDef[] | ISelect[]>}
    */
   async getCollectionUnitsFromCategoryId(
     category_id: string,
     asSelect = false
-  ) {
+  ): Promise<ICollectionUnit[] | ISelect[]> {
     const data =
       await this.repository.getCollectionUnitsFromCategoryId(category_id);
 
     if (asSelect) {
       return toSelectFormat(data, "collection_unit_id", "unit_name");
     }
+
+    return data;
+  }
+
+  /**
+   * Get 'collection units' from category name OR scientific name.
+   *
+   * @async
+   * @param {string} category_name - Name of the collection category.
+   * @param {string} [itis_scientific_name] - ITIS Scientific name.
+   * @param {boolean} [asSelect] - Optional UI format indicator.
+   * @returns {Promise<ICollectionUnit[] | ISelect[]>}
+   */
+  async getCollectionUnitsFromCategoryOrScientificName(
+    category_name: string,
+    itis_scientific_name?: string,
+    asSelect = false
+  ): Promise<ICollectionUnit[] | ISelect[]> {
+    let tsns: number[] = [];
+
+    if (itis_scientific_name) {
+      const tsn =
+        await this.itisService.getTsnFromScientificName(itis_scientific_name);
+      tsns = await this.itisService.getTsnHierarchy(tsn);
+    }
+    const data = await this.repository.getCollectionUnitsFromCategoryOrTsns(
+      category_name,
+      tsns
+    );
+
+    if (asSelect) {
+      return toSelectFormat(data, "collection_unit_id", "unit_name");
+    }
+
+    return data;
   }
 
   /**
@@ -29,9 +75,13 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<ICollectionCategoryDef[]>}
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ICollectionCategoryDef[] | ISelect[]>}
    */
-  async getTsnCollectionCategories(tsn: number, asSelect = false) {
+  async getTsnCollectionCategories(
+    tsn: number,
+    asSelect = false
+  ): Promise<ICollectionCategoryDef[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnCollectionCategories(tsns);
@@ -52,9 +102,13 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<ITsnMarkingBodyLocation[]>}
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnMarkingBodyLocation[] | ISelect[]>}
    */
-  async getTsnMarkingBodyLocations(tsn: number, asSelect = false) {
+  async getTsnMarkingBodyLocations(
+    tsn: number,
+    asSelect = false
+  ): Promise<ITsnMarkingBodyLocation[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnMarkingBodyLocations(tsns);
@@ -79,9 +133,13 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<ITsnQualitativeMeasurement[]>}
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnQualitativeMeasurement[] | ISelect[]>}
    */
-  async getTsnQualitativeMeasurements(tsn: number, asSelect = false) {
+  async getTsnQualitativeMeasurements(
+    tsn: number,
+    asSelect = false
+  ): Promise<ITsnQualitativeMeasurement[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQualitativeMeasurements(tsns);
@@ -102,9 +160,13 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {number} tsn - ITIS TSN identifier.
-   * @returns {Promise<ITsnQuantitativeMeasurement[]>}
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnQuantitativeMeasurement[] | ISelect[]>}
    */
-  async getTsnQuantitativeMeasurements(tsn: number, asSelect = false) {
+  async getTsnQuantitativeMeasurements(
+    tsn: number,
+    asSelect = false
+  ): Promise<ITsnQuantitativeMeasurement[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
@@ -121,12 +183,13 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {string} taxonMeasurementId - qualitative measurement identifier.
-   * @returns {Promise<ITsnQualitativeMeasurementOption[]>}
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnQualitativeMeasurementOption[] | ISelect[]>}
    */
   async getQualitativeMeasurementOptions(
     taxonMeasurementId: string,
     asSelect = false
-  ) {
+  ): Promise<ITsnQualitativeMeasurementOption[] | ISelect[]> {
     const data =
       await this.repository.getQualitativeMeasurementOptions(
         taxonMeasurementId
@@ -146,9 +209,13 @@ export class XrefService extends InternalService<XrefRepository> {
    *
    * @async
    * @param {string} tsn - ITIS TSN identifier.
-   * @returns {Promise<{ITsnMeasurements}>}
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnMeasurements | ISelectChildren[]>}
    */
-  async getTsnMeasurements(tsn: number, asSelect = false) {
+  async getTsnMeasurements(
+    tsn: number,
+    asSelect = false
+  ): Promise<ITsnMeasurements[] | ISelectChildren[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const quantitative =
@@ -183,30 +250,4 @@ export class XrefService extends InternalService<XrefRepository> {
 
     return { quantitative, qualitative };
   }
-
-  //TODO: find alternative to this endpoint
-  // async getCollectionUnitsFromCategory(
-  //   category_name: string,
-  //   taxon_name_common?: string,
-  //   taxon_name_latin?: string,
-  // ) {
-  //   const taxon_categories =
-  //     await prisma.xref_taxon_collection_category.findFirstOrThrow({
-  //       where: {
-  //         lk_taxon: {
-  //           taxon_name_common: taxon_name_common
-  //             ? { equals: taxon_name_common, mode: "insensitive" }
-  //             : undefined,
-  //           taxon_name_latin: taxon_name_latin
-  //             ? { equals: taxon_name_latin, mode: "insensitive" }
-  //             : undefined,
-  //         },
-  //         lk_collection_category: {
-  //           category_name: { equals: category_name, mode: "insensitive" },
-  //         },
-  //       },
-  //     });
-  //   const category_id = taxon_categories.collection_category_id;
-  //   return await getCollectionUnitsFromCategoryId(category_id);
-  // }
 }

@@ -1,5 +1,8 @@
 import express, { Request, Response } from "express";
-import { CollectionUnitCategoryIdSchema } from "../../schemas/xref-schema";
+import {
+  CollectionUnitCategoryIdSchema,
+  CollectionUnitCategoryQuerySchema,
+} from "../../schemas/xref-schema";
 import { ICbDatabase } from "../../utils/database";
 import { isSelectFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
@@ -8,32 +11,48 @@ import { tsnQuerySchema } from "../../utils/zod_helpers";
 export const XrefRouter = (db: ICbDatabase) => {
   const xrefRouter = express.Router();
 
+  /**
+   * Endpoint to retrieve 'taxon collection units'.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query category_name - Name of the collection cateogory.
+   * @query itis_scientific_name - ITIS scientific name.
+   *
+   */
   xrefRouter.get(
     "/collection-units",
     catchErrors(async (req: Request, res: Response) => {
-      const { category_id } = CollectionUnitCategoryIdSchema.parse(req.query);
+      const { category_name, itis_scientific_name } =
+        CollectionUnitCategoryQuerySchema.parse(req.query);
 
-      if (category_id) {
-        const response =
-          await db.xrefService.getCollectionUnitsFromCategoryId(category_id);
+      const response =
+        await db.xrefService.getCollectionUnitsFromCategoryOrScientificName(
+          category_name,
+          itis_scientific_name
+        );
 
-        return res.status(200).json(response);
-      }
+      return res.status(200).json(response);
+    })
+  );
 
-      return res.status(404).json({ error: "missing endpoint branch TODO" });
-      // TODO: Need a solution for this part
-      // const { category_name, taxon_name_common, taxon_name_latin } =
-      //   CollectionUnitCategorySchema.parse(req.query);
-      // const response = await formatParse(
-      //   getFormat(req),
-      //   db.getCollectionUnitsFromCategory(
-      //     category_name,
-      //     taxon_name_common,
-      //     taxon_name_latin,
-      //   ),
-      //   xrefCollectionUnitFormats,
-      // );
-      // return res.status(200).json(response);
+  /**
+   * Endpoint to retrieve 'taxon collection units' from category_id.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @param category_id - Primary identifier of xref_collection_unit.
+   *
+   */
+  xrefRouter.get(
+    "/collection-units/:category_id",
+    catchErrors(async (req: Request, res: Response) => {
+      const { category_id } = CollectionUnitCategoryIdSchema.parse(req.params);
+
+      const response =
+        await db.xrefService.getCollectionUnitsFromCategoryId(category_id);
+
+      return res.status(200).json(response);
     })
   );
 

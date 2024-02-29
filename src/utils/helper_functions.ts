@@ -84,8 +84,16 @@ const toSelect = <AsType>(
   } satisfies ISelect;
 };
 
-const toSelectFormat = <T>(data: T[], idKey: keyof T, valueKey: keyof T) =>
-  data.map((item) => ({ id: item[idKey], key: idKey, value: item[valueKey] }));
+const toSelectFormat = <T>(
+  data: T[],
+  idKey: keyof T,
+  valueKey: keyof T
+): ISelect[] =>
+  data.map((item) => ({
+    id: item[idKey] as string,
+    key: idKey as string,
+    value: item[valueKey] as string,
+  }));
 
 //Putting the function here so tests dont run utils each time
 export const prisMock = (

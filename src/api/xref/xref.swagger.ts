@@ -12,7 +12,6 @@ import {
 } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
-  CollectionUnitCategorySchema,
   TsnMarkingBodyLocationSchema,
   TsnMeasurementsSchema,
   TsnQualitativeMeasurementSchema,
@@ -42,7 +41,7 @@ const getXrefCollectionUnits: ZodOpenApiOperationObject = {
     "Get all collection units available in the DB. To filter by category, provide either just a category_id, or provide a category name plus a taxon_name_latin or taxon_name_common.",
   tags: [TAG],
   requestParams: {
-    query: CollectionUnitCategorySchema.extend({
+    query: CollectionUnitCategoryIdSchema.extend({
       category_name: z.string().optional(),
       ...CollectionUnitCategoryIdSchema.shape,
       format: formats,

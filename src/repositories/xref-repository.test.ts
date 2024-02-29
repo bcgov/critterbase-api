@@ -59,24 +59,6 @@ describe("xref-repository", () => {
         },
       });
     });
-
-    it("should throw an error if no collection units are found", async () => {
-      mockPrismaClient.xref_collection_unit.findMany.mockResolvedValue([]);
-      const xrefRepository = new XrefRepository(mockPrismaClient);
-
-      const category_id = "non-existent-category";
-      await expect(
-        xrefRepository.getCollectionUnitsFromCategoryId(category_id)
-      ).rejects.toThrow("Failed to find collection units.");
-
-      expect(
-        mockPrismaClient.xref_collection_unit.findMany
-      ).toHaveBeenCalledWith({
-        where: {
-          collection_category_id: category_id,
-        },
-      });
-    });
   });
 
   describe("getTsnCollectionCategories", () => {
@@ -108,15 +90,6 @@ describe("xref-repository", () => {
       const result = await xrefRepository.getTsnCollectionCategories(123456);
 
       expect(result).toEqual(mockResult);
-    });
-
-    it("should throw an error if no collection categories are found", async () => {
-      mockPrismaClient.$queryRaw.mockResolvedValue([]);
-      const xrefRepository = new XrefRepository(mockPrismaClient);
-
-      await expect(
-        xrefRepository.getTsnCollectionCategories(456789)
-      ).rejects.toThrow("Failed to find collection categories.");
     });
   });
 
@@ -159,29 +132,6 @@ describe("xref-repository", () => {
         mockPrismaClient.xref_taxon_marking_body_location.findMany
       ).toHaveBeenCalledWith({
         where: { itis_tsn: { in: [123456, 456789] } },
-        select: {
-          taxon_marking_body_location_id: true,
-          itis_tsn: true,
-          body_location: true,
-          description: true,
-        },
-      });
-    });
-
-    it("should throw an error if no marking body locations are found", async () => {
-      mockPrismaClient.xref_taxon_marking_body_location.findMany.mockResolvedValue(
-        []
-      );
-      const xrefRepository = new XrefRepository(mockPrismaClient);
-
-      await expect(
-        xrefRepository.getTsnMarkingBodyLocations([123])
-      ).rejects.toThrow("Failed to find marking body locations.");
-
-      expect(
-        mockPrismaClient.xref_taxon_marking_body_location.findMany
-      ).toHaveBeenCalledWith({
-        where: { itis_tsn: { in: [123] } },
         select: {
           taxon_marking_body_location_id: true,
           itis_tsn: true,
@@ -243,15 +193,6 @@ describe("xref-repository", () => {
 
       expect(result).toEqual(mockResult);
     });
-
-    it("should throw an error if no qualitative measurements are found", async () => {
-      mockPrismaClient.$queryRaw.mockResolvedValue([]);
-      const xrefRepository = new XrefRepository(mockPrismaClient);
-
-      await expect(
-        xrefRepository.getTsnQualitativeMeasurements([123])
-      ).rejects.toThrow("Failed to find qualitative measurements.");
-    });
   });
 
   describe("getQualitativeMeasurementOptions", () => {
@@ -294,30 +235,6 @@ describe("xref-repository", () => {
         mockPrismaClient.xref_taxon_measurement_qualitative_option.findMany
       ).toHaveBeenCalledWith({
         where: { taxon_measurement_id: "aaaa" },
-        select: {
-          qualitative_option_id: true,
-          taxon_measurement_id: true,
-          option_value: true,
-          option_label: true,
-          option_desc: true,
-        },
-      });
-    });
-
-    it("should throw an error if no qualitative measurements are found", async () => {
-      mockPrismaClient.xref_taxon_measurement_qualitative_option.findMany.mockResolvedValue(
-        []
-      );
-      const xrefRepository = new XrefRepository(mockPrismaClient);
-
-      await expect(
-        xrefRepository.getQualitativeMeasurementOptions("bbbb")
-      ).rejects.toThrow("Failed to find qualitative measurement options.");
-
-      expect(
-        mockPrismaClient.xref_taxon_measurement_qualitative_option.findMany
-      ).toHaveBeenCalledWith({
-        where: { taxon_measurement_id: "bbbb" },
         select: {
           qualitative_option_id: true,
           taxon_measurement_id: true,
@@ -372,31 +289,6 @@ describe("xref-repository", () => {
         mockPrismaClient.xref_taxon_measurement_quantitative.findMany
       ).toHaveBeenCalledWith({
         where: { itis_tsn: { in: [123456, 456789] } },
-        select: {
-          taxon_measurement_id: true,
-          itis_tsn: true,
-          measurement_name: true,
-          min_value: true,
-          max_value: true,
-          unit: true,
-        },
-      });
-    });
-
-    it("should throw an error if no collection units are found", async () => {
-      mockPrismaClient.xref_taxon_measurement_quantitative.findMany.mockResolvedValue(
-        []
-      );
-      const xrefRepository = new XrefRepository(mockPrismaClient);
-
-      await expect(
-        xrefRepository.getTsnQuantitativeMeasurements([123])
-      ).rejects.toThrow("Failed to find quantitative measurement.");
-
-      expect(
-        mockPrismaClient.xref_taxon_measurement_quantitative.findMany
-      ).toHaveBeenCalledWith({
-        where: { itis_tsn: { in: [123] } },
         select: {
           taxon_measurement_id: true,
           itis_tsn: true,

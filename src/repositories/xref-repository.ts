@@ -1,7 +1,8 @@
 import { Repository } from "./base-repository";
 import {
+  CollectionUnitSchema,
   ICollectionCategoryDef,
-  ICollectionUnitDef,
+  ICollectionUnit,
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
@@ -19,13 +20,39 @@ export class XrefRepository extends Repository {
    */
   async getCollectionUnitsFromCategoryId(
     category_id: string
-  ): Promise<ICollectionUnitDef[]> {
+  ): Promise<ICollectionUnit[]> {
     const result = await this.prisma.xref_collection_unit.findMany({
       where: {
         collection_category_id: category_id,
       },
     });
 
+    return result;
+  }
+
+  /**
+   * Get 'collection units' from category name or tsn hierarchy.
+   *
+   * @async
+   * @param {string} category_name - Name of the collection category.
+   * @param {number[]} [tsns] - ITIS TSN Identifiers.
+   * @returns {Promise<ICollectionUnit[]>}
+   */
+  async getCollectionUnitsFromCategoryOrTsns(
+    category_name: string,
+    tsns?: number[]
+  ): Promise<ICollectionUnit[]> {
+    const result = this.safeQuery(
+      Prisma.sql`
+        SELECT c.collection_unit_id, c.collection_category_id, c.unit_name, c.description
+        FROM xref_collection_unit c
+        JOIN xref_taxon_collection_category x
+          ON c.collection_category_id = x.collection_category_id
+        JOIN lk_collection_category l
+          ON l.collection_category_id = x.collection_category_id
+        WHERE l.category_name ILIKE ${category_name} OR x.itis_tsn = ANY(${tsns});`,
+      CollectionUnitSchema.array()
+    );
     return result;
   }
 
@@ -141,7 +168,9 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - ITIS TSN identifiers.
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
-  async getTsnQuantitativeMeasurements(tsns: number[]) {
+  async getTsnQuantitativeMeasurements(
+    tsns: number[]
+  ): Promise<ITsnQuantitativeMeasurement[]> {
     const result =
       await this.prisma.xref_taxon_measurement_quantitative.findMany({
         where: { itis_tsn: { in: tsns } },

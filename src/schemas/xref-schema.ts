@@ -70,6 +70,19 @@ export const TsnQuantitativeMeasurementSchema = implement<
   unit: z.nativeEnum(measurement_unit),
 });
 
+/**
+ * @table xref_collection_unit
+ *
+ */
+export const CollectionUnitSchema = implement<
+  Omit<xref_collection_unit, AuditColumns>
+>().with({
+  collection_unit_id: zodID,
+  collection_category_id: zodID,
+  unit_name: z.string(),
+  description: z.string().nullable(),
+});
+
 export const TsnMeasurementsSchema = z.object({
   qualitative: TsnQualitativeMeasurementSchema.array(),
   quantitative: TsnQuantitativeMeasurementSchema.array(),
@@ -103,16 +116,13 @@ export type ICollectionCategoryDef = Omit<
   AuditColumns
 > & { itis_tsn: number };
 
-export type ICollectionUnitDef = Omit<xref_collection_unit, AuditColumns>;
+export type ICollectionUnit = z.infer<typeof CollectionUnitSchema>;
 
-export const CollectionUnitCategorySchema = z.object({
+export const CollectionUnitCategoryQuerySchema = z.object({
   category_name: z.string(),
-  taxon_name_latin: z.string().optional(),
-  taxon_name_common: z.string().optional(),
+  itis_scientific_name: z.string().optional(),
 });
 
-export const CollectionUnitCategoryIdSchema = z
-  .object({
-    category_id: z.string().uuid().optional(),
-  })
-  .passthrough();
+export const CollectionUnitCategoryIdSchema = z.object({
+  category_id: z.string().uuid(),
+});

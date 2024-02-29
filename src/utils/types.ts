@@ -126,6 +126,8 @@ interface ISelect {
   value: string;
 }
 
+type ISelectChildren = ISelect & { children: ISelect[] };
+
 export enum QueryFormats {
   default = "default",
   detailed = "detailed",
@@ -175,6 +177,7 @@ export {
   Implements,
   FormatParse,
   ISelect,
+  ISelectChildren,
   FormatParseBody,
   ReqBody,
   PrismaTransactionClient,
