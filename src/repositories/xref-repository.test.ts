@@ -61,6 +61,49 @@ describe("xref-repository", () => {
     });
   });
 
+  describe("getCollectionUnitsFromCategoryOrTsns", () => {
+    beforeEach(() => {
+      mockPrismaClient = {
+        $queryRaw: jest.fn(),
+      };
+    });
+
+    it("should return some collection units successfully", async () => {
+      const mockResult = [
+        {
+          collection_unit_id: "1",
+          collection_category_id: "1",
+          unit_name: "name",
+          description: "desc",
+          create_user: "1",
+          update_user: "1",
+          create_timestamp: new Date("1970-01-01"),
+          update_timestamp: new Date("1970-01-01"),
+        },
+        {
+          collection_unit_id: "2",
+          collection_category_id: "2",
+          unit_name: "name",
+          description: "desc",
+          create_user: "2",
+          update_user: "2",
+          create_timestamp: new Date("1970-01-01"),
+          update_timestamp: new Date("1970-01-01"),
+        },
+      ];
+
+      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
+
+      const xrefRepository = new XrefRepository(mockPrismaClient);
+      const result = await xrefRepository.getCollectionUnitsFromCategoryOrTsns(
+        "valid_category_id",
+        []
+      );
+
+      expect(result).toEqual(mockResult);
+    });
+  });
+
   describe("getTsnCollectionCategories", () => {
     beforeEach(() => {
       mockPrismaClient = {
@@ -87,7 +130,7 @@ describe("xref-repository", () => {
       mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
 
       const xrefRepository = new XrefRepository(mockPrismaClient);
-      const result = await xrefRepository.getTsnCollectionCategories(123456);
+      const result = await xrefRepository.getTsnCollectionCategories([9]);
 
       expect(result).toEqual(mockResult);
     });

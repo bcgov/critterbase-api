@@ -6,6 +6,7 @@ import {
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
+  ITsnQuantitativeMeasurement,
   TsnQualitativeMeasurementSchema,
 } from "../schemas/xref-schema";
 import { Prisma } from "@prisma/client";

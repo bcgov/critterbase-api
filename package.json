@@ -14,6 +14,7 @@
     "dev": "npx prisma generate && nodemon -r dotenv/config ./src/server.ts",
     "lint": "npx eslint . --max-warnings=0",
     "format:fix":"prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss}\"",
+    "format:check": "prettier --check \"./src/**/*.{js,jsx,ts,tsx,css,scss}\"",
     "dead:code": "ts-prune | (! grep -v 'used in module')",
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:dev-setup": "npx prisma migrate deploy && npx prisma db seed"
