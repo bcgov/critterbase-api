@@ -3,7 +3,7 @@ name: Format
 on: [push]
 
 jobs:
-  Format:
+  prettier:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

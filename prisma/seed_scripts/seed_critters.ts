@@ -30,11 +30,11 @@ export const seedCritters = async () => {
           },
         },
       },
-    },
+    }
   );
 
   if (!markingBodyLocation || !quantitative || !qualitative) {
-    console.log("failed to find value for seed lookup");
+    console.error("failed to find value for seed lookup");
     return;
   }
 
