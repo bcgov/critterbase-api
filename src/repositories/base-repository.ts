@@ -44,7 +44,8 @@ export class Repository {
       console.log(parsed.error.errors, { result });
 
       throw apiError.sqlExecuteIssue(
-        "Failed to parse raw sql with provided Zod schema."
+        "Failed to parse raw sql with provided Zod schema.",
+        parsed.error.errors
       );
     }
 

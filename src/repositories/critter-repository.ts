@@ -278,8 +278,11 @@ export class CritterRepository extends Repository {
           t.name as marking_type,
           mt.material,
           c1.colour as primary_colour,
+          m.primary_colour_id,
           c2.colour as secondary_colour,
+          m.secondary_colour_id,
           c3.colour as text_colour,
+          m.text_colour_id,
           m.identifier,
           m.frequency,
           m.frequency_unit,
@@ -332,6 +335,7 @@ export class CritterRepository extends Repository {
         JOIN (
           SELECT
             location_id, latitude, longitude, coordinate_uncertainty,
+            region_env_id, region_nr_id, wmu_id,
             coordinate_uncertainty_unit, elevation, temperature, location_comment
           FROM location
         ) as cl
@@ -339,6 +343,7 @@ export class CritterRepository extends Repository {
         JOIN (
           SELECT
             location_id, latitude, longitude, coordinate_uncertainty,
+            region_env_id, region_nr_id, wmu_id,
             coordinate_uncertainty_unit, elevation, temperature, location_comment
           FROM location
         ) as rl
@@ -368,11 +373,9 @@ export class CritterRepository extends Repository {
           m.mortality_id,
           m.mortality_timestamp,
           row_to_json(ml) as mortality_location,
-          pd.cod_category as proximate_cause_of_death_category,
-          pd.cod_reason as proximate_cause_of_death_reason,
+          m.proximate_cause_of_death_id,
           m.proximate_cause_of_death_confidence,
-          ud.cod_category as ultimate_cause_of_death_category,
-          ud.cod_reason as ultimate_cause_of_death_reason,
+          m.ultimate_cause_of_death_id,
           m.ultimate_cause_of_death_confidence,
           m.mortality_comment,
           m.proximate_predated_by_itis_tsn,
@@ -381,6 +384,7 @@ export class CritterRepository extends Repository {
         JOIN (
           SELECT
             location_id, latitude, longitude, coordinate_uncertainty,
+            region_env_id, region_nr_id, wmu_id,
             coordinate_uncertainty_unit, elevation, temperature, location_comment
           FROM location
         ) as ml
@@ -412,6 +416,7 @@ export class CritterRepository extends Repository {
         SELECT
           m.measurement_qualitative_id,
           m.taxon_measurement_id,
+          m.qualitative_option_id,
           m.capture_id,
           m.mortality_id,
           x.measurement_name,
@@ -476,6 +481,8 @@ export class CritterRepository extends Repository {
       Prisma.sql`
         SELECT
           c.critter_collection_unit_id,
+          l.collection_category_id,
+          x.collection_unit_id,
           x.unit_name,
           l.category_name
         FROM critter_collection_unit c
