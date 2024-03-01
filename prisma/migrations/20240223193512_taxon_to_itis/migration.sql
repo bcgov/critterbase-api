@@ -113,7 +113,7 @@ ADD COLUMN     "itis_tsn" INTEGER NOT NULL;
 
 -- AlterTable
 ALTER TABLE "xref_taxon_measurement_qualitative" DROP COLUMN "taxon_id",
-ADD COLUMN     "itis_tsn" INTEGER;
+ADD COLUMN     "itis_tsn" INTEGER NOT NULL;
 
 -- AlterTable
 ALTER TABLE "xref_taxon_measurement_quantitative" DROP COLUMN "taxon_id",

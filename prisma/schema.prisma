@@ -502,7 +502,7 @@ model xref_taxon_measurement_qualitative {
   update_user                                               String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
   update_timestamp                                          DateTime                                    @default(now()) @db.Timestamptz(6)
-  itis_tsn                                                  Int?
+  itis_tsn                                                  Int
   measurement_qualitative                                   measurement_qualitative[]
   user_xref_taxon_measurement_qualitative_create_userTouser user                                        @relation("xref_taxon_measurement_qualitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_create_user")
   user_xref_taxon_measurement_qualitative_update_userTouser user                                        @relation("xref_taxon_measurement_qualitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_update_user")
