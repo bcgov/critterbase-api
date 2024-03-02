@@ -3,15 +3,14 @@ import {
   ICollectionCategoryDef,
   ICollectionUnit,
   IMeasurementSearch,
-  IMeasurementWithTsnHiearchy,
+  IMeasurementWithTsnHieararchy,
   ITsnMarkingBodyLocation,
-  ITsnMeasurements,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
   ITsnQuantitativeMeasurement,
 } from "../schemas/xref-schema";
 import { toSelectFormat } from "../utils/helper_functions";
-import { ISelect, ISelectChildren } from "../utils/types";
+import { ISelect } from "../utils/types";
 import { InternalService } from "./base-service";
 
 export class XrefService extends InternalService<XrefRepository> {
@@ -251,7 +250,7 @@ export class XrefService extends InternalService<XrefRepository> {
   }
 
   /**
-   * Search for measurement definitions from properties.
+   * Search for measurements by search tearms.
    * Currently supports measurement name.
    *
    * @async
@@ -260,7 +259,7 @@ export class XrefService extends InternalService<XrefRepository> {
    */
   async searchForMeasurements(
     search: IMeasurementSearch
-  ): Promise<IMeasurementWithTsnHiearchy> {
+  ): Promise<IMeasurementWithTsnHieararchy> {
     // Search for the measurements
     const [qualitative, quantitative] = await Promise.all([
       this.repository.searchForQualitativeMeasurements(search),
@@ -284,12 +283,12 @@ export class XrefService extends InternalService<XrefRepository> {
     // Inject the tsn hiearchy into the measurements.
     const qualitativeWithHiearchy = qualitative.map((measurement) => ({
       ...measurement,
-      tsnHiearchy: tsnHiearchyMap.get(measurement.itis_tsn),
+      tsnHieararchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
     }));
 
     const quantitativeWithHieararchy = quantitative.map((measurement) => ({
       ...measurement,
-      tsnHiearchy: tsnHiearchyMap.get(measurement.itis_tsn),
+      tsnHieararchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
     }));
 
     return {
