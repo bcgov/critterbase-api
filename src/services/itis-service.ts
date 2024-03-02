@@ -88,6 +88,10 @@ export class ItisService extends ExternalService {
     }
   }
 
+  _splitSolrHierarchyStringToArray(solrHiearchy: string) {
+    return solrHiearchy.split("$").filter(Number).map(Number);
+  }
+
   /**
    * Search ITIS Solr service for reference of TSN. Parse commonly used values from response.
    *
@@ -113,7 +117,7 @@ export class ItisService extends ExternalService {
 
     const { tsn, hierarchyTSN, nameWOInd } = solrTaxon;
 
-    const tsnHierarchy = hierarchyTSN[0].split("$").filter(Number).map(Number);
+    const tsnHierarchy = this._splitSolrHierarchyStringToArray(hierarchyTSN[0]);
 
     return { tsn: Number(tsn), tsnHierarchy, scientificName: nameWOInd };
   }
@@ -136,6 +140,29 @@ export class ItisService extends ExternalService {
     }
 
     return tsnHierarchy;
+  }
+
+  async getTsnsHieararchyMap(searchTsns: number[]) {
+    const uniqueSearchTsns = [...new Set(searchTsns)];
+    const solrQuery = uniqueSearchTsns.map((tsn) => `tsn:${tsn}`).join("+");
+    const result = await this._itisSolrSearch(solrQuery);
+
+    const tsnHiearchyMap = new Map<number, number[]>();
+
+    for (const tsn of searchTsns) {
+      const solrTaxon = result.response.docs.find(
+        (taxon) => (taxon.tsn = String(tsn))
+      );
+
+      if (solrTaxon) {
+        tsnHiearchyMap.set(
+          tsn,
+          this._splitSolrHierarchyStringToArray(solrTaxon.hierarchyTSN[0])
+        );
+      }
+    }
+
+    return tsnHiearchyMap;
   }
 
   /**

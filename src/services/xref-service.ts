@@ -2,6 +2,8 @@ import { XrefRepository } from "../repositories/xref-repository";
 import {
   ICollectionCategoryDef,
   ICollectionUnit,
+  IMeasurementSearch,
+  IMeasurementWithTsnHiearchy,
   ITsnMarkingBodyLocation,
   ITsnMeasurements,
   ITsnQualitativeMeasurement,
@@ -212,10 +214,7 @@ export class XrefService extends InternalService<XrefRepository> {
    * @param {boolean} [asSelect] - Format of the response.
    * @returns {Promise<ITsnMeasurements | ISelectChildren[]>}
    */
-  async getTsnMeasurements(
-    tsn: number,
-    asSelect = false
-  ): Promise<ITsnMeasurements[] | ISelectChildren[]> {
+  async getTsnMeasurements(tsn: number, asSelect = false) {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const quantitative =
@@ -249,5 +248,53 @@ export class XrefService extends InternalService<XrefRepository> {
     }
 
     return { quantitative, qualitative };
+  }
+
+  /**
+   * Search for measurement definitions from properties.
+   * Currently supports measurement name.
+   *
+   * @async
+   * @param {IMeasurementSearch} search - Search properties.
+   * @returns {Promise<IMeasurementWithTsnHiearchy[]>}
+   */
+  async searchForMeasurements(
+    search: IMeasurementSearch
+  ): Promise<IMeasurementWithTsnHiearchy> {
+    // Search for the measurements
+    const [qualitative, quantitative] = await Promise.all([
+      this.repository.searchForQualitativeMeasurements(search),
+      this.repository.searchForQuantitativeMeasurements(search),
+    ]);
+
+    // Get the tsns of the measurements
+    const qualitativeTsns = qualitative.map(
+      (measurement) => measurement.itis_tsn
+    );
+    const quantitativeTsns = quantitative.map(
+      (measurement) => measurement.itis_tsn
+    );
+
+    // Get the tsnHiearchy map for each tsn
+    const tsnHiearchyMap = await this.itisService.getTsnsHieararchyMap([
+      ...qualitativeTsns,
+      ...quantitativeTsns,
+    ]);
+
+    // Inject the tsn hiearchy into the measurements.
+    const qualitativeWithHiearchy = qualitative.map((measurement) => ({
+      ...measurement,
+      tsnHiearchy: tsnHiearchyMap.get(measurement.itis_tsn),
+    }));
+
+    const quantitativeWithHieararchy = quantitative.map((measurement) => ({
+      ...measurement,
+      tsnHiearchy: tsnHiearchyMap.get(measurement.itis_tsn),
+    }));
+
+    return {
+      quantitative: quantitativeWithHieararchy,
+      qualitative: qualitativeWithHiearchy,
+    };
   }
 }

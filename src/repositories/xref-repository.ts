@@ -3,6 +3,7 @@ import {
   CollectionUnitSchema,
   ICollectionCategoryDef,
   ICollectionUnit,
+  IMeasurementSearch,
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
@@ -181,9 +182,78 @@ export class XrefRepository extends Repository {
           measurement_name: true,
           min_value: true,
           max_value: true,
+          measurement_desc: true,
           unit: true,
         },
       });
+
+    return result;
+  }
+
+  /**
+   * Search for 'qualitative measurements' by attributes.
+   * Currently supporting measurement name.
+   *
+   * @async
+   * @param {IMeasurementSearch} search - Search properties.
+   * @returns {Promise<ITsnQuantitativeMeasurement[]>}
+   */
+  async searchForQuantitativeMeasurements(
+    search: IMeasurementSearch
+  ): Promise<ITsnQuantitativeMeasurement[]> {
+    const result =
+      await this.prisma.xref_taxon_measurement_quantitative.findMany({
+        where: {
+          measurement_name: { contains: search.name, mode: "insensitive" },
+        },
+        select: {
+          taxon_measurement_id: true,
+          itis_tsn: true,
+          measurement_name: true,
+          min_value: true,
+          max_value: true,
+          measurement_desc: true,
+          unit: true,
+        },
+      });
+
+    return result;
+  }
+
+  /**
+   * Search for 'quantitative measurements' by attributes.
+   * Currently supporting measurement name.
+   *
+   * @async
+   * @param {IMeasurementSearch} search - Search properties.
+   * @returns {Promise<ITsnQualitativeMeasurement[]>}
+   */
+  async searchForQualitativeMeasurements(
+    search: IMeasurementSearch
+  ): Promise<ITsnQualitativeMeasurement[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+      SELECT
+        q.taxon_measurement_id,
+        q.itis_tsn,
+        q.measurement_name,
+        q.measurement_desc,
+        json_agg(
+          json_build_object(
+            'qualitative_option_id', o.qualitative_option_id,
+            'taxon_measurement_id', o.taxon_measurement_id,
+            'option_label', o.option_label,
+            'option_value', o.option_value,
+            'option_desc', o.option_desc
+          )
+        ) as options
+      FROM xref_taxon_measurement_qualitative q
+      LEFT JOIN xref_taxon_measurement_qualitative_option o
+        ON q.taxon_measurement_id = o.taxon_measurement_id
+      WHERE q.measurement_name ILIKE ${search.name}
+      GROUP BY q.taxon_measurement_id;`,
+      TsnQualitativeMeasurementSchema.array()
+    );
 
     return result;
   }

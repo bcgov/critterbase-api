@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,
     "lib": ["esnext"],
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "target": "es2018"
   },
   "ts-node": {
     "swc": true

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategoryQuerySchema,
+  MeasurementSearchQuery,
 } from "../../schemas/xref-schema";
 import { ICbDatabase } from "../../utils/database";
 import { isSelectFormat } from "../../utils/helper_functions";
@@ -160,6 +161,17 @@ export const XrefRouter = (db: ICbDatabase) => {
       const format = isSelectFormat(req);
 
       const response = await db.xrefService.getTsnMeasurements(tsn, format);
+
+      res.status(200).json(response);
+    })
+  );
+
+  xrefRouter.get(
+    "/search/measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const search = MeasurementSearchQuery.parse(req.query);
+
+      const response = await db.xrefService.searchForMeasurements(search);
 
       res.status(200).json(response);
     })

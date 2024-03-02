@@ -48,7 +48,7 @@ export const TsnQualitativeMeasurementSchema = implement<
   }
 >().with({
   taxon_measurement_id: zodID,
-  itis_tsn: z.number().nullable(), // TODO: This shouldnt be nullable
+  itis_tsn: z.number(),
   measurement_name: z.string(),
   measurement_desc: z.string().nullable(),
   options: z.array(TsnQualitativeMeasurementOptionSchema),
@@ -65,9 +65,9 @@ export const TsnQuantitativeMeasurementSchema = implement<
   itis_tsn: z.number(),
   measurement_name: z.string(),
   measurement_desc: z.string().nullable(),
-  min_value: z.number(),
+  min_value: z.number().nullable(),
   max_value: z.number().nullable(),
-  unit: z.nativeEnum(measurement_unit),
+  unit: z.nativeEnum(measurement_unit).nullable(),
 });
 
 /**
@@ -88,10 +88,29 @@ export const TsnMeasurementsSchema = z.object({
   quantitative: TsnQuantitativeMeasurementSchema.array(),
 });
 
+export const MeasurementsWithTsnHieararchy = z.object({
+  qualitative: TsnQualitativeMeasurementSchema.extend({
+    tsnHieararchy: z.number().array(),
+  }).array(),
+  quantitative: TsnQuantitativeMeasurementSchema.extend({
+    tsnHieararchy: z.number().array(),
+  }).array(),
+});
+
+export const MeasurementSearchQuery = z.object({
+  name: z.string(),
+});
+
 /**
  * Types from zod schemas.
  *
  */
+
+export type IMeasurementWithTsnHieararchy = z.infer<
+  typeof MeasurementsWithTsnHieararchy
+>;
+
+export type IMeasurementSearch = z.infer<typeof MeasurementSearchQuery>;
 
 export type ITsnMarkingBodyLocation = z.infer<
   typeof TsnMarkingBodyLocationSchema

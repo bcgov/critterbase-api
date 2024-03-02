@@ -46,18 +46,27 @@ export class CritterService extends InternalService<CritterRepository> {
    */
   async getCritterById(critterId: string, format = defaultFormat) {
     if (format === QueryFormats.detailed) {
-      const critter = await this.repository.getCritterById(critterId);
-      const markings = await this.repository.findCritterMarkings(critterId);
-      const captures = await this.repository.findCritterCaptures(critterId);
-      const qualitative =
-        await this.repository.findCritterQualitativeMeasurements(critterId);
-      const quantitative =
-        await this.repository.findCritterQuantitativeMeasurements(critterId);
-      const collection_units =
-        await this.repository.findCritterCollectionUnits(critterId);
-      const mortality = await this.repository.findCritterMortalities(critterId);
-      const family_parent = await this.repository.findCritterParents(critterId);
-      const family_child = await this.repository.findCritterChildren(critterId);
+      const [
+        critter,
+        markings,
+        captures,
+        qualitative,
+        quantitative,
+        collection_units,
+        mortality,
+        family_parent,
+        family_child,
+      ] = await Promise.all([
+        this.repository.getCritterById(critterId),
+        this.repository.findCritterMarkings(critterId),
+        this.repository.findCritterCaptures(critterId),
+        this.repository.findCritterQualitativeMeasurements(critterId),
+        this.repository.findCritterQuantitativeMeasurements(critterId),
+        this.repository.findCritterCollectionUnits(critterId),
+        this.repository.findCritterMortalities(critterId),
+        this.repository.findCritterParents(critterId),
+        this.repository.findCritterChildren(critterId),
+      ]);
 
       return {
         ...critter,
