@@ -1,57 +1,12 @@
 import axios from "axios";
-import {
-  IItisGetFullHierarchyResponse,
-  IItisSolrStub,
-} from "../schemas/itis-schema";
+import { IItisSolrStub } from "../schemas/itis-schema";
 import { ItisService } from "../services/itis-service";
-
 jest.mock("axios");
+
 const axiosMock = axios as jest.Mocked<typeof axios>;
 
 const focalTsn = 180703;
 const childTsn = 898418;
-
-const itisSolrMockRes: IItisSolrStub = {
-  response: {
-    numFound: 2,
-    docs: [
-      { tsn: String(focalTsn), nameWOInd: "Taxon A" },
-      { tsn: String(childTsn), nameWOInd: "Taxon B" },
-    ],
-  },
-};
-
-const itisHierarchyMockRes: Partial<IItisGetFullHierarchyResponse> = {
-  hierarchyList: [
-    {
-      author: "Gray, 1821",
-      class: "gov.usgs.itis.itis_service.data.SvcHierarchyRecord",
-      parentName: "Capreolinae",
-      parentTsn: "552369",
-      rankName: "Genus",
-      taxonName: "Alces",
-      tsn: "180702",
-    },
-    {
-      author: "(Linnaeus, 1758)",
-      class: "gov.usgs.itis.itis_service.data.SvcHierarchyRecord",
-      parentName: "Alces",
-      parentTsn: "180702",
-      rankName: "Species",
-      taxonName: "Alces alces",
-      tsn: `${focalTsn}`,
-    },
-    {
-      author: "(Linnaeus, 1758)",
-      class: "gov.usgs.itis.itis_service.data.SvcHierarchyRecord",
-      parentName: "Alces alces",
-      parentTsn: "180703",
-      rankName: "Subspecies",
-      taxonName: "Alces alces alces",
-      tsn: `${childTsn}`,
-    },
-  ],
-};
 
 describe("ItisService", () => {
   const ORIGINAL_ENV = process.env;
@@ -101,13 +56,15 @@ describe("ItisService", () => {
     describe("_itisSolrSearch", () => {
       it("should format the request url correctly", async () => {
         const service = new ItisService();
-        axiosMock.get.mockResolvedValue({ data: "test" });
+        axiosMock.get.mockResolvedValue({
+          data: { response: { docs: true } },
+        });
         const data = await service._itisSolrSearch("query");
 
         expect(axiosMock.get.mock.calls[0][0]).toBe(
           "solr/?wt=json&omitHeader=true&q=query"
         );
-        expect(data).toBe("test");
+        expect(data).toBeTruthy();
       });
 
       it("should throw error if no response from axios request", async () => {
@@ -132,9 +89,6 @@ describe("ItisService", () => {
       webServiceSpy.mockClear();
       solrSearchSpy.mockClear();
       searchTsnSpy.mockClear();
-    });
-
-    describe("getTsnHierarchy", () => {
       searchTsnSpy.mockImplementation(() =>
         Promise.resolve({
           tsn: 1,
@@ -142,7 +96,17 @@ describe("ItisService", () => {
           scientificName: "Science",
         })
       );
+      webServiceSpy.mockImplementation(() =>
+        Promise.reject({ tsnHierarchy: [] })
+      );
+      solrSearchSpy.mockImplementation(() =>
+        Promise.resolve([
+          { nameWOInd: "test test", tsn: "1", hierarchyTSN: ["$1$2$"] },
+        ])
+      );
+    });
 
+    describe("getTsnHierarchy", () => {
       it("should return hierarchy list", async () => {
         const data = await service.getTsnHierarchy(1);
         expect(data).toBeDefined();
@@ -150,10 +114,6 @@ describe("ItisService", () => {
       });
 
       it("should throw error if no hierarchy returned", async () => {
-        webServiceSpy.mockImplementation(() =>
-          Promise.reject({ tsnHierarchy: [] })
-        );
-
         expect(async () => {
           await service.getTsnHierarchy(focalTsn);
         }).rejects.toThrow("ITIS TSN produced invalid hierarchy.");
@@ -174,21 +134,12 @@ describe("ItisService", () => {
 
     describe("getTsnFromScientificName", () => {
       it("should inject query to solr search with encoded space characters", async () => {
-        solrSearchSpy.mockImplementation(() =>
-          Promise.resolve({
-            response: { docs: [{ tsn: "1", nameWOInd: "test test" }] },
-          })
-        );
         await service.getTsnFromScientificName("test test");
         expect(solrSearchSpy.mock.calls[0][0]).toBe("nameWOInd:test\\%20test");
       });
 
       it("should throw error if unable to find scientific name", async () => {
-        solrSearchSpy.mockImplementation(() =>
-          Promise.resolve({
-            response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
-          })
-        );
+        solrSearchSpy.mockImplementation(() => Promise.resolve([]));
 
         try {
           await service.getTsnFromScientificName("bad");
@@ -201,14 +152,33 @@ describe("ItisService", () => {
       });
 
       it("should return tsn if match of scientific name in response", async () => {
-        solrSearchSpy.mockImplementation(() =>
-          Promise.resolve({
-            response: { docs: [{ tsn: "2", nameWOInd: "test" }] },
-          })
-        );
-        const response = await service.getTsnFromScientificName("test");
-        expect(response).toBe(2);
+        const response = await service.getTsnFromScientificName("test test");
+        expect(response).toBe(1);
       });
+    });
+
+    describe("getTsnsHierarchyMap", () => {
+      it("should format tsn query", async () => {
+        await service.getTsnsHierarchyMap([1, 2]);
+        expect(solrSearchSpy.mock.calls[0][0]).toBe("tsn:1+tsn:2");
+      });
+
+      it("should strip out duplicate tsns from array", async () => {
+        await service.getTsnsHierarchyMap([1, 2, 2]);
+        expect(solrSearchSpy.mock.calls[0][0]).toBe("tsn:1+tsn:2");
+      });
+
+      it("should return map with hierarchies", async () => {
+        const response = await service.getTsnsHierarchyMap([1, 2]);
+        const map = new Map();
+        map.set(1, [1, 2]);
+        expect(response).toStrictEqual(map);
+      });
+    });
+
+    describe("_splitSolrHierarchyStringToArray", () => {
+      const result = service._splitSolrHierarchyStringToArray("$1$2$");
+      expect(result).toStrictEqual([1, 2]);
     });
   });
 });

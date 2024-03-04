@@ -250,7 +250,7 @@ export class XrefService extends InternalService<XrefRepository> {
   }
 
   /**
-   * Search for measurements by search tearms.
+   * Search for measurement definitions from properties.
    * Currently supports measurement name.
    *
    * @async
@@ -275,7 +275,7 @@ export class XrefService extends InternalService<XrefRepository> {
     );
 
     // Get the tsnHiearchy map for each tsn
-    const tsnHiearchyMap = await this.itisService.getTsnsHieararchyMap([
+    const tsnHiearchyMap = await this.itisService.getTsnsHierarchyMap([
       ...qualitativeTsns,
       ...quantitativeTsns,
     ]);

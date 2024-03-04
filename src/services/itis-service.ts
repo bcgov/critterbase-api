@@ -70,13 +70,13 @@ export class ItisService extends ExternalService {
    * @param {string} solrQuery - query to pass to request.
    * @returns {Promise<T>} Generic ITIS Solr response.
    */
-  async _itisSolrSearch<T = IItisSolrStub>(solrQuery: string): Promise<T> {
+  async _itisSolrSearch(solrQuery: string) {
     const url = `${this.solrServiceUrl}/?wt=json&omitHeader=true&q=${solrQuery}`;
 
     try {
-      const res = await axios.get<T>(url);
+      const res = await axios.get<IItisSolrStub>(url);
 
-      return res.data;
+      return res.data.response.docs;
     } catch (err) {
       const axiosError = err as AxiosError;
 
@@ -104,9 +104,7 @@ export class ItisService extends ExternalService {
     const result = await this._itisSolrSearch(`tsn:${searchTsn}`);
     // This is almost certaintly one value in docs array when searching for tsn.
     // To be safe searching for the tsn in the docs array.
-    const solrTaxon = result.response.docs.find(
-      (taxon) => taxon.tsn === String(searchTsn)
-    );
+    const solrTaxon = result.find((taxon) => taxon.tsn === String(searchTsn));
 
     if (!solrTaxon) {
       throw apiError.notFound(`ITIS was unable to find TSN.`, [
@@ -142,7 +140,7 @@ export class ItisService extends ExternalService {
     return tsnHierarchy;
   }
 
-  async getTsnsHieararchyMap(searchTsns: number[]) {
+  async getTsnsHierarchyMap(searchTsns: number[]) {
     const uniqueSearchTsns = [...new Set(searchTsns)];
     const solrQuery = uniqueSearchTsns.map((tsn) => `tsn:${tsn}`).join("+");
     const result = await this._itisSolrSearch(solrQuery);
@@ -150,9 +148,7 @@ export class ItisService extends ExternalService {
     const tsnHiearchyMap = new Map<number, number[]>();
 
     for (const tsn of searchTsns) {
-      const solrTaxon = result.response.docs.find(
-        (taxon) => (taxon.tsn = String(tsn))
-      );
+      const solrTaxon = result.find((taxon) => taxon.tsn === String(tsn));
 
       if (solrTaxon) {
         tsnHiearchyMap.set(
@@ -201,7 +197,7 @@ export class ItisService extends ExternalService {
 
     const result = await this._itisSolrSearch(solrQuery);
 
-    const foundTaxon = result.response.docs.find(
+    const foundTaxon = result.find(
       (itisTaxon) =>
         itisTaxon.nameWOInd.toUpperCase() === scientificName.toUpperCase()
     );

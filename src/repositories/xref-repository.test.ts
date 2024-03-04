@@ -304,6 +304,7 @@ describe("xref-repository", () => {
           taxon_measurement_id: "1",
           itis_tsn: 123456,
           measurement_name: "name",
+          measurement_desc: "desc",
           min_value: 1,
           max_value: 100,
           unit: null,
@@ -312,6 +313,7 @@ describe("xref-repository", () => {
           taxon_measurement_id: "2",
           itis_tsn: 456789,
           measurement_name: "name",
+          measurement_desc: "desc",
           min_value: 1,
           max_value: 100,
           unit: null,
@@ -335,6 +337,7 @@ describe("xref-repository", () => {
         select: {
           taxon_measurement_id: true,
           itis_tsn: true,
+          measurement_desc: true,
           measurement_name: true,
           min_value: true,
           max_value: true,
