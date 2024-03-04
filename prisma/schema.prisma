@@ -92,6 +92,7 @@ model critter {
   measurement_qualitative        measurement_qualitative[]
   measurement_quantitative       measurement_quantitative[]
   mortality                      mortality[]
+  event                          event[]
 }
 
 model critter_collection_unit {
@@ -542,6 +543,26 @@ model xref_taxon_measurement_quantitative {
   measurement_quantitative                                   measurement_quantitative[]
   user_xref_taxon_measurement_quantitative_create_userTouser user                       @relation("xref_taxon_measurement_quantitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_create_user")
   user_xref_taxon_measurement_quantitative_update_userTouser user                       @relation("xref_taxon_measurement_quantitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_update_user")
+}
+
+model event_group {
+  event_group_id String  @id @default(uuid()) @db.Uuid
+  source_system  String
+  event          event[]
+
+  @@unique([event_group_id])
+}
+
+model event {
+  event_id       String  @id @default(uuid()) @db.Uuid
+  event_group_id String? @db.Uuid
+  itis_tsn       Int
+  critter_id     String? @db.Uuid
+
+  critter     critter?     @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
+  event_group event_group? @relation(fields: [event_group_id], references: [event_group_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([event_id])
 }
 
 enum cod_confidence {
