@@ -90,10 +90,10 @@ export const TsnMeasurementsSchema = z.object({
 
 export const MeasurementsWithTsnHieararchy = z.object({
   qualitative: TsnQualitativeMeasurementSchema.extend({
-    tsnHieararchy: z.number().array(),
+    tsnHierarchy: z.number().array(),
   }).array(),
   quantitative: TsnQuantitativeMeasurementSchema.extend({
-    tsnHieararchy: z.number().array(),
+    tsnHierarchy: z.number().array(),
   }).array(),
 });
 

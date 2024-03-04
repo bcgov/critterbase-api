@@ -283,12 +283,12 @@ export class XrefService extends InternalService<XrefRepository> {
     // Inject the tsn hiearchy into the measurements.
     const qualitativeWithHiearchy = qualitative.map((measurement) => ({
       ...measurement,
-      tsnHieararchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
+      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
     }));
 
     const quantitativeWithHieararchy = quantitative.map((measurement) => ({
       ...measurement,
-      tsnHieararchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
+      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
     }));
 
     return {
