@@ -27,6 +27,8 @@ model artifact {
   measurement_qualitative_artifact_measurement_qualitativeTomeasurement_qualitative    measurement_qualitative?  @relation("artifact_measurement_qualitativeTomeasurement_qualitative", fields: [measurement_qualitative], references: [measurement_qualitative_id], onDelete: NoAction, onUpdate: NoAction)
   measurement_quantitative_artifact_measurement_quantitativeTomeasurement_quantitative measurement_quantitative? @relation("artifact_measurement_quantitativeTomeasurement_quantitative", fields: [measurement_quantitative], references: [measurement_quantitative_id], onDelete: NoAction, onUpdate: NoAction)
   user_artifact_update_userTouser                                                      user                      @relation("artifact_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  event                                                                                event?                    @relation(fields: [event_id], references: [event_id])
+  event_id                                                                             String?                   @db.Uuid
 }
 
 model audit_log {
@@ -65,6 +67,8 @@ model capture {
   marking                                        marking[]
   measurement_qualitative                        measurement_qualitative[]
   measurement_quantitative                       measurement_quantitative[]
+  event                                          event?                     @relation(fields: [event_id], references: [event_id])
+  event_id                                       String?                    @db.Uuid
 }
 
 model critter {
@@ -107,6 +111,8 @@ model critter_collection_unit {
   xref_collection_unit                           xref_collection_unit @relation(fields: [collection_unit_id], references: [collection_unit_id], onDelete: NoAction, onUpdate: NoAction, map: "collection_unit_taxon_collection_unit_id_fkey")
   user_critter_collection_unit_create_userTouser user                 @relation("critter_collection_unit_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_collection_unit_create_user")
   user_critter_collection_unit_update_userTouser user                 @relation("critter_collection_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_collection_unit_update_user")
+  event                                          event?               @relation(fields: [event_id], references: [event_id])
+  event_id                                       String?              @db.Uuid
 }
 
 model family {
@@ -118,6 +124,8 @@ model family {
   update_timestamp DateTime        @default(now()) @db.Timestamptz(6)
   family_child     family_child[]
   family_parent    family_parent[]
+  event            event?          @relation(fields: [event_id], references: [event_id])
+  event_id         String?         @db.Uuid
 }
 
 model family_child {
@@ -331,6 +339,8 @@ model marking {
   lk_colour_marking_secondary_colour_idTolk_colour lk_colour?                       @relation("marking_secondary_colour_idTolk_colour", fields: [secondary_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
   xref_taxon_marking_body_location                 xref_taxon_marking_body_location @relation(fields: [taxon_marking_body_location_id], references: [taxon_marking_body_location_id], onDelete: NoAction, onUpdate: NoAction, map: "marking_taxon_marking_location_id_fkey")
   lk_colour_marking_text_colour_idTolk_colour      lk_colour?                       @relation("marking_text_colour_idTolk_colour", fields: [text_colour_id], references: [colour_id], onDelete: NoAction, onUpdate: NoAction)
+  event                                            event?                           @relation(fields: [event_id], references: [event_id])
+  event_id                                         String?                          @db.Uuid
 }
 
 model measurement_qualitative {
@@ -353,6 +363,8 @@ model measurement_qualitative {
   xref_taxon_measurement_qualitative                                 xref_taxon_measurement_qualitative        @relation(fields: [taxon_measurement_id], references: [taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_measurement_qualitative_xref_measurement")
   capture_idTocapture                                                capture?                                  @relation(fields: [capture_id], references: [capture_id], onDelete: NoAction, onUpdate: NoAction)
   critter                                                            critter                                   @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_qualitative_fk")
+  event                                                              event?                                    @relation(fields: [event_id], references: [event_id])
+  event_id                                                           String?                                   @db.Uuid
 }
 
 model measurement_quantitative {
@@ -372,6 +384,8 @@ model measurement_quantitative {
   critter                                                              critter                             @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_empirical_critter_fk")
   xref_taxon_measurement_quantitative                                  xref_taxon_measurement_quantitative @relation(fields: [taxon_measurement_id], references: [taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_empirical_tax_fk")
   capture_idTocapture                                                  capture?                            @relation(fields: [capture_id], references: [capture_id], onDelete: NoAction, onUpdate: NoAction)
+  event                                                                event?                              @relation(fields: [event_id], references: [event_id])
+  event_id                                                             String?                             @db.Uuid
 }
 
 model mortality {
@@ -396,6 +410,8 @@ model mortality {
   location                                                                   location?          @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_location_fk")
   lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death lk_cause_of_death  @relation("mortality_proximate_cause_of_death_idTolk_cause_of_death", fields: [proximate_cause_of_death_id], references: [cod_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_pcod_fk")
   lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death  lk_cause_of_death? @relation("mortality_ultimate_cause_of_death_idTolk_cause_of_death", fields: [ultimate_cause_of_death_id], references: [cod_id], onDelete: NoAction, onUpdate: NoAction, map: "mortality_ucod_fk")
+  event                                                                      event?             @relation(fields: [event_id], references: [event_id])
+  event_id                                                                   String?            @db.Uuid
 }
 
 model user {
@@ -546,7 +562,7 @@ model xref_taxon_measurement_quantitative {
 }
 
 model event_group {
-  event_group_id String  @id @default(uuid()) @db.Uuid
+  event_group_id String  @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   source_system  String
   event          event[]
 
@@ -554,13 +570,22 @@ model event_group {
 }
 
 model event {
-  event_id       String  @id @default(uuid()) @db.Uuid
+  event_id       String  @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   event_group_id String? @db.Uuid
   itis_tsn       Int
   critter_id     String? @db.Uuid
 
   critter     critter?     @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction)
   event_group event_group? @relation(fields: [event_group_id], references: [event_group_id], onDelete: NoAction, onUpdate: NoAction)
+
+  artifact                 artifact[]
+  capture                  capture[]
+  critter_collection_unit  critter_collection_unit[]
+  marking                  marking[]
+  measurement_qualitative  measurement_qualitative[]
+  measurement_quantitative measurement_quantitative[]
+  mortality                mortality[]
+  family                   family[]
 
   @@unique([event_id])
 }
