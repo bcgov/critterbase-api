@@ -9,7 +9,6 @@ import { uuidParamsSchema } from "../../utils/zod_helpers";
 import { ICbDatabase } from "../../utils/database";
 import { upload } from "../../utils/object_store";
 
-
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();
 
@@ -47,7 +46,7 @@ export const ArtifactRouter = (db: ICbDatabase) => {
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
-      await db.getCritterById(id);
+      await db.critterService.getCritterById(id);
       const artifacts = await db.getArtifactsByCritterId(id);
       return res.status(200).json(artifacts);
     })

@@ -81,9 +81,10 @@ const _getObjectStoreBucketName = (): string => {
  */
 const getS3HostUrl = (key?: string): string => {
   // Appends the given S3 object key, trimming between 0 and 2 trailing '/' characters
-  return `${_getObjectStoreUrl()}/${_getObjectStoreBucketName()}/${
-    key ?? ""
-  }`.replace(/\/{0,2}$/, "");
+  return `${_getObjectStoreUrl()}/${_getObjectStoreBucketName()}/${key ?? ""}`.replace(
+    /\/{0,2}$/,
+    ""
+  );
 };
 
 const uploadFileToS3 = async (

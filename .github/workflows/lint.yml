@@ -1,9 +1,9 @@
-name: EsLint
+name: Lint
 
 on: [push]
 
 jobs:
-  EsLint:
+  eslint:
     runs-on: ubuntu-latest
     strategy:
       matrix:

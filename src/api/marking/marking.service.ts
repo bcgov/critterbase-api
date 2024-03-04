@@ -1,8 +1,7 @@
-import { marking } from "@prisma/client";
 import { prisma } from "../../utils/constants";
 import { PrismaTransactionClient, ReqBody } from "../../utils/types";
 import {
-  getBodyLocationByNameAndTaxonUUID,
+  getBodyLocationByNameAndTsn,
   getColourByName,
   getMarkingTypeByName,
 } from "../lookup/lookup.service";
@@ -12,7 +11,6 @@ import {
   MarkingUpdateInput,
   markingIncludes,
 } from "./marking.utils";
-import { getParentTaxonIds } from "../../utils/helper_functions";
 
 /**
  * * Returns all existing markings from the database
@@ -41,7 +39,7 @@ const getMarkingById = async (marking_id: string): Promise<MarkingIncludes> => {
 
 /**
  * * Gets all markings that reference a critter_id
- * @param {string} marking_id
+ * @param {string} critter_id
  */
 const getMarkingsByCritterId = async (
   critter_id: string
@@ -91,7 +89,10 @@ const createMarking = async (newMarkingData: MarkingCreateInput) => {
  * * Removes a marking from the database
  * @param {string} marking_id
  */
-const deleteMarking = async (marking_id: string, prismaOverride?: PrismaTransactionClient): Promise<MarkingIncludes> => {
+const deleteMarking = async (
+  marking_id: string,
+  prismaOverride?: PrismaTransactionClient
+): Promise<MarkingIncludes> => {
   const client = prismaOverride ?? prisma;
   const marking: MarkingIncludes = await client.marking.delete({
     where: {
@@ -109,7 +110,7 @@ const appendEnglishMarkingsAsUUID = async (
     body_location: string;
     marking_type: string;
   }>,
-  taxon_id: string
+  itis_tsn: number
 ) => {
   if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);
@@ -120,45 +121,14 @@ const appendEnglishMarkingsAsUUID = async (
     body.secondary_colour_id = col?.colour_id;
   }
   if (body.body_location) {
-    const taxon_uuid = taxon_id;
-    const loc = await getBodyLocationByNameAndTaxonUUID(
-      body.body_location,
-      taxon_uuid
-    );
+    const loc = await getBodyLocationByNameAndTsn(body.body_location, itis_tsn);
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
   }
-  if(body.marking_type) {
+  if (body.marking_type) {
     const marking_type = await getMarkingTypeByName(body.marking_type);
     body.marking_type_id = marking_type?.marking_type_id;
   }
   return body;
-};
-
-const verifyMarkingsAgainstTaxon = async (
-  taxon_id: string,
-  body: (Partial<marking> &
-    Pick<marking, "marking_id" | "taxon_marking_body_location_id">)[]
-): Promise<string[]> => {
-  const hier: string[] = await getParentTaxonIds(taxon_id);
-  const marking_ids: string[] = body.map((a) => a.marking_id);
-  const markings = await prisma.marking.findMany({
-    include: {
-      xref_taxon_marking_body_location: {
-        select: {
-          taxon_id: true,
-        },
-      },
-    },
-    where: { marking_id: { in: marking_ids } },
-  });
-  const problemIds = [];
-  for (const m of markings) {
-    const curr_id = m.xref_taxon_marking_body_location.taxon_id;
-    if (!hier.includes(curr_id) && taxon_id != curr_id) {
-      problemIds.push(m.marking_id);
-    }
-  }
-  return problemIds;
 };
 
 export {
@@ -169,5 +139,4 @@ export {
   createMarking,
   deleteMarking,
   appendEnglishMarkingsAsUUID,
-  verifyMarkingsAgainstTaxon,
 };

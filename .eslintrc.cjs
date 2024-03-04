@@ -17,11 +17,10 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
-        "args": "none",
-        "ignoreRestSiblings": true,
-        "caughtErrors": "none"
-      }
-    ]
-  }
-,
+        args: "none",
+        ignoreRestSiblings: true,
+        caughtErrors: "none",
+      },
+    ],
+  },
 };

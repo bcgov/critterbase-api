@@ -1,10 +1,40 @@
-import { user } from "@prisma/client";
+import { prisma } from "../../src/utils/constants";
+import { queryRandomUUID } from "../prisma_utils";
+import { DEVELOPERS } from "./seed_constants";
 
-const seedUsers: Pick<user, "user_identifier" | "keycloak_uuid">[] = [
-  {
-    user_identifier: "MAC DELUCA", // This would normally be the user_id from the external system
-    keycloak_uuid: "0054CF4823A744309BE399C34B6B0F43",
-  },
-];
+/**
+ * Seed SYSTEM account and developer accounts.
+ * See ./seed_constants.ts to add additional developer accounts to seed.
+ *
+ * @async
+ * @throws
+ * @returns {Promise<void>}
+ */
+const seedUsers = async () => {
+  const systemUserUUID = await queryRandomUUID(prisma);
+  /**
+   * Create system user. Required for auto filling audit columns.
+   * Temporarily disabling triggers to populate system account.
+   */
+  await prisma.$executeRaw`ALTER TABLE critterbase."user" DISABLE TRIGGER all`;
+
+  console.log(`Seeding (1) system account...`);
+
+  await prisma.user.create({
+    data: {
+      user_identifier: "SYSTEM",
+      user_id: systemUserUUID,
+      create_user: systemUserUUID,
+      update_user: systemUserUUID,
+    },
+  });
+  await prisma.$executeRaw`ALTER TABLE critterbase."user" ENABLE TRIGGER all`;
+
+  console.log(`Seeding (${DEVELOPERS.length}) users...`);
+
+  await prisma.user.createMany({
+    data: DEVELOPERS,
+  });
+};
 
 export default seedUsers;

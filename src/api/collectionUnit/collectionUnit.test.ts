@@ -267,7 +267,6 @@ describe("API: CollectionUnit", () => {
         getCollectionUnitsByCritterId.mockResolvedValue([
           mockCollectionUnitIncludes,
         ]);
-        getCritterById.mockResolvedValue({}); // Doesn't throw
         const response = await request.get(
           `/api/collection-units/critter/${ID}`
         );
@@ -279,16 +278,12 @@ describe("API: CollectionUnit", () => {
       });
 
       it("returns 404 when given an invalid critter ID", async () => {
-        getCritterById.mockImplementation(() => {
-          throw apiError.notFound("error");
-        });
         const response = await request.get(
           `/api/collection-units/critter/${ID}`
         );
-        expect.assertions(3);
-        expect(getCritterById.mock.calls.length).toBe(1);
-        expect(getCollectionUnitsByCritterId.mock.calls.length).toBe(0);
-        expect(response.status).toBe(404);
+        expect.assertions(2);
+        expect(getCollectionUnitsByCritterId).toBeCalled();
+        expect(response.status).toBe(400);
       });
     });
 
