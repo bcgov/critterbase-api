@@ -12,6 +12,8 @@ import {
 } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
+  MeasurementSearchQuery,
+  MeasurementsWithTsnHierarchy,
   TsnMarkingBodyLocationSchema,
   TsnMeasurementsSchema,
   TsnQualitativeMeasurementSchema,
@@ -34,6 +36,28 @@ export const xrefSchemas = {
 };
 
 const formats = z.enum([QueryFormats.asSelect]).optional();
+
+const searchMeasurements: ZodOpenApiOperationObject = {
+  operationId: "searchMeasurements",
+  summary:
+    "Search for measurements by properties. Currently only supports measurement name. Payload returns tsn hierarchy for each measurement.",
+  tags: [TAG],
+  requestParams: {
+    query: MeasurementSearchQuery,
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: MeasurementsWithTsnHierarchy,
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
 
 const getXrefCollectionUnits: ZodOpenApiOperationObject = {
   operationId: "getXrefCollectionUnits",
@@ -243,5 +267,8 @@ export const xrefPaths = {
   },
   [`${routes.xref}/taxon-measurements`]: {
     get: getTsnMeasurements,
+  },
+  [`${routes.xref}/mesurements/search`]: {
+    get: searchMeasurements,
   },
 };

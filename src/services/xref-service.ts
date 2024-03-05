@@ -3,7 +3,7 @@ import {
   ICollectionCategoryDef,
   ICollectionUnit,
   IMeasurementSearch,
-  IMeasurementWithTsnHieararchy,
+  IMeasurementWithTsnHierarchy,
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
@@ -259,7 +259,7 @@ export class XrefService extends InternalService<XrefRepository> {
    */
   async searchForMeasurements(
     search: IMeasurementSearch
-  ): Promise<IMeasurementWithTsnHieararchy> {
+  ): Promise<IMeasurementWithTsnHierarchy> {
     // Search for the measurements
     const [qualitative, quantitative] = await Promise.all([
       this.repository.searchForQualitativeMeasurements(search),

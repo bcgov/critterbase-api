@@ -88,7 +88,7 @@ export const TsnMeasurementsSchema = z.object({
   quantitative: TsnQuantitativeMeasurementSchema.array(),
 });
 
-export const MeasurementsWithTsnHieararchy = z.object({
+export const MeasurementsWithTsnHierarchy = z.object({
   qualitative: TsnQualitativeMeasurementSchema.extend({
     tsnHierarchy: z.number().array(),
   }).array(),
@@ -106,8 +106,8 @@ export const MeasurementSearchQuery = z.object({
  *
  */
 
-export type IMeasurementWithTsnHieararchy = z.infer<
-  typeof MeasurementsWithTsnHieararchy
+export type IMeasurementWithTsnHierarchy = z.infer<
+  typeof MeasurementsWithTsnHierarchy
 >;
 
 export type IMeasurementSearch = z.infer<typeof MeasurementSearchQuery>;

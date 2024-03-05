@@ -166,8 +166,13 @@ export const XrefRouter = (db: ICbDatabase) => {
     })
   );
 
+  /**
+   * Endpoint to search for measurements both 'qualitative' and 'quantitative'.
+   *
+   * @query search - Search properties.
+   */
   xrefRouter.get(
-    "/search/measurements",
+    "/measurements/search",
     catchErrors(async (req: Request, res: Response) => {
       const search = MeasurementSearchQuery.parse(req.query);
 

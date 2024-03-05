@@ -32,6 +32,8 @@ const xrefService = new XrefService(new XrefRepository(), itisService);
 const markingService = new MarkingService(new MarkingRepository(), itisService);
 
 export const db = {
+  // Eventually these old services will be converted into the new format
+  // OLD
   ...access,
   ...artifact,
   ...bulk,
@@ -44,6 +46,7 @@ export const db = {
   ...measurement,
   ...mortality,
   ...user,
+  // NEW
   critterService,
   xrefService,
   markingService,
