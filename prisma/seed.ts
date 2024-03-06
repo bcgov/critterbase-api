@@ -19,56 +19,89 @@ import {
   ITIS_TSN,
   CARIBOU_POPULATION_UNITS,
 } from "./seed_scripts/seed_constants";
-
 import { seedCritters } from "./seed_scripts/seed_critters";
 
+
+const environment = process.env.NODE_ENV || "development";
+
 async function main() {
-  /**
-   * Abort the seed if data already exists.
-   */
-  const users = await prisma.user.findMany();
-  if (users.length) {
-    console.log("Previously seeded. Skipping...");
-    return;
+
+  /*
+  * Production only seeds.
+  */
+  if(environment === "production") {
+    /*
+    * Seed taxon measurement cross-ref tables.
+    */
+    console.log("Seeding taxon measurement cross-ref tables...");
+    await seedTaxonQualitativeMeasurements();
+    await seedTaxonQuantitativeMeasurements();
   }
+  
+  
+  /*
+  * Seed the database with lookup tables and system accounts.
+  */
+  if(environment === "development" || environment === "test") {
+    /**
+     * Abort the seed if data already exists.
+     */
+    const users = await prisma.user.findMany();
+    if (users.length) {
+      console.log("Previously seeded. Skipping...");
+      return;
+    }
 
-  /**
-   * Seed system account and developers.
-   */
-  await seedUsers();
+    /**
+     * Seed system account and developers.
+     */
+    await seedUsers();
+  
+    /**
+     * Seed regions with JSON region files.
+     */
+    await seedRegions();
+  
+    /**
+     * Seed lookup tables.
+     */
+    await seedColours();
+    await seedMarkingTypes();
+    await seedMaterials();
+    await seedCausesOfDeath();
+  
+    /**
+     * Seed taxon cross-ref tables (xref).
+     */
+    await seedTaxonBodyLocations();
+    /*
+    * Seed taxon measurement cross-ref tables.
+    */
+    console.log("Seeding taxon measurement cross-ref tables...");
+    await seedTaxonQualitativeMeasurements();
+    await seedTaxonQuantitativeMeasurements();
 
-  /**
-   * Seed regions with JSON region files.
-   */
-  await seedRegions();
+    /**
+     * Seed collection unit tables for Caribou.
+     *
+     */
+    // Create a collection unit category for population unit.
+    const populationUnitId = await seedCollectionUnitCategory("Population Unit");
 
-  /**
-   * Seed lookup tables.
-   */
-  await seedColours();
-  await seedMarkingTypes();
-  await seedMaterials();
-  await seedCausesOfDeath();
+    // Link population unit category to Caribou.
+    await seedTaxonCollectionCategory(populationUnitId, ITIS_TSN.CARIBOU);
 
-  /**
-   * Seed taxon cross-ref tables (xref).
-   */
-  await seedTaxonBodyLocations();
-  await seedTaxonQualitativeMeasurements();
-  await seedTaxonQuantitativeMeasurements();
+    // Populate collection units with caribou population units.
+    await seedTaxonCollectionUnits(populationUnitId, CARIBOU_POPULATION_UNITS);
 
-  /**
-   * Seed collection unit tables for Caribou.
-   *
-   */
-  // Create a collection unit category for population unit.
-  const populationUnitId = await seedCollectionUnitCategory("Population Unit");
 
-  // Link population unit category to Caribou.
-  await seedTaxonCollectionCategory(populationUnitId, ITIS_TSN.CARIBOU);
-
-  // Populate collection units with caribou population units.
-  await seedTaxonCollectionUnits(populationUnitId, CARIBOU_POPULATION_UNITS);
+    
+    /**
+     * Seed a critter with all attributes
+     *
+     */
+    await seedCritters();
+  }
 
   //Have to do this mess of string manipulation because prisma execute raw will only allow you to run one statement at a time.
   // const sqls = fs
@@ -82,12 +115,6 @@ async function main() {
   // for (const sql of sqls) {
   //   await prisma.$executeRawUnsafe(sql);
   // }
-
-  /**
-   * Seed a critter with all attributes
-   *
-   */
-  await seedCritters();
 }
 
 main()
