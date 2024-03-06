@@ -1,5 +1,6 @@
 import { prisma } from "../../src/utils/constants";
 import { ITIS_TSN } from "./seed_constants";
+import { taxonMeasurementQualitativeData, taxonMeasurementQuantitativeData } from "./seed_measurements";
 
 interface ICollectionUnitSeed {
   tsn: ITIS_TSN;
@@ -60,37 +61,19 @@ export const seedTaxonCollectionUnits = async (
  * @returns {Promise<void>}
  */
 export const seedTaxonQualitativeMeasurements = async () => {
-  const measurements = [
-    {
-      name: "Life Stage",
-      itis_tsn: ITIS_TSN.CANIS_LUPUS,
-      options: ["Adult", "Subadult", "Young of year", "Juvenile", "Neonate"],
-    },
-    {
-      name: "Life Stage",
-      itis_tsn: ITIS_TSN.ARTIODACTYLA,
-      options: ["Adult", "Subadult", "Young of year", "Juvenile", "Pup"],
-    },
-    {
-      name: "Juvenile at heel indicator",
-      itis_tsn: ITIS_TSN.MAMMALIA,
-      options: ["False", "True"],
-    },
-  ];
-
   console.log(
-    `Seeding (${measurements.length}) qualitative measurements and options...`,
+    `Seeding (${taxonMeasurementQualitativeData.length}) qualitative measurements and options...`,
   );
 
   // Create qualitative measurements and associated options
-  for (const measurement of measurements) {
+  for (const measurement of taxonMeasurementQualitativeData) {
     await prisma.xref_taxon_measurement_qualitative.create({
       data: {
         itis_tsn: measurement.itis_tsn,
-        measurement_name: measurement.name,
+        measurement_name: measurement.measurement_name,
         xref_taxon_measurement_qualitative_option: {
           create: measurement.options.map((option, index) => ({
-            option_label: option,
+            option_label: option.option_label,
             option_value: index,
           })),
         },
@@ -107,21 +90,11 @@ export const seedTaxonQualitativeMeasurements = async () => {
  * @returns {Promise<void>}
  */
 export const seedTaxonQuantitativeMeasurements = async () => {
-  const measurements = [
-    { name: "Estimated age", itis_tsn: ITIS_TSN.MAMMALIA },
-    { name: "Juvenile count", itis_tsn: ITIS_TSN.MAMMALIA },
-  ];
-
-  console.log(`Seeding (${measurements.length}) quantitative measurements...`);
+  console.log(`Seeding (${taxonMeasurementQuantitativeData.length}) quantitative measurements...`);
 
   await prisma.xref_taxon_measurement_quantitative.createMany({
-    data: measurements.map((quantitative) => {
-      return {
-        measurement_name: quantitative.name,
-        itis_tsn: quantitative.itis_tsn,
-      };
-    }),
-  });
+    data: taxonMeasurementQuantitativeData
+    });
 };
 
 /**
