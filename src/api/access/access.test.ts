@@ -11,7 +11,7 @@ import {
   getTableDataTypes as _getTableDataTypes,
 } from "./access.service";
 import { LoginCredentials } from "../user/user.utils";
-import * as auth from '../../authentication/auth';
+import * as auth from "../../authentication/auth";
 const ID = "11084b96-5cbd-421e-8106-511ecfb51f7a";
 const USER: user = {
   user_id: ID,
@@ -26,7 +26,9 @@ const USER: user = {
 const findUnique = jest.spyOn(prisma.user, "findUnique").mockImplementation();
 const findFirst = jest.spyOn(prisma.user, "findFirst").mockImplementation();
 const queryRaw = jest.spyOn(prisma, "$queryRaw").mockImplementation();
-const authRequest = jest.spyOn(auth, "authenticateRequest").mockImplementation();
+const authRequest = jest
+  .spyOn(auth, "authenticateRequest")
+  .mockImplementation();
 
 const loginUser = jest.fn();
 const createUser = jest.fn();
@@ -57,7 +59,11 @@ beforeEach(() => {
   findUnique.mockResolvedValue(USER);
   findFirst.mockResolvedValue(USER);
   queryRaw.mockResolvedValue({ data: "lol" });
-  authRequest.mockResolvedValue({keycloak_uuid: ID, system_name: 'system_string', identifier: 'jimbob'})
+  authRequest.mockResolvedValue({
+    keycloak_uuid: ID,
+    system_name: "system_string",
+    identifier: "jimbob",
+  });
 });
 
 describe("SERVICES", () => {
@@ -69,17 +75,19 @@ describe("SERVICES", () => {
     });
     it("user_id: login fails with non existant user_id", async () => {
       findFirst.mockResolvedValue(null);
-      await expect(_loginUser({ keycloak_uuid: 'd39846870e85412694e522a0eb0b5569'})).rejects.toThrowError(apiError);
+      await expect(
+        _loginUser({ keycloak_uuid: "d39846870e85412694e522a0eb0b5569" })
+      ).rejects.toThrowError(apiError);
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });
     it("keycloak_uuid: login fails with invalid formatted keycloak_uuid", async () => {
       findFirst.mockResolvedValue(null);
       await expect(_loginUser({ keycloak_uuid: "test" })).rejects.toThrowError(
-      apiError
-    );
-    expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+        apiError
+      );
+      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
     });
-  })
+  });
   describe("getTableDataTypes", () => {
     it("should call prisma raw query", () => {
       const types = _getTableDataTypes("user");
@@ -116,7 +124,7 @@ describe("SERVICES", () => {
         expect(createUser.mock.calls.length).toBe(1);
         expect(setUserContext.mock.calls.length).toBe(1);
         expect(setUserContext.mock.calls[0][0]).toBe(ID);
-        expect(setUserContext.mock.calls[0][1]).toBe('system_string');
+        expect(setUserContext.mock.calls[0][1]).toBe("system_string");
         expect(res.status).toBe(201);
       });
     });

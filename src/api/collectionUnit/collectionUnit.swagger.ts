@@ -1,177 +1,195 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { CollectionUnitCreateBodySchema, CollectionUnitUpdateBodySchema, SimpleCollectionUnitIncludesSchema, critter_collection_unitIncludesSchema } from './collectionUnit.utils';
-import {z} from 'zod';
-import { noAudit, zodID } from '../../utils/zod_helpers';
-import { routes } from '../../utils/constants';
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { ZodOpenApiOperationObject } from "zod-openapi";
+import {
+  CollectionUnitCreateBodySchema,
+  CollectionUnitUpdateBodySchema,
+  SimpleCollectionUnitIncludesSchema,
+  critter_collection_unitIncludesSchema,
+} from "./collectionUnit.utils";
+import { z } from "zod";
+import { noAudit, zodID } from "../../utils/zod_helpers";
+import { routes } from "../../utils/constants";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized,
+} from "../../utils/swagger_helpers";
 
-const SwaggerCollectionResponseValidation = 
-    critter_collection_unitIncludesSchema
-      .omit({collection_unit_id: true, xref_collection_unit: true})
-      .extend({unit_name: z.string().nullable(), unit_description: z.string().nullable()})
+const SwaggerCollectionResponseValidation =
+  critter_collection_unitIncludesSchema
+    .omit({ collection_unit_id: true, xref_collection_unit: true })
+    .extend({
+      unit_name: z.string().nullable(),
+      unit_description: z.string().nullable(),
+    });
 
-const TAG = 'Collection units';
+const TAG = "Collection units";
 
 const getCollectionUnits: ZodOpenApiOperationObject = {
-    operationId: 'getCollectionUnit',
-    summary: 'Get a collection unit by id',
-    tags: [TAG],
-    requestParams: {
-        path: z.object( {id: zodID} )
-    },
-    responses: {
-        '200': {
-            description: SwagDesc.get,
-            content: {
-                'application/json': {
-                    schema: SwaggerCollectionResponseValidation
-                }
-            }
+  operationId: "getCollectionUnit",
+  summary: "Get a collection unit by id",
+  tags: [TAG],
+  requestParams: {
+    path: z.object({ id: zodID }),
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: SwaggerCollectionResponseValidation,
         },
-        ...SwagErr,
-        ...SwagUnauthorized,
-        ...SwagNotFound,
-    }
-}
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
+  },
+};
 
 const getAllCollectionUnits: ZodOpenApiOperationObject = {
-    operationId: 'getCollectionUnits',
-    summary: 'Get every critter collection unit entry.',
-    tags: [TAG],
-    responses: {
-        '200': {
-            description: SwagDesc.get,
-            content: {
-                'application/json': {
-                    schema: SwaggerCollectionResponseValidation.array()
-                }
-            }
+  operationId: "getCollectionUnits",
+  summary: "Get every critter collection unit entry.",
+  tags: [TAG],
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: SwaggerCollectionResponseValidation.array(),
         },
-        ...SwagErr,
-        ...SwagUnauthorized,
-    }
-}
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
 
 const createCollectionUnit: ZodOpenApiOperationObject = {
-    operationId: 'createCollectionUnit',
-    summary: 'Associate an existing critter with a compatible collection unit.',
-    tags: [TAG],
-    requestBody: {
-        content: {
-            'application/json' : {
-                schema: CollectionUnitCreateBodySchema
-            }
-        }
+  operationId: "createCollectionUnit",
+  summary: "Associate an existing critter with a compatible collection unit.",
+  tags: [TAG],
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: CollectionUnitCreateBodySchema,
+      },
     },
-    responses: {
-        '201' : {
-            description: SwagDesc.create,
-            content: {
-                'application/json' : {
-                    schema: SwaggerCollectionResponseValidation
-                }
-            }
+  },
+  responses: {
+    "201": {
+      description: SwagDesc.create,
+      content: {
+        "application/json": {
+          schema: SwaggerCollectionResponseValidation,
         },
-        ...SwagErr,
-        ...SwagUnauthorized,
-        ...SwagNotFound,
-    }
-}
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
+  },
+};
 
 const updateCollectionUnit: ZodOpenApiOperationObject = {
-    operationId: 'updateCollectionUnit',
-    summary: 'Update a collection unit association. You may change which collection unit is associated here, but you may not change the critter.',
-    tags: [TAG],
-    requestParams: {
-        path: z.object( {id: zodID} )
+  operationId: "updateCollectionUnit",
+  summary:
+    "Update a collection unit association. You may change which collection unit is associated here, but you may not change the critter.",
+  tags: [TAG],
+  requestParams: {
+    path: z.object({ id: zodID }),
+  },
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: CollectionUnitUpdateBodySchema,
+      },
     },
-    requestBody: {
-        content: {
-            'application/json' : {
-                schema: CollectionUnitUpdateBodySchema
-            }
-        }
-    },
-    responses: {
-        '200' : {
-            description: SwagDesc.update,
-            content: {
-                'application/json' : {
-                    schema: SwaggerCollectionResponseValidation
-                }
-            }
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.update,
+      content: {
+        "application/json": {
+          schema: SwaggerCollectionResponseValidation,
         },
-        ...SwagErr,
-        ...SwagUnauthorized,
-        ...SwagNotFound,
-    }
-}
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
+  },
+};
 
 const deleteCollectionUnit: ZodOpenApiOperationObject = {
-    operationId: 'deleteCollectionUnit',
-    summary: 'Deletes a critter collection unit association.',
-    tags: [TAG],
-    requestParams: {
-        path: z.object( {id: zodID} )
-    },
-    responses: {
-        '200' : {
-            description: SwagDesc.delete,
-            content: {
-                'application/json' : {
-                    schema: SwaggerCollectionResponseValidation
-                }
-            }
+  operationId: "deleteCollectionUnit",
+  summary: "Deletes a critter collection unit association.",
+  tags: [TAG],
+  requestParams: {
+    path: z.object({ id: zodID }),
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.delete,
+      content: {
+        "application/json": {
+          schema: SwaggerCollectionResponseValidation,
         },
-        ...SwagErr,
-        ...SwagUnauthorized,
-        ...SwagNotFound,
-    }
-}
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
+  },
+};
 
 const getCollectionUnitsByCritterId: ZodOpenApiOperationObject = {
-    operationId: 'getCollectionUnitsByCritterId',
-    summary: 'Get all critter collection units associated with the provided critter id.',
-    tags: [TAG],
-    requestParams: {
-        path: z.object( {id: zodID} )
-    },
-    responses: {
-        '200' : {
-            description: SwagDesc.get,
-            content: {
-                'application/json' : {
-                    schema: SwaggerCollectionResponseValidation.array()
-                }
-            }
+  operationId: "getCollectionUnitsByCritterId",
+  summary:
+    "Get all critter collection units associated with the provided critter id.",
+  tags: [TAG],
+  requestParams: {
+    path: z.object({ id: zodID }),
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: SwaggerCollectionResponseValidation.array(),
         },
-        ...SwagErr,
-        ...SwagUnauthorized,
-        ...SwagNotFound,
-    }
-}
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+    ...SwagNotFound,
+  },
+};
 
-
-export const SwaggerSimpleCollectionResponseValidation = SimpleCollectionUnitIncludesSchema
-.omit({xref_collection_unit: true, critter_id: true, ...noAudit}).extend({
-  category_name: z.string(), 
-  unit_name: z.string(), 
-  collection_category_id: zodID
-})
+export const SwaggerSimpleCollectionResponseValidation =
+  SimpleCollectionUnitIncludesSchema.omit({
+    xref_collection_unit: true,
+    critter_id: true,
+    ...noAudit,
+  }).extend({
+    category_name: z.string(),
+    unit_name: z.string(),
+    collection_category_id: zodID,
+  });
 
 export const collectionUnitsPaths = {
-    [`${routes.collection_units}`] : {
-        get: getAllCollectionUnits
-    },
-    [`${routes.collection_units}/create`] : {
-        post: createCollectionUnit
-    },
-    [`${routes.collection_units}/critter/{id}`] : {
-        get: getCollectionUnitsByCritterId
-    },
-    [`${routes.collection_units}/{id}`] : {
-        get: getCollectionUnits,
-        patch: updateCollectionUnit,
-        delete: deleteCollectionUnit
-    }
-}
+  [`${routes.collection_units}`]: {
+    get: getAllCollectionUnits,
+  },
+  [`${routes.collection_units}/create`]: {
+    post: createCollectionUnit,
+  },
+  [`${routes.collection_units}/critter/{id}`]: {
+    get: getCollectionUnitsByCritterId,
+  },
+  [`${routes.collection_units}/{id}`]: {
+    get: getCollectionUnits,
+    patch: updateCollectionUnit,
+    delete: deleteCollectionUnit,
+  },
+};

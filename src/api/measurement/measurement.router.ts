@@ -3,7 +3,6 @@ import { ICbDatabase } from "../../utils/database";
 import { catchErrors } from "../../utils/middleware";
 import { uuidParamsSchema } from "../../utils/zod_helpers";
 import {
-  MeasurementVerificationSchema,
   QualitativeCreateSchema,
   QualitativeResponseSchema,
   QualitativeUpdateSchema,
@@ -56,28 +55,6 @@ export const MeasurementRouter = (db: ICbDatabase) => {
       const parsed = QuantitativeCreateSchema.parse(req.body);
       const measurement = await db.createQuantMeasurement(parsed);
       return res.status(201).json(measurement);
-    })
-  );
-
-  measurementRouter.post(
-    "/verify",
-    catchErrors(async (req: Request, res: Response) => {
-      const parsed = MeasurementVerificationSchema.parse(req.body);
-      const qual = await db.verifyQualitativeMeasurementsAgainstTaxon(
-        parsed.taxon_id,
-        parsed.qualitative
-      );
-      const quan = await db.verifyQuantitativeMeasurementsAgainstTaxon(
-        parsed.taxon_id,
-        parsed.quantitative
-      );
-      return res.status(200).json({
-        verified: qual.length + quan.length === 0,
-        invalid_measurements: {
-          qualitative_measurement_ids: qual,
-          quantitative_measurement_ids: quan,
-        },
-      });
     })
   );
 

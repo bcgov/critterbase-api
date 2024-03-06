@@ -17,7 +17,7 @@ WORKDIR $HOME
 COPY package*.json ./
 
 # Install all node modules and copy files into volumne
-FROM base as dev_install
+FROM base as installer
 
 RUN npm install
 
@@ -28,21 +28,21 @@ COPY . .
 
 VOLUME ${HOME}
 
+# Generate the prisma client and types
+
+RUN npx prisma generate
+
 
 ################################################################################
 ####                      DEVELOPMENT CONTAINERS                            ####
 ################################################################################
 
-# Generate the prisma client for api and db_setup containers
-FROM dev_install as prisma
-RUN npm run prisma:generate
-
 # Run migrations and seeds
-FROM prisma as db_setup
+FROM installer as db_setup
 CMD npm run prisma:dev-setup
 
 # Run the dev api server
-FROM prisma as dev_api
+FROM installer as dev_api
 CMD npm run dev
 
 # Expose the api port

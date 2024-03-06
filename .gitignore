@@ -6,3 +6,4 @@ oc
 dist
 .npm
 .cache
+.ash_history

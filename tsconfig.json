@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,
     "lib": ["esnext"],
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "target": "es2018"
   },
   "ts-node": {
     "swc": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "prisma/**/*.ts"],
   "exclude": ["src/**/*.test.ts", "dist/*"]
 }

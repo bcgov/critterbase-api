@@ -41,7 +41,7 @@ const SwagArtifactResponseSchema = implement<ArtifactResponse>().with({
 const ArtifactCreateBodySchema = implement<
   Omit<
     Prisma.artifactCreateManyInput,
-    keyof AuditColumns | "artifact_id" | "artifact_url"
+    AuditColumns | "artifact_id" | "artifact_url"
   >
 >().with(
   artifactSchema
@@ -55,7 +55,7 @@ const ArtifactCreateBodySchema = implement<
 const ArtifactUpdateBodySchema = implement<
   Omit<
     Prisma.artifactUncheckedUpdateManyInput,
-    "artifact_url" | "artifact_id" | keyof AuditColumns
+    "artifact_url" | "artifact_id" | AuditColumns
   >
 >()
   .with(ArtifactCreateBodySchema.partial().shape)

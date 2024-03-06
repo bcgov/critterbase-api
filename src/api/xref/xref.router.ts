@@ -1,143 +1,183 @@
 import express, { Request, Response } from "express";
-import { prisma } from "../../utils/constants";
-import { ICbDatabase } from "../../utils/database";
-import { formatParse, getFormat } from "../../utils/helper_functions";
-import { catchErrors } from "../../utils/middleware";
-import {
-  taxonIdSchema,
-  taxonMeasurementIdSchema,
-} from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
-  CollectionUnitCategorySchema,
-  xrefCollectionUnitFormats,
-  xrefTaxonCollectionCategoryFormats,
-  xrefTaxonMarkingBodyLocationFormats,
-  xrefTaxonMeasurementOptionSchema,
-  xrefTaxonMeasurementSchema,
-} from "./xref.utils";
+  CollectionUnitCategoryQuerySchema,
+  MeasurementSearchQuery,
+} from "../../schemas/xref-schema";
+import { ICbDatabase } from "../../utils/database";
+import { isSelectFormat } from "../../utils/helper_functions";
+import { catchErrors } from "../../utils/middleware";
+import { tsnQuerySchema } from "../../utils/zod_helpers";
 
 export const XrefRouter = (db: ICbDatabase) => {
   const xrefRouter = express.Router();
 
+  /**
+   * Endpoint to retrieve 'taxon collection units'.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query category_name - Name of the collection cateogory.
+   * @query itis_scientific_name - ITIS scientific name.
+   *
+   */
   xrefRouter.get(
     "/collection-units",
     catchErrors(async (req: Request, res: Response) => {
-      const { category_id } = CollectionUnitCategoryIdSchema.parse(req.query);
-      if (category_id) {
-        const response = await formatParse(
-          getFormat(req),
-          db.getCollectionUnitsFromCategoryId(category_id),
-          xrefCollectionUnitFormats
-        );
-        return res.status(200).json(response);
-      }
-      const { category_name, taxon_name_common, taxon_name_latin } =
-        CollectionUnitCategorySchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getCollectionUnitsFromCategory(
+      const { category_name, itis_scientific_name } =
+        CollectionUnitCategoryQuerySchema.parse(req.query);
+
+      const response =
+        await db.xrefService.getCollectionUnitsFromCategoryOrScientificName(
           category_name,
-          taxon_name_common,
-          taxon_name_latin
-        ),
-        xrefCollectionUnitFormats
-      );
+          itis_scientific_name
+        );
+
       return res.status(200).json(response);
     })
   );
 
+  /**
+   * Endpoint to retrieve 'taxon collection units' from category_id.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @param category_id - Primary identifier of xref_collection_unit.
+   *
+   */
+  xrefRouter.get(
+    "/collection-units/:category_id",
+    catchErrors(async (req: Request, res: Response) => {
+      const { category_id } = CollectionUnitCategoryIdSchema.parse(req.params);
+
+      const response =
+        await db.xrefService.getCollectionUnitsFromCategoryId(category_id);
+
+      return res.status(200).json(response);
+    })
+  );
+
+  /**
+   * Endpoint to retrieve 'taxon collection categories'.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query tsn - ITIS TSN identifier
+   *
+   */
   xrefRouter.get(
     "/taxon-collection-categories",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonCollectionCategories(taxon_id),
-        xrefTaxonCollectionCategoryFormats
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getTsnCollectionCategories(
+        tsn,
+        format
       );
+
       res.status(200).json(response);
     })
   );
 
+  /**
+   * Endpoint to retrieve 'taxon marking body locations' from TSN query.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query tsn - ITIS TSN identifier
+   */
   xrefRouter.get(
     "/taxon-marking-body-locations",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonMarkingBodyLocations(taxon_id),
-        xrefTaxonMarkingBodyLocationFormats
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getTsnMarkingBodyLocations(
+        tsn,
+        format
       );
+
       res.status(200).json(response);
     })
   );
 
-  xrefRouter.get(
-    "/taxon-marking-body-locations",
-    catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonMarkingBodyLocations(taxon_id),
-        xrefTaxonMarkingBodyLocationFormats
-      );
-      res.status(200).json(response);
-    })
-  );
-
+  /**
+   * Endpoint to retrieve 'taxon qualitative measurements'
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query tsn - ITIS TSN identifier
+   *
+   */
   xrefRouter.get(
     "/taxon-qualitative-measurements",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonQualitativeMeasurements(taxon_id),
-        xrefTaxonMeasurementSchema
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getTsnQualitativeMeasurements(
+        tsn,
+        format
       );
+
       res.status(200).json(response);
     })
   );
 
-  xrefRouter.get(
-    "/taxon-qualitative-measurement-options",
-    catchErrors(async (req: Request, res: Response) => {
-      const { taxon_measurement_id } = taxonMeasurementIdSchema.parse(
-        req.query
-      );
-      const response = await formatParse(
-        getFormat(req),
-        prisma.xref_taxon_measurement_qualitative_option.findMany({
-          where: { taxon_measurement_id },
-        }),
-        xrefTaxonMeasurementOptionSchema
-      );
-      res.status(200).json(response);
-    })
-  );
-
+  /**
+   * Endpoint to retrieve 'taxon quantitative measurements'.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query tsn - ITIS TSN identifier
+   */
   xrefRouter.get(
     "/taxon-quantitative-measurements",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonQuantitativeMeasurements(taxon_id),
-        xrefTaxonMeasurementSchema
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getTsnQuantitativeMeasurements(
+        tsn,
+        format
       );
+
       res.status(200).json(response);
     })
   );
 
+  /**
+   * Endpoint to retrieve measurements both 'qualitative' and 'quantitative'.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @query tsn - ITIS TSN identifier
+   */
   xrefRouter.get(
     "/taxon-measurements",
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_id } = taxonIdSchema.parse(req.query);
-      const response = await formatParse(
-        getFormat(req),
-        db.getTaxonMeasurements(taxon_id),
-        xrefTaxonMeasurementSchema
-      );
+      const { tsn } = tsnQuerySchema.parse(req.query);
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getTsnMeasurements(tsn, format);
+
+      res.status(200).json(response);
+    })
+  );
+
+  /**
+   * Endpoint to search for measurements both 'qualitative' and 'quantitative'.
+   *
+   * @query search - Search properties.
+   */
+  xrefRouter.get(
+    "/measurements/search",
+    catchErrors(async (req: Request, res: Response) => {
+      const search = MeasurementSearchQuery.parse(req.query);
+
+      const response = await db.xrefService.searchForMeasurements(search);
+
       res.status(200).json(response);
     })
   );

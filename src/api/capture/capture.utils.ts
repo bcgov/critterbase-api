@@ -54,7 +54,7 @@ const CaptureIncludeSchema = implement<CaptureIncludeType>().with({
 });
 
 const CaptureUpdateSchema = implement<
-  Omit<Prisma.captureUncheckedUpdateManyInput, keyof AuditColumns> & {
+  Omit<Prisma.captureUncheckedUpdateManyInput, AuditColumns> & {
     capture_location?: LocationBody;
     release_location?: LocationBody;
     force_create_release?: boolean;
@@ -72,7 +72,7 @@ const CaptureUpdateSchema = implement<
 );
 
 const CaptureCreateSchema = implement<
-  Omit<Prisma.captureCreateManyInput, keyof AuditColumns> & {
+  Omit<Prisma.captureCreateManyInput, AuditColumns> & {
     capture_location?: LocationBody;
     release_location?: LocationBody;
     // capture_mortality?: boolean;
@@ -113,7 +113,9 @@ const CaptureResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
-const CaptureDeleteSchema = CaptureBodySchema.pick({capture_id: true}).extend(DeleteSchema.shape);
+const CaptureDeleteSchema = CaptureBodySchema.pick({ capture_id: true }).extend(
+  DeleteSchema.shape
+);
 
 type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
 
@@ -130,5 +132,5 @@ export {
   CaptureResponseSchema,
   CaptureBodySchema,
   CaptureIncludeSchema,
-  CaptureDeleteSchema
+  CaptureDeleteSchema,
 };

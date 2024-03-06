@@ -11,7 +11,6 @@ import { Request, Response } from "express-serve-static-core";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
-import { eCritterStatus } from "../critter/critter.utils";
 import {
   codFormats,
   collectionUnitCategoriesFormats,
@@ -20,13 +19,12 @@ import {
   markingTypesFormats,
   regionEnvFormats,
   regionNrFormats,
-  taxonFormats,
-  taxonSpeciesAndSubsWhere,
   wmuFormats,
 } from "./lookup.utils";
 import { ICbDatabase } from "../../utils/database";
+import { eCritterStatus } from "../../schemas/critter-schema";
 
-export const LookupRouter = (db: ICbDatabase) => {
+export const LookupRouter = (_db: ICbDatabase) => {
   const lookupRouter = express.Router();
   const order = "asc";
 
@@ -35,38 +33,38 @@ export const LookupRouter = (db: ICbDatabase) => {
    */
   lookupRouter.get(
     "/enum/sex",
-    catchErrors(async (req: Request, res: Response) =>
+    catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json(Object.keys(sex))
     )
   );
   lookupRouter.get(
     "/enum/critter-status",
-    catchErrors(async (req: Request, res: Response) =>
+    catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json(Object.keys(eCritterStatus))
     )
   );
   lookupRouter.get(
     "/enum/cod-confidence",
-    catchErrors(async (req: Request, res: Response) =>
+    catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json(Object.keys(cod_confidence))
     )
   );
 
   lookupRouter.get(
     "/enum/coordinate-uncertainty-unit",
-    catchErrors(async (req: Request, res: Response) =>
+    catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json(Object.keys(coordinate_uncertainty_unit))
     )
   );
   lookupRouter.get(
     "/enum/frequency-units",
-    catchErrors(async (req: Request, res: Response) =>
+    catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json(Object.keys(frequency_unit))
     )
   );
   lookupRouter.get(
     "/enum/measurement-units",
-    catchErrors(async (req: Request, res: Response) =>
+    catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json(Object.keys(measurement_unit))
     )
   );
@@ -113,7 +111,7 @@ export const LookupRouter = (db: ICbDatabase) => {
       const rgx = "(\\d)-(\\d+)";
       const wmu = await formatParse(
         getFormat(req),
-        prisma.$queryRaw`SELECT wmu_id, wmu_name, description, create_user, update_user, create_timestamp, update_timestamp FROM "critterbase"."lk_wildlife_management_unit" lwmu 
+        prisma.$queryRaw`SELECT wmu_id, wmu_name, description, create_user, update_user, create_timestamp, update_timestamp FROM "critterbase"."lk_wildlife_management_unit" lwmu
         ORDER BY (regexp_matches(lwmu.wmu_name, ${rgx}))[1]::int,
           (regexp_matches(lwmu.wmu_name, ${rgx}))[2]::int;`,
         wmuFormats
@@ -168,38 +166,5 @@ export const LookupRouter = (db: ICbDatabase) => {
     })
   );
 
-  /**
-   * This includes all taxons
-   */
-  lookupRouter.get(
-    "/taxons",
-    catchErrors(async (req: Request, res: Response) => {
-      const taxons = await formatParse(
-        getFormat(req),
-        prisma.lk_taxon.findMany({
-          orderBy: [{ taxon_name_common: order }, { taxon_name_latin: order }],
-        }),
-        taxonFormats
-      );
-      res.status(200).json(taxons);
-    })
-  );
-  /**
-   * This includes species and sub species
-   */
-  lookupRouter.get(
-    "/taxons/species",
-    catchErrors(async (req: Request, res: Response) => {
-      const species = await formatParse(
-        getFormat(req),
-        prisma.lk_taxon.findMany({
-          ...taxonSpeciesAndSubsWhere,
-          orderBy: [{ taxon_name_common: order }, { taxon_name_latin: order }],
-        }),
-        taxonFormats
-      );
-      res.status(200).json(species);
-    })
-  );
   return lookupRouter;
 };
