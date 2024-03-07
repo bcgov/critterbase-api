@@ -58,6 +58,9 @@ export class CritterRepository extends Repository {
   async getAllCritters(): Promise<ICritter[]> {
     const result = await this.prisma.critter.findMany({
       select: this._critterProperties,
+      orderBy: {
+        create_timestamp: "desc",
+      },
     });
 
     if (!result.length) {
@@ -82,6 +85,9 @@ export class CritterRepository extends Repository {
     const result = await this.prisma.critter.findMany({
       where: { critter_id: { in: critter_ids } },
       select: this._critterProperties,
+      orderBy: {
+        create_timestamp: "desc",
+      },
     });
 
     if (!result.length) {
@@ -132,6 +138,9 @@ export class CritterRepository extends Repository {
     const result = await this.prisma.critter.findMany({
       where: { wlh_id: wlhId },
       select: this._critterProperties,
+      orderBy: {
+        create_timestamp: "desc",
+      },
     });
 
     if (!result.length) {

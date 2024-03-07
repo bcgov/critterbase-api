@@ -139,6 +139,42 @@ export class XrefRepository extends Repository {
   }
 
   /**
+   * Get 'qualitative measurements' by ids.
+   *
+   * @async
+   * @param {number[]} taxonMeasurementIds - Primary keys of xref_taxon_measurement_qualitative.
+   * @returns {Promise<ITsnQualitativeMeasurement[]>}
+   */
+  async getQualitativeMeasurementsByIds(
+    taxonMeasurementIds: string[]
+  ): Promise<ITsnQualitativeMeasurement[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+      SELECT
+        q.taxon_measurement_id,
+        q.itis_tsn,
+        q.measurement_name,
+        q.measurement_desc,
+        json_agg(
+          json_build_object(
+            'qualitative_option_id', o.qualitative_option_id,
+            'option_label', o.option_label,
+            'option_value', o.option_value,
+            'option_desc', o.option_desc
+          )
+        ) as options
+      FROM xref_taxon_measurement_qualitative q
+      LEFT JOIN xref_taxon_measurement_qualitative_option o
+        ON q.taxon_measurement_id = o.taxon_measurement_id
+      WHERE q.taxon_measurement_id = ANY(${taxonMeasurementIds}::uuid[])
+      GROUP BY q.taxon_measurement_id;`,
+      TsnQualitativeMeasurementSchema.array()
+    );
+
+    return result;
+  }
+
+  /**
    * Get 'qualitative measurement options' for taxon_measurement_id
    *
    * @async
@@ -176,6 +212,33 @@ export class XrefRepository extends Repository {
     const result =
       await this.prisma.xref_taxon_measurement_quantitative.findMany({
         where: { itis_tsn: { in: tsns } },
+        select: {
+          taxon_measurement_id: true,
+          itis_tsn: true,
+          measurement_name: true,
+          min_value: true,
+          max_value: true,
+          measurement_desc: true,
+          unit: true,
+        },
+      });
+
+    return result;
+  }
+
+  /**
+   * Get 'quantitative measurements' defintions by ids.
+   *
+   * @async
+   * @param {string[]} taxonMeasurementIds - Primary keys of xref_taxon_measurement_quantitative.
+   * @returns {Promise<ITsnQuantitativeMeasurement[]>}
+   */
+  async getQuantitativeMeasurementsByIds(
+    taxonMeasurementIds: string[]
+  ): Promise<ITsnQuantitativeMeasurement[]> {
+    const result =
+      await this.prisma.xref_taxon_measurement_quantitative.findMany({
+        where: { taxon_measurement_id: { in: taxonMeasurementIds } },
         select: {
           taxon_measurement_id: true,
           itis_tsn: true,

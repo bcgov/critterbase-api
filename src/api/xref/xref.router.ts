@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategoryQuerySchema,
+  MeasurementIdsQuerySchema,
   MeasurementSearchQuery,
 } from "../../schemas/xref-schema";
 import { ICbDatabase } from "../../utils/database";
@@ -58,7 +59,7 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to retrieve 'taxon collection categories'.
+   * Endpoint to retrieve 'taxon collection categories' by tsn.
    *
    * Optionally can return as 'select' format.
    *
@@ -103,7 +104,7 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to retrieve 'taxon qualitative measurements'
+   * Endpoint to retrieve 'taxon qualitative measurements' by tsn.
    *
    * Optionally can return as 'select' format.
    *
@@ -126,7 +127,32 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to retrieve 'taxon quantitative measurements'.
+   * Endpoint to retrieve 'taxon qualitative measurements' by ids.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @body taxon_measurement_ids - Array of taxon measurement ids.
+   *
+   */
+  xrefRouter.post(
+    "/taxon-qualitative-measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_measurement_ids } = MeasurementIdsQuerySchema.parse(
+        req.body
+      );
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getQualitativeMeasurementsByIds(
+        taxon_measurement_ids,
+        format
+      );
+
+      res.status(200).json(response);
+    })
+  );
+
+  /**
+   * Endpoint to retrieve 'taxon quantitative measurements' by tsn.
    *
    * Optionally can return as 'select' format.
    *
@@ -148,7 +174,32 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to retrieve measurements both 'qualitative' and 'quantitative'.
+   * Endpoint to retrieve 'taxon quantitative measurements' by ids.
+   *
+   * Optionally can return as 'select' format.
+   *
+   * @body taxon_measurement_ids - Array of taxon measurement ids.
+   *
+   */
+  xrefRouter.post(
+    "/taxon-quantitative-measurements",
+    catchErrors(async (req: Request, res: Response) => {
+      const { taxon_measurement_ids } = MeasurementIdsQuerySchema.parse(
+        req.body
+      );
+      const format = isSelectFormat(req);
+
+      const response = await db.xrefService.getQuantitativeMeasurementsByIds(
+        taxon_measurement_ids,
+        format
+      );
+
+      res.status(200).json(response);
+    })
+  );
+
+  /**
+   * Endpoint to retrieve measurements both 'qualitative' and 'quantitative' by tsn.
    *
    * Optionally can return as 'select' format.
    *
@@ -167,7 +218,7 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
-   * Endpoint to search for measurements both 'qualitative' and 'quantitative'.
+   * Endpoint to search for measurements both 'qualitative' and 'quantitative' by search terms.
    *
    * @query search - Search properties.
    */

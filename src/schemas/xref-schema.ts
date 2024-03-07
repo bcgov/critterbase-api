@@ -44,14 +44,18 @@ export const TsnQualitativeMeasurementOptionSchema = implement<
  */
 export const TsnQualitativeMeasurementSchema = implement<
   Omit<xref_taxon_measurement_qualitative, AuditColumns> & {
-    options: ITsnQualitativeMeasurementOption[];
+    options: Omit<ITsnQualitativeMeasurementOption, "taxon_measurement_id">[];
   }
 >().with({
   taxon_measurement_id: zodID,
   itis_tsn: z.number(),
   measurement_name: z.string(),
   measurement_desc: z.string().nullable(),
-  options: z.array(TsnQualitativeMeasurementOptionSchema),
+  options: z.array(
+    TsnQualitativeMeasurementOptionSchema.omit({
+      taxon_measurement_id: true,
+    }).strict()
+  ),
 });
 
 /**
@@ -144,4 +148,8 @@ export const CollectionUnitCategoryQuerySchema = z.object({
 
 export const CollectionUnitCategoryIdSchema = z.object({
   category_id: z.string().uuid(),
+});
+
+export const MeasurementIdsQuerySchema = z.object({
+  taxon_measurement_ids: z.string().uuid().array(),
 });
