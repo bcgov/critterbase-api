@@ -223,7 +223,7 @@ export const XrefRouter = (db: ICbDatabase) => {
    * @query search - Search properties.
    */
   xrefRouter.get(
-    "/measurements/search",
+    "/taxon-measurements/search",
     catchErrors(async (req: Request, res: Response) => {
       const search = MeasurementSearchQuery.parse(req.query);
 
