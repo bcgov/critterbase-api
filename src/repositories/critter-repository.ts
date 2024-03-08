@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
 import {
   CritterUpdate,
   ICritter,
@@ -257,7 +258,7 @@ export class CritterRepository extends Repository {
         OR
           (t.name ILIKE ${query.marking?.marking_type}
           AND m.identifier ILIKE ${query.marking?.identifier});`,
-      CritterSchema.array()
+      z.array(CritterSchema)
     );
 
     return result;
@@ -283,7 +284,9 @@ export class CritterRepository extends Repository {
           m.marking_id,
           m.capture_id,
           m.mortality_id,
+          b.taxon_marking_body_location_id,
           b.body_location,
+          m.marking_type_id,
           t.name as marking_type,
           mt.material,
           c1.colour as primary_colour,
@@ -314,7 +317,7 @@ export class CritterRepository extends Repository {
           ON c3.colour_id = m.text_colour_id
         WHERE m.critter_id = ${critterId}::uuid
         `,
-      DetailedCritterMarkingSchema.array()
+      z.array(DetailedCritterMarkingSchema)
     );
 
     return result;
@@ -359,7 +362,7 @@ export class CritterRepository extends Repository {
           ON rl.location_id = c.release_location_id
         WHERE c.critter_id = ${critterId}::uuid
         GROUP BY c.capture_id, cl.*, rl.*;`,
-      DetailedCritterCaptureSchema.array()
+      z.array(DetailedCritterCaptureSchema)
     );
 
     return result;
@@ -404,7 +407,7 @@ export class CritterRepository extends Repository {
           ON m.proximate_cause_of_death_id = ud.cod_id
         WHERE m.critter_id = ${critterId}::uuid
         GROUP BY m.mortality_id, pd.cod_category, ud.cod_category, pd.cod_reason, ud.cod_reason, ml.*;`,
-      DetailedCritterMortalitySchema.array()
+      z.array(DetailedCritterMortalitySchema)
     );
 
     return result;
@@ -438,7 +441,7 @@ export class CritterRepository extends Repository {
         JOIN xref_taxon_measurement_qualitative_option o
           ON o.qualitative_option_id = m.qualitative_option_id
         WHERE m.critter_id = ${critterId}::uuid;`,
-      DetailedCritterQualitativeMeasurementSchema.array()
+      z.array(DetailedCritterQualitativeMeasurementSchema)
     );
 
     return result;
@@ -470,7 +473,7 @@ export class CritterRepository extends Repository {
         JOIN xref_taxon_measurement_quantitative x
           ON x.taxon_measurement_id = m.taxon_measurement_id
         WHERE m.critter_id = ${critterId}::uuid;`,
-      DetailedCritterQuantitativeMeasurementSchema.array()
+      z.array(DetailedCritterQuantitativeMeasurementSchema)
     );
 
     return result;
@@ -500,7 +503,7 @@ export class CritterRepository extends Repository {
         JOIN lk_collection_category l
           ON l.collection_category_id = x.collection_category_id
         WHERE c.critter_id = ${critterId}::uuid;`,
-      DetailedCritterCollectionUnit.array()
+      z.array(DetailedCritterCollectionUnit)
     );
 
     return result;
@@ -560,7 +563,7 @@ export class CritterRepository extends Repository {
         JOIN family f
           ON c.family_id = f.family_id
         WHERE p.parent_critter_id = ${critterId}::uuid;`,
-      DetailedCritterChildSchema.array()
+      z.array(DetailedCritterChildSchema)
     );
 
     return result;

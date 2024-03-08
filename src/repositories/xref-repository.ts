@@ -121,7 +121,6 @@ export class XrefRepository extends Repository {
         json_agg(
           json_build_object(
             'qualitative_option_id', o.qualitative_option_id,
-            'taxon_measurement_id', o.taxon_measurement_id,
             'option_label', o.option_label,
             'option_value', o.option_value,
             'option_desc', o.option_desc
