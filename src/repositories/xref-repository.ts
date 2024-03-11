@@ -293,6 +293,7 @@ export class XrefRepository extends Repository {
   async searchForQualitativeMeasurements(
     search: IMeasurementSearch
   ): Promise<ITsnQualitativeMeasurement[]> {
+    const partialMatchTerm = `%${search.name}%`;
     const result = await this.safeQuery(
       Prisma.sql`
       SELECT
@@ -303,7 +304,6 @@ export class XrefRepository extends Repository {
         json_agg(
           json_build_object(
             'qualitative_option_id', o.qualitative_option_id,
-            'taxon_measurement_id', o.taxon_measurement_id,
             'option_label', o.option_label,
             'option_value', o.option_value,
             'option_desc', o.option_desc
@@ -312,7 +312,7 @@ export class XrefRepository extends Repository {
       FROM xref_taxon_measurement_qualitative q
       LEFT JOIN xref_taxon_measurement_qualitative_option o
         ON q.taxon_measurement_id = o.taxon_measurement_id
-      WHERE q.measurement_name ILIKE ${search.name}
+      WHERE q.measurement_name ILIKE ${partialMatchTerm}
       GROUP BY q.taxon_measurement_id;`,
       TsnQualitativeMeasurementSchema.array()
     );
