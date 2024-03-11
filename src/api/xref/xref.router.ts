@@ -218,6 +218,19 @@ export const XrefRouter = (db: ICbDatabase) => {
   );
 
   /**
+   * TODO: POST Endpoint to retrieve measurements both 'qualitative' and 'quantitative' by array of tsns.
+   *
+   * 1. Accept array of tsns in body.
+   * 2. Query ITIS for hieararchies for all tsns.
+   * 3. Get measurements for each tsn hieararchy.
+   * 4. Get options for each qualitative measurement.
+   * 5. Return object mapping each original tsn to both qualitative / quantitative measurements.
+   *
+   * ie: { 123: { qualitative: [], quantitative: [] } }
+   *
+   */
+
+  /**
    * Endpoint to search for measurements both 'qualitative' and 'quantitative' by search terms.
    *
    * @query search - Search properties.

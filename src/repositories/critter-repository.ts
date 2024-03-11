@@ -303,17 +303,17 @@ export class CritterRepository extends Repository {
           m.removed_timestamp,
           m.comment
         FROM marking m
-        JOIN xref_taxon_marking_body_location b
+        LEFT JOIN xref_taxon_marking_body_location b
           ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
-        JOIN lk_marking_type t
+        LEFT JOIN lk_marking_type t
           ON t.marking_type_id = m.marking_type_id
-        JOIN lk_marking_material mt
+        LEFT JOIN lk_marking_material mt
           ON mt.marking_material_id = m.marking_material_id
-        JOIN lk_colour c1
+        LEFT JOIN lk_colour c1
           ON c1.colour_id = m.primary_colour_id
-        JOIN lk_colour c2
+        LEFT JOIN lk_colour c2
           ON c2.colour_id = m.secondary_colour_id
-        JOIN lk_colour c3
+        LEFT JOIN lk_colour c3
           ON c3.colour_id = m.text_colour_id
         WHERE m.critter_id = ${critterId}::uuid
         `,
