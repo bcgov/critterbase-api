@@ -50,9 +50,12 @@ export const XrefRouter = (db: ICbDatabase) => {
     "/collection-units/:category_id",
     catchErrors(async (req: Request, res: Response) => {
       const { category_id } = CollectionUnitCategoryIdSchema.parse(req.params);
+      const format = isSelectFormat(req);
 
-      const response =
-        await db.xrefService.getCollectionUnitsFromCategoryId(category_id);
+      const response = await db.xrefService.getCollectionUnitsFromCategoryId(
+        category_id,
+        format
+      );
 
       return res.status(200).json(response);
     })
