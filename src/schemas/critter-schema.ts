@@ -177,7 +177,7 @@ export const DetailedCritterMortalitySchema = z
   .object({
     mortality_id: zodID,
     mortality_timestamp: z.coerce.date(),
-    mortality_location: DetailedCritterLocationSchema,
+    location: DetailedCritterLocationSchema,
     proximate_cause_of_death_id: zodID.nullable(),
     proximate_cause_of_death_confidence: z.string().nullable(),
     ultimate_cause_of_death_id: zodID.nullable(),
@@ -196,7 +196,7 @@ export const DetailedCritterQualitativeMeasurementSchema = z.object({
   mortality_id: zodID.nullable(),
   measurement_name: z.string(),
   value: z.string(),
-  measurement_comment: z.string(),
+  measurement_comment: z.string().nullable(),
   measured_timestamp: z.coerce.date(),
 });
 

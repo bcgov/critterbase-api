@@ -384,7 +384,7 @@ export class CritterRepository extends Repository {
         SELECT
           m.mortality_id,
           m.mortality_timestamp,
-          row_to_json(ml) as mortality_location,
+          row_to_json(ml) as location,
           m.proximate_cause_of_death_id,
           m.proximate_cause_of_death_confidence,
           m.ultimate_cause_of_death_id,
