@@ -335,7 +335,7 @@ export const xrefPaths = {
   [`${routes.xref}/taxon-measurements`]: {
     get: getTsnMeasurements,
   },
-  [`${routes.xref}/taxon-mesurements/search`]: {
+  [`${routes.xref}/taxon-measurements/search`]: {
     get: searchMeasurements,
   },
 };
