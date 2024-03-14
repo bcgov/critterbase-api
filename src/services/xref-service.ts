@@ -180,6 +180,54 @@ export class XrefService extends InternalService<XrefRepository> {
   }
 
   /**
+   * Get 'quantitative measurements' defintions by ids.
+   *
+   * @async
+   * @param {string[]} taxonMeasurementIds - Primary keys of xref_taxon_measurement_quantitative.
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnQuantitativeMeasurement[] | ISelect[]>}
+   */
+  async getQuantitativeMeasurementsByIds(
+    taxonMeasurementIds: string[],
+    asSelect = false
+  ): Promise<ITsnQuantitativeMeasurement[] | ISelect[]> {
+    const data =
+      await this.repository.getQuantitativeMeasurementsByIds(
+        taxonMeasurementIds
+      );
+
+    if (asSelect) {
+      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+    }
+
+    return data;
+  }
+
+  /**
+   * Get 'qualitative measurements' defintions by ids.
+   *
+   * @async
+   * @param {string[]} taxonMeasurementIds - Primary keys of xref_taxon_measurement_qualitative.
+   * @param {boolean} [asSelect] - Format of the response.
+   * @returns {Promise<ITsnQualitativeMeasurement[] | ISelect[]>}
+   */
+  async getQualitativeMeasurementsByIds(
+    taxonMeasurementIds: string[],
+    asSelect = false
+  ): Promise<ITsnQualitativeMeasurement[] | ISelect[]> {
+    const data =
+      await this.repository.getQualitativeMeasurementsByIds(
+        taxonMeasurementIds
+      );
+
+    if (asSelect) {
+      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+    }
+
+    return data;
+  }
+
+  /**
    * Get all 'qualitative measurement options'
    *
    * @async

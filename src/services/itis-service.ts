@@ -232,14 +232,13 @@ export class ItisService extends ExternalService {
   async patchTsnAndScientificName<T extends Partial<IItisProperties>>(
     objectToPatch: T
   ): Promise<T & Required<IItisProperties>> {
-    const missingPropertiesError =
-      "itis_tsn and itis_scientific_name missing in object";
-
     /**
      * Throw error if neither tsn nor scientific name provided.
      */
     if (!objectToPatch.itis_scientific_name && !objectToPatch.itis_tsn) {
-      throw apiError.syntaxIssue(missingPropertiesError);
+      throw apiError.syntaxIssue(
+        "itis_tsn and itis_scientific_name missing in object"
+      );
     }
 
     /**
@@ -262,7 +261,7 @@ export class ItisService extends ExternalService {
      * Throw error if no scientific name. (nothing to patch object with)
      */
     if (!objectToPatch.itis_scientific_name) {
-      throw apiError.syntaxIssue(missingPropertiesError);
+      throw apiError.syntaxIssue("itis_scientific_name missing in object");
     }
 
     /**

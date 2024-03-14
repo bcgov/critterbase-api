@@ -12,6 +12,7 @@ import {
 } from "../../utils/zod_helpers";
 import {
   CollectionUnitCategoryIdSchema,
+  MeasurementIdsQuerySchema,
   MeasurementSearchQuery,
   MeasurementsWithTsnHierarchy,
   TsnMarkingBodyLocationSchema,
@@ -217,6 +218,70 @@ const getTsnQuantitativeMeasurements: ZodOpenApiOperationObject = {
   },
 };
 
+const getQuantitativeMeasurementsByIds: ZodOpenApiOperationObject = {
+  operationId: "getTsnQuantitativeMeasurementsByIds",
+  summary: "Get quantitative measurements by taxon measurement ids.",
+  tags: [TAG],
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: MeasurementIdsQuerySchema,
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: {
+            oneOf: [
+              {
+                $ref: "#/components/schemas/xrefTsnQuantitativeMeasurementSchema",
+              },
+              { $ref: "#/components/schemas/asSelectSchema" },
+            ],
+          },
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
+
+const getQualitativeMeasurementsByIds: ZodOpenApiOperationObject = {
+  operationId: "getQualitativeMeasurementsByIds",
+  summary: "Get qualitative measurements by taxon measurement ids.",
+  tags: [TAG],
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: MeasurementIdsQuerySchema,
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: SwagDesc.get,
+      content: {
+        "application/json": {
+          schema: {
+            oneOf: [
+              {
+                $ref: "#/components/schemas/xrefTsnQualitativeMeasurementSchema",
+              },
+              { $ref: "#/components/schemas/asSelectSchema" },
+            ],
+          },
+        },
+      },
+    },
+    ...SwagErr,
+    ...SwagUnauthorized,
+  },
+};
+
 const getTsnMeasurements: ZodOpenApiOperationObject = {
   operationId: "getTsnMeasurements",
   summary:
@@ -261,14 +326,16 @@ export const xrefPaths = {
   },
   [`${routes.xref}/taxon-qualitative-measurements`]: {
     get: getTsnQualitativeMeasurements,
+    post: getQualitativeMeasurementsByIds,
   },
   [`${routes.xref}/taxon-quantitative-measurements`]: {
     get: getTsnQuantitativeMeasurements,
+    post: getQuantitativeMeasurementsByIds,
   },
   [`${routes.xref}/taxon-measurements`]: {
     get: getTsnMeasurements,
   },
-  [`${routes.xref}/mesurements/search`]: {
+  [`${routes.xref}/taxon-mesurements/search`]: {
     get: searchMeasurements,
   },
 };

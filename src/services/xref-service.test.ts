@@ -87,7 +87,6 @@ describe("xref-service", () => {
         itis_tsn: 1,
         options: [
           {
-            taxon_measurement_id: "c4ed6208-6fe4-41d1-94d3-17e49eb5f898",
             qualitative_option_id: "c4ed6208-6fe4-41d1-94d3-17e49eb5f898",
             option_label: "Label",
             option_value: 123,

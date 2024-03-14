@@ -116,66 +116,77 @@ export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
  *
  */
 export const DetailedCritterLocationSchema = implement<
-  Omit<location, AuditColumns | "region_nr_id" | "region_env_id" | "wmu_id">
->().with({
-  location_id: zodID,
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
-  coordinate_uncertainty: z.number().nullable(),
-  coordinate_uncertainty_unit: z
-    .nativeEnum(coordinate_uncertainty_unit)
-    .nullable(),
-  region_env_id: zodID.nullable(),
-  region_nr_id: zodID.nullable(),
-  wmu_id: zodID.nullable(),
-  elevation: z.number().nullable(),
-  temperature: z.number().nullable(),
-  location_comment: z.string().nullable(),
-});
+  Omit<location, AuditColumns>
+>()
+  .with({
+    location_id: zodID,
+    latitude: z.number().nullable(),
+    longitude: z.number().nullable(),
+    coordinate_uncertainty: z.number().nullable(),
+    coordinate_uncertainty_unit: z
+      .nativeEnum(coordinate_uncertainty_unit)
+      .nullable(),
+    region_env_id: zodID.nullable(),
+    region_nr_id: zodID.nullable(),
+    wmu_id: zodID.nullable(),
+    elevation: z.number().nullable(),
+    temperature: z.number().nullable(),
+    location_comment: z.string().nullable(),
+  })
+  .strict();
 
-export const DetailedCritterMarkingSchema = z.object({
-  marking_id: zodID,
-  capture_id: zodID.nullable(),
-  mortality_id: zodID.nullable(),
-  body_location: z.string(),
-  material: z.string(),
-  primary_colour: z.string().nullable(),
-  primary_colour_id: zodID.nullable(),
-  secondary_colour: z.string().nullable(),
-  secondary_colour_id: zodID.nullable(),
-  text_colour: z.string().nullable(),
-  text_colour_id: zodID.nullable(),
-  identifier: z.string().nullable(),
-  frequency: z.number().nullable(),
-  frequency_unit: z.nativeEnum(frequency_unit).nullable(),
-  order: z.number().nullable(),
-  attached_timestamp: z.coerce.date(),
-  removed_timestamp: z.coerce.date().nullable(),
-  comment: z.string().nullable(),
-});
+export const DetailedCritterMarkingSchema = z
+  .object({
+    marking_id: zodID,
+    capture_id: zodID.nullable(),
+    mortality_id: zodID.nullable(),
+    taxon_marking_body_location_id: zodID,
+    body_location: z.string(),
+    marking_type: z.string(),
+    marking_type_id: zodID,
+    material: z.string().nullable(),
+    primary_colour: z.string().nullable(),
+    primary_colour_id: zodID.nullable(),
+    secondary_colour: z.string().nullable(),
+    secondary_colour_id: zodID.nullable(),
+    text_colour: z.string().nullable(),
+    text_colour_id: zodID.nullable(),
+    identifier: z.string().nullable(),
+    frequency: z.number().nullable(),
+    frequency_unit: z.nativeEnum(frequency_unit).nullable(),
+    order: z.number().nullable(),
+    attached_timestamp: z.coerce.date(),
+    removed_timestamp: z.coerce.date().nullable(),
+    comment: z.string().nullable(),
+  })
+  .strict();
 
-export const DetailedCritterCaptureSchema = z.object({
-  capture_id: zodID,
-  capture_timestamp: z.coerce.date(),
-  release_timestamp: z.coerce.date().nullable(),
-  capture_location: DetailedCritterLocationSchema,
-  release_location: DetailedCritterLocationSchema,
-  capture_comment: z.string().nullable(),
-  release_comment: z.string().nullable(),
-});
+export const DetailedCritterCaptureSchema = z
+  .object({
+    capture_id: zodID,
+    capture_timestamp: z.coerce.date(),
+    release_timestamp: z.coerce.date().nullable(),
+    capture_location: DetailedCritterLocationSchema,
+    release_location: DetailedCritterLocationSchema,
+    capture_comment: z.string().nullable(),
+    release_comment: z.string().nullable(),
+  })
+  .strict();
 
-export const DetailedCritterMortalitySchema = z.object({
-  mortality_id: zodID,
-  mortality_timestamp: z.coerce.date(),
-  mortality_location: DetailedCritterLocationSchema,
-  proximate_cause_of_death_id: zodID.nullable(),
-  proximate_cause_of_death_confidence: z.string().nullable(),
-  ultimate_cause_of_death_id: zodID.nullable(),
-  ultimate_cause_of_death_confidence: z.string().nullable(),
-  mortality_comment: z.string().nullable(),
-  proximate_predated_by_itis_tsn: z.number().nullable(),
-  ultimate_predated_by_itis_tsn: z.number().nullable(),
-});
+export const DetailedCritterMortalitySchema = z
+  .object({
+    mortality_id: zodID,
+    mortality_timestamp: z.coerce.date(),
+    location: DetailedCritterLocationSchema,
+    proximate_cause_of_death_id: zodID.nullable(),
+    proximate_cause_of_death_confidence: z.string().nullable(),
+    ultimate_cause_of_death_id: zodID.nullable(),
+    ultimate_cause_of_death_confidence: z.string().nullable(),
+    mortality_comment: z.string().nullable(),
+    proximate_predated_by_itis_tsn: z.number().nullable(),
+    ultimate_predated_by_itis_tsn: z.number().nullable(),
+  })
+  .strict();
 
 export const DetailedCritterQualitativeMeasurementSchema = z.object({
   measurement_qualitative_id: zodID,
@@ -185,7 +196,7 @@ export const DetailedCritterQualitativeMeasurementSchema = z.object({
   mortality_id: zodID.nullable(),
   measurement_name: z.string(),
   value: z.string(),
-  measurement_comment: z.string(),
+  measurement_comment: z.string().nullable(),
   measured_timestamp: z.coerce.date(),
 });
 
@@ -194,7 +205,9 @@ export const DetailedCritterQuantitativeMeasurementSchema =
     measurement_qualitative_id: true,
     qualitative_option_id: true,
     value: true,
-  }).extend({ measurement_quantitative_id: zodID, value: z.number() });
+  })
+    .extend({ measurement_quantitative_id: zodID, value: z.number() })
+    .strict();
 
 export const DetailedCritterCollectionUnit = z.object({
   critter_collection_unit_id: zodID,
@@ -204,17 +217,21 @@ export const DetailedCritterCollectionUnit = z.object({
   category_name: z.string(),
 });
 
-export const DetailedCritterParentSchema = z.object({
-  family_id: zodID,
-  family_label: z.string(),
-  parent_critter_id: zodID,
-});
+export const DetailedCritterParentSchema = z
+  .object({
+    family_id: zodID,
+    family_label: z.string(),
+    parent_critter_id: zodID,
+  })
+  .strict();
 
-export const DetailedCritterChildSchema = z.object({
-  family_id: zodID,
-  family_label: z.string(),
-  child_critter_id: zodID,
-});
+export const DetailedCritterChildSchema = z
+  .object({
+    family_id: zodID,
+    family_label: z.string(),
+    child_critter_id: zodID,
+  })
+  .strict();
 
 export const DetailedCritterSchema = CritterSchema.extend({
   markings: DetailedCritterMarkingSchema.array(),
@@ -227,7 +244,7 @@ export const DetailedCritterSchema = CritterSchema.extend({
   }),
   family_parent: DetailedCritterParentSchema.array(),
   family_child: DetailedCritterChildSchema.array(),
-});
+}).strict();
 
 export type IDetailedCritter = z.infer<typeof DetailedCritterSchema>;
 
