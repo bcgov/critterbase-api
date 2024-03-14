@@ -6,17 +6,9 @@ import {
   CritterCreateRequiredItis,
   SimilarCritterQuery,
   IDetailedCritterMarking,
-  DetailedCritterMarkingSchema,
-  CritterSchema,
-  DetailedCritterMortalitySchema,
   IDetailedCritterMortality,
-  DetailedCritterQualitativeMeasurementSchema,
   IDetailedCritterQualitativeMeasurement,
-  DetailedCritterQuantitativeMeasurementSchema,
-  IDetailedCritterQuantitativeMeasurement,
-  DetailedCritterCollectionUnit,
   IDetailedCritterCollectionUnit,
-  DetailedCritterCaptureSchema,
   IDetailedCritterCapture,
   IDetailedCritterParent,
   IDetailedCritterChild,
@@ -65,6 +57,9 @@ describe("xref-repository", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          create_timestamp: "desc",
+        },
         select: {
           critter_id: true,
           itis_tsn: true,
@@ -87,6 +82,9 @@ describe("xref-repository", () => {
       );
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          create_timestamp: "desc",
+        },
         select: {
           critter_id: true,
           itis_tsn: true,
@@ -144,6 +142,9 @@ describe("xref-repository", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          create_timestamp: "desc",
+        },
         where: { critter_id: { in: ["aaaa", "bbbb"] } },
         select: {
           critter_id: true,
@@ -167,6 +168,9 @@ describe("xref-repository", () => {
       ).rejects.toThrow("Failed to find critters.");
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          create_timestamp: "desc",
+        },
         where: { critter_id: { in: ["cccc", "dddd"] } },
         select: {
           critter_id: true,
@@ -278,6 +282,9 @@ describe("xref-repository", () => {
 
       expect(result).toEqual(mockResult);
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          create_timestamp: "desc",
+        },
         where: { wlh_id: "aaaa" },
         select: {
           critter_id: true,
@@ -301,6 +308,9 @@ describe("xref-repository", () => {
       ).rejects.toThrow("Failed to find critters with wlh-id: cccc.");
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
+        orderBy: {
+          create_timestamp: "desc",
+        },
         where: { wlh_id: "cccc" },
         select: {
           critter_id: true,
@@ -328,7 +338,7 @@ describe("xref-repository", () => {
     it("should insert a critter successfully", async () => {
       const mockUpdate: CritterUpdate = {
         itis_tsn: 1234,
-        itis_scientific_name: "Aaa",
+        //itis_scientific_name: "test",
         animal_id: "aaaa",
         sex: "Male",
         wlh_id: null,
@@ -521,10 +531,16 @@ describe("xref-repository", () => {
       const mockResult: IDetailedCritterMarking[] = [
         {
           marking_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
+          taxon_marking_body_location_id: "1",
           body_location: "body",
+          marking_type: "type",
+          marking_type_id: "1",
           material: "mmm",
           capture_id: null,
           mortality_id: null,
+          primary_colour_id: "1",
+          secondary_colour_id: "2",
+          text_colour_id: "2",
           primary_colour: null,
           secondary_colour: null,
           text_colour: null,
@@ -566,6 +582,9 @@ describe("xref-repository", () => {
             longitude: null,
             coordinate_uncertainty: null,
             coordinate_uncertainty_unit: "m",
+            wmu_id: "1",
+            region_nr_id: "1",
+            region_env_id: "1",
             elevation: null,
             temperature: null,
             location_comment: null,
@@ -574,6 +593,9 @@ describe("xref-repository", () => {
             location_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
             latitude: null,
             longitude: null,
+            wmu_id: "1",
+            region_nr_id: "1",
+            region_env_id: "1",
             coordinate_uncertainty: null,
             coordinate_uncertainty_unit: "m",
             elevation: null,
@@ -610,6 +632,9 @@ describe("xref-repository", () => {
             location_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
             latitude: null,
             longitude: null,
+            wmu_id: "1",
+            region_nr_id: "1",
+            region_env_id: "1",
             coordinate_uncertainty: null,
             coordinate_uncertainty_unit: "m",
             elevation: null,
@@ -648,6 +673,7 @@ describe("xref-repository", () => {
         {
           measurement_qualitative_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
           taxon_measurement_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
+          qualitative_option_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
           capture_id: null,
           mortality_id: null,
           measurement_name: "name",
@@ -678,6 +704,8 @@ describe("xref-repository", () => {
       const mockResult: IDetailedCritterCollectionUnit[] = [
         {
           critter_collection_unit_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
+          collection_category_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
+          collection_unit_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
           unit_name: "name",
           category_name: "name",
         },
@@ -702,6 +730,7 @@ describe("xref-repository", () => {
     it("should find critter parents successfully", async () => {
       const mockResult: IDetailedCritterParent[] = [
         {
+          family_label: "blah",
           family_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
           parent_critter_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
         },
@@ -726,6 +755,7 @@ describe("xref-repository", () => {
     it("should find critter children successfully", async () => {
       const mockResult: IDetailedCritterChild[] = [
         {
+          family_label: "blah",
           family_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
           child_critter_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
         },
