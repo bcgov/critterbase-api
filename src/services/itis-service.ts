@@ -121,7 +121,7 @@ export class ItisService extends ExternalService {
   }
 
   /**
-   * Retrieves the taxon hierarchy ABOVE the provided TSN (includes provied TSN taxon).
+   * Retrieves the taxon hierarchy ABOVE the provided TSN (includes provided TSN taxon).
    * Will not return children below TSN. ie: A species does not return sub-species.
    *
    * @async
@@ -145,20 +145,20 @@ export class ItisService extends ExternalService {
     const solrQuery = uniqueSearchTsns.map((tsn) => `tsn:${tsn}`).join("+");
     const result = await this._itisSolrSearch(solrQuery);
 
-    const tsnHiearchyMap = new Map<number, number[]>();
+    const tsnHierarchyMap = new Map<number, number[]>();
 
     for (const tsn of searchTsns) {
       const solrTaxon = result.find((taxon) => taxon.tsn === String(tsn));
 
       if (solrTaxon) {
-        tsnHiearchyMap.set(
+        tsnHierarchyMap.set(
           tsn,
           this._splitSolrHierarchyStringToArray(solrTaxon.hierarchyTSN[0])
         );
       }
     }
 
-    return tsnHiearchyMap;
+    return tsnHierarchyMap;
   }
 
   /**
