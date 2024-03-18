@@ -1,11 +1,11 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import console from "console";
 import type { Request } from "express";
 import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
 import { FormatParse, ISelect, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./constants";
+
 /**
  ** Formats a prisma error messsage based on the prisma error code
  * @param code string
@@ -18,6 +18,7 @@ const prismaErrorMsg = (
   err: PrismaClientKnownRequestError
 ): { error: string; status: number } => {
   const { meta, message, code } = err;
+
   switch (code) {
     case "P2025":
       return {
@@ -26,23 +27,16 @@ const prismaErrorMsg = (
       };
     case "P2002":
       return {
-        error: `unique constraint failed on the fields: ${
-          typeof meta?.target === "string" ? meta.target : "unknown fields..."
-        }`,
+        error: `unique constraint failed`,
         status: 400,
       };
     case "P2003":
       return {
-        error: `foreign key constraint failed on the field: ${
-          typeof meta?.fieldName === "string"
-            ? meta.fieldName
-            : "unknown field name..."
-        }`,
+        error: `foreign key constraint failed`,
         status: 404,
       };
   }
-  console.log(`NEW PRISMA ERROR: ${JSON.stringify(err)}`);
-  return { error: `unsupported prisma error: "${code}"`, status: 400 };
+  return { error: `request failed at database: "${code}"`, status: 400 };
 };
 
 const intersect = <T>(A: T[], B: T[]): T[] => {
@@ -54,6 +48,9 @@ const sessionHours = (hours: number) => hours * 3600000;
 
 const getFormat = (req: Request): QueryFormats =>
   QueryFormatSchema.parse(req.query).format;
+
+const isSelectFormat = (req: Request) =>
+  getFormat(req) === QueryFormats.asSelect;
 
 type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
 
@@ -69,7 +66,9 @@ const formatParse = async (
   if (!Parser) {
     return serviceData;
   }
-  return isArray ? array(Parser).parse(serviceData) as Record<string, unknown>[] : Parser.parse(serviceData) as Record<string, unknown>;
+  return isArray
+    ? (array(Parser).parse(serviceData) as Record<string, unknown>[])
+    : (Parser.parse(serviceData) as Record<string, unknown>);
 };
 
 const toSelect = <AsType>(
@@ -85,15 +84,17 @@ const toSelect = <AsType>(
   } satisfies ISelect;
 };
 
-const getParentTaxonIds = async (taxon_id: string): Promise<string[]> => {
-  const result: { get_taxon_ids: string[] }[] =
-    await prisma.$queryRaw`SELECT * FROM get_taxon_ids(${taxon_id})`;
-  if (!result.length) {
-    return [];
-  } else {
-    return result[0].get_taxon_ids;
-  }
-};
+const toSelectFormat = <T>(
+  data: T[],
+  idKey: keyof T,
+  valueKey: keyof T
+): ISelect[] =>
+  data.map((item) => ({
+    id: item[idKey] as string,
+    key: idKey as string,
+    value: item[valueKey] as string,
+  }));
+
 //Putting the function here so tests dont run utils each time
 export const prisMock = (
   model: Prisma.ModelName,
@@ -121,5 +122,6 @@ export {
   intersect,
   toSelect,
   ServiceReturn,
-  getParentTaxonIds,
+  isSelectFormat,
+  toSelectFormat,
 };

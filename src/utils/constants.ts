@@ -1,6 +1,4 @@
 import { PrismaClient, user } from "@prisma/client";
-// import { makeApp } from "../server";
-// import { db } from "./database";
 import { QueryFormats } from "./types";
 declare module "express-session" {
   interface SessionData {
@@ -17,6 +15,8 @@ declare global {
       API_KEY: string;
       DB_URL: string;
       AUTHENTICATE: string;
+      ITIS_WEB_SERVICE: string;
+      ITIS_SOLR_SERVICE: string;
     }
   }
 }
@@ -45,14 +45,6 @@ const routes = {
 
 const oneDay = 60 * 60 * 24 * 1000;
 
-const API_KEY_HEADER = "api-key";
-
-const USER_ID_HEADER = "user-id";
-
-const KEYCLOAK_UUID_HEADER = "keycloak-uuid";
-
-const API_KEY = process.env.API_KEY;
-
 const PORT = process.env.PORT;
 
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -62,8 +54,6 @@ const IS_PROD = process.env.NODE_ENV === "production";
 const IS_TEST = process.env.NODE_ENV === "test";
 
 const NO_AUTH = process.env.AUTHENTICATE === "false";
-
-//const request = supertest(makeApp(db));
 
 /**
  * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
@@ -106,13 +96,9 @@ const defaultFormat = QueryFormats.default;
 
 export {
   PORT,
-  API_KEY_HEADER,
-  USER_ID_HEADER,
-  KEYCLOAK_UUID_HEADER,
   IS_DEV,
   IS_PROD,
   IS_TEST,
-  API_KEY,
   NO_AUTH,
   prisma,
   // request,

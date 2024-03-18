@@ -5,10 +5,7 @@ import type {
   family_child,
   family_parent,
 } from "@prisma/client";
-import {
-  FamilyUpdate,
-  ImmediateFamily,
-} from "./family.utils";
+import { FamilyUpdate, ImmediateFamily } from "./family.utils";
 import { PrismaTransactionClient } from "../../utils/types";
 
 const getAllFamilies = async (): Promise<family[]> => {

@@ -11,10 +11,10 @@ import { apiError } from "../../utils/types";
 const createUser = async (newUserData: UserCreateInput): Promise<user> => {
   const existingUser = await prisma.user.findFirst({
     where: {
-      keycloak_uuid: newUserData.keycloak_uuid
-    }
+      keycloak_uuid: newUserData.keycloak_uuid,
+    },
   });
-  if(existingUser) {
+  if (existingUser) {
     return existingUser;
   }
   const newUser = await prisma.user.create({ data: newUserData });
@@ -26,12 +26,12 @@ const createUser = async (newUserData: UserCreateInput): Promise<user> => {
  * @param {UserCreateInput} newUserData - The user data to be upserted
  */
 const upsertUser = async (newUserData: UserCreateInput): Promise<user> => {
-  if(!newUserData.keycloak_uuid) {
-    throw apiError.requiredProperty('keycloak_uuid');
+  if (!newUserData.keycloak_uuid) {
+    throw apiError.requiredProperty("keycloak_uuid");
   }
   const newUser = await prisma.user.upsert({
     where: {
-      keycloak_uuid: newUserData.keycloak_uuid
+      keycloak_uuid: newUserData.keycloak_uuid,
     },
     update: newUserData,
     create: newUserData,

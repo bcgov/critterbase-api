@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  frequency_unit,
-  marking,
-  Prisma
-} from "@prisma/client";
+import { frequency_unit, marking, Prisma } from "@prisma/client";
 import { z, ZodString } from "zod";
 import {
   DeleteSchema,
@@ -142,11 +138,9 @@ const markingResponseSchema = ResponseSchema.transform((obj) => {
   };
 });
 
-
-
 //Validate incoming request body for create marking
 const MarkingCreateBodySchema = implement<
-  Omit<Prisma.markingCreateManyInput, "marking_id" | keyof AuditColumns>
+  Omit<Prisma.markingCreateManyInput, "marking_id" | AuditColumns>
 >().with(
   markingSchema
     .omit({ ...noAudit, marking_id: true })
@@ -177,8 +171,8 @@ const MarkingDeleteSchema = markingSchema
   .extend(DeleteSchema.shape);
 
 const MarkingVerificationSchema = z.object({
-  taxon_id: zodID,
-  markings: z.array(markingSchema.partial().required({marking_id: true, taxon_marking_body_location_id: true}))
+  itis_tsn: z.number(),
+  markings: z.array(markingSchema.partial().required({ marking_id: true })),
 });
 
 export {
@@ -197,5 +191,5 @@ export type {
   MarkingUpdateInput,
   MarkingIncludes,
   FormattedMarking,
-  MarkingVerificationType
+  MarkingVerificationType,
 };

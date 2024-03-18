@@ -18,7 +18,7 @@ export const MarkingRouter = (db: ICbDatabase) => {
 
   /**
    ** Marking Router Home
-  */
+   */
   markingRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
@@ -30,7 +30,7 @@ export const MarkingRouter = (db: ICbDatabase) => {
 
   /**
    ** Create new marking
-  */
+   */
   markingRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
@@ -55,17 +55,22 @@ export const MarkingRouter = (db: ICbDatabase) => {
     })
   );
 
-  markingRouter.post("/verify",
+  markingRouter.post(
+    "/verify",
     catchErrors(async (req: Request, res: Response) => {
-      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(req.body);
-      const problems = await db.verifyMarkingsAgainstTaxon(parsed.taxon_id, parsed.markings);
-      return res.status(200).json({verified: problems.length === 0, invalid_markings: problems});
-    }
-  ));
+      const parsed: MarkingVerificationType = MarkingVerificationSchema.parse(
+        req.body
+      );
+      const response =
+        await db.markingService.verifyMarkingsCanBeAssignedToTsn(parsed);
+
+      return res.status(200).json(response);
+    })
+  );
 
   /**
    ** All marking_id related routes
-  */
+   */
   markingRouter
     .route("/:id")
     .all(
@@ -98,5 +103,5 @@ export const MarkingRouter = (db: ICbDatabase) => {
         return res.status(200).json(deleted);
       })
     );
-    return markingRouter;
-}
+  return markingRouter;
+};

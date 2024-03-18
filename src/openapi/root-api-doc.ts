@@ -1,4 +1,3 @@
-
 // ! A Lot of stuff in here is just a placeholder for now. Will be updated as we go along.
 export const rootAPIDoc = {
   openapi: "3.0.0",
@@ -138,6 +137,6 @@ export const rootAPIDoc = {
 
 // Options for the swagger docs
 export const options = {
-    apis: ["./src/api/**/*.ts"],
-    swaggerDefinition: rootAPIDoc,
-  };
+  apis: ["./src/api/**/*.ts"],
+  swaggerDefinition: rootAPIDoc,
+};

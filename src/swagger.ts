@@ -6,12 +6,7 @@ import { bulkPaths } from "./api/bulk/bulk.swagger";
 import { artifactPaths } from "./api/artifact/artifact.swagger";
 import { locationPaths } from "./api/location/location.swagger";
 import { userPaths } from "./api/user/user.swagger";
-import {
-  API_KEY_HEADER,
-  KEYCLOAK_UUID_HEADER,
-  PORT,
-  USER_ID_HEADER,
-} from "./utils/constants";
+import { PORT } from "./utils/constants";
 import { accessPaths } from "./api/access/access.swagger";
 import { enumPaths, lookupSchemas } from "./api/lookup/lookup.swagger";
 import { markingPaths } from "./api/marking/marking.swagger";
@@ -28,31 +23,22 @@ const document = createDocument({
       ...lookupSchemas,
       ...xrefSchemas,
     },
+    //TODO: add keycloak authentication into securitySchemes for service accounts.
     securitySchemes: {
-      apiKeyAuth: {
+      userAuth: {
         type: "apiKey",
         in: "header",
-        name: API_KEY_HEADER,
-        description: `A valid uuid for header: '${API_KEY_HEADER}' must be provided`,
-      },
-      userIdAuth: {
-        type: "apiKey",
-        in: "header",
-        name: USER_ID_HEADER,
-        description: `This header is used to identify the user. A valid uuid for header: '${USER_ID_HEADER}' must be provided`,
-      },
-      keycloakUuidAuth: {
-        type: "apiKey",
-        in: "header",
-        name: KEYCLOAK_UUID_HEADER,
-        description: `This header is used for user identification with Keycloak. A valid Keycloak uuid for header: '${KEYCLOAK_UUID_HEADER}' must be provided`,
+        name: "user",
+        description: `
+          Key value pair for keycloak_guid and username.This header is used to identify specific users from external systems that authenticate with keycloak service account.
+          example: {"keycloak_guid":"0000ABC0000CBD0000EFG","username":"John Smith"}`,
       },
     },
   },
   info: {
     title: "Critterbase API",
     version: "1.0.0",
-    description: "A simple demo for zod-openapi",
+    description: "BCGov Critterbase API",
     license: {
       name: "MIT",
     },
@@ -71,11 +57,11 @@ const document = createDocument({
     ...enumPaths,
     ...xrefPaths,
     ...familyPaths,
-    ...measurementPaths
+    ...measurementPaths,
   },
   servers: [
     {
-      url: PORT ? `http://localhost:${PORT}` : "http://localhost:3000",
+      url: PORT ? `http://localhost:${PORT}` : "http://localhost:9000",
       description: "local api via node",
     },
     {
@@ -93,12 +79,9 @@ const document = createDocument({
   ],
   security: [
     {
-      apiKeyAuth: [],
-      userIdAuth: [],
-      keycloakUuidAuth: [],
+      userAuth: [],
     },
   ],
 });
 
-//console.log(stringify(document));
 export const yaml = document;
