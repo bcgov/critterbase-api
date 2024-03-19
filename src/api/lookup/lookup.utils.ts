@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {
-  Prisma,
   lk_collection_category,
   lk_colour,
   lk_marking_material,
   lk_marking_type,
   lk_region_env,
   lk_region_nr,
-  lk_taxon,
   lk_wildlife_management_unit,
 } from "@prisma/client";
-import { z } from "zod";
 import { toSelect } from "../../utils/helper_functions";
 import { FormatParse } from "../../utils/types";
 import { ResponseSchema } from "../../utils/zod_helpers";
@@ -95,44 +92,6 @@ const collectionUnitCategoriesFormats: FormatParse = {
   },
 };
 
-const taxonFormats: FormatParse = {
-  asSelect: {
-    schema: ResponseSchema.transform((val) => {
-      const { taxon_id, taxon_name_common, taxon_name_latin } = val as lk_taxon;
-      return {
-        key: Object.keys({ taxon_id })[0], //This helps to ensure the key is correctly named with schema
-        id: taxon_id,
-        value: taxon_name_common ?? taxon_name_latin,
-      };
-    }),
-  },
-};
-
-const CollectionCategoriesByTaxonIdSchema = z
-  .object({
-    taxon_id: z.string().optional(),
-  })
-  .passthrough();
-
-//Prisma includes/selects/wheres
-const taxonSpeciesAndSubsWhere = {
-  where: {
-    OR: [
-      {
-        genus_id: {
-          not: null,
-        },
-        species_id: null,
-      },
-      {
-        species_id: {
-          not: null,
-        },
-        sub_species_id: null,
-      },
-    ],
-  } satisfies Prisma.lk_taxonWhereInput,
-};
 export {
   regionEnvFormats,
   regionNrFormats,
@@ -141,8 +100,5 @@ export {
   markingMaterialsFormats,
   markingTypesFormats,
   collectionUnitCategoriesFormats,
-  taxonFormats,
-  taxonSpeciesAndSubsWhere,
-  CollectionCategoriesByTaxonIdSchema,
   colourFormats,
 };

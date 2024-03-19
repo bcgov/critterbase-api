@@ -45,7 +45,8 @@ const getCaptures: ZodOpenApiOperationObject = {
 
 const createCapture: ZodOpenApiOperationObject = {
   operationId: "createCapture",
-  summary: "Creates a new capture event. Note that it is possible to nest location creation data here, which will automatically create and link location rows to this capture.",
+  summary:
+    "Creates a new capture event. Note that it is possible to nest location creation data here, which will automatically create and link location rows to this capture.",
   tags: [TAG],
   requestBody: {
     content: {

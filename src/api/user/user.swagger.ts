@@ -6,7 +6,12 @@ import {
   UserUpdateBodySchema,
   SwagUserSchema,
 } from "./user.utils";
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from "../../utils/swagger_helpers";
+import {
+  SwagDesc,
+  SwagErr,
+  SwagNotFound,
+  SwagUnauthorized,
+} from "../../utils/swagger_helpers";
 import { routes } from "../../utils/constants";
 
 const TAG = "User";
@@ -122,7 +127,7 @@ const deleteUser: ZodOpenApiOperationObject = {
     },
     ...SwagErr,
     ...SwagNotFound,
-    ...SwagUnauthorized
+    ...SwagUnauthorized,
   },
 };
 

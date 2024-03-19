@@ -9,18 +9,17 @@ import {
   frequency_unit,
   measurement_unit,
 } from "@prisma/client";
-import { eCritterStatus } from "../critter/critter.utils";
-import { PrismaTransactionClient } from "../../utils/types";
 import { prisma } from "../../utils/constants";
 import {
-  getBodyLocationByNameAndTaxonUUID,
+  getBodyLocationByNameAndTsn,
   getColourByName,
   getMarkingTypeByName,
 } from "./lookup.service";
 import { codFormats } from "./lookup.utils";
+import { eCritterStatus } from "../../schemas/critter-schema";
 
-const mockDB: Partial<Record<keyof ICbDatabase, any>> = {};
-const request = supertest(makeApp(mockDB));
+const mockDB = {};
+const request = supertest(makeApp(mockDB as any));
 const mockVal: any = { value: true };
 const prismaMock = (
   model: Prisma.ModelName,
@@ -52,9 +51,9 @@ describe("API: Lookup", () => {
       expect(data.value).toBe(true);
       expect(mock.mock.calls.length).toBe(1);
     });
-    it(getBodyLocationByNameAndTaxonUUID.name, async () => {
+    it(getBodyLocationByNameAndTsn.name, async () => {
       const mock = prismaMock("xref_taxon_marking_body_location", "findFirst");
-      const data: any = await getBodyLocationByNameAndTaxonUUID("name", "uuid");
+      const data: any = await getBodyLocationByNameAndTsn("name", 1);
       expect(data.value).toBe(true);
       expect(mock.mock.calls.length).toBe(1);
     });
@@ -105,8 +104,6 @@ describe("API: Lookup", () => {
           route: "/collection-unit-categories",
           mock: prismaMock("lk_collection_category"),
         },
-        { route: "/taxons", mock: prismaMock("lk_taxon") },
-        { route: "/taxons/species", mock: prismaMock("lk_taxon") },
       ];
       it("should return status 200 and a value for each lookup route optionally formatted asSelect", async () => {
         for (const req of l) {

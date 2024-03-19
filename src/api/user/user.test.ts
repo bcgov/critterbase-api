@@ -166,7 +166,7 @@ describe("API: User", () => {
     describe("setUserContext()", () => {
       it("sets the user context with provided user_id and system_name", async () => {
         queryRaw.mockResolvedValue([{ api_set_context: ID }]);
-        const result = await _setUserContext(ID, 'CRITTERBASE');
+        const result = await _setUserContext(ID, "CRITTERBASE");
         expect.assertions(3);
         expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
         expect(result).toBeDefined();
@@ -271,7 +271,7 @@ describe("API: User", () => {
         });
         const res = await request
           .patch(`/api/users/${ID}`)
-          .send({ user_identifier: 'CRITTERBASE' });
+          .send({ user_identifier: "CRITTERBASE" });
         expect.assertions(2);
         expect(updateUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(404);
@@ -291,7 +291,7 @@ describe("API: User", () => {
         updateUser.mockResolvedValue(RETURN_USER);
         const res = await request
           .patch(`/api/users/${ID}`)
-          .send({ user_identifier: 'CRITTERBASE' });
+          .send({ user_identifier: "CRITTERBASE" });
         expect.assertions(2);
         expect(updateUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(200);
@@ -301,7 +301,7 @@ describe("API: User", () => {
         updateUser.mockResolvedValue(RETURN_USER);
         const res = await request
           .patch(`/api/users/${ID}`)
-          .send({ user_identifier: 'CRITTERBASE' });
+          .send({ user_identifier: "CRITTERBASE" });
         expect.assertions(2);
         expect(updateUser.mock.calls.length).toBe(1);
         expect(UserSchema.safeParse(res.body).success).toBe(true);

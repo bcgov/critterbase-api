@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { catchErrors } from "../../utils/middleware";
 import { UserCreateBodySchema } from "../user/user.utils";
-
+import swaggerUIExpress from "swagger-ui-express";
 import { Prisma } from "@prisma/client";
+import { yaml } from "../../swagger";
 import express from "express";
 import { ICbDatabase } from "../../utils/database";
 import { authenticateRequest } from "../../authentication/auth";
@@ -11,21 +12,35 @@ export const AccessRouter = (db: ICbDatabase) => {
   const accessRouter = express.Router();
 
   /**
-   ** Logs basic details about the current supported routes
-   * @params All four express params.
+   * Swagger API documentation.
+   *
+   */
+  accessRouter.use(
+    "/swagger",
+    swaggerUIExpress.serve,
+    swaggerUIExpress.setup(yaml)
+  );
+
+  /**
+   * Welcome to Critterbase home endpoint.
+   *
    */
   accessRouter.get("/", (req: Request, res: Response) => {
     return res.status(200).json("Welcome to Critterbase API");
   });
 
   /**
-   ** Signup endpoint
+   * Signup endpoint
+   *
    */
   accessRouter.post(
     "/signup",
     catchErrors(async (req: Request, res: Response) => {
       const kc = await authenticateRequest(req);
-      const parsedUser = UserCreateBodySchema.parse({user_identifier: kc.identifier, keycloak_uuid: kc.keycloak_uuid});
+      const parsedUser = UserCreateBodySchema.parse({
+        user_identifier: kc.identifier,
+        keycloak_uuid: kc.keycloak_uuid,
+      });
       await db.createUser(parsedUser);
       const contextUserId = await db.setUserContext(
         kc.keycloak_uuid,

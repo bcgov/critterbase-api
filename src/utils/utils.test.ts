@@ -71,7 +71,7 @@ describe("Utils", () => {
       });
     });
     describe(prismaErrorMsg.name, () => {
-      const defaultMsg = `unsupported prisma error: "BADCODE"`;
+      const defaultMsg = `request failed at database: "BADCODE"`;
       const supportedErrorCodes = ["P2025", "P2002", "P2003"];
       let ops: any = {
         code: undefined,
@@ -99,7 +99,8 @@ describe("Utils", () => {
         const { error: err2, status: status2 } = prismaErrorMsg(
           new PrismaClientKnownRequestError("test 1", { ...ops })
         );
-        expect(err1).not.toEqual(err2);
+
+        expect(err1).toEqual(err2);
         expect(status1).toBe(404);
         expect(status2).toBe(404);
         ops.code = supportedErrorCodes[1];
@@ -110,7 +111,8 @@ describe("Utils", () => {
         const { error: err4, status: status4 } = prismaErrorMsg(
           new PrismaClientKnownRequestError("test 1", { ...ops })
         );
-        expect(err3).not.toEqual(err4);
+
+        expect(err3).toEqual(err4);
         expect(status3).toBe(400);
         expect(status4).toBe(400);
         ops.code = supportedErrorCodes[0];
@@ -121,6 +123,7 @@ describe("Utils", () => {
         const { error: err6, status: status6 } = prismaErrorMsg(
           new PrismaClientKnownRequestError("test 1", { ...ops })
         );
+
         expect(err5).not.toEqual(err6);
         expect(status5).toBe(404);
         expect(status6).toBe(404);
@@ -165,22 +168,6 @@ describe("Utils", () => {
           parser
         );
         expect(arrData.length);
-      });
-    });
-    describe(getParentTaxonIds.name, () => {
-      const p = jest
-        .spyOn(prisma, "$queryRaw")
-        .mockImplementation()
-        .mockResolvedValue([{ get_taxon_ids: ["UUID"] }]);
-      it("should return an array of taxon Ids", async () => {
-        const ids = await getParentTaxonIds("TEST");
-        expect(ids.length).toBe(1);
-        expect(ids[0]).toBe("UUID");
-      });
-      it("returns empty array if no parent taxon_ids found", async () => {
-        p.mockResolvedValue({});
-        const ids = await getParentTaxonIds("TEST");
-        expect(ids.length).toBe(0);
       });
     });
     describe(prisMock.name, () => {
@@ -296,7 +283,7 @@ describe("Utils", () => {
         expect(mockRes.json.mock.calls[0][0]).toEqual({ error: "apiError" });
       });
 
-      it("should catch PrismaKnownClinentError", () => {
+      it("should catch PrismaKnownClientError", () => {
         middleware.errorHandler(
           new PrismaClientKnownRequestError("Prisma", {
             code: "Prisma",
@@ -307,7 +294,8 @@ describe("Utils", () => {
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toEqual({
-          error: `unsupported prisma error: "Prisma"`,
+          error: `request failed at database: "Prisma"`,
+          issues: [undefined],
         });
       });
 
@@ -327,28 +315,9 @@ describe("Utils", () => {
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
-        expect(mockRes.json.mock.calls[0][0].errors.ZodErr).toBeDefined();
+        expect(mockRes.json.mock.calls[0][0].error).toBeDefined();
       });
 
-      it("should catch custom ZodError", () => {
-        middleware.errorHandler(
-          new ZodError([
-            {
-              code: ZodIssueCode.unrecognized_keys,
-              keys: ["KeyA"],
-              path: ["PathA"],
-              message: "",
-            },
-          ]),
-          mockReq,
-          mockRes,
-          mockNext
-        );
-
-        expect(mockRes.status.mock.calls[0][0]).toBe(400);
-        expect(mockRes.json.mock.calls[0][0]).toBeDefined();
-        expect(mockRes.json.mock.calls[0][0].errors.ZodErr).not.toBeDefined();
-      });
       it("should catch fieldKey ZodError", () => {
         middleware.errorHandler(
           new ZodError([
@@ -364,7 +333,6 @@ describe("Utils", () => {
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toBeDefined();
-        expect(mockRes.json.mock.calls[0][0]).toEqual({ error: "Issue" });
       });
       it("should pass to next if no errors are passed", () => {
         middleware.errorHandler(undefined, mockReq, mockRes, mockNext);

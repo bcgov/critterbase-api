@@ -10,12 +10,11 @@ import {
 import { ICbDatabase } from "../../utils/database";
 
 export const MortalityRouter = (db: ICbDatabase) => {
-
   const mortalityRouter = express.Router();
 
   /**
    ** Mortality Router Home
-  */
+   */
   mortalityRouter.get(
     "/",
     catchErrors(async (req: Request, res: Response) => {
@@ -26,7 +25,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
 
   /**
    ** Create new mortality
-  */
+   */
   mortalityRouter.post(
     "/create",
     catchErrors(async (req: Request, res: Response) => {
@@ -81,4 +80,4 @@ export const MortalityRouter = (db: ICbDatabase) => {
       })
     );
   return mortalityRouter;
-}
+};

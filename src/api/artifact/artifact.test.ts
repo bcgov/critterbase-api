@@ -86,7 +86,8 @@ const request = supertest(
     createArtifact,
     deleteArtifact,
     getCritterById,
-  } as Record<keyof ICbDatabase, any>)
+    critterService: { getCritterById },
+  } as unknown as Record<keyof ICbDatabase, any>)
 );
 
 beforeEach(() => {

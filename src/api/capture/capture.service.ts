@@ -19,9 +19,7 @@ const getCaptureById = async (capture_id: string): Promise<capture | null> => {
   return capture;
 };
 
-const getCaptureByCritter = async (
-  critter_id: string
-): Promise<capture[]> => {
+const getCaptureByCritter = async (critter_id: string): Promise<capture[]> => {
   await prisma.critter.findUniqueOrThrow({
     where: {
       critter_id: critter_id,
@@ -56,15 +54,15 @@ const createCapture = async (capture_data: CaptureCreate) => {
             connect: { location_id: capture_location_id },
           }
         : capture_location
-        ? { create: capture_location }
-        : undefined,
+          ? { create: capture_location }
+          : undefined,
       location_capture_release_location_idTolocation: release_location_id
         ? {
             connect: { location_id: release_location_id },
           }
         : release_location
-        ? { create: release_location }
-        : undefined,
+          ? { create: release_location }
+          : undefined,
       ...rest,
     },
   });
@@ -75,62 +73,80 @@ const updateCapture = async (
   capture_data: CaptureUpdate,
   prismaOverride?: PrismaTransactionClient
 ): Promise<capture | null> => {
-  const { capture_location, release_location, critter_id, capture_location_id, release_location_id, force_create_release, ...rest } = capture_data;
-  const c_upsertBody = {create: {}, update: {}};
-  const r_upsertBody = {create: {}, update: {}};
-  if(capture_location) {
-      const {location_id, ...others} = capture_location;
-      c_upsertBody.create = {...others};
-      c_upsertBody.update = {location_id, ...others};
+  const {
+    capture_location,
+    release_location,
+    critter_id,
+    capture_location_id,
+    release_location_id,
+    force_create_release,
+    ...rest
+  } = capture_data;
+  const c_upsertBody = { create: {}, update: {} };
+  const r_upsertBody = { create: {}, update: {} };
+  if (capture_location) {
+    const { location_id, ...others } = capture_location;
+    c_upsertBody.create = { ...others };
+    c_upsertBody.update = { location_id, ...others };
   }
-  if(release_location) {
-      const {location_id, ...others} = release_location;
-      r_upsertBody.create = {...others};
-      r_upsertBody.update = {location_id, ...others};
+  if (release_location) {
+    const { location_id, ...others } = release_location;
+    r_upsertBody.create = { ...others };
+    r_upsertBody.update = { location_id, ...others };
   }
 
   const client = prismaOverride ?? prisma;
 
   return await client.capture.update({
-      where: { capture_id: capture_id },
-      data: {
-          location_capture_capture_location_idTolocation: capture_location ? {
-              upsert: c_upsertBody
-          } : undefined,
-          location_capture_release_location_idTolocation: release_location ? 
-          (force_create_release 
-          ? 
-          {
-              create: r_upsertBody.create
-          } : {
-              upsert: r_upsertBody
-          }) : undefined,
-          ...rest
-      }
+    where: { capture_id: capture_id },
+    data: {
+      location_capture_capture_location_idTolocation: capture_location
+        ? {
+            upsert: c_upsertBody,
+          }
+        : undefined,
+      location_capture_release_location_idTolocation: release_location
+        ? force_create_release
+          ? {
+              create: r_upsertBody.create,
+            }
+          : {
+              upsert: r_upsertBody,
+            }
+        : undefined,
+      ...rest,
+    },
   });
 };
 
-const deleteCapture = async (capture_id: string, prismaOverride?: PrismaTransactionClient): Promise<capture | null> => {
+const deleteCapture = async (
+  capture_id: string,
+  prismaOverride?: PrismaTransactionClient
+): Promise<capture | null> => {
   const client = prismaOverride ?? prisma;
   const capture = await client.capture.findUniqueOrThrow({
     where: {
-      capture_id: capture_id
-    }
+      capture_id: capture_id,
+    },
   });
   const captureRes = await client.capture.delete({
     where: {
       capture_id: capture_id,
     },
   });
-  if(capture.capture_location_id) {
+  if (capture.capture_location_id) {
     await client.location.delete({
-      where: {location_id: capture.capture_location_id}
-    })
+      where: { location_id: capture.capture_location_id },
+    });
   }
-  if(capture.release_location_id && capture.capture_location_id !== capture.release_location_id) { //If using same location the row is already deleted by the above call.
+  if (
+    capture.release_location_id &&
+    capture.capture_location_id !== capture.release_location_id
+  ) {
+    //If using same location the row is already deleted by the above call.
     await client.location.delete({
-      where: {location_id: capture.release_location_id}
-    })
+      where: { location_id: capture.release_location_id },
+    });
   }
   return captureRes;
 };
