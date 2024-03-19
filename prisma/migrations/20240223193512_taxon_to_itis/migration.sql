@@ -92,7 +92,8 @@ DROP VIEW IF EXISTS lk_taxon_w_level;
 -- AlterTable
 ALTER TABLE "critter" DROP COLUMN IF EXISTS "taxon_id",
 ADD COLUMN     IF NOT EXISTS "itis_scientific_name" TEXT NOT NULL,
-ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER NOT NULL;
+ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER NOT NULL,
+ALTER COLUMN "itis_scientific_name" SET DEFAULT "UNKNOWN";
 
 -- AlterTable
 ALTER TABLE "mortality" DROP COLUMN IF EXISTS "proximate_predated_by_taxon_id",
