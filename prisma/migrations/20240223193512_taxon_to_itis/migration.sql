@@ -105,7 +105,7 @@ ALTER TABLE "xref_taxon_collection_category" DROP CONSTRAINT IF EXISTS "xref_tax
 DROP COLUMN IF EXISTS "taxon_id",
 ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER NOT NULL,
 ALTER COLUMN "collection_category_id" SET DEFAULT crypto.gen_random_uuid(),
-ADD CONSTRAINT IF NOT EXISTS "xref_taxon_collection_category_pk" PRIMARY KEY ("collection_category_id");
+ADD CONSTRAINT "xref_taxon_collection_category_pk" PRIMARY KEY ("collection_category_id");
 
 -- AlterTable
 ALTER TABLE "xref_taxon_marking_body_location" DROP COLUMN IF EXISTS "taxon_id",
