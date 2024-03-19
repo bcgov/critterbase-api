@@ -17,7 +17,7 @@ interface ICollectionUnitSeed {
  */
 export const seedTaxonCollectionCategory = async (
   categoryId: string,
-  tsn: number,
+  tsn: number
 ) => {
   console.log(`Seeding (1) collection category for: '${ITIS_TSN[tsn]}'...`);
 
@@ -40,7 +40,7 @@ export const seedTaxonCollectionCategory = async (
  */
 export const seedTaxonCollectionUnits = async (
   categoryId: string,
-  units: string[],
+  units: string[]
 ) => {
   console.log(`Seeding (${units.length}) collection units...`);
 
@@ -73,13 +73,13 @@ export const seedTaxonQualitativeMeasurements = async () => {
     },
     {
       name: "Juvenile at heel indicator",
-      itis_tsn: ITIS_TSN.MAMMALIA,
+      itis_tsn: ITIS_TSN.ANIMALIA,
       options: ["False", "True"],
     },
   ];
 
   console.log(
-    `Seeding (${measurements.length}) qualitative measurements and options...`,
+    `Seeding (${measurements.length}) qualitative measurements and options...`
   );
 
   // Create qualitative measurements and associated options
@@ -108,8 +108,8 @@ export const seedTaxonQualitativeMeasurements = async () => {
  */
 export const seedTaxonQuantitativeMeasurements = async () => {
   const measurements = [
-    { name: "Estimated age", itis_tsn: ITIS_TSN.MAMMALIA },
-    { name: "Juvenile count", itis_tsn: ITIS_TSN.MAMMALIA },
+    { name: "Estimated age", itis_tsn: ITIS_TSN.ANIMALIA },
+    { name: "Juvenile count", itis_tsn: ITIS_TSN.ANIMALIA },
   ];
 
   console.log(`Seeding (${measurements.length}) quantitative measurements...`);
@@ -138,7 +138,7 @@ export const seedTaxonBodyLocations = async () => {
 
   await prisma.xref_taxon_marking_body_location.createMany({
     data: bodyLocations.map((location) => {
-      return { itis_tsn: ITIS_TSN.CARIBOU, body_location: location };
+      return { itis_tsn: ITIS_TSN.ANIMALIA, body_location: location };
     }),
   });
 };

@@ -120,7 +120,7 @@ ALTER TABLE "xref_taxon_measurement_quantitative" DROP COLUMN "taxon_id",
 ADD COLUMN     "itis_tsn" INTEGER NOT NULL;
 
 -- Patch TSN's
--- Animalia 
+-- Animalia
 UPDATE critter a                             SET itis_tsn                       = 202423 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Animalia';
 UPDATE xref_taxon_collection_category a      SET itis_tsn                       = 202423 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Animalia';
 UPDATE xref_taxon_marking_body_location a    SET itis_tsn                       = 202423 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Animalia';
@@ -256,13 +256,40 @@ UPDATE mortality a                           SET proximate_predated_by_itis_tsn 
 UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180541 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus';
 
 -- Usrsus arctos
-UPDATE critter a                             SET itis_tsn                       = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
-UPDATE xref_taxon_collection_category a      SET itis_tsn                       = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
-UPDATE xref_taxon_marking_body_location a    SET itis_tsn                       = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
-UPDATE xref_taxon_measurement_qualitative a  SET itis_tsn                       = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
-UPDATE xref_taxon_measurement_quantitative a SET itis_tsn                       = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
-UPDATE mortality a                           SET proximate_predated_by_itis_tsn = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
-UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180543 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE critter a                             SET itis_tsn                       = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE xref_taxon_collection_category a      SET itis_tsn                       = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE xref_taxon_marking_body_location a    SET itis_tsn                       = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE xref_taxon_measurement_qualitative a  SET itis_tsn                       = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE xref_taxon_measurement_quantitative a SET itis_tsn                       = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE mortality a                           SET proximate_predated_by_itis_tsn = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 202385 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Ursus arctos';
+
+-- Bovidae
+UPDATE critter a                             SET itis_tsn                       = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+UPDATE xref_taxon_collection_category a      SET itis_tsn                       = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+UPDATE xref_taxon_marking_body_location a    SET itis_tsn                       = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+UPDATE xref_taxon_measurement_qualitative a  SET itis_tsn                       = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+UPDATE xref_taxon_measurement_quantitative a SET itis_tsn                       = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+UPDATE mortality a                           SET proximate_predated_by_itis_tsn = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180704 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bovidae';
+
+-- Bison
+UPDATE critter a                             SET itis_tsn                       = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+UPDATE xref_taxon_collection_category a      SET itis_tsn                       = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+UPDATE xref_taxon_marking_body_location a    SET itis_tsn                       = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+UPDATE xref_taxon_measurement_qualitative a  SET itis_tsn                       = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+UPDATE xref_taxon_measurement_quantitative a SET itis_tsn                       = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+UPDATE mortality a                           SET proximate_predated_by_itis_tsn = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180705 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison';
+
+-- Bison bison
+UPDATE critter a                             SET itis_tsn                       = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
+UPDATE xref_taxon_collection_category a      SET itis_tsn                       = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
+UPDATE xref_taxon_marking_body_location a    SET itis_tsn                       = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
+UPDATE xref_taxon_measurement_qualitative a  SET itis_tsn                       = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
+UPDATE xref_taxon_measurement_quantitative a SET itis_tsn                       = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
+UPDATE mortality a                           SET proximate_predated_by_itis_tsn = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
+UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
 
 -- DropTable
 DROP TABLE "lk_taxon";
