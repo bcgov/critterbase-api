@@ -94,8 +94,6 @@ ALTER TABLE "critter" DROP COLUMN IF EXISTS "taxon_id",
 ADD COLUMN     IF NOT EXISTS "itis_scientific_name" TEXT NOT NULL,
 ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER NOT NULL;
 
-ALTER TABLE "critter" ALTER COLUMN "itis_scientific_name" SET DEFAULT 'UNKNOWN';
-
 -- AlterTable
 ALTER TABLE "mortality" DROP COLUMN IF EXISTS "proximate_predated_by_taxon_id",
 DROP COLUMN "ultimate_predated_by_taxon_id",
@@ -210,7 +208,7 @@ UPDATE xref_taxon_measurement_qualitative a  SET itis_tsn                       
 UPDATE xref_taxon_measurement_quantitative a SET itis_tsn                       = 180701 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Rangifer tarandus';
 UPDATE mortality a                           SET proximate_predated_by_itis_tsn = 180701 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Rangifer tarandus';
 UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180701 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Rangifer tarandus';
-UPDATE critter a                             SET itis_scientific_name           = 'Rangifer tarandus' FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Rangier tarandus';
+UPDATE critter a                             SET itis_scientific_name           = 'Rangifer tarandus' FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Rangifer tarandus';
 
 -- Carnivora
 UPDATE critter a                             SET itis_tsn                       = 180539 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Carnivora';
