@@ -7,3 +7,4 @@ dist
 .npm
 .cache
 .ash_history
+ts-traces

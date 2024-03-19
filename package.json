@@ -11,6 +11,8 @@
     "build": "tsc",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
+    "trace": "tsc --noEmit --extendedDiagnostics --generateTrace ./ts-traces",
+    "trace:analyze": "npx @typescript/analyze-trace ts-traces > ./ts-traces/analysis.txt && cat ./ts-traces/analysis.txt",
     "dev": "npx prisma generate && nodemon -r dotenv/config ./src/server.ts",
     "lint": "npx eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix --ignore-pattern 'node_modules' --ext .ts",

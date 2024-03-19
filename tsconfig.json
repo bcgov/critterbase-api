@@ -7,11 +7,12 @@
     "lib": ["esnext"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "target": "es2018"
+    "target": "es2018",
+    "skipLibCheck": true
   },
   "ts-node": {
     "swc": true
   },
   "include": ["src/**/*.ts", "prisma/**/*.ts"],
-  "exclude": ["src/**/*.test.ts", "dist/*"]
+  "exclude": ["node_modules/**", "src/**/*.test.ts", "dist/*"]
 }

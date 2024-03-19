@@ -1,4 +1,3 @@
-import { seedRegions } from "./seed_scripts/seed_regions";
 import { prisma } from "../src/utils/constants";
 import seedUsers from "./seed_scripts/seed_users";
 import {
@@ -21,6 +20,7 @@ import {
 } from "./seed_scripts/seed_constants";
 
 import { seedCritters } from "./seed_scripts/seed_critters";
+import { seedRegions } from "./seed_scripts/seed_regions";
 
 async function main() {
   /**
