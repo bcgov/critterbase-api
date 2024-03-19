@@ -104,7 +104,7 @@ ADD COLUMN     IF NOT EXISTS "ultimate_predated_by_itis_tsn" INTEGER;
 ALTER TABLE "xref_taxon_collection_category" DROP CONSTRAINT IF EXISTS "xref_taxon_collection_category_pk",
 DROP COLUMN IF EXISTS "taxon_id",
 ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER NOT NULL,
-ALTER COLUMN IF NOT EXISTS "collection_category_id" SET DEFAULT crypto.gen_random_uuid(),
+ALTER COLUMN "collection_category_id" SET DEFAULT crypto.gen_random_uuid(),
 ADD CONSTRAINT IF NOT EXISTS "xref_taxon_collection_category_pk" PRIMARY KEY ("collection_category_id");
 
 -- AlterTable
