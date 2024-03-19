@@ -26,21 +26,37 @@ const seedRegions = async () => {
 
   try {
     /**
-     * Dynamically importing the region files to prevent typescript compilation blowing up.
+     * Reading in the region files to prevent typescript compilation from blowing up.
+     * If these files are imported, typescript will try to compile them and run out of memory.
      *
      */
-    nrRegionJson = await fs.readFile("./region_data/ADM_NR_REGIONS_SP.json");
-    envRegionJson = await fs.readFile(
-      "./region_data/EADM_WLAP_REGION_BND_AREA_SVW.json"
+    nrRegionJson = JSON.parse(
+      await fs.readFile(
+        "./prisma/seed_scripts/region_data/ADM_NR_REGIONS_SP.json",
+        "utf8"
+      )
     );
-    wmuJson = await fs.readFile(
-      "./region_data/WAA_WILDLIFE_MGMT_UNITS_SVW.json"
+    envRegionJson = JSON.parse(
+      await fs.readFile(
+        "./prisma/seed_scripts/region_data/EADM_WLAP_REGION_BND_AREA_SVW.json",
+        "utf8"
+      )
     );
-    popUnitJson = await fs.readFile(
-      "./region_data/GCPB_CARIBOU_POPULATION_SP.json"
+    wmuJson = JSON.parse(
+      await fs.readFile(
+        "./prisma/seed_scripts/region_data/WAA_WILDLIFE_MGMT_UNITS_SVW.json",
+        "utf8"
+      )
+    );
+    popUnitJson = JSON.parse(
+      await fs.readFile(
+        "./prisma/seed_scripts/region_data/GCPB_CARIBOU_POPULATION_SP.json",
+        "utf8"
+      )
     );
   } catch (err) {
     console.log(`Issue reading JSON region files. ${err}`);
+    return;
   }
 
   const regionStructureList: RegionStructure[] = [

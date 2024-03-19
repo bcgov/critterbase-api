@@ -310,6 +310,9 @@ UPDATE mortality a                           SET proximate_predated_by_itis_tsn 
 UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
 UPDATE critter a                             SET itis_scientific_name           = 'Bison bison' FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
 
+-- NULL safety check
+UPDATE critter                             SET itis_scientific_name             = 'UNKNOWN' WHERE critter.itis_scientific_name IS NULL;
+
 -- DropTable
 DROP TABLE IF EXISTS "lk_taxon";
 
