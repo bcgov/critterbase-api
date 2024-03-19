@@ -91,8 +91,8 @@ DROP VIEW IF EXISTS lk_taxon_w_level;
 
 -- AlterTable
 ALTER TABLE "critter" DROP COLUMN IF EXISTS "taxon_id",
-ADD COLUMN     IF NOT EXISTS "itis_scientific_name" TEXT NOT NULL,
-ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER NOT NULL;
+ADD COLUMN     IF NOT EXISTS "itis_scientific_name" TEXT,
+ADD COLUMN     IF NOT EXISTS "itis_tsn" INTEGER;
 
 -- AlterTable
 ALTER TABLE "mortality" DROP COLUMN IF EXISTS "proximate_predated_by_taxon_id",
@@ -310,8 +310,6 @@ UPDATE mortality a                           SET proximate_predated_by_itis_tsn 
 UPDATE mortality a                           SET ultimate_predated_by_itis_tsn  = 180706 FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
 UPDATE critter a                             SET itis_scientific_name           = 'Bison bison' FROM lk_taxon WHERE lk_taxon.taxon_name_latin = 'Bison bison';
 
--- NULL safety check
-UPDATE critter                             SET itis_scientific_name             = 'UNKNOWN' WHERE critter.itis_scientific_name IS NULL;
 
 -- DropTable
 DROP TABLE IF EXISTS "lk_taxon";
@@ -321,4 +319,12 @@ DROP TABLE IF EXISTS "lk_taxon";
 DROP TRIGGER IF EXISTS trg_measurement_qualitative_upsert ON measurement_qualitative CASCADE;
 
 DROP TRIGGER IF EXISTS trg_measurement_empirical_tax_upsert ON measurement_quantitative CASCADE;
+
+-- AlterTable
+ALTER TABLE "critter" ALTER COLUMN "itis_scientific_name" SET NOT NULL;
+ALTER TABLE "critter" ALTER COLUMN "itis_tsn" SET NOT NULL;
+ALTER TABLE "xref_taxon_collection_category" ALTER COLUMN "itis_tsn" SET NOT NULL;
+ALTER TABLE "xref_taxon_marking_body_location" ALTER COLUMN "itis_tsn" SET NOT NULL;
+ALTER TABLE "xref_taxon_measurement_qualitative" ALTER COLUMN "itis_tsn" SET NOT NULL;
+ALTER TABLE "xref_taxon_measurement_quantitative" ALTER COLUMN "itis_tsn" SET NOT NULL;
 
