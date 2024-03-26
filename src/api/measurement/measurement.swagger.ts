@@ -4,8 +4,6 @@ import { routes } from "../../utils/constants";
 import { SwagDesc, SwagErr, SwagNotFound } from "../../utils/swagger_helpers";
 import { zodID } from "../../utils/zod_helpers";
 import {
-  MeasurementQualitativeIncludeSchema,
-  MeasurementQuantitativeIncludeSchema,
   QualitativeCreateSchema,
   QualitativeSchema,
   QuantitativeCreateSchema,
