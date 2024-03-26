@@ -3,18 +3,15 @@ name: Deprecated Code
 on: [push]
 
 jobs:
-  eslint:
+  ts-prune:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{matrix.node-version}}
+          node-version: "18"
           cache: "npm"
       - name: Setup Node
         run: npm install
-      - name: Run Deprecated Code
+      - name: Run Deprecated Code Check
         run: npm run action:deprecated
