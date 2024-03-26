@@ -160,17 +160,17 @@ model lk_cause_of_death {
 }
 
 model lk_collection_category {
-  collection_category_id                        String                          @id(map: "xref_taxon_collection_category_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  category_name                                 String                          @unique(map: "xref_taxon_collection_category_category_name_key")
+  collection_category_id                        String                           @id(map: "xref_taxon_collection_category_pkey") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  category_name                                 String                           @unique(map: "xref_taxon_collection_category_category_name_key")
   description                                   String?
-  create_user                                   String                          @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                                   String                          @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                              DateTime                        @default(now()) @db.Timestamptz(6)
-  update_timestamp                              DateTime                        @default(now()) @db.Timestamptz(6)
-  user_lk_collection_category_create_userTouser user                            @relation("lk_collection_category_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_create_user")
-  user_lk_collection_category_update_userTouser user                            @relation("lk_collection_category_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_update_user")
+  create_user                                   String                           @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                                   String                           @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                              DateTime                         @default(now()) @db.Timestamptz(6)
+  update_timestamp                              DateTime                         @default(now()) @db.Timestamptz(6)
+  user_lk_collection_category_create_userTouser user                             @relation("lk_collection_category_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_create_user")
+  user_lk_collection_category_update_userTouser user                             @relation("lk_collection_category_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_collection_category_update_user")
   xref_collection_unit                          xref_collection_unit[]
-  xref_taxon_collection_category                xref_taxon_collection_category?
+  xref_taxon_collection_category                xref_taxon_collection_category[] @ignore
 }
 
 model lk_colour {
@@ -453,6 +453,8 @@ model user {
   xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser xref_taxon_measurement_qualitative_option[] @relation("xref_taxon_measurement_qualitative_option_update_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_create_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_update_userTouser")
+
+  @@unique([user_identifier, keycloak_uuid], map: "unq_user_identifier_and_uuid")
 }
 
 model xref_collection_unit {
@@ -470,14 +472,17 @@ model xref_collection_unit {
   user_xref_collection_unit_update_userTouser user                      @relation("xref_collection_unit_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_collection_unit_update_user")
 }
 
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model xref_taxon_collection_category {
-  collection_category_id String                 @id(map: "xref_taxon_collection_category_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  collection_category_id String                 @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   create_user            String                 @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user            String                 @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp       DateTime               @default(now()) @db.Timestamptz(6)
   update_timestamp       String                 @default(dbgenerated("now()")) @db.VarChar
   itis_tsn               Int
   lk_collection_category lk_collection_category @relation(fields: [collection_category_id], references: [collection_category_id], onDelete: NoAction, onUpdate: NoAction, map: "xref_taxon_collection_category_category_fk")
+
+  @@ignore
 }
 
 model xref_taxon_marking_body_location {

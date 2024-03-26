@@ -3,7 +3,7 @@ name: Deprecated Code
 on: [push]
 
 jobs:
-  ts-prune:
+  knip:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
