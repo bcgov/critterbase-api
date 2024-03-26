@@ -12,13 +12,13 @@
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
     "dev": "npx prisma generate && nodemon -r dotenv/config ./src/server.ts",
-    "lint": "npx eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix --ignore-pattern 'node_modules' --ext .ts",
     "format:fix":"prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss}\"",
-    "format:check": "prettier --check \"./src/**/*.{js,jsx,ts,tsx,css,scss}\"",
-    "dead:code": "ts-prune | (! grep -v 'used in module')",
     "prisma:deploy": "npx prisma migrate deploy",
-    "prisma:dev-setup": "npx prisma migrate deploy && npx prisma db seed"
+    "prisma:dev-setup": "grep NODE_ENV .env | cut -d '=' -f2 | grep 'development' && npx prisma migrate reset -f",
+    "action:format": "prettier --check \"./src/**/*.{js,jsx,ts,tsx,css,scss}\"",
+    "action:lint": "eslint . --max-warnings=0",
+    "action:deprecated": "ts-prune | (! grep -v 'used in module')"
   },
   "author": "",
   "license": "ISC",

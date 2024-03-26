@@ -14,4 +14,4 @@ jobs:
       - name: Setup Node
         run: npm install
       - name: Run Format Check
-        run: npm run format:check
+        run: npm run action:check

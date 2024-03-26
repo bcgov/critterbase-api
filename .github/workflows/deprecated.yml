@@ -1,4 +1,4 @@
-name: Lint
+name: Deprecated Code
 
 on: [push]
 
@@ -16,5 +16,5 @@ jobs:
           cache: "npm"
       - name: Setup Node
         run: npm install
-      - name: Run ESLint
-        run: npm run action:lint
+      - name: Run Deprecated Code
+        run: npm run action:deprecated
