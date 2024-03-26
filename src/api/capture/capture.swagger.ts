@@ -8,7 +8,7 @@ import {
 } from "./capture.utils";
 import { CommonLocationValidation } from "../location/location.utils";
 
-export const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
+const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
   location_capture_capture_location_idTolocation: true,
   location_capture_release_location_idTolocation: true,
 }).extend({
@@ -116,7 +116,7 @@ const getCaptureById: ZodOpenApiOperationObject = {
 
 const updateCapture: ZodOpenApiOperationObject = {
   operationId: "updateCapture",
-  summary: `Updates a specific capture event. 
+  summary: `Updates a specific capture event.
   Note that it is possible to nest capture data, which will update the associated location data, or create new data if none is present.
   You can also force the creation of release data, useful in the case where capture event currently uses the same location record for both capture and release, but you wish to separate them.`,
   tags: [TAG],

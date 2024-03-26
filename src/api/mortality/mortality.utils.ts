@@ -121,8 +121,6 @@ const MortalityResponseSchema = ResponseSchema.transform((val) => {
   };
 });
 
-type FormattedMortality = z.infer<typeof MortalityResponseSchema>;
-
 const MortalityDeleteSchema = MortalityBodySchema.pick({
   mortality_id: true,
 }).extend(DeleteSchema.shape);
@@ -136,9 +134,4 @@ export {
   MortalityIncludeSchema,
   MortalityDeleteSchema,
 };
-export type {
-  MortalityIncludeType,
-  FormattedMortality,
-  MortalityCreate,
-  MortalityUpdate,
-};
+export type { MortalityCreate, MortalityUpdate };

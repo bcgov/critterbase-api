@@ -15,7 +15,7 @@ import {
   SwagUnauthorized,
 } from "../../utils/swagger_helpers";
 
-export const SwaggerMortalityResponseValidation = MortalityIncludeSchema.omit({
+const SwaggerMortalityResponseValidation = MortalityIncludeSchema.omit({
   lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death:
     true,
   lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death:

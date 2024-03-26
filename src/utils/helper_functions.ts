@@ -104,8 +104,7 @@ const prisMock = (
     | "findUniqueOrThrow"
     | "update"
     | "delete"
-    | "create"
-    | "findMany",
+    | "create",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   returns: any
 ) =>
@@ -123,7 +122,6 @@ export {
   getFormat,
   intersect,
   toSelect,
-  ServiceReturn,
   isSelectFormat,
   toSelectFormat,
 };

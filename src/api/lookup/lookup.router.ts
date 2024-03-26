@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { sex } from ".prisma/client";
 import {
   cod_confidence,
   coordinate_uncertainty_unit,
   frequency_unit,
   measurement_unit,
 } from "@prisma/client";
-import express from "express";
-import { Request, Response } from "express-serve-static-core";
+import express, { Request, Response } from "express";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
@@ -34,7 +32,7 @@ export const LookupRouter = (_db: ICbDatabase) => {
   lookupRouter.get(
     "/enum/sex",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(sex))
+      res.status(200).json([eCritterStatus.alive, eCritterStatus.mortality])
     )
   );
   lookupRouter.get(

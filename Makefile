@@ -45,6 +45,16 @@ clean: ## Closes and cleans (removes) all project containers
 	@echo "==============================================="
 	@docker-compose -f docker-compose.yml down -v --rmi all --remove-orphans
 
+## ------------------------------------------------------------------------------
+## Run Github Actions Locally
+## ------------------------------------------------------------------------------
+
+run-actions: ## Runs Critterbase Github actions - skipping tests.
+	@echo "==============================================="
+	@echo "Make: run-actions - running github actions locally"
+	@echo "==============================================="
+	@npm run action:lint; npm run action:format; npm run action:deprecated;
+
 
 ## ------------------------------------------------------------------------------
 ## Build/Run Postgres DB Commands

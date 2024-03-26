@@ -78,32 +78,6 @@ const critter_collection_unitIncludesSchema =
       description: z.string().nullable(),
     }),
   });
-/*
-include: {
-    xref_collection_unit: {
-      select: {
-        collection_unit_id: true,
-        unit_name: true,
-        lk_collection_category: {
-          select: {
-            collection_category_id: true,
-            category_name: true
-          },
-        },
-      },
-    },*/
-const SimpleCollectionUnitIncludesSchema =
-  implement<SimpleCollectionUnitIncludes>().with({
-    ...critter_collection_unitSchema.shape,
-    xref_collection_unit: z.object({
-      collection_unit_id: zodID,
-      unit_name: z.string(),
-      lk_collection_category: z.object({
-        collection_category_id: zodID,
-        category_name: z.string(),
-      }),
-    }),
-  });
 
 // Formatted API response schema which omits fields and unpacks nested data
 const CollectionUnitResponseSchema =
@@ -180,13 +154,11 @@ type CollectionUnitUpsertType = z.infer<typeof CollectionUnitUpsertSchema>;
 export {
   CollectionUnitResponseSchema,
   SimpleCollectionUnitResponseSchema,
-  simpleCollectionUnitIncludes,
   collectionUnitIncludes,
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
   CollectionUnitDeleteSchema,
   CollectionUnitUpsertSchema,
-  SimpleCollectionUnitIncludesSchema,
   critter_collection_unitIncludesSchema,
 };
 export type {

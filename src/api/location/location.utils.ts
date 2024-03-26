@@ -76,20 +76,6 @@ const LocationResponseSchema = ResponseSchema.transform((val) => {
 // Types
 type LocationResponse = z.infer<typeof LocationResponseSchema>;
 
-type LocationSubsetType = Prisma.locationGetPayload<
-  typeof commonLocationSelect
->;
-
-type FormattedLocation = Omit<
-  LocationSubsetType,
-  "lk_region_env" | "lk_region_nr" | "lk_wildlife_management_unit"
-> & {
-  region_env_name: string;
-  lk_region_nr: string;
-  lk_wildlife_management_unit: string;
-};
-//type FormattedLocation = Prisma.PromiseReturnType<typeof getLocationOrThrow>;
-
 type LocationBody = z.infer<typeof LocationCreateSchema>;
 
 const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
@@ -185,13 +171,7 @@ const locationIncludes: Prisma.locationInclude = {
   lk_region_env: true,
 };
 
-export type {
-  LocationSubsetType,
-  FormattedLocation,
-  LocationResponse,
-  LocationBody,
-  CommonLocationType,
-};
+export type { LocationResponse, LocationBody, CommonLocationType };
 export {
   commonLocationSelect,
   CommonLocationSchema,
