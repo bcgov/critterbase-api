@@ -95,25 +95,6 @@ const toSelectFormat = <T>(
     value: item[valueKey] as string,
   }));
 
-//Putting the function here so tests dont run utils each time
-export const prisMock = (
-  model: Prisma.ModelName,
-  method:
-    | "findMany"
-    | "findFirst"
-    | "findUniqueOrThrow"
-    | "update"
-    | "delete"
-    | "create" = "findMany",
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  returns: any
-) =>
-  jest
-    .spyOn(prisma[model], method)
-    .mockImplementation()
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    .mockResolvedValue(returns);
-
 export {
   prismaErrorMsg,
   sessionHours,

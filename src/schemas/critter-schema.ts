@@ -254,10 +254,6 @@ export type IDetailedCritterParent = z.infer<
 
 export type IDetailedCritterChild = z.infer<typeof DetailedCritterChildSchema>;
 
-export type IDetailedCritterLocation = z.infer<
-  typeof DetailedCritterLocationSchema
->;
-
 export type IDetailedCritterMarking = z.infer<
   typeof DetailedCritterMarkingSchema
 >;
