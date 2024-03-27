@@ -1,3 +1,7 @@
+-- AlterTable
+-- Primary key mistakenly dropped in last migration, adding back
+ALTER TABLE "xref_taxon_collection_category" ADD CONSTRAINT "xref_taxon_collection_category_pk" PRIMARY KEY ("collection_category_id");
+
 -- Create unique constraint for user
 ALTER TABLE "user" ADD CONSTRAINT unq_user_identifier_and_uuid UNIQUE (user_identifier, keycloak_uuid);
 
