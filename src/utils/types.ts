@@ -4,7 +4,7 @@ import { z } from "zod";
 import { IResponseSchema } from "./zod_helpers";
 import { PrismaClient } from "@prisma/client";
 type uuid = string;
-type CustomError = Error & Record<string, unknown>;
+type CustomError = unknown;
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
  */
