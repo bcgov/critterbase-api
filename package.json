@@ -9,7 +9,7 @@
   "scripts": {
     "start": "npx prisma migrate deploy; npx pm2 --no-daemon start dist/src/server.js",
     "build": "tsc",
-    "test": "jest --forceExit",
+    "test": "NODE_ENV=test jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
     "dev": "npx prisma generate && nodemon -r dotenv/config ./src/server.ts",
     "lint:fix": "eslint . --fix --ignore-pattern 'node_modules' --ext .ts",

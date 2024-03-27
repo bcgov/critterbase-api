@@ -21,6 +21,7 @@ export $(shell sed 's/=.*//' .env)
 
 postgres: | close build-postgres run-postgres ## Performs all commands necessary to run the postgres project (db) in docker
 backend: | close build-backend run-backend ## Performs all commands necessary to run all backend projects (db, api) in docker
+actions: | action-lint action-format action-deprecated action-test ## Performs all commands necessary to run Github actions locally
 
 
 ## ------------------------------------------------------------------------------
@@ -45,16 +46,6 @@ clean: ## Closes and cleans (removes) all project containers
 	@echo "==============================================="
 	@docker-compose -f docker-compose.yml down -v --rmi all --remove-orphans
 
-## ------------------------------------------------------------------------------
-## Run Github Actions Locally
-## ------------------------------------------------------------------------------
-
-run-actions: ## Runs Critterbase Github actions - skipping tests.
-	@echo "==============================================="
-	@echo "Make: run-actions - running github actions locally"
-	@echo "==============================================="
-	@npm run action:lint; npm run action:format; npm run action:deprecated;
-
 
 ## ------------------------------------------------------------------------------
 ## Build/Run Postgres DB Commands
@@ -63,15 +54,16 @@ run-actions: ## Runs Critterbase Github actions - skipping tests.
 
 build-postgres: ## Builds the postgres db containers
 	@echo "==============================================="
-	@echo "Make: build-postgres - building postgres db  images"
+	@echo "Make: build-postgres - building postgres db images"
 	@echo "==============================================="
 	@docker-compose -f docker-compose.yml build db db_setup
 
 run-postgres: ## Runs the postgres db containers
 	@echo "==============================================="
-	@echo "Make: run-postgres - running postgres db  images"
+	@echo "Make: run-postgres - running postgres db images"
 	@echo "==============================================="
 	@docker-compose -f docker-compose.yml up -d db db_setup
+
 
 ## ------------------------------------------------------------------------------
 ## Build/Run Backend Commands
@@ -89,3 +81,34 @@ run-backend: ## Runs all backend containers
 	@echo "Make: run-backend - running backend images"
 	@echo "==============================================="
 	@docker-compose -f docker-compose.yml up -d db db_setup api
+
+
+## ------------------------------------------------------------------------------
+## Run Github Actions Locally
+## ------------------------------------------------------------------------------
+
+action-lint: ## Runs Github lint action
+	@echo "==============================================="
+	@echo "Make: action-lint - running Github lint action"
+	@echo "==============================================="
+	@npm run action:lint
+
+action-format: ## Runs Github format action
+	@echo "==============================================="
+	@echo "Make: action-format - running Github format action"
+	@echo "==============================================="
+	@npm run action:format
+
+action-deprecated: ## Runs Github deprecated action
+	@echo "==============================================="
+	@echo "Make: action-deprecated - running Github deprecated action"
+	@echo "==============================================="
+	@npm run action:deprecated
+
+action-test: ## Runs Github test action
+	@echo -n "\nRun test suite? [y/n] " && read ans && [ $${ans:-n} = y ]
+	@echo "==============================================="
+	@echo "Make: action-test - running Github test action"
+	@echo "==============================================="
+	@npm run test
+
