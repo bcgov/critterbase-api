@@ -1,48 +1,43 @@
-import type { Request, Response } from "express";
-import express, { NextFunction } from "express";
-import { array } from "zod";
-import { catchErrors } from "../../utils/middleware";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
+import type { Request, Response } from 'express';
+import express, { NextFunction } from 'express';
+import { array } from 'zod';
+import { catchErrors } from '../../utils/middleware';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitResponseSchema,
-  CollectionUnitUpdateBodySchema,
-} from "./collectionUnit.utils";
-import { ICbDatabase } from "../../utils/database";
+  CollectionUnitUpdateBodySchema
+} from './collectionUnit.utils';
+import { ICbDatabase } from '../../utils/database';
 
 export const CollectionUnitRouter = (db: ICbDatabase) => {
   const collectionUnitRouter = express.Router();
 
   collectionUnitRouter.get(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const collectionUnits = await db.getAllCollectionUnits();
-      const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
-        collectionUnits
-      );
+      const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(collectionUnits);
       return res.status(200).json(formattedCollectionUnit);
     })
   );
 
   collectionUnitRouter.post(
-    "/create",
+    '/create',
     catchErrors(async (req: Request, res: Response) => {
       const collectionUnitData = CollectionUnitCreateBodySchema.parse(req.body);
       const collectionUnit = await db.createCollectionUnit(collectionUnitData);
-      const formattedCollectionUnit =
-        CollectionUnitResponseSchema.parse(collectionUnit);
+      const formattedCollectionUnit = CollectionUnitResponseSchema.parse(collectionUnit);
       return res.status(201).json(formattedCollectionUnit);
     })
   );
 
-  collectionUnitRouter.route("/critter/:id").get(
+  collectionUnitRouter.route('/critter/:id').get(
     catchErrors(async (req: Request, res: Response) => {
       // validate uuid and confirm that critter_id exists
       const { id } = uuidParamsSchema.parse(req.params);
       const collectionUnits = await db.getCollectionUnitsByCritterId(id);
-      const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(
-        collectionUnits
-      );
+      const formattedCollectionUnit = array(CollectionUnitResponseSchema).parse(collectionUnits);
       return res.status(200).json(formattedCollectionUnit);
     })
   );
@@ -51,7 +46,7 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
    ** All collectionUnit_id related routes
    */
   collectionUnitRouter
-    .route("/:id")
+    .route('/:id')
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         // validate uuid
@@ -62,22 +57,15 @@ export const CollectionUnitRouter = (db: ICbDatabase) => {
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const collectionUnit = await db.getCollectionUnitById(req.params.id);
-        const formattedCollectionUnit =
-          CollectionUnitResponseSchema.parse(collectionUnit);
+        const formattedCollectionUnit = CollectionUnitResponseSchema.parse(collectionUnit);
         return res.status(200).json(formattedCollectionUnit);
       })
     )
     .patch(
       catchErrors(async (req: Request, res: Response) => {
-        const collectionUnitData = CollectionUnitUpdateBodySchema.parse(
-          req.body
-        );
-        const collectionUnit = await db.updateCollectionUnit(
-          req.params.id,
-          collectionUnitData
-        );
-        const formattedCollectionUnit =
-          CollectionUnitResponseSchema.parse(collectionUnit);
+        const collectionUnitData = CollectionUnitUpdateBodySchema.parse(req.body);
+        const collectionUnit = await db.updateCollectionUnit(req.params.id, collectionUnitData);
+        const formattedCollectionUnit = CollectionUnitResponseSchema.parse(collectionUnit);
         return res.status(200).json(formattedCollectionUnit);
       })
     )

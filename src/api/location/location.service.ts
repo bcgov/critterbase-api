@@ -1,7 +1,7 @@
-import { location } from "@prisma/client";
+import { location } from '@prisma/client';
 
-import { prisma } from "../../utils/constants";
-import { LocationBody, locationIncludes } from "./location.utils";
+import { prisma } from '../../utils/constants';
+import { LocationBody, locationIncludes } from './location.utils';
 
 /**
  ** gets a single location by id
@@ -12,9 +12,9 @@ import { LocationBody, locationIncludes } from "./location.utils";
 const getLocationOrThrow = async (id: string) => {
   const location = await prisma.location.findUniqueOrThrow({
     where: {
-      location_id: id,
+      location_id: id
     },
-    include: locationIncludes,
+    include: locationIncludes
   });
   return location;
 };
@@ -25,7 +25,7 @@ const getLocationOrThrow = async (id: string) => {
  */
 const getAllLocations = async (): Promise<location[]> => {
   const locations = await prisma.location.findMany({
-    include: locationIncludes,
+    include: locationIncludes
   });
   return locations;
 };
@@ -38,8 +38,8 @@ const getAllLocations = async (): Promise<location[]> => {
 const deleteLocation = async (id: string): Promise<location> => {
   return await prisma.location.delete({
     where: {
-      location_id: id,
-    },
+      location_id: id
+    }
   });
 };
 
@@ -58,22 +58,13 @@ const createLocation = async (data: LocationBody): Promise<location> => {
  * @param id string -> critter_id
  * @returns {Promise<Location>}
  */
-const updateLocation = async (
-  data: LocationBody,
-  id: string
-): Promise<location> => {
+const updateLocation = async (data: LocationBody, id: string): Promise<location> => {
   return await prisma.location.update({
     where: {
-      location_id: id,
+      location_id: id
     },
-    data,
+    data
   });
 };
 
-export {
-  getAllLocations,
-  getLocationOrThrow,
-  deleteLocation,
-  createLocation,
-  updateLocation,
-};
+export { getAllLocations, getLocationOrThrow, deleteLocation, createLocation, updateLocation };

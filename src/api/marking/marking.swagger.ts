@@ -1,21 +1,12 @@
-import { z } from "zod";
-import {
-  MarkingCreateBodySchema,
-  MarkingVerificationSchema,
-  markingIncludesSchema,
-} from "./marking.utils";
-import { ZodOpenApiOperationObject } from "zod-openapi";
-import { zodID } from "../../utils/zod_helpers";
-import { MarkingUpdateBodySchema } from "./marking.utils";
-import { routes } from "../../utils/constants";
-import {
-  SwagDesc,
-  SwagErr,
-  SwagNotFound,
-  SwagUnauthorized,
-} from "../../utils/swagger_helpers";
+import { z } from 'zod';
+import { MarkingCreateBodySchema, MarkingVerificationSchema, markingIncludesSchema } from './marking.utils';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
+import { zodID } from '../../utils/zod_helpers';
+import { MarkingUpdateBodySchema } from './marking.utils';
+import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 
-const TAG = "Markings";
+const TAG = 'Markings';
 const SwaggerMarkingResponseValidation = markingIncludesSchema
   .omit({
     lk_colour_marking_primary_colour_idTolk_colour: true,
@@ -23,7 +14,7 @@ const SwaggerMarkingResponseValidation = markingIncludesSchema
     lk_colour_marking_text_colour_idTolk_colour: true,
     lk_marking_type: true,
     lk_marking_material: true,
-    xref_taxon_marking_body_location: true,
+    xref_taxon_marking_body_location: true
   })
   .extend({
     body_location: z.string().nullable(),
@@ -31,194 +22,193 @@ const SwaggerMarkingResponseValidation = markingIncludesSchema
     marking_material: z.string().nullable(),
     primary_colour: z.string().nullable(),
     secondary_colour: z.string().nullable(),
-    text_colour: z.string().nullable(),
+    text_colour: z.string().nullable()
   });
 
 const getMarkingById: ZodOpenApiOperationObject = {
-  operationId: "getMarkingById",
-  summary: "Get a marking by id",
+  operationId: 'getMarkingById',
+  summary: 'Get a marking by id',
   tags: [TAG],
   requestParams: {
-    path: z.object({ id: zodID }),
+    path: z.object({ id: zodID })
   },
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.get,
       content: {
-        "application/json": {
-          schema: SwaggerMarkingResponseValidation,
-        },
-      },
+        'application/json': {
+          schema: SwaggerMarkingResponseValidation
+        }
+      }
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound,
-  },
+    ...SwagNotFound
+  }
 };
 
 const updateMarkingById: ZodOpenApiOperationObject = {
-  operationId: "updateMarkingById",
-  summary: "Update a marking by id",
+  operationId: 'updateMarkingById',
+  summary: 'Update a marking by id',
   tags: [TAG],
   requestParams: {
-    path: z.object({ id: zodID }),
+    path: z.object({ id: zodID })
   },
   requestBody: {
     content: {
-      "application/json": {
-        schema: MarkingUpdateBodySchema,
-      },
-    },
+      'application/json': {
+        schema: MarkingUpdateBodySchema
+      }
+    }
   },
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.update,
       content: {
-        "application/json": {
-          schema: SwaggerMarkingResponseValidation,
-        },
-      },
+        'application/json': {
+          schema: SwaggerMarkingResponseValidation
+        }
+      }
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound,
-  },
+    ...SwagNotFound
+  }
 };
 
 const deleteMarkingById: ZodOpenApiOperationObject = {
-  operationId: "deleteMarkingById",
-  summary: "Delete a marking by id",
+  operationId: 'deleteMarkingById',
+  summary: 'Delete a marking by id',
   tags: [TAG],
   requestParams: {
-    path: z.object({ id: zodID }),
+    path: z.object({ id: zodID })
   },
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.delete,
       content: {
-        "application/json": {
-          schema: SwaggerMarkingResponseValidation,
-        },
-      },
+        'application/json': {
+          schema: SwaggerMarkingResponseValidation
+        }
+      }
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound,
-  },
+    ...SwagNotFound
+  }
 };
 
 const getMarkingsByCritterId: ZodOpenApiOperationObject = {
-  operationId: "getMarkingsByCritterId",
+  operationId: 'getMarkingsByCritterId',
   tags: [TAG],
-  summary:
-    "Get all markings attached to the critter using the provided critter id.",
+  summary: 'Get all markings attached to the critter using the provided critter id.',
   requestParams: {
-    path: z.object({ id: zodID }),
+    path: z.object({ id: zodID })
   },
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.get,
       content: {
-        "application/json": {
-          schema: SwaggerMarkingResponseValidation.array(),
-        },
-      },
+        'application/json': {
+          schema: SwaggerMarkingResponseValidation.array()
+        }
+      }
     },
     ...SwagErr,
     ...SwagUnauthorized,
-    ...SwagNotFound,
-  },
+    ...SwagNotFound
+  }
 };
 
 const verifyMarkings: ZodOpenApiOperationObject = {
-  operationId: "verifyMarkings",
+  operationId: 'verifyMarkings',
   tags: [TAG],
   summary: `Verify whether the supplied markings can be attached to a specific tsn.
   If all markings pass, verified is true.
   If not, verified is false and invalid_markings contains primary id of problematic markings.`,
   requestBody: {
     content: {
-      "application/json": {
-        schema: MarkingVerificationSchema,
-      },
-    },
+      'application/json': {
+        schema: MarkingVerificationSchema
+      }
+    }
   },
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.get,
       content: {
-        "application/json": {
+        'application/json': {
           schema: z.object({
             verified: z.boolean(),
-            invalid_marking: zodID.array(),
-          }),
-        },
-      },
+            invalid_marking: zodID.array()
+          })
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const createMarking: ZodOpenApiOperationObject = {
-  operationId: "createMarking",
+  operationId: 'createMarking',
   tags: [TAG],
-  summary: "Create a marking.",
+  summary: 'Create a marking.',
   requestBody: {
     content: {
-      "application/json": {
-        schema: MarkingCreateBodySchema,
-      },
-    },
+      'application/json': {
+        schema: MarkingCreateBodySchema
+      }
+    }
   },
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.create,
       content: {
-        "application/json": {
-          schema: SwaggerMarkingResponseValidation,
-        },
-      },
+        'application/json': {
+          schema: SwaggerMarkingResponseValidation
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 const getAllMarkings: ZodOpenApiOperationObject = {
-  operationId: "getAllMarkings",
+  operationId: 'getAllMarkings',
   tags: [TAG],
-  summary: "Get all markings from the db.",
+  summary: 'Get all markings from the db.',
   responses: {
-    "200": {
+    '200': {
       description: SwagDesc.get,
       content: {
-        "application/json": {
-          schema: SwaggerMarkingResponseValidation.array(),
-        },
-      },
+        'application/json': {
+          schema: SwaggerMarkingResponseValidation.array()
+        }
+      }
     },
     ...SwagErr,
-    ...SwagUnauthorized,
-  },
+    ...SwagUnauthorized
+  }
 };
 
 export const markingPaths = {
   [`${routes.markings}`]: {
-    get: getAllMarkings,
+    get: getAllMarkings
   },
   [`${routes.markings}/create`]: {
-    post: createMarking,
+    post: createMarking
   },
   [`${routes.markings}/verify`]: {
-    get: verifyMarkings,
+    get: verifyMarkings
   },
   [`${routes.markings}/critter/{id}`]: {
-    post: getMarkingsByCritterId,
+    post: getMarkingsByCritterId
   },
   [`${routes.markings}/{id}`]: {
     get: getMarkingById,
     patch: updateMarkingById,
-    delete: deleteMarkingById,
-  },
+    delete: deleteMarkingById
+  }
 };

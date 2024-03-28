@@ -1,15 +1,15 @@
-import type { Request, Response } from "express";
-import express, { NextFunction } from "express";
-import { prisma } from "../../utils/constants";
-import { catchErrors } from "../../utils/middleware";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
+import type { Request, Response } from 'express';
+import express, { NextFunction } from 'express';
+import { prisma } from '../../utils/constants';
+import { catchErrors } from '../../utils/middleware';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
 import {
   FamilyChildCreateBodySchema,
   FamilyCreateBodySchema,
   FamilyParentCreateBodySchema,
-  FamilyUpdateBodySchema,
-} from "./family.utils";
-import { ICbDatabase } from "../../utils/database";
+  FamilyUpdateBodySchema
+} from './family.utils';
+import { ICbDatabase } from '../../utils/database';
 
 export const FamilyRouter = (db: ICbDatabase) => {
   const familyRouter = express.Router();
@@ -18,7 +18,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
    ** Family Router Home
    */
   familyRouter.get(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const families = await db.getAllFamilies();
       return res.status(200).json(families);
@@ -29,7 +29,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
    ** Create new family
    */
   familyRouter.post(
-    "/create",
+    '/create',
     catchErrors(async (req: Request, res: Response) => {
       const parsed = FamilyCreateBodySchema.parse(req.body);
       const result = await db.createNewFamily(parsed.family_label);
@@ -38,7 +38,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
   );
 
   familyRouter.get(
-    "/parents/:id",
+    '/parents/:id',
     catchErrors(async (req: Request, res: Response) => {
       const { id } = uuidParamsSchema.parse(req.params);
       const parents = await db.getParentsOfCritterId(id);
@@ -47,7 +47,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
   );
 
   familyRouter
-    .route("/parents")
+    .route('/parents')
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const parents = await db.getAllParents();
@@ -74,7 +74,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
     );
 
   familyRouter.get(
-    "/children/:id",
+    '/children/:id',
     catchErrors(async (req: Request, res: Response) => {
       const { id } = uuidParamsSchema.parse(req.params);
       const children = await db.getChildrenOfCritterId(id);
@@ -83,7 +83,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
   );
 
   familyRouter
-    .route("/children")
+    .route('/children')
     .get(
       catchErrors(async (req: Request, res: Response) => {
         const children = await db.getAllChildren();
@@ -113,7 +113,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
    * * All critter_id related routes
    */
   familyRouter.get(
-    "/immediate/:id",
+    '/immediate/:id',
     catchErrors(async (req: Request, res: Response) => {
       const { id } = uuidParamsSchema.parse(req.params);
       const parents = await db.getParentsOfCritterId(id);
@@ -122,21 +122,21 @@ export const FamilyRouter = (db: ICbDatabase) => {
       const result = {
         children: children,
         siblings: siblings,
-        parents: parents,
+        parents: parents
       };
       return res.status(200).json(result);
     })
   );
 
   familyRouter
-    .route("/:id")
+    .route('/:id')
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         uuidParamsSchema.parse(req.params);
         await prisma.family.findUniqueOrThrow({
           where: {
-            family_id: req.params.id,
-          },
+            family_id: req.params.id
+          }
         });
         next();
       })
@@ -165,7 +165,7 @@ export const FamilyRouter = (db: ICbDatabase) => {
     );
 
   familyRouter.get(
-    "/label/:label",
+    '/label/:label',
     catchErrors(async (req: Request, res: Response) => {
       const label = req.params.label;
       const result = await db.getFamilyByLabel(label);

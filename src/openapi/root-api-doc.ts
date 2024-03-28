@@ -1,37 +1,37 @@
 // ! A Lot of stuff in here is just a placeholder for now. Will be updated as we go along.
 export const rootAPIDoc = {
-  openapi: "3.0.0",
+  openapi: '3.0.0',
   info: {
-    version: "0.0.0",
-    title: "critterbase-api",
-    description: "API for CritterBase",
+    version: '0.0.0',
+    title: 'critterbase-api',
+    description: 'API for CritterBase',
     license: {
-      name: "Apache 2.0",
-      url: "https://www.apache.org/licenses/LICENSE-2.0.html",
-    },
+      name: 'Apache 2.0',
+      url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+    }
   },
   servers: [
     {
-      url: "http://localhost:3000/api",
-      description: "local api via node",
+      url: 'http://localhost:3000/api',
+      description: 'local api via node'
     },
     {
-      url: "https://moe-critterbase-api-dev.apps.silver.devops.gov.bc.ca/api",
-      description: "deployed api in dev environment",
+      url: 'https://moe-critterbase-api-dev.apps.silver.devops.gov.bc.ca/api',
+      description: 'deployed api in dev environment'
     },
     {
-      url: "https://moe-critterbase-api-test.apps.silver.devops.gov.bc.ca/api",
-      description: "deployed api in test environment",
+      url: 'https://moe-critterbase-api-test.apps.silver.devops.gov.bc.ca/api',
+      description: 'deployed api in test environment'
     },
     {
-      url: "https://moe-critterbase-api-prod.apps.silver.devops.gov.bc.ca/api",
-      description: "deployed api in prod environment",
-    },
+      url: 'https://moe-critterbase-api-prod.apps.silver.devops.gov.bc.ca/api',
+      description: 'deployed api in prod environment'
+    }
   ],
   tags: [],
   externalDocs: {
-    description: "Visit GitHub to find out more about this API",
-    url: "https://github.com/bcgov/critterbase-api.git",
+    description: 'Visit GitHub to find out more about this API',
+    url: 'https://github.com/bcgov/critterbase-api.git'
   },
   paths: {},
   components: {
@@ -40,103 +40,103 @@ export const rootAPIDoc = {
     },
     responses: {
       // TODO: update responses
-      "400": {
-        description: "Bad Request",
+      '400': {
+        description: 'Bad Request',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              $ref: "#/components/schemas/Error",
-            },
-          },
-        },
+              $ref: '#/components/schemas/Error'
+            }
+          }
+        }
       },
-      "401": {
-        description: "Unauthorized",
+      '401': {
+        description: 'Unauthorized',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              $ref: "#/components/schemas/Error",
-            },
-          },
-        },
+              $ref: '#/components/schemas/Error'
+            }
+          }
+        }
       },
-      "403": {
-        description: "Forbidden",
+      '403': {
+        description: 'Forbidden',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              $ref: "#/components/schemas/Error",
-            },
-          },
-        },
+              $ref: '#/components/schemas/Error'
+            }
+          }
+        }
       },
-      "409": {
-        description: "Conflict",
+      '409': {
+        description: 'Conflict',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              $ref: "#/components/schemas/Error",
-            },
-          },
-        },
+              $ref: '#/components/schemas/Error'
+            }
+          }
+        }
       },
-      "500": {
-        description: "Internal Server Error",
+      '500': {
+        description: 'Internal Server Error',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              $ref: "#/components/schemas/Error",
-            },
-          },
-        },
+              $ref: '#/components/schemas/Error'
+            }
+          }
+        }
       },
       default: {
-        description: "Unknown Error",
+        description: 'Unknown Error',
         content: {
-          "application/json": {
+          'application/json': {
             schema: {
-              $ref: "#/components/schemas/Error",
-            },
-          },
-        },
-      },
+              $ref: '#/components/schemas/Error'
+            }
+          }
+        }
+      }
     },
     schemas: {
       Error: {
         // TODO: update error schema
-        description: "Error response object",
-        required: ["name", "status", "message"],
+        description: 'Error response object',
+        required: ['name', 'status', 'message'],
         properties: {
           name: {
-            type: "string",
+            type: 'string'
           },
           status: {
-            type: "number",
+            type: 'number'
           },
           message: {
-            type: "string",
+            type: 'string'
           },
           errors: {
-            type: "array",
+            type: 'array',
             items: {
               anyOf: [
                 {
-                  type: "string",
+                  type: 'string'
                 },
                 {
-                  type: "object",
-                },
-              ],
-            },
-          },
-        },
-      },
-    },
-  },
+                  type: 'object'
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
 };
 
 // Options for the swagger docs
 export const options = {
-  apis: ["./src/api/**/*.ts"],
-  swaggerDefinition: rootAPIDoc,
+  apis: ['./src/api/**/*.ts'],
+  swaggerDefinition: rootAPIDoc
 };
