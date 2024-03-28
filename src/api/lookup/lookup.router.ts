@@ -6,8 +6,7 @@ import {
   frequency_unit,
   measurement_unit,
 } from "@prisma/client";
-import express from "express";
-import { Request, Response } from "express-serve-static-core";
+import express, { Request, Response } from "express";
 import { prisma } from "../../utils/constants";
 import { formatParse, getFormat } from "../../utils/helper_functions";
 import { catchErrors } from "../../utils/middleware";
@@ -40,7 +39,7 @@ export const LookupRouter = (_db: ICbDatabase) => {
   lookupRouter.get(
     "/enum/critter-status",
     catchErrors(async (_req: Request, res: Response) =>
-      res.status(200).json(Object.keys(eCritterStatus))
+      res.status(200).json([eCritterStatus.alive, eCritterStatus.mortality])
     )
   );
   lookupRouter.get(

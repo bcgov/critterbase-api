@@ -19,6 +19,42 @@ export class Repository {
   }
 
   /**
+   * Prisma transaction handler.
+   * Accepts callback function to wrap db requests in a transaction,
+   * can abort the transaction by throwing errors within the callback.
+   *
+   * example:
+   *  const userPayload = {...}
+   *  await transaction(async () => {
+   *    const user = await createUser(userPayload)
+   *    if (!user) {
+   *      throw new Error(`missing user`) // First request rolled back
+   *    }
+   *    return updateUser(...user) // Both requests committed
+   *  });
+   *
+   * @async
+   * @template T - Transaction return.
+   * @param {() => Promise<T>} transactions - DB requests / services.
+   * @returns {Promise<T>} Transaction return.
+   */
+  async transaction<T>(transactions: () => Promise<T>): Promise<T> {
+    // save previous prisma client
+    const prismaClient = this.prisma;
+    // wrap requests with prisma $transaction
+    const data = await this.prisma.$transaction(async (transactionClient) => {
+      // set prisma client to be the transaction client
+      this.prisma = transactionClient as PrismaClient;
+      // run transaction requests
+      return transactions();
+    });
+    // set prisma back to the original client
+    this.prisma = prismaClient;
+    // return response from transactions
+    return data;
+  }
+
+  /**
    * Safely queries with prisma raw sql and validates against zod schema.
    *
    * @async

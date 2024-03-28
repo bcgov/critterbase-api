@@ -4,7 +4,7 @@ import { z } from "zod";
 import { IResponseSchema } from "./zod_helpers";
 import { PrismaClient } from "@prisma/client";
 type uuid = string;
-type CustomError = string | unknown;
+type CustomError = unknown;
 /**
  ** Custom Critterbase Error. Includes a status code with the message.
  */
@@ -159,18 +159,6 @@ type PrismaTransactionClient = Omit<
   "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
 >;
 
-type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-
-/**
- * XOR is needed to have a real mutually exclusive union type
- * https://stackoverflow.com/questions/42123407/does-typescript-support-mutually-exclusive-types
- */
-type XOR<T, U> = T extends object
-  ? U extends object
-    ? (Without<T, U> & U) | (Without<U, T> & T)
-    : U
-  : T;
-
 export {
   apiError,
   AuditColumns,
@@ -178,8 +166,6 @@ export {
   FormatParse,
   ISelect,
   ISelectChildren,
-  FormatParseBody,
   ReqBody,
   PrismaTransactionClient,
-  XOR,
 };

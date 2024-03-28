@@ -1,9 +1,9 @@
-name: Format
+name: Deprecated Code
 
 on: [push]
 
 jobs:
-  prettier:
+  knip:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -13,5 +13,5 @@ jobs:
           cache: "npm"
       - name: Setup Node
         run: npm install
-      - name: Run Format Check
-        run: npm run action:format
+      - name: Run Deprecated Code Check
+        run: npm run action:deprecated

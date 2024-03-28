@@ -1,10 +1,5 @@
-import { PrismaClient, user } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { QueryFormats } from "./types";
-declare module "express-session" {
-  interface SessionData {
-    user?: user;
-  }
-}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -43,8 +38,6 @@ const routes = {
   id: ":id",
 };
 
-const oneDay = 60 * 60 * 24 * 1000;
-
 const PORT = process.env.PORT;
 
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -67,31 +60,6 @@ const prisma =
 
 if (!IS_PROD) globalPrisma.prisma = prisma;
 
-const strings = {
-  app: {
-    invalidUUID: (id: string) => `id: '${id}' is not a valid UUID`,
-    idRequired: `id is required`,
-    emptyBody: `body must include at least one property`,
-  },
-  location: {
-    notFoundMulti: "no locations found",
-    notFound: "location not found",
-    //noID: "id was not provided in params",
-    deleted: (id: string): string => `Deleted location ${id}`,
-    // updated: (id: string): string => `Updated location ${id}`,
-  },
-  user: {
-    notFound: "user not found",
-    noData: "no new data was provided or the format was invalid",
-    systemUserIdExists: "system_user_id already exists",
-  },
-  marking: {
-    notFound: "marking not found",
-  },
-  artifact: {
-    notFound: "artifact not found",
-  },
-};
 const defaultFormat = QueryFormats.default;
 
 export {
@@ -102,8 +70,6 @@ export {
   NO_AUTH,
   prisma,
   // request,
-  strings,
   defaultFormat,
-  oneDay,
   routes,
 };

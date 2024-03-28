@@ -1,12 +1,10 @@
-version: "3.5"
-
-name: ${DOCKER_PROJECT_NAME}
+version: "3.3"
 
 services:
   ## Build postgres docker image
   db:
-    image: ${DOCKER_PROJECT_NAME}-db-img
-    container_name: ${DOCKER_PROJECT_NAME}-db-container
+    image: ${COMPOSE_PROJECT_NAME}-db-img
+    container_name: db-${COMPOSE_PROJECT_NAME}
     build:
       context: ./
       dockerfile: .docker/Dockerfile.db
@@ -29,8 +27,8 @@ services:
 
   ## Build the database setup image (runs migrations and seeds)
   db_setup:
-    image: ${DOCKER_PROJECT_NAME}-db-setup-img
-    container_name: ${DOCKER_PROJECT_NAME}-db-setup-container
+    image: ${COMPOSE_PROJECT_NAME}-db-setup-img
+    container_name: db-setup-${COMPOSE_PROJECT_NAME}
     build:
       context: ./
       dockerfile: .docker/Dockerfile.dev.api
@@ -50,8 +48,8 @@ services:
 
   ## Build the API image (generates the prisma client and runs server)
   api:
-    image: ${DOCKER_PROJECT_NAME}-api-img
-    container_name: ${DOCKER_PROJECT_NAME}-api-container
+    image: ${COMPOSE_PROJECT_NAME}-api-img
+    container_name: api-${COMPOSE_PROJECT_NAME}
     build:
       context: ./
       dockerfile: .docker/Dockerfile.dev.api
@@ -75,8 +73,10 @@ services:
     networks:
       - critterbase-network
     depends_on:
-      - db
-      - db_setup
+      db:
+        condition: service_healthy
+      #db_setup:
+        #condition: service_completed_successfully
 
 networks:
   critterbase-network:
@@ -84,4 +84,4 @@ networks:
 
 volumes:
   postgres:
-    name: ${DOCKER_PROJECT_NAME}-db-vol
+    name: ${COMPOSE_PROJECT_NAME}-db-vol

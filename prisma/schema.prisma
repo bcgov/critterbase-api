@@ -453,6 +453,8 @@ model user {
   xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser xref_taxon_measurement_qualitative_option[] @relation("xref_taxon_measurement_qualitative_option_update_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_create_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_update_userTouser")
+
+  @@unique([user_identifier, keycloak_uuid], map: "unq_user_identifier_and_uuid")
 }
 
 model xref_collection_unit {

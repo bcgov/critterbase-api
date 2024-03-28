@@ -5,12 +5,13 @@ import {
   IMeasurementSearch,
   IMeasurementWithTsnHierarchy,
   ITsnMarkingBodyLocation,
+  ITsnMeasurements,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
   ITsnQuantitativeMeasurement,
 } from "../schemas/xref-schema";
 import { toSelectFormat } from "../utils/helper_functions";
-import { ISelect } from "../utils/types";
+import { ISelect, ISelectChildren } from "../utils/types";
 import { InternalService } from "./base-service";
 
 export class XrefService extends InternalService<XrefRepository> {
@@ -259,9 +260,15 @@ export class XrefService extends InternalService<XrefRepository> {
    * @async
    * @param {string} tsn - ITIS TSN identifier.
    * @param {boolean} [asSelect] - Format of the response.
-   * @returns {Promise<ITsnMeasurements | ISelectChildren[]>}
+   * @returns {Promise<ITsnMeasurements | { qualitative: ISelectChildren[]; quantitative: ISelect[] }>}
    */
-  async getTsnMeasurements(tsn: number, asSelect = false) {
+  async getTsnMeasurements(
+    tsn: number,
+    asSelect = false
+  ): Promise<
+    | ITsnMeasurements
+    | { qualitative: ISelectChildren[]; quantitative: ISelect[] }
+  > {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const quantitative =
@@ -284,7 +291,7 @@ export class XrefService extends InternalService<XrefRepository> {
         children: measurement.options.map((option) => ({
           id: option.qualitative_option_id,
           key: "qualitative_option_id",
-          value: option.option_label,
+          value: option.option_label ?? "unknown",
         })),
       }));
 

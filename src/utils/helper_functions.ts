@@ -1,10 +1,10 @@
+import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import type { Request } from "express";
 import { ZodRawShape, ZodTypeAny, array, objectOutputType } from "zod";
+import { prisma } from "./constants";
 import { FormatParse, ISelect, QueryFormats } from "./types";
 import { QueryFormatSchema } from "./zod_helpers";
-import { Prisma } from "@prisma/client";
-import { prisma } from "./constants";
 
 /**
  ** Formats a prisma error messsage based on the prisma error code
@@ -96,7 +96,7 @@ const toSelectFormat = <T>(
   }));
 
 //Putting the function here so tests dont run utils each time
-export const prisMock = (
+const prisMock = (
   model: Prisma.ModelName,
   method:
     | "findMany"
@@ -104,7 +104,7 @@ export const prisMock = (
     | "findUniqueOrThrow"
     | "update"
     | "delete"
-    | "create" = "findMany",
+    | "create",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   returns: any
 ) =>
@@ -115,13 +115,13 @@ export const prisMock = (
     .mockResolvedValue(returns);
 
 export {
+  prisMock,
   prismaErrorMsg,
   sessionHours,
   formatParse,
   getFormat,
   intersect,
   toSelect,
-  ServiceReturn,
   isSelectFormat,
   toSelectFormat,
 };

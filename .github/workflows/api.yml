@@ -1,0 +1,55 @@
+name: API + DB Setup
+
+on: [push]
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Create ENV file
+        run: touch .env
+
+      - name: Populate ENV values
+        run: yes | make env
+
+      - name: Cache docker images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('docker-compose.yml') }}
+
+      - name: Build containers (db, db_setup, api)
+        run: make build-backend
+
+      - name: Run database container
+        run: docker-compose -f docker-compose.yml up -d db
+
+      - name: Run database setup container
+        run: docker-compose -f docker-compose.yml up --exit-code-from db_setup
+
+      - name: Run API container
+        run: docker-compose -f docker-compose.yml up -d api
+
+      - name: Check database health
+        uses: stringbean/docker-healthcheck-action@v1
+        with:
+          container: db-critterbase
+          wait-time: 50
+          require-status: running
+          require-healthy: true
+
+      - name: Log database setup
+        if: always()
+        run: docker logs db-setup-critterbase -f
+
+      - name: Check API running
+        uses: stringbean/docker-healthcheck-action@v1
+        with:
+          container: api-critterbase
+          wait-time: 50
+          require-status: running

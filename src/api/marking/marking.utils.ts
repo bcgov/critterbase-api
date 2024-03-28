@@ -181,7 +181,6 @@ export {
   markingResponseSchema,
   markingIncludes,
   markingIncludesSchema,
-  MarkingCreateWithEnglishSchema,
   MarkingDeleteSchema,
   MarkingUpdateByIdSchema,
   MarkingVerificationSchema,
@@ -190,6 +189,5 @@ export type {
   MarkingCreateInput,
   MarkingUpdateInput,
   MarkingIncludes,
-  FormattedMarking,
   MarkingVerificationType,
 };

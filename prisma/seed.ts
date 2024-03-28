@@ -26,8 +26,8 @@ async function main() {
   /**
    * Abort the seed if data already exists.
    */
-  const users = await prisma.user.findMany();
-  if (users.length) {
+  const critters = await prisma.critter.findMany();
+  if (critters.length) {
     console.log("Previously seeded. Skipping...");
     return;
   }

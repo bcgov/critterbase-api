@@ -117,14 +117,7 @@ const CaptureDeleteSchema = CaptureBodySchema.pick({ capture_id: true }).extend(
   DeleteSchema.shape
 );
 
-type FormattedCapture = z.infer<typeof CaptureResponseSchema>;
-
-export type {
-  CaptureIncludeType,
-  FormattedCapture,
-  CaptureCreate,
-  CaptureUpdate,
-};
+export type { CaptureCreate, CaptureUpdate };
 export {
   captureInclude,
   CaptureCreateSchema,

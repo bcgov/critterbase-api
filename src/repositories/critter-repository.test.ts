@@ -159,13 +159,14 @@ describe("xref-repository", () => {
       });
     });
 
-    it("should throw an error if no critters are found", async () => {
+    it("should return empty array if no critters are found", async () => {
       mockPrismaClient.critter.findMany.mockResolvedValue([]);
       const critterRepository = new CritterRepository(mockPrismaClient);
-
-      await expect(
-        critterRepository.getMultipleCrittersByIds(["cccc", "dddd"])
-      ).rejects.toThrow("Failed to find critters.");
+      const res = await critterRepository.getMultipleCrittersByIds([
+        "cccc",
+        "dddd",
+      ]);
+      expect(res).toStrictEqual([]);
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
         orderBy: {
@@ -299,13 +300,11 @@ describe("xref-repository", () => {
       });
     });
 
-    it("should throw an error if no critter is found", async () => {
+    it("should return an empty array if no critter is found", async () => {
       mockPrismaClient.critter.findMany.mockResolvedValue([]);
       const critterRepository = new CritterRepository(mockPrismaClient);
-
-      await expect(
-        critterRepository.getCrittersByWlhId("cccc")
-      ).rejects.toThrow("Failed to find critters with wlh-id: cccc.");
+      const res = await critterRepository.getCrittersByWlhId("cccc");
+      expect(res).toStrictEqual([]);
 
       expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
         orderBy: {
@@ -628,7 +627,7 @@ describe("xref-repository", () => {
         {
           mortality_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
           mortality_timestamp: new Date("1970-01-01"),
-          mortality_location: {
+          location: {
             location_id: "da290f16-53f9-4c26-939e-d7f56c4c4513",
             latitude: null,
             longitude: null,

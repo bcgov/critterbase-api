@@ -115,9 +115,7 @@ export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
  * schema files are created for each service/repo/router
  *
  */
-export const DetailedCritterLocationSchema = implement<
-  Omit<location, AuditColumns>
->()
+const DetailedCritterLocationSchema = implement<Omit<location, AuditColumns>>()
   .with({
     location_id: zodID,
     latitude: z.number().nullable(),
@@ -253,10 +251,6 @@ export type IDetailedCritterParent = z.infer<
 >;
 
 export type IDetailedCritterChild = z.infer<typeof DetailedCritterChildSchema>;
-
-export type IDetailedCritterLocation = z.infer<
-  typeof DetailedCritterLocationSchema
->;
 
 export type IDetailedCritterMarking = z.infer<
   typeof DetailedCritterMarkingSchema

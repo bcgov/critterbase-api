@@ -5,6 +5,8 @@ import { QueryFormats } from "../utils/types";
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
+  ICritter,
+  IDetailedCritter,
   SimilarCritterQuery,
 } from "../schemas/critter-schema";
 
@@ -42,9 +44,12 @@ export class CritterService extends InternalService<CritterRepository> {
    * @async
    * @param {string} critterId - critter id.
    * @param {QueryFormats} format - additional response format (supports detailed).
-   * @returns {Promise<ICritter | ICritterDetailed>} critter object.
+   * @returns {Promise<ICritter | IDetailedCritter>} critter object.
    */
-  async getCritterById(critterId: string, format = defaultFormat) {
+  async getCritterById(
+    critterId: string,
+    format = defaultFormat
+  ): Promise<ICritter | IDetailedCritter> {
     if (format === QueryFormats.detailed) {
       const [
         critter,

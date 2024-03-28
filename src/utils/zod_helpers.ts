@@ -3,10 +3,6 @@ import {
   lk_region_nr,
   lk_wildlife_management_unit,
   xref_collection_unit,
-  measurement_unit,
-  xref_taxon_measurement_qualitative,
-  xref_taxon_measurement_qualitative_option,
-  xref_taxon_measurement_quantitative,
   lk_colour,
   lk_marking_material,
   lk_marking_type,
@@ -45,16 +41,8 @@ const uuidParamsSchema = z.object({
   id: z.string().uuid("query param is an invalid UUID"),
 });
 
-const critterIdSchema = z.object({
-  critter_id: zodID,
-});
-
 const tsnQuerySchema = z.object({
   tsn: z.preprocess((val) => Number(val), z.number()),
-});
-
-const taxonMeasurementIdSchema = z.object({
-  taxon_measurement_id: zodID,
 });
 
 const LookupWmuSchema = implement<lk_wildlife_management_unit>().with({
@@ -77,37 +65,6 @@ const LookupRegionEnvSchema = implement<lk_region_env>().with({
   description: z.string().nullable(),
   ...zodAudit,
 });
-
-const XrefTaxonMeasurementQuantitativeSchema =
-  implement<xref_taxon_measurement_quantitative>().with({
-    taxon_measurement_id: zodID,
-    itis_tsn: z.number(),
-    measurement_name: z.string(),
-    measurement_desc: z.string().nullable(),
-    min_value: z.number().nullable(),
-    max_value: z.number().nullable(),
-    unit: z.nativeEnum(measurement_unit).nullable(),
-    ...zodAudit,
-  });
-
-const XrefTaxonMeasurementQualitativeSchema =
-  implement<xref_taxon_measurement_qualitative>().with({
-    taxon_measurement_id: zodID,
-    itis_tsn: z.number(),
-    measurement_name: z.string(),
-    measurement_desc: z.string().nullable(),
-    ...zodAudit,
-  });
-
-const XrefTaxonMeasurementQualitativeOptionSchema =
-  implement<xref_taxon_measurement_qualitative_option>().with({
-    qualitative_option_id: z.string(),
-    taxon_measurement_id: zodID,
-    option_label: z.string(),
-    option_value: z.number(),
-    option_desc: z.string().nullable(),
-    ...zodAudit,
-  });
 
 const nonEmpty = (obj: Record<string | number | symbol, unknown>) =>
   Object.values(obj).some((v) => v !== undefined);
@@ -199,7 +156,6 @@ export type { IResponseSchema };
 
 export {
   uuidParamsSchema,
-  critterIdSchema,
   nonEmpty,
   noAudit,
   zodID,
@@ -211,9 +167,6 @@ export {
   LookupWmuSchema,
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
-  XrefTaxonMeasurementQuantitativeSchema,
-  XrefTaxonMeasurementQualitativeSchema,
-  XrefTaxonMeasurementQualitativeOptionSchema,
   ResponseSchema,
   zodAudit,
   NumberToString,
@@ -222,6 +175,5 @@ export {
   LookupCollectionUnitCategorySchema,
   LookupCodSchema,
   XrefTaxonCollectionCategorySchema,
-  taxonMeasurementIdSchema,
   tsnQuerySchema,
 };

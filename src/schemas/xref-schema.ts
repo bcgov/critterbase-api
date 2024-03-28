@@ -28,7 +28,7 @@ export const TsnMarkingBodyLocationSchema = implement<
  * @table xref_taxon_measurement_qualitative_option
  *
  */
-export const TsnQualitativeMeasurementOptionSchema = implement<
+const TsnQualitativeMeasurementOptionSchema = implement<
   Omit<xref_taxon_measurement_qualitative_option, AuditColumns>
 >().with({
   qualitative_option_id: zodID,

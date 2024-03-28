@@ -16,7 +16,7 @@ import {
 } from "../../utils/swagger_helpers";
 
 const TAG = "Markings";
-export const SwaggerMarkingResponseValidation = markingIncludesSchema
+const SwaggerMarkingResponseValidation = markingIncludesSchema
   .omit({
     lk_colour_marking_primary_colour_idTolk_colour: true,
     lk_colour_marking_secondary_colour_idTolk_colour: true,

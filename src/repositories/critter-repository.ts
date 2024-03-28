@@ -91,13 +91,6 @@ export class CritterRepository extends Repository {
       },
     });
 
-    if (!result.length) {
-      throw apiError.notFound(`Failed to find critters.`, [
-        `CritterRepository -> getMultipleCrittersByIds`,
-        "results had a length of 0",
-      ]);
-    }
-
     return result;
   }
 
@@ -143,13 +136,6 @@ export class CritterRepository extends Repository {
         create_timestamp: "desc",
       },
     });
-
-    if (!result.length) {
-      throw apiError.notFound(
-        `Failed to find critters with wlh-id: ${wlhId}.`,
-        ["CritterRepository -> getCritterByWlhId", "results had a length of 0"]
-      );
-    }
 
     return result;
   }
@@ -528,11 +514,9 @@ export class CritterRepository extends Repository {
           f.family_label,
           p.parent_critter_id
         FROM family_parent p
-        JOIN family_child c
-          ON p.family_id = c.family_id
-        JOIN family f
+        LEFT JOIN family f
           ON p.family_id = f.family_id
-        WHERE c.child_critter_id = ${critterId}::uuid;`,
+        WHERE p.parent_critter_id = ${critterId}::uuid;`,
       DetailedCritterParentSchema.array()
     );
 
@@ -558,11 +542,9 @@ export class CritterRepository extends Repository {
           f.family_label,
           c.child_critter_id
         FROM family_child c
-        JOIN family_parent p
-          ON c.family_id = p.family_id
-        JOIN family f
+        LEFT JOIN family f
           ON c.family_id = f.family_id
-        WHERE p.parent_critter_id = ${critterId}::uuid;`,
+        WHERE c.child_critter_id = ${critterId}::uuid;`,
       z.array(DetailedCritterChildSchema)
     );
 

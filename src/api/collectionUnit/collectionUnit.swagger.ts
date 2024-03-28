@@ -2,11 +2,10 @@ import { ZodOpenApiOperationObject } from "zod-openapi";
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitUpdateBodySchema,
-  SimpleCollectionUnitIncludesSchema,
   critter_collection_unitIncludesSchema,
 } from "./collectionUnit.utils";
 import { z } from "zod";
-import { noAudit, zodID } from "../../utils/zod_helpers";
+import { zodID } from "../../utils/zod_helpers";
 import { routes } from "../../utils/constants";
 import {
   SwagDesc,
@@ -165,17 +164,6 @@ const getCollectionUnitsByCritterId: ZodOpenApiOperationObject = {
     ...SwagNotFound,
   },
 };
-
-export const SwaggerSimpleCollectionResponseValidation =
-  SimpleCollectionUnitIncludesSchema.omit({
-    xref_collection_unit: true,
-    critter_id: true,
-    ...noAudit,
-  }).extend({
-    category_name: z.string(),
-    unit_name: z.string(),
-    collection_category_id: zodID,
-  });
 
 export const collectionUnitsPaths = {
   [`${routes.collection_units}`]: {
