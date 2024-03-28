@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/require-await */
-import express, { NextFunction, Request, Response } from "express";
-import { getFormat } from "../../utils/helper_functions";
-import { catchErrors } from "../../utils/middleware";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
+import express, { NextFunction, Request, Response } from 'express';
+import { getFormat } from '../../utils/helper_functions';
+import { catchErrors } from '../../utils/middleware';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
 
-import { ICbDatabase } from "../../utils/database";
+import { ICbDatabase } from '../../utils/database';
 import {
   CritterCreateSchema,
   CritterUpdateSchema,
   SimilarCritterQuerySchema,
   CritterIdsRequestSchema,
-  WlhIdQuerySchema,
-} from "../../schemas/critter-schema";
+  WlhIdQuerySchema
+} from '../../schemas/critter-schema';
 
 /**
  *
@@ -26,12 +26,11 @@ export const CritterRouter = (db: ICbDatabase) => {
    *
    */
   critterRouter.get(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const { wlh_id } = WlhIdQuerySchema.parse(req.query);
 
-      const response =
-        await db.critterService.getAllCrittersOrCrittersWithWlhId(wlh_id);
+      const response = await db.critterService.getAllCrittersOrCrittersWithWlhId(wlh_id);
 
       return res.status(200).json(response);
     })
@@ -43,12 +42,11 @@ export const CritterRouter = (db: ICbDatabase) => {
    *
    */
   critterRouter.post(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const { critter_ids } = CritterIdsRequestSchema.parse(req.body);
 
-      const response =
-        await db.critterService.getMultipleCrittersByIds(critter_ids);
+      const response = await db.critterService.getMultipleCrittersByIds(critter_ids);
 
       return res.status(200).json(response);
     })
@@ -59,7 +57,7 @@ export const CritterRouter = (db: ICbDatabase) => {
    *
    */
   critterRouter.post(
-    "/unique",
+    '/unique',
     catchErrors(async (req: Request, res: Response) => {
       const parsed = SimilarCritterQuerySchema.parse(req.body);
 
@@ -74,7 +72,7 @@ export const CritterRouter = (db: ICbDatabase) => {
    *
    */
   critterRouter.post(
-    "/create",
+    '/create',
     catchErrors(async (req: Request, res: Response) => {
       const payload = CritterCreateSchema.parse(req.body);
 
@@ -90,7 +88,7 @@ export const CritterRouter = (db: ICbDatabase) => {
    *
    */
   critterRouter
-    .route("/:id")
+    .route('/:id')
     .all(
       catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);
@@ -106,10 +104,7 @@ export const CritterRouter = (db: ICbDatabase) => {
         const critterId = req.params.id;
         const format = getFormat(req);
 
-        const response = await db.critterService.getCritterById(
-          critterId,
-          format
-        );
+        const response = await db.critterService.getCritterById(critterId, format);
 
         return res.status(200).json(response);
       })
@@ -123,10 +118,7 @@ export const CritterRouter = (db: ICbDatabase) => {
         const critterId = req.params.id;
         const payload = CritterUpdateSchema.parse(req.body);
 
-        const response = await db.critterService.updateCritter(
-          critterId,
-          payload
-        );
+        const response = await db.critterService.updateCritter(critterId, payload);
 
         return res.status(201).json(response);
       })

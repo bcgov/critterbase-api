@@ -1,14 +1,14 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response } from 'express';
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategoryQuerySchema,
   MeasurementIdsQuerySchema,
-  MeasurementSearchQuery,
-} from "../../schemas/xref-schema";
-import { ICbDatabase } from "../../utils/database";
-import { isSelectFormat } from "../../utils/helper_functions";
-import { catchErrors } from "../../utils/middleware";
-import { tsnQuerySchema } from "../../utils/zod_helpers";
+  MeasurementSearchQuery
+} from '../../schemas/xref-schema';
+import { ICbDatabase } from '../../utils/database';
+import { isSelectFormat } from '../../utils/helper_functions';
+import { catchErrors } from '../../utils/middleware';
+import { tsnQuerySchema } from '../../utils/zod_helpers';
 
 export const XrefRouter = (db: ICbDatabase) => {
   const xrefRouter = express.Router();
@@ -23,16 +23,14 @@ export const XrefRouter = (db: ICbDatabase) => {
    *
    */
   xrefRouter.get(
-    "/collection-units",
+    '/collection-units',
     catchErrors(async (req: Request, res: Response) => {
-      const { category_name, itis_scientific_name } =
-        CollectionUnitCategoryQuerySchema.parse(req.query);
+      const { category_name, itis_scientific_name } = CollectionUnitCategoryQuerySchema.parse(req.query);
 
-      const response =
-        await db.xrefService.getCollectionUnitsFromCategoryOrScientificName(
-          category_name,
-          itis_scientific_name
-        );
+      const response = await db.xrefService.getCollectionUnitsFromCategoryOrScientificName(
+        category_name,
+        itis_scientific_name
+      );
 
       return res.status(200).json(response);
     })
@@ -47,15 +45,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    *
    */
   xrefRouter.get(
-    "/collection-units/:category_id",
+    '/collection-units/:category_id',
     catchErrors(async (req: Request, res: Response) => {
       const { category_id } = CollectionUnitCategoryIdSchema.parse(req.params);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getCollectionUnitsFromCategoryId(
-        category_id,
-        format
-      );
+      const response = await db.xrefService.getCollectionUnitsFromCategoryId(category_id, format);
 
       return res.status(200).json(response);
     })
@@ -70,15 +65,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    *
    */
   xrefRouter.get(
-    "/taxon-collection-categories",
+    '/taxon-collection-categories',
     catchErrors(async (req: Request, res: Response) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getTsnCollectionCategories(
-        tsn,
-        format
-      );
+      const response = await db.xrefService.getTsnCollectionCategories(tsn, format);
 
       res.status(200).json(response);
     })
@@ -92,15 +84,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    * @query tsn - ITIS TSN identifier
    */
   xrefRouter.get(
-    "/taxon-marking-body-locations",
+    '/taxon-marking-body-locations',
     catchErrors(async (req: Request, res: Response) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getTsnMarkingBodyLocations(
-        tsn,
-        format
-      );
+      const response = await db.xrefService.getTsnMarkingBodyLocations(tsn, format);
 
       res.status(200).json(response);
     })
@@ -115,15 +104,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    *
    */
   xrefRouter.get(
-    "/taxon-qualitative-measurements",
+    '/taxon-qualitative-measurements',
     catchErrors(async (req: Request, res: Response) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getTsnQualitativeMeasurements(
-        tsn,
-        format
-      );
+      const response = await db.xrefService.getTsnQualitativeMeasurements(tsn, format);
 
       res.status(200).json(response);
     })
@@ -138,17 +124,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    *
    */
   xrefRouter.post(
-    "/taxon-qualitative-measurements",
+    '/taxon-qualitative-measurements',
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_measurement_ids } = MeasurementIdsQuerySchema.parse(
-        req.body
-      );
+      const { taxon_measurement_ids } = MeasurementIdsQuerySchema.parse(req.body);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getQualitativeMeasurementsByIds(
-        taxon_measurement_ids,
-        format
-      );
+      const response = await db.xrefService.getQualitativeMeasurementsByIds(taxon_measurement_ids, format);
 
       res.status(200).json(response);
     })
@@ -162,15 +143,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    * @query tsn - ITIS TSN identifier
    */
   xrefRouter.get(
-    "/taxon-quantitative-measurements",
+    '/taxon-quantitative-measurements',
     catchErrors(async (req: Request, res: Response) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getTsnQuantitativeMeasurements(
-        tsn,
-        format
-      );
+      const response = await db.xrefService.getTsnQuantitativeMeasurements(tsn, format);
 
       res.status(200).json(response);
     })
@@ -185,17 +163,12 @@ export const XrefRouter = (db: ICbDatabase) => {
    *
    */
   xrefRouter.post(
-    "/taxon-quantitative-measurements",
+    '/taxon-quantitative-measurements',
     catchErrors(async (req: Request, res: Response) => {
-      const { taxon_measurement_ids } = MeasurementIdsQuerySchema.parse(
-        req.body
-      );
+      const { taxon_measurement_ids } = MeasurementIdsQuerySchema.parse(req.body);
       const format = isSelectFormat(req);
 
-      const response = await db.xrefService.getQuantitativeMeasurementsByIds(
-        taxon_measurement_ids,
-        format
-      );
+      const response = await db.xrefService.getQuantitativeMeasurementsByIds(taxon_measurement_ids, format);
 
       res.status(200).json(response);
     })
@@ -209,7 +182,7 @@ export const XrefRouter = (db: ICbDatabase) => {
    * @query tsn - ITIS TSN identifier
    */
   xrefRouter.get(
-    "/taxon-measurements",
+    '/taxon-measurements',
     catchErrors(async (req: Request, res: Response) => {
       const { tsn } = tsnQuerySchema.parse(req.query);
       const format = isSelectFormat(req);
@@ -239,7 +212,7 @@ export const XrefRouter = (db: ICbDatabase) => {
    * @query search - Search properties.
    */
   xrefRouter.get(
-    "/taxon-measurements/search",
+    '/taxon-measurements/search',
     catchErrors(async (req: Request, res: Response) => {
       const search = MeasurementSearchQuery.parse(req.query);
 

@@ -1,5 +1,5 @@
-import { Repository } from "../repositories/base-repository";
-import { ItisService } from "./itis-service";
+import { Repository } from '../repositories/base-repository';
+import { ItisService } from './itis-service';
 
 /**
  * Base class for Critterbase internal services.

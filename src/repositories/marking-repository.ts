@@ -1,13 +1,10 @@
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { zodID } from "../utils/zod_helpers";
-import { Repository } from "./base-repository";
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
+import { zodID } from '../utils/zod_helpers';
+import { Repository } from './base-repository';
 
 export class MarkingRepository extends Repository {
-  async findInvalidMarkingIdsFromTsnHierarchy(
-    markingIds: string[],
-    tsnHierarchy: number[]
-  ) {
+  async findInvalidMarkingIdsFromTsnHierarchy(markingIds: string[], tsnHierarchy: number[]) {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT m.marking_id

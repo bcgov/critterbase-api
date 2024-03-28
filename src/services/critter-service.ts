@@ -1,14 +1,14 @@
-import { defaultFormat } from "../utils/constants";
-import { CritterRepository } from "../repositories/critter-repository";
-import { InternalService } from "./base-service";
-import { QueryFormats } from "../utils/types";
+import { defaultFormat } from '../utils/constants';
+import { CritterRepository } from '../repositories/critter-repository';
+import { InternalService } from './base-service';
+import { QueryFormats } from '../utils/types';
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
   ICritter,
   IDetailedCritter,
-  SimilarCritterQuery,
-} from "../schemas/critter-schema";
+  SimilarCritterQuery
+} from '../schemas/critter-schema';
 
 /**
  * Critter Service
@@ -46,10 +46,7 @@ export class CritterService extends InternalService<CritterRepository> {
    * @param {QueryFormats} format - additional response format (supports detailed).
    * @returns {Promise<ICritter | IDetailedCritter>} critter object.
    */
-  async getCritterById(
-    critterId: string,
-    format = defaultFormat
-  ): Promise<ICritter | IDetailedCritter> {
+  async getCritterById(critterId: string, format = defaultFormat): Promise<ICritter | IDetailedCritter> {
     if (format === QueryFormats.detailed) {
       const [
         critter,
@@ -60,7 +57,7 @@ export class CritterService extends InternalService<CritterRepository> {
         collection_units,
         mortality,
         family_parent,
-        family_child,
+        family_child
       ] = await Promise.all([
         this.repository.getCritterById(critterId),
         this.repository.findCritterMarkings(critterId),
@@ -70,7 +67,7 @@ export class CritterService extends InternalService<CritterRepository> {
         this.repository.findCritterCollectionUnits(critterId),
         this.repository.findCritterMortalities(critterId),
         this.repository.findCritterParents(critterId),
-        this.repository.findCritterChildren(critterId),
+        this.repository.findCritterChildren(critterId)
       ]);
 
       return {
@@ -81,7 +78,7 @@ export class CritterService extends InternalService<CritterRepository> {
         measurements: { qualitative, quantitative },
         mortality,
         family_parent,
-        family_child,
+        family_child
       };
     }
     return this.repository.getCritterById(critterId);
@@ -123,8 +120,7 @@ export class CritterService extends InternalService<CritterRepository> {
    * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
-    const itisPatchedCritter =
-      await this.itisService.patchTsnAndScientificName(critterData);
+    const itisPatchedCritter = await this.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.updateCritter(critterId, itisPatchedCritter);
   }
@@ -139,8 +135,7 @@ export class CritterService extends InternalService<CritterRepository> {
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreateOptionalItis) {
-    const itisPatchedCritter =
-      await this.itisService.patchTsnAndScientificName(critterData);
+    const itisPatchedCritter = await this.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.createCritter(itisPatchedCritter);
   }

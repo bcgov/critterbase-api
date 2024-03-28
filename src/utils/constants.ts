@@ -1,12 +1,12 @@
-import { PrismaClient } from "@prisma/client";
-import { QueryFormats } from "./types";
+import { PrismaClient } from '@prisma/client';
+import { QueryFormats } from './types';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface ProcessEnv {
       PORT?: string;
-      NODE_ENV: "development" | "test" | "production";
+      NODE_ENV: 'development' | 'test' | 'production';
       API_KEY: string;
       DB_URL: string;
       AUTHENTICATE: string;
@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-const api = "/api";
+const api = '/api';
 const routes = {
   home: api,
   //routes
@@ -34,19 +34,19 @@ const routes = {
   bulk: `${api}/bulk`,
   xref: `${api}/xref`,
   //modifiers
-  create: "create",
-  id: ":id",
+  create: 'create',
+  id: ':id'
 };
 
 const PORT = process.env.PORT;
 
-const IS_DEV = process.env.NODE_ENV === "development";
+const IS_DEV = process.env.NODE_ENV === 'development';
 
-const IS_PROD = process.env.NODE_ENV === "production";
+const IS_PROD = process.env.NODE_ENV === 'production';
 
-const IS_TEST = process.env.NODE_ENV === "test";
+const IS_TEST = process.env.NODE_ENV === 'test';
 
-const NO_AUTH = process.env.AUTHENTICATE === "false";
+const NO_AUTH = process.env.AUTHENTICATE === 'false';
 
 /**
  * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
@@ -71,5 +71,5 @@ export {
   prisma,
   // request,
   defaultFormat,
-  routes,
+  routes
 };

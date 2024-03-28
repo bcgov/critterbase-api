@@ -1,13 +1,9 @@
-import type { Request, Response } from "express";
-import express, { NextFunction } from "express";
-import { catchErrors } from "../../utils/middleware";
-import { uuidParamsSchema } from "../../utils/zod_helpers";
-import {
-  MortalityCreateSchema,
-  MortalityResponseSchema,
-  MortalityUpdateSchema,
-} from "./mortality.utils";
-import { ICbDatabase } from "../../utils/database";
+import type { Request, Response } from 'express';
+import express, { NextFunction } from 'express';
+import { catchErrors } from '../../utils/middleware';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
+import { MortalityCreateSchema, MortalityResponseSchema, MortalityUpdateSchema } from './mortality.utils';
+import { ICbDatabase } from '../../utils/database';
 
 export const MortalityRouter = (db: ICbDatabase) => {
   const mortalityRouter = express.Router();
@@ -16,7 +12,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
    ** Mortality Router Home
    */
   mortalityRouter.get(
-    "/",
+    '/',
     catchErrors(async (req: Request, res: Response) => {
       const mort = await db.getAllMortalities();
       return res.status(200).json(mort);
@@ -27,7 +23,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
    ** Create new mortality
    */
   mortalityRouter.post(
-    "/create",
+    '/create',
     catchErrors(async (req: Request, res: Response) => {
       const parsed = MortalityCreateSchema.parse(req.body);
       const mort = await db.createMortality(parsed);
@@ -36,7 +32,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
   );
 
   mortalityRouter.get(
-    "/critter/:id",
+    '/critter/:id',
     catchErrors(async (req: Request, res: Response) => {
       const id = req.params.id;
       const mort = await db.getMortalityByCritter(id);
@@ -49,7 +45,7 @@ export const MortalityRouter = (db: ICbDatabase) => {
    * * All mortality_id related routes
    */
   mortalityRouter
-    .route("/:id")
+    .route('/:id')
     .all(
       catchErrors(async (req: Request, res: Response, next: NextFunction) => {
         await uuidParamsSchema.parseAsync(req.params);

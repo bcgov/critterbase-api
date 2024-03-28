@@ -1,4 +1,4 @@
-import { Repository } from "./base-repository";
+import { Repository } from './base-repository';
 import {
   CollectionUnitSchema,
   ICollectionCategoryDef,
@@ -8,9 +8,9 @@ import {
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
   ITsnQuantitativeMeasurement,
-  TsnQualitativeMeasurementSchema,
-} from "../schemas/xref-schema";
-import { Prisma } from "@prisma/client";
+  TsnQualitativeMeasurementSchema
+} from '../schemas/xref-schema';
+import { Prisma } from '@prisma/client';
 
 export class XrefRepository extends Repository {
   /**
@@ -20,13 +20,11 @@ export class XrefRepository extends Repository {
    * @param {string} category_id - primary key of 'xref_collection_unit'.
    * @returns {Promise<ICollectionUnitDef[]>}
    */
-  async getCollectionUnitsFromCategoryId(
-    category_id: string
-  ): Promise<ICollectionUnit[]> {
+  async getCollectionUnitsFromCategoryId(category_id: string): Promise<ICollectionUnit[]> {
     const result = await this.prisma.xref_collection_unit.findMany({
       where: {
-        collection_category_id: category_id,
-      },
+        collection_category_id: category_id
+      }
     });
 
     return result;
@@ -40,10 +38,7 @@ export class XrefRepository extends Repository {
    * @param {number[]} [tsns] - ITIS TSN Identifiers.
    * @returns {Promise<ICollectionUnit[]>}
    */
-  async getCollectionUnitsFromCategoryOrTsns(
-    category_name: string,
-    tsns?: number[]
-  ): Promise<ICollectionUnit[]> {
+  async getCollectionUnitsFromCategoryOrTsns(category_name: string, tsns?: number[]): Promise<ICollectionUnit[]> {
     const result = this.safeQuery(
       Prisma.sql`
         SELECT c.collection_unit_id, c.collection_category_id, c.unit_name, c.description
@@ -65,9 +60,7 @@ export class XrefRepository extends Repository {
    * @param {number} tsns - ITIS TSN identifiers.
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
-  async getTsnCollectionCategories(
-    tsns: number[]
-  ): Promise<ICollectionCategoryDef[]> {
+  async getTsnCollectionCategories(tsns: number[]): Promise<ICollectionCategoryDef[]> {
     const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
       FROM lk_collection_category cc
@@ -85,17 +78,15 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - ITIS TSN identifiers.
    * @returns {Promise<ITsnMarkingBodyLocation[]>}
    */
-  async getTsnMarkingBodyLocations(
-    tsns: number[]
-  ): Promise<ITsnMarkingBodyLocation[]> {
+  async getTsnMarkingBodyLocations(tsns: number[]): Promise<ITsnMarkingBodyLocation[]> {
     const result = await this.prisma.xref_taxon_marking_body_location.findMany({
       where: { itis_tsn: { in: tsns } },
       select: {
         taxon_marking_body_location_id: true,
         itis_tsn: true,
         body_location: true,
-        description: true,
-      },
+        description: true
+      }
     });
 
     return result;
@@ -108,9 +99,7 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - ITIS TSN identifiers.
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
-  async getTsnQualitativeMeasurements(
-    tsns: number[]
-  ): Promise<ITsnQualitativeMeasurement[]> {
+  async getTsnQualitativeMeasurements(tsns: number[]): Promise<ITsnQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
       SELECT
@@ -144,9 +133,7 @@ export class XrefRepository extends Repository {
    * @param {number[]} taxonMeasurementIds - Primary keys of xref_taxon_measurement_qualitative.
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
-  async getQualitativeMeasurementsByIds(
-    taxonMeasurementIds: string[]
-  ): Promise<ITsnQualitativeMeasurement[]> {
+  async getQualitativeMeasurementsByIds(taxonMeasurementIds: string[]): Promise<ITsnQualitativeMeasurement[]> {
     const result = await this.safeQuery(
       Prisma.sql`
       SELECT
@@ -180,20 +167,17 @@ export class XrefRepository extends Repository {
    * @param {string} taxonMeasurementId - primary key of xref_taxon_measurement_qualitative
    * @returns {Promise<ITsnQualitativeMeasurementOption>}
    */
-  async getQualitativeMeasurementOptions(
-    taxonMeasurementId: string
-  ): Promise<ITsnQualitativeMeasurementOption[]> {
-    const result =
-      await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
-        where: { taxon_measurement_id: taxonMeasurementId },
-        select: {
-          qualitative_option_id: true,
-          taxon_measurement_id: true,
-          option_value: true,
-          option_label: true,
-          option_desc: true,
-        },
-      });
+  async getQualitativeMeasurementOptions(taxonMeasurementId: string): Promise<ITsnQualitativeMeasurementOption[]> {
+    const result = await this.prisma.xref_taxon_measurement_qualitative_option.findMany({
+      where: { taxon_measurement_id: taxonMeasurementId },
+      select: {
+        qualitative_option_id: true,
+        taxon_measurement_id: true,
+        option_value: true,
+        option_label: true,
+        option_desc: true
+      }
+    });
 
     return result;
   }
@@ -205,22 +189,19 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - ITIS TSN identifiers.
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
-  async getTsnQuantitativeMeasurements(
-    tsns: number[]
-  ): Promise<ITsnQuantitativeMeasurement[]> {
-    const result =
-      await this.prisma.xref_taxon_measurement_quantitative.findMany({
-        where: { itis_tsn: { in: tsns } },
-        select: {
-          taxon_measurement_id: true,
-          itis_tsn: true,
-          measurement_name: true,
-          min_value: true,
-          max_value: true,
-          measurement_desc: true,
-          unit: true,
-        },
-      });
+  async getTsnQuantitativeMeasurements(tsns: number[]): Promise<ITsnQuantitativeMeasurement[]> {
+    const result = await this.prisma.xref_taxon_measurement_quantitative.findMany({
+      where: { itis_tsn: { in: tsns } },
+      select: {
+        taxon_measurement_id: true,
+        itis_tsn: true,
+        measurement_name: true,
+        min_value: true,
+        max_value: true,
+        measurement_desc: true,
+        unit: true
+      }
+    });
 
     return result;
   }
@@ -232,22 +213,19 @@ export class XrefRepository extends Repository {
    * @param {string[]} taxonMeasurementIds - Primary keys of xref_taxon_measurement_quantitative.
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
-  async getQuantitativeMeasurementsByIds(
-    taxonMeasurementIds: string[]
-  ): Promise<ITsnQuantitativeMeasurement[]> {
-    const result =
-      await this.prisma.xref_taxon_measurement_quantitative.findMany({
-        where: { taxon_measurement_id: { in: taxonMeasurementIds } },
-        select: {
-          taxon_measurement_id: true,
-          itis_tsn: true,
-          measurement_name: true,
-          min_value: true,
-          max_value: true,
-          measurement_desc: true,
-          unit: true,
-        },
-      });
+  async getQuantitativeMeasurementsByIds(taxonMeasurementIds: string[]): Promise<ITsnQuantitativeMeasurement[]> {
+    const result = await this.prisma.xref_taxon_measurement_quantitative.findMany({
+      where: { taxon_measurement_id: { in: taxonMeasurementIds } },
+      select: {
+        taxon_measurement_id: true,
+        itis_tsn: true,
+        measurement_name: true,
+        min_value: true,
+        max_value: true,
+        measurement_desc: true,
+        unit: true
+      }
+    });
 
     return result;
   }
@@ -260,24 +238,21 @@ export class XrefRepository extends Repository {
    * @param {IMeasurementSearch} search - Search properties.
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
-  async searchForQuantitativeMeasurements(
-    search: IMeasurementSearch
-  ): Promise<ITsnQuantitativeMeasurement[]> {
-    const result =
-      await this.prisma.xref_taxon_measurement_quantitative.findMany({
-        where: {
-          measurement_name: { contains: search.name, mode: "insensitive" },
-        },
-        select: {
-          taxon_measurement_id: true,
-          itis_tsn: true,
-          measurement_name: true,
-          min_value: true,
-          max_value: true,
-          measurement_desc: true,
-          unit: true,
-        },
-      });
+  async searchForQuantitativeMeasurements(search: IMeasurementSearch): Promise<ITsnQuantitativeMeasurement[]> {
+    const result = await this.prisma.xref_taxon_measurement_quantitative.findMany({
+      where: {
+        measurement_name: { contains: search.name, mode: 'insensitive' }
+      },
+      select: {
+        taxon_measurement_id: true,
+        itis_tsn: true,
+        measurement_name: true,
+        min_value: true,
+        max_value: true,
+        measurement_desc: true,
+        unit: true
+      }
+    });
 
     return result;
   }
@@ -290,9 +265,7 @@ export class XrefRepository extends Repository {
    * @param {IMeasurementSearch} search - Search properties.
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
-  async searchForQualitativeMeasurements(
-    search: IMeasurementSearch
-  ): Promise<ITsnQualitativeMeasurement[]> {
+  async searchForQualitativeMeasurements(search: IMeasurementSearch): Promise<ITsnQualitativeMeasurement[]> {
     const partialMatchTerm = `%${search.name}%`;
     const result = await this.safeQuery(
       Prisma.sql`

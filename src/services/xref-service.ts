@@ -1,4 +1,4 @@
-import { XrefRepository } from "../repositories/xref-repository";
+import { XrefRepository } from '../repositories/xref-repository';
 import {
   ICollectionCategoryDef,
   ICollectionUnit,
@@ -8,11 +8,11 @@ import {
   ITsnMeasurements,
   ITsnQualitativeMeasurement,
   ITsnQualitativeMeasurementOption,
-  ITsnQuantitativeMeasurement,
-} from "../schemas/xref-schema";
-import { toSelectFormat } from "../utils/helper_functions";
-import { ISelect, ISelectChildren } from "../utils/types";
-import { InternalService } from "./base-service";
+  ITsnQuantitativeMeasurement
+} from '../schemas/xref-schema';
+import { toSelectFormat } from '../utils/helper_functions';
+import { ISelect, ISelectChildren } from '../utils/types';
+import { InternalService } from './base-service';
 
 export class XrefService extends InternalService<XrefRepository> {
   /**
@@ -27,11 +27,10 @@ export class XrefService extends InternalService<XrefRepository> {
     category_id: string,
     asSelect = false
   ): Promise<ICollectionUnit[] | ISelect[]> {
-    const data =
-      await this.repository.getCollectionUnitsFromCategoryId(category_id);
+    const data = await this.repository.getCollectionUnitsFromCategoryId(category_id);
 
     if (asSelect) {
-      return toSelectFormat(data, "collection_unit_id", "unit_name");
+      return toSelectFormat(data, 'collection_unit_id', 'unit_name');
     }
 
     return data;
@@ -54,17 +53,13 @@ export class XrefService extends InternalService<XrefRepository> {
     let tsns: number[] = [];
 
     if (itis_scientific_name) {
-      const tsn =
-        await this.itisService.getTsnFromScientificName(itis_scientific_name);
+      const tsn = await this.itisService.getTsnFromScientificName(itis_scientific_name);
       tsns = await this.itisService.getTsnHierarchy(tsn);
     }
-    const data = await this.repository.getCollectionUnitsFromCategoryOrTsns(
-      category_name,
-      tsns
-    );
+    const data = await this.repository.getCollectionUnitsFromCategoryOrTsns(category_name, tsns);
 
     if (asSelect) {
-      return toSelectFormat(data, "collection_unit_id", "unit_name");
+      return toSelectFormat(data, 'collection_unit_id', 'unit_name');
     }
 
     return data;
@@ -80,16 +75,13 @@ export class XrefService extends InternalService<XrefRepository> {
    * @param {boolean} [asSelect] - Format of the response.
    * @returns {Promise<ICollectionCategoryDef[] | ISelect[]>}
    */
-  async getTsnCollectionCategories(
-    tsn: number,
-    asSelect = false
-  ): Promise<ICollectionCategoryDef[] | ISelect[]> {
+  async getTsnCollectionCategories(tsn: number, asSelect = false): Promise<ICollectionCategoryDef[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnCollectionCategories(tsns);
 
     if (asSelect) {
-      return toSelectFormat(data, "collection_category_id", "category_name");
+      return toSelectFormat(data, 'collection_category_id', 'category_name');
     }
 
     return data;
@@ -107,20 +99,13 @@ export class XrefService extends InternalService<XrefRepository> {
    * @param {boolean} [asSelect] - Format of the response.
    * @returns {Promise<ITsnMarkingBodyLocation[] | ISelect[]>}
    */
-  async getTsnMarkingBodyLocations(
-    tsn: number,
-    asSelect = false
-  ): Promise<ITsnMarkingBodyLocation[] | ISelect[]> {
+  async getTsnMarkingBodyLocations(tsn: number, asSelect = false): Promise<ITsnMarkingBodyLocation[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnMarkingBodyLocations(tsns);
 
     if (asSelect) {
-      return toSelectFormat(
-        data,
-        "taxon_marking_body_location_id",
-        "body_location"
-      );
+      return toSelectFormat(data, 'taxon_marking_body_location_id', 'body_location');
     }
 
     return data;
@@ -147,7 +132,7 @@ export class XrefService extends InternalService<XrefRepository> {
     const data = await this.repository.getTsnQualitativeMeasurements(tsns);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+      return toSelectFormat(data, 'taxon_measurement_id', 'measurement_name');
     }
 
     return data;
@@ -174,7 +159,7 @@ export class XrefService extends InternalService<XrefRepository> {
     const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+      return toSelectFormat(data, 'taxon_measurement_id', 'measurement_name');
     }
 
     return data;
@@ -192,13 +177,10 @@ export class XrefService extends InternalService<XrefRepository> {
     taxonMeasurementIds: string[],
     asSelect = false
   ): Promise<ITsnQuantitativeMeasurement[] | ISelect[]> {
-    const data =
-      await this.repository.getQuantitativeMeasurementsByIds(
-        taxonMeasurementIds
-      );
+    const data = await this.repository.getQuantitativeMeasurementsByIds(taxonMeasurementIds);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+      return toSelectFormat(data, 'taxon_measurement_id', 'measurement_name');
     }
 
     return data;
@@ -216,13 +198,10 @@ export class XrefService extends InternalService<XrefRepository> {
     taxonMeasurementIds: string[],
     asSelect = false
   ): Promise<ITsnQualitativeMeasurement[] | ISelect[]> {
-    const data =
-      await this.repository.getQualitativeMeasurementsByIds(
-        taxonMeasurementIds
-      );
+    const data = await this.repository.getQualitativeMeasurementsByIds(taxonMeasurementIds);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "measurement_name");
+      return toSelectFormat(data, 'taxon_measurement_id', 'measurement_name');
     }
 
     return data;
@@ -240,13 +219,10 @@ export class XrefService extends InternalService<XrefRepository> {
     taxonMeasurementId: string,
     asSelect = false
   ): Promise<ITsnQualitativeMeasurementOption[] | ISelect[]> {
-    const data =
-      await this.repository.getQualitativeMeasurementOptions(
-        taxonMeasurementId
-      );
+    const data = await this.repository.getQualitativeMeasurementOptions(taxonMeasurementId);
 
     if (asSelect) {
-      return toSelectFormat(data, "taxon_measurement_id", "option_value");
+      return toSelectFormat(data, 'taxon_measurement_id', 'option_value');
     }
 
     return data;
@@ -265,39 +241,30 @@ export class XrefService extends InternalService<XrefRepository> {
   async getTsnMeasurements(
     tsn: number,
     asSelect = false
-  ): Promise<
-    | ITsnMeasurements
-    | { qualitative: ISelectChildren[]; quantitative: ISelect[] }
-  > {
+  ): Promise<ITsnMeasurements | { qualitative: ISelectChildren[]; quantitative: ISelect[] }> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
-    const quantitative =
-      await this.repository.getTsnQuantitativeMeasurements(tsns);
+    const quantitative = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
-    const qualitative =
-      await this.repository.getTsnQualitativeMeasurements(tsns);
+    const qualitative = await this.repository.getTsnQualitativeMeasurements(tsns);
 
     if (asSelect) {
-      const quantitativeAsSelect = toSelectFormat(
-        quantitative,
-        "taxon_measurement_id",
-        "measurement_name"
-      );
+      const quantitativeAsSelect = toSelectFormat(quantitative, 'taxon_measurement_id', 'measurement_name');
 
       const qualitativeAsSelect = qualitative.map((measurement) => ({
         id: measurement.taxon_measurement_id,
-        key: "taxon_measurement_id",
+        key: 'taxon_measurement_id',
         value: measurement.measurement_name,
         children: measurement.options.map((option) => ({
           id: option.qualitative_option_id,
-          key: "qualitative_option_id",
-          value: option.option_label ?? "unknown",
-        })),
+          key: 'qualitative_option_id',
+          value: option.option_label ?? 'unknown'
+        }))
       }));
 
       return {
         quantitative: quantitativeAsSelect,
-        qualitative: qualitativeAsSelect,
+        qualitative: qualitativeAsSelect
       };
     }
 
@@ -312,43 +279,34 @@ export class XrefService extends InternalService<XrefRepository> {
    * @param {IMeasurementSearch} search - Search properties.
    * @returns {Promise<IMeasurementWithTsnHiearchy[]>}
    */
-  async searchForMeasurements(
-    search: IMeasurementSearch
-  ): Promise<IMeasurementWithTsnHierarchy> {
+  async searchForMeasurements(search: IMeasurementSearch): Promise<IMeasurementWithTsnHierarchy> {
     // Search for the measurements
     const [qualitative, quantitative] = await Promise.all([
       this.repository.searchForQualitativeMeasurements(search),
-      this.repository.searchForQuantitativeMeasurements(search),
+      this.repository.searchForQuantitativeMeasurements(search)
     ]);
 
     // Get the tsns of the measurements
-    const qualitativeTsns = qualitative.map(
-      (measurement) => measurement.itis_tsn
-    );
-    const quantitativeTsns = quantitative.map(
-      (measurement) => measurement.itis_tsn
-    );
+    const qualitativeTsns = qualitative.map((measurement) => measurement.itis_tsn);
+    const quantitativeTsns = quantitative.map((measurement) => measurement.itis_tsn);
 
     // Get the tsnHiearchy map for each tsn
-    const tsnHiearchyMap = await this.itisService.getTsnsHierarchyMap([
-      ...qualitativeTsns,
-      ...quantitativeTsns,
-    ]);
+    const tsnHiearchyMap = await this.itisService.getTsnsHierarchyMap([...qualitativeTsns, ...quantitativeTsns]);
 
     // Inject the tsn hiearchy into the measurements.
     const qualitativeWithHiearchy = qualitative.map((measurement) => ({
       ...measurement,
-      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
+      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? []
     }));
 
     const quantitativeWithHieararchy = quantitative.map((measurement) => ({
       ...measurement,
-      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? [],
+      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? []
     }));
 
     return {
       quantitative: quantitativeWithHieararchy,
-      qualitative: qualitativeWithHiearchy,
+      qualitative: qualitativeWithHiearchy
     };
   }
 }
