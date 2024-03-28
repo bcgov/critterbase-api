@@ -9,4 +9,4 @@ jobs:
             - uses: actions/checkout@v1
             - uses: artiomtr/jest-coverage-report-action@v2
               with:
-                  threshold: 80
+                  threshold: 90
