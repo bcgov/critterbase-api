@@ -10,12 +10,19 @@ ALTER TABLE "user" ADD CONSTRAINT unq_user_identifier_and_uuid UNIQUE (user_iden
 ALTER TABLE "user" DISABLE TRIGGER ALL;
 
 -- In PRODUCTION environments this value already exits.
+-- Using fallback values to handle the edge cases
 INSERT INTO "user" (user_id, user_identifier, keycloak_uuid, create_user, update_user)
-VALUES ('00000000-0000-0000-0000-000000000000','SYSTEM', NULL, '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000')
-ON CONFLICT (user_identifier, keycloak_uuid) DO NOTHING;
+VALUES (
+  coalesce(getuserid('SYSTEM'), '00000000-0000-0000-0000-000000000000'),
+  'SYSTEM',
+  NULL,
+  coalesce(getuserid('SYSTEM'), '00000000-0000-0000-0000-000000000000'),
+  coalesce(getuserid('SYSTEM'), '00000000-0000-0000-0000-000000000000'))
+ON CONFLICT (user_id) DO NOTHING;
 
-ALTER TABLE "user" ENABLE TRIGGER ALL;
+
 -- Enable trigger after SYSTEM account rectified.
+ALTER TABLE "user" ENABLE TRIGGER ALL;
 
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
