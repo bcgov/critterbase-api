@@ -1,5 +1,6 @@
 -- AlterTable
 -- Primary key mistakenly dropped in last migration, adding back
+ALTER TABLE "xref_taxon_collection_category" DROP CONSTRAINT IF EXISTS "xref_taxon_collection_category_pk";
 ALTER TABLE "xref_taxon_collection_category" ADD CONSTRAINT "xref_taxon_collection_category_pk" PRIMARY KEY ("collection_category_id");
 
 -- Create unique constraint for user
