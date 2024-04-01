@@ -233,6 +233,11 @@ export const DetailedCritterSchema = CritterSchema.extend({
   family_child: DetailedCritterChildSchema.array()
 }).strict();
 
+export const DetailedGetManyCritterSchema = CritterSchema.extend({
+  mortality: z.object({ mortality_id: zodID, mortality_timestamp: z.coerce.date() }).array(),
+  collection_units: DetailedCritterCollectionUnit.array()
+});
+
 export type IDetailedCritter = z.infer<typeof DetailedCritterSchema>;
 
 export type IDetailedCritterParent = z.infer<typeof DetailedCritterParentSchema>;

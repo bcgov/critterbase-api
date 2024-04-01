@@ -8,7 +8,8 @@ import {
   CritterCreateSchema,
   DetailedCritterSchema,
   SimilarCritterQuerySchema,
-  CritterIdsRequestSchema
+  CritterIdsRequestSchema,
+  DetailedGetManyCritterSchema
 } from '../../schemas/critter-schema';
 import { QueryFormats } from '../../utils/types';
 
@@ -16,7 +17,9 @@ const TAG = 'Critter';
 
 export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
-  detailedCritterResponse: DetailedCritterSchema
+  detailedCritterResponse: DetailedCritterSchema,
+  defaultCritterResponseArray: z.array(CritterSchema),
+  detailedManyCritterResponseArray: z.array(DetailedGetManyCritterSchema)
 };
 
 export const critterPaths = {
@@ -56,12 +59,15 @@ export const critterPaths = {
      */
     post: {
       operationId: 'crittersByIds',
-      summary: 'Retrieve specific critters by a list of IDs',
+      summary: 'Retrieve specific critters by a list of critter ids. Can optionally return a detailed response.',
       tags: [TAG],
+      requestParams: {
+        query: z.object({ format: z.enum([QueryFormats.detailed]).optional() })
+      },
       requestBody: {
         content: {
           'application/json': {
-            schema: CritterIdsRequestSchema //TODO: move to critter-schema
+            schema: CritterIdsRequestSchema
           }
         }
       },
@@ -70,7 +76,12 @@ export const critterPaths = {
           description: SwagDesc.get,
           content: {
             'application/json': {
-              schema: CritterSchema.array()
+              schema: {
+                oneOf: [
+                  { $ref: '#/components/schemas/defaultCritterResponseArray' },
+                  { $ref: '#/components/schemas/detailedManyCritterResponseArray' }
+                ]
+              }
             }
           }
         },

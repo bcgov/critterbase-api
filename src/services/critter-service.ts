@@ -34,7 +34,10 @@ export class CritterService extends InternalService<CritterRepository> {
    * @param {string[]} critterIds - array of critter ids.
    * @returns {Promise<ICritter[]>} array of critter objects.
    */
-  async getMultipleCrittersByIds(critterIds: string[]) {
+  async getMultipleCrittersByIds(critterIds: string[], format = defaultFormat) {
+    if (format === QueryFormats.detailed) {
+      return this.repository.getMultipleCrittersByIdsDetailed(critterIds);
+    }
     return this.repository.getMultipleCrittersByIds(critterIds);
   }
 
