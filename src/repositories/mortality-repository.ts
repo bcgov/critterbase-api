@@ -1,11 +1,6 @@
 import { Prisma } from '@prisma/client';
 import type { mortality } from '@prisma/client';
-import {
-  MortalityCreate,
-  mortalityInclude,
-  MortalityResponseSchema,
-  MortalityUpdate
-} from '../api/mortality/mortality.utils';
+import { MortalityCreate, mortalityInclude, MortalityUpdate } from '../api/mortality/mortality.utils';
 import { PrismaTransactionClient } from '../utils/types';
 import { Repository } from './base-repository';
 import { prisma } from '../utils/constants';
@@ -89,10 +84,7 @@ export class MortalityRepository extends Repository {
    * @returns {Promise<mortality[]>} Critter mortalities.
    */
   async getMortalityByCritter(critter_id: string): Promise<mortality[]> {
-    //TODO: remove oldResponse once validated the payloads are the same
-    const oldResponse = await getMortalityByCritter(critter_id);
-    const oldResponseParsed = oldResponse.map((response) => MortalityResponseSchema.parse(response));
-    const newResponse = await this.safeQuery(
+    const data = await this.safeQuery(
       Prisma.sql`
         SELECT
           m.*,
@@ -130,7 +122,7 @@ export class MortalityRepository extends Repository {
       z.array(z.unknown())
     );
 
-    return this.validateSameResponse(newResponse, oldResponseParsed) as mortality[];
+    return data as mortality[];
   }
 
   /**
