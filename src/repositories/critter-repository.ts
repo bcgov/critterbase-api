@@ -297,10 +297,6 @@ export class CritterRepository extends Repository {
 
     return result;
   }
-  /**
-   * TODO: Move these repository methods to individual repositories once built.
-   * ie: CritterRepository.getCritterMarkings -> MarkingRepository.getCritterMarkings
-   */
 
   /**
    * Find a critter's markings.

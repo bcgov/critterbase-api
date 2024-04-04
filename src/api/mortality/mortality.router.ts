@@ -7,8 +7,8 @@ import { ICbDatabase } from '../../utils/database';
 /**
  * Mortality Router.
  *
- * @param {ICbDatabase} db - Critterbase services.
- * @returns {Router} Express Router.
+ * @param {ICbDatabase} db - Critterbase database services.
+ * @returns {Router} Express router.
  */
 export const MortalityRouter = (db: ICbDatabase) => {
   const mortalityRouter = express.Router();
@@ -46,7 +46,6 @@ export const MortalityRouter = (db: ICbDatabase) => {
     '/critter/:id',
     catchErrors(async (req: Request, res: Response) => {
       const response = await db.mortalityService.getMortalityByCritter(req.params.id);
-      //const parsed = mortalityService.map((a) => MortalityResponseSchema.parse(a));
       return res.status(200).json(response);
     })
   );

@@ -1,6 +1,6 @@
 import { defaultFormat } from '../utils/constants';
 import { CritterRepository } from '../repositories/critter-repository';
-import { InternalService } from './base-service';
+import { IBaseServices, InternalService, ServiceHandler } from './base-service';
 import { QueryFormats } from '../utils/types';
 import {
   CritterCreateOptionalItis,
@@ -13,19 +13,22 @@ import { ItisService } from './itis-service';
 
 /**
  * Critter Service
+ *
  * @export
  * @class Critter Service
- * @extends Service<CritterRepository>
+ * @extends InternalService
  */
-export class CritterService extends InternalService<CritterRepository> {
+export class CritterService extends ServiceHandler<CritterRepository, IBaseServices> {
   /**
-   * Instantiate MortalityService and inject dependencies.
+   * Instantiate CritterService and inject dependencies.
    *
    * @static
    * @returns {CritterService}
    */
   static init(): CritterService {
-    return new CritterService(new CritterRepository(), new ItisService());
+    return new CritterService(new CritterRepository(), {
+      itisService: new ItisService()
+    });
   }
 
   /**
@@ -134,7 +137,7 @@ export class CritterService extends InternalService<CritterRepository> {
    * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
-    const itisPatchedCritter = await this.itisService.patchTsnAndScientificName(critterData);
+    const itisPatchedCritter = await this.services.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.updateCritter(critterId, itisPatchedCritter);
   }
@@ -149,7 +152,7 @@ export class CritterService extends InternalService<CritterRepository> {
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreateOptionalItis) {
-    const itisPatchedCritter = await this.itisService.patchTsnAndScientificName(critterData);
+    const itisPatchedCritter = await this.services.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.createCritter(itisPatchedCritter);
   }

@@ -1,20 +1,38 @@
 import { Repository } from '../repositories/base-repository';
 import { ItisService } from './itis-service';
 
+export interface IBaseServices {
+  itisService: ItisService;
+}
+
 /**
  * Base class for Critterbase internal services.
  *
  * @export
  * @class Service
- * @template TRepo - Repository Class
+ * @template TRepo - Repository Class.
  */
-export class InternalService<T extends Repository> {
-  repository: T;
-  itisService: ItisService;
+export class Service<TRepo extends Repository> {
+  repository: TRepo;
 
-  constructor(repository: T, itisService: ItisService) {
+  constructor(repository: TRepo) {
     this.repository = repository;
-    this.itisService = itisService;
+  }
+}
+
+/**
+ * Base class for Critterbase internal services with additional services as dependencies.
+ *
+ * @template TRepo - Repository Class.
+ * @template TServices - Services.
+ * @extends Service
+ */
+export class ServiceHandler<TRepo extends Repository, TServices> extends Service<TRepo> {
+  services: TServices;
+
+  constructor(repository: TRepo, services: TServices) {
+    super(repository);
+    this.services = services;
   }
 }
 

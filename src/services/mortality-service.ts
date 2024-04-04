@@ -1,10 +1,14 @@
 import type { mortality } from '@prisma/client';
 import { MortalityRepository } from '../repositories/mortality-repository';
-import { InternalService } from './base-service';
+import { IBaseServices, ServiceHandler } from './base-service';
 import { MortalityCreate, MortalityUpdate } from '../api/mortality/mortality.utils';
 import { ItisService } from './itis-service';
 
-export class MortalityService extends InternalService<MortalityRepository> {
+/**
+ * MortalityService
+ * @extends InternalService
+ */
+export class MortalityService extends ServiceHandler<MortalityRepository, IBaseServices> {
   /**
    * Instantiate MortalityService and inject dependencies.
    *
@@ -12,7 +16,7 @@ export class MortalityService extends InternalService<MortalityRepository> {
    * @returns {MortalityService}
    */
   static init(): MortalityService {
-    return new MortalityService(new MortalityRepository(), new ItisService());
+    return new MortalityService(new MortalityRepository(), { itisService: new ItisService() });
   }
 
   /**
