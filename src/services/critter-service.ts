@@ -9,6 +9,7 @@ import {
   IDetailedCritter,
   SimilarCritterQuery
 } from '../schemas/critter-schema';
+import { ItisService } from './itis-service';
 
 /**
  * Critter Service
@@ -17,6 +18,16 @@ import {
  * @extends Service<CritterRepository>
  */
 export class CritterService extends InternalService<CritterRepository> {
+  /**
+   * Instantiate MortalityService and inject dependencies.
+   *
+   * @static
+   * @returns {CritterService}
+   */
+  static init(): CritterService {
+    return new CritterService(new CritterRepository(), new ItisService());
+  }
+
   /**
    * Get all critters.
    *

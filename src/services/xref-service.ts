@@ -13,8 +13,19 @@ import {
 import { toSelectFormat } from '../utils/helper_functions';
 import { ISelect, ISelectChildren } from '../utils/types';
 import { InternalService } from './base-service';
+import { ItisService } from './itis-service';
 
 export class XrefService extends InternalService<XrefRepository> {
+  /**
+   * Instantiate MortalityService and inject dependencies.
+   *
+   * @static
+   * @returns {XrefService}
+   */
+  static init(): XrefService {
+    return new XrefService(new XrefRepository(), new ItisService());
+  }
+
   /**
    * Gets 'collection units' from a category id.
    *

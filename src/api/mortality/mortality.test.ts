@@ -9,7 +9,7 @@ import {
   getMortalityById as _getMortalityById,
   updateMortality as _updateMortality,
   appendDefaultCOD as _appendDefaultCod
-} from './mortality.service';
+} from '../../services/mortality-service';
 import { critter, lk_cause_of_death, mortality } from '@prisma/client';
 import { makeApp } from '../../app';
 import { ICbDatabase } from '../../utils/database';

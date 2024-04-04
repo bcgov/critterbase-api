@@ -1,8 +1,19 @@
 import { MarkingVerificationType } from '../api/marking/marking.utils';
 import { MarkingRepository } from '../repositories/marking-repository';
 import { InternalService } from './base-service';
+import { ItisService } from './itis-service';
 
 export class MarkingService extends InternalService<MarkingRepository> {
+  /**
+   * Instantiate MarkingService and inject dependencies.
+   *
+   * @static
+   * @returns {MarkingService}
+   */
+  static init(): MarkingService {
+    return new MarkingService(new MarkingRepository(), new ItisService());
+  }
+
   /**
    * Verify whether the supplied markings can be assigned to specific TSN (taxon).
    *

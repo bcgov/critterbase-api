@@ -2,6 +2,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { IS_DEV, prisma } from '../utils/constants';
 import { apiError } from '../utils/types';
+import { isDeepStrictEqual } from 'util';
 
 /**
  * Base class for Critterbase Repositories.
@@ -80,5 +81,13 @@ export class Repository {
     }
 
     return result; // eslint-disable-line
+  }
+
+  validateSameResponse<TNew, TOld>(newResponse: TNew, oldResponse: TOld): TNew {
+    if (!isDeepStrictEqual(newResponse, oldResponse)) {
+      console.log({ newResponse, oldResponse });
+      throw new Error(`Refactored code is not the same as previous`);
+    }
+    return newResponse;
   }
 }
