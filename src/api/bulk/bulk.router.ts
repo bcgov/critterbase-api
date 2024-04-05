@@ -84,7 +84,7 @@ export const BulkRouter = (db: ICbDatabase) => {
       const parsedMortalities = mortalities
         ? await Promise.all(
             mortalities.map(async (m: Record<string, unknown>) => {
-              await db.appendDefaultCOD(m);
+              await db.mortalityService.appendDefaultCOD(m);
               return MortalityCreateSchema.parse(m);
             })
           )

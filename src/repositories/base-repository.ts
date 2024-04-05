@@ -6,23 +6,28 @@ import { isDeepStrictEqual } from 'util';
 
 /**
  * Base class for Critterbase Repositories.
+ *
  * TODO: pull prisma config from constants and initialize in constructor.
- *       once all services / repositories are built for all routers.
+ * once all services / repositories are built for all routers.
  *
  * @export
  * @class Repository
  */
 export class Repository {
   prisma: PrismaClient;
+  transactionTimeoutMilliseconds: number;
 
-  constructor(prismaClient: PrismaClient = prisma) {
+  constructor(prismaClient: PrismaClient = prisma, transactionTimeout = 5000) {
     this.prisma = prismaClient;
+    this.transactionTimeoutMilliseconds = transactionTimeout;
   }
 
   /**
    * Prisma transaction handler.
    * Accepts callback function to wrap db requests in a transaction,
    * can abort the transaction by throwing errors within the callback.
+   *
+   * link: https://www.prisma.io/docs/orm/prisma-client/queries/transactions#interactive-transactions-1
    *
    * example:
    *  const userPayload = {...}
@@ -40,29 +45,38 @@ export class Repository {
    * @returns {Promise<T>} Transaction return.
    */
   async transactionHandler<T>(transactions: () => Promise<T>): Promise<T> {
-    // save previous prisma client
-    const originalClient = this.prisma;
+    const originalClient = this.prisma; // save original prisma client
 
     try {
-      // wrap requests with prisma $transaction
-      const result = await this.prisma.$transaction(async (transactionClient) => {
-        // set prisma client to be the transaction client
-        this.prisma = transactionClient as PrismaClient;
-        // run transaction requests
-        return transactions();
+      const startTimer = performance.now(); // start transaction timer
+
+      return await this.prisma.$transaction(async (transactionClient) => {
+        this.prisma = transactionClient as PrismaClient; // set prisma client to transaction client
+
+        const transactionData = await transactions(); // run transactions with prisma transaction client
+
+        const endTimer = performance.now();
+
+        const transactionsTimedOut = endTimer - startTimer >= this.transactionTimeoutMilliseconds;
+
+        if (transactionsTimedOut) {
+          throw apiError.serverIssue(
+            `Transaction request took longer than ${this.transactionTimeoutMilliseconds} ms rolling back...`
+          );
+        }
+
+        return transactionData; // if no errors thrown prisma commits transactions
       });
 
-      return result;
-
-      // no catch clause to bubble error up
+      // no catch clause to intentionally bubble error up
     } finally {
-      // set prisma back to the original client
-      this.prisma = originalClient;
+      this.prisma = originalClient; // restore original client
     }
   }
 
   /**
    * Safely queries with prisma raw sql and validates against zod schema.
+   * Validation only in DEV environments.
    *
    * @async
    * @template TSchema - Zod Schema generic.
@@ -83,16 +97,30 @@ export class Repository {
     if (!parsed.success) {
       console.log(parsed.error.errors, { result });
 
-      throw apiError.sqlExecuteIssue('Failed to parse raw sql with provided Zod schema.', parsed.error.errors);
+      throw apiError.requestIssue('Failed to parse raw sql with provided Zod schema.', parsed.error.errors);
     }
 
     return result; // eslint-disable-line
   }
 
+  /**
+   * REFACTOR TOOL
+   *
+   * Validates strict equality between two objects.
+   * Used when refactoring services / repositories.
+   *
+   * @template TNew
+   * @template TOld
+   * @param {TNew} newResponse - New response object.
+   * @param {TOld} oldResponse - Old response object.
+   * @throws {Error} - Throws if objects are not equal.
+   * @returns {TNew} New response.
+   */
   validateSameResponse<TNew, TOld>(newResponse: TNew, oldResponse: TOld): TNew {
     if (!isDeepStrictEqual(newResponse, oldResponse)) {
-      console.log({ newResponse, oldResponse });
-      throw new Error(`Refactored code is not the same as previous`);
+      throw apiError.requestIssue(`New response is not the same as old response`, [
+        { diff: { newResponse, oldResponse } }
+      ]);
     }
     return newResponse;
   }

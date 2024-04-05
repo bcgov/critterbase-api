@@ -21,6 +21,7 @@ describe('Critter Router', () => {
       mockCritterService.getAllCrittersOrCrittersWithWlhId.mockResolvedValueOnce(true);
       const res = await request.get('/api/critters');
 
+      expect(mockCritterService.getAllCritters).toHaveBeenCalled();
       expect(res.status).toBe(200);
       expect(res.body).toBe(true);
     });
