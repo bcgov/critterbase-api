@@ -1,6 +1,6 @@
 import { defaultFormat } from '../utils/constants';
 import { CritterRepository } from '../repositories/critter-repository';
-import { IBaseServices, InternalService, ServiceHandler } from './base-service';
+import { Service } from './base-service';
 import { QueryFormats } from '../utils/types';
 import {
   CritterCreateOptionalItis,
@@ -18,7 +18,15 @@ import { ItisService } from './itis-service';
  * @class Critter Service
  * @extends InternalService
  */
-export class CritterService extends ServiceHandler<CritterRepository, IBaseServices> {
+export class CritterService implements Service {
+  repository: CritterRepository;
+  itisService: ItisService;
+
+  constructor(repository: CritterRepository, itisService: ItisService) {
+    this.repository = repository;
+    this.itisService = itisService;
+  }
+
   /**
    * Instantiate CritterService and inject dependencies.
    *
@@ -26,9 +34,7 @@ export class CritterService extends ServiceHandler<CritterRepository, IBaseServi
    * @returns {CritterService}
    */
   static init(): CritterService {
-    return new CritterService(new CritterRepository(), {
-      itisService: new ItisService()
-    });
+    return new CritterService(new CritterRepository(), new ItisService());
   }
 
   /**
@@ -137,7 +143,7 @@ export class CritterService extends ServiceHandler<CritterRepository, IBaseServi
    * @returns {Promise<ICritter>} critter object.
    */
   async updateCritter(critterId: string, critterData: CritterUpdate) {
-    const itisPatchedCritter = await this.services.itisService.patchTsnAndScientificName(critterData);
+    const itisPatchedCritter = await this.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.updateCritter(critterId, itisPatchedCritter);
   }
@@ -152,7 +158,7 @@ export class CritterService extends ServiceHandler<CritterRepository, IBaseServi
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreateOptionalItis) {
-    const itisPatchedCritter = await this.services.itisService.patchTsnAndScientificName(critterData);
+    const itisPatchedCritter = await this.itisService.patchTsnAndScientificName(critterData);
 
     return this.repository.createCritter(itisPatchedCritter);
   }

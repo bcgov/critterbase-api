@@ -1,10 +1,3 @@
-import {
-  appendDefaultCOD,
-  getAllMortalities,
-  getMortalityByCritter,
-  getMortalityById
-} from '../repositories/mortality-repository';
-import { ItisService } from './itis-service';
 import { MortalityService } from './mortality-service';
 
 describe('mortality-service', () => {
@@ -80,7 +73,7 @@ describe('mortality-service', () => {
     });
 
     describe('deleteMortality', () => {
-      it('should call correct repository method and pass update body and id', async () => {
+      it('should call correct repository method and pass id', async () => {
         repository = { deleteMortality: jest.fn() };
 
         const mortalityService = new MortalityService(repository, itisService);

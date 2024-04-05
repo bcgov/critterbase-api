@@ -1,6 +1,6 @@
 import type { mortality } from '@prisma/client';
 import { MortalityRepository } from '../repositories/mortality-repository';
-import { IBaseServices, ServiceHandler } from './base-service';
+import { Service } from './base-service';
 import { MortalityCreate, MortalityUpdate } from '../api/mortality/mortality.utils';
 import { ItisService } from './itis-service';
 
@@ -8,7 +8,14 @@ import { ItisService } from './itis-service';
  * MortalityService
  * @extends InternalService
  */
-export class MortalityService extends ServiceHandler<MortalityRepository, IBaseServices> {
+export class MortalityService implements Service {
+  repository: MortalityRepository;
+  itisService: ItisService;
+
+  constructor(repository: MortalityRepository, itisService: ItisService) {
+    this.repository = repository;
+    this.itisService = itisService;
+  }
   /**
    * Instantiate MortalityService and inject dependencies.
    *
@@ -16,7 +23,7 @@ export class MortalityService extends ServiceHandler<MortalityRepository, IBaseS
    * @returns {MortalityService}
    */
   static init(): MortalityService {
-    return new MortalityService(new MortalityRepository(), { itisService: new ItisService() });
+    return new MortalityService(new MortalityRepository(), new ItisService());
   }
 
   /**
@@ -41,7 +48,8 @@ export class MortalityService extends ServiceHandler<MortalityRepository, IBaseS
   }
 
   /**
-   * Append the default cause of death (`Unknown`) id to the body.
+   * Append the default cause of death (`Unknown`) id to the body,
+   * if `proximate_cause_of_death_id` not provided.
    *
    * @async
    * @param {[TODO:type]} body - [TODO:description]

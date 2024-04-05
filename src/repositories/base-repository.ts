@@ -29,7 +29,7 @@ export class Repository {
    *  await transaction(async () => {
    *    const user = await createUser(userPayload)
    *    if (!user) {
-   *      throw new Error(`missing user`) // First request rolled back
+   *      throw new Error(`missing user`) // Requests rolled back
    *    }
    *    return updateUser(...user) // Both requests committed
    *  });
@@ -39,20 +39,26 @@ export class Repository {
    * @param {() => Promise<T>} transactions - DB requests / services.
    * @returns {Promise<T>} Transaction return.
    */
-  async transaction<T>(transactions: () => Promise<T>): Promise<T> {
+  async transactionHandler<T>(transactions: () => Promise<T>): Promise<T> {
     // save previous prisma client
-    const prismaClient = this.prisma;
-    // wrap requests with prisma $transaction
-    const data = await this.prisma.$transaction(async (transactionClient) => {
-      // set prisma client to be the transaction client
-      this.prisma = transactionClient as PrismaClient;
-      // run transaction requests
-      return transactions();
-    });
-    // set prisma back to the original client
-    this.prisma = prismaClient;
-    // return response from transactions
-    return data;
+    const originalClient = this.prisma;
+
+    try {
+      // wrap requests with prisma $transaction
+      const result = await this.prisma.$transaction(async (transactionClient) => {
+        // set prisma client to be the transaction client
+        this.prisma = transactionClient as PrismaClient;
+        // run transaction requests
+        return transactions();
+      });
+
+      return result;
+
+      // no catch clause to bubble error up
+    } finally {
+      // set prisma back to the original client
+      this.prisma = originalClient;
+    }
   }
 
   /**

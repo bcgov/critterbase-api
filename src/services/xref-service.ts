@@ -12,10 +12,18 @@ import {
 } from '../schemas/xref-schema';
 import { toSelectFormat } from '../utils/helper_functions';
 import { ISelect, ISelectChildren } from '../utils/types';
-import { IBaseServices, ServiceHandler } from './base-service';
+import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
-export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
+export class XrefService implements Service {
+  repository: XrefRepository;
+  itisService: ItisService;
+
+  constructor(repository: XrefRepository, itisService: ItisService) {
+    this.repository = repository;
+    this.itisService = itisService;
+  }
+
   /**
    * Instantiate MortalityService and inject dependencies.
    *
@@ -23,7 +31,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
    * @returns {XrefService}
    */
   static init(): XrefService {
-    return new XrefService(new XrefRepository(), { itisService: new ItisService() });
+    return new XrefService(new XrefRepository(), new ItisService());
   }
 
   /**
@@ -64,8 +72,8 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
     let tsns: number[] = [];
 
     if (itis_scientific_name) {
-      const tsn = await this.services.itisService.getTsnFromScientificName(itis_scientific_name);
-      tsns = await this.services.itisService.getTsnHierarchy(tsn);
+      const tsn = await this.itisService.getTsnFromScientificName(itis_scientific_name);
+      tsns = await this.itisService.getTsnHierarchy(tsn);
     }
     const data = await this.repository.getCollectionUnitsFromCategoryOrTsns(category_name, tsns);
 
@@ -87,7 +95,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
    * @returns {Promise<ICollectionCategoryDef[] | ISelect[]>}
    */
   async getTsnCollectionCategories(tsn: number, asSelect = false): Promise<ICollectionCategoryDef[] | ISelect[]> {
-    const tsns = await this.services.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnCollectionCategories(tsns);
 
@@ -111,7 +119,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
    * @returns {Promise<ITsnMarkingBodyLocation[] | ISelect[]>}
    */
   async getTsnMarkingBodyLocations(tsn: number, asSelect = false): Promise<ITsnMarkingBodyLocation[] | ISelect[]> {
-    const tsns = await this.services.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnMarkingBodyLocations(tsns);
 
@@ -138,7 +146,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
     tsn: number,
     asSelect = false
   ): Promise<ITsnQualitativeMeasurement[] | ISelect[]> {
-    const tsns = await this.services.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQualitativeMeasurements(tsns);
 
@@ -165,7 +173,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
     tsn: number,
     asSelect = false
   ): Promise<ITsnQuantitativeMeasurement[] | ISelect[]> {
-    const tsns = await this.services.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
@@ -253,7 +261,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
     tsn: number,
     asSelect = false
   ): Promise<ITsnMeasurements | { qualitative: ISelectChildren[]; quantitative: ISelect[] }> {
-    const tsns = await this.services.itisService.getTsnHierarchy(tsn);
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const quantitative = await this.repository.getTsnQuantitativeMeasurements(tsns);
 
@@ -302,10 +310,7 @@ export class XrefService extends ServiceHandler<XrefRepository, IBaseServices> {
     const quantitativeTsns = quantitative.map((measurement) => measurement.itis_tsn);
 
     // Get the tsnHiearchy map for each tsn
-    const tsnHiearchyMap = await this.services.itisService.getTsnsHierarchyMap([
-      ...qualitativeTsns,
-      ...quantitativeTsns
-    ]);
+    const tsnHiearchyMap = await this.itisService.getTsnsHierarchyMap([...qualitativeTsns, ...quantitativeTsns]);
 
     // Inject the tsn hiearchy into the measurements.
     const qualitativeWithHiearchy = qualitative.map((measurement) => ({

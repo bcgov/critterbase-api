@@ -1,7 +1,8 @@
+import { prisma } from '../utils/constants';
 import { MortalityRepository } from './mortality-repository';
 
 const mockMortalities = [{ mortality: 1 }, { mortality: 2 }];
-const mockMortality = { mortality: 1 };
+const mockMortality = { mortality: 1, location_id: 3 };
 
 describe('mortality-repository', () => {
   let mockPrismaClient;
@@ -85,6 +86,65 @@ describe('mortality-repository', () => {
     it.todo('should pass the correct zod schema to safeQuery');
   });
 
+  describe('getMortalityByCritter', () => {
+    const mortalityRepository = new MortalityRepository(mockPrismaClient);
+    const mockSafeQuery = jest.spyOn(mortalityRepository, 'safeQuery').mockImplementation(async () => [mockMortality]);
+
+    it('should return mortality successfully', async () => {
+      const result = await mortalityRepository.getMortalityByCritter('critter_id');
+
+      expect(mockSafeQuery).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(Array);
+      expect(result).toEqual([mockMortality]);
+    });
+
+    it('should format the sql correctly - and should not change', async () => {
+      await mortalityRepository.getMortalityByCritter('critter_id');
+
+      expect(mockSafeQuery.mock.calls[0][0].values).toStrictEqual(['critter_id']);
+
+      // stripping extra whitespace to only test against the actual sql
+      expect(mockSafeQuery.mock.calls[0][0].sql.replace(/ /g, '')).toBe(
+        `
+        SELECT
+          m.*,
+          json_build_object(
+            'latitude', l.latitude,
+            'longitude', l.longitude,
+            'coordinate_uncertainty', l.coordinate_uncertainty,
+            'temperature', l.temperature,
+            'location_comment', l.location_comment,
+            'region_env_id', l.region_env_id,
+            'region_nr_id', l.region_nr_id,
+            'wmu_id', l.wmu_id,
+            'region_env_name', re.region_env_name,
+            'region_nr_name', rn.region_nr_name,
+            'wmu_name', rw.wmu_name
+          ) as location,
+        json_build_object(
+          'cod_category', c1.cod_category,
+          'cod_reason', c1.cod_reason
+        ) as proximate_cause_of_death,
+        json_build_object(
+          'cod_category', c2.cod_category,
+          'cod_reason', c2.cod_reason
+        ) as ultimate_cause_of_death
+        FROM mortality m
+        JOIN lk_cause_of_death d1 ON m.proximate_cause_of_death_id = d1.cod_id
+        JOIN lk_cause_of_death d2 ON m.ultimate_cause_of_death_id = d2.cod_id
+        JOIN location l ON m.location_id = l.location_id
+        JOIN lk_region_env re ON re.region_env_id = l.region_env_id
+        JOIN lk_region_nr rn ON rn.region_nr_id = l.region_nr_id
+        JOIN lk_wildlife_management_unit rw ON rw.wmu_id = l.wmu_id
+        JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
+        JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
+        WHERE critter_id = ?::uuid;`.replace(/ /g, '')
+      );
+    });
+
+    it.todo('should pass the correct zod schema to safeQuery');
+  });
+
   describe('createMortality', () => {
     beforeEach(() => {
       mockPrismaClient = {
@@ -133,27 +193,57 @@ describe('mortality-repository', () => {
     beforeEach(() => {
       mockPrismaClient = {
         mortality: {
-          delete: jest.fn(),
-          findUniqueOrThrow: jest.fn()
+          delete: jest.fn()
         },
         location: {
           delete: jest.fn()
-        }
+        },
+        $transaction: jest.fn()
       };
     });
 
-    it('should return updated mortality', async () => {
-      mockPrismaClient.mortality.delete.mockResolvedValue(mockMortality);
-      mockPrismaClient.mortality.findUniqueOrThrow.mockResolvedValue({ location_id: 'a' });
-      mockPrismaClient.location.delete.mockResolvedValue(true);
-
+    it('should delete both mortality and location from existing mortality id', async () => {
       const mortalityRepository = new MortalityRepository(mockPrismaClient);
+
+      mockPrismaClient.mortality.delete.mockResolvedValue(mockMortality);
+      mockPrismaClient.location.delete.mockResolvedValue(true);
+      jest.spyOn(mortalityRepository, 'transactionHandler').mockImplementation((callback) => callback());
+
       const result = await mortalityRepository.deleteMortality('mortality_id');
 
       expect(result).toEqual(mockMortality);
-      expect(mockPrismaClient.mortality.delete).toHaveBeenCalled();
+      expect(mockPrismaClient.mortality.delete).toHaveBeenCalledWith({
+        where: {
+          mortality_id: 'mortality_id'
+        }
+      });
+      expect(mockPrismaClient.location.delete).toHaveBeenCalledWith({
+        where: { location_id: mockMortality.location_id }
+      });
     });
 
-    it.todo('should format the prisma delete query correctly');
+    it('should not call delete location if mortality delete fails', async () => {
+      const mortalityRepository = new MortalityRepository(mockPrismaClient);
+
+      mockPrismaClient.mortality.delete.mockResolvedValue(() => {
+        throw 'test';
+      });
+      mockPrismaClient.location.delete.mockResolvedValue(true);
+      jest.spyOn(mortalityRepository, 'transactionHandler').mockImplementation((callback) => callback());
+
+      try {
+        await mortalityRepository.deleteMortality('mortality_id');
+        expect(false);
+      } catch (err) {
+        expect(err).toBe('test');
+      }
+
+      expect(mockPrismaClient.mortality.delete).toHaveBeenCalledWith({
+        where: {
+          mortality_id: 'mortality_id'
+        }
+      });
+      expect(mockPrismaClient.location.delete).not.toHaveBeenCalled();
+    });
   });
 });

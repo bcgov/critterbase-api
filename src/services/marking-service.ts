@@ -1,9 +1,17 @@
 import { MarkingVerificationType } from '../api/marking/marking.utils';
 import { MarkingRepository } from '../repositories/marking-repository';
-import { IBaseServices, ServiceHandler } from './base-service';
+import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
-export class MarkingService extends ServiceHandler<MarkingRepository, IBaseServices> {
+export class MarkingService implements Service {
+  repository: MarkingRepository;
+  itisService: ItisService;
+
+  constructor(repository: MarkingRepository, itisService: ItisService) {
+    this.repository = repository;
+    this.itisService = itisService;
+  }
+
   /**
    * Instantiate MarkingService and inject dependencies.
    *
@@ -11,7 +19,7 @@ export class MarkingService extends ServiceHandler<MarkingRepository, IBaseServi
    * @returns {MarkingService}
    */
   static init(): MarkingService {
-    return new MarkingService(new MarkingRepository(), { itisService: new ItisService() });
+    return new MarkingService(new MarkingRepository(), new ItisService());
   }
 
   /**
@@ -22,7 +30,7 @@ export class MarkingService extends ServiceHandler<MarkingRepository, IBaseServi
    * @returns {Promise<{verified: boolean, invalid_markings: string[]}>} indicator if all verified, and array of problematic marking ids.
    */
   async verifyMarkingsCanBeAssignedToTsn(body: MarkingVerificationType) {
-    const tsnHierarchy = await this.services.itisService.getTsnHierarchy(body.itis_tsn);
+    const tsnHierarchy = await this.itisService.getTsnHierarchy(body.itis_tsn);
 
     const markingIds = body.markings.map((marking) => marking.marking_id);
 
