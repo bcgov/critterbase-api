@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CommonLocationValidation } from '../location/location.utils';
-import { MortalityCreateSchema, MortalityIncludeSchema, MortalityUpdateSchema } from './mortality.utils';
+import { MortalityCreateSchema, MortalityIncludeSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { zodID } from '../../utils/zod_helpers';
 import { routes } from '../../utils/constants';

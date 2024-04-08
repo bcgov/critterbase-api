@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { cod_confidence, mortality, Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { AuditColumns } from '../../utils/types';
-import { DeleteSchema, implement, noAudit, ResponseSchema, zodID } from '../../utils/zod_helpers';
+import { AuditColumns } from '../utils/types';
+import { DeleteSchema, implement, noAudit, ResponseSchema, zodID } from '../utils/zod_helpers';
 import {
   CommonFormattedLocationSchema,
   CommonLocationSchema,
@@ -10,7 +10,7 @@ import {
   LocationBody,
   LocationCreateSchema,
   LocationUpdateSchema
-} from '../location/location.utils';
+} from '../api/location/location.utils';
 
 const MortalityBodySchema = implement<mortality>().with({
   mortality_id: zodID,

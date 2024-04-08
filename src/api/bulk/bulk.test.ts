@@ -42,7 +42,7 @@ const db: any = {
   deleteMarking,
   deleteCollectionUnit,
   itisService: { patchTsnAndScientificName },
-  mortalityService: { appendDefaultCOD }
+  mortalityService: { appendDefaultCOD, updateMortality }
 };
 
 const request = supertest(makeApp(db));
@@ -486,7 +486,6 @@ describe('API: Bulk', () => {
           families: { families: [], parents: [], children: [] }
         };
         const res = await request.post('/api/bulk').send(body);
-        console.log(res.error);
         expect.assertions(1);
         expect(res.status).toBe(201);
       });

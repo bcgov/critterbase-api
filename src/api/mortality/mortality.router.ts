@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
-import { MortalityCreateSchema, MortalityUpdateSchema } from './mortality.utils';
+import { MortalityCreateSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { ICbDatabase } from '../../utils/database';
 /**
  * Mortality Router.

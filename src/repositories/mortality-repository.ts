@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import type { mortality } from '@prisma/client';
-import { MortalityCreate, MortalityUpdate } from '../api/mortality/mortality.utils';
+import { MortalityCreate, MortalityUpdate } from '../schemas/mortality-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 import { z } from 'zod';

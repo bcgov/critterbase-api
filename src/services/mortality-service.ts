@@ -1,7 +1,7 @@
 import type { mortality } from '@prisma/client';
 import { MortalityRepository } from '../repositories/mortality-repository';
 import { Service } from './base-service';
-import { MortalityCreate, MortalityUpdate } from '../api/mortality/mortality.utils';
+import { MortalityCreate, MortalityUpdate } from '../schemas/mortality-schema';
 import { ItisService } from './itis-service';
 
 /**

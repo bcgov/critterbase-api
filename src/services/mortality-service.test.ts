@@ -8,6 +8,7 @@ describe('mortality-service', () => {
   describe('init', () => {
     it('should instantiate MortalityService with all its dependencies', () => {
       expect(mortalityService).toBeInstanceOf(MortalityService);
+      expect(mortalityService).toBeInstanceOf(MortalityService);
       expect(mortalityService.repository).toBeDefined();
       expect(mortalityService.itisService).toBeDefined();
     });
