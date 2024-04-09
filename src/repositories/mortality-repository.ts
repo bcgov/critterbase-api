@@ -1,10 +1,20 @@
 import { Prisma } from '@prisma/client';
 import type { mortality } from '@prisma/client';
-import { MortalityCreate, MortalityUpdate } from '../schemas/mortality-schema';
+import {
+  MortalityCreate,
+  MortalityDetailed,
+  MortalityDetailedSchema,
+  MortalityUpdate
+} from '../schemas/mortality-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 import { z } from 'zod';
 
+/**
+ * Mortality Repository
+ *
+ * @extends Repository
+ */
 export class MortalityRepository extends Repository {
   /**
    * Get all mortality records in Critterbase.
@@ -20,10 +30,11 @@ export class MortalityRepository extends Repository {
    * Get critter mortality by mortality id.
    *
    * @async
+   * @throws {apiError.notFound} - Mortality not found.
    * @param {string} mortality_id - Primary identifier of a mortality.
-   * @returns {Promise<mortality | null>} Critter mortality or null.
+   * @returns {Promise<MortalityDetailed>} Critter mortality or null.
    */
-  async getMortalityById(mortality_id: string): Promise<mortality | null> {
+  async getMortalityById(mortality_id: string): Promise<MortalityDetailed> {
     const data = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -59,7 +70,7 @@ export class MortalityRepository extends Repository {
         JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
         JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
         WHERE mortality_id = ${mortality_id}::uuid;`,
-      z.array(z.unknown())
+      z.array(MortalityDetailedSchema)
     );
 
     if (!data[0]) {
@@ -69,10 +80,19 @@ export class MortalityRepository extends Repository {
       ]);
     }
 
-    return data[0] as mortality;
+    return data[0];
   }
 
-  async appendDefaultCOD(body: { proximate_cause_of_death_id?: string }) {
+  /**
+   * Append the default cause of death (`Unknown`) id to the body
+   * if `proximate_cause_of_death_id` not provided.
+   *
+   * @async
+   * @template T
+   * @param {T} body - Object containing `proximate_cause_of_death_id`.
+   * @returns {Promise<T>} Body object.
+   */
+  async appendDefaultCOD<T extends { proximate_cause_of_death_id?: string }>(body: T): Promise<T> {
     const cod_res = await this.prisma.lk_cause_of_death.findFirstOrThrow({
       where: { cod_category: 'Unknown' }
     });
@@ -87,9 +107,9 @@ export class MortalityRepository extends Repository {
    *
    * @async
    * @param {string} critter_id - Primary identifier of a critter.
-   * @returns {Promise<mortality[]>} Critter mortalities.
+   * @returns {Promise<MortalityDetailed[]>} Critter mortalities.
    */
-  async getMortalityByCritter(critter_id: string): Promise<mortality[]> {
+  async getMortalityByCritter(critter_id: string): Promise<MortalityDetailed[]> {
     const data = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -125,16 +145,17 @@ export class MortalityRepository extends Repository {
         JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
         JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
         WHERE critter_id = ${critter_id}::uuid;`,
-      z.array(z.unknown())
+      z.array(MortalityDetailedSchema)
     );
 
-    return data as mortality[];
+    return data;
   }
 
   /**
    * Create a critter mortality.
    *
    * @async
+   * @throws {apiError.sqlExecuteIssue} - Failed to create mortality.
    * @param {MortalityCreate} mortality_data - Create payload.
    * @returns {Promise<mortality>} Critter mortality.
    */
@@ -177,11 +198,12 @@ export class MortalityRepository extends Repository {
    * Update a critter mortality.
    *
    * @async
+   * @throws {apiError.sqlExecuteIssue} - Failed to update mortality.
    * @param {string} mortality_id - Primary identifier of a mortality.
    * @param {MortalityUpdate} mortality_data - Update payload.
    * @returns {Promise<mortality>} Critter mortality.
    */
-  async updateMortality(mortality_id: string, mortality_data: MortalityUpdate) {
+  async updateMortality(mortality_id: string, mortality_data: MortalityUpdate): Promise<mortality> {
     const { location, location_id, critter_id, proximate_cause_of_death_id, ultimate_cause_of_death_id, ...rest } =
       mortality_data;
     const upsertBody = { create: {}, update: {} };
@@ -217,13 +239,13 @@ export class MortalityRepository extends Repository {
   }
 
   /**
-   * Delete a critter mortality.
+   * Delete a critter mortality and location as a transaction.
    *
    * @async
    * @param {string} mortality_id - Primary identifier of a mortality.
    * @returns {Promise<mortality>} Critter mortality.
    */
-  async deleteMortality(mortality_id: string) {
+  async deleteMortality(mortality_id: string): Promise<mortality> {
     return this.transactionHandler(async () => {
       const mortality = await this.prisma.mortality.delete({
         where: {

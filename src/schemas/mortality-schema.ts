@@ -1,18 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { cod_confidence, mortality, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
-import { DeleteSchema, implement, noAudit, ResponseSchema, zodID } from '../utils/zod_helpers';
-import {
-  CommonFormattedLocationSchema,
-  CommonLocationSchema,
-  commonLocationSelect,
-  LocationBody,
-  LocationCreateSchema,
-  LocationUpdateSchema
-} from '../api/location/location.utils';
+import { DeleteSchema, implement, noAudit, zodID } from '../utils/zod_helpers';
+import { LocationBody, LocationCreateSchema, LocationUpdateSchema } from '../api/location/location.utils';
 
-const MortalityBodySchema = implement<mortality>().with({
+/**
+ * Mortality base schema (includes audit columns).
+ *
+ */
+const MortalitySchema = implement<mortality>().with({
   mortality_id: zodID,
   critter_id: zodID,
   location_id: zodID.nullable(),
@@ -30,56 +26,50 @@ const MortalityBodySchema = implement<mortality>().with({
   update_timestamp: z.coerce.date()
 });
 
-const mortalityInclude = Prisma.validator<Prisma.mortalityArgs>()({
-  include: {
-    location: {
-      ...commonLocationSelect
-    },
-    lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: {
-      select: {
-        cod_category: true,
-        cod_reason: true
-      }
-    },
-    lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: {
-      select: {
-        cod_category: true,
-        cod_reason: true
-      }
-    }
-  }
-});
-
-const MortalityIncludeSchema = implement<MortalityIncludeType>().with({
-  ...MortalityBodySchema.shape,
-  location: CommonLocationSchema,
-  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: z.object({
-    cod_category: z.string(),
-    cod_reason: z.string().nullable()
+const MortalityDetailedSchema = MortalitySchema.extend({
+  location: z.object({
+    latitude: z.number().nullable(),
+    longitude: z.number().nullable(),
+    coordinate_uncertainty: z.number().nullable(),
+    wmu_id: zodID.nullable(),
+    region_nr_id: zodID.nullable(),
+    region_env_id: zodID.nullable(),
+    temperature: z.number().nullable(),
+    location_comment: z.string().nullable(),
+    region_env_name: z.string().nullable(),
+    region_nr_name: z.string().nullable(),
+    wmu_name: z.string().nullable()
   }),
-  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: z
-    .object({ cod_category: z.string(), cod_reason: z.string().nullable() })
-    .nullable()
+  proximate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string() }),
+  ultimate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string() })
 });
 
+/**
+ * Schema for mortality update payloads.
+ *
+ */
 const MortalityUpdateSchema = implement<
   Omit<Prisma.mortalityUncheckedUpdateManyInput, AuditColumns> & {
     location?: LocationBody;
   }
 >().with(
-  MortalityBodySchema.omit({
+  MortalitySchema.omit({
     ...noAudit
   })
     .extend({ location: LocationUpdateSchema })
     .partial().shape
 );
 
+/**
+ * Schema for mortality create payloads.
+ *
+ */
 const MortalityCreateSchema = implement<
   Omit<Prisma.mortalityCreateManyInput, AuditColumns> & {
     location?: LocationBody;
   }
 >().with(
-  MortalityBodySchema.omit({ ...noAudit })
+  MortalitySchema.omit({ ...noAudit })
     .extend({ location: LocationCreateSchema })
     .partial()
     .required({
@@ -89,37 +79,29 @@ const MortalityCreateSchema = implement<
     }).shape
 );
 
-type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
-type MortalityUpdate = z.infer<typeof MortalityUpdateSchema>;
-
-type MortalityIncludeType = Prisma.mortalityGetPayload<typeof mortalityInclude>;
-
-const MortalityResponseSchema = ResponseSchema.transform((val) => {
-  const {
-    location,
-    lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death,
-    lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death,
-    ...rest
-  } = val as MortalityIncludeType;
-  return {
-    ...rest,
-    location: location ? CommonFormattedLocationSchema.parse(location) : null,
-    proximate_cause_of_death: lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death ?? null,
-    ultimate_cause_of_death: lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death ?? null
-  };
-});
-
-const MortalityDeleteSchema = MortalityBodySchema.pick({
+/**
+ * Schema for mortality delete payloads, used mostly for bulk requests.
+ *
+ */
+const MortalityDeleteSchema = MortalitySchema.pick({
   mortality_id: true
 }).extend(DeleteSchema.shape);
 
+/**
+ * Inferred schema types.
+ *
+ */
+type MortalityCreate = z.infer<typeof MortalityCreateSchema>;
+type MortalityUpdate = z.infer<typeof MortalityUpdateSchema>;
+type MortalityDetailed = z.infer<typeof MortalityDetailedSchema>;
+
 export {
-  mortalityInclude,
+  MortalityCreate,
+  MortalityUpdate,
   MortalityCreateSchema,
   MortalityUpdateSchema,
-  MortalityResponseSchema,
-  MortalityBodySchema,
-  MortalityIncludeSchema,
-  MortalityDeleteSchema
+  MortalitySchema,
+  MortalityDeleteSchema,
+  MortalityDetailedSchema,
+  MortalityDetailed
 };
-export type { MortalityCreate, MortalityUpdate };

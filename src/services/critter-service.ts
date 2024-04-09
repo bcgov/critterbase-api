@@ -15,13 +15,19 @@ import { ItisService } from './itis-service';
  * Critter Service
  *
  * @export
- * @class Critter Service
- * @extends InternalService
+ * @class CritterService
+ * @implements InternalService
  */
 export class CritterService implements Service {
   repository: CritterRepository;
   itisService: ItisService;
 
+  /**
+   * Construct CritterService class.
+   *
+   * @param {CritterRepository} repository - Critter repository dependency.
+   * @param {ItisService} itisService - Itis service dependency.
+   */
   constructor(repository: CritterRepository, itisService: ItisService) {
     this.repository = repository;
     this.itisService = itisService;
@@ -153,8 +159,8 @@ export class CritterService implements Service {
    * Patches itis_tsn + itis_scientific_name with ITIS values.
    *
    * @async
-   * @param {CritterCreateOptionalItis} critterData - create critter payload with optional itis fields.
    * @throws {apiError.notFound} - when invalid tsn.
+   * @param {CritterCreateOptionalItis} critterData - create critter payload with optional itis fields.
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreateOptionalItis) {
