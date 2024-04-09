@@ -22,7 +22,10 @@ import {
   DetailedCritterChildSchema,
   IDetailedCritterParent,
   IDetailedCritterChild,
-  DetailedGetManyCritterSchema
+  DetailedGetManyCritterSchema,
+  IDetailedGetManyCritter,
+  IDetailedManyCritter,
+  DetailedManyCritterSchema
 } from '../schemas/critter-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
@@ -96,19 +99,18 @@ export class CritterRepository extends Repository {
 
   /**
    * Get multiple critters with additional properties by critter ids.
-   *
    * Used to continue supporting BCTW integration.
    *
    * Additional properties include:
-   *    mortality: includes mortality_id + mortality_timestamp.
-   *    collection_units: includes important collection_unit related properties.
+   *    mortality: mortality_id + mortality_timestamp.
+   *    collection_units: relevant collection_unit related properties.
    *
    * @async
    * @param {string[]} critter_ids - array of critter ids.
-   * @returns {Promise<TODO>} array of critter objects.
+   * @returns {Promise<IDetailedManyCritter[]>} array of critter objects.
    *
    */
-  async getMultipleCrittersByIdsDetailed(critter_ids: string[]) {
+  async getMultipleCrittersByIdsDetailed(critter_ids: string[]): Promise<IDetailedManyCritter[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
@@ -142,7 +144,7 @@ export class CritterRepository extends Repository {
           ON l.collection_category_id = x.collection_category_id
         WHERE c.critter_id = ANY(${critter_ids}::uuid[])
         GROUP BY c.critter_id;`,
-      z.array(DetailedGetManyCritterSchema)
+      z.array(DetailedManyCritterSchema)
     );
 
     return result;
