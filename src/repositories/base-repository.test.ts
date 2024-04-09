@@ -2,7 +2,6 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { Repository } from './base-repository';
 import { z } from 'zod';
 import { apiError } from '../utils/types';
-import { prisma } from '../utils/constants';
 jest.requireMock('../utils/constants').prisma = jest.fn();
 
 describe('base-repository', () => {
@@ -81,6 +80,7 @@ describe('base-repository', () => {
     });
 
     it('should set prisma client to transaction client and back to original', async () => {
+      jest.requireMock('../utils/constants').prisma = jest.fn();
       const originalPrisma = repo.prisma;
       await repo.transactionHandler(async () => {
         jest.advanceTimersByTime(1);
@@ -91,6 +91,7 @@ describe('base-repository', () => {
     });
 
     it('should set prisma client to orignal client if transactions fail', async () => {
+      jest.requireMock('../utils/constants').prisma = jest.fn();
       const originalPrisma = repo.prisma;
       try {
         await repo.transactionHandler(async () => {
@@ -105,7 +106,8 @@ describe('base-repository', () => {
     });
 
     it('should throw apiError if transactions take longer than allowed', async () => {
-      const mockRepo = new Repository(prisma, 1);
+      mockPrismaClient = { $transaction: (callback: any) => callback(jest.fn()) };
+      const mockRepo = new Repository(mockPrismaClient, 1);
       try {
         await mockRepo.transactionHandler(async () => {
           jest.advanceTimersByTime(1);
@@ -117,6 +119,7 @@ describe('base-repository', () => {
     });
 
     it('should call transactions and return data', async () => {
+      jest.requireMock('../utils/constants').prisma = jest.fn();
       const transactionsMock = jest.fn().mockResolvedValue(true);
       const res = await repo.transactionHandler(transactionsMock);
       expect(transactionsMock).toHaveBeenCalled();
