@@ -7,6 +7,7 @@ import {
   CritterUpdate,
   ICritter,
   IDetailedCritter,
+  IDetailedManyCritter,
   SimilarCritterQuery
 } from '../schemas/critter-schema';
 import { ItisService } from './itis-service';
@@ -54,13 +55,16 @@ export class CritterService implements Service {
   }
 
   /**
-   * Get multiple critters by critter ids.
+   * Get multiple critters by critter ids (default or detailed format)
    *
    * @async
    * @param {string[]} critterIds - array of critter ids.
-   * @returns {Promise<ICritter[]>} array of critter objects.
+   * @returns {Promise<ICritter[] | IDetailedManyCritter[]>} default or detailed critter objects.
    */
-  async getMultipleCrittersByIds(critterIds: string[], format = defaultFormat) {
+  async getMultipleCrittersByIds(
+    critterIds: string[],
+    format = defaultFormat
+  ): Promise<ICritter[] | IDetailedManyCritter[]> {
     if (format === QueryFormats.detailed) {
       return this.repository.getMultipleCrittersByIdsDetailed(critterIds);
     }
@@ -73,7 +77,7 @@ export class CritterService implements Service {
    * @async
    * @param {string} critterId - critter id.
    * @param {QueryFormats} format - additional response format (supports detailed).
-   * @returns {Promise<ICritter | IDetailedCritter>} critter object.
+   * @returns {Promise<ICritter | IDetailedCritter>} default or detailed critter object.
    */
   async getCritterById(critterId: string, format = defaultFormat): Promise<ICritter | IDetailedCritter> {
     if (format === QueryFormats.detailed) {
