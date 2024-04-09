@@ -22,8 +22,6 @@ import {
   DetailedCritterChildSchema,
   IDetailedCritterParent,
   IDetailedCritterChild,
-  DetailedGetManyCritterSchema,
-  IDetailedGetManyCritter,
   IDetailedManyCritter,
   DetailedManyCritterSchema
 } from '../schemas/critter-schema';

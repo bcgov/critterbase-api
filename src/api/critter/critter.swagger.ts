@@ -9,7 +9,7 @@ import {
   DetailedCritterSchema,
   SimilarCritterQuerySchema,
   CritterIdsRequestSchema,
-  DetailedGetManyCritterSchema
+  DetailedManyCritterSchema
 } from '../../schemas/critter-schema';
 import { QueryFormats } from '../../utils/types';
 
@@ -19,7 +19,7 @@ export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
   detailedCritterResponse: DetailedCritterSchema,
   defaultCritterResponseArray: z.array(CritterSchema),
-  detailedManyCritterResponseArray: z.array(DetailedGetManyCritterSchema)
+  detailedManyCritterResponseArray: z.array(DetailedManyCritterSchema)
 };
 
 export const critterPaths = {
