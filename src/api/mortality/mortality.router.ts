@@ -4,7 +4,6 @@ import { catchErrors } from '../../utils/middleware';
 import { zodID } from '../../utils/zod_helpers';
 import { MortalityCreateSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { ICbDatabase } from '../../utils/database';
-import { z } from 'zod';
 
 /**
  * Mortality Router.

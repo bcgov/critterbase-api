@@ -3,6 +3,7 @@ import { Repository } from './base-repository';
 import { z } from 'zod';
 import { apiError } from '../utils/types';
 import { prisma } from '../utils/constants';
+jest.requireMock('../utils/constants').prisma = jest.fn();
 
 describe('base-repository', () => {
   let mockPrismaClient;
