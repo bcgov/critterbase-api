@@ -104,7 +104,7 @@ export class ItisService extends ExternalService {
     const solrTaxon = result.find((taxon) => taxon.tsn === String(searchTsn));
 
     if (!solrTaxon) {
-      throw apiError.notFound(`ITIS was unable to find TSN.`, [
+      throw apiError.notFound(`ITIS was unable to find TSN for '${searchTsn}'.`, [
         'ItisWebService -> searchSolrForTsn',
         'probably invalid TSN'
       ]);

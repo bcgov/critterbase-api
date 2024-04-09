@@ -37,6 +37,26 @@ export class MortalityService implements Service {
   }
 
   /**
+   * Validate `proximate_predated_by_itis_tsn` or `ultimate_predated_by_itis_tsn` are TSN values.
+   * ItisService method will throw if unable to find matching TSN value.
+   *
+   * @async
+   * @throws {apiError.notFound} - Failed to find matching ITIS TSN.
+   * @param {MortalityUpdate | MortalityCreate} body - Update or create payload (includes predation values).
+   * @returns {Promise<void>} - Does not return - only throws when invalid TSN's.
+   */
+  async throwIfPredationsAreNotTsns(body: MortalityUpdate | MortalityCreate): Promise<void> {
+    const promises = [];
+    if (body?.proximate_predated_by_itis_tsn) {
+      promises.push(this.itisService.searchSolrByTsn(body.proximate_predated_by_itis_tsn));
+    }
+    if (body?.ultimate_predated_by_itis_tsn) {
+      promises.push(this.itisService.searchSolrByTsn(body.ultimate_predated_by_itis_tsn));
+    }
+    await Promise.all(promises);
+  }
+
+  /**
    * Get all mortality records in Critterbase.
    *
    * @async
@@ -52,7 +72,7 @@ export class MortalityService implements Service {
    * @async
    * @throws {apiError.notFound} - Mortality not found.
    * @param {string} mortality_id - Primary identifier of a mortality.
-   * @returns {Promise<mortality | null>} Critter mortality or null.
+   * @returns {Promise<MortalityDetailed>} Critter mortality or null.
    */
   async getMortalityById(mortality_id: string): Promise<MortalityDetailed> {
     return this.repository.getMortalityById(mortality_id);
@@ -87,10 +107,12 @@ export class MortalityService implements Service {
    *
    * @async
    * @throws {apiError.sqlExecuteIssue} - Failed to create mortality.
+   * @throws {apiError.notFound} - ITIS failed to find matching TSN's for predations.
    * @param {MortalityCreate} mortality_data - Create payload.
    * @returns {Promise<mortality>} Critter mortality.
    */
   async createMortality(mortality_data: MortalityCreate): Promise<mortality> {
+    await this.throwIfPredationsAreNotTsns(mortality_data);
     return this.repository.createMortality(mortality_data);
   }
 
@@ -99,11 +121,13 @@ export class MortalityService implements Service {
    *
    * @async
    * @throws {apiError.sqlExecuteIssue} - Failed to update mortality.
+   * @throws {apiError.notFound} - ITIS failed to find matching TSN's for predations.
    * @param {string} mortality_id - Primary identifier of a mortality.
    * @param {MortalityUpdate} mortality_data - Update payload.
    * @returns {Promise<mortality>} Critter mortality.
    */
   async updateMortality(mortality_id: string, mortality_data: MortalityUpdate): Promise<mortality> {
+    await this.throwIfPredationsAreNotTsns(mortality_data);
     return this.repository.updateMortality(mortality_id, mortality_data);
   }
 
