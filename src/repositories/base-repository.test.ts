@@ -69,10 +69,13 @@ describe('base-repository', () => {
   });
 
   describe('transactionHandler', () => {
-    const repo = new Repository();
+    //const repo = new Repository();
 
     beforeEach(() => {
       jest.useFakeTimers();
+      mockPrismaClient = {
+        $transaction: (callback: any) => callback(jest.fn())
+      };
     });
 
     afterEach(() => {
@@ -80,7 +83,7 @@ describe('base-repository', () => {
     });
 
     it('should set prisma client to transaction client and back to original', async () => {
-      jest.requireMock('../utils/constants').prisma = jest.fn();
+      const repo = new Repository(mockPrismaClient);
       const originalPrisma = repo.prisma;
       await repo.transactionHandler(async () => {
         jest.advanceTimersByTime(1);
@@ -91,7 +94,7 @@ describe('base-repository', () => {
     });
 
     it('should set prisma client to orignal client if transactions fail', async () => {
-      jest.requireMock('../utils/constants').prisma = jest.fn();
+      const repo = new Repository(mockPrismaClient);
       const originalPrisma = repo.prisma;
       try {
         await repo.transactionHandler(async () => {
@@ -106,7 +109,6 @@ describe('base-repository', () => {
     });
 
     it('should throw apiError if transactions take longer than allowed', async () => {
-      mockPrismaClient = { $transaction: (callback: any) => callback(jest.fn()) };
       const mockRepo = new Repository(mockPrismaClient, 1);
       try {
         await mockRepo.transactionHandler(async () => {
@@ -119,9 +121,9 @@ describe('base-repository', () => {
     });
 
     it('should call transactions and return data', async () => {
-      jest.requireMock('../utils/constants').prisma = jest.fn();
+      const mockRepo = new Repository(mockPrismaClient, 1);
       const transactionsMock = jest.fn().mockResolvedValue(true);
-      const res = await repo.transactionHandler(transactionsMock);
+      const res = await mockRepo.transactionHandler(transactionsMock);
       expect(transactionsMock).toHaveBeenCalled();
       expect(res).toBe(true);
     });
