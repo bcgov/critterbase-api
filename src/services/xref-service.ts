@@ -15,10 +15,23 @@ import { ISelect, ISelectChildren } from '../utils/types';
 import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
+/**
+ * Xref Service
+ *
+ * @export
+ * @class XrefService
+ * @implements Service
+ */
 export class XrefService implements Service {
   repository: XrefRepository;
   itisService: ItisService;
 
+  /**
+   * Construct XrefService class.
+   *
+   * @param {XrefRepository} repository - Repository dependency.
+   * @param {ItisService} itisService - Itis service dependency.
+   */
   constructor(repository: XrefRepository, itisService: ItisService) {
     this.repository = repository;
     this.itisService = itisService;

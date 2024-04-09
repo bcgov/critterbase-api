@@ -3,10 +3,23 @@ import { MarkingRepository } from '../repositories/marking-repository';
 import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
+/**
+ * Marking Service
+ *
+ * @export
+ * @class MarkingService
+ * @implements Service
+ */
 export class MarkingService implements Service {
   repository: MarkingRepository;
   itisService: ItisService;
 
+  /**
+   * Construct MarkingService class.
+   *
+   * @param {MarkingRepository} repository - Repository dependency.
+   * @param {ItisService} itisService - Itis service dependency.
+   */
   constructor(repository: MarkingRepository, itisService: ItisService) {
     this.repository = repository;
     this.itisService = itisService;
