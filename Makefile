@@ -21,7 +21,7 @@ export $(shell sed 's/=.*//' .env)
 
 postgres: | close build-postgres run-postgres ## Performs all commands necessary to run the postgres project (db) in docker
 backend: | close build-backend run-backend ## Performs all commands necessary to run all backend projects (db, api) in docker
-actions: | action-lint action-format action-deprecated action-build action-test ## Performs all commands necessary to run Github actions locally
+actions: | action-lint action-format action-deprecated ## Performs all commands necessary to run Github actions locally
 
 
 ## ------------------------------------------------------------------------------
@@ -104,11 +104,4 @@ action-deprecated: ## Runs Github deprecated action
 	@echo "Make: action-deprecated - running Github deprecated action"
 	@echo "==============================================="
 	@npm run action:deprecated
-
-action-test: ## Runs Github test action
-	@echo -n "\nRun test suite? [y/n] " && read ans && [ $${ans:-n} = y ]
-	@echo "==============================================="
-	@echo "Make: action-test - running Github test action"
-	@echo "==============================================="
-	@npm run test
 
