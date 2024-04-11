@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { catchErrors } from '../../utils/middleware';
 import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../capture/capture.utils';
 import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
-import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../mortality/mortality.utils';
+import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
 import { BulkCreationSchema, filterAndRemoveDeletes } from './bulk.utils';
 import {
@@ -84,7 +84,7 @@ export const BulkRouter = (db: ICbDatabase) => {
       const parsedMortalities = mortalities
         ? await Promise.all(
             mortalities.map(async (m: Record<string, unknown>) => {
-              await db.appendDefaultCOD(m);
+              await db.mortalityService.appendDefaultCOD(m);
               return MortalityCreateSchema.parse(m);
             })
           )

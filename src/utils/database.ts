@@ -8,28 +8,24 @@ import * as location from '../api/location/location.service';
 import * as lookup from '../api/lookup/lookup.service';
 import * as marking from '../api/marking/marking.service';
 import * as measurement from '../api/measurement/measurement.service';
-import * as mortality from '../api/mortality/mortality.service';
+import * as mortality from '../repositories/mortality-repository';
+import { MortalityService } from '../services/mortality-service';
 import * as user from '../api/user/user.service';
-import { CritterRepository } from '../repositories/critter-repository';
-import { MarkingRepository } from '../repositories/marking-repository';
-import { XrefRepository } from '../repositories/xref-repository';
 import { CritterService } from '../services/critter-service';
 import { ItisService } from '../services/itis-service';
 import { MarkingService } from '../services/marking-service';
 import { XrefService } from '../services/xref-service';
 
 /**
- * Instantiating Services
+ * Instantiating Services.
  *
  */
-
 const itisService = new ItisService();
 
-const critterService = new CritterService(new CritterRepository(), itisService);
-
-const xrefService = new XrefService(new XrefRepository(), itisService);
-
-const markingService = new MarkingService(new MarkingRepository(), itisService);
+const critterService = CritterService.init();
+const xrefService = XrefService.init();
+const markingService = MarkingService.init();
+const mortalityService = MortalityService.init();
 
 export const db = {
   // Eventually these old services will be converted into the new format
@@ -47,6 +43,7 @@ export const db = {
   ...mortality,
   ...user,
   // NEW
+  mortalityService,
   critterService,
   xrefService,
   markingService,

@@ -1,22 +1,49 @@
 import { defaultFormat } from '../utils/constants';
 import { CritterRepository } from '../repositories/critter-repository';
-import { InternalService } from './base-service';
+import { Service } from './base-service';
 import { QueryFormats } from '../utils/types';
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
   ICritter,
   IDetailedCritter,
+  IDetailedManyCritter,
   SimilarCritterQuery
 } from '../schemas/critter-schema';
+import { ItisService } from './itis-service';
 
 /**
  * Critter Service
+ *
  * @export
- * @class Critter Service
- * @extends Service<CritterRepository>
+ * @class CritterService
+ * @implements InternalService
  */
-export class CritterService extends InternalService<CritterRepository> {
+export class CritterService implements Service {
+  repository: CritterRepository;
+  itisService: ItisService;
+
+  /**
+   * Construct CritterService class.
+   *
+   * @param {CritterRepository} repository - Critter repository dependency.
+   * @param {ItisService} itisService - Itis service dependency.
+   */
+  constructor(repository: CritterRepository, itisService: ItisService) {
+    this.repository = repository;
+    this.itisService = itisService;
+  }
+
+  /**
+   * Instantiate CritterService and inject dependencies.
+   *
+   * @static
+   * @returns {CritterService}
+   */
+  static init(): CritterService {
+    return new CritterService(new CritterRepository(), new ItisService());
+  }
+
   /**
    * Get all critters.
    *
@@ -28,13 +55,19 @@ export class CritterService extends InternalService<CritterRepository> {
   }
 
   /**
-   * Get multiple critters by critter ids.
+   * Get multiple critters by critter ids (default or detailed format)
    *
    * @async
    * @param {string[]} critterIds - array of critter ids.
-   * @returns {Promise<ICritter[]>} array of critter objects.
+   * @returns {Promise<ICritter[] | IDetailedManyCritter[]>} default or detailed critter objects.
    */
-  async getMultipleCrittersByIds(critterIds: string[]) {
+  async getMultipleCrittersByIds(
+    critterIds: string[],
+    format = defaultFormat
+  ): Promise<ICritter[] | IDetailedManyCritter[]> {
+    if (format === QueryFormats.detailed) {
+      return this.repository.getMultipleCrittersByIdsDetailed(critterIds);
+    }
     return this.repository.getMultipleCrittersByIds(critterIds);
   }
 
@@ -44,7 +77,7 @@ export class CritterService extends InternalService<CritterRepository> {
    * @async
    * @param {string} critterId - critter id.
    * @param {QueryFormats} format - additional response format (supports detailed).
-   * @returns {Promise<ICritter | IDetailedCritter>} critter object.
+   * @returns {Promise<ICritter | IDetailedCritter>} default or detailed critter object.
    */
   async getCritterById(critterId: string, format = defaultFormat): Promise<ICritter | IDetailedCritter> {
     if (format === QueryFormats.detailed) {
@@ -130,8 +163,8 @@ export class CritterService extends InternalService<CritterRepository> {
    * Patches itis_tsn + itis_scientific_name with ITIS values.
    *
    * @async
-   * @param {CritterCreateOptionalItis} critterData - create critter payload with optional itis fields.
    * @throws {apiError.notFound} - when invalid tsn.
+   * @param {CritterCreateOptionalItis} critterData - create critter payload with optional itis fields.
    * @returns {Promise<ICritter>} critter object.
    */
   async createCritter(critterData: CritterCreateOptionalItis) {

@@ -4,7 +4,7 @@ import { zodID } from '../../utils/zod_helpers';
 import { MarkingCreateBodySchema } from '../marking/marking.utils';
 import { CaptureCreateSchema, CaptureUpdateSchema } from '../capture/capture.utils';
 import { routes } from '../../utils/constants';
-import { MortalityCreateSchema, MortalityUpdateSchema } from '../mortality/mortality.utils';
+import { MortalityCreateSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { CollectionUnitCreateBodySchema, CollectionUnitUpsertSchema } from '../collectionUnit/collectionUnit.utils';
 import { LocationCreateSchema, LocationUpdateSchema } from '../location/location.utils';
 import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';

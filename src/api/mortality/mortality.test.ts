@@ -1,20 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { prisma } from '../../utils/constants';
 import { apiError } from '../../utils/types';
-import {
-  createMortality as _createMortality,
-  deleteMortality as _deleteMortality,
-  getAllMortalities as _getAllMortalities,
-  getMortalityByCritter as _getMortalityByCritter,
-  getMortalityById as _getMortalityById,
-  updateMortality as _updateMortality,
-  appendDefaultCOD as _appendDefaultCod
-} from './mortality.service';
 import { critter, lk_cause_of_death, mortality } from '@prisma/client';
 import { makeApp } from '../../app';
 import { ICbDatabase } from '../../utils/database';
 import supertest from 'supertest';
-import { MortalityBodySchema, MortalityResponseSchema } from './mortality.utils';
 
 const createMortality = jest.fn();
 const deleteMortality = jest.fn();
@@ -25,21 +15,16 @@ const updateMortality = jest.fn();
 
 const request = supertest(
   makeApp({
-    createMortality,
-    deleteMortality,
-    getAllMortalities,
-    getMortalityById,
-    updateMortality,
-    getMortalityByCritter
+    mortalityService: {
+      createMortality,
+      deleteMortality,
+      getAllMortalities,
+      getMortalityById,
+      updateMortality,
+      getMortalityByCritter
+    }
   } as Record<keyof ICbDatabase, any>)
 );
-
-const create = jest.spyOn(prisma.mortality, 'create').mockImplementation();
-const update = jest.spyOn(prisma.mortality, 'update').mockImplementation();
-const mdelete = jest.spyOn(prisma.mortality, 'delete').mockImplementation();
-const findMany = jest.spyOn(prisma.mortality, 'findMany').mockImplementation();
-const findUniqueOrThrow = jest.spyOn(prisma.mortality, 'findUniqueOrThrow').mockImplementation();
-const codFindFirstOrThrow = jest.spyOn(prisma.lk_cause_of_death, 'findFirstOrThrow').mockImplementation();
 
 const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
 const MORTALITY_ID = '1af85263-6a7e-4b76-8ca6-118fd3c43f50';
@@ -72,16 +57,6 @@ const LOCATION = {
   lk_wildlife_management_unit: null
 };
 
-const COD: lk_cause_of_death = {
-  cod_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
-  cod_category: 'Unknown',
-  cod_reason: null,
-  create_user: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
-  update_user: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
-  create_timestamp: new Date(),
-  update_timestamp: new Date()
-};
-
 const CRITTER: critter = {
   critter_id: CRITTER_ID,
   itis_tsn: 1,
@@ -95,23 +70,6 @@ const CRITTER: critter = {
   create_timestamp: new Date(),
   update_timestamp: new Date(),
   critter_comment: 'Hi :)'
-};
-
-const MORTALITY_FORMATTED = {
-  ...MORTALITY,
-  location: LOCATION,
-  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: {
-    cod_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'
-  },
-  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: {
-    cod_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'
-  },
-  lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: {
-    taxon_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'
-  },
-  lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: {
-    taxon_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'
-  }
 };
 
 beforeEach(() => {
@@ -136,143 +94,6 @@ beforeEach(() => {
 });
 
 describe('API: Critter', () => {
-  describe('UTILS', () => {
-    describe('MoratlityResponseSchema', () => {
-      it('test with extra info included', () => {
-        const parsed = MortalityResponseSchema.parse(MORTALITY_FORMATTED);
-        expect(parsed.location).toBeDefined();
-        expect(parsed.proximate_cause_of_death).toBeDefined();
-        expect(parsed.ultimate_cause_of_death).toBeDefined();
-      });
-      it('test with no extra info included', () => {
-        const parsed = MortalityResponseSchema.parse(MORTALITY);
-        expect(parsed.location).toBeNull();
-        expect(parsed.proximate_cause_of_death).toBeNull();
-        expect(parsed.ultimate_cause_of_death).toBeNull();
-      });
-    });
-  });
-  describe('SERVICES', () => {
-    describe('getting mortalities', () => {
-      it('returns all mortalities', async () => {
-        findMany.mockResolvedValue([MORTALITY]);
-        const res = await _getAllMortalities();
-        expect.assertions(2);
-        expect(prisma.mortality.findMany).toHaveBeenCalled();
-        expect(res.length).toBeGreaterThanOrEqual(1);
-      });
-      it('returns one mortality', async () => {
-        findUniqueOrThrow.mockResolvedValue(MORTALITY_FORMATTED);
-        const res = await _getMortalityById(MORTALITY_ID);
-        expect.assertions(2);
-        expect(prisma.mortality.findUniqueOrThrow).toHaveBeenCalled();
-        expect(res?.mortality_id).toBe(MORTALITY_ID);
-      });
-      it('should get one or more mortalities for this critter', async () => {
-        findMany.mockResolvedValue([MORTALITY_FORMATTED]);
-        const res = await _getMortalityByCritter(CRITTER_ID);
-        expect.assertions(2);
-        expect(prisma.mortality.findMany).toHaveBeenCalled();
-        expect(res.length).toBeGreaterThanOrEqual(1);
-      });
-    });
-    describe('creating mortalities', () => {
-      it('should create a mortality', async () => {
-        create.mockResolvedValue(MORTALITY);
-        const res = await _createMortality({
-          critter_id: CRITTER_ID,
-          proximate_cause_of_death_id: '6109c0a8-a71d-4662-9604-a8beb72f2f6f',
-          proximate_predated_by_itis_tsn: 1,
-          ultimate_cause_of_death_id: '6109c0a8-a71d-4662-9604-a8beb72f2f6f',
-          ultimate_predated_by_itis_tsn: 1,
-          mortality_timestamp: new Date()
-        });
-        expect.assertions(3);
-        expect(MortalityBodySchema.safeParse(res).success).toBe(true);
-        expect(res.mortality_id).toBe(MORTALITY_ID);
-        expect(prisma.mortality.create).toHaveBeenCalled();
-      });
-      it('should create a mortality with included location', async () => {
-        create.mockResolvedValue({
-          ...MORTALITY,
-          location_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10'
-        });
-        const res = await _createMortality({
-          ...MORTALITY,
-          location: LOCATION
-        });
-        expect.assertions(4);
-        expect(MortalityBodySchema.safeParse(res).success).toBe(true);
-        expect(res.mortality_id).toBe(MORTALITY_ID);
-        expect(res.location_id).toBe('cd606593-c448-4c01-9824-0f7ea9ef3d10');
-        expect(prisma.mortality.create).toHaveBeenCalled();
-      });
-      it('creates mortality and assigns the location_id', async () => {
-        create.mockResolvedValue({
-          ...MORTALITY,
-          location_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10'
-        });
-        const res = await _createMortality({
-          ...MORTALITY,
-          location_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10'
-        });
-        expect.assertions(2);
-        expect(prisma.mortality.create).toHaveBeenCalled();
-        expect(res.location_id).toBe('cd606593-c448-4c01-9824-0f7ea9ef3d10');
-      });
-    });
-    describe('modifying mortalities', () => {
-      it('updates an existing mortality', async () => {
-        update.mockResolvedValue({
-          ...MORTALITY,
-          mortality_comment: 'banana',
-          ultimate_cause_of_death_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
-          proximate_predated_by_itis_tsn: 1,
-          ultimate_predated_by_itis_tsn: 1
-        });
-        const res = await _updateMortality(MORTALITY_ID, {
-          mortality_comment: 'banana',
-          ultimate_cause_of_death_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10',
-          proximate_predated_by_itis_tsn: 1,
-          ultimate_predated_by_itis_tsn: 1
-        });
-        expect.assertions(2);
-        expect(prisma.mortality.update).toHaveBeenCalled();
-        expect(res.mortality_comment).toBe('banana');
-      });
-      it('updates mortality and upserts the attached location', async () => {
-        update.mockResolvedValue({
-          ...MORTALITY,
-          location_id: 'cd606593-c448-4c01-9824-0f7ea9ef3d10'
-        });
-        const res = await _updateMortality(MORTALITY_ID, {
-          ...MORTALITY,
-          location: LOCATION
-        });
-        expect.assertions(2);
-        expect(prisma.mortality.update).toHaveBeenCalled();
-        expect(res.location_id).toBe('cd606593-c448-4c01-9824-0f7ea9ef3d10');
-      });
-      it('should delete an existing mortality', async () => {
-        mdelete.mockResolvedValue(MORTALITY);
-        const res = await _deleteMortality(MORTALITY_ID);
-        expect.assertions(2);
-        expect(prisma.mortality.delete).toHaveBeenCalled();
-        expect(res.mortality_id).toBe(MORTALITY_ID);
-      });
-    });
-    describe('appendDefaultCOD(body)', () => {
-      it('should return Unknown cod_category to the provided body', async () => {
-        codFindFirstOrThrow.mockResolvedValue(COD);
-        const res = await _appendDefaultCod({
-          proximate_cause_of_death_id: undefined
-        });
-        expect.assertions(2);
-        expect(prisma.lk_cause_of_death.findFirstOrThrow).toHaveBeenCalled();
-        expect(res.proximate_cause_of_death_id).not.toBeUndefined();
-      });
-    });
-  });
   describe('ROUTERS', () => {
     describe('GET /api/mortality', () => {
       it('should return status 200', async () => {

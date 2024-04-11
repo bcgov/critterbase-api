@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../../utils/constants';
 import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from '../collectionUnit/collectionUnit.utils';
 import { MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
-import { MortalityDeleteSchema, MortalityUpdate } from '../mortality/mortality.utils';
+import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
 import { apiError } from '../../utils/types';
 import { ICbDatabase } from '../../utils/database';
 import { CaptureDeleteSchema, CaptureUpdate } from '../capture/capture.utils';
@@ -197,7 +197,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         if (!m.mortality_id) {
           throw apiError.requiredProperty('mortality_id');
         }
-        await db.updateMortality(m.mortality_id, m, prisma);
+        await db.mortalityService.updateMortality(m.mortality_id, m);
       }
       for (let i = 0; i < markings.length; i++) {
         const ma = markings[i];
@@ -278,7 +278,8 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     for (let i = 0; i < _deleteMoralities.length; i++) {
       const _dma = _deleteMoralities[i];
       counts.deleted.mortalities = i + 1;
-      await db.deleteMortality(_dma.mortality_id, prisma);
+      //TODO: update bulk router to support transactions
+      await db.mortalityService.deleteMortality(_dma.mortality_id);
     }
     for (let i = 0; i < _deleteQual.length; i++) {
       const _dma = _deleteQual[i];

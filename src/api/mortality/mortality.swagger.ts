@@ -1,26 +1,14 @@
 import { z } from 'zod';
-import { CommonLocationValidation } from '../location/location.utils';
-import { MortalityCreateSchema, MortalityIncludeSchema, MortalityUpdateSchema } from './mortality.utils';
+import {
+  MortalityCreateSchema,
+  MortalityDetailedSchema,
+  MortalitySchema,
+  MortalityUpdateSchema
+} from '../../schemas/mortality-schema';
 import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { zodID } from '../../utils/zod_helpers';
 import { routes } from '../../utils/constants';
 import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
-
-const SwaggerMortalityResponseValidation = MortalityIncludeSchema.omit({
-  lk_cause_of_death_mortality_proximate_cause_of_death_idTolk_cause_of_death: true,
-  lk_cause_of_death_mortality_ultimate_cause_of_death_idTolk_cause_of_death: true,
-  lk_taxon_mortality_proximate_predated_by_taxon_idTolk_taxon: true,
-  lk_taxon_mortality_ultimate_predated_by_taxon_idTolk_taxon: true
-}).extend({
-  location: CommonLocationValidation.nullable(),
-  proximate_cause_of_death: z.object({
-    cod_category: z.string(),
-    cod_reason: z.string().nullable()
-  }),
-  ultimate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string().nullable() }).nullable(),
-  proximate_cause_of_death_taxon: z.object({ taxon_id: z.string(), taxon_name_latin: z.string() }).nullable(),
-  ultimate_cause_of_death_taxon: z.object({ taxon_id: z.string(), taxon_name_latin: z.string() }).nullable()
-});
 
 const TAG = 'Mortalities';
 
@@ -33,7 +21,7 @@ const getAllMortalities: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'application/json': {
-          schema: SwaggerMortalityResponseValidation.array()
+          schema: z.array(MortalitySchema)
         }
       }
     },
@@ -59,7 +47,7 @@ const createMortality: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       content: {
         'application/json': {
-          schema: SwaggerMortalityResponseValidation
+          schema: MortalitySchema
         }
       }
     },
@@ -81,7 +69,7 @@ const getMortalityByCritter: ZodOpenApiOperationObject = {
       description: 'Retrieved all mortalities for this critter. Should only be one in most cases.',
       content: {
         'application/json': {
-          schema: SwaggerMortalityResponseValidation.array()
+          schema: MortalityDetailedSchema
         }
       }
     },
@@ -103,7 +91,7 @@ const getMortalityById: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'application/json': {
-          schema: SwaggerMortalityResponseValidation
+          schema: MortalityDetailedSchema
         }
       }
     },
@@ -133,7 +121,7 @@ const updateMortality: ZodOpenApiOperationObject = {
       description: SwagDesc.update,
       content: {
         'application/json': {
-          schema: SwaggerMortalityResponseValidation
+          schema: MortalitySchema
         }
       }
     },
@@ -155,7 +143,7 @@ const deleteMortality: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         'application/json': {
-          schema: SwaggerMortalityResponseValidation
+          schema: MortalitySchema
         }
       }
     },

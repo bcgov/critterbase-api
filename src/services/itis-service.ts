@@ -11,6 +11,7 @@ import { ExternalService } from './base-service';
  *
  * @export
  * @class ItisWebService
+ * @extends ExternalService
  */
 export class ItisService extends ExternalService {
   solrServiceUrl: string;
@@ -24,6 +25,10 @@ export class ItisService extends ExternalService {
     TSN_FULL_RECORD: 'getFullRecordFromTSN'
   };
 
+  /**
+   * Construct ItisService class.
+   *
+   */
   constructor() {
     super(process.env.ITIS_WEB_SERVICE);
     this.solrServiceUrl = process.env.ITIS_SOLR_SERVICE;
@@ -104,7 +109,7 @@ export class ItisService extends ExternalService {
     const solrTaxon = result.find((taxon) => taxon.tsn === String(searchTsn));
 
     if (!solrTaxon) {
-      throw apiError.notFound(`ITIS was unable to find TSN.`, [
+      throw apiError.notFound(`ITIS was unable to find TSN for '${searchTsn}'.`, [
         'ItisWebService -> searchSolrForTsn',
         'probably invalid TSN'
       ]);

@@ -12,9 +12,41 @@ import {
 } from '../schemas/xref-schema';
 import { toSelectFormat } from '../utils/helper_functions';
 import { ISelect, ISelectChildren } from '../utils/types';
-import { InternalService } from './base-service';
+import { Service } from './base-service';
+import { ItisService } from './itis-service';
 
-export class XrefService extends InternalService<XrefRepository> {
+/**
+ * Xref Service
+ *
+ * @export
+ * @class XrefService
+ * @implements Service
+ */
+export class XrefService implements Service {
+  repository: XrefRepository;
+  itisService: ItisService;
+
+  /**
+   * Construct XrefService class.
+   *
+   * @param {XrefRepository} repository - Repository dependency.
+   * @param {ItisService} itisService - Itis service dependency.
+   */
+  constructor(repository: XrefRepository, itisService: ItisService) {
+    this.repository = repository;
+    this.itisService = itisService;
+  }
+
+  /**
+   * Instantiate MortalityService and inject dependencies.
+   *
+   * @static
+   * @returns {XrefService}
+   */
+  static init(): XrefService {
+    return new XrefService(new XrefRepository(), new ItisService());
+  }
+
   /**
    * Gets 'collection units' from a category id.
    *

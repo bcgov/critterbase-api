@@ -6,13 +6,11 @@ import {
   bulkErrMap
 } from './bulk.service';
 import { makeApp } from '../../app';
-import { ICbDatabase } from '../../utils/database';
 import { prisma } from '../../utils/constants';
 import {
   capture,
   critter,
   critter_collection_unit,
-  lk_taxon,
   marking,
   measurement_qualitative,
   measurement_quantitative,
@@ -33,7 +31,7 @@ const deleteMarking = jest.fn();
 const deleteCollectionUnit = jest.fn();
 const patchTsnAndScientificName = jest.fn();
 
-const db = {
+const db: any = {
   bulkCreateData,
   bulkUpdateData,
   bulkDeleteData,
@@ -41,11 +39,11 @@ const db = {
   updateMortality,
   appendEnglishTaxonAsUUID,
   appendEnglishMarkingsAsUUID,
-  appendDefaultCOD,
   deleteMarking,
   deleteCollectionUnit,
-  itisService: { patchTsnAndScientificName }
-} as Record<keyof ICbDatabase, any>;
+  itisService: { patchTsnAndScientificName },
+  mortalityService: { appendDefaultCOD, updateMortality }
+};
 
 const request = supertest(makeApp(db));
 
@@ -54,8 +52,8 @@ const OTHER_CRITTER_ID = '27e2b7c9-2754-4286-9eb9-fd4f0a8378ef';
 const WLH_ID = '12-1234';
 const CRITTER: critter = {
   itis_tsn: 1,
+  //itis_scientific_name: 'alces',
   critter_id: CRITTER_ID,
-  taxon_id: '98f9fede-95fc-4321-9444-7c2742e336fe',
   wlh_id: WLH_ID,
   animal_id: 'A13',
   sex: 'Male',
@@ -65,31 +63,6 @@ const CRITTER: critter = {
   create_timestamp: new Date(),
   update_timestamp: new Date(),
   critter_comment: 'Hi :)'
-};
-
-const TAXON: lk_taxon = {
-  taxon_id: '98f9fede-95fc-4321-9444-7c2742e336fe',
-  kingdom_id: null,
-  phylum_id: null,
-  class_id: null,
-  order_id: null,
-  family_id: null,
-  genus_id: null,
-  species_id: null,
-  sub_species_id: null,
-  taxon_name_common: null,
-  taxon_name_latin: 'Caribou',
-  spi_taxonomy_id: 0,
-  taxon_description: null,
-  create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  create_timestamp: new Date(),
-  update_timestamp: new Date()
-};
-
-const OTHER_CRITTER: critter = {
-  ...CRITTER,
-  critter_id: OTHER_CRITTER_ID
 };
 
 const MARKING: marking = {
@@ -138,10 +111,10 @@ const MORTALITY: mortality = {
   mortality_timestamp: new Date(),
   proximate_cause_of_death_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   proximate_cause_of_death_confidence: null,
-  proximate_predated_by_taxon_id: null,
+  proximate_predated_by_itis_tsn: null,
   ultimate_cause_of_death_id: null,
   ultimate_cause_of_death_confidence: null,
-  ultimate_predated_by_taxon_id: null,
+  ultimate_predated_by_itis_tsn: null,
   mortality_comment: null,
   create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',

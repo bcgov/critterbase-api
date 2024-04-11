@@ -45,8 +45,9 @@ export const CritterRouter = (db: ICbDatabase) => {
     '/',
     catchErrors(async (req: Request, res: Response) => {
       const { critter_ids } = CritterIdsRequestSchema.parse(req.body);
+      const format = getFormat(req);
 
-      const response = await db.critterService.getMultipleCrittersByIds(critter_ids);
+      const response = await db.critterService.getMultipleCrittersByIds(critter_ids, format);
 
       return res.status(200).json(response);
     })
