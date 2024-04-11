@@ -133,6 +133,7 @@ export const DetailedCritterMarkingSchema = z
     marking_type: z.string(),
     marking_type_id: zodID,
     material: z.string().nullable(),
+    marking_material_id: zodID.nullable(),
     primary_colour: z.string().nullable(),
     primary_colour_id: zodID.nullable(),
     secondary_colour: z.string().nullable(),

@@ -317,6 +317,7 @@ export class CritterRepository extends Repository {
           m.marking_type_id,
           t.name as marking_type,
           mt.material,
+          mt.marking_material_id,
           c1.colour as primary_colour,
           m.primary_colour_id,
           c2.colour as secondary_colour,
