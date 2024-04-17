@@ -95,8 +95,7 @@ const appendEnglishMarkingsAsUUID = async (
     secondary_colour: string;
     body_location: string;
     marking_type: string;
-  }>,
-  itis_tsn: number
+  }>
 ) => {
   if (body.primary_colour) {
     const col = await getColourByName(body.primary_colour);
@@ -107,7 +106,7 @@ const appendEnglishMarkingsAsUUID = async (
     body.secondary_colour_id = col?.colour_id;
   }
   if (body.body_location) {
-    const loc = await getBodyLocationByNameAndTsn(body.body_location, itis_tsn);
+    const loc = await getBodyLocationByNameAndTsn(body.body_location);
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
   }
   if (body.marking_type) {
