@@ -286,12 +286,12 @@ export class CritterRepository extends Repository {
         OR
           c.animal_id ILIKE ${query.critter?.animal_id}
         OR
-          (pc.colour ILIKE ${query.marking?.primary_colour}
-          AND x.body_location ILIKE ${query.marking?.body_location}
-          AND t.name ILIKE ${query.marking?.marking_type})
+          (pc.colour ILIKE ANY(${query.markings?.map((marking) => marking.primary_colour)})
+          AND x.body_location ILIKE ANY(${query.markings?.map((marking) => marking.body_location)})
+          AND t.name ILIKE ANY(${query.markings?.map((marking) => marking.marking_type)}))
         OR
-          (t.name ILIKE ${query.marking?.marking_type}
-          AND m.identifier ILIKE ${query.marking?.identifier});`,
+          (t.name ILIKE ANY(${query.markings?.map((marking) => marking.marking_type)})
+          AND m.identifier ILIKE ANY(${query.markings?.map((marking) => marking.identifier)}));`,
       z.array(CritterSchema)
     );
 

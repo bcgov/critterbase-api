@@ -63,14 +63,17 @@ export const BulkCritterUpdateSchema = CritterSchema.partial().omit({
  */
 export const SimilarCritterQuerySchema = z.object({
   critter: CritterSchema.partial().optional(),
-  marking: z
-    .object({
-      primary_colour: z.string(),
-      identifier: z.string(),
-      marking_type: z.string(),
-      body_location: z.string()
-    })
-    .partial()
+  markings: z
+    .array(
+      z
+        .object({
+          primary_colour: z.string(),
+          identifier: z.string(),
+          marking_type: z.string(),
+          body_location: z.string()
+        })
+        .partial()
+    )
     .optional()
 });
 
