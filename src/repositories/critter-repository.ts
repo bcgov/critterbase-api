@@ -284,7 +284,8 @@ export class CritterRepository extends Repository {
         WHERE
           c.wlh_id = ${query.critter?.wlh_id}
         OR
-          c.animal_id ILIKE ${query.critter?.animal_id}
+          (c.animal_id ILIKE ${query.critter?.animal_id}
+          AND c.itis_tsn = ${query.critter?.itis_tsn})
         OR
           (pc.colour ILIKE ANY(${query.markings?.map((marking) => marking.primary_colour)})
           AND x.body_location ILIKE ANY(${query.markings?.map((marking) => marking.body_location)})

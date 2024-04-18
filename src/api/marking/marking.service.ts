@@ -1,3 +1,4 @@
+import { ItisService } from '../../services/itis-service';
 import { prisma } from '../../utils/constants';
 import { PrismaTransactionClient, ReqBody } from '../../utils/types';
 import { getBodyLocationByNameAndTsn, getColourByName, getMarkingTypeByName } from '../lookup/lookup.service';
