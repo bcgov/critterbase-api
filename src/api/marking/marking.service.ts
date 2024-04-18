@@ -1,7 +1,6 @@
-import { ItisService } from '../../services/itis-service';
 import { prisma } from '../../utils/constants';
 import { PrismaTransactionClient, ReqBody } from '../../utils/types';
-import { getBodyLocationByNameAndTsn, getColourByName, getMarkingTypeByName } from '../lookup/lookup.service';
+import { getBodyLocationByName, getColourByName, getMarkingTypeByName } from '../lookup/lookup.service';
 import { MarkingCreateInput, MarkingIncludes, MarkingUpdateInput, markingIncludes } from './marking.utils';
 
 /**
@@ -107,7 +106,7 @@ const appendEnglishMarkingsAsUUID = async (
     body.secondary_colour_id = col?.colour_id;
   }
   if (body.body_location) {
-    const loc = await getBodyLocationByNameAndTsn(body.body_location);
+    const loc = await getBodyLocationByName(body.body_location);
     body.taxon_marking_body_location_id = loc?.taxon_marking_body_location_id;
   }
   if (body.marking_type) {

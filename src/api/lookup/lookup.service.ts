@@ -7,7 +7,7 @@ const getColourByName = async (name: string): Promise<lk_colour | null> => {
   });
 };
 
-const getBodyLocationByNameAndTsn = async (body_name: string): Promise<xref_taxon_marking_body_location | null> => {
+const getBodyLocationByName = async (body_name: string): Promise<xref_taxon_marking_body_location | null> => {
   return prisma.xref_taxon_marking_body_location.findFirst({
     where: {
       body_location: { equals: body_name, mode: 'insensitive' }
@@ -23,4 +23,4 @@ const getMarkingTypeByName = async (marking_name: string): Promise<lk_marking_ty
   });
 };
 
-export { getColourByName, getMarkingTypeByName, getBodyLocationByNameAndTsn };
+export { getColourByName, getMarkingTypeByName, getBodyLocationByName };

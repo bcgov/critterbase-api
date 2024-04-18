@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from 'crypto';
+import { randomUUID } from 'crypto';
 import { markingResponseSchema } from './marking.utils';
 import { prisma } from '../../utils/constants';
 import {
@@ -46,7 +46,7 @@ const findUniqueOrThrow = jest.spyOn(prisma.marking, 'findUniqueOrThrow').mockIm
 const mDelete = jest.spyOn(prisma.marking, 'delete').mockImplementation();
 const critterFindUniqueOrThrow = jest.spyOn(prisma.critter, 'findUniqueOrThrow').mockImplementation();
 const getColourByName = jest.spyOn(lookups, 'getColourByName').mockImplementation();
-const getBodyLocationByNameAndTsn = jest.spyOn(lookups, 'getBodyLocationByNameAndTsn').mockImplementation();
+const getBodyLocationByName = jest.spyOn(lookups, 'getBodyLocationByName').mockImplementation();
 
 const MARKING_ID = '4804d622-9539-40e6-a8a5-b7b223c2f09f';
 const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
@@ -199,11 +199,11 @@ describe('API: Marking', () => {
           body_location: 'Left Ear'
         };
         getColourByName.mockResolvedValue(COLOUR);
-        getBodyLocationByNameAndTsn.mockResolvedValue(XREF_TAX_LOC);
-        const new_body = await _appendEnglishMarkingsAsUUID(body, 1);
+        getBodyLocationByName.mockResolvedValue(XREF_TAX_LOC);
+        const new_body = await _appendEnglishMarkingsAsUUID(body);
         expect.assertions(5);
         expect(getColourByName.mock.calls.length).toBe(2);
-        expect(getBodyLocationByNameAndTsn.mock.calls.length).toBe(1);
+        expect(getBodyLocationByName.mock.calls.length).toBe(1);
         expect(new_body).toHaveProperty('primary_colour_id');
         expect(new_body).toHaveProperty('secondary_colour_id');
         expect(new_body).toHaveProperty('taxon_marking_body_location_id');
@@ -213,11 +213,11 @@ describe('API: Marking', () => {
           foo: 'bar'
         };
         getColourByName.mockResolvedValue(COLOUR);
-        getBodyLocationByNameAndTsn.mockResolvedValue(XREF_TAX_LOC);
-        const new_body = await _appendEnglishMarkingsAsUUID(body, 1);
+        getBodyLocationByName.mockResolvedValue(XREF_TAX_LOC);
+        const new_body = await _appendEnglishMarkingsAsUUID(body);
         expect.assertions(5);
         expect(getColourByName.mock.calls.length).toBe(0);
-        expect(getBodyLocationByNameAndTsn.mock.calls.length).toBe(0);
+        expect(getBodyLocationByName.mock.calls.length).toBe(0);
         expect(new_body).not.toHaveProperty('primary_colour_id');
         expect(new_body).not.toHaveProperty('secondary_colour_id');
         expect(new_body).not.toHaveProperty('taxon_marking_body_location_id');
@@ -229,11 +229,11 @@ describe('API: Marking', () => {
           body_location: 'foo'
         };
         getColourByName.mockResolvedValue(null);
-        getBodyLocationByNameAndTsn.mockResolvedValue(null);
+        getBodyLocationByName.mockResolvedValue(null);
         const new_body = await _appendEnglishMarkingsAsUUID(body, 1);
         expect.assertions(5);
         expect(getColourByName.mock.calls.length).toBe(2);
-        expect(getBodyLocationByNameAndTsn.mock.calls.length).toBe(1);
+        expect(getBodyLocationByName.mock.calls.length).toBe(1);
         expect(new_body.primary_colour_id).toBeUndefined();
         expect(new_body.secondary_colour_id).toBeUndefined();
         expect(new_body.taxon_marking_body_location_id).toBeUndefined();
