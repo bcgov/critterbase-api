@@ -1,11 +1,10 @@
 import supertest from 'supertest';
 import { makeApp } from '../../app';
-import { ICbDatabase, db } from '../../utils/database';
 import { sex } from '.prisma/client';
 import { Prisma } from '@prisma/client';
 import { cod_confidence, coordinate_uncertainty_unit as cuu, frequency_unit, measurement_unit } from '@prisma/client';
 import { prisma } from '../../utils/constants';
-import { getBodyLocationByNameAndTsn, getColourByName, getMarkingTypeByName } from './lookup.service';
+import { getBodyLocationByName, getColourByName, getMarkingTypeByName } from './lookup.service';
 import { codFormats } from './lookup.utils';
 import { eCritterStatus } from '../../schemas/critter-schema';
 
@@ -36,9 +35,9 @@ describe('API: Lookup', () => {
       expect(data.value).toBe(true);
       expect(mock.mock.calls.length).toBe(1);
     });
-    it(getBodyLocationByNameAndTsn.name, async () => {
+    it(getBodyLocationByName.name, async () => {
       const mock = prismaMock('xref_taxon_marking_body_location', 'findFirst');
-      const data: any = await getBodyLocationByNameAndTsn('name', 1);
+      const data: any = await getBodyLocationByName('name');
       expect(data.value).toBe(true);
       expect(mock.mock.calls.length).toBe(1);
     });

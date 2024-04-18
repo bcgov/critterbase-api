@@ -522,6 +522,7 @@ describe('xref-repository', () => {
           capture_id: null,
           mortality_id: null,
           primary_colour_id: '1',
+          marking_material_id: '1',
           secondary_colour_id: '2',
           text_colour_id: '2',
           primary_colour: null,

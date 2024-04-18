@@ -72,8 +72,7 @@ export const BulkRouter = (db: ICbDatabase) => {
       const markingsAppend = markings
         ? await Promise.all(
             markings.map(async (marking: Record<string, unknown>) => {
-              const itis_tsn = critterTsnLookup[marking.critter_id as string];
-              await db.appendEnglishMarkingsAsUUID(marking, itis_tsn);
+              await db.appendEnglishMarkingsAsUUID(marking);
               return MarkingCreateBodySchema.parseAsync(marking);
             })
           )
