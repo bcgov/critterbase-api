@@ -149,34 +149,52 @@ export const BulkRouter = (db: ICbDatabase) => {
 
       const updateBody: IBulkMutate = {
         critters: critters
-          ? z.array(CritterUpdateSchema.extend({ critter_id: zodID })).parse(critters, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'critters')
-            })
+          ? z.array(CritterUpdateSchema.extend({ critter_id: zodID })).parse(
+              critters.filter((m) => !m._delete),
+              {
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'critters')
+              }
+            )
           : [],
         collections: collections
-          ? z.array(CollectionUnitUpsertSchema).parse(collections, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'collections')
-            })
+          ? z.array(CollectionUnitUpsertSchema).parse(
+              collections.filter((m) => !m._delete),
+              {
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'collections')
+              }
+            )
           : [],
         markings: markings
-          ? z.array(MarkingUpdateByIdSchema).parse(markings, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'markings')
-            })
+          ? z.array(MarkingUpdateByIdSchema).parse(
+              markings.filter((m) => !m._delete),
+              {
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'markings')
+              }
+            )
           : [],
         locations: locations
-          ? z.array(LocationUpdateSchema.extend({ location_id: zodID })).parse(locations, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'locations')
-            })
+          ? z.array(LocationUpdateSchema.extend({ location_id: zodID })).parse(
+              locations.filter((m) => !m._delete),
+              {
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'locations')
+              }
+            )
           : [],
         captures: captures
-          ? z.array(CaptureUpdateSchema.extend({ capture_id: zodID })).parse(captures, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'captures')
-            })
+          ? z.array(CaptureUpdateSchema.extend({ capture_id: zodID })).parse(
+              captures.filter((m) => !m._delete),
+              {
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'captures')
+              }
+            )
           : [],
         mortalities: mortalities
-          ? z.array(MortalityUpdateSchema.extend({ mortality_id: zodID })).parse(mortalities, {
-              errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'mortalities')
-            })
+          ? z.array(MortalityUpdateSchema.extend({ mortality_id: zodID })).parse(
+              mortalities.filter((m) => !m._delete),
+              {
+                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'mortalities')
+              }
+            )
           : [],
         qualitative_measurements: qualitative_measurements
           ? z
@@ -185,9 +203,12 @@ export const BulkRouter = (db: ICbDatabase) => {
                   measurement_qualitative_id: true
                 })
               )
-              .parse(qualitative_measurements, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'qualitative_measurements')
-              })
+              .parse(
+                qualitative_measurements.filter((m) => !m._delete),
+                {
+                  errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'qualitative_measurements')
+                }
+              )
           : [],
         quantitative_measurements: quantitative_measurements
           ? z
@@ -196,9 +217,12 @@ export const BulkRouter = (db: ICbDatabase) => {
                   measurement_quantitative_id: true
                 })
               )
-              .parse(quantitative_measurements, {
-                errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'quantitative_measurements')
-              })
+              .parse(
+                quantitative_measurements.filter((m) => !m._delete),
+                {
+                  errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'quantitative_measurements')
+                }
+              )
           : []
       };
 
