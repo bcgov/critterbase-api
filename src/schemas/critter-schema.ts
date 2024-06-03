@@ -1,4 +1,4 @@
-import { coordinate_uncertainty_unit, critter, frequency_unit, location, sex } from '@prisma/client';
+import { coordinate_uncertainty_unit, critter, frequency_unit, sex } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
 import { implement, zodID } from '../utils/zod_helpers';
@@ -110,8 +110,8 @@ export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
  * schema files are created for each service/repo/router
  *
  */
-const DetailedCritterLocationSchema = implement<Omit<location, AuditColumns>>()
-  .with({
+const DetailedCritterLocationSchema = z
+  .object({
     location_id: zodID,
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
@@ -120,6 +120,9 @@ const DetailedCritterLocationSchema = implement<Omit<location, AuditColumns>>()
     region_env_id: zodID.nullable(),
     region_nr_id: zodID.nullable(),
     wmu_id: zodID.nullable(),
+    region_env_name: z.string().nullable(),
+    region_nr_name: z.string().nullable(),
+    wmu_name: z.string().nullable(),
     elevation: z.number().nullable(),
     temperature: z.number().nullable(),
     location_comment: z.string().nullable()

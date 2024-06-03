@@ -1,29 +1,25 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import {
-  CritterUpdate,
-  ICritter,
   CritterCreateRequiredItis,
-  SimilarCritterQuery,
-  IDetailedCritterMarking,
-  DetailedCritterMarkingSchema,
   CritterSchema,
-  DetailedCritterMortalitySchema,
-  IDetailedCritterMortality,
-  DetailedCritterQualitativeMeasurementSchema,
-  IDetailedCritterQualitativeMeasurement,
-  DetailedCritterQuantitativeMeasurementSchema,
-  IDetailedCritterQuantitativeMeasurement,
-  DetailedCritterCollectionUnit,
-  IDetailedCritterCollectionUnit,
-  DetailedCritterCaptureSchema,
-  IDetailedCritterCapture,
-  DetailedCritterParentSchema,
+  CritterUpdate,
   DetailedCritterChildSchema,
-  IDetailedCritterParent,
+  DetailedCritterCollectionUnit,
+  DetailedCritterMortalitySchema,
+  DetailedCritterParentSchema,
+  DetailedCritterQualitativeMeasurementSchema,
+  DetailedCritterQuantitativeMeasurementSchema,
+  DetailedManyCritterSchema,
+  ICritter,
   IDetailedCritterChild,
+  IDetailedCritterCollectionUnit,
+  IDetailedCritterMortality,
+  IDetailedCritterParent,
+  IDetailedCritterQualitativeMeasurement,
+  IDetailedCritterQuantitativeMeasurement,
   IDetailedManyCritter,
-  DetailedManyCritterSchema
+  SimilarCritterQuery
 } from '../schemas/critter-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
@@ -299,102 +295,104 @@ export class CritterRepository extends Repository {
     return result;
   }
 
-  /**
-   * Find a critter's markings.
-   *
-   * @async
-   * @param {string} critterId - critter id.
-   * @returns {Promise<IDetailedCritterMarking[]>} markings.
-   */
-  async findCritterMarkings(critterId: string): Promise<IDetailedCritterMarking[]> {
-    const result = await this.safeQuery(
-      Prisma.sql`
-        SELECT
-          m.marking_id,
-          m.capture_id,
-          m.mortality_id,
-          b.taxon_marking_body_location_id,
-          b.body_location,
-          m.marking_type_id,
-          t.name as marking_type,
-          mt.material,
-          mt.marking_material_id,
-          c1.colour as primary_colour,
-          m.primary_colour_id,
-          c2.colour as secondary_colour,
-          m.secondary_colour_id,
-          c3.colour as text_colour,
-          m.text_colour_id,
-          m.identifier,
-          m.frequency,
-          m.frequency_unit,
-          m.order,
-          m.attached_timestamp,
-          m.removed_timestamp,
-          m.comment
-        FROM marking m
-        LEFT JOIN xref_taxon_marking_body_location b
-          ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
-        LEFT JOIN lk_marking_type t
-          ON t.marking_type_id = m.marking_type_id
-        LEFT JOIN lk_marking_material mt
-          ON mt.marking_material_id = m.marking_material_id
-        LEFT JOIN lk_colour c1
-          ON c1.colour_id = m.primary_colour_id
-        LEFT JOIN lk_colour c2
-          ON c2.colour_id = m.secondary_colour_id
-        LEFT JOIN lk_colour c3
-          ON c3.colour_id = m.text_colour_id
-        WHERE m.critter_id = ${critterId}::uuid
-        `,
-      z.array(DetailedCritterMarkingSchema)
-    );
+  ///**
+  // * Find a critter's markings.
+  // *
+  // * @async
+  // * @param {string} critterId - critter id.
+  // * @returns {Promise<IDetailedCritterMarking[]>} markings.
+  // */
+  //async findCritterMarkings(critterId: string): Promise<IDetailedCritterMarking[]> {
+  //  const result = await this.safeQuery(
+  //    Prisma.sql`
+  //      SELECT
+  //        m.marking_id,
+  //        m.capture_id,
+  //        m.mortality_id,
+  //        b.taxon_marking_body_location_id,
+  //        b.body_location,
+  //        m.marking_type_id,
+  //        t.name as marking_type,
+  //        mt.material,
+  //        mt.marking_material_id,
+  //        c1.colour as primary_colour,
+  //        m.primary_colour_id,
+  //        c2.colour as secondary_colour,
+  //        m.secondary_colour_id,
+  //        c3.colour as text_colour,
+  //        m.text_colour_id,
+  //        m.identifier,
+  //        m.frequency,
+  //        m.frequency_unit,
+  //        m.order,
+  //        m.attached_timestamp,
+  //        m.removed_timestamp,
+  //        m.comment
+  //      FROM marking m
+  //      LEFT JOIN xref_taxon_marking_body_location b
+  //        ON m.taxon_marking_body_location_id = b.taxon_marking_body_location_id
+  //      LEFT JOIN lk_marking_type t
+  //        ON t.marking_type_id = m.marking_type_id
+  //      LEFT JOIN lk_marking_material mt
+  //        ON mt.marking_material_id = m.marking_material_id
+  //      LEFT JOIN lk_colour c1
+  //        ON c1.colour_id = m.primary_colour_id
+  //      LEFT JOIN lk_colour c2
+  //        ON c2.colour_id = m.secondary_colour_id
+  //      LEFT JOIN lk_colour c3
+  //        ON c3.colour_id = m.text_colour_id
+  //      WHERE m.critter_id = ${critterId}::uuid
+  //      `,
+  //    z.array(DetailedCritterMarkingSchema)
+  //  );
+  //
+  //  return result;
+  //}
 
-    return result;
-  }
-
-  /**
-   * Find a critter's captures.
-   *
-   * @async
-   * @param {string} critterId - critter id.
-   * @returns {Promise<IDetailedCritterCapture[]>} captures.
-   */
-  async findCritterCaptures(critterId: string): Promise<IDetailedCritterCapture[]> {
-    const result = await this.safeQuery(
-      Prisma.sql`
-        SELECT
-          c.capture_id,
-          c.capture_timestamp,
-          c.release_timestamp,
-          row_to_json(cl) as capture_location,
-          row_to_json(rl) as release_location,
-          c.capture_comment,
-          c.release_comment
-        FROM capture c
-        JOIN (
-          SELECT
-            location_id, latitude, longitude, coordinate_uncertainty,
-            region_env_id, region_nr_id, wmu_id,
-            coordinate_uncertainty_unit, elevation, temperature, location_comment
-          FROM location
-        ) as cl
-          ON cl.location_id = c.capture_location_id
-        JOIN (
-          SELECT
-            location_id, latitude, longitude, coordinate_uncertainty,
-            region_env_id, region_nr_id, wmu_id,
-            coordinate_uncertainty_unit, elevation, temperature, location_comment
-          FROM location
-        ) as rl
-          ON rl.location_id = c.release_location_id
-        WHERE c.critter_id = ${critterId}::uuid
-        GROUP BY c.capture_id, cl.*, rl.*;`,
-      z.array(DetailedCritterCaptureSchema)
-    );
-
-    return result;
-  }
+  ///**
+  // * Find a critter's captures.
+  // * TODO: Deprecate this code - this has been moved to capture service
+  // * import and use the method from the capture-service instead
+  // *
+  // * @async
+  // * @param {string} critterId - critter id.
+  // * @returns {Promise<IDetailedCritterCapture[]>} captures.
+  // */
+  //async findCritterCaptures(critterId: string): Promise<IDetailedCritterCapture[]> {
+  //  const result = await this.safeQuery(
+  //    Prisma.sql`
+  //      SELECT
+  //        c.capture_id,
+  //        c.capture_timestamp,
+  //        c.release_timestamp,
+  //        row_to_json(cl) as capture_location,
+  //        row_to_json(rl) as release_location,
+  //        c.capture_comment,
+  //        c.release_comment
+  //      FROM capture c
+  //      JOIN (
+  //        SELECT
+  //          location_id, latitude, longitude, coordinate_uncertainty,
+  //          region_env_id, region_nr_id, wmu_id,
+  //          coordinate_uncertainty_unit, elevation, temperature, location_comment
+  //        FROM location
+  //      ) as cl
+  //        ON cl.location_id = c.capture_location_id
+  //      JOIN (
+  //        SELECT
+  //          location_id, latitude, longitude, coordinate_uncertainty,
+  //          region_env_id, region_nr_id, wmu_id,
+  //          coordinate_uncertainty_unit, elevation, temperature, location_comment
+  //        FROM location
+  //      ) as rl
+  //        ON rl.location_id = c.release_location_id
+  //      WHERE c.critter_id = ${critterId}::uuid
+  //      GROUP BY c.capture_id, cl.*, rl.*;`,
+  //    z.array(DetailedCritterCaptureSchema)
+  //  );
+  //
+  //  return result;
+  //}
 
   /**
    * Find a critter's mortality(s).
@@ -421,10 +419,14 @@ export class CritterRepository extends Repository {
         FROM mortality m
         JOIN (
           SELECT
-            location_id, latitude, longitude, coordinate_uncertainty,
-            region_env_id, region_nr_id, wmu_id,
-            coordinate_uncertainty_unit, elevation, temperature, location_comment
-          FROM location
+            l.location_id, l.latitude, l.longitude, l.coordinate_uncertainty,
+            l.region_env_id, l.region_nr_id, l.wmu_id,
+            e.region_env_name, n.region_nr_name, w.wmu_name,
+            l.coordinate_uncertainty_unit, l.elevation, l.temperature, l.location_comment
+          FROM location l
+          LEFT JOIN lk_region_env e ON e.region_env_id = l.region_env_id
+          LEFT JOIN lk_region_nr n ON n.region_nr_id = l.region_nr_id
+          LEFT JOIN lk_wildlife_management_unit w ON w.wmu_id = l.wmu_id
         ) as ml
           ON ml.location_id = m.location_id
         LEFT JOIN lk_cause_of_death pd
