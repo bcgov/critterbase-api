@@ -18,7 +18,7 @@ export class CaptureService implements Service {
   /**
    * Construct CaptureService class.
    *
-   * @param {CaptureRepository} repository - Repository dependency
+   * @param {CaptureRepository} repository - Repository dependency.
    */
   constructor(repository: CaptureRepository) {
     this.repository = repository;
