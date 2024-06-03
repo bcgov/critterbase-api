@@ -47,9 +47,11 @@ model audit_log {
 model capture {
   capture_id                                     String                     @id(map: "capture_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   critter_id                                     String                     @db.Uuid
+  capture_method_id                              String?                    @db.Uuid
   capture_location_id                            String?                    @db.Uuid
   release_location_id                            String?                    @db.Uuid
-  capture_timestamp                              DateTime                   @db.Timestamptz(6)
+  capture_date                                   DateTime                   @db.Date()
+  capture_time                                   DateTime?                  @db.Time()
   release_timestamp                              DateTime?                  @db.Timestamptz(6)
   capture_comment                                String?
   release_comment                                String?
@@ -65,6 +67,7 @@ model capture {
   marking                                        marking[]
   measurement_qualitative                        measurement_qualitative[]
   measurement_quantitative                       measurement_quantitative[]
+  lk_capture_method                              lk_capture_method?         @relation(fields: [capture_method_id], references: [capture_method_id])
 }
 
 model critter {
@@ -371,6 +374,7 @@ model measurement_quantitative {
   critter                                                              critter                             @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_empirical_critter_fk")
   xref_taxon_measurement_quantitative                                  xref_taxon_measurement_quantitative @relation(fields: [taxon_measurement_id], references: [taxon_measurement_id], onDelete: NoAction, onUpdate: NoAction, map: "measurement_empirical_tax_fk")
   capture_idTocapture                                                  capture?                            @relation(fields: [capture_id], references: [capture_id], onDelete: NoAction, onUpdate: NoAction)
+  lk_capture_methodTaxon_measurement_id                                String?                             @db.Uuid
 }
 
 model mortality {
@@ -453,6 +457,7 @@ model user {
   xref_taxon_measurement_qualitative_option_xref_taxon_measurement_qualitative_option_update_userTouser xref_taxon_measurement_qualitative_option[] @relation("xref_taxon_measurement_qualitative_option_update_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_create_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_create_userTouser")
   xref_taxon_measurement_quantitative_xref_taxon_measurement_quantitative_update_userTouser             xref_taxon_measurement_quantitative[]       @relation("xref_taxon_measurement_quantitative_update_userTouser")
+  lk_capture_method                                                                                     lk_capture_method[]
 
   @@unique([user_identifier, keycloak_uuid], map: "unq_user_identifier_and_uuid")
 }
@@ -544,6 +549,19 @@ model xref_taxon_measurement_quantitative {
   measurement_quantitative                                   measurement_quantitative[]
   user_xref_taxon_measurement_quantitative_create_userTouser user                       @relation("xref_taxon_measurement_quantitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_create_user")
   user_xref_taxon_measurement_quantitative_update_userTouser user                       @relation("xref_taxon_measurement_quantitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_update_user")
+}
+
+model lk_capture_method {
+  capture_method_id String    @id(map: "capture_method_empirical_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  name              String
+  description       String?
+  create_user       String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user       String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp  DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp  DateTime  @default(now()) @db.Timestamptz(6)
+  user              user?     @relation(fields: [userUser_id], references: [user_id])
+  userUser_id       String?   @db.Uuid
+  capture           capture[]
 }
 
 enum cod_confidence {
