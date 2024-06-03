@@ -18,7 +18,7 @@ export class CaptureService implements Service {
   /**
    * Construct CaptureService class.
    *
-   * @param {CaptureRepository} repository - Repository dependency.
+   * @param {CaptureRepository} repository - Repository dependency
    */
   constructor(repository: CaptureRepository) {
     this.repository = repository;
@@ -42,17 +42,32 @@ export class CaptureService implements Service {
    * Find all captures of a critter.
    *
    * @async
-   * @param {string} critterId - critter id.
-   * @returns {Promise<IDetailedCritterCapture[]>} captures.
+   * @param {string} critterId - Critter primary identifier
+   * @returns {Promise<IDetailedCritterCapture[]>} captures
    */
   async findCritterCaptures(critterId: string): Promise<IDetailedCritterCapture[]> {
     return this.repository.findCritterCaptures(critterId);
   }
 
+  /**
+   * Create a capture
+   *
+   * @async
+   * @param {CaptureCreate} payload - [TODO:description]
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async createCapture(payload: CaptureCreate) {
     return this.repository.createCapture(payload);
   }
 
+  /**
+   * Update a capture
+   *
+   * @async
+   * @param {string} captureId - Capture primary identifier
+   * @param {CaptureUpdate} payload - Capture update payload
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
   async updateCapture(captureId: string, payload: CaptureUpdate) {
     return this.repository.updateCapture(captureId, payload);
   }
@@ -61,7 +76,7 @@ export class CaptureService implements Service {
    * Delete a capture and related locations.
    *
    * @async
-   * @param {string} captureId - capture id
+   * @param {string} captureId - capture primary id
    * @returns {Promise<capture>}
    */
   async deleteCapture(captureId: string): Promise<capture> {

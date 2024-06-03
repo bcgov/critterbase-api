@@ -1,7 +1,8 @@
 import type { mortality } from '@prisma/client';
 import { MortalityRepository } from '../repositories/mortality-repository';
-import { Service } from './base-service';
+import { IDetailedCritterMortality } from '../schemas/critter-schema';
 import { MortalityCreate, MortalityDetailed, MortalityUpdate } from '../schemas/mortality-schema';
+import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
 /**
@@ -140,5 +141,17 @@ export class MortalityService implements Service {
    */
   async deleteMortality(mortality_id: string): Promise<mortality> {
     return this.repository.deleteMortality(mortality_id);
+  }
+
+  /**
+   * Find a critter's mortality(s).
+   * Business rules allow critters to have multiple mortalities.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<IDetailedCritterMortality[]>} mortalities.
+   */
+  async findCritterMortalities(critterId: string): Promise<IDetailedCritterMortality[]> {
+    return this.findCritterMortalities(critterId);
   }
 }

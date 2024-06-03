@@ -107,7 +107,7 @@ export class CritterService implements Service {
       this.repository.findCritterQualitativeMeasurements(critterId),
       this.repository.findCritterQuantitativeMeasurements(critterId),
       this.repository.findCritterCollectionUnits(critterId),
-      this.repository.findCritterMortalities(critterId),
+      this.mortalityService.findCritterMortalities(critterId),
       this.repository.findCritterParents(critterId),
       this.repository.findCritterChildren(critterId)
     ]);

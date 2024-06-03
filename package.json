@@ -11,7 +11,7 @@
     "build": "tsc",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
-    "dev": "nodemon -r dotenv/config ./src/server.ts",
+    "dev": "tsc -w & nodemon -r dotenv/config ./src/server.ts",
     "lint:fix": "eslint . --fix --ignore-pattern 'node_modules' --ext .ts",
     "format:fix": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss}\"",
     "prisma:deploy": "npx prisma migrate deploy",
