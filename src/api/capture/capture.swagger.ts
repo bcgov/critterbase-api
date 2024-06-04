@@ -1,38 +1,20 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { zodID } from '../../utils/zod_helpers';
-import { CaptureCreateSchema, CaptureIncludeSchema, CaptureUpdateSchema } from './capture.utils';
-import { CommonLocationValidation } from '../location/location.utils';
-
-const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
-  location_capture_capture_location_idTolocation: true,
-  location_capture_release_location_idTolocation: true
-}).extend({
-  capture_location: CommonLocationValidation.nullable(),
-  release_location: CommonLocationValidation.nullable()
-});
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+//import { CaptureCreateSchema, CaptureIncludeSchema, CaptureUpdateSchema } from './capture.utils';
+import { CaptureCreateSchema, CaptureSchema } from '../../schemas/capture-schema';
 import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+
+//const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
+//  location_capture_capture_location_idTolocation: true,
+//  location_capture_release_location_idTolocation: true
+//}).extend({
+//  capture_location: CommonLocationValidation.nullable(),
+//  release_location: CommonLocationValidation.nullable()
+//});
 
 const TAG = 'Capture';
-
-const getCaptures: ZodOpenApiOperationObject = {
-  operationId: 'getCaptures',
-  summary: 'Gets all capture events',
-  tags: [TAG],
-  responses: {
-    '200': {
-      description: SwagDesc.get,
-      content: {
-        'application/json': {
-          schema: z.array(SwaggerCaptureResponseValidation)
-        }
-      }
-    },
-    ...SwagErr,
-    ...SwagUnauthorized
-  }
-};
 
 const createCapture: ZodOpenApiOperationObject = {
   operationId: 'createCapture',
@@ -51,7 +33,7 @@ const createCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       content: {
         'application/json': {
-          schema: SwaggerCaptureResponseValidation
+          schema: CaptureSchema
         }
       }
     },

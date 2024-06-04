@@ -1,8 +1,5 @@
-import { capture } from '@prisma/client';
-import { CaptureUpdate } from '../api/capture/capture.utils';
 import { CaptureRepository } from '../repositories/capture-repository';
-import { CaptureCreate } from '../schemas/capture-schema';
-import { IDetailedCritterCapture } from '../schemas/critter-schema';
+import { Capture, CaptureCreate, CaptureUpdate, DetailedCapture } from '../schemas/capture-schema';
 import { Service } from './base-service';
 
 /**
@@ -18,7 +15,7 @@ export class CaptureService implements Service {
   /**
    * Construct CaptureService class.
    *
-   * @param {CaptureRepository} repository - Repository dependency.
+   * @param {CaptureRepository} repository - Repository dependency
    */
   constructor(repository: CaptureRepository) {
     this.repository = repository;
@@ -34,7 +31,14 @@ export class CaptureService implements Service {
     return new CaptureService(new CaptureRepository());
   }
 
-  async getCaptureById(captureId: string) {
+  /**
+   * Get a capture by id.
+   *
+   * @async
+   * @param {string} captureId - Capture primary identifier
+   * @returns {Promise<DetailedCapture>} Detailed capture
+   */
+  async getCaptureById(captureId: string): Promise<DetailedCapture> {
     return this.repository.getCaptureById(captureId);
   }
 
@@ -43,32 +47,32 @@ export class CaptureService implements Service {
    *
    * @async
    * @param {string} critterId - Critter primary identifier
-   * @returns {Promise<IDetailedCritterCapture[]>} captures
+   * @returns {Promise<IDetailedCritterCapture[]>} Captures
    */
-  async findCritterCaptures(critterId: string): Promise<IDetailedCritterCapture[]> {
+  async findCritterCaptures(critterId: string): Promise<DetailedCapture[]> {
     return this.repository.findCritterCaptures(critterId);
   }
 
   /**
-   * Create a capture
+   * Create a capture.
    *
    * @async
-   * @param {CaptureCreate} payload - [TODO:description]
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @param {CaptureCreate} payload - Capture create payload
+   * @returns {Promise<>} Created capture
    */
-  async createCapture(payload: CaptureCreate) {
+  async createCapture(payload: CaptureCreate): Promise<Capture> {
     return this.repository.createCapture(payload);
   }
 
   /**
-   * Update a capture
+   * Update a capture.
    *
    * @async
    * @param {string} captureId - Capture primary identifier
    * @param {CaptureUpdate} payload - Capture update payload
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @returns {Promise<Capture>} Updated capture
    */
-  async updateCapture(captureId: string, payload: CaptureUpdate) {
+  async updateCapture(captureId: string, payload: CaptureUpdate): Promise<Capture> {
     return this.repository.updateCapture(captureId, payload);
   }
 
@@ -77,9 +81,9 @@ export class CaptureService implements Service {
    *
    * @async
    * @param {string} captureId - capture primary id
-   * @returns {Promise<capture>}
+   * @returns {Promise<capture>} Deleted capture
    */
-  async deleteCapture(captureId: string): Promise<capture> {
+  async deleteCapture(captureId: string): Promise<Capture> {
     return this.repository.deleteCapture(captureId);
   }
 }

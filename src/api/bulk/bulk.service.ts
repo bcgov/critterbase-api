@@ -1,15 +1,15 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { prisma } from '../../utils/constants';
-import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from '../collectionUnit/collectionUnit.utils';
-import { MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
-import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
-import { apiError } from '../../utils/types';
-import { ICbDatabase } from '../../utils/database';
-import { CaptureDeleteSchema, CaptureUpdate } from '../capture/capture.utils';
-import { QualitativeDeleteSchema, QuantitativeDeleteSchema } from '../measurement/measurement.utils';
-import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from '../family/family.utils';
 import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
+import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
+import { prisma } from '../../utils/constants';
+import { ICbDatabase } from '../../utils/database';
+import { apiError } from '../../utils/types';
+import { CaptureDeleteSchema, CaptureUpdate } from '../capture/capture.utils';
+import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from '../collectionUnit/collectionUnit.utils';
+import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from '../family/family.utils';
+import { MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
+import { QualitativeDeleteSchema, QuantitativeDeleteSchema } from '../measurement/measurement.utils';
 
 interface IBulkCreate {
   critters: Prisma.critterCreateManyInput[];
@@ -189,7 +189,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         if (!c.capture_id) {
           throw apiError.requiredProperty('capture_id');
         }
-        await db.updateCapture(c.capture_id, c, prisma);
+        await db.captureService.updateCapture(c.capture_id, c);
       }
       for (let i = 0; i < mortalities.length; i++) {
         const m = mortalities[i];
@@ -309,4 +309,4 @@ const bulkErrMap = (issue: z.ZodIssueOptionalMessage, ctx: z.ErrorMapCtx, objKey
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`
 });
 
-export { IBulkCreate, IBulkMutate, IBulkDelete, bulkCreateData, bulkErrMap, bulkUpdateData, bulkDeleteData };
+export { IBulkCreate, IBulkDelete, IBulkMutate, bulkCreateData, bulkDeleteData, bulkErrMap, bulkUpdateData };

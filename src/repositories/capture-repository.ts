@@ -1,27 +1,60 @@
-import { Prisma, capture } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { CaptureUpdate } from '../api/capture/capture.utils';
-import { CaptureCreate } from '../schemas/capture-schema';
-import { DetailedCritterCaptureSchema, IDetailedCritterCapture } from '../schemas/critter-schema';
+import {
+  Capture,
+  CaptureCreate,
+  CaptureUpdate,
+  DetailedCapture,
+  DetailedCaptureSchema
+} from '../schemas/capture-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
+/**
+ * Capture Repository
+ *
+ * @export
+ * @class CaptureRepository
+ * @extends Repository
+ */
 export class CaptureRepository extends Repository {
+  /**
+   * Default capture properties, omitting audit columns.
+   *
+   */
+  private _captureProperties = {
+    capture_id: true,
+    critter_id: true,
+    capture_method_id: true,
+    capture_location_id: true,
+    release_location_id: true,
+    capture_date: true,
+    capture_time: true,
+    release_date: true,
+    release_time: true,
+    capture_comment: true,
+    release_comment: true
+  };
+
   /**
    * Get a capture by id.
    *
    * @async
    * @param {string} captureId - Capture primary identifier
    * @throws {apiError.notFound} - If unable to find capture by id
-   * @returns {Promise<IDetailedCritterCapture>} Detailed critter capture
+   * @returns {Promise<DetailedCapture>} Detailed capture
    */
-  async getCaptureById(captureId: string): Promise<IDetailedCritterCapture> {
+  async getCaptureById(captureId: string): Promise<DetailedCapture> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
           c.capture_id,
-          c.capture_timestamp,
-          c.release_timestamp,
+          c.capture_date,
+          c.capture_time,
+          c.release_date,
+          c.release_time,
+          c.capture_location_id,
+          c.release_location_id,
           row_to_json(cl) as capture_location,
           row_to_json(rl) as release_location,
           c.capture_comment,
@@ -53,7 +86,7 @@ export class CaptureRepository extends Repository {
           ON rl.location_id = c.release_location_id
         WHERE c.capture_id = ${captureId}::uuid
         GROUP BY c.capture_id, cl.*, rl.*;`,
-      z.array(DetailedCritterCaptureSchema)
+      z.array(DetailedCaptureSchema)
     );
 
     if (!result.length) {
@@ -65,20 +98,25 @@ export class CaptureRepository extends Repository {
 
     return result[0];
   }
+
   /**
    * Find all captures of a critter.
    *
    * @async
    * @param {string} critterId - critter id.
-   * @returns {Promise<IDetailedCritterCapture[]>} captures.
+   * @returns {Promise<DetailedCapture[]>} Detailed captures
    */
-  async findCritterCaptures(critterId: string): Promise<IDetailedCritterCapture[]> {
+  async findCritterCaptures(critterId: string): Promise<DetailedCapture[]> {
     const result = await this.safeQuery(
       Prisma.sql`
         SELECT
           c.capture_id,
-          c.capture_timestamp,
-          c.release_timestamp,
+          c.capture_date,
+          c.capture_time,
+          c.release_date,
+          c.release_time,
+          c.capture_location_id,
+          c.release_location_id,
           row_to_json(cl) as capture_location,
           row_to_json(rl) as release_location,
           c.capture_comment,
@@ -110,34 +148,63 @@ export class CaptureRepository extends Repository {
           ON rl.location_id = c.release_location_id
         WHERE c.critter_id = ${critterId}::uuid
         GROUP BY c.capture_id, cl.*, rl.*;`,
-      z.array(DetailedCritterCaptureSchema)
+      z.array(DetailedCaptureSchema)
     );
 
     return result;
   }
 
-  async createCapture(payload: CaptureCreate) {
+  /**
+   * Create a capture.
+   * If the release location is not included,
+   * the DB trigger will populate release_location_id with capture_location_id.
+   *
+   * @async
+   * @param {CaptureCreate} payload - Capture create payload
+   * @returns {Promise<Capture>} Created capture
+   */
+  async createCapture(payload: CaptureCreate): Promise<Capture> {
     return this.prisma.capture.create({
       data: {
         capture_id: payload.capture_id,
         critter: { connect: { critter_id: payload.critter_id } },
-        capture_timestamp: payload.capture_timestamp,
-        release_timestamp: payload.release_timestamp,
+        capture_date: payload.capture_date,
+        capture_time: payload.capture_time,
+        release_date: payload.release_date,
+        release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
         location_capture_capture_location_idTolocation: { create: payload.capture_location },
-        // if the release location exists create it - otherwise db trigger will use capture_location_id
-        location_capture_release_location_idTolocation: payload.release_location
-          ? { create: payload.release_location }
-          : undefined
-      }
+        location_capture_release_location_idTolocation: { create: payload.release_location }
+      },
+      select: this._captureProperties
     });
   }
 
-  async updateCapture(captureId: string, payload: CaptureUpdate) {
+  /**
+   * Update a capture.
+   *
+   * @async
+   * @param {string} captureId - Capture primary identifier
+   * @param {CaptureUpdate} payload - Capture update payload
+   * @returns {Promise<Capture>} Updated capture
+   */
+  async updateCapture(captureId: string, payload: CaptureUpdate): Promise<Capture> {
     return this.prisma.capture.update({
       where: { capture_id: captureId },
-      data: {}
+      data: {
+        capture_id: payload.capture_id,
+        critter: { connect: { critter_id: payload.critter_id } },
+        capture_date: payload.capture_date,
+        capture_time: payload.capture_time,
+        release_date: payload.release_date,
+        release_time: payload.release_time,
+        capture_comment: payload.capture_comment,
+        release_comment: payload.release_comment,
+        location_capture_capture_location_idTolocation: { create: payload.capture_location },
+        location_capture_release_location_idTolocation: { create: payload.release_location }
+      },
+      select: this._captureProperties
     });
   }
 
@@ -146,16 +213,18 @@ export class CaptureRepository extends Repository {
    *
    * @async
    * @param {string} captureId - capture id
-   * @returns {Promise<capture>}
+   * @returns {Promise<capture>} Deleted capture
    */
-  async deleteCapture(captureId: string): Promise<capture> {
+  async deleteCapture(captureId: string): Promise<Capture> {
     return this.transactionHandler(async () => {
       const locationIdsSet: Set<string> = new Set();
 
+      // Delete the capture
       const capture = await this.prisma.capture.delete({
         where: {
           capture_id: captureId
-        }
+        },
+        select: this._captureProperties
       });
 
       if (capture.capture_location_id) {
@@ -166,6 +235,7 @@ export class CaptureRepository extends Repository {
         locationIdsSet.add(capture.release_location_id);
       }
 
+      // Delete the associated locations
       await this.prisma.location.deleteMany({
         where: {
           location_id: { in: Array.from(locationIdsSet) }

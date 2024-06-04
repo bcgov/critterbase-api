@@ -1,14 +1,14 @@
 import {
+  lk_cause_of_death,
+  lk_collection_category,
+  lk_colour,
+  lk_marking_material,
+  lk_marking_type,
   lk_region_env,
   lk_region_nr,
   lk_wildlife_management_unit,
   xref_collection_unit,
-  lk_colour,
-  lk_marking_material,
-  lk_marking_type,
-  xref_taxon_marking_body_location,
-  lk_collection_category,
-  lk_cause_of_death
+  xref_taxon_marking_body_location
 } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns, Implements, QueryFormats } from './types';
@@ -73,6 +73,13 @@ const noAudit: Record<AuditColumns, true> = {
   update_timestamp: true
 };
 
+/**
+ * Implements a zod schema from an existing type.
+ * Throws a type warning if the underlying zod schema is not the correct type.
+ *
+ * @template Model - Generic type to enforce
+ * @returns {Model}
+ */
 export function implement<Model = never>() {
   return {
     with: <
@@ -149,25 +156,25 @@ type IResponseSchema = z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny> | z.ZodTypeAny;
 export type { IResponseSchema };
 
 export {
-  uuidParamsSchema,
-  nonEmpty,
-  noAudit,
-  zodID,
+  DeleteSchema,
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
   LookUpMaterialSchema,
-  XrefTaxonMarkingBodyLocationSchema,
-  XrefCollectionUnitSchema,
-  LookupWmuSchema,
+  LookupCodSchema,
+  LookupCollectionUnitCategorySchema,
   LookupRegionEnvSchema,
   LookupRegionNrSchema,
-  ResponseSchema,
-  zodAudit,
+  LookupWmuSchema,
   NumberToString,
   QueryFormatSchema,
-  DeleteSchema,
-  LookupCollectionUnitCategorySchema,
-  LookupCodSchema,
+  ResponseSchema,
+  XrefCollectionUnitSchema,
   XrefTaxonCollectionCategorySchema,
-  tsnQuerySchema
+  XrefTaxonMarkingBodyLocationSchema,
+  noAudit,
+  nonEmpty,
+  tsnQuerySchema,
+  uuidParamsSchema,
+  zodAudit,
+  zodID
 };

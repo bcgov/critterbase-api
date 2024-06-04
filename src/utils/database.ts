@@ -1,7 +1,6 @@
 import * as access from '../api/access/access.service';
 import * as artifact from '../api/artifact/artifact.service';
 import * as bulk from '../api/bulk/bulk.service';
-import * as capture from '../api/capture/capture.service';
 import * as collectionUnit from '../api/collectionUnit/collectionUnit.service';
 import * as family from '../api/family/family.service';
 import * as location from '../api/location/location.service';
@@ -35,7 +34,6 @@ export const db = {
   ...access,
   ...artifact,
   ...bulk,
-  ...capture,
   ...collectionUnit,
   ...family,
   ...location,

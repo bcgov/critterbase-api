@@ -2,6 +2,7 @@ import { coordinate_uncertainty_unit, critter, frequency_unit, sex } from '@pris
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
 import { implement, zodID } from '../utils/zod_helpers';
+import { DetailedCaptureSchema } from './capture-schema';
 
 export enum eCritterStatus {
   alive = 'alive',
@@ -110,7 +111,7 @@ export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
  * schema files are created for each service/repo/router
  *
  */
-const DetailedCritterLocationSchema = z
+export const DetailedCritterLocationSchema = z
   .object({
     location_id: zodID,
     latitude: z.number().nullable(),
@@ -153,18 +154,6 @@ export const DetailedCritterMarkingSchema = z
     attached_timestamp: z.coerce.date(),
     removed_timestamp: z.coerce.date().nullable(),
     comment: z.string().nullable()
-  })
-  .strict();
-
-export const DetailedCritterCaptureSchema = z
-  .object({
-    capture_id: zodID,
-    capture_timestamp: z.coerce.date(),
-    release_timestamp: z.coerce.date().nullable(),
-    capture_location: DetailedCritterLocationSchema,
-    release_location: DetailedCritterLocationSchema,
-    capture_comment: z.string().nullable(),
-    release_comment: z.string().nullable()
   })
   .strict();
 
@@ -229,7 +218,7 @@ export const DetailedCritterChildSchema = z
 
 export const DetailedCritterSchema = CritterSchema.extend({
   markings: DetailedCritterMarkingSchema.array(),
-  captures: DetailedCritterCaptureSchema.array(),
+  captures: DetailedCaptureSchema.array(),
   collection_units: DetailedCritterCollectionUnit.array(),
   mortality: DetailedCritterMortalitySchema.array(),
   measurements: z.object({
@@ -254,8 +243,6 @@ export type IDetailedCritterParent = z.infer<typeof DetailedCritterParentSchema>
 export type IDetailedCritterChild = z.infer<typeof DetailedCritterChildSchema>;
 
 export type IDetailedCritterMarking = z.infer<typeof DetailedCritterMarkingSchema>;
-
-export type IDetailedCritterCapture = z.infer<typeof DetailedCritterCaptureSchema>;
 
 export type IDetailedCritterMortality = z.infer<typeof DetailedCritterMortalitySchema>;
 

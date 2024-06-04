@@ -1,10 +1,9 @@
 import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
-import { CaptureCreateSchema } from '../../schemas/capture-schema';
+import { CaptureCreateSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
-import { CaptureUpdateSchema } from './capture.utils';
 
 /**
  * Critter Router Home

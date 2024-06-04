@@ -8,20 +8,22 @@
 -- AlterTable
 ALTER TABLE "capture"
 ADD COLUMN     "capture_date" DATE NOT NULL,
+ADD COLUMN     "release_date" DATE,
 ADD COLUMN     "capture_method_id" UUID,
-ADD COLUMN     "capture_time" TIME;
+ADD COLUMN     "capture_time" TIME,
+ADD COLUMN     "release_time" TIME;
 
 -- UpdateCaptureTable
 UPDATE "capture"
 SET
   capture_date = capture_timestamp::date,
-  capture_time = capture_timestamp::time;
+  capture_time = capture_timestamp::time,
+  release_date = release_timestamp::date,
+  release_time = release_timestamp::time;
 
 -- DropTimestamp
 ALTER TABLE "capture" DROP COLUMN "capture_timestamp";
-
--- AlterTable
-ALTER TABLE "measurement_quantitative" ADD COLUMN     "lk_capture_methodTaxon_measurement_id" UUID;
+ALTER TABLE "capture" DROP COLUMN "release_timestamp";
 
 -- CreateTable
 CREATE TABLE "lk_capture_method" (
