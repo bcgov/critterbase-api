@@ -169,16 +169,16 @@ export class CaptureRepository extends Repository {
     return this.prisma.capture.create({
       data: {
         capture_id: payload.capture_id,
-        critter: { connect: { critter_id: payload.critter_id } },
-        capture_method_id: payload.capture_method_id,
         capture_date: payload.capture_date,
         capture_time: payload.capture_time,
         release_date: payload.release_date,
         release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
-        location_capture_capture_location_idTolocation: { create: payload.capture_location },
-        location_capture_release_location_idTolocation: { create: payload.release_location }
+        critter: { connect: { critter_id: payload.critter_id } },
+        capture_method: { connect: { capture_method_id: payload.capture_method_id } },
+        capture_location: { create: payload.capture_location },
+        release_location: { create: payload.release_location }
       },
       select: this._captureProperties
     });
@@ -204,8 +204,8 @@ export class CaptureRepository extends Repository {
         release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
-        location_capture_capture_location_idTolocation: { create: payload.capture_location },
-        location_capture_release_location_idTolocation: { create: payload.release_location }
+        capture_location: { create: payload.capture_location },
+        release_location: { create: payload.release_location }
       },
       select: this._captureProperties
     });
