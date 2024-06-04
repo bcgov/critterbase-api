@@ -419,7 +419,7 @@ export class CritterRepository extends Repository {
           m.proximate_predated_by_itis_tsn,
           m.ultimate_predated_by_itis_tsn
         FROM mortality m
-        JOIN (
+        LEFT JOIN (
           SELECT
             location_id, latitude, longitude, coordinate_uncertainty,
             region_env_id, region_nr_id, wmu_id,
