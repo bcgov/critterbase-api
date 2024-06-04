@@ -4,7 +4,7 @@ import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '.
 import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
 import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
-import { BulkCreationSchema, filterAndRemoveDeletes, getBulkDeletes, getBulkUpdates } from './bulk.utils';
+import { BulkCreationSchema, getBulkDeletes, getBulkUpdates } from './bulk.utils';
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitDeleteSchema,
