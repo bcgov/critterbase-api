@@ -49,6 +49,7 @@ export class CaptureRepository extends Repository {
       Prisma.sql`
         SELECT
           c.capture_id,
+          c.capture_method,
           c.capture_date,
           c.capture_time,
           c.release_date,
@@ -111,6 +112,7 @@ export class CaptureRepository extends Repository {
       Prisma.sql`
         SELECT
           c.capture_id,
+          c.capture_method_id,
           c.capture_date,
           c.capture_time,
           c.release_date,
@@ -168,6 +170,7 @@ export class CaptureRepository extends Repository {
       data: {
         capture_id: payload.capture_id,
         critter: { connect: { critter_id: payload.critter_id } },
+        capture_method_id: payload.capture_method_id,
         capture_date: payload.capture_date,
         capture_time: payload.capture_time,
         release_date: payload.release_date,
@@ -217,9 +220,7 @@ export class CaptureRepository extends Repository {
    */
   async deleteCapture(captureId: string): Promise<Capture> {
     return this.transactionHandler(async () => {
-      const locationIdsSet: Set<string> = new Set();
-
-      // Delete the capture
+      // Delete the capture + cascade location deletes
       const capture = await this.prisma.capture.delete({
         where: {
           capture_id: captureId
@@ -227,20 +228,20 @@ export class CaptureRepository extends Repository {
         select: this._captureProperties
       });
 
-      if (capture.capture_location_id) {
-        locationIdsSet.add(capture.capture_location_id);
-      }
-
-      if (capture.release_location_id) {
-        locationIdsSet.add(capture.release_location_id);
-      }
+      //if (capture.capture_location_id) {
+      //  locationIdsSet.add(capture.capture_location_id);
+      //}
+      //
+      //if (capture.release_location_id) {
+      //  locationIdsSet.add(capture.release_location_id);
+      //}
 
       // Delete the associated locations
-      await this.prisma.location.deleteMany({
-        where: {
-          location_id: { in: Array.from(locationIdsSet) }
-        }
-      });
+      //await this.prisma.location.deleteMany({
+      //  where: {
+      //    location_id: { in: Array.from(locationIdsSet) }
+      //  }
+      //});
 
       return capture;
     });

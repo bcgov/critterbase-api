@@ -46,7 +46,7 @@ export const CaptureCreateSchema = z
   .object({
     capture_id: zodID.optional(),
     critter_id: zodID,
-    capture_method: zodID.nullable(),
+    capture_method_id: zodID.optional(),
     capture_location: LocationCreateSchema.optional(),
     release_location: LocationCreateSchema.optional(),
     capture_date: z.coerce.date(),

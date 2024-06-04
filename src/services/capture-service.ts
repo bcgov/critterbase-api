@@ -58,7 +58,7 @@ export class CaptureService implements Service {
    *
    * @async
    * @param {CaptureCreate} payload - Capture create payload
-   * @returns {Promise<>} Created capture
+   * @returns {Promise<Capture>} Created capture
    */
   async createCapture(payload: CaptureCreate): Promise<Capture> {
     return this.repository.createCapture(payload);
@@ -81,7 +81,7 @@ export class CaptureService implements Service {
    *
    * @async
    * @param {string} captureId - capture primary id
-   * @returns {Promise<capture>} Deleted capture
+   * @returns {Promise<Capture>} Deleted capture
    */
   async deleteCapture(captureId: string): Promise<Capture> {
     return this.repository.deleteCapture(captureId);
