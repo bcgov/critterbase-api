@@ -1,6 +1,11 @@
-import { capture, critter, location } from '@prisma/client';
+import { capture, critter } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import supertest from 'supertest';
+import { makeApp } from '../../app';
 import { prisma, routes } from '../../utils/constants';
+import { ICbDatabase } from '../../utils/database';
+import { apiError } from '../../utils/types';
+import { mockCommonLocation } from '../location/location.test';
 import {
   createCapture as _createCapture,
   deleteCapture as _deleteCapture,
@@ -9,12 +14,6 @@ import {
   getCaptureById as _getCaptureById,
   updateCapture as _updateCapture
 } from './capture.service';
-import { CaptureBodySchema, CaptureResponseSchema } from './capture.utils';
-import { makeApp } from '../../app';
-import { ICbDatabase } from '../../utils/database';
-import supertest from 'supertest';
-import { apiError } from '../../utils/types';
-import { mockCommonLocation } from '../location/location.test';
 
 const getAllCaptures = jest.fn();
 const getCaptureByCritter = jest.fn();

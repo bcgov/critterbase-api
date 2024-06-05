@@ -1,9 +1,9 @@
 import { coordinate_uncertainty_unit, location, Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { extendZodWithOpenApi } from 'zod-openapi';
 import { AuditColumns } from '../../utils/types';
 import { implement, noAudit, ResponseSchema, zodAudit, zodID } from '../../utils/zod_helpers';
 import { getLocationOrThrow } from './location.service';
-import { extendZodWithOpenApi } from 'zod-openapi';
 extendZodWithOpenApi(z);
 
 // Zod Schemas
@@ -156,15 +156,15 @@ const locationIncludes: Prisma.locationInclude = {
   lk_region_env: true
 };
 
-export type { LocationResponse, LocationBody, CommonLocationType };
 export {
-  commonLocationSelect,
+  CommonFormattedLocationSchema,
   CommonLocationSchema,
+  commonLocationSelect,
+  CommonLocationValidation,
   LocationCreateSchema,
   locationIncludes,
   LocationResponseSchema,
   LocationSchema,
-  LocationUpdateSchema,
-  CommonFormattedLocationSchema,
-  CommonLocationValidation
+  LocationUpdateSchema
 };
+export type { CommonLocationType, LocationBody, LocationResponse };

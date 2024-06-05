@@ -1,14 +1,13 @@
-import { capture } from '@prisma/client';
+import { capture, coordinate_uncertainty_unit } from '@prisma/client';
 import { z } from 'zod';
 import { LocationCreateSchema } from '../api/location/location.utils';
 import { AuditColumns } from '../utils/types';
-import { implement, zodID } from '../utils/zod_helpers';
-import { DetailedCritterLocationSchema } from './critter-schema';
+import { DeleteSchema, implement, zodID } from '../utils/zod_helpers';
 
 /**
  * @table Capture
  *
- * Base Capture schema omitting audit columns.
+ * Base Capture schema, omitting audit columns.
  * Using 'implement' to keep zod schema in sync with prisma type.
  *
  */
@@ -29,13 +28,40 @@ export const CaptureSchema = implement<Capture>()
   .strict();
 
 /**
+ * Detailed location schema, omitting audit columns.
+ *
+ */
+export const DetailedLocationSchema = z
+  .object({
+    location_id: zodID,
+    latitude: z.number().nullable(),
+    longitude: z.number().nullable(),
+    coordinate_uncertainty: z.number().nullable(),
+    coordinate_uncertainty_unit: z.nativeEnum(coordinate_uncertainty_unit).nullable(),
+    region_env_id: zodID.nullable(),
+    region_nr_id: zodID.nullable(),
+    wmu_id: zodID.nullable(),
+    //TODO: update mortality repo query
+    //
+    //region_env_name: z.string().nullable(),
+    //region_nr_name: z.string().nullable(),
+    //wmu_name: z.string().nullable(),
+    elevation: z.number().nullable(),
+    temperature: z.number().nullable(),
+    location_comment: z.string().nullable()
+  })
+  .strict();
+
+/**
  * Detailed capture schema with location details included.
  *
  */
-export const DetailedCaptureSchema = CaptureSchema.extend({
-  capture_location: DetailedCritterLocationSchema.optional(),
-  release_location: DetailedCritterLocationSchema.optional()
-}).strict();
+export const DetailedCaptureSchema = CaptureSchema.omit({ capture_location_id: true, release_location_id: true })
+  .extend({
+    capture_location: DetailedLocationSchema.nullish(),
+    release_location: DetailedLocationSchema.nullish()
+  })
+  .strict();
 
 /**
  * Create capture schema.
@@ -67,8 +93,8 @@ export const CaptureUpdateSchema = z
     capture_id: zodID.optional(),
     critter_id: zodID,
     capture_method: zodID.nullable(),
-    capture_location_id: zodID.nullable(),
-    release_location_id: zodID.nullable(),
+    capture_location_id: zodID.optional(),
+    release_location_id: zodID.optional(),
     capture_location: LocationCreateSchema.optional(),
     release_location: LocationCreateSchema.optional(),
     capture_date: z.coerce.date(),
@@ -79,6 +105,12 @@ export const CaptureUpdateSchema = z
     release_comment: z.string().nullish()
   })
   .strict();
+
+/**
+ * Schema for capture delete payloads, used mostly for bulk requests.
+ *
+ */
+export const CaptureDeleteSchema = z.object({ capture_id: zodID }).extend(DeleteSchema.shape);
 
 /**
  * Inferred types from zod schemas.

@@ -1,13 +1,13 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { loginUser } from '../api/access/access.service';
+import { setUserContext } from '../api/user/user.service';
 import { AuthLoginSchema } from '../api/user/user.utils';
+import { authenticateRequest } from '../authentication/auth';
 import { IS_TEST, NO_AUTH } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
-import { authenticateRequest } from '../authentication/auth';
-import { setUserContext } from '../api/user/user.service';
 
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
@@ -70,6 +70,7 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(err);
   if (err instanceof ZodError) {
     return res.status(400).json({ error: 'Zod validation failed.', issues: err.issues });
   }
@@ -80,8 +81,11 @@ const errorHandler = (
     const { status, error } = prismaErrorMsg(err);
     return res.status(status).json({ error, issues: [err.meta] });
   }
+  if (err instanceof PrismaClientValidationError) {
+    return res.status(500).json({ error: 'Prisma query syntax error', issues: ['View logs'] });
+  }
   if (err instanceof Error) {
-    return res.status(400).json({ error: err.message || 'unknown error' });
+    return res.status(400).json({ error: err.message || 'Unknown error' });
   }
   next(err);
 };

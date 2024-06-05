@@ -25,16 +25,16 @@ const prismaErrorMsg = (err: PrismaClientKnownRequestError): { error: string; st
       };
     case 'P2002':
       return {
-        error: `unique constraint failed`,
+        error: `Unique constraint failed`,
         status: 400
       };
     case 'P2003':
       return {
-        error: `foreign key constraint failed`,
+        error: `Foreign key constraint failed`,
         status: 404
       };
   }
-  return { error: `request failed at database: "${code}"`, status: 400 };
+  return { error: `Request failed at database: "${code}"`, status: 400 };
 };
 
 const intersect = <T>(A: T[], B: T[]): T[] => {
@@ -101,13 +101,13 @@ const prisMock = (
     .mockResolvedValue(returns);
 
 export {
-  prisMock,
-  prismaErrorMsg,
-  sessionHours,
   formatParse,
   getFormat,
   intersect,
-  toSelect,
   isSelectFormat,
+  prisMock,
+  prismaErrorMsg,
+  sessionHours,
+  toSelect,
   toSelectFormat
 };

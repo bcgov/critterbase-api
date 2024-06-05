@@ -1,14 +1,14 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { MarkingCreateBodySchema } from '../marking/marking.utils';
-import { CaptureCreateSchema, CaptureUpdateSchema } from '../capture/capture.utils';
-import { routes } from '../../utils/constants';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
+import { CaptureCreateSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
+import { CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
 import { MortalityCreateSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
+import { routes } from '../../utils/constants';
+import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { zodID } from '../../utils/zod_helpers';
 import { CollectionUnitCreateBodySchema, CollectionUnitUpsertSchema } from '../collectionUnit/collectionUnit.utils';
 import { LocationCreateSchema, LocationUpdateSchema } from '../location/location.utils';
-import { SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { MarkingCreateBodySchema } from '../marking/marking.utils';
 
 const TAG = 'Bulk';
 const bulkCreation: ZodOpenApiOperationObject = {

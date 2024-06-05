@@ -1,5 +1,5 @@
 import { prisma } from '../../src/utils/constants';
-import { CRITTER_ONE, ITIS_TSN } from './seed_constants';
+import { ITIS_TSN, STATIC_UUIDS } from './seed_constants';
 
 export const seedCritters = async () => {
   console.log('Seeding (1) critter + attributes...');
@@ -41,7 +41,7 @@ export const seedCritters = async () => {
    */
   const critter = await prisma.critter.create({
     data: {
-      critter_id: CRITTER_ONE,
+      critter_id: STATIC_UUIDS.CRITTER_A,
       wlh_id: '123-45',
       animal_id: 'Carl',
       sex: 'Male',
@@ -67,6 +67,7 @@ export const seedCritters = async () => {
 
   const capture = await prisma.capture.create({
     data: {
+      capture_id: STATIC_UUIDS.CAPTURE_A,
       critter_id: critter.critter_id,
       capture_location_id: location.location_id,
       release_location_id: location.location_id,

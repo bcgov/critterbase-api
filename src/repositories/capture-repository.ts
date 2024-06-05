@@ -1,13 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { z } from 'zod';
-import {
-  Capture,
-  CaptureCreate,
-  CaptureUpdate,
-  DetailedCapture,
-  DetailedCaptureSchema
-} from '../schemas/capture-schema';
-import { apiError } from '../utils/types';
+import { Capture, CaptureCreate, CaptureUpdate, DetailedCapture } from '../schemas/capture-schema';
 import { Repository } from './base-repository';
 
 /**
@@ -19,7 +11,7 @@ import { Repository } from './base-repository';
  */
 export class CaptureRepository extends Repository {
   /**
-   * Default capture properties, omitting audit columns.
+   * Prisma capture properties, omitting audit columns.
    *
    */
   private _captureProperties = {
@@ -37,7 +29,25 @@ export class CaptureRepository extends Repository {
   };
 
   /**
-   * Get a capture by id.
+   * Prisma location properties, omitting audit columns.
+   *
+   */
+  private _captureLocationProperties = {
+    location_id: true,
+    latitude: true,
+    longitude: true,
+    coordinate_uncertainty: true,
+    coordinate_uncertainty_unit: true,
+    elevation: true,
+    temperature: true,
+    region_env_id: true,
+    region_nr_id: true,
+    wmu_id: true,
+    location_comment: true
+  };
+
+  /**
+   * Get a capture by id with location details.
    *
    * @async
    * @param {string} captureId - Capture primary identifier
@@ -45,113 +55,42 @@ export class CaptureRepository extends Repository {
    * @returns {Promise<DetailedCapture>} Detailed capture
    */
   async getCaptureById(captureId: string): Promise<DetailedCapture> {
-    const result = await this.safeQuery(
-      Prisma.sql`
-        SELECT
-          c.capture_id,
-          c.capture_method,
-          c.capture_date,
-          c.capture_time,
-          c.release_date,
-          c.release_time,
-          c.capture_location_id,
-          c.release_location_id,
-          row_to_json(cl) as capture_location,
-          row_to_json(rl) as release_location,
-          c.capture_comment,
-          c.release_comment
-        FROM capture c
-        JOIN (
-          SELECT
-            l.location_id, l.latitude, l.longitude, l.coordinate_uncertainty,
-            l.region_env_id, l.region_nr_id, l.wmu_id,
-            e.region_env_name, n.region_nr_name, w.wmu_name,
-            l.coordinate_uncertainty_unit, l.elevation, l.temperature, l.location_comment
-          FROM location l
-          LEFT JOIN lk_region_env e ON e.region_env_id = l.region_env_id
-          LEFT JOIN lk_region_nr n ON n.region_nr_id = l.region_nr_id
-          LEFT JOIN lk_wildlife_management_unit w ON w.wmu_id = l.wmu_id
-        ) as cl
-          ON cl.location_id = c.capture_location_id
-        JOIN (
-          SELECT
-            l.location_id, l.latitude, l.longitude, l.coordinate_uncertainty,
-            l.region_env_id, l.region_nr_id, l.wmu_id,
-            e.region_env_name, n.region_nr_name, w.wmu_name,
-            l.coordinate_uncertainty_unit, l.elevation, l.temperature, l.location_comment
-          FROM location l
-          LEFT JOIN lk_region_env e ON e.region_env_id = l.region_env_id
-          LEFT JOIN lk_region_nr n ON n.region_nr_id = l.region_nr_id
-          LEFT JOIN lk_wildlife_management_unit w ON w.wmu_id = l.wmu_id
-        ) as rl
-          ON rl.location_id = c.release_location_id
-        WHERE c.capture_id = ${captureId}::uuid
-        GROUP BY c.capture_id, cl.*, rl.*;`,
-      z.array(DetailedCaptureSchema)
-    );
+    const result = await this.prisma.capture.findUniqueOrThrow({
+      where: {
+        capture_id: captureId
+      },
+      select: {
+        ...this._captureProperties,
+        capture_location_id: false,
+        release_location_id: false,
+        capture_location: { select: this._captureLocationProperties },
+        release_location: { select: this._captureLocationProperties }
+      }
+    });
 
-    if (!result.length) {
-      throw apiError.notFound(`Failed to find capture`, [
-        'CaptureRespository -> getCaptureById',
-        'results had a length of 0'
-      ]);
-    }
-
-    return result[0];
+    return result;
   }
 
   /**
-   * Find all captures of a critter.
+   * Find all captures of a critter with location details.
    *
    * @async
    * @param {string} critterId - critter id.
    * @returns {Promise<DetailedCapture[]>} Detailed captures
    */
   async findCritterCaptures(critterId: string): Promise<DetailedCapture[]> {
-    const result = await this.safeQuery(
-      Prisma.sql`
-        SELECT
-          c.capture_id,
-          c.capture_method_id,
-          c.capture_date,
-          c.capture_time,
-          c.release_date,
-          c.release_time,
-          c.capture_location_id,
-          c.release_location_id,
-          row_to_json(cl) as capture_location,
-          row_to_json(rl) as release_location,
-          c.capture_comment,
-          c.release_comment
-        FROM capture c
-        JOIN (
-          SELECT
-            l.location_id, l.latitude, l.longitude, l.coordinate_uncertainty,
-            l.region_env_id, l.region_nr_id, l.wmu_id,
-            e.region_env_name, n.region_nr_name, w.wmu_name,
-            l.coordinate_uncertainty_unit, l.elevation, l.temperature, l.location_comment
-          FROM location l
-          LEFT JOIN lk_region_env e ON e.region_env_id = l.region_env_id
-          LEFT JOIN lk_region_nr n ON n.region_nr_id = l.region_nr_id
-          LEFT JOIN lk_wildlife_management_unit w ON w.wmu_id = l.wmu_id
-        ) as cl
-          ON cl.location_id = c.capture_location_id
-        JOIN (
-          SELECT
-            l.location_id, l.latitude, l.longitude, l.coordinate_uncertainty,
-            l.region_env_id, l.region_nr_id, l.wmu_id,
-            e.region_env_name, n.region_nr_name, w.wmu_name,
-            l.coordinate_uncertainty_unit, l.elevation, l.temperature, l.location_comment
-          FROM location l
-          LEFT JOIN lk_region_env e ON e.region_env_id = l.region_env_id
-          LEFT JOIN lk_region_nr n ON n.region_nr_id = l.region_nr_id
-          LEFT JOIN lk_wildlife_management_unit w ON w.wmu_id = l.wmu_id
-        ) as rl
-          ON rl.location_id = c.release_location_id
-        WHERE c.critter_id = ${critterId}::uuid
-        GROUP BY c.capture_id, cl.*, rl.*;`,
-      z.array(DetailedCaptureSchema)
-    );
+    const result = await this.prisma.capture.findMany({
+      where: {
+        critter_id: critterId
+      },
+      select: {
+        ...this._captureProperties,
+        capture_location_id: false,
+        release_location_id: false,
+        capture_location: { select: this._captureLocationProperties },
+        release_location: { select: this._captureLocationProperties }
+      }
+    });
 
     return result;
   }
@@ -176,9 +115,11 @@ export class CaptureRepository extends Repository {
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
         critter: { connect: { critter_id: payload.critter_id } },
-        capture_method: { connect: { capture_method_id: payload.capture_method_id } },
-        capture_location: { create: payload.capture_location },
-        release_location: { create: payload.release_location }
+        capture_method: payload.capture_method_id
+          ? { connect: { capture_method_id: payload.capture_method_id } }
+          : undefined,
+        capture_location: payload.capture_location && { create: payload.capture_location },
+        release_location: payload.release_location && { create: payload.release_location }
       },
       select: this._captureProperties
     });
@@ -196,7 +137,6 @@ export class CaptureRepository extends Repository {
     return this.prisma.capture.update({
       where: { capture_id: captureId },
       data: {
-        capture_id: payload.capture_id,
         critter: { connect: { critter_id: payload.critter_id } },
         capture_date: payload.capture_date,
         capture_time: payload.capture_time,
@@ -212,38 +152,24 @@ export class CaptureRepository extends Repository {
   }
 
   /**
-   * Delete a capture and related locations.
+   * Delete capture and related locations.
    *
    * @async
-   * @param {string} captureId - capture id
-   * @returns {Promise<capture>} Deleted capture
+   * @param {string} captureId - capture ids
+   * @returns {Promise<Prisma.BatchPayload>} Deleted capture
    */
   async deleteCapture(captureId: string): Promise<Capture> {
-    return this.transactionHandler(async () => {
-      // Delete the capture + cascade location deletes
-      const capture = await this.prisma.capture.delete({
-        where: {
-          capture_id: captureId
-        },
-        select: this._captureProperties
-      });
+    return this.prisma.capture.delete({ where: { capture_id: captureId }, select: this._captureProperties });
+  }
 
-      //if (capture.capture_location_id) {
-      //  locationIdsSet.add(capture.capture_location_id);
-      //}
-      //
-      //if (capture.release_location_id) {
-      //  locationIdsSet.add(capture.release_location_id);
-      //}
-
-      // Delete the associated locations
-      //await this.prisma.location.deleteMany({
-      //  where: {
-      //    location_id: { in: Array.from(locationIdsSet) }
-      //  }
-      //});
-
-      return capture;
-    });
+  /**
+   * Delete captures and related locations.
+   *
+   * @async
+   * @param {string} captureIds - capture ids
+   * @returns {Promise<Prisma.BatchPayload>} Deleted captures count
+   */
+  async deleteCaptures(captureIds: string[]): Promise<Prisma.BatchPayload> {
+    return this.prisma.capture.deleteMany({ where: { capture_id: { in: captureIds } } });
   }
 }

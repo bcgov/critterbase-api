@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { CaptureRepository } from '../repositories/capture-repository';
 import { Capture, CaptureCreate, CaptureUpdate, DetailedCapture } from '../schemas/capture-schema';
 import { Service } from './base-service';
@@ -85,5 +86,16 @@ export class CaptureService implements Service {
    */
   async deleteCapture(captureId: string): Promise<Capture> {
     return this.repository.deleteCapture(captureId);
+  }
+
+  /**
+   * Delete captures and related locations.
+   *
+   * @async
+   * @param {string} captureIds - capture primary id
+   * @returns {Promise<Capture>} Deleted capture
+   */
+  async deleteMultipleCaptures(captureIds: string[]): Promise<Prisma.BatchPayload> {
+    return this.repository.deleteCaptures(captureIds);
   }
 }

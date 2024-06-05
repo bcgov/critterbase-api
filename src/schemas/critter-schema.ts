@@ -1,8 +1,8 @@
-import { coordinate_uncertainty_unit, critter, frequency_unit, sex } from '@prisma/client';
+import { critter, frequency_unit, sex } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
 import { implement, zodID } from '../utils/zod_helpers';
-import { DetailedCaptureSchema } from './capture-schema';
+import { DetailedCaptureSchema, DetailedLocationSchema } from './capture-schema';
 
 export enum eCritterStatus {
   alive = 'alive',
@@ -111,24 +111,6 @@ export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
  * schema files are created for each service/repo/router
  *
  */
-export const DetailedCritterLocationSchema = z
-  .object({
-    location_id: zodID,
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-    coordinate_uncertainty: z.number().nullable(),
-    coordinate_uncertainty_unit: z.nativeEnum(coordinate_uncertainty_unit).nullable(),
-    region_env_id: zodID.nullable(),
-    region_nr_id: zodID.nullable(),
-    wmu_id: zodID.nullable(),
-    region_env_name: z.string().nullable(),
-    region_nr_name: z.string().nullable(),
-    wmu_name: z.string().nullable(),
-    elevation: z.number().nullable(),
-    temperature: z.number().nullable(),
-    location_comment: z.string().nullable()
-  })
-  .strict();
 
 export const DetailedCritterMarkingSchema = z
   .object({
@@ -161,7 +143,7 @@ export const DetailedCritterMortalitySchema = z
   .object({
     mortality_id: zodID,
     mortality_timestamp: z.coerce.date(),
-    location: DetailedCritterLocationSchema,
+    location: DetailedLocationSchema,
     proximate_cause_of_death_id: zodID.nullable(),
     proximate_cause_of_death_confidence: z.string().nullable(),
     ultimate_cause_of_death_id: zodID.nullable(),
