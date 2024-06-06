@@ -96,6 +96,6 @@ export class CaptureService implements Service {
    * @returns {Promise<Capture>} Deleted capture
    */
   async deleteMultipleCaptures(captureIds: string[]): Promise<Prisma.BatchPayload> {
-    return this.repository.deleteCaptures(captureIds);
+    return this.repository.deleteMultipleCaptures(captureIds);
   }
 }

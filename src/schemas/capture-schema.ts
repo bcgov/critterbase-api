@@ -1,6 +1,6 @@
 import { capture, coordinate_uncertainty_unit } from '@prisma/client';
 import { z } from 'zod';
-import { LocationCreateSchema } from '../api/location/location.utils';
+import { LocationCreateSchema, LocationUpdateSchema } from '../api/location/location.utils';
 import { AuditColumns } from '../utils/types';
 import { DeleteSchema, implement, zodID } from '../utils/zod_helpers';
 
@@ -92,11 +92,11 @@ export const CaptureUpdateSchema = z
   .object({
     capture_id: zodID.optional(),
     critter_id: zodID,
-    capture_method: zodID.nullable(),
+    capture_method_id: zodID.nullish(),
     capture_location_id: zodID.optional(),
     release_location_id: zodID.optional(),
-    capture_location: LocationCreateSchema.optional(),
-    release_location: LocationCreateSchema.optional(),
+    capture_location: LocationUpdateSchema.optional(),
+    release_location: LocationUpdateSchema.optional(),
     capture_date: z.coerce.date(),
     capture_time: z.coerce.date().nullish(),
     release_date: z.coerce.date().nullish(),

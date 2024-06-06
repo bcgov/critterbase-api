@@ -115,10 +115,13 @@ export class CaptureRepository extends Repository {
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
         critter: { connect: { critter_id: payload.critter_id } },
+        // if the capture_method is included: connect to capture
         capture_method: payload.capture_method_id
           ? { connect: { capture_method_id: payload.capture_method_id } }
           : undefined,
+        // if the capture_location included: create
         capture_location: payload.capture_location && { create: payload.capture_location },
+        // if the release_location included: create
         release_location: payload.release_location && { create: payload.release_location }
       },
       select: this._captureProperties
@@ -134,18 +137,51 @@ export class CaptureRepository extends Repository {
    * @returns {Promise<Capture>} Updated capture
    */
   async updateCapture(captureId: string, payload: CaptureUpdate): Promise<Capture> {
+    let releaseLocationUpsert;
+
+    // Get the current capture record to compare location ids for upsert
+    const capture = await this.getCaptureById(captureId);
+
+    if (payload.release_location) {
+      /**
+       * If release and capture are referencing the same location id -> create release location
+       * Why: The release location id is updated to the capture location id if no release details
+       * are provided on creation.
+       */
+      if (capture?.capture_location?.location_id === capture?.release_location?.location_id) {
+        releaseLocationUpsert = { create: payload.release_location };
+        // If release and capture are referencing different location ids -> update existing release location
+      } else {
+        releaseLocationUpsert = {
+          update: { ...payload.release_location, location_id: capture?.release_location?.location_id }
+        };
+      }
+    }
+
     return this.prisma.capture.update({
       where: { capture_id: captureId },
       data: {
-        critter: { connect: { critter_id: payload.critter_id } },
         capture_date: payload.capture_date,
         capture_time: payload.capture_time,
         release_date: payload.release_date,
         release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
-        capture_location: { create: payload.capture_location },
-        release_location: { create: payload.release_location }
+        // connect the capture to the critter
+        critter: { connect: { critter_id: payload.critter_id } },
+        // if the capture_method_id exists connect to the capture record
+        capture_method: payload.capture_method_id
+          ? { connect: { capture_method_id: payload.capture_method_id } }
+          : undefined,
+        // if the capture location included: upsert
+        capture_location: payload.capture_location && {
+          upsert: {
+            create: payload.capture_location,
+            update: { ...payload.capture_location, location_id: capture.capture_location?.location_id }
+          }
+        },
+        // if the release location included: upsert
+        release_location: releaseLocationUpsert
       },
       select: this._captureProperties
     });
@@ -153,6 +189,7 @@ export class CaptureRepository extends Repository {
 
   /**
    * Delete capture and related locations.
+   * Locations are deleted via database `Cascade`.
    *
    * @async
    * @param {string} captureId - capture ids
@@ -164,12 +201,13 @@ export class CaptureRepository extends Repository {
 
   /**
    * Delete captures and related locations.
+   * Locations are deleted via database `Cascade`.
    *
    * @async
    * @param {string} captureIds - capture ids
    * @returns {Promise<Prisma.BatchPayload>} Deleted captures count
    */
-  async deleteCaptures(captureIds: string[]): Promise<Prisma.BatchPayload> {
+  async deleteMultipleCaptures(captureIds: string[]): Promise<Prisma.BatchPayload> {
     return this.prisma.capture.deleteMany({ where: { capture_id: { in: captureIds } } });
   }
 }

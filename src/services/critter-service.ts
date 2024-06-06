@@ -15,6 +15,13 @@ import { ItisService } from './itis-service';
 import { MarkingService } from './marking-service';
 import { MortalityService } from './mortality-service';
 
+type CritterServiceDependencies = {
+  itisService: ItisService;
+  mortalityService: MortalityService;
+  markingService: MarkingService;
+  captureService: CaptureService;
+};
+
 /**
  * Critter Service
  *
@@ -24,7 +31,9 @@ import { MortalityService } from './mortality-service';
  */
 export class CritterService implements Service {
   repository: CritterRepository;
-
+  /**
+   * Service Dependencies
+   */
   itisService: ItisService;
   mortalityService: MortalityService;
   markingService: MarkingService;
@@ -35,13 +44,13 @@ export class CritterService implements Service {
    *
    * @param {CritterRepository} repository - Critter repository dependency.
    */
-  constructor(repository: CritterRepository) {
+  constructor(repository: CritterRepository, services: CritterServiceDependencies) {
     this.repository = repository;
 
-    this.itisService = new ItisService();
-    this.mortalityService = MortalityService.init();
-    this.markingService = MarkingService.init();
-    this.captureService = CaptureService.init();
+    this.itisService = services.itisService;
+    this.mortalityService = services.mortalityService;
+    this.markingService = services.markingService;
+    this.captureService = services.captureService;
   }
 
   /**
@@ -51,7 +60,13 @@ export class CritterService implements Service {
    * @returns {CritterService}
    */
   static init(): CritterService {
-    return new CritterService(new CritterRepository());
+    return new CritterService(new CritterRepository(), {
+      itisService: new ItisService(),
+      mortalityService: MortalityService.init(),
+      markingService: MarkingService.init(),
+      captureService: CaptureService.init()
+      // TODO: fill in missing services once refactor finalized
+    });
   }
 
   /**
