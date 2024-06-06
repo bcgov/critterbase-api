@@ -1,17 +1,17 @@
 import { CritterRepository } from './critter-repository';
 
+import { DetailedCapture } from '../schemas/capture-schema';
 import {
+  CritterCreateRequiredItis,
   CritterUpdate,
   ICritter,
-  CritterCreateRequiredItis,
-  SimilarCritterQuery,
+  IDetailedCritterChild,
+  IDetailedCritterCollectionUnit,
   IDetailedCritterMarking,
   IDetailedCritterMortality,
-  IDetailedCritterQualitativeMeasurement,
-  IDetailedCritterCollectionUnit,
-  IDetailedCritterCapture,
   IDetailedCritterParent,
-  IDetailedCritterChild
+  IDetailedCritterQualitativeMeasurement,
+  SimilarCritterQuery
 } from '../schemas/critter-schema';
 
 describe('xref-repository', () => {
@@ -555,7 +555,7 @@ describe('xref-repository', () => {
     });
 
     it('should find critter captures successfully', async () => {
-      const mockResult: IDetailedCritterCapture[] = [
+      const mockResult: DetailedCapture[] = [
         {
           capture_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
           capture_timestamp: new Date('1970-01-01'),

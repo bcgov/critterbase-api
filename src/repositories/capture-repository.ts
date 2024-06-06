@@ -167,8 +167,11 @@ export class CaptureRepository extends Repository {
         release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
-        // connect the capture to the critter
-        critter: { connect: { critter_id: payload.critter_id } },
+        /**
+         * connect the capture to the critter
+         * Note: Would a capture ever be updated to a different critter?
+         */
+        critter: payload.critter_id ? { connect: { critter_id: payload.critter_id } } : undefined,
         // if the capture_method_id exists connect to the capture record
         capture_method: payload.capture_method_id
           ? { connect: { capture_method_id: payload.capture_method_id } }

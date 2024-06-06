@@ -91,13 +91,13 @@ export const CaptureCreateSchema = z
 export const CaptureUpdateSchema = z
   .object({
     capture_id: zodID.optional(),
-    critter_id: zodID,
+    critter_id: zodID.optional(),
     capture_method_id: zodID.nullish(),
     capture_location_id: zodID.optional(),
     release_location_id: zodID.optional(),
     capture_location: LocationUpdateSchema.optional(),
     release_location: LocationUpdateSchema.optional(),
-    capture_date: z.coerce.date(),
+    capture_date: z.coerce.date().optional(),
     capture_time: z.coerce.date().nullish(),
     release_date: z.coerce.date().nullish(),
     release_time: z.coerce.date().nullish(),
