@@ -6,9 +6,8 @@ import { implement, noAudit, ResponseSchema, zodAudit, zodID } from '../../utils
 import { getLocationOrThrow } from './location.service';
 extendZodWithOpenApi(z);
 
-// Zod Schemas
 /**
- ** Base location schema
+ * Base location schema
  * Note: implements the prisma type to stay in sync with DB.
  */
 const LocationSchema = implement<location>()
@@ -66,105 +65,11 @@ type LocationResponse = z.infer<typeof LocationResponseSchema>;
 
 type LocationBody = z.infer<typeof LocationCreateSchema>;
 
-const commonLocationSelect = Prisma.validator<Prisma.locationArgs>()({
-  select: {
-    latitude: true,
-    longitude: true,
-    coordinate_uncertainty: true,
-    temperature: true,
-    location_comment: true,
-    lk_region_env: {
-      select: {
-        region_env_id: true,
-        region_env_name: true
-      }
-    },
-    lk_region_nr: {
-      select: {
-        region_nr_id: true,
-        region_nr_name: true
-      }
-    },
-    lk_wildlife_management_unit: {
-      select: {
-        wmu_id: true,
-        wmu_name: true
-      }
-    }
-  }
-});
-
-type CommonLocationType = Prisma.locationGetPayload<typeof commonLocationSelect>;
-
-const CommonLocationSchema = implement<CommonLocationType>()
-  .with({
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-    coordinate_uncertainty: z.number().nullable(),
-    temperature: z.number().nullable(),
-    location_comment: z.string().nullable(),
-    lk_region_env: z
-      .object({
-        region_env_id: z.string(),
-        region_env_name: z.string()
-      })
-      .nullable(),
-    lk_region_nr: z
-      .object({
-        region_nr_id: z.string(),
-        region_nr_name: z.string()
-      })
-      .nullable(),
-    lk_wildlife_management_unit: z
-      .object({
-        wmu_id: z.string(),
-        wmu_name: z.string()
-      })
-      .nullable()
-  })
-  .openapi({ description: 'Responds with default location' });
-
-const CommonLocationValidation = CommonLocationSchema.omit({
-  lk_region_env: true,
-  lk_region_nr: true,
-  lk_wildlife_management_unit: true
-}).extend({
-  region_env_id: zodID.nullish(),
-  region_nr_id: zodID.nullish(),
-  wmu_id: zodID.nullish(),
-  region_env_name: z.string().nullish(),
-  region_nr_name: z.string().nullish(),
-  wmu_name: z.string().nullish()
-});
-
-const CommonFormattedLocationSchema = CommonLocationSchema.transform((val) => {
-  const { lk_region_env, lk_region_nr, lk_wildlife_management_unit, ...rest } = val;
-  return {
-    ...rest,
-    region_env_id: lk_region_env?.region_env_id,
-    region_nr_id: lk_region_nr?.region_nr_id,
-    wmu_id: lk_wildlife_management_unit?.wmu_id,
-    region_env_name: lk_region_env?.region_env_name,
-    region_nr_name: lk_region_nr?.region_nr_name,
-    wmu_name: lk_wildlife_management_unit?.wmu_name
-  };
-}).openapi({ description: 'Responds with formatted location' });
-
 const locationIncludes: Prisma.locationInclude = {
   lk_wildlife_management_unit: true,
   lk_region_nr: true,
   lk_region_env: true
 };
 
-export {
-  CommonFormattedLocationSchema,
-  CommonLocationSchema,
-  commonLocationSelect,
-  CommonLocationValidation,
-  LocationCreateSchema,
-  locationIncludes,
-  LocationResponseSchema,
-  LocationSchema,
-  LocationUpdateSchema
-};
-export type { CommonLocationType, LocationBody, LocationResponse };
+export { LocationCreateSchema, locationIncludes, LocationResponseSchema, LocationSchema, LocationUpdateSchema };
+export type { LocationBody, LocationResponse };
