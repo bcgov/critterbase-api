@@ -1,4 +1,4 @@
-import { capture, coordinate_uncertainty_unit } from '@prisma/client';
+import { Prisma, capture, coordinate_uncertainty_unit } from '@prisma/client';
 import { z } from 'zod';
 import { LocationCreateSchema, LocationUpdateSchema } from '../api/location/location.utils';
 import { AuditColumns } from '../utils/types';
@@ -120,3 +120,9 @@ export type Capture = Omit<capture, AuditColumns>; // Omitting audit columns.
 export type CaptureCreate = z.infer<typeof CaptureCreateSchema>;
 export type CaptureUpdate = z.infer<typeof CaptureUpdateSchema>;
 export type DetailedCapture = z.infer<typeof DetailedCaptureSchema>;
+
+/**
+ * Type wrapper for complex prisma location `where` type
+ *
+ */
+export type PrismaCaptureLocationUpsert = Prisma.locationUpdateOneWithoutRelease_locationNestedInput | undefined;

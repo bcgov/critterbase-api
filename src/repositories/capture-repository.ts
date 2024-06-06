@@ -1,5 +1,11 @@
 import { Prisma } from '@prisma/client';
-import { Capture, CaptureCreate, CaptureUpdate, DetailedCapture } from '../schemas/capture-schema';
+import {
+  Capture,
+  CaptureCreate,
+  CaptureUpdate,
+  DetailedCapture,
+  PrismaCaptureLocationUpsert
+} from '../schemas/capture-schema';
 import { Repository } from './base-repository';
 
 /**
@@ -137,7 +143,7 @@ export class CaptureRepository extends Repository {
    * @returns {Promise<Capture>} Updated capture
    */
   async updateCapture(captureId: string, payload: CaptureUpdate): Promise<Capture> {
-    let releaseLocationUpsert;
+    let releaseLocationUpsert: PrismaCaptureLocationUpsert;
 
     // Get the current capture record to compare location ids for upsert
     const capture = await this.getCaptureById(captureId);
