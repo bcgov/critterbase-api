@@ -19,6 +19,8 @@ COPY package*.json ./
 # Install all node modules and copy files into volumne
 FROM base as installer
 
+COPY prisma ./prisma/
+
 RUN npm install
 
 ENV PATH ${HOME}/node_modules/.bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
