@@ -15,7 +15,7 @@ import { ItisService } from './itis-service';
 import { MarkingService } from './marking-service';
 import { MortalityService } from './mortality-service';
 
-type CritterServiceDependencies = {
+type CritterAttributeServices = {
   itisService: ItisService;
   mortalityService: MortalityService;
   markingService: MarkingService;
@@ -44,7 +44,7 @@ export class CritterService implements Service {
    *
    * @param {CritterRepository} repository - Critter repository dependency.
    */
-  constructor(repository: CritterRepository, services: CritterServiceDependencies) {
+  constructor(repository: CritterRepository, services: CritterAttributeServices) {
     this.repository = repository;
 
     this.itisService = services.itisService;
