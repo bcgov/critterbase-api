@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { z } from 'zod';
 import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
 import { BulkCritterCreateSchema, CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
@@ -18,7 +19,6 @@ import {
   FamilyParentCreateBodySchema,
   FamilyParentDeleteSchema
 } from '../family/family.utils';
-import { LocationUpdateSchema } from '../location/location.utils';
 import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
 import {
   QualitativeCreateSchema,

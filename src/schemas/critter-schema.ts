@@ -2,7 +2,8 @@ import { critter, frequency_unit, sex } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
 import { implement, zodID } from '../utils/zod_helpers';
-import { DetailedCaptureSchema, DetailedLocationSchema } from './capture-schema';
+import { DetailedCaptureSchema } from './capture-schema';
+import { LocationSchema } from './location-schema';
 
 export enum eCritterStatus {
   alive = 'alive',
@@ -143,7 +144,7 @@ export const DetailedCritterMortalitySchema = z
   .object({
     mortality_id: zodID,
     mortality_timestamp: z.coerce.date(),
-    location: DetailedLocationSchema,
+    location: LocationSchema.nullable(),
     proximate_cause_of_death_id: zodID.nullable(),
     proximate_cause_of_death_confidence: z.string().nullable(),
     ultimate_cause_of_death_id: zodID.nullable(),

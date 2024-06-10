@@ -3,7 +3,6 @@ import * as artifact from '../api/artifact/artifact.service';
 import * as bulk from '../api/bulk/bulk.service';
 import * as collectionUnit from '../api/collectionUnit/collectionUnit.service';
 import * as family from '../api/family/family.service';
-import * as location from '../api/location/location.service';
 import * as lookup from '../api/lookup/lookup.service';
 import * as marking from '../api/marking/marking.service';
 import * as measurement from '../api/measurement/measurement.service';
@@ -36,7 +35,6 @@ export const db = {
   ...bulk,
   ...collectionUnit,
   ...family,
-  ...location,
   ...lookup,
   ...marking,
   ...measurement,

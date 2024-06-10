@@ -8,17 +8,16 @@ import { CaptureRouter } from './api/capture/capture.router';
 import { CollectionUnitRouter } from './api/collectionUnit/collectionUnit.router';
 import { CritterRouter } from './api/critter/critter.router';
 import { FamilyRouter } from './api/family/family.router';
-import { LocationRouter } from './api/location/location.router';
+import { LookupRouter } from './api/lookup/lookup.router';
 import { MarkingRouter } from './api/marking/marking.router';
 import { MeasurementRouter } from './api/measurement/measurement.router';
 import { MortalityRouter } from './api/mortality/mortality.router';
-import { LookupRouter } from './api/lookup/lookup.router';
 import { UserRouter } from './api/user/user.router';
 import { XrefRouter } from './api/xref/xref.router';
+import { routes } from './utils/constants';
 import { ICbDatabase } from './utils/database';
 import { auth, errorHandler, errorLogger, logger } from './utils/middleware';
 import { apiError } from './utils/types';
-import { routes } from './utils/constants';
 
 export const makeApp = (db: ICbDatabase) => {
   const app = express();
@@ -33,7 +32,6 @@ export const makeApp = (db: ICbDatabase) => {
 
   app.use(auth);
   app.use(routes.critters, CritterRouter(db));
-  app.use(routes.locations, LocationRouter(db));
   app.use(routes.markings, MarkingRouter(db));
   app.use(routes.users, UserRouter(db));
   app.use(routes.collection_units, CollectionUnitRouter(db));

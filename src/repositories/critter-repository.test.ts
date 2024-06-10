@@ -1,6 +1,5 @@
 import { CritterRepository } from './critter-repository';
 
-import { DetailedCapture } from '../schemas/capture-schema';
 import {
   CritterCreateRequiredItis,
   CritterUpdate,
@@ -8,7 +7,6 @@ import {
   IDetailedCritterChild,
   IDetailedCritterCollectionUnit,
   IDetailedCritterMarking,
-  IDetailedCritterMortality,
   IDetailedCritterParent,
   IDetailedCritterQualitativeMeasurement,
   SimilarCritterQuery
@@ -541,105 +539,7 @@ describe('xref-repository', () => {
       mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
 
       const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.findCritterMarkings('aaaa');
-
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('findCritterCaptures', () => {
-    beforeEach(() => {
-      mockPrismaClient = {
-        $queryRaw: jest.fn()
-      };
-    });
-
-    it('should find critter captures successfully', async () => {
-      const mockResult: DetailedCapture[] = [
-        {
-          capture_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          capture_timestamp: new Date('1970-01-01'),
-          release_timestamp: null,
-          capture_location: {
-            location_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-            latitude: null,
-            longitude: null,
-            coordinate_uncertainty: null,
-            coordinate_uncertainty_unit: 'm',
-            wmu_id: '1',
-            region_nr_id: '1',
-            region_env_id: '1',
-            elevation: null,
-            temperature: null,
-            location_comment: null
-          },
-          release_location: {
-            location_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-            latitude: null,
-            longitude: null,
-            wmu_id: '1',
-            region_nr_id: '1',
-            region_env_id: '1',
-            coordinate_uncertainty: null,
-            coordinate_uncertainty_unit: 'm',
-            elevation: null,
-            temperature: null,
-            location_comment: null
-          },
-          capture_comment: 'howdy',
-          release_comment: 'seeya'
-        }
-      ];
-
-      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
-
-      const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.findCritterCaptures('aaaa');
-
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('findCritterMortalities', () => {
-    beforeEach(() => {
-      mockPrismaClient = {
-        $queryRaw: jest.fn()
-      };
-    });
-
-    it('should find critter mortalities successfully', async () => {
-      const mockResult: IDetailedCritterMortality[] = [
-        {
-          mortality_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          mortality_timestamp: new Date('1970-01-01'),
-          location: {
-            location_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-            latitude: null,
-            longitude: null,
-            wmu_id: '1',
-            region_nr_id: '1',
-            region_env_id: '1',
-            coordinate_uncertainty: null,
-            coordinate_uncertainty_unit: 'm',
-            elevation: null,
-            temperature: null,
-            location_comment: null
-          },
-          proximate_cause_of_death_category: null,
-          proximate_cause_of_death_reason: null,
-          proximate_cause_of_death_confidence: null,
-          ultimate_cause_of_death_category: null,
-          ultimate_cause_of_death_reason: null,
-          mortality_comment: null,
-          proximate_predated_by_itis_tsn: null,
-          ultimate_predated_by_itis_tsn: null
-        }
-      ];
-
-      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
-
-      const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.findCritterMortalities('aaaa');
+      const result = await critterRepository.markingService.findCritterMarkings('aaaa');
 
       expect(result).toEqual(mockResult);
     });

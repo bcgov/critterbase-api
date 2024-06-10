@@ -13,7 +13,14 @@ const deleteCapture = jest.fn();
 const deleteCaptures = jest.fn();
 const createCapture = jest.fn();
 
-const captureService = { getCaptureById, updateCapture, deleteCapture, deleteCaptures, createCapture };
+const captureService = {
+  getCaptureById,
+  updateCapture,
+  deleteCapture,
+  deleteCaptures,
+  createCapture,
+  findCritterCaptures
+};
 
 const request = supertest(
   makeApp({
@@ -59,7 +66,7 @@ const CAPTURE_WITH_LOCATION = {
 };
 
 beforeEach(() => {
-  findCritterCaptures.mockResolvedValue(CAPTURE);
+  findCritterCaptures.mockResolvedValue([CAPTURE]);
   getCaptureById.mockResolvedValue(CAPTURE);
   updateCapture.mockResolvedValue(CAPTURE);
   deleteCapture.mockResolvedValue(CAPTURE);

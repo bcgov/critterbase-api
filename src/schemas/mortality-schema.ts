@@ -2,7 +2,7 @@ import { cod_confidence, mortality, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
 import { DeleteSchema, implement, noAudit, zodID } from '../utils/zod_helpers';
-import { LocationBody, LocationCreateSchema, LocationUpdateSchema } from '../api/location/location.utils';
+import { LocationCreate, LocationCreateSchema, LocationUpdate, LocationUpdateSchema } from './location-schema';
 
 /**
  * Mortality base schema (includes audit columns).
@@ -50,7 +50,7 @@ const MortalityDetailedSchema = MortalitySchema.extend({
  */
 const MortalityUpdateSchema = implement<
   Omit<Prisma.mortalityUncheckedUpdateManyInput, AuditColumns> & {
-    location?: LocationBody;
+    location?: LocationUpdate;
   }
 >().with(
   MortalitySchema.omit({
@@ -66,7 +66,7 @@ const MortalityUpdateSchema = implement<
  */
 const MortalityCreateSchema = implement<
   Omit<Prisma.mortalityCreateManyInput, AuditColumns> & {
-    location?: LocationBody;
+    location?: LocationCreate;
   }
 >().with(
   MortalitySchema.omit({ ...noAudit })
@@ -97,11 +97,11 @@ type MortalityDetailed = z.infer<typeof MortalityDetailedSchema>;
 
 export {
   MortalityCreate,
-  MortalityUpdate,
   MortalityCreateSchema,
-  MortalityUpdateSchema,
-  MortalitySchema,
   MortalityDeleteSchema,
+  MortalityDetailed,
   MortalityDetailedSchema,
-  MortalityDetailed
+  MortalitySchema,
+  MortalityUpdate,
+  MortalityUpdateSchema
 };
