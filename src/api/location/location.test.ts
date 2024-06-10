@@ -1,24 +1,24 @@
-import { apiError } from '../../utils/types';
+import { location } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
+import { apiError } from '../../utils/types';
 import {
-  getLocationOrThrow as _getLocationOrThrow,
-  getAllLocations as _getAllLocations,
-  deleteLocation as _deleteLocation,
   createLocation as _createLocation,
+  deleteLocation as _deleteLocation,
+  getAllLocations as _getAllLocations,
+  getLocationOrThrow as _getLocationOrThrow,
   updateLocation as _updateLocation
 } from './location.service';
 import {
   CommonFormattedLocationSchema,
-  LocationResponse,
-  LocationBody,
   CommonLocationType,
+  LocationBody,
+  LocationResponse,
   LocationResponseSchema
 } from './location.utils';
-import { randomUUID } from 'crypto';
-import { location } from '@prisma/client';
 
 // Mock Location Objects
 const ID = randomUUID();

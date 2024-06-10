@@ -2,10 +2,13 @@
 import { sex } from '.prisma/client';
 import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit } from '@prisma/client';
 import express, { Request, Response } from 'express';
+import { eCritterStatus } from '../../schemas/critter-schema';
 import { prisma } from '../../utils/constants';
+import { ICbDatabase } from '../../utils/database';
 import { formatParse, getFormat } from '../../utils/helper_functions';
 import { catchErrors } from '../../utils/middleware';
 import {
+  captureMethodsFormats,
   codFormats,
   collectionUnitCategoriesFormats,
   colourFormats,
@@ -15,46 +18,69 @@ import {
   regionNrFormats,
   wmuFormats
 } from './lookup.utils';
-import { ICbDatabase } from '../../utils/database';
-import { eCritterStatus } from '../../schemas/critter-schema';
 
 export const LookupRouter = (_db: ICbDatabase) => {
   const lookupRouter = express.Router();
   const order = 'asc';
 
   /**
-   ** Enum lookups
+   * Critter sex
+   * @example 'Male' or 'Female'
    */
   lookupRouter.get(
     '/enum/sex',
     catchErrors(async (_req: Request, res: Response) => res.status(200).json(Object.keys(sex)))
   );
+
+  /**
+   * Critter life status
+   * @example 'alive' or 'mortality'
+   */
   lookupRouter.get(
     '/enum/critter-status',
     catchErrors(async (_req: Request, res: Response) =>
       res.status(200).json([eCritterStatus.alive, eCritterStatus.mortality])
     )
   );
+
+  /**
+   * Cause of death confidence
+   * @example 'Probable' or 'Definite'
+   */
   lookupRouter.get(
     '/enum/cod-confidence',
     catchErrors(async (_req: Request, res: Response) => res.status(200).json(Object.keys(cod_confidence)))
   );
 
+  /**
+   * Coordinate uncertainty units
+   * @example 'm' ie: meters
+   */
   lookupRouter.get(
     '/enum/coordinate-uncertainty-unit',
     catchErrors(async (_req: Request, res: Response) => res.status(200).json(Object.keys(coordinate_uncertainty_unit)))
   );
+
+  /**
+   * Frequency units
+   * @example 'Hz' or 'KHz'
+   */
   lookupRouter.get(
     '/enum/frequency-units',
     catchErrors(async (_req: Request, res: Response) => res.status(200).json(Object.keys(frequency_unit)))
   );
+
+  /**
+   * Measurement units
+   * @example 'millimeter' or 'killogram'
+   */
   lookupRouter.get(
     '/enum/measurement-units',
     catchErrors(async (_req: Request, res: Response) => res.status(200).json(Object.keys(measurement_unit)))
   );
 
   /**
-   * * Lookup tables
+   * Colours
    */
   lookupRouter.get(
     '/colours',
@@ -63,6 +89,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(colours);
     })
   );
+
+  /**
+   * ENV Regions
+   */
   lookupRouter.get(
     '/region-envs',
     catchErrors(async (req: Request, res: Response) => {
@@ -70,6 +100,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(envs);
     })
   );
+
+  /**
+   * NR Regions
+   */
   lookupRouter.get(
     '/region-nrs',
     catchErrors(async (req: Request, res: Response) => {
@@ -81,6 +115,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(nr);
     })
   );
+
+  /**
+   * Wildlife Management Units
+   */
   lookupRouter.get(
     '/wmus',
     catchErrors(async (req: Request, res: Response) => {
@@ -95,6 +133,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(wmu);
     })
   );
+
+  /**
+   * Cause of deaths
+   */
   lookupRouter.get(
     '/cods',
     catchErrors(async (req: Request, res: Response) => {
@@ -106,6 +148,11 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(cod);
     })
   );
+
+  /**
+   * Marking Materials
+   *
+   */
   lookupRouter.get(
     '/marking-materials',
     catchErrors(async (req: Request, res: Response) => {
@@ -117,6 +164,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(materials);
     })
   );
+
+  /**
+   * Marking types
+   */
   lookupRouter.get(
     '/marking-types',
     catchErrors(async (req: Request, res: Response) => {
@@ -128,6 +179,10 @@ export const LookupRouter = (_db: ICbDatabase) => {
       res.status(200).json(materials);
     })
   );
+
+  /**
+   * Collection Unit Categories
+   */
   lookupRouter.get(
     '/collection-unit-categories',
     catchErrors(async (req: Request, res: Response) => {
@@ -137,6 +192,23 @@ export const LookupRouter = (_db: ICbDatabase) => {
           orderBy: { category_name: order }
         }),
         collectionUnitCategoriesFormats
+      );
+      res.status(200).json(materials);
+    })
+  );
+
+  /**
+   * Capture Methods
+   */
+  lookupRouter.get(
+    '/capture-methods',
+    catchErrors(async (req: Request, res: Response) => {
+      const materials = await formatParse(
+        getFormat(req),
+        prisma.lk_capture_method.findMany({
+          orderBy: { method_name: order }
+        }),
+        captureMethodsFormats
       );
       res.status(200).json(materials);
     })
