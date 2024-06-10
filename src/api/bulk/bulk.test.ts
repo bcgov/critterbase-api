@@ -21,19 +21,20 @@ const appendDefaultCOD = jest.fn();
 const deleteMarking = jest.fn();
 const deleteCollectionUnit = jest.fn();
 const patchTsnAndScientificName = jest.fn();
+const deleteMultipleCaptures = jest.fn().mockResolvedValue({ count: 1 });
 
 const db: any = {
   bulkCreateData,
   bulkUpdateData,
   bulkDeleteData,
-  updateCapture,
   updateMortality,
   appendEnglishTaxonAsUUID,
   appendEnglishMarkingsAsUUID,
   deleteMarking,
   deleteCollectionUnit,
   itisService: { patchTsnAndScientificName },
-  mortalityService: { appendDefaultCOD, updateMortality }
+  mortalityService: { appendDefaultCOD, updateMortality },
+  captureService: { updateCapture, deleteMultipleCaptures }
 };
 
 const request = supertest(makeApp(db));
@@ -403,10 +404,17 @@ describe('API: Bulk', () => {
           itis_scientific_name: 'Biggus Moosus'
         });
         const body = {
-          critters: [CRITTER],
+          critters: [{ critter_id: CRITTER_ID, animal_id: 'steve', sex: 'Male', itis_tsn: 123456 }],
           collections: [COLLECTION],
           locations: [LOCATION],
-          captures: [CAPTURE],
+          captures: [
+            {
+              capture_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              critter_id: CRITTER_ID,
+              capture_method_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              capture_date: new Date()
+            }
+          ],
           mortalities: [MORTALITY],
           markings: [MARKING],
           quantitative_measurements: [],
@@ -427,12 +435,19 @@ describe('API: Bulk', () => {
     describe('PATCH /api/bulk', () => {
       it('should return status 200', async () => {
         const body = {
-          critters: [CRITTER],
-          collections: [COLLECTION, { ...COLLECTION, _delete: true }],
+          critters: [{ critter_id: CRITTER_ID, animal_id: 'steve', sex: 'Male', itis_tsn: 123456 }],
+          collections: [COLLECTION],
           locations: [LOCATION],
-          captures: [CAPTURE],
+          captures: [
+            {
+              capture_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              critter_id: CRITTER_ID,
+              capture_method_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              capture_date: new Date()
+            }
+          ],
           mortalities: [MORTALITY],
-          markings: [MARKING, { ...MARKING, _delete: true }],
+          markings: [MARKING],
           quantitative_measurements: [],
           qualitative_measurements: [],
           families: { families: [], parents: [], children: [] }

@@ -3,12 +3,19 @@ import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { loginUser } from '../api/access/access.service';
 import { setUserContext } from '../api/user/user.service';
-import { AuthLoginSchema } from '../api/user/user.utils';
 import { authenticateRequest } from '../authentication/auth';
 import { IS_TEST, NO_AUTH } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
 
+/**
+ * Express request handler callback
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<Response>}
+ */
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
 /**
@@ -70,19 +77,43 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  /**
+   * Zod validation errors
+   * @description Incorrect request body or params
+   *
+   */
   if (err instanceof ZodError) {
     return res.status(400).json({ error: 'Zod validation failed.', issues: err.issues });
   }
+  /**
+   * ApiError
+   * @description Manually thrown errors from repository / service methods
+   */
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message, issues: err.errors });
   }
+  /**
+   * Known prisma errors
+   * @description Database constraint failed
+   *
+   */
   if (err instanceof PrismaClientKnownRequestError) {
     const { status, error } = prismaErrorMsg(err);
     return res.status(status).json({ error, issues: [err.meta] });
   }
+  /**
+   * Prisma Validation Errors
+   * @description Incorrect raw prisma query syntax
+   *
+   */
   if (err instanceof PrismaClientValidationError) {
     return res.status(500).json({ error: 'Prisma query syntax error', issues: ['View logs'] });
   }
+  /**
+   * Error
+   * @description Fallback for all other types of errors
+   *
+   */
   if (err instanceof Error) {
     return res.status(400).json({ error: err.message || 'Unknown error' });
   }
@@ -99,17 +130,43 @@ const errorHandler = (
  * @returns {Promise<void>}
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
+  /**
+   * Bypass if NODE_ENV is `TEST` or AUTHETICATE is 'FALSE'
+   */
   if (IS_TEST || NO_AUTH) {
     return next();
   }
+  /**
+   * Authenticate the incomming request via Bearer token
+   */
   const kc = await authenticateRequest(req);
-  const parsed = AuthLoginSchema.parse({
-    keycloak_uuid: kc.keycloak_uuid,
-    system_name: kc.system_name
-  });
-  await loginUser(parsed);
-  console.log(JSON.stringify(kc));
+  /**
+   * Login the user to critterbase
+   * Note: User needs to already exist
+   *
+   */
+  const user = await loginUser({ keycloak_uuid: kc.keycloak_uuid });
+  /**
+   * Set the user context in the database
+   * Note: This populates the audit columns for all subsequent requests
+   *
+   */
   await setUserContext(kc.keycloak_uuid, kc.system_name);
+  /**
+   * Log the important user details
+   *
+   */
+  console.log(
+    JSON.stringify({
+      user_identifier: user.user_identifier,
+      keycloak_uuid: user?.keycloak_uuid,
+      user_id: user.user_id
+    })
+  );
+  /**
+   * Pass the request to the next request handler
+   *
+   */
   next();
 });
 
