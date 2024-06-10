@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/constants';
 import type { user } from '@prisma/client';
-import { UserCreateInput, UserUpdateInput } from './user.utils';
+import { UserCreateInput, UserUpdateInput } from '../../schemas/user-schema';
 import { apiError } from '../../utils/types';
 
 /**

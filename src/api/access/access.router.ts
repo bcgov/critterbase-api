@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { catchErrors } from '../../utils/middleware';
-import { UserCreateBodySchema } from '../user/user.utils';
+import { UserCreateBodySchema } from '../../schemas/user-schema';
 import swaggerUIExpress from 'swagger-ui-express';
 import { Prisma } from '@prisma/client';
 import { yaml } from '../../swagger';

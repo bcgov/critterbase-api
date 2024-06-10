@@ -1,7 +1,7 @@
 import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
 import { zodID } from '../../utils/zod_helpers';
-import { UserCreateBodySchema, UserUpdateBodySchema, SwagUserSchema } from './user.utils';
+import { UserCreateBodySchema, UserUpdateBodySchema, SwagUserSchema } from '../../schemas/user-schema';
 import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 import { routes } from '../../utils/constants';
 

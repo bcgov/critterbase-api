@@ -60,8 +60,8 @@ class apiError extends Error {
   /**
    ** Authorization headers are missing or incorrect
    */
-  static unauthorized(message: string) {
-    return new apiError(message, 401, 'unauthorized');
+  static unauthorized(message: string, errors?: CustomError[]) {
+    return new apiError(message, 401, 'unauthorized', errors);
   }
 
   /**

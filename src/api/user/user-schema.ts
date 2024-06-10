@@ -1,7 +1,7 @@
 import { Prisma, user } from '.prisma/client';
 import { z } from 'zod';
-import { AuditColumns } from '../../utils/types';
-import { implement, noAudit, nonEmpty, zodAudit, zodID } from '../../utils/zod_helpers';
+import { AuditColumns } from '../utils/types';
+import { implement, noAudit, nonEmpty, zodAudit, zodID } from '../utils/zod_helpers';
 
 // Types
 type UserCreateInput = z.infer<typeof UserCreateBodySchema>;
