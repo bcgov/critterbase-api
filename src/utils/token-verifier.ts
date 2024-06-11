@@ -15,12 +15,14 @@ interface ITokenVerifierConfig {
    * Token issuer ie: `https://dev.loginproxy.gov.bc.ca/auth/realms/standard`
    */
   tokenIssuer: string;
+
+  allowedAudiences: string[];
 }
 
 /**
  * @export
  * @class TokenVerifier
- * @description Parse and verify a JWT token (authorization header) against its issuer.
+ * @description Verify a JWT token against its issuer.
  */
 export class TokenVerifier {
   _tokenClient: JwksClient;
@@ -147,7 +149,7 @@ export class TokenVerifier {
    * @throws {apiError} - If unable to correctly verify token against token issuer
    * @returns {Promise<JwtPayload>} Jwt Token
    */
-  async getVerifiedToken<T extends JwtPayload>(authHeader: string): Promise<JwtPayload> {
+  async getVerifiedToken<T extends JwtPayload>(authHeader: string): Promise<T> {
     // Strip the bearer token from the auth header
     const bearerToken = this._getBearerTokenFromAuthHeader(authHeader);
 

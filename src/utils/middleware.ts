@@ -97,6 +97,7 @@ const errorHandler = (
  * @returns {void}
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
+  // If running test suite or authentication disabled: skip
   if (IS_TEST || NO_AUTH) {
     return next();
   }

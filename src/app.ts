@@ -29,9 +29,9 @@ export const makeApp = (db: ICbDatabase) => {
 
   app.use(logger);
 
-  app.use(routes.home, AccessRouter(db));
+  app.use(routes.home, AccessRouter(db)); // Accessible without authentication
 
-  app.use(auth);
+  app.use(auth); // All routers below this point require authentication
   app.use(routes.critters, CritterRouter(db));
   app.use(routes.locations, LocationRouter(db));
   app.use(routes.markings, MarkingRouter(db));

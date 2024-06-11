@@ -1,23 +1,12 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { Request } from 'express';
 import { apiError } from '../utils/types';
-import { JwtPayload } from 'jsonwebtoken';
 import { TokenVerifier } from '../utils/token-verifier';
 import { AuthorizationHeadersSchema } from '../utils/zod_helpers';
 import { ZodError } from 'zod';
 import { AuthorizedUser } from '../schemas/user-schema';
-
-const KEYCLOAK_URL = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/certs`;
-const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}`;
-const ALLOWED_AUDIENCES = String(process.env.ALLOWED_AUD).split(' ');
-
-type BCGovJwtPayload = JwtPayload & {
-  idir_user_guid?: string;
-  bceid_user_guid?: string;
-  bceid_business_guid?: string;
-  idir_username?: string;
-  bceid_username?: string;
-};
+import { KeycloakJwtPayload, KeycloakTokenParser } from '../utils/keycloak-token-parser';
+import { ALLOWED_AUDIENCES, KEYCLOAK_ISSUER, KEYCLOAK_URL } from '../utils/constants';
 
 /**
  * Authenticate the request's bearer token (JWT), audience and user header.
@@ -30,25 +19,29 @@ type BCGovJwtPayload = JwtPayload & {
 export const authenticateRequest = async function (req: Request): Promise<AuthorizedUser> {
   const tokenService = new TokenVerifier({
     tokenURI: KEYCLOAK_URL,
-    tokenIssuer: KEYCLOAK_ISSUER
+    tokenIssuer: KEYCLOAK_ISSUER,
+    allowedAudiences: ALLOWED_AUDIENCES
   });
 
   try {
     // Parse authorization and user object from headers
-    const { authorization, user } = AuthorizationHeadersSchema.parse(req.headers);
+    const { authorization } = AuthorizationHeadersSchema.parse(req.headers);
 
     // Retrive verified token from authorization header (Bearer token)
-    const verifiedToken = await tokenService.getVerifiedToken<BCGovJwtPayload>(authorization);
+    const verifiedToken = await tokenService.getVerifiedToken<KeycloakJwtPayload>(authorization);
 
-    // Validate the token audience is allowed in ENV variable (ALLOWED_AUD): space delimited list
+    // Validate the token audience is allowed
     if (typeof verifiedToken.aud !== 'string' || !ALLOWED_AUDIENCES.includes(verifiedToken.aud)) {
-      throw apiError.forbidden(`Token audience not allowed: '${verifiedToken.aud}'`);
+      throw new apiError(`Token audience not allowed`);
     }
 
+    // Parse the details from the keycloak token
+    const keycloakToken = new KeycloakTokenParser(verifiedToken);
+
     const authorizedUser = {
-      keycloak_uuid: user.keycloak_guid.toUpperCase(),
-      user_identifier: user.username,
-      system_name: String(verifiedToken.clientId)
+      keycloak_uuid: keycloakToken.id,
+      user_identifier: keycloakToken.username,
+      system_name: keycloakToken.system
     };
 
     console.info(`(${authorizedUser.system_name}) ${authorizedUser.user_identifier}:${authorizedUser.keycloak_uuid}`);
