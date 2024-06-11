@@ -145,6 +145,11 @@ const XrefTaxonCollectionCategorySchema = implement<xref_collection_unit>().with
   ...zodAudit
 });
 
+export const AuthorizationHeadersSchema = z.object({
+  authorization: z.string(),
+  user: z.object({ keycloak_guid: z.string(), username: z.string() })
+});
+
 type IResponseSchema = z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny> | z.ZodTypeAny;
 export type { IResponseSchema };
 
