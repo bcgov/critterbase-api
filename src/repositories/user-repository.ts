@@ -20,7 +20,7 @@ export class UserRepository extends Repository {
    * @param {CreateUser} user - User data
    * @returns {User} Critterbase user
    */
-  async createUser(user: CreateUser): Promise<User> {
+  async createOrGetUser(user: CreateUser) {
     const existingUser = await this.prisma.user.findFirst({
       where: {
         keycloak_uuid: user.keycloak_uuid
@@ -29,10 +29,14 @@ export class UserRepository extends Repository {
     });
 
     if (existingUser) {
-      return existingUser;
+      // If querying by keycloak_uuid is successfull - keycloak_uuid is defined
+      return existingUser as UserWithKeycloakUuid;
     }
 
-    return this.prisma.user.create({ data: user });
+    const newUser = await this.prisma.user.create({ data: user, select: this._userProperties });
+
+    // If creating a user is successfull with CreateUser payload - keycloak_uuid is defined
+    return newUser as UserWithKeycloakUuid;
   }
 
   /**
@@ -104,7 +108,7 @@ export class UserRepository extends Repository {
    * @param {string} userId - The uuid / primary key for the user
    * @returns {User}
    */
-  async deleteUser(userId: string): Promise<User> {
+  async deleteUserById(userId: string): Promise<User> {
     return this.prisma.user.delete({
       where: {
         user_id: userId

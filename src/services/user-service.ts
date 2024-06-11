@@ -1,5 +1,5 @@
 import { UserRepository } from '../repositories/user-repository';
-import { CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
+import { CreateUser, AuthorizedUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
 import { apiError } from '../utils/types';
 import { Service } from './base-service';
 
@@ -32,8 +32,8 @@ export class UserService implements Service {
    * @param {CreateUser} user - User data
    * @returns {User} Critterbase user
    */
-  async createUser(user: CreateUser): Promise<User> {
-    return this.createUser(user);
+  async createOrGetUser(user: CreateUser): Promise<User> {
+    return this.repository.createOrGetUser(user);
   }
 
   /**
@@ -43,7 +43,7 @@ export class UserService implements Service {
    * @returns {User} Critterbase user
    */
   async upsertUser(user: CreateUser): Promise<User> {
-    return this.upsertUser(user);
+    return this.repository.upsertUser(user);
   }
 
   /**
@@ -53,7 +53,7 @@ export class UserService implements Service {
    * @returns {User[]} All critterbase users
    */
   async getUsers(): Promise<User[]> {
-    return this.getUsers();
+    return this.repository.getUsers();
   }
 
   /**
@@ -64,7 +64,7 @@ export class UserService implements Service {
    * @returns {User}
    */
   async getUserById(userId: string): Promise<User> {
-    return this.getUserById(userId);
+    return this.repository.getUserById(userId);
   }
 
   /**
@@ -76,7 +76,7 @@ export class UserService implements Service {
    * @returns {User}
    */
   async updateUser(userId: string, user: UpdateUser): Promise<User> {
-    return this.updateUser(userId, user);
+    return this.repository.updateUser(userId, user);
   }
 
   /**
@@ -87,8 +87,8 @@ export class UserService implements Service {
    * @param {string} userId - The uuid / primary key for the user
    * @returns {User}
    */
-  async deleteUser(userId: string): Promise<User> {
-    return this.deleteUser(userId);
+  async deleteUserById(userId: string): Promise<User> {
+    return this.repository.deleteUserById(userId);
   }
 
   /**
@@ -100,7 +100,7 @@ export class UserService implements Service {
    * @returns {Promise<void>}
    */
   async setDatabaseUserContext(keycloakUuid: string, systemName: string): Promise<void> {
-    return this.setDatabaseUserContext(keycloakUuid, systemName);
+    return this.repository.setDatabaseUserContext(keycloakUuid, systemName);
   }
 
   /**
@@ -120,15 +120,18 @@ export class UserService implements Service {
    * Note: The database context allows subsequent requests to populate the audit columns
    *
    * @async
-   * @param {string} keycloakUuid - Keycloak primary identifier
-   * @param {string} systemName - System name
+   * @param {AuthorizedUser} payload - User to login
    * @throws {apiError.unauthorized} - User is unauthorized
    * @returns {Promise<void>}
    */
-  async loginUser(keycloakUuid: string, systemName: string): Promise<void> {
+  async loginUser(payload: AuthorizedUser): Promise<void> {
     try {
-      const user = await this.getUserByKeycloakUuid(keycloakUuid);
-      await this.setDatabaseUserContext(user.keycloak_uuid, systemName);
+      const user = await this.repository.createOrGetUser({
+        keycloak_uuid: payload.keycloak_uuid,
+        user_identifier: payload.user_identifier
+      });
+
+      await this.repository.setDatabaseUserContext(user.keycloak_uuid, payload.system_name);
     } catch (err) {
       throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', err]);
     }

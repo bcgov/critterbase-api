@@ -38,6 +38,12 @@ export const CreateUserSchema = z
   .strict();
 
 /**
+ * Authorized user schema
+ *
+ */
+export const AuthorizedUserSchema = CreateUserSchema.extend({ system_name: z.string() }).strict();
+
+/**
  * Update user schema
  *
  */
@@ -65,3 +71,4 @@ export type UserWithKeycloakUuid = z.infer<typeof UserWithKeycloakUuidSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
 export type LoginCredentials = z.infer<typeof AuthLoginSchema>;
+export type AuthorizedUser = z.infer<typeof AuthorizedUserSchema>;
