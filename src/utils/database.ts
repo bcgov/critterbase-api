@@ -6,6 +6,7 @@ import * as collectionUnit from '../api/collectionUnit/collectionUnit.service';
 import * as family from '../api/family/family.service';
 import * as location from '../api/location/location.service';
 import * as lookup from '../api/lookup/lookup.service';
+import * as marking from '../api/marking/marking.service';
 import * as measurement from '../api/measurement/measurement.service';
 import { MortalityService } from '../services/mortality-service';
 import { CritterService } from '../services/critter-service';
@@ -49,6 +50,7 @@ export const db = {
   ...location,
   ...lookup,
   ...measurement,
+  ...marking,
   // NEW
   userService,
   mortalityService,

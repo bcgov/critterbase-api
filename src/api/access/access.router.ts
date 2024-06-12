@@ -5,17 +5,14 @@ import { Prisma } from '@prisma/client';
 import { yaml } from '../../swagger';
 import express from 'express';
 import { ICbDatabase } from '../../utils/database';
-import { authenticateRequest } from '../../authentication/auth';
-import { CreateUserSchema } from '../../schemas/user-schema';
 
+/**
+ * Access Router
+ *
+ * @description Endpoints without authentication
+ */
 export const AccessRouter = (db: ICbDatabase) => {
   const accessRouter = express.Router();
-
-  /**
-   * Swagger API documentation.
-   *
-   */
-  accessRouter.use('/swagger', swaggerUIExpress.serve, swaggerUIExpress.setup(yaml));
 
   /**
    * Welcome to Critterbase home endpoint.
@@ -26,21 +23,15 @@ export const AccessRouter = (db: ICbDatabase) => {
   });
 
   /**
-   * Signup endpoint
+   * Swagger API documentation.
    *
    */
-  accessRouter.post(
-    '/signup',
-    catchErrors(async (req: Request, res: Response) => {
-      const authUser = await authenticateRequest(req);
+  accessRouter.use('/swagger', swaggerUIExpress.serve, swaggerUIExpress.setup(yaml));
 
-      await db.createUser(parsedUser);
-
-      const contextUserId = await db.setUserContext(authUser.keycloak_uuid, authUser.system_name);
-      return res.status(201).json({ user_id: contextUserId }).end();
-    })
-  );
-
+  /**
+   * Get table types
+   *
+   */
   accessRouter.get(
     '/types/:model',
     catchErrors(async (req: Request, res: Response) => {
