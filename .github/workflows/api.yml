@@ -13,27 +13,22 @@ jobs:
           cache: "npm"
 
       - name: Create ENV file
-        run: touch .env
+        run: touch .env && yes | make env
 
-      - name: Populate ENV values
-        run: yes | make env
-
-      - name: Cache docker images
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          key: docker-${{ runner.os }}-${{ hashFiles('docker-compose.yml') }}
+      - name: Clean containers
+        run: make clean
 
       - name: Build containers (db, db_setup, api)
         run: make build-backend
 
       - name: Run database container
-        run: docker-compose -f docker-compose.yml up -d db
+        run: docker-compose -f docker-compose.yml up -d critterbase-db
 
       - name: Run database setup container
-        run: docker-compose -f docker-compose.yml up --exit-code-from db_setup
+        run: docker-compose -f docker-compose.yml up --exit-code-from critterbase-db_setup
 
       - name: Run API container
-        run: docker-compose -f docker-compose.yml up -d api
+        run: docker-compose -f docker-compose.yml up -d critterbase-api
 
       - name: Check database health
         uses: stringbean/docker-healthcheck-action@v1

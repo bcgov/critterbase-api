@@ -169,7 +169,7 @@ export const DetailedCritterMortalitySchema = z
   .object({
     mortality_id: zodID,
     mortality_timestamp: z.coerce.date(),
-    location: DetailedCritterLocationSchema,
+    location: DetailedCritterLocationSchema.nullable(),
     proximate_cause_of_death_id: zodID.nullable(),
     proximate_cause_of_death_confidence: z.string().nullable(),
     ultimate_cause_of_death_id: zodID.nullable(),

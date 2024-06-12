@@ -72,7 +72,7 @@ const markingSchema = implement<marking>().with({
     .refine((value) => typeof value !== 'undefined', {
       message: 'Value is undefined'
     })
-    .transform((value) => String(value))
+    .transform((value) => String(value ?? ''))
     .pipe(z.string().nullable()) as unknown as z.ZodNullable<ZodString>,
   frequency: z.number().nullable(),
   frequency_unit: z.nativeEnum(frequency_unit).nullable(),
