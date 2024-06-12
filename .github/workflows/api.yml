@@ -12,20 +12,11 @@ jobs:
           node-version: "18"
           cache: "npm"
 
+      - name: Clean containers
+        run: make clean
+
       - name: Create ENV file
-        run: touch .env
-
-      - name: Populate ENV values
-        run: yes | make env
-
-      - name: Set DB host ENV value
-        env:
-          DB_HOST: db
-
-      - name: Cache docker images
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          key: docker-${{ runner.os }}-${{ hashFiles('docker-compose.yml') }}
+        run: touch .env && yes | make env
 
       - name: Build containers (db, db_setup, api)
         run: make build-backend
