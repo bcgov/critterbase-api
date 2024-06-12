@@ -20,7 +20,7 @@ export const UserSchema = implement<User>().with({
  * User schema with required keycloak uuid
  *
  */
-export const UserWithKeycloakUuidSchema = z.object({
+const UserWithKeycloakUuidSchema = z.object({
   user_id: zodID,
   user_identifier: z.string(),
   keycloak_uuid: z.string()
@@ -30,37 +30,27 @@ export const UserWithKeycloakUuidSchema = z.object({
  * Create user schema
  *
  */
-export const CreateUserSchema = z
-  .object({
-    user_identifier: z.string(),
-    keycloak_uuid: z.string()
-  })
-  .strict();
-
-/**
- * Authorized user schema
- *
- */
-export const AuthorizedUserSchema = CreateUserSchema.extend({ system_name: z.string() }).strict();
+export const CreateUserSchema = z.object({
+  user_id: z.string().uuid().optional(),
+  user_identifier: z.string(),
+  keycloak_uuid: z.string()
+});
 
 /**
  * Update user schema
  *
  */
 export const UpdateUserSchema = z.object({
-  user_identifier: z.string(),
-  keycloakd_uuid: z.string()
+  user_id: z.string().uuid().optional(),
+  user_identifier: z.string().optional(),
+  keycloak_uuid: z.string().optional()
 });
 
 /**
- * Login user schema
+ * Authorized user schema
  *
  */
-export const AuthLoginSchema = z.object({
-  keycloak_uuid: z.string()
-});
-
-export const SwagUserSchema = UserSchema.extend({ system_user_id: z.string() });
+const AuthorizedUserSchema = CreateUserSchema.extend({ system_name: z.string() }).strict();
 
 /**
  * Inferred zod types
@@ -70,5 +60,4 @@ export type User = Omit<user, AuditColumns>;
 export type UserWithKeycloakUuid = z.infer<typeof UserWithKeycloakUuidSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
-export type LoginCredentials = z.infer<typeof AuthLoginSchema>;
 export type AuthorizedUser = z.infer<typeof AuthorizedUserSchema>;

@@ -1,31 +1,14 @@
-import { Prisma, user } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../utils/constants';
-import { apiError } from '../../utils/types';
-import { LoginCredentials } from '../../schemas/user-schema';
 
 /**
- * Login the user to critterbase
+ * Get database table data types.
  *
  * @async
- * @param {LoginCredentials} login - Keycloak UUID
- * @throws {apiError.unauthorized} - User does not exist
- * @returns {Promise<user>} Critterbase user
+ * @param {Prisma.ModelName} model - Database table name
+ * @returns {Promise<>}
  */
-const loginUser = async (login: LoginCredentials): Promise<user> => {
-  // Find a user that matches keycloak_uuid
-  const foundUser = await prisma.user.findFirst({
-    where: {
-      keycloak_uuid: login.keycloak_uuid
-    }
-  });
-
-  if (!foundUser) {
-    throw apiError.unauthorized('User not found. Login failed');
-  }
-  return foundUser;
-};
-
-const getTableDataTypes = async (model: Prisma.ModelName) => {
+export const getTableDataTypes = async (model: Prisma.ModelName) => {
   const results = await prisma.$queryRaw`
       WITH enums AS (
         SELECT typname, array_agg(e.enumlabel) AS enum_vals
@@ -37,5 +20,3 @@ const getTableDataTypes = async (model: Prisma.ModelName) => {
       WHERE table_name = ${model}`;
   return results;
 };
-
-export { getTableDataTypes, loginUser };

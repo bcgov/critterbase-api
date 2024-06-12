@@ -37,29 +37,29 @@ export class TokenVerifier {
     this._tokenClient = new JwksClient({ jwksUri: config.tokenURI });
   }
 
-  /**
-   * Get bearer token from auth header.
-   *
-   * @memberof TokenVerifier
-   * @param {string} authHeader - Authorization header
-   * @throws {apiError} - If unable to parse bearer token from auth header
-   * @returns {string} String bearer token
-   */
-  _getBearerTokenFromAuthHeader(authHeader: string): string {
-    // Validate the authorization header is formed correctly
-    if (!authHeader.startsWith('Bearer')) {
-      throw new apiError('Authorization header should begin with `Bearer `.');
-    }
-
-    // Split off the bearer token ['Bearer', 'xxxx.yyyyy.xxxx']
-    const tokenString = authHeader.split(' ')[1];
-
-    if (!tokenString) {
-      throw new apiError('Parsed bearer token was undefined.');
-    }
-
-    return tokenString;
-  }
+  ///**
+  // * Get bearer token from auth header.
+  // *
+  // * @memberof TokenVerifier
+  // * @param {string} authHeader - Authorization header
+  // * @throws {apiError} - If unable to parse bearer token from auth header
+  // * @returns {string} String bearer token
+  // */
+  //_getBearerTokenFromAuthHeader(authHeader: string): string {
+  //  // Validate the authorization header is formed correctly
+  //  if (!authHeader.startsWith('Bearer')) {
+  //    throw new apiError('Authorization header should begin with `Bearer `.');
+  //  }
+  //
+  //  // Split off the bearer token ['Bearer', 'xxxx.yyyyy.xxxx']
+  //  const tokenString = authHeader.split(' ')[1];
+  //
+  //  if (!tokenString) {
+  //    throw new apiError('Parsed bearer token was undefined.');
+  //  }
+  //
+  //  return tokenString;
+  //}
 
   /**
    * Get decoded token.
@@ -144,13 +144,11 @@ export class TokenVerifier {
    *
    * @async
    * @memberof TokenVerifier
+   * @param {string} bearerToken - String bearer token
    * @throws {apiError} - If unable to correctly verify token against token issuer
    * @returns {Promise<JwtPayload>} Jwt Token
    */
-  async getVerifiedToken<T extends JwtPayload>(authHeader: string): Promise<T> {
-    // Strip the bearer token from the auth header
-    const bearerToken = this._getBearerTokenFromAuthHeader(authHeader);
-
+  async getVerifiedToken<T extends JwtPayload>(bearerToken: string): Promise<T> {
     // Decode the jwt token
     const jwtToken = this._getDecodedToken(bearerToken);
 
