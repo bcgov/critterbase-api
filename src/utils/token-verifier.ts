@@ -15,8 +15,6 @@ interface ITokenVerifierConfig {
    * Token issuer ie: `https://dev.loginproxy.gov.bc.ca/auth/realms/standard`
    */
   tokenIssuer: string;
-
-  allowedAudiences: string[];
 }
 
 /**
@@ -68,7 +66,7 @@ export class TokenVerifier {
    *
    * @memberof TokenVerifier
    * @throws {apiError} - If unabled to decode token
-   * @returns {Jwt} Decoded token
+   * @returns {Jwt} Jwt token
    */
   _getDecodedToken(tokenString: string): Jwt {
     // Get decoded jwt token

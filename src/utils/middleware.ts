@@ -101,6 +101,7 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
   if (IS_TEST || NO_AUTH) {
     return next();
   }
+
   const userService = UserService.init();
 
   // Authenticate the request - parse token, audience and user details from headers
