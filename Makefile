@@ -56,13 +56,13 @@ build-postgres: ## Builds the postgres db containers
 	@echo "==============================================="
 	@echo "Make: build-postgres - building postgres db images"
 	@echo "==============================================="
-	@docker-compose -f docker-compose.yml build db db_setup
+	@docker-compose -f docker-compose.yml build critterbase-db critterbase-db_setup
 
 run-postgres: ## Runs the postgres db containers
 	@echo "==============================================="
 	@echo "Make: run-postgres - running postgres db images"
 	@echo "==============================================="
-	@docker-compose -f docker-compose.yml up -d db db_setup
+	@docker-compose -f docker-compose.yml up -d critterbase-db crtterbase-db_setup
 
 
 ## ------------------------------------------------------------------------------
@@ -74,13 +74,13 @@ build-backend: ## Builds all backend containers
 	@echo "==============================================="
 	@echo "Make: build-backend - building backend images"
 	@echo "==============================================="
-	@docker-compose -f docker-compose.yml build db db_setup api
+	@docker-compose -f docker-compose.yml build critterbase-db critterbase-db_setup critterbase-api
 
 run-backend: ## Runs all backend containers
 	@echo "==============================================="
 	@echo "Make: run-backend - running backend images"
 	@echo "==============================================="
-	@docker-compose -f docker-compose.yml up -d db db_setup api
+	@docker-compose -f docker-compose.yml up -d critterbase-db critterbase-db_setup critterbase-api
 
 
 ## ------------------------------------------------------------------------------

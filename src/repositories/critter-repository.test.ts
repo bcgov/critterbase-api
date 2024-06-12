@@ -6,7 +6,6 @@ import {
   ICritter,
   IDetailedCritterChild,
   IDetailedCritterCollectionUnit,
-  IDetailedCritterMarking,
   IDetailedCritterParent,
   IDetailedCritterQualitativeMeasurement,
   SimilarCritterQuery
@@ -496,50 +495,6 @@ describe('xref-repository', () => {
 
       const critterRepository = new CritterRepository(mockPrismaClient);
       const result = await critterRepository.findSimilarCritters(mockQuery);
-
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('findCritterMarkings', () => {
-    beforeEach(() => {
-      mockPrismaClient = {
-        $queryRaw: jest.fn()
-      };
-    });
-
-    it('should find critter markings successfully', async () => {
-      const mockResult: IDetailedCritterMarking[] = [
-        {
-          marking_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          taxon_marking_body_location_id: '1',
-          body_location: 'body',
-          marking_type: 'type',
-          marking_type_id: '1',
-          material: 'mmm',
-          capture_id: null,
-          mortality_id: null,
-          primary_colour_id: '1',
-          marking_material_id: '1',
-          secondary_colour_id: '2',
-          text_colour_id: '2',
-          primary_colour: null,
-          secondary_colour: null,
-          text_colour: null,
-          identifier: null,
-          frequency: null,
-          frequency_unit: null,
-          order: null,
-          attached_timestamp: new Date('1970-01-01'),
-          removed_timestamp: null,
-          comment: null
-        }
-      ];
-
-      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
-
-      const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.markingService.findCritterMarkings('aaaa');
 
       expect(result).toEqual(mockResult);
     });

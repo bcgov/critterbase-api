@@ -27,21 +27,23 @@ const MortalitySchema = implement<mortality>().with({
 });
 
 const MortalityDetailedSchema = MortalitySchema.extend({
-  location: z.object({
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-    coordinate_uncertainty: z.number().nullable(),
-    wmu_id: zodID.nullable(),
-    region_nr_id: zodID.nullable(),
-    region_env_id: zodID.nullable(),
-    temperature: z.number().nullable(),
-    location_comment: z.string().nullable(),
-    region_env_name: z.string().nullable(),
-    region_nr_name: z.string().nullable(),
-    wmu_name: z.string().nullable()
-  }),
-  proximate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string() }),
-  ultimate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string() })
+  location: z
+    .object({
+      latitude: z.number().nullable(),
+      longitude: z.number().nullable(),
+      coordinate_uncertainty: z.number().nullable(),
+      wmu_id: zodID.nullable(),
+      region_nr_id: zodID.nullable(),
+      region_env_id: zodID.nullable(),
+      temperature: z.number().nullable(),
+      location_comment: z.string().nullable(),
+      region_env_name: z.string().nullable(),
+      region_nr_name: z.string().nullable(),
+      wmu_name: z.string().nullable()
+    })
+    .nullable(),
+  proximate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string().nullable() }),
+  ultimate_cause_of_death: z.object({ cod_category: z.string().nullable(), cod_reason: z.string().nullable() })
 });
 
 /**

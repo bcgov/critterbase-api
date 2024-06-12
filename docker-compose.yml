@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   ## Build postgres docker image
-  db:
+  critterbase-db:
     image: ${COMPOSE_PROJECT_NAME}-db-img
     container_name: db-${COMPOSE_PROJECT_NAME}
     build:
@@ -24,11 +24,9 @@ services:
       - critterbase-network
     volumes:
       - postgres:/var/lib/postgresql/data
-    extra_hosts:
-      - ${DB_HOST}:host-gateway # allows linux OS to map internal IP of docker container to localhost
 
   ## Build the database setup image (runs migrations and seeds)
-  db_setup:
+  critterbase-db_setup:
     image: ${COMPOSE_PROJECT_NAME}-db-setup-img
     container_name: db-setup-${COMPOSE_PROJECT_NAME}
     build:
@@ -45,13 +43,11 @@ services:
     networks:
       - critterbase-network
     depends_on:
-      db:
+      critterbase-db:
         condition: service_healthy
-    extra_hosts:
-      - ${DB_HOST}:host-gateway # allows linux OS to map internal IP of docker container to localhost
 
   ## Build the API image (generates the prisma client and runs server)
-  api:
+  critterbase-api:
     image: ${COMPOSE_PROJECT_NAME}-api-img
     container_name: api-${COMPOSE_PROJECT_NAME}
     build:
@@ -77,10 +73,8 @@ services:
     networks:
       - critterbase-network
     depends_on:
-      db:
+      critterbase-db:
         condition: service_healthy
-    extra_hosts:
-      - ${DB_HOST}:host-gateway # allows linux OS to map internal IP of docker container to localhost
 
 networks:
   critterbase-network:
