@@ -18,6 +18,10 @@ jobs:
       - name: Populate ENV values
         run: yes | make env
 
+      - name: Set DB host ENV value
+        env:
+          DB_HOST: db
+
       - name: Cache docker images
         uses: ScribeMD/docker-cache@0.5.0
         with:
