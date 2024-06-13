@@ -47,13 +47,13 @@ export const CaptureCreateSchema = z
   .object({
     capture_id: zodID.optional(),
     critter_id: zodID,
-    capture_method_id: zodID.optional(),
+    capture_method_id: zodID.nullish(),
     capture_location: LocationCreateSchema.optional(),
     release_location: LocationCreateSchema.optional(),
     capture_date: z.coerce.date(),
-    capture_time: z.coerce.date().nullish(),
+    capture_time: z.string().nullish(),
     release_date: z.coerce.date().nullish(),
-    release_time: z.coerce.date().nullish(),
+    release_time: z.string().nullish(),
     capture_comment: z.string().nullish(),
     release_comment: z.string().nullish()
   })
@@ -73,9 +73,9 @@ export const CaptureUpdateSchema = z
     capture_location: LocationUpdateSchema.optional(),
     release_location: LocationUpdateSchema.optional(),
     capture_date: z.coerce.date().optional(),
-    capture_time: z.coerce.date().nullish(),
+    capture_time: z.string().nullish(),
     release_date: z.coerce.date().nullish(),
-    release_time: z.coerce.date().nullish(),
+    release_time: z.string().nullish(),
     capture_comment: z.string().nullish(),
     release_comment: z.string().nullish()
   })

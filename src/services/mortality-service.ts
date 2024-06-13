@@ -152,6 +152,6 @@ export class MortalityService implements Service {
    * @returns {Promise<IDetailedCritterMortality[]>} mortalities.
    */
   async findCritterMortalities(critterId: string): Promise<IDetailedCritterMortality[]> {
-    return this.findCritterMortalities(critterId);
+    return this.repository.findCritterMortalities(critterId);
   }
 }

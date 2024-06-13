@@ -55,81 +55,43 @@ interface IBulkResCount {
   deleted: Partial<Record<keyof IBulkCreate, number>>;
 }
 
+/**
+ * Bulk create Critterbase entities.
+ *
+ * @async
+ * @param {IBulkCreate} bulkParams - Create payloads
+ * @returns {*} Created entity counts
+ */
 const bulkCreateData = async (bulkParams: IBulkCreate) => {
-  const {
-    critters,
-    collections,
-    markings,
-    locations,
-    captures,
-    mortalities,
-    quantitative_measurements,
-    qualitative_measurements,
-    families,
-    family_children,
-    family_parents
-  } = bulkParams;
-  const counts: Omit<IBulkResCount, 'updated' | 'deleted'> = {
-    created: {}
+  const bulkResponse = await prisma.$transaction([
+    prisma.critter.createMany({ data: bulkParams.critters }),
+    prisma.critter_collection_unit.createMany({ data: bulkParams.collections }),
+    prisma.location.createMany({ data: bulkParams.locations }),
+    prisma.capture.createMany({ data: bulkParams.captures }),
+    prisma.mortality.createMany({ data: bulkParams.mortalities }),
+    prisma.marking.createMany({ data: bulkParams.markings }),
+    prisma.measurement_qualitative.createMany({ data: bulkParams.qualitative_measurements }),
+    prisma.measurement_quantitative.createMany({ data: bulkParams.quantitative_measurements }),
+    prisma.family.createMany({ data: bulkParams.families }),
+    prisma.family_parent.createMany({ data: bulkParams.family_parents }),
+    prisma.family_child.createMany({ data: bulkParams.family_children })
+  ]);
+
+  return {
+    created: {
+      critterCount: bulkResponse[0].count,
+      collections: bulkResponse[1].count,
+      locations: bulkResponse[2].count,
+      captures: bulkResponse[3].count,
+      mortalities: bulkResponse[4].count,
+      markings: bulkResponse[5].count,
+      qualitative_measurements: bulkResponse[6].count,
+      quantitative_measurements: bulkResponse[7].count,
+      families: bulkResponse[8].count,
+      family_parents: bulkResponse[9].count,
+      family_children: bulkResponse[10].count
+    }
   };
-  await prisma.$transaction(async (prisma) => {
-    const critterCount = await prisma.critter.createMany({
-      data: critters
-    });
-    counts.created.critters = critterCount.count;
-
-    const cuCount = await prisma.critter_collection_unit.createMany({
-      data: collections
-    });
-    counts.created.collections = cuCount.count;
-
-    const locCount = await prisma.location.createMany({
-      data: locations
-    });
-    counts.created.locations = locCount.count;
-
-    const captureCount = await prisma.capture.createMany({
-      data: captures
-    });
-    counts.created.captures = captureCount.count;
-
-    const mortalitycount = await prisma.mortality.createMany({
-      data: mortalities
-    });
-    counts.created.mortalities = mortalitycount.count;
-
-    const markingCount = await prisma.marking.createMany({
-      data: markings
-    });
-    counts.created.markings = markingCount.count;
-
-    const measQualCount = await prisma.measurement_qualitative.createMany({
-      data: qualitative_measurements
-    });
-    counts.created.qualitative_measurements = measQualCount.count;
-
-    const measQuantCount = await prisma.measurement_quantitative.createMany({
-      data: quantitative_measurements
-    });
-    counts.created.quantitative_measurements = measQuantCount.count;
-
-    const familyCount = await prisma.family.createMany({
-      data: families
-    });
-    counts.created.families = familyCount.count;
-
-    const familyParentCount = await prisma.family_parent.createMany({
-      data: family_parents
-    });
-    counts.created.family_parents = familyParentCount.count;
-
-    const familyChildCount = await prisma.family_child.createMany({
-      data: family_children
-    });
-    counts.created.family_children = familyChildCount.count;
-  });
-
-  return counts;
 };
 
 const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
