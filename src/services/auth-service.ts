@@ -1,12 +1,12 @@
 import { IncomingHttpHeaders } from 'http';
 import { TokenVerifier } from '../utils/token-verifier';
-import { AuthHeadersSchema } from '../utils/zod_helpers';
 import { UserService } from './user-service';
 import { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { ALLOWED_AUDIENCES } from '../utils/constants';
 import { apiError } from '../utils/types';
 import { AuthenticatedUser } from '../schemas/user-schema';
 import { ZodError } from 'zod';
+import { AuthHeadersSchema } from '../schemas/auth-schema';
 
 /**
  * @export
@@ -63,15 +63,13 @@ export class AuthService {
       const verifiedToken = await this._tokenVerifier.getVerifiedToken<JwtPayload>(token);
 
       // 3. Validate the token audience is allowed
-      if (typeof verifiedToken.aud !== 'string' || !this._allowedAudiences.includes(verifiedToken.aud)) {
-        throw new apiError(`Token audience not allowed.`);
-      }
+      const audience = this._authenticateTokenAudience(verifiedToken);
 
       //4. Return the authenticated user
       return {
         keycloak_uuid,
         user_identifier,
-        system_name: verifiedToken.aud
+        system_name: audience
       };
     } catch (error) {
       this._errorHandler(error);
@@ -88,6 +86,26 @@ export class AuthService {
    */
   async authorize(authenticatedUser: AuthenticatedUser) {
     return this._userService.loginUser(authenticatedUser);
+  }
+
+  /**
+   * Authenticate the token's audience against the list of audiences Critterbase allows.
+   * Note: `audience` is assigned to the token from the origin. ie: sims-svc-4464
+   *
+   * @param {JwtPayload} verifiedToken - Verified JWT token
+   * @throws {apiError} - If unable to authenticate audience
+   * @returns {string} Token audience
+   */
+  _authenticateTokenAudience(verifiedToken: JwtPayload): string {
+    if (typeof verifiedToken.aud !== 'string') {
+      throw new apiError(`Token audience invalid type.`);
+    }
+
+    if (!this._allowedAudiences.includes(verifiedToken.aud)) {
+      throw new apiError(`Token audience not allowed. ${verifiedToken.aud}`);
+    }
+
+    return verifiedToken.aud;
   }
 
   /**

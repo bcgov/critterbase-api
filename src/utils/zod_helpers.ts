@@ -145,32 +145,6 @@ const XrefTaxonCollectionCategorySchema = implement<xref_collection_unit>().with
   ...zodAudit
 });
 
-const AuthHeadersSchema = z
-  .object({
-    authorization: z.preprocess((token) => (token as string).split(' ')?.[1], z.string()),
-    user: z.string({
-      errorMap: () => ({
-        message: `Malformed 'user' header, expecting {'keycloak_guid': 'ABC', 'username': 'SteveBrule'}`
-      })
-    })
-  })
-  .transform((value, ctx) => {
-    try {
-      const parsedUser = JSON.parse(value.user) as { keycloak_guid: string; username: string };
-      return {
-        token: value.authorization,
-        keycloak_uuid: parsedUser.keycloak_guid,
-        user_identifier: parsedUser.username
-      };
-    } catch (err) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `Malformed 'user' header, expecting {'keycloak_guid': 'ABC', 'username': 'SteveBrule'}`
-      });
-      return z.NEVER;
-    }
-  });
-
 type IResponseSchema = z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny> | z.ZodTypeAny;
 export type { IResponseSchema };
 
@@ -195,6 +169,5 @@ export {
   LookupCollectionUnitCategorySchema,
   LookupCodSchema,
   XrefTaxonCollectionCategorySchema,
-  tsnQuerySchema,
-  AuthHeadersSchema
+  tsnQuerySchema
 };
