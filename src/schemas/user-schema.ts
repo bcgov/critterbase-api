@@ -47,10 +47,10 @@ export const UpdateUserSchema = z.object({
 });
 
 /**
- * Authorized user schema
+ * Authenticated user schema
  *
  */
-const AuthorizedUserSchema = CreateUserSchema.extend({ system_name: z.string() }).strict();
+const AuthenticatedUser = CreateUserSchema.extend({ system_name: z.string() }).strict();
 
 /**
  * Inferred zod types
@@ -60,4 +60,4 @@ export type User = Omit<user, AuditColumns>;
 export type UserWithKeycloakUuid = z.infer<typeof UserWithKeycloakUuidSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
-export type AuthorizedUser = z.infer<typeof AuthorizedUserSchema>;
+export type AuthenticatedUser = z.infer<typeof AuthenticatedUser>;

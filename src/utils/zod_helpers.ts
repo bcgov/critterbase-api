@@ -148,7 +148,11 @@ const XrefTaxonCollectionCategorySchema = implement<xref_collection_unit>().with
 const AuthHeadersSchema = z
   .object({
     authorization: z.preprocess((token) => (token as string).split(' ')?.[1], z.string()),
-    user: z.string()
+    user: z.string({
+      errorMap: () => ({
+        message: `Malformed 'user' header, expecting {'keycloak_guid': 'ABC', 'username': 'SteveBrule'}`
+      })
+    })
   })
   .transform((value, ctx) => {
     try {

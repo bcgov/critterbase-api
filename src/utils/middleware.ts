@@ -1,11 +1,26 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { IS_TEST, NO_AUTH } from './constants';
+import { BYPASS_AUTH, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
-import { authenticateRequest } from '../authentication/auth';
 import { UserService } from '../services/user-service';
+import { TokenVerifier } from './token-verifier';
+import { AuthService } from '../services/auth-service';
+
+/**
+ * Token Verifier
+ *
+ * @description Verifies jwt token against issuer.
+ */
+const tokenVerifier = new TokenVerifier({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
+
+/**
+ * Auth Service
+ *
+ * @description Handles authentication and authorization.
+ */
+const authService = new AuthService(tokenVerifier, UserService.init());
 
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
@@ -88,8 +103,8 @@ const errorHandler = (
 };
 
 /**
- * Middleware: Authorization.
- * Authorizes a user into Critterbase and sets the user context in the DB.
+ * Middleware: Auth (Authentication and Authorization).
+ * Authenticates and authorizes a user into Critterbase.
  *
  * Note: Auth middleware is bypassed if NODE_ENV=TEST or AUTHENTICATE=FALSE.
  *
@@ -98,17 +113,15 @@ const errorHandler = (
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
   // If running test suite or authentication disabled: skip
-  if (IS_TEST || NO_AUTH) {
+  if (BYPASS_AUTH) {
     return next();
   }
 
-  const userService = UserService.init();
+  // Authenticate the request: Verify token, user and audience from headers
+  const authenticatedUser = await authService.authenticate(req.headers);
 
-  // Authenticate the request - parse token, audience and user details from headers
-  const authUser = await authenticateRequest(req);
-
-  // Login user and set database context for auditing
-  await userService.loginUser(authUser);
+  // Authorize user: Login user and set database context for auditing
+  await authService.authorize(authenticatedUser);
 
   next();
 });

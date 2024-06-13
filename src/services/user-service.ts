@@ -1,5 +1,5 @@
 import { UserRepository } from '../repositories/user-repository';
-import { CreateUser, AuthorizedUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
+import { CreateUser, AuthenticatedUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
 import { apiError } from '../utils/types';
 import { Service } from './base-service';
 
@@ -120,18 +120,23 @@ export class UserService implements Service {
    * Note: The database context allows subsequent requests to populate the audit columns
    *
    * @async
-   * @param {AuthorizedUser} payload - User to login
+   * @param {AuthenticatedUser} payload - User to login
    * @throws {apiError.unauthorized} - User is unauthorized
    * @returns {Promise<void>}
    */
-  async loginUser(payload: AuthorizedUser): Promise<void> {
+  async loginUser(payload: AuthenticatedUser): Promise<void> {
     try {
-      const user = await this.repository.createOrGetUser({
+      const createOrGetUserPromise = this.repository.createOrGetUser({
         keycloak_uuid: payload.keycloak_uuid,
         user_identifier: payload.user_identifier
       });
 
-      await this.repository.setDatabaseUserContext(user.keycloak_uuid, payload.system_name);
+      const setDatabaseContextPromise = this.repository.setDatabaseUserContext(
+        payload.keycloak_uuid,
+        payload.system_name
+      );
+
+      await Promise.all([createOrGetUserPromise, setDatabaseContextPromise]);
     } catch (err) {
       throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', err]);
     }

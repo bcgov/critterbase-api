@@ -1,4 +1,4 @@
-import { JwksClient } from 'jwks-rsa';
+import JwksRsa, { JwksClient } from 'jwks-rsa';
 import { apiError } from './types';
 import { Jwt, JwtPayload, decode, verify } from 'jsonwebtoken';
 
@@ -34,32 +34,15 @@ export class TokenVerifier {
    */
   constructor(config: ITokenVerifierConfig) {
     this._tokenIssuer = config.tokenIssuer;
-    this._tokenClient = new JwksClient({ jwksUri: config.tokenURI });
+    /**
+     * https://github.com/auth0/node-jwks-rsa/blob/master/EXAMPLES.md
+     */
+    this._tokenClient = new JwksClient({
+      cache: true,
+      cacheMaxAge: 600000, // 10 minutes
+      jwksUri: config.tokenURI
+    });
   }
-
-  ///**
-  // * Get bearer token from auth header.
-  // *
-  // * @memberof TokenVerifier
-  // * @param {string} authHeader - Authorization header
-  // * @throws {apiError} - If unable to parse bearer token from auth header
-  // * @returns {string} String bearer token
-  // */
-  //_getBearerTokenFromAuthHeader(authHeader: string): string {
-  //  // Validate the authorization header is formed correctly
-  //  if (!authHeader.startsWith('Bearer')) {
-  //    throw new apiError('Authorization header should begin with `Bearer `.');
-  //  }
-  //
-  //  // Split off the bearer token ['Bearer', 'xxxx.yyyyy.xxxx']
-  //  const tokenString = authHeader.split(' ')[1];
-  //
-  //  if (!tokenString) {
-  //    throw new apiError('Parsed bearer token was undefined.');
-  //  }
-  //
-  //  return tokenString;
-  //}
 
   /**
    * Get decoded token.
@@ -127,7 +110,7 @@ export class TokenVerifier {
    * @returns {JwtPayload} Jwt token
    */
   _verifyToken(tokenString: string, publicKey: string): JwtPayload {
-    // Verify token using public signing key
+    // Verify token using public key
     const verifiedToken = verify(tokenString, publicKey, {
       issuer: [this._tokenIssuer]
     });
