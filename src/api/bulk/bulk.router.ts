@@ -106,7 +106,7 @@ export const BulkRouter = (db: ICbDatabase) => {
 
       const familyChildren = families?.children ? z.array(FamilyChildCreateBodySchema).parse(families.children) : [];
 
-      const results = await db.bulkCreateData({
+      const results = await db.bulkService.repository.createEntities({
         critters: crittersAppend,
         collections: parsedCollections,
         markings: markingsAppend,

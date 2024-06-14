@@ -20,3 +20,5 @@
 3. Consider strategy to properly deprecate old endpoints / tag api
 
 4. Refactor messy bulk router/service code
+
+5. Update all lookup values and xref lookup values to be sentenced cased

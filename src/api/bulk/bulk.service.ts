@@ -63,12 +63,16 @@ interface IBulkResCount {
  * @returns {*} Created entity counts
  */
 const bulkCreateData = async (bulkParams: IBulkCreate) => {
+  /**
+   * Create critters, captures and mortalities first as other creates are dependant on these ids.
+   */
+  const critter = await prisma.critter.createMany({ data: bulkParams.critters });
+  const capture = await prisma.capture.createMany({ data: bulkParams.captures });
+  const mortality = await prisma.mortality.createMany({ data: bulkParams.mortalities });
+
   const bulkResponse = await prisma.$transaction([
-    prisma.critter.createMany({ data: bulkParams.critters }),
     prisma.critter_collection_unit.createMany({ data: bulkParams.collections }),
     prisma.location.createMany({ data: bulkParams.locations }),
-    prisma.capture.createMany({ data: bulkParams.captures }),
-    prisma.mortality.createMany({ data: bulkParams.mortalities }),
     prisma.marking.createMany({ data: bulkParams.markings }),
     prisma.measurement_qualitative.createMany({ data: bulkParams.qualitative_measurements }),
     prisma.measurement_quantitative.createMany({ data: bulkParams.quantitative_measurements }),
@@ -79,17 +83,17 @@ const bulkCreateData = async (bulkParams: IBulkCreate) => {
 
   return {
     created: {
-      critterCount: bulkResponse[0].count,
-      collections: bulkResponse[1].count,
-      locations: bulkResponse[2].count,
-      captures: bulkResponse[3].count,
-      mortalities: bulkResponse[4].count,
-      markings: bulkResponse[5].count,
-      qualitative_measurements: bulkResponse[6].count,
-      quantitative_measurements: bulkResponse[7].count,
-      families: bulkResponse[8].count,
-      family_parents: bulkResponse[9].count,
-      family_children: bulkResponse[10].count
+      critterCount: critter.count,
+      captures: capture.count,
+      mortalities: mortality.count,
+      collections: bulkResponse[0].count,
+      locations: bulkResponse[1].count,
+      markings: bulkResponse[2].count,
+      qualitative_measurements: bulkResponse[3].count,
+      quantitative_measurements: bulkResponse[4].count,
+      families: bulkResponse[5].count,
+      family_parents: bulkResponse[6].count,
+      family_children: bulkResponse[7].count
     }
   };
 };

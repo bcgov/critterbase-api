@@ -8,6 +8,7 @@ import * as marking from '../api/marking/marking.service';
 import * as measurement from '../api/measurement/measurement.service';
 import * as user from '../api/user/user.service';
 import * as mortality from '../repositories/mortality-repository';
+import { BulkService } from '../services/bulk-service';
 import { CaptureService } from '../services/capture-service';
 import { CritterService } from '../services/critter-service';
 import { ItisService } from '../services/itis-service';
@@ -26,6 +27,7 @@ const xrefService = XrefService.init();
 const markingService = MarkingService.init();
 const mortalityService = MortalityService.init();
 const captureService = CaptureService.init();
+const bulkService = BulkService.init();
 
 export const db = {
   // Eventually these old services will be converted into the new format
@@ -40,7 +42,8 @@ export const db = {
   ...measurement,
   ...mortality,
   ...user,
-  // NEW
+  // NEW,
+  bulkService,
   mortalityService,
   critterService,
   xrefService,

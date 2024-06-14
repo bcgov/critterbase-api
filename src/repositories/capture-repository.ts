@@ -152,7 +152,7 @@ export class CaptureRepository extends Repository {
     if (payload.release_location) {
       /**
        * If release and capture are referencing the same location id -> create release location
-       * Why: The release location id is updated to the capture location id if no release details
+       * Why?: The release location id is updated to the capture location id if no release details
        * are provided on creation.
        */
       if (capture?.capture_location?.location_id === capture?.release_location?.location_id) {
@@ -175,22 +175,22 @@ export class CaptureRepository extends Repository {
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
         /**
-         * connect the capture to the critter
-         * Note: Would a capture ever be updated to a different critter?
+         * Connect the capture to the critter
+         * Note: Would a capture ever be updated to a different critter? If not this line can be removed.
          */
         critter: payload.critter_id ? { connect: { critter_id: payload.critter_id } } : undefined,
-        // if the capture_method_id exists connect to the capture record
+        // If the capture_method_id exists connect to the capture record
         capture_method: payload.capture_method_id
           ? { connect: { capture_method_id: payload.capture_method_id } }
           : undefined,
-        // if the capture location included: upsert
+        // If the capture location included: upsert
         capture_location: payload.capture_location && {
           upsert: {
             create: payload.capture_location,
             update: { ...payload.capture_location, location_id: capture.capture_location?.location_id }
           }
         },
-        // if the release location included: upsert
+        // If the release location included: upsert
         release_location: releaseLocationUpsert
       },
       select: this._captureProperties
