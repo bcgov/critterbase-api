@@ -1,8 +1,4 @@
-import { isDate } from 'util/types';
-
-type NullishDate = Date | undefined | null;
-
-type NullishStringDate = NullishDate | string;
+type NullishTime = string | undefined | null;
 
 /**
  * Get 'time' in Postgres DateTime format.
@@ -10,7 +6,7 @@ type NullishStringDate = NullishDate | string;
  * @param {Date | string | undefined | null} time - Time string ie: '10:10:10'
  * @returns {Date | undefined | null}
  */
-export const getPostgresTime = (time: NullishStringDate): NullishDate => {
+export const getPrismaTime = (time: NullishTime): null | undefined | Date => {
   if (time === '') {
     return null;
   }
@@ -19,15 +15,6 @@ export const getPostgresTime = (time: NullishStringDate): NullishDate => {
     return time;
   }
 
-  if (isDate(time)) {
-    return time;
-  }
-
-  // Time string can be formatted to a Date
-  if (isDate(new Date(time))) {
-    return new Date(time);
-  }
-
   // Postgres only uses the time portion, year/month/day is not used
-  return new Date(`1970-01-01 ${time}`);
+  return new Date(`1990-01-01T${time}`);
 };
