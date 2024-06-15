@@ -6,7 +6,7 @@ import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
 import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
-import { apiError } from '../../utils/types';
+import { PrismaTransactionClient, apiError } from '../../utils/types';
 import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from '../collectionUnit/collectionUnit.utils';
 import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from '../family/family.utils';
 import { MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
@@ -156,7 +156,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         if (!c.capture_id) {
           throw apiError.requiredProperty('capture_id');
         }
-        await db.captureService.updateCapture(c.capture_id, c);
+        await db.captureService.repository.updateCapture(c.capture_id, c);
       }
       for (let i = 0; i < mortalities.length; i++) {
         const m = mortalities[i];
@@ -235,16 +235,19 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     for (let i = 0; i < _deleteMarkings.length; i++) {
       const _dma = _deleteMarkings[i];
       counts.deleted.markings = i + 1;
-      await db.deleteMarking(_dma.marking_id, repository.prisma);
+      await db.deleteMarking(_dma.marking_id, repository.prisma as unknown as PrismaTransactionClient);
     }
     for (let i = 0; i < _deleteUnits.length; i++) {
       const _dma = _deleteUnits[i];
       counts.deleted.collections = i + 1;
-      await db.deleteCollectionUnit(_dma.critter_collection_unit_id, repository.prisma);
+      await db.deleteCollectionUnit(
+        _dma.critter_collection_unit_id,
+        repository.prisma as unknown as PrismaTransactionClient
+      );
     }
 
     const captureIds = _deleteCaptures.map((capture) => capture.capture_id);
-    const captureCount = await db.captureService.deleteMultipleCaptures(captureIds);
+    const captureCount = await db.captureService.repository.deleteMultipleCaptures(captureIds);
     counts.deleted.captures = captureCount.count;
 
     for (let i = 0; i < _deleteMoralities.length; i++) {
@@ -255,22 +258,36 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     for (let i = 0; i < _deleteQual.length; i++) {
       const _dma = _deleteQual[i];
       counts.deleted.qualitative_measurements = i + 1;
-      await db.deleteQualMeasurement(_dma.measurement_qualitative_id, repository.prisma);
+      await db.deleteQualMeasurement(
+        _dma.measurement_qualitative_id,
+        repository.prisma as unknown as PrismaTransactionClient
+      );
     }
     for (let i = 0; i < _deleteQuant.length; i++) {
       const _dma = _deleteQuant[i];
       counts.deleted.captures = i + 1;
-      await db.deleteQuantMeasurement(_dma.measurement_quantitative_id, repository.prisma);
+      await db.deleteQuantMeasurement(
+        _dma.measurement_quantitative_id,
+        repository.prisma as unknown as PrismaTransactionClient
+      );
     }
     for (let i = 0; i < _deleteParents.length; i++) {
       const _dma = _deleteParents[i];
       counts.deleted.family_parents = i + 1;
-      await db.removeParentOfFamily(_dma.family_id, _dma.parent_critter_id, repository.prisma);
+      await db.removeParentOfFamily(
+        _dma.family_id,
+        _dma.parent_critter_id,
+        repository.prisma as unknown as PrismaTransactionClient
+      );
     }
     for (let i = 0; i < _deleteChildren.length; i++) {
       const _dma = _deleteChildren[i];
       counts.deleted.family_children = i + 1;
-      await db.removeChildOfFamily(_dma.family_id, _dma.child_critter_id, repository.prisma);
+      await db.removeChildOfFamily(
+        _dma.family_id,
+        _dma.child_critter_id,
+        repository.prisma as unknown as PrismaTransactionClient
+      );
     }
   });
   return counts;

@@ -6,7 +6,6 @@ import {
   DetailedCapture,
   PrismaCaptureLocationUpsert
 } from '../schemas/capture-schema';
-import { getPrismaTime } from '../utils/datetime';
 import { Repository } from './base-repository';
 
 /**
@@ -112,13 +111,14 @@ export class CaptureRepository extends Repository {
    * @returns {Promise<Capture>} Created capture
    */
   async createCapture(payload: CaptureCreate): Promise<Capture> {
+    console.log(payload?.capture_time);
     return this.prisma.capture.create({
       data: {
         capture_id: payload.capture_id,
         capture_date: payload.capture_date,
-        capture_time: getPrismaTime(payload.capture_time),
+        capture_time: payload.capture_time,
         release_date: payload.release_date,
-        release_time: getPrismaTime(payload.capture_time),
+        release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
         critter: { connect: { critter_id: payload.critter_id } },
@@ -169,9 +169,9 @@ export class CaptureRepository extends Repository {
       where: { capture_id: captureId },
       data: {
         capture_date: payload.capture_date,
-        capture_time: getPrismaTime(payload.capture_time),
+        capture_time: payload.capture_time,
         release_date: payload.release_date,
-        release_time: getPrismaTime(payload.release_time),
+        release_time: payload.release_time,
         capture_comment: payload.capture_comment,
         release_comment: payload.release_comment,
         /**

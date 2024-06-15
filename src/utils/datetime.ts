@@ -1,20 +1,23 @@
-type NullishTime = string | undefined | null;
+export const TO_LOCALE_TIME_FORMAT = 'it-IT'; // 00:10:10
+
+export const TO_LOCALE_DATE_FORMAT = 'fr-CA'; // 2024-01-01
 
 /**
- * Get 'time' in Postgres DateTime format.
+ * Parse formatted date string from Date object.
  *
- * @param {Date | string | undefined | null} time - Time string ie: '10:10:10'
- * @returns {Date | undefined | null}
+ * @param {Date} date - Date to format
+ * @returns {string}
  */
-export const getPrismaTime = (time: NullishTime): null | undefined | Date => {
-  if (time === '') {
-    return null;
-  }
-  // Undefined or null
-  if (time == null) {
-    return time;
-  }
+export const toPgDateString = (date: Date): string => {
+  return date.toLocaleDateString(TO_LOCALE_DATE_FORMAT); // 2024-01-01
+};
 
-  // Postgres only uses the time portion, year/month/day is not used
-  return new Date(`1990-01-01T${time}`);
+/**
+ * Parse formatted time string from Date object.
+ *
+ * @param {Date} date - Date to format
+ * @returns {string}
+ */
+export const toPgTimeString = (date: Date): string => {
+  return date.toLocaleTimeString(TO_LOCALE_TIME_FORMAT); // 00:10:10
 };

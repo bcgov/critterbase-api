@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { isDeepStrictEqual } from 'util';
 import { z } from 'zod';
+import { PrismaClientExtended } from '../client/client';
 import { IS_DEV, prisma } from '../utils/constants';
-import { PrismaClientExtended } from '../utils/extended-prisma-client';
 import { apiError } from '../utils/types';
 
 /**

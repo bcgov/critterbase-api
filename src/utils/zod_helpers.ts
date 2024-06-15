@@ -16,6 +16,8 @@ import { AuditColumns, Implements, QueryFormats } from './types';
 // Schemas
 const zodID = z.string().uuid();
 
+const zodTime = z.preprocess((time) => new Date(`1970-01-01 ${time as string}`), z.date());
+
 const zodAudit = {
   create_user: z.string().uuid(),
   update_user: z.string().uuid(),
@@ -176,5 +178,6 @@ export {
   tsnQuerySchema,
   uuidParamsSchema,
   zodAudit,
-  zodID
+  zodID,
+  zodTime
 };

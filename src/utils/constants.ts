@@ -1,4 +1,4 @@
-import { PrismaClientExtended, extendedPrismaClient } from './extended-prisma-client';
+import { prismaClient } from '../client/client';
 import { QueryFormats } from './types';
 
 declare global {
@@ -50,15 +50,8 @@ const NO_AUTH = process.env.AUTHENTICATE === 'false';
 
 const defaultFormat = QueryFormats.default;
 
-/**
- * https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
- * Prevents multiple unwated instances of PrismaClient when hot reloading
- */
-const globalPrisma = global as unknown as { prisma: PrismaClientExtended };
-
-const prisma = globalPrisma.prisma || extendedPrismaClient;
-
-if (!IS_PROD) globalPrisma.prisma = prisma;
+// TODO: Temp patch: Update all prisma imports to client.ts
+const prisma = prismaClient;
 
 export {
   IS_DEV,

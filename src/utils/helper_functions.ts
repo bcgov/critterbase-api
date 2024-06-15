@@ -48,7 +48,7 @@ const getFormat = (req: Request): QueryFormats => QueryFormatSchema.parse(req.qu
 
 const isSelectFormat = (req: Request) => getFormat(req) === QueryFormats.asSelect;
 
-type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
+export type ServiceReturn = Record<string, unknown> | Record<string, unknown>[];
 
 //TODO fully type the conditional return. Note: very difficult
 const formatParse = async (

@@ -5,7 +5,7 @@ import express, { Request, Response } from 'express';
 import { eCritterStatus } from '../../schemas/critter-schema';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
-import { formatParse, getFormat } from '../../utils/helper_functions';
+import { ServiceReturn, formatParse, getFormat } from '../../utils/helper_functions';
 import { catchErrors } from '../../utils/middleware';
 import {
   captureMethodsFormats,
@@ -127,7 +127,7 @@ export const LookupRouter = (_db: ICbDatabase) => {
         getFormat(req),
         prisma.$queryRaw`SELECT wmu_id, wmu_name, description, create_user, update_user, create_timestamp, update_timestamp FROM "critterbase"."lk_wildlife_management_unit" lwmu
         ORDER BY (regexp_matches(lwmu.wmu_name, ${rgx}))[1]::int,
-          (regexp_matches(lwmu.wmu_name, ${rgx}))[2]::int;`,
+          (regexp_matches(lwmu.wmu_name, ${rgx}))[2]::int;` as Promise<ServiceReturn>,
         wmuFormats
       );
       res.status(200).json(wmu);
