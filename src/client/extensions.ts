@@ -20,19 +20,19 @@ export const captureExtension = Prisma.defineExtension({
       capture_time: {
         needs: { capture_time: true },
         compute(capture: capture) {
-          return capture.capture_time && toPgTimeString(capture.capture_time); // 10:10:10
+          return capture.capture_time && toPgTimeString(capture.capture_time); // 10:10:10 | null
         }
       },
       release_date: {
         needs: { release_date: true },
         compute(capture: capture) {
-          return capture.release_date && toPgDateString(capture.release_date); // 2024-01-01
+          return capture.release_date && toPgDateString(capture.release_date); // 2024-01-01 | null
         }
       },
       release_time: {
         needs: { release_time: true },
         compute(capture: capture) {
-          return capture.release_time && toPgTimeString(capture.release_time); // 10:10:10
+          return capture.release_time && toPgTimeString(capture.release_time); // 10:10:10 | null
         }
       }
     }

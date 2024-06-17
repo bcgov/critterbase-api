@@ -1,8 +1,17 @@
 import { BulkRepository } from '../repositories/bulk-repository';
 import { Service } from './base-service';
 
+/**
+ * Bulk Service
+ * Handles multiple create / update / get actions for related Critter entities.
+ *
+ * @export
+ * @class BulkService
+ * @implements Service
+ */
 export class BulkService implements Service {
   repository: BulkRepository;
+
   /**
    * Construct BulkService class.
    *

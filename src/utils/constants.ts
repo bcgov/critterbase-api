@@ -50,17 +50,7 @@ const NO_AUTH = process.env.AUTHENTICATE === 'false';
 
 const defaultFormat = QueryFormats.default;
 
-// TODO: Temp patch: Update all prisma imports to client.ts
+// TODO: Update all prisma imports to client.ts
 const prisma = prismaClient;
 
-export {
-  IS_DEV,
-  IS_PROD,
-  IS_TEST,
-  NO_AUTH,
-  PORT,
-  // request,
-  defaultFormat,
-  prisma,
-  routes
-};
+export { IS_DEV, IS_PROD, IS_TEST, NO_AUTH, PORT, defaultFormat, prisma, routes };
