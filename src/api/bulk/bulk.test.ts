@@ -1,14 +1,12 @@
 import { capture, critter, critter_collection_unit, location, marking, mortality } from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
+import { PrismaClientExtended } from '../../client/client';
+import { BulkRepository } from '../../repositories/bulk-repository';
+import { BulkService } from '../../services/bulk-service';
 import { prisma } from '../../utils/constants';
-import { PrismaTransactionClient, apiError } from '../../utils/types';
-import {
-  bulkCreateData as _bulkCreateData,
-  bulkDeleteData as _bulkDeleteData,
-  bulkUpdateData as _bulkUpdateData,
-  bulkErrMap
-} from './bulk.service';
+import { apiError } from '../../utils/types';
+import { bulkDeleteData as _bulkDeleteData, bulkUpdateData as _bulkUpdateData, bulkErrMap } from './bulk.service';
 
 const bulkCreateData = jest.fn();
 const bulkUpdateData = jest.fn();
@@ -22,6 +20,7 @@ const deleteMarking = jest.fn();
 const deleteCollectionUnit = jest.fn();
 const patchTsnAndScientificName = jest.fn();
 const deleteMultipleCaptures = jest.fn().mockResolvedValue({ count: 1 });
+const createEntities = jest.fn();
 
 const db: any = {
   bulkCreateData,
@@ -32,6 +31,7 @@ const db: any = {
   appendEnglishMarkingsAsUUID,
   deleteMarking,
   deleteCollectionUnit,
+  bulkService: { repository: { createEntities } },
   itisService: { patchTsnAndScientificName },
   mortalityService: { appendDefaultCOD, updateMortality },
   captureService: { updateCapture, deleteMultipleCaptures }
@@ -40,7 +40,6 @@ const db: any = {
 const request = supertest(makeApp(db));
 
 const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
-const OTHER_CRITTER_ID = '27e2b7c9-2754-4286-9eb9-fd4f0a8378ef';
 const WLH_ID = '12-1234';
 const CRITTER: critter = {
   itis_tsn: 1,
@@ -182,11 +181,12 @@ const prismaMock = {
   },
   family_parent: {
     createMany: jest.fn().mockResolvedValue({ count: 1 })
-  }
+  },
+  $transaction: (callback: any) => callback(prismaMock)
 };
 jest
   .spyOn(prisma, '$transaction')
-  .mockImplementation((callback) => callback(prismaMock as unknown as PrismaTransactionClient));
+  .mockImplementation((callback) => callback(prismaMock as unknown as PrismaClientExtended));
 
 describe('API: Bulk', () => {
   describe('SERVICES', () => {
@@ -203,7 +203,9 @@ describe('API: Bulk', () => {
         prismaMock.measurement_qualitative.createMany.mockResolvedValue({
           count: 1
         });
-        const result = await _bulkCreateData({
+
+        const bulkService = new BulkService(new BulkRepository(prismaMock as unknown as PrismaClientExtended));
+        await bulkService.repository.createEntities({
           critters: [CRITTER],
           collections: [COLLECTION],
           locations: [LOCATION],

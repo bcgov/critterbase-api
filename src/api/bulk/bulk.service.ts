@@ -55,49 +55,6 @@ interface IBulkResCount {
   deleted: Partial<Record<keyof IBulkCreate, number>>;
 }
 
-/**
- * Bulk create Critterbase entities.
- *
- * @async
- * @param {IBulkCreate} bulkParams - Create payloads
- * @returns {*} Created entity counts
- */
-const bulkCreateData = async (bulkParams: IBulkCreate) => {
-  /**
-   * Create critters, captures and mortalities first as other creates are dependant on these ids.
-   */
-  const critter = await prisma.critter.createMany({ data: bulkParams.critters });
-  const capture = await prisma.capture.createMany({ data: bulkParams.captures });
-  const mortality = await prisma.mortality.createMany({ data: bulkParams.mortalities });
-
-  const bulkResponse = await prisma.$transaction([
-    prisma.critter_collection_unit.createMany({ data: bulkParams.collections }),
-    prisma.location.createMany({ data: bulkParams.locations }),
-    prisma.marking.createMany({ data: bulkParams.markings }),
-    prisma.measurement_qualitative.createMany({ data: bulkParams.qualitative_measurements }),
-    prisma.measurement_quantitative.createMany({ data: bulkParams.quantitative_measurements }),
-    prisma.family.createMany({ data: bulkParams.families }),
-    prisma.family_parent.createMany({ data: bulkParams.family_parents }),
-    prisma.family_child.createMany({ data: bulkParams.family_children })
-  ]);
-
-  return {
-    created: {
-      critterCount: critter.count,
-      captures: capture.count,
-      mortalities: mortality.count,
-      collections: bulkResponse[0].count,
-      locations: bulkResponse[1].count,
-      markings: bulkResponse[2].count,
-      qualitative_measurements: bulkResponse[3].count,
-      quantitative_measurements: bulkResponse[4].count,
-      families: bulkResponse[5].count,
-      family_parents: bulkResponse[6].count,
-      family_children: bulkResponse[7].count
-    }
-  };
-};
-
 const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
   const {
     critters,
@@ -156,7 +113,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
         if (!c.capture_id) {
           throw apiError.requiredProperty('capture_id');
         }
-        await db.captureService.repository.updateCapture(c.capture_id, c);
+        await db.captureService.updateCapture(c.capture_id, c);
       }
       for (let i = 0; i < mortalities.length; i++) {
         const m = mortalities[i];
@@ -247,7 +204,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     }
 
     const captureIds = _deleteCaptures.map((capture) => capture.capture_id);
-    const captureCount = await db.captureService.repository.deleteMultipleCaptures(captureIds);
+    const captureCount = await db.captureService.deleteMultipleCaptures(captureIds);
     counts.deleted.captures = captureCount.count;
 
     for (let i = 0; i < _deleteMoralities.length; i++) {
@@ -297,4 +254,4 @@ const bulkErrMap = (issue: z.ZodIssueOptionalMessage, ctx: z.ErrorMapCtx, objKey
   message: `${objKey}[${issue.path[0]}].${issue.path[1]}~${ctx.defaultError}`
 });
 
-export { IBulkCreate, IBulkDelete, IBulkMutate, bulkCreateData, bulkDeleteData, bulkErrMap, bulkUpdateData };
+export { IBulkCreate, IBulkDelete, IBulkMutate, bulkDeleteData, bulkErrMap, bulkUpdateData };

@@ -49,6 +49,6 @@ export const LocationUpdateSchema = implement<Partial<Location>>()
  * Inferred types
  *
  */
-export type Location = Omit<location, AuditColumns>;
+type Location = Omit<location, AuditColumns>;
 export type LocationCreate = z.infer<typeof LocationCreateSchema>;
 export type LocationUpdate = z.infer<typeof LocationUpdateSchema>;

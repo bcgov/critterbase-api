@@ -1,6 +1,6 @@
-export const TO_LOCALE_TIME_FORMAT = 'it-IT'; // 00:10:10
+const TO_LOCALE_TIME_FORMAT = 'it-IT'; // 00:10:10
 
-export const TO_LOCALE_DATE_FORMAT = 'fr-CA'; // 2024-01-01
+const TO_LOCALE_DATE_FORMAT = 'fr-CA'; // 2024-01-01
 
 /**
  * Parse formatted date string from Date object.
