@@ -42,8 +42,6 @@ const intersect = <T>(A: T[], B: T[]): T[] => {
   return Array.from(new Set(A)).filter((x) => setB.has(x));
 };
 
-const sessionHours = (hours: number) => hours * 3600000;
-
 const getFormat = (req: Request): QueryFormats => QueryFormatSchema.parse(req.query).format;
 
 const isSelectFormat = (req: Request) => getFormat(req) === QueryFormats.asSelect;
@@ -100,14 +98,4 @@ const prisMock = (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     .mockResolvedValue(returns);
 
-export {
-  prisMock,
-  prismaErrorMsg,
-  sessionHours,
-  formatParse,
-  getFormat,
-  intersect,
-  toSelect,
-  isSelectFormat,
-  toSelectFormat
-};
+export { prisMock, prismaErrorMsg, formatParse, getFormat, intersect, toSelect, isSelectFormat, toSelectFormat };

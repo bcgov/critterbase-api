@@ -1,18 +1,32 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { loginUser } from '../api/access/access.service';
-import { AuthLoginSchema } from '../api/user/user.utils';
-import { IS_TEST, NO_AUTH } from './constants';
+import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
-import { authenticateRequest } from '../authentication/auth';
-import { setUserContext } from '../api/user/user.service';
+import { UserService } from '../services/user-service';
+import { TokenService } from '../services/token-service';
+import { AuthService } from '../services/auth-service';
+
+/**
+ * Token Service
+ *
+ * @description Verifies jwt token against issuer.
+ */
+const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
+
+/**
+ * Auth Service
+ *
+ * @description Handles authentication and authorization.
+ */
+const authService = new AuthService(tokenService, UserService.init());
 
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
 /**
- * Catches errors on API routes. Used instead of wrapping try / catch on every endpoint.
+ * Catches errors on API routes.
+ * Used instead of wrapping try / catch on every endpoint.
  *
  * @param {ExpressHandler} fn - Express Handler callback.
  */
@@ -21,11 +35,12 @@ const catchErrors = (fn: ExpressHandler) => (req: Request, res: Response, next: 
 };
 
 /**
- * Middleware: Logs the incoming requests.
+ * Middleware: Logs incomming requests.
  *
  * @param {Request} req - Express Request.
  * @param {Response} _res - Express Response.
  * @param {NextFunction} next - Express Next callback.
+ * @returns {void}
  */
 const logger = (req: Request, _res: Response, next: NextFunction) => {
   if (!IS_TEST) {
@@ -37,7 +52,7 @@ const logger = (req: Request, _res: Response, next: NextFunction) => {
 /**
  * Middleware: Logs server errors.
  *
- * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - [TODO:description]
+ * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err
  * @param {Request} req - Express Request.
  * @param {Response} _res - Express Response.
  * @param {NextFunction} next - Express Next callback.
@@ -56,7 +71,8 @@ const errorLogger = (
 };
 
 /**
- * Middleware: Generic express error handler. Will handle any errors catchErrors catches.
+ * Middleware: Express error handler.
+ * Handles any caught errors via `catchErrors`.
  *
  * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - supported errors.
  * @param {Request} _req - Express Request.
@@ -87,26 +103,26 @@ const errorHandler = (
 };
 
 /**
- * Middleware: Authorization.
- * Authorizes a user into Critterbase and sets the user context in DB.
+ * Middleware: Auth (Authentication and Authorization).
+ * Authenticates and authorizes a user into Critterbase.
  *
- * Note: Will bypass auth if NODE_ENV=TEST or AUTHENTICATE=NO_AUTH useful for development.
+ * Note: Auth middleware is bypassed if NODE_ENV=TEST or AUTHENTICATE=FALSE.
  *
  * @async
- * @returns {Promise<void>}
+ * @returns {void}
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
-  if (IS_TEST || NO_AUTH) {
+  // If running test suite or authentication disabled: skip
+  if (BYPASS_AUTHENTICATION) {
     return next();
   }
-  const kc = await authenticateRequest(req);
-  const parsed = AuthLoginSchema.parse({
-    keycloak_uuid: kc.keycloak_uuid,
-    system_name: kc.system_name
-  });
-  await loginUser(parsed);
-  console.log(JSON.stringify(kc));
-  await setUserContext(kc.keycloak_uuid, kc.system_name);
+
+  // Authenticate the request: Verify token, user and audience from headers
+  const authenticatedUser = await authService.authenticate(req.headers);
+
+  // Authorize user: Login user and set database context for auditing
+  await authService.authorize(authenticatedUser);
+
   next();
 });
 
