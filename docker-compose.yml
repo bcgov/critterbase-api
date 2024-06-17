@@ -83,4 +83,3 @@ networks:
 volumes:
   postgres:
     name: ${COMPOSE_PROJECT_NAME}-db-vol
-
