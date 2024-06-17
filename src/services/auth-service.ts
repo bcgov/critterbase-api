@@ -1,5 +1,5 @@
 import { IncomingHttpHeaders } from 'http';
-import { TokenVerifier } from '../utils/token-verifier';
+import { TokenService } from './token-service';
 import { UserService } from './user-service';
 import { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { ALLOWED_AUDIENCES } from '../utils/constants';
@@ -9,6 +9,8 @@ import { ZodError } from 'zod';
 import { AuthHeadersSchema } from '../schemas/auth-schema';
 
 /**
+ * Authentication / Authorization Service
+ *
  * @export
  * @class AuthService
  */
@@ -17,7 +19,7 @@ export class AuthService {
    * Verifies the token against the issuer.
    *
    */
-  _tokenVerifier: TokenVerifier;
+  _tokenService: TokenService;
   /**
    * Grants ability to login the user to the API.
    *
@@ -32,11 +34,11 @@ export class AuthService {
   /**
    * Constructs an instance of AuthService.
    *
-   * @param {TokenVerifier} tokenVerifier - JWT token verifier
+   * @param {TokenService} tokenVerifier - JWT token verifier
    * @param {UserService} userService - User Service
    */
-  constructor(tokenVerifier: TokenVerifier, userService: UserService) {
-    this._tokenVerifier = tokenVerifier;
+  constructor(tokenVerifier: TokenService, userService: UserService) {
+    this._tokenService = tokenVerifier;
     this._userService = userService;
     this._allowedAudiences = ALLOWED_AUDIENCES;
   }
@@ -60,7 +62,7 @@ export class AuthService {
       const { token, keycloak_uuid, user_identifier } = AuthHeadersSchema.parse(headers);
 
       // 2. Verify jwt token against issuer
-      const verifiedToken = await this._tokenVerifier.getVerifiedToken<JwtPayload>(token);
+      const verifiedToken = await this._tokenService.getVerifiedToken<JwtPayload>(token);
 
       // 3. Validate the token audience is allowed
       const audience = this._authenticateTokenAudience(verifiedToken);

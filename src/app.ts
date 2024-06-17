@@ -20,6 +20,12 @@ import { auth, errorHandler, errorLogger, logger } from './utils/middleware';
 import { apiError } from './utils/types';
 import { routes } from './utils/constants';
 
+/**
+ * Generate express API with Database (data layer) as dependency.
+ *
+ * @param {ICbDatabase} db - Database data layer (Services / ORM)
+ * @returns {Express} Express API
+ */
 export const makeApp = (db: ICbDatabase) => {
   const app = express();
 
@@ -27,7 +33,7 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(helmet());
   app.use(express.json());
 
-  app.use(logger);
+  app.use(logger); // Logs all incomming requests
 
   app.use(routes.home, AccessRouter(db)); // Accessible without authentication
 
@@ -50,8 +56,8 @@ export const makeApp = (db: ICbDatabase) => {
     throw apiError.notFound(`${req.method} ${req.url} -> route not found`);
   });
 
-  app.use(errorLogger);
-  app.use(errorHandler);
+  app.use(errorLogger); // Logs thrown errors
+  app.use(errorHandler); // Catches all errors thrown from endpoints and passes to errorLogger
 
   return app;
 };

@@ -17,7 +17,7 @@ const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCL
 
 const ALLOWED_AUDIENCES = String(process.env.ALLOWED_AUD).split(' ');
 
-const BYPASS_AUTH = NO_AUTH || IS_TEST;
+const BYPASS_AUTHENTICATION = NO_AUTH || IS_TEST;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -78,7 +78,7 @@ export {
   KEYCLOAK_URL,
   KEYCLOAK_ISSUER,
   ALLOWED_AUDIENCES,
-  BYPASS_AUTH,
+  BYPASS_AUTHENTICATION,
   prisma,
   // request,
   defaultFormat,

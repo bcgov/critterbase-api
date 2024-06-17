@@ -1,11 +1,11 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { BYPASS_AUTH, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
+import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
 import { UserService } from '../services/user-service';
-import { TokenVerifier } from './token-verifier';
+import { TokenService } from '../services/token-service';
 import { AuthService } from '../services/auth-service';
 
 /**
@@ -13,7 +13,7 @@ import { AuthService } from '../services/auth-service';
  *
  * @description Verifies jwt token against issuer.
  */
-const tokenVerifier = new TokenVerifier({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
+const tokenVerifier = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
 
 /**
  * Auth Service
@@ -113,7 +113,7 @@ const errorHandler = (
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
   // If running test suite or authentication disabled: skip
-  if (BYPASS_AUTH) {
+  if (BYPASS_AUTHENTICATION) {
     return next();
   }
 
