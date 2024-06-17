@@ -9,18 +9,18 @@ import { TokenService } from '../services/token-service';
 import { AuthService } from '../services/auth-service';
 
 /**
- * Token Verifier
+ * Token Service
  *
  * @description Verifies jwt token against issuer.
  */
-const tokenVerifier = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
+const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
 
 /**
  * Auth Service
  *
  * @description Handles authentication and authorization.
  */
-const authService = new AuthService(tokenVerifier, UserService.init());
+const authService = new AuthService(tokenService, UserService.init());
 
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 

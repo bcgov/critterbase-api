@@ -6,7 +6,7 @@ import { Jwt, JwtPayload, decode, verify } from 'jsonwebtoken';
  * TokenService constructor config
  *
  */
-interface TokenServiceConfig {
+interface ITokenServiceConfig {
   /**
    * Token URI: ie: `https://dev.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/certs`
    */
@@ -23,21 +23,21 @@ interface TokenServiceConfig {
  * @description Verify a JWT token against its issuer.
  */
 export class TokenService {
-  _tokenClient: JwksClient;
+  jwtClient: JwksClient;
   _tokenIssuer: string;
 
   /**
    * Construct instance of TokenService.
    *
    * @memberof TokenService
-   * @param {ITokenVerifierConfig} config - Contains tokenURI and tokenIssuer
+   * @param {ITokenServiceConfig} config - Contains tokenURI and tokenIssuer
    */
-  constructor(config: TokenServiceConfig) {
+  constructor(config: ITokenServiceConfig) {
     this._tokenIssuer = config.tokenIssuer;
     /**
      * https://github.com/auth0/node-jwks-rsa/blob/master/EXAMPLES.md
      */
-    this._tokenClient = new JwksClient({
+    this.jwtClient = new JwksClient({
       cache: true,
       cacheMaxAge: 600000, // 10 minutes
       jwksUri: config.tokenURI
@@ -91,7 +91,7 @@ export class TokenService {
    */
   async _getPublicKeyFromTokenKeyId(tokenKeyId: string): Promise<string> {
     // Get signing key from token client
-    const signingKey = await this._tokenClient.getSigningKey(tokenKeyId);
+    const signingKey = await this.jwtClient.getSigningKey(tokenKeyId);
 
     if (!signingKey) {
       throw new apiError('Token public key was undefined.');

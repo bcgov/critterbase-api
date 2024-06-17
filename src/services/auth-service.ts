@@ -34,11 +34,11 @@ export class AuthService {
   /**
    * Constructs an instance of AuthService.
    *
-   * @param {TokenService} tokenVerifier - JWT token verifier
+   * @param {TokenService} tokenService - JWT token service
    * @param {UserService} userService - User Service
    */
-  constructor(tokenVerifier: TokenService, userService: UserService) {
-    this._tokenService = tokenVerifier;
+  constructor(tokenService: TokenService, userService: UserService) {
+    this._tokenService = tokenService;
     this._userService = userService;
     this._allowedAudiences = ALLOWED_AUDIENCES;
   }
