@@ -57,9 +57,6 @@ const FamilyChildDeleteSchema = FamilyChildSchema.pick({
 }).extend(DeleteSchema.shape);
 
 type FamilyUpdate = z.infer<typeof FamilyUpdateBodySchema>;
-type FamilyCreate = z.infer<typeof FamilyCreateBodySchema>;
-type FamilyParentCreate = z.infer<typeof FamilyParentCreateBodySchema>;
-type FamilyChildCreate = z.infer<typeof FamilyChildCreateBodySchema>;
 
 export {
   FamilyChildCreateBodySchema,
@@ -72,11 +69,4 @@ export {
   FamilySchema,
   FamilyUpdateBodySchema
 };
-export type {
-  FamilyChildCreate,
-  FamilyCreate,
-  FamilyParentCreate,
-  FamilyUpdate,
-  ImmediateFamily,
-  ImmediateFamilyCritter
-};
+export type { FamilyUpdate, ImmediateFamily, ImmediateFamilyCritter };
