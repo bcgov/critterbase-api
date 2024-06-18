@@ -13,9 +13,9 @@ ALTER TABLE "capture" DROP CONSTRAINT "capture_cap_location_fk";
 ALTER TABLE "capture" DROP CONSTRAINT "capture_rel_location_fk";
 
 -- AlterTable
-ALTER TABLE "capture" 
-ADD COLUMN     "capture_date" DATE NOT NULL,
+ALTER TABLE "capture"
 ADD COLUMN     "capture_method_id" UUID,
+ADD COLUMN     "capture_date" DATE NOT NULL,
 ADD COLUMN     "capture_time" TIME,
 ADD COLUMN     "release_date" DATE,
 ADD COLUMN     "release_time" TIME;
@@ -61,6 +61,6 @@ ALTER TABLE "lk_capture_method" ADD CONSTRAINT "lk_capture_method_update_user_fk
 
 -- AddReferenceValues
 INSERT INTO "lk_capture_method" (method_name, description)
-VALUES 
+VALUES
   ('Net Gun', 'Captured with a Net Gun'),
   ('Snare', 'Captured with a Snare');
