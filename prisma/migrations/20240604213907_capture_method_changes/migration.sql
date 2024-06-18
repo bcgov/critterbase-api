@@ -15,7 +15,7 @@ ALTER TABLE "capture" DROP CONSTRAINT "capture_rel_location_fk";
 -- AlterTable
 ALTER TABLE "capture"
 ADD COLUMN     "capture_method_id" UUID,
-ADD COLUMN     "capture_date" DATE NOT NULL,
+ADD COLUMN     "capture_date" DATE,
 ADD COLUMN     "capture_time" TIME,
 ADD COLUMN     "release_date" DATE,
 ADD COLUMN     "release_time" TIME;
@@ -28,8 +28,10 @@ SET
   release_date = release_timestamp::date,
   release_time = release_timestamp::time;
 
-ALTER TABLE "capture" DROP COLUMN "capture_timestamp",
-DROP COLUMN "release_timestamp";
+ALTER TABLE "capture"
+DROP COLUMN "capture_timestamp",
+DROP COLUMN "release_timestamp",
+ALTER COLUMN "capture_date" SET NOT NULL;
 
 -- CreateTable
 CREATE TABLE "lk_capture_method" (
