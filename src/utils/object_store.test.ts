@@ -2,9 +2,9 @@ import {
   _getObjectStoreBucketName,
   _getObjectStoreUrl,
   _getS3Client,
+  getFileDownloadUrl,
   getS3HostUrl,
-  uploadFileToS3,
-  getFileDownloadUrl
+  uploadFileToS3
 } from './object_store';
 import { apiError } from './types';
 
@@ -32,8 +32,7 @@ jest.mock('@aws-sdk/s3-request-presigner', () => ({
 }));
 
 // Import after mocking
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 describe('File: object_store.ts', () => {
   beforeEach(() => {

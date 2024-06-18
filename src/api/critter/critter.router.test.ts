@@ -1,5 +1,5 @@
-import { makeApp } from '../../app';
 import supertest from 'supertest';
+import { makeApp } from '../../app';
 
 const id = '3277ea2a-38ee-4aa4-a9af-b2c40d8cb940';
 

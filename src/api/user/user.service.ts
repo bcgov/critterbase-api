@@ -1,7 +1,7 @@
-import { prisma } from '../../utils/constants';
 import type { user } from '@prisma/client';
-import { UserCreateInput, UserUpdateInput } from './user.utils';
+import { prisma } from '../../utils/constants';
 import { apiError } from '../../utils/types';
+import { UserCreateInput, UserUpdateInput } from './user.utils';
 
 /**
  * * Adds a user to the database
@@ -89,9 +89,10 @@ const deleteUser = async (user_id: string): Promise<user> => {
 };
 
 const setUserContext = async (keycloak_uuid: string, system_name: string) => {
-  const result: [{ api_set_context: string }] =
-    await prisma.$queryRaw`SELECT * FROM api_set_context(${keycloak_uuid}, ${system_name})`;
+  const result = (await prisma.$queryRaw`SELECT * FROM api_set_context(${keycloak_uuid}, ${system_name})`) as [
+    { api_set_context: string }
+  ];
   return result[0].api_set_context;
 };
 
-export { createUser, upsertUser, getUsers, getUser, updateUser, deleteUser, setUserContext };
+export { createUser, deleteUser, getUser, getUsers, setUserContext, updateUser, upsertUser };

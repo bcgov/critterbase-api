@@ -1,14 +1,12 @@
 import { user } from '@prisma/client';
 import { apiError } from '../../utils/types';
 // import { createUser } from "../user/user.service";
-import { PrismaClient as OriginalPrismaClient } from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
+import * as auth from '../../authentication/auth';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
-import { loginUser as _loginUser, getTableDataTypes as _getTableDataTypes } from './access.service';
-import { LoginCredentials } from '../user/user.utils';
-import * as auth from '../../authentication/auth';
+import { getTableDataTypes as _getTableDataTypes, loginUser as _loginUser } from './access.service';
 const ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
 const USER: user = {
   user_id: ID,

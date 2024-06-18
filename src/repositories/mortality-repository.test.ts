@@ -1,4 +1,3 @@
-import { prisma } from '../utils/constants';
 import { MortalityRepository } from './mortality-repository';
 
 const mockMortalities = [{ mortality: 1 }, { mortality: 2 }];

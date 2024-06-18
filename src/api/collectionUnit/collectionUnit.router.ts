@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
 import { array } from 'zod';
+import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
 import {
@@ -8,7 +9,6 @@ import {
   CollectionUnitResponseSchema,
   CollectionUnitUpdateBodySchema
 } from './collectionUnit.utils';
-import { ICbDatabase } from '../../utils/database';
 
 export const CollectionUnitRouter = (db: ICbDatabase) => {
   const collectionUnitRouter = express.Router();

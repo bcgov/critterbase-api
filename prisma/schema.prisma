@@ -45,26 +45,30 @@ model audit_log {
 }
 
 model capture {
-  capture_id                                     String                     @id(map: "capture_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  critter_id                                     String                     @db.Uuid
-  capture_location_id                            String?                    @db.Uuid
-  release_location_id                            String?                    @db.Uuid
-  capture_timestamp                              DateTime                   @db.Timestamptz(6)
-  release_timestamp                              DateTime?                  @db.Timestamptz(6)
-  capture_comment                                String?
-  release_comment                                String?
-  create_user                                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                               DateTime                   @default(now()) @db.Timestamptz(6)
-  update_timestamp                               DateTime                   @default(now()) @db.Timestamptz(6)
-  location_capture_capture_location_idTolocation location?                  @relation("capture_capture_location_idTolocation", fields: [capture_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cap_location_fk")
-  user_capture_create_userTouser                 user                       @relation("capture_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cu_fk")
-  critter                                        critter                    @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_fk")
-  location_capture_release_location_idTolocation location?                  @relation("capture_release_location_idTolocation", fields: [release_location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_rel_location_fk")
-  user_capture_update_userTouser                 user                       @relation("capture_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_uu_fk")
-  marking                                        marking[]
-  measurement_qualitative                        measurement_qualitative[]
-  measurement_quantitative                       measurement_quantitative[]
+  capture_id                     String                     @id(map: "capture_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  critter_id                     String                     @db.Uuid
+  capture_location_id            String?                    @db.Uuid
+  release_location_id            String?                    @db.Uuid
+  capture_comment                String?
+  release_comment                String?
+  create_user                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
+  update_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
+  capture_date                   DateTime                   @db.Date
+  capture_method_id              String?                    @db.Uuid
+  capture_time                   DateTime?                  @db.Time(0)
+  release_date                   DateTime?                  @db.Date
+  release_time                   DateTime?                  @db.Time(0)
+  capture_location               location?                  @relation("capture_location", fields: [capture_location_id], references: [location_id], onDelete: Cascade, onUpdate: NoAction, map: "capture_cap_location_fk")
+  capture_method                 lk_capture_method?         @relation(fields: [capture_method_id], references: [capture_method_id], onDelete: NoAction, onUpdate: NoAction)
+  user_capture_create_userTouser user                       @relation("capture_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_cu_fk")
+  critter                        critter                    @relation(fields: [critter_id], references: [critter_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_fk")
+  release_location               location?                  @relation("release_location", fields: [release_location_id], references: [location_id], onDelete: Cascade, onUpdate: NoAction, map: "capture_rel_location_fk")
+  user_capture_update_userTouser user                       @relation("capture_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "capture_uu_fk")
+  marking                        marking[]
+  measurement_qualitative        measurement_qualitative[]
+  measurement_quantitative       measurement_quantitative[]
 }
 
 model critter {
@@ -273,29 +277,29 @@ model lk_wildlife_management_unit {
 }
 
 model location {
-  location_id                                   String                       @id(map: "location_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  latitude                                      Float?
-  longitude                                     Float?
-  coordinate_uncertainty                        Float?
-  coordinate_uncertainty_unit                   coordinate_uncertainty_unit?
-  wmu_id                                        String?                      @db.Uuid
-  region_nr_id                                  String?                      @db.Uuid
-  region_env_id                                 String?                      @db.Uuid
-  elevation                                     Float?
-  temperature                                   Float?
-  location_comment                              String?
-  create_user                                   String                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                                   String                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp                              DateTime                     @default(now()) @db.Timestamptz(6)
-  update_timestamp                              DateTime                     @default(now()) @db.Timestamptz(6)
-  capture_capture_capture_location_idTolocation capture[]                    @relation("capture_capture_location_idTolocation")
-  capture_capture_release_location_idTolocation capture[]                    @relation("capture_release_location_idTolocation")
-  user_location_create_userTouser               user                         @relation("location_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_create_user")
-  user_location_update_userTouser               user                         @relation("location_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_update_user")
-  lk_wildlife_management_unit                   lk_wildlife_management_unit? @relation(fields: [wmu_id], references: [wmu_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_wmu_id_user")
-  lk_region_env                                 lk_region_env?               @relation(fields: [region_env_id], references: [region_env_id], onDelete: NoAction, onUpdate: NoAction, map: "location_env_fk")
-  lk_region_nr                                  lk_region_nr?                @relation(fields: [region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "location_nrr_fk")
-  mortality                                     mortality[]
+  location_id                     String                       @id(map: "location_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  latitude                        Float?
+  longitude                       Float?
+  coordinate_uncertainty          Float?
+  coordinate_uncertainty_unit     coordinate_uncertainty_unit?
+  wmu_id                          String?                      @db.Uuid
+  region_nr_id                    String?                      @db.Uuid
+  region_env_id                   String?                      @db.Uuid
+  elevation                       Float?
+  temperature                     Float?
+  location_comment                String?
+  create_user                     String                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                     String                       @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                DateTime                     @default(now()) @db.Timestamptz(6)
+  update_timestamp                DateTime                     @default(now()) @db.Timestamptz(6)
+  capture_location                capture[]                    @relation("capture_location")
+  release_location                capture[]                    @relation("release_location")
+  user_location_create_userTouser user                         @relation("location_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_create_user")
+  user_location_update_userTouser user                         @relation("location_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_update_user")
+  lk_wildlife_management_unit     lk_wildlife_management_unit? @relation(fields: [wmu_id], references: [wmu_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_wmu_id_user")
+  lk_region_env                   lk_region_env?               @relation(fields: [region_env_id], references: [region_env_id], onDelete: NoAction, onUpdate: NoAction, map: "location_env_fk")
+  lk_region_nr                    lk_region_nr?                @relation(fields: [region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "location_nrr_fk")
+  mortality                       mortality[]
 }
 
 model marking {
@@ -415,6 +419,8 @@ model user {
   critter_critter_update_userTouser                                                                     critter[]                                   @relation("critter_update_userTouser")
   critter_collection_unit_critter_collection_unit_create_userTouser                                     critter_collection_unit[]                   @relation("critter_collection_unit_create_userTouser")
   critter_collection_unit_critter_collection_unit_update_userTouser                                     critter_collection_unit[]                   @relation("critter_collection_unit_update_userTouser")
+  lk_capture_method_create_user                                                                         lk_capture_method[]                         @relation("lk_capture_method_create_user")
+  lk_capture_method_update_user                                                                         lk_capture_method[]                         @relation("lk_capture_method_update_user")
   lk_cause_of_death_lk_cause_of_death_create_userTouser                                                 lk_cause_of_death[]                         @relation("lk_cause_of_death_create_userTouser")
   lk_cause_of_death_lk_cause_of_death_update_userTouser                                                 lk_cause_of_death[]                         @relation("lk_cause_of_death_update_userTouser")
   lk_collection_category_lk_collection_category_create_userTouser                                       lk_collection_category[]                    @relation("lk_collection_category_create_userTouser")
@@ -544,6 +550,19 @@ model xref_taxon_measurement_quantitative {
   measurement_quantitative                                   measurement_quantitative[]
   user_xref_taxon_measurement_quantitative_create_userTouser user                       @relation("xref_taxon_measurement_quantitative_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_create_user")
   user_xref_taxon_measurement_quantitative_update_userTouser user                       @relation("xref_taxon_measurement_quantitative_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_quantitative_update_user")
+}
+
+model lk_capture_method {
+  capture_method_id String    @id(map: "lk_capture_method_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  method_name       String
+  description       String?
+  create_user       String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user       String    @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp  DateTime  @default(now()) @db.Timestamptz(6)
+  update_timestamp  DateTime  @default(now()) @db.Timestamptz(6)
+  capture           capture[]
+  user_create_user  user      @relation("lk_capture_method_create_user", fields: [create_user], references: [user_id])
+  user_update_user  user      @relation("lk_capture_method_update_user", fields: [update_user], references: [user_id])
 }
 
 enum cod_confidence {

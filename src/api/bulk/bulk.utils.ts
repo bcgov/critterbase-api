@@ -29,7 +29,7 @@ const BulkCreationSchema = z.object({
  * @return {*}
  */
 const getBulkUpdates = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
-  return arr?.filter((val, idx, arr) => !val._delete);
+  return arr?.filter((val) => !val._delete);
 };
 
 /**
@@ -42,7 +42,7 @@ const getBulkUpdates = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
  * @return {*}
  */
 const getBulkDeletes = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
-  return arr?.filter((val, idx, arr) => val._delete);
+  return arr?.filter((val) => val._delete);
 };
 
-export { BulkCreationSchema, getBulkUpdates, getBulkDeletes };
+export { BulkCreationSchema, getBulkDeletes, getBulkUpdates };

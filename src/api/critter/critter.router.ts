@@ -4,14 +4,14 @@ import { getFormat } from '../../utils/helper_functions';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
 
-import { ICbDatabase } from '../../utils/database';
 import {
   CritterCreateSchema,
+  CritterIdsRequestSchema,
   CritterUpdateSchema,
   SimilarCritterQuerySchema,
-  CritterIdsRequestSchema,
   WlhIdQuerySchema
 } from '../../schemas/critter-schema';
+import { ICbDatabase } from '../../utils/database';
 
 /**
  *

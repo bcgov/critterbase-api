@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { Repository } from './base-repository';
 import { z } from 'zod';
 import { apiError } from '../utils/types';
+import { Repository } from './base-repository';
 
 describe('base-repository', () => {
   let mockPrismaClient;

@@ -1,12 +1,11 @@
-import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
+import express, { Request, Response } from 'express';
+import swaggerUIExpress from 'swagger-ui-express';
+import { authenticateRequest } from '../../authentication/auth';
+import { yaml } from '../../swagger';
+import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { UserCreateBodySchema } from '../user/user.utils';
-import swaggerUIExpress from 'swagger-ui-express';
-import { Prisma } from '@prisma/client';
-import { yaml } from '../../swagger';
-import express from 'express';
-import { ICbDatabase } from '../../utils/database';
-import { authenticateRequest } from '../../authentication/auth';
 
 export const AccessRouter = (db: ICbDatabase) => {
   const accessRouter = express.Router();

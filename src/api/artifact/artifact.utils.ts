@@ -49,5 +49,5 @@ const ArtifactUpdateBodySchema = implement<
   .with(ArtifactCreateBodySchema.partial().shape)
   .refine(nonEmpty, 'no new data was provided or the format was invalid');
 
-export { artifactSchema, ArtifactCreateBodySchema, ArtifactUpdateBodySchema, SwagArtifactResponseSchema };
-export type { ArtifactCreate, ArtifactUpdate, ArtifactResponse };
+export { ArtifactCreateBodySchema, artifactSchema, ArtifactUpdateBodySchema, SwagArtifactResponseSchema };
+export type { ArtifactCreate, ArtifactResponse, ArtifactUpdate };

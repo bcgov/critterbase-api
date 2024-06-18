@@ -1,5 +1,7 @@
-import { Prisma } from '@prisma/client';
 import type { mortality } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
+import { DetailedCritterMortalitySchema, IDetailedCritterMortality } from '../schemas/critter-schema';
 import {
   MortalityCreate,
   MortalityDetailed,
@@ -8,7 +10,6 @@ import {
 } from '../schemas/mortality-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
-import { z } from 'zod';
 
 /**
  * Mortality Repository
@@ -262,5 +263,52 @@ export class MortalityRepository extends Repository {
       }
       return mortality;
     });
+  }
+
+  /**
+   * Find a critter's mortality(s).
+   * Business rules allow critters to have multiple mortalities.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<IDetailedCritterMortality[]>} mortalities.
+   */
+  async findCritterMortalities(critterId: string): Promise<IDetailedCritterMortality[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+        SELECT
+          m.mortality_id,
+          m.mortality_timestamp,
+          row_to_json(ml) as location,
+          m.proximate_cause_of_death_id,
+          m.proximate_cause_of_death_confidence,
+          m.ultimate_cause_of_death_id,
+          m.ultimate_cause_of_death_confidence,
+          m.mortality_comment,
+          m.proximate_predated_by_itis_tsn,
+          m.ultimate_predated_by_itis_tsn
+        FROM mortality m
+        JOIN (
+          SELECT
+            l.location_id, l.latitude, l.longitude, l.coordinate_uncertainty,
+            l.region_env_id, l.region_nr_id, l.wmu_id,
+            e.region_env_name, n.region_nr_name, w.wmu_name,
+            l.coordinate_uncertainty_unit, l.elevation, l.temperature, l.location_comment
+          FROM location l
+          LEFT JOIN lk_region_env e ON e.region_env_id = l.region_env_id
+          LEFT JOIN lk_region_nr n ON n.region_nr_id = l.region_nr_id
+          LEFT JOIN lk_wildlife_management_unit w ON w.wmu_id = l.wmu_id
+        ) as ml
+          ON ml.location_id = m.location_id
+        LEFT JOIN lk_cause_of_death pd
+          ON m.proximate_cause_of_death_id = pd.cod_id
+        LEFT JOIN lk_cause_of_death ud
+          ON m.proximate_cause_of_death_id = ud.cod_id
+        WHERE m.critter_id = ${critterId}::uuid
+        GROUP BY m.mortality_id, pd.cod_category, ud.cod_category, pd.cod_reason, ud.cod_reason, ml.*;`,
+      z.array(DetailedCritterMortalitySchema)
+    );
+
+    return result;
   }
 }

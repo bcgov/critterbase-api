@@ -1,15 +1,15 @@
 import { measurement_qualitative, measurement_quantitative } from '@prisma/client';
 import { prisma } from '../../utils/constants';
+import { PrismaTransactionClient } from '../../utils/types';
 import {
-  measurementQualitativeInclude,
-  measurementQuantitativeInclude,
   Measurements,
   QualitativeBody,
   QualitativeUpdateBody,
   QuantitativeBody,
-  QuantitativeUpdateBody
+  QuantitativeUpdateBody,
+  measurementQualitativeInclude,
+  measurementQuantitativeInclude
 } from './measurement.utils';
-import { PrismaTransactionClient } from '../../utils/types';
 
 const getAllQuantMeasurements = async (): Promise<measurement_quantitative[]> => {
   const quantMeasurement = await prisma.measurement_quantitative.findMany();
@@ -118,17 +118,17 @@ const deleteQuantMeasurement = async (
 };
 
 export {
-  getAllQualMeasurements,
-  getQualMeasurementOrThrow,
-  getQuantMeasurementOrThrow,
   createQualMeasurement,
   createQuantMeasurement,
-  getQualMeasurementsByCritterId,
-  getQuantMeasurementsByCritterId,
   deleteQualMeasurement,
   deleteQuantMeasurement,
+  getAllQualMeasurements,
   getAllQuantMeasurements,
   getMeasurementsByCritterId,
-  updateQuantMeasurement,
-  updateQualMeasurement
+  getQualMeasurementOrThrow,
+  getQualMeasurementsByCritterId,
+  getQuantMeasurementOrThrow,
+  getQuantMeasurementsByCritterId,
+  updateQualMeasurement,
+  updateQuantMeasurement
 };

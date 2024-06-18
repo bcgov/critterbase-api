@@ -1,12 +1,17 @@
+import { sex } from '.prisma/client';
+import {
+  Prisma,
+  cod_confidence,
+  coordinate_uncertainty_unit as cuu,
+  frequency_unit,
+  measurement_unit
+} from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
-import { sex } from '.prisma/client';
-import { Prisma } from '@prisma/client';
-import { cod_confidence, coordinate_uncertainty_unit as cuu, frequency_unit, measurement_unit } from '@prisma/client';
+import { eCritterStatus } from '../../schemas/critter-schema';
 import { prisma } from '../../utils/constants';
 import { getBodyLocationByName, getColourByName, getMarkingTypeByName } from './lookup.service';
 import { codFormats } from './lookup.utils';
-import { eCritterStatus } from '../../schemas/critter-schema';
 
 const mockDB = {};
 const request = supertest(makeApp(mockDB as any));

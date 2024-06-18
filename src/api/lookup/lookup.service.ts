@@ -23,4 +23,4 @@ const getMarkingTypeByName = async (marking_name: string): Promise<lk_marking_ty
   });
 };
 
-export { getColourByName, getMarkingTypeByName, getBodyLocationByName };
+export { getBodyLocationByName, getColourByName, getMarkingTypeByName };

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
 import { prisma } from '../../utils/constants';
+import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
 import {
@@ -9,7 +10,6 @@ import {
   FamilyParentCreateBodySchema,
   FamilyUpdateBodySchema
 } from './family.utils';
-import { ICbDatabase } from '../../utils/database';
 
 export const FamilyRouter = (db: ICbDatabase) => {
   const familyRouter = express.Router();

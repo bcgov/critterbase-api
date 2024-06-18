@@ -1,14 +1,14 @@
 import { z } from 'zod';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
 import {
   MortalityCreateSchema,
   MortalityDetailedSchema,
   MortalitySchema,
   MortalityUpdateSchema
 } from '../../schemas/mortality-schema';
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { zodID } from '../../utils/zod_helpers';
 import { routes } from '../../utils/constants';
 import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { zodID } from '../../utils/zod_helpers';
 
 const TAG = 'Mortalities';
 
