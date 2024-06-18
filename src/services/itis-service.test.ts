@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { IItisSolrStub } from '../schemas/itis-schema';
 import { ItisService } from '../services/itis-service';
 jest.mock('axios');
 

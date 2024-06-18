@@ -1,17 +1,17 @@
 import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { routes } from '../../utils/constants';
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 import {
+  CritterCreateSchema,
+  CritterIdsRequestSchema,
   CritterSchema,
   CritterUpdateSchema,
-  CritterCreateSchema,
   DetailedCritterSchema,
-  SimilarCritterQuerySchema,
-  CritterIdsRequestSchema,
-  DetailedManyCritterSchema
+  DetailedManyCritterSchema,
+  SimilarCritterQuerySchema
 } from '../../schemas/critter-schema';
+import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 import { QueryFormats } from '../../utils/types';
+import { zodID } from '../../utils/zod_helpers';
 
 const TAG = 'Critter';
 

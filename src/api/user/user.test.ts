@@ -1,20 +1,20 @@
 import { user } from '@prisma/client';
-import { apiError } from '../../utils/types';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
-import { UserCreateInput, UserSchema } from './user.utils';
+import { apiError } from '../../utils/types';
+import { zodID } from '../../utils/zod_helpers';
 import {
   createUser as _createUser,
-  upsertUser as _upsertUser,
-  getUsers as _getUsers,
-  getUser as _getUser,
-  updateUser as _updateUser,
   deleteUser as _deleteUser,
-  setUserContext as _setUserContext
+  getUser as _getUser,
+  getUsers as _getUsers,
+  setUserContext as _setUserContext,
+  updateUser as _updateUser,
+  upsertUser as _upsertUser
 } from './user.service';
-import { zodID } from '../../utils/zod_helpers';
+import { UserCreateInput, UserSchema } from './user.utils';
 
 // Mock User Objects
 const ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { frequency_unit, marking, Prisma } from '@prisma/client';
 import { z, ZodString } from 'zod';
+import { AuditColumns } from '../../utils/types';
 import {
   DeleteSchema,
   implement,
@@ -15,7 +16,6 @@ import {
   zodAudit,
   zodID
 } from '../../utils/zod_helpers';
-import { AuditColumns } from '../../utils/types';
 // Types
 type MarkingIncludes = Prisma.markingGetPayload<typeof markingIncludes>;
 
@@ -171,12 +171,12 @@ const MarkingVerificationSchema = z.object({
 
 export {
   MarkingCreateBodySchema,
-  MarkingUpdateBodySchema,
-  markingResponseSchema,
+  MarkingDeleteSchema,
   markingIncludes,
   markingIncludesSchema,
-  MarkingDeleteSchema,
+  markingResponseSchema,
+  MarkingUpdateBodySchema,
   MarkingUpdateByIdSchema,
   MarkingVerificationSchema
 };
-export type { MarkingCreateInput, MarkingUpdateInput, MarkingIncludes, MarkingVerificationType };
+export type { MarkingCreateInput, MarkingIncludes, MarkingUpdateInput, MarkingVerificationType };

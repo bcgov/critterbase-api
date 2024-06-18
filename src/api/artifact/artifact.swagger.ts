@@ -1,9 +1,9 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
+import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagNotFound, SwagServerError, SwagUnauthorized } from '../../utils/swagger_helpers';
 import { zodID } from '../../utils/zod_helpers';
 import { ArtifactCreateBodySchema, ArtifactUpdateBodySchema, SwagArtifactResponseSchema } from './artifact.utils';
-import { SwagDesc, SwagErr, SwagNotFound, SwagServerError, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { routes } from '../../utils/constants';
 
 const TAG = 'Artifact';
 

@@ -1,8 +1,11 @@
 import { artifact } from '@prisma/client';
+import { Buffer } from 'buffer';
 import { randomUUID } from 'crypto';
+import supertest from 'supertest';
+import { makeApp } from '../../app';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
-import { ArtifactCreate, ArtifactResponse, ArtifactUpdate, artifactSchema } from './artifact.utils';
+import { apiError } from '../../utils/types';
 import {
   createArtifact as _createArtifact,
   deleteArtifact as _deleteArtifact,
@@ -11,10 +14,7 @@ import {
   getArtifactsByCritterId as _getArtifactsByCritterId,
   updateArtifact as _updateArtifact
 } from './artifact.service';
-import { apiError } from '../../utils/types';
-import { makeApp } from '../../app';
-import supertest from 'supertest';
-import { Buffer } from 'buffer';
+import { ArtifactCreate, ArtifactResponse, ArtifactUpdate, artifactSchema } from './artifact.utils';
 
 // Mock Artifact
 const ID = randomUUID();

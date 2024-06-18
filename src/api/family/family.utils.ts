@@ -62,21 +62,21 @@ type FamilyParentCreate = z.infer<typeof FamilyParentCreateBodySchema>;
 type FamilyChildCreate = z.infer<typeof FamilyChildCreateBodySchema>;
 
 export {
+  FamilyChildCreateBodySchema,
+  FamilyChildDeleteSchema,
   FamilyChildSchema,
   FamilyCreateBodySchema,
-  FamilyUpdateBodySchema,
   FamilyParentCreateBodySchema,
-  FamilyChildCreateBodySchema,
-  FamilySchema,
-  FamilyParentSchema,
   FamilyParentDeleteSchema,
-  FamilyChildDeleteSchema
+  FamilyParentSchema,
+  FamilySchema,
+  FamilyUpdateBodySchema
 };
 export type {
-  ImmediateFamily,
-  ImmediateFamilyCritter,
-  FamilyUpdate,
-  FamilyCreate,
   FamilyChildCreate,
-  FamilyParentCreate
+  FamilyCreate,
+  FamilyParentCreate,
+  FamilyUpdate,
+  ImmediateFamily,
+  ImmediateFamilyCritter
 };

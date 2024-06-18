@@ -1,7 +1,9 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { z } from 'zod';
 import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex } from '@prisma/client';
+import { z } from 'zod';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
+import { eCritterStatus } from '../../schemas/critter-schema';
 import { routes } from '../../utils/constants';
+import { SwagErr, SwagServerError, SwagUnauthorized } from '../../utils/swagger_helpers';
 import {
   LookUpColourSchema,
   LookUpMarkingTypeSchema,
@@ -13,8 +15,6 @@ import {
   LookupWmuSchema,
   zodID
 } from '../../utils/zod_helpers';
-import { SwagErr, SwagServerError, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { eCritterStatus } from '../../schemas/critter-schema';
 
 const availValues = 'Available values for this enumerated type.';
 const availRows = 'Available rows for this type of data as specified in a lookup table.';
