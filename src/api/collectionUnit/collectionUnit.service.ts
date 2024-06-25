@@ -96,10 +96,10 @@ const deleteCollectionUnit = async (
 };
 
 export {
+  createCollectionUnit,
+  deleteCollectionUnit,
   getAllCollectionUnits,
   getCollectionUnitById,
   getCollectionUnitsByCritterId,
-  updateCollectionUnit,
-  createCollectionUnit,
-  deleteCollectionUnit
+  updateCollectionUnit
 };

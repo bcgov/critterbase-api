@@ -1,38 +1,16 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
-import { zodID } from '../../utils/zod_helpers';
-import { CaptureCreateSchema, CaptureIncludeSchema, CaptureUpdateSchema } from './capture.utils';
-import { CommonLocationValidation } from '../location/location.utils';
-
-const SwaggerCaptureResponseValidation = CaptureIncludeSchema.omit({
-  location_capture_capture_location_idTolocation: true,
-  location_capture_release_location_idTolocation: true
-}).extend({
-  capture_location: CommonLocationValidation.nullable(),
-  release_location: CommonLocationValidation.nullable()
-});
-import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
+import {
+  CaptureCreateSchema,
+  CaptureSchema,
+  CaptureUpdateSchema,
+  DetailedCaptureSchema
+} from '../../schemas/capture-schema';
 import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { zodID } from '../../utils/zod_helpers';
 
 const TAG = 'Capture';
-
-const getCaptures: ZodOpenApiOperationObject = {
-  operationId: 'getCaptures',
-  summary: 'Gets all capture events',
-  tags: [TAG],
-  responses: {
-    '200': {
-      description: SwagDesc.get,
-      content: {
-        'application/json': {
-          schema: z.array(SwaggerCaptureResponseValidation)
-        }
-      }
-    },
-    ...SwagErr,
-    ...SwagUnauthorized
-  }
-};
 
 const createCapture: ZodOpenApiOperationObject = {
   operationId: 'createCapture',
@@ -51,7 +29,7 @@ const createCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.create,
       content: {
         'application/json': {
-          schema: SwaggerCaptureResponseValidation
+          schema: CaptureSchema
         }
       }
     },
@@ -61,7 +39,7 @@ const createCapture: ZodOpenApiOperationObject = {
   }
 };
 
-const getCaptureByCritterId: ZodOpenApiOperationObject = {
+const findCritterCaptures: ZodOpenApiOperationObject = {
   operationId: 'getCaptureByCritterId',
   summary: 'Gets all captures with a specific critter id',
   tags: [TAG],
@@ -73,7 +51,7 @@ const getCaptureByCritterId: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'application/json': {
-          schema: z.array(SwaggerCaptureResponseValidation)
+          schema: z.array(DetailedCaptureSchema)
         }
       }
     },
@@ -95,7 +73,7 @@ const getCaptureById: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'application/json': {
-          schema: SwaggerCaptureResponseValidation
+          schema: DetailedCaptureSchema
         }
       }
     },
@@ -126,7 +104,7 @@ const updateCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.update,
       content: {
         'application/json': {
-          schema: SwaggerCaptureResponseValidation
+          schema: CaptureSchema
         }
       }
     },
@@ -148,7 +126,7 @@ const deleteCapture: ZodOpenApiOperationObject = {
       description: SwagDesc.delete,
       content: {
         'application/json': {
-          schema: SwaggerCaptureResponseValidation
+          schema: CaptureSchema
         }
       }
     },
@@ -159,14 +137,11 @@ const deleteCapture: ZodOpenApiOperationObject = {
 };
 
 export const capturePaths = {
-  [routes.captures]: {
-    get: getCaptures
-  },
   [`${routes.captures}/create`]: {
     post: createCapture
   },
   [`${routes.captures}/critter/{id}`]: {
-    get: getCaptureByCritterId
+    get: findCritterCaptures
   },
   [`${routes.captures}/{id}`]: {
     get: getCaptureById,

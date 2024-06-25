@@ -1,10 +1,10 @@
-import express, { NextFunction } from 'express';
 import type { Request, Response } from 'express';
-import { catchErrors } from '../../utils/middleware';
-import { ArtifactCreateBodySchema, ArtifactUpdateBodySchema } from './artifact.utils';
-import { uuidParamsSchema } from '../../utils/zod_helpers';
+import express, { NextFunction } from 'express';
 import { ICbDatabase } from '../../utils/database';
+import { catchErrors } from '../../utils/middleware';
 import { upload } from '../../utils/object_store';
+import { uuidParamsSchema } from '../../utils/zod_helpers';
+import { ArtifactCreateBodySchema, ArtifactUpdateBodySchema } from './artifact.utils';
 
 export const ArtifactRouter = (db: ICbDatabase) => {
   const artifactRouter = express.Router();

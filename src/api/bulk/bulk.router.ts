@@ -1,19 +1,25 @@
 import express, { Request, Response } from 'express';
-import { catchErrors } from '../../utils/middleware';
-import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../capture/capture.utils';
-import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
+import { z } from 'zod';
+import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
+import { BulkCritterCreateSchema, CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
-import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
-import { BulkCreationSchema, getBulkDeletes, getBulkUpdates } from './bulk.utils';
+import { ICbDatabase } from '../../utils/database';
+import { catchErrors } from '../../utils/middleware';
+import { zodID } from '../../utils/zod_helpers';
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitDeleteSchema,
   CollectionUnitUpsertSchema
 } from '../collectionUnit/collectionUnit.utils';
-import { z } from 'zod';
-import { LocationUpdateSchema } from '../location/location.utils';
-import { zodID } from '../../utils/zod_helpers';
-import { ICbDatabase } from '../../utils/database';
+import {
+  FamilyChildCreateBodySchema,
+  FamilyChildDeleteSchema,
+  FamilyCreateBodySchema,
+  FamilyParentCreateBodySchema,
+  FamilyParentDeleteSchema
+} from '../family/family.utils';
+import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
 import {
   QualitativeCreateSchema,
   QualitativeDeleteSchema,
@@ -22,14 +28,8 @@ import {
   QuantitativeDeleteSchema,
   QuantitativeUpdateSchema
 } from '../measurement/measurement.utils';
-import {
-  FamilyChildCreateBodySchema,
-  FamilyChildDeleteSchema,
-  FamilyCreateBodySchema,
-  FamilyParentCreateBodySchema,
-  FamilyParentDeleteSchema
-} from '../family/family.utils';
-import { BulkCritterCreateSchema, CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
+import { BulkCreationSchema, getBulkDeletes, getBulkUpdates } from './bulk.utils';
 
 export const BulkRouter = (db: ICbDatabase) => {
   const bulkRouter = express.Router();
@@ -106,7 +106,7 @@ export const BulkRouter = (db: ICbDatabase) => {
 
       const familyChildren = families?.children ? z.array(FamilyChildCreateBodySchema).parse(families.children) : [];
 
-      const results = await db.bulkCreateData({
+      const results = await db.bulkService.repository.createEntities({
         critters: crittersAppend,
         collections: parsedCollections,
         markings: markingsAppend,

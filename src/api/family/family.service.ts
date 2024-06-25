@@ -1,7 +1,7 @@
-import { prisma } from '../../utils/constants';
 import type { critter, family, family_child, family_parent } from '@prisma/client';
-import { FamilyUpdate, ImmediateFamily } from './family.utils';
+import { prisma } from '../../utils/constants';
 import { PrismaTransactionClient } from '../../utils/types';
+import { FamilyUpdate, ImmediateFamily } from './family.utils';
 
 const getAllFamilies = async (): Promise<family[]> => {
   return await prisma.family.findMany();
@@ -200,20 +200,20 @@ const getImmediateFamily = async (family_id: string): Promise<ImmediateFamily> =
 };
 
 export {
-  getAllFamilies,
-  getAllChildren,
-  getAllParents,
-  getParentsOfCritterId,
-  getChildrenOfCritterId,
-  getSiblingsOfCritterId,
-  getImmediateFamily,
-  getFamilyById,
-  getFamilyByLabel,
-  makeChildOfFamily,
-  makeParentOfFamily,
   createNewFamily,
   deleteFamily,
-  updateFamily,
+  getAllChildren,
+  getAllFamilies,
+  getAllParents,
+  getChildrenOfCritterId,
+  getFamilyById,
+  getFamilyByLabel,
+  getImmediateFamily,
+  getParentsOfCritterId,
+  getSiblingsOfCritterId,
+  makeChildOfFamily,
+  makeParentOfFamily,
   removeChildOfFamily,
-  removeParentOfFamily
+  removeParentOfFamily,
+  updateFamily
 };

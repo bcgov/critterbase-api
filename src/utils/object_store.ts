@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import multer from 'multer';
 import { apiError } from './types';
@@ -114,11 +114,11 @@ const getFileDownloadUrl = async (fileName: string): Promise<string> => {
 };
 
 export {
-  upload,
-  _getS3Client,
-  _getObjectStoreUrl,
   _getObjectStoreBucketName,
+  _getObjectStoreUrl,
+  _getS3Client,
+  getFileDownloadUrl,
   getS3HostUrl,
-  uploadFileToS3,
-  getFileDownloadUrl
+  upload,
+  uploadFileToS3
 };

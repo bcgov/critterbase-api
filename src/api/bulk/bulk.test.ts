@@ -1,23 +1,12 @@
+import { capture, critter, critter_collection_unit, location, marking, mortality } from '@prisma/client';
 import supertest from 'supertest';
-import {
-  bulkCreateData as _bulkCreateData,
-  bulkUpdateData as _bulkUpdateData,
-  bulkDeleteData as _bulkDeleteData,
-  bulkErrMap
-} from './bulk.service';
 import { makeApp } from '../../app';
+import { PrismaClientExtended } from '../../client/client';
+import { BulkRepository } from '../../repositories/bulk-repository';
+import { BulkService } from '../../services/bulk-service';
 import { prisma } from '../../utils/constants';
-import {
-  capture,
-  critter,
-  critter_collection_unit,
-  marking,
-  measurement_qualitative,
-  measurement_quantitative,
-  mortality,
-  location
-} from '@prisma/client';
-import { PrismaTransactionClient, apiError } from '../../utils/types';
+import { apiError } from '../../utils/types';
+import { bulkDeleteData as _bulkDeleteData, bulkUpdateData as _bulkUpdateData, bulkErrMap } from './bulk.service';
 
 const bulkCreateData = jest.fn();
 const bulkUpdateData = jest.fn();
@@ -30,29 +19,31 @@ const appendDefaultCOD = jest.fn();
 const deleteMarking = jest.fn();
 const deleteCollectionUnit = jest.fn();
 const patchTsnAndScientificName = jest.fn();
+const deleteMultipleCaptures = jest.fn().mockResolvedValue({ count: 1 });
+const createEntities = jest.fn();
 
 const db: any = {
   bulkCreateData,
   bulkUpdateData,
   bulkDeleteData,
-  updateCapture,
   updateMortality,
   appendEnglishTaxonAsUUID,
   appendEnglishMarkingsAsUUID,
   deleteMarking,
   deleteCollectionUnit,
+  bulkService: { repository: { createEntities } },
   itisService: { patchTsnAndScientificName },
-  mortalityService: { appendDefaultCOD, updateMortality }
+  mortalityService: { appendDefaultCOD, updateMortality },
+  captureService: { updateCapture, deleteMultipleCaptures }
 };
 
 const request = supertest(makeApp(db));
 
 const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
-const OTHER_CRITTER_ID = '27e2b7c9-2754-4286-9eb9-fd4f0a8378ef';
 const WLH_ID = '12-1234';
 const CRITTER: critter = {
   itis_tsn: 1,
-  //itis_scientific_name: 'alces',
+  itis_scientific_name: 'alces',
   critter_id: CRITTER_ID,
   wlh_id: WLH_ID,
   animal_id: 'A13',
@@ -92,10 +83,13 @@ const MARKING: marking = {
 const CAPTURE: capture = {
   capture_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   critter_id: CRITTER_ID,
+  capture_method_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   capture_location_id: null,
   release_location_id: null,
-  capture_timestamp: new Date(),
-  release_timestamp: null,
+  capture_date: new Date(),
+  capture_time: new Date(),
+  release_date: null,
+  release_time: null,
   capture_comment: null,
   release_comment: null,
   create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
@@ -120,60 +114,6 @@ const MORTALITY: mortality = {
   update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   create_timestamp: new Date(),
   update_timestamp: new Date()
-};
-
-const QUALITATIVE: measurement_qualitative = {
-  measurement_qualitative_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  critter_id: CRITTER_ID,
-  taxon_measurement_id: '98f9fede-95fc-4321-9444-7c2742e336fe',
-  capture_id: null,
-  mortality_id: null,
-  qualitative_option_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  measurement_comment: null,
-  measured_timestamp: null,
-  create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  create_timestamp: new Date(),
-  update_timestamp: new Date()
-};
-
-const QUANTITATIVE: measurement_quantitative = {
-  measurement_quantitative_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  critter_id: CRITTER_ID,
-  taxon_measurement_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  capture_id: null,
-  mortality_id: null,
-  value: 0,
-  measurement_comment: null,
-  measured_timestamp: null,
-  create_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  create_timestamp: new Date(),
-  update_timestamp: new Date()
-};
-
-const DEFAULTFORMAT_CRITTER = {
-  ...CRITTER,
-  lk_taxon: {
-    taxon_name_common: 'Caribou',
-    taxon_name_latin: 'Rangifer tarandus'
-  },
-  lk_region_nr: {
-    region_nr_name: 'Somewhere'
-  },
-  critter_collection_unit: [
-    {
-      xref_collection_unit: {
-        lk_collection_category: {
-          category_name: 'name',
-          collection_category_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50'
-        },
-        unit_name: 'name',
-        unit_description: 'desc'
-      }
-    }
-  ],
-  mortality: [MORTALITY]
 };
 
 const COLLECTION: critter_collection_unit = {
@@ -202,18 +142,6 @@ const LOCATION: location = {
   update_user: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   create_timestamp: new Date(),
   update_timestamp: new Date()
-};
-
-const DETAILEDFORMAT_CRITTER = {
-  ...DEFAULTFORMAT_CRITTER,
-  user_critter_create_userTouser: {
-    system_name: 'CRITTERBASE'
-  },
-  capture: [CAPTURE],
-  mortality: [MORTALITY],
-  marking: [MARKING],
-  measurement_qualitative: [QUALITATIVE],
-  measurement_quantitative: [QUANTITATIVE]
 };
 
 const prismaMock = {
@@ -253,11 +181,12 @@ const prismaMock = {
   },
   family_parent: {
     createMany: jest.fn().mockResolvedValue({ count: 1 })
-  }
+  },
+  $transaction: (callback: any) => callback(prismaMock)
 };
 jest
   .spyOn(prisma, '$transaction')
-  .mockImplementation((callback) => callback(prismaMock as unknown as PrismaTransactionClient));
+  .mockImplementation((callback) => callback(prismaMock as unknown as PrismaClientExtended));
 
 describe('API: Bulk', () => {
   describe('SERVICES', () => {
@@ -274,7 +203,9 @@ describe('API: Bulk', () => {
         prismaMock.measurement_qualitative.createMany.mockResolvedValue({
           count: 1
         });
-        const result = await _bulkCreateData({
+
+        const bulkService = new BulkService(new BulkRepository(prismaMock as unknown as PrismaClientExtended));
+        await bulkService.repository.createEntities({
           critters: [CRITTER],
           collections: [COLLECTION],
           locations: [LOCATION],
@@ -475,10 +406,17 @@ describe('API: Bulk', () => {
           itis_scientific_name: 'Biggus Moosus'
         });
         const body = {
-          critters: [CRITTER],
+          critters: [{ critter_id: CRITTER_ID, animal_id: 'steve', sex: 'Male', itis_tsn: 123456 }],
           collections: [COLLECTION],
           locations: [LOCATION],
-          captures: [CAPTURE],
+          captures: [
+            {
+              capture_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              critter_id: CRITTER_ID,
+              capture_method_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              capture_date: new Date()
+            }
+          ],
           mortalities: [MORTALITY],
           markings: [MARKING],
           quantitative_measurements: [],
@@ -499,12 +437,19 @@ describe('API: Bulk', () => {
     describe('PATCH /api/bulk', () => {
       it('should return status 200', async () => {
         const body = {
-          critters: [CRITTER],
-          collections: [COLLECTION, { ...COLLECTION, _delete: true }],
+          critters: [{ critter_id: CRITTER_ID, animal_id: 'steve', sex: 'Male', itis_tsn: 123456 }],
+          collections: [COLLECTION],
           locations: [LOCATION],
-          captures: [CAPTURE],
+          captures: [
+            {
+              capture_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              critter_id: CRITTER_ID,
+              capture_method_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
+              capture_date: new Date()
+            }
+          ],
           mortalities: [MORTALITY],
-          markings: [MARKING, { ...MARKING, _delete: true }],
+          markings: [MARKING],
           quantitative_measurements: [],
           qualitative_measurements: [],
           families: { families: [], parents: [], children: [] }

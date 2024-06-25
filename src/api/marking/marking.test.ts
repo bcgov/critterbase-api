@@ -1,21 +1,21 @@
+import { critter, lk_colour, marking, xref_taxon_marking_body_location } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { markingResponseSchema } from './marking.utils';
+import supertest from 'supertest';
+import { makeApp } from '../../app';
 import { prisma } from '../../utils/constants';
+import { ICbDatabase } from '../../utils/database';
+import { apiError } from '../../utils/types';
+import * as lookups from '../lookup/lookup.service';
 import {
+  appendEnglishMarkingsAsUUID as _appendEnglishMarkingsAsUUID,
   createMarking as _createMarking,
   deleteMarking as _deleteMarking,
   getAllMarkings as _getAllMarkings,
   getMarkingById as _getMarkingById,
   getMarkingsByCritterId as _getMarkingsByCritterId,
-  updateMarking as _updateMarking,
-  appendEnglishMarkingsAsUUID as _appendEnglishMarkingsAsUUID
+  updateMarking as _updateMarking
 } from './marking.service';
-import { makeApp } from '../../app';
-import supertest from 'supertest';
-import { ICbDatabase } from '../../utils/database';
-import { critter, lk_colour, marking, xref_taxon_marking_body_location } from '@prisma/client';
-import { apiError } from '../../utils/types';
-import * as lookups from '../lookup/lookup.service';
+import { markingResponseSchema } from './marking.utils';
 
 const createMarking = jest.fn();
 const getAllMarkings = jest.fn();

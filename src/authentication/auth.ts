@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { Request } from 'express';
-import { apiError } from '../utils/types';
 import { JwtPayload, decode, verify } from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';
+import { apiError } from '../utils/types';
 
 const KEYCLOAK_URL = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/certs`;
 const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}`;

@@ -1,10 +1,9 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import e, { Request } from 'express';
+import { Request } from 'express';
 // import { app } from "../server";
 import {
   formatParse,
   getFormat,
-  getParentTaxonIds,
   intersect,
   prismaErrorMsg,
   prisMock,
@@ -12,12 +11,11 @@ import {
   toSelect
 } from './helper_functions';
 // import { catchErrors, errorHandler, errorLogger } from "./middleware";
+import { randomUUID } from 'crypto';
 import { ZodError, ZodIssueCode } from 'zod';
-import { prisma } from './constants';
 import * as mw from './middleware';
 import { apiError, FormatParse, QueryFormats } from './types';
 import { NumberToString, ResponseSchema } from './zod_helpers';
-import { randomUUID } from 'crypto';
 
 const ID = 'e47da43e-bb5b-46e9-8403-f0eff31e5522';
 const KEYCLOAK_ID = 'ababababababababababababababababab';
@@ -71,7 +69,7 @@ describe('Utils', () => {
       });
     });
     describe(prismaErrorMsg.name, () => {
-      const defaultMsg = `request failed at database: "BADCODE"`;
+      const defaultMsg = `Request failed at database: "BADCODE"`;
       const supportedErrorCodes = ['P2025', 'P2002', 'P2003'];
       let ops: any = {
         code: undefined,
@@ -255,7 +253,7 @@ describe('Utils', () => {
         middleware.errorHandler(new Error(), mockReq, mockRes, mockNext);
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toEqual({
-          error: 'unknown error'
+          error: 'Unknown error'
         });
       });
       it('should catch apiError', () => {
@@ -275,7 +273,7 @@ describe('Utils', () => {
         );
         expect(mockRes.status.mock.calls[0][0]).toBe(400);
         expect(mockRes.json.mock.calls[0][0]).toEqual({
-          error: `request failed at database: "Prisma"`,
+          error: `Request failed at database: "Prisma"`,
           issues: [undefined]
         });
       });

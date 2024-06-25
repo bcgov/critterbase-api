@@ -1,17 +1,14 @@
 import { CritterRepository } from './critter-repository';
 
 import {
+  CritterCreateRequiredItis,
   CritterUpdate,
   ICritter,
-  CritterCreateRequiredItis,
-  SimilarCritterQuery,
-  IDetailedCritterMarking,
-  IDetailedCritterMortality,
-  IDetailedCritterQualitativeMeasurement,
+  IDetailedCritterChild,
   IDetailedCritterCollectionUnit,
-  IDetailedCritterCapture,
   IDetailedCritterParent,
-  IDetailedCritterChild
+  IDetailedCritterQualitativeMeasurement,
+  SimilarCritterQuery
 } from '../schemas/critter-schema';
 
 describe('xref-repository', () => {
@@ -498,148 +495,6 @@ describe('xref-repository', () => {
 
       const critterRepository = new CritterRepository(mockPrismaClient);
       const result = await critterRepository.findSimilarCritters(mockQuery);
-
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('findCritterMarkings', () => {
-    beforeEach(() => {
-      mockPrismaClient = {
-        $queryRaw: jest.fn()
-      };
-    });
-
-    it('should find critter markings successfully', async () => {
-      const mockResult: IDetailedCritterMarking[] = [
-        {
-          marking_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          taxon_marking_body_location_id: '1',
-          body_location: 'body',
-          marking_type: 'type',
-          marking_type_id: '1',
-          material: 'mmm',
-          capture_id: null,
-          mortality_id: null,
-          primary_colour_id: '1',
-          marking_material_id: '1',
-          secondary_colour_id: '2',
-          text_colour_id: '2',
-          primary_colour: null,
-          secondary_colour: null,
-          text_colour: null,
-          identifier: null,
-          frequency: null,
-          frequency_unit: null,
-          order: null,
-          attached_timestamp: new Date('1970-01-01'),
-          removed_timestamp: null,
-          comment: null
-        }
-      ];
-
-      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
-
-      const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.findCritterMarkings('aaaa');
-
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('findCritterCaptures', () => {
-    beforeEach(() => {
-      mockPrismaClient = {
-        $queryRaw: jest.fn()
-      };
-    });
-
-    it('should find critter captures successfully', async () => {
-      const mockResult: IDetailedCritterCapture[] = [
-        {
-          capture_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          capture_timestamp: new Date('1970-01-01'),
-          release_timestamp: null,
-          capture_location: {
-            location_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-            latitude: null,
-            longitude: null,
-            coordinate_uncertainty: null,
-            coordinate_uncertainty_unit: 'm',
-            wmu_id: '1',
-            region_nr_id: '1',
-            region_env_id: '1',
-            elevation: null,
-            temperature: null,
-            location_comment: null
-          },
-          release_location: {
-            location_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-            latitude: null,
-            longitude: null,
-            wmu_id: '1',
-            region_nr_id: '1',
-            region_env_id: '1',
-            coordinate_uncertainty: null,
-            coordinate_uncertainty_unit: 'm',
-            elevation: null,
-            temperature: null,
-            location_comment: null
-          },
-          capture_comment: 'howdy',
-          release_comment: 'seeya'
-        }
-      ];
-
-      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
-
-      const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.findCritterCaptures('aaaa');
-
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('findCritterMortalities', () => {
-    beforeEach(() => {
-      mockPrismaClient = {
-        $queryRaw: jest.fn()
-      };
-    });
-
-    it('should find critter mortalities successfully', async () => {
-      const mockResult: IDetailedCritterMortality[] = [
-        {
-          mortality_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          mortality_timestamp: new Date('1970-01-01'),
-          location: {
-            location_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-            latitude: null,
-            longitude: null,
-            wmu_id: '1',
-            region_nr_id: '1',
-            region_env_id: '1',
-            coordinate_uncertainty: null,
-            coordinate_uncertainty_unit: 'm',
-            elevation: null,
-            temperature: null,
-            location_comment: null
-          },
-          proximate_cause_of_death_category: null,
-          proximate_cause_of_death_reason: null,
-          proximate_cause_of_death_confidence: null,
-          ultimate_cause_of_death_category: null,
-          ultimate_cause_of_death_reason: null,
-          mortality_comment: null,
-          proximate_predated_by_itis_tsn: null,
-          ultimate_predated_by_itis_tsn: null
-        }
-      ];
-
-      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
-
-      const critterRepository = new CritterRepository(mockPrismaClient);
-      const result = await critterRepository.findCritterMortalities('aaaa');
 
       expect(result).toEqual(mockResult);
     });

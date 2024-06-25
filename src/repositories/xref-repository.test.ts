@@ -1,5 +1,5 @@
-import { XrefRepository } from './xref-repository';
 import { ICollectionCategoryDef, ITsnMarkingBodyLocation } from '../schemas/xref-schema';
+import { XrefRepository } from './xref-repository';
 
 describe('xref-repository', () => {
   let mockPrismaClient;

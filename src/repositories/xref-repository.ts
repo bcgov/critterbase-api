@@ -1,4 +1,4 @@
-import { Repository } from './base-repository';
+import { Prisma } from '@prisma/client';
 import {
   CollectionUnitSchema,
   ICollectionCategoryDef,
@@ -10,7 +10,7 @@ import {
   ITsnQuantitativeMeasurement,
   TsnQualitativeMeasurementSchema
 } from '../schemas/xref-schema';
-import { Prisma } from '@prisma/client';
+import { Repository } from './base-repository';
 
 export class XrefRepository extends Repository {
   /**
@@ -61,12 +61,12 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ICollectionCategoryDef[]>}
    */
   async getTsnCollectionCategories(tsns: number[]): Promise<ICollectionCategoryDef[]> {
-    const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
+    const result = (await this.prisma.$queryRaw`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
       FROM lk_collection_category cc
       INNER JOIN xref_taxon_collection_category x
       ON x.collection_category_id = cc.collection_category_id
-      AND x.itis_tsn = ANY(${tsns});`;
+      AND x.itis_tsn = ANY(${tsns});`) as ICollectionCategoryDef[];
 
     return result;
   }

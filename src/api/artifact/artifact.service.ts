@@ -1,8 +1,8 @@
-import { prisma } from '../../utils/constants';
 import { artifact } from '@prisma/client';
-import { ArtifactCreate, ArtifactResponse, ArtifactUpdate } from './artifact.utils';
 import { randomUUID } from 'crypto';
+import { prisma } from '../../utils/constants';
 import { Metadata, getFileDownloadUrl, uploadFileToS3 } from '../../utils/object_store';
+import { ArtifactCreate, ArtifactResponse, ArtifactUpdate } from './artifact.utils';
 
 /**
  * * Gets an artifact by the artifact_id
@@ -103,4 +103,4 @@ const addSignedUrlToArtifact = async (artifact: artifact): Promise<ArtifactRespo
 const addSignedUrlToArtifacts = async (artifacts: artifact[]): Promise<ArtifactResponse[]> =>
   Promise.all(artifacts.map(addSignedUrlToArtifact));
 
-export { getArtifactById, getArtifactsByCritterId, getAllArtifacts, updateArtifact, createArtifact, deleteArtifact };
+export { createArtifact, deleteArtifact, getAllArtifacts, getArtifactById, getArtifactsByCritterId, updateArtifact };

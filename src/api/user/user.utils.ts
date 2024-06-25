@@ -38,5 +38,5 @@ const AuthLoginSchema = z.object({
   keycloak_uuid: z.string()
 });
 
-export { UserCreateBodySchema, UserUpdateBodySchema, AuthLoginSchema, UserSchema, SwagUserSchema };
-export type { UserCreateInput, UserUpdateInput, LoginCredentials };
+export { SwagUserSchema, UserCreateBodySchema, UserSchema, UserUpdateBodySchema };
+export type { LoginCredentials, UserCreateInput, UserUpdateInput };

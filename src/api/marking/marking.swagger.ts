@@ -1,10 +1,14 @@
 import { z } from 'zod';
-import { MarkingCreateBodySchema, MarkingVerificationSchema, markingIncludesSchema } from './marking.utils';
 import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { zodID } from '../../utils/zod_helpers';
-import { MarkingUpdateBodySchema } from './marking.utils';
 import { routes } from '../../utils/constants';
 import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
+import { zodID } from '../../utils/zod_helpers';
+import {
+  MarkingCreateBodySchema,
+  MarkingUpdateBodySchema,
+  MarkingVerificationSchema,
+  markingIncludesSchema
+} from './marking.utils';
 
 const TAG = 'Markings';
 const SwaggerMarkingResponseValidation = markingIncludesSchema

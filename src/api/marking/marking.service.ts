@@ -117,11 +117,11 @@ const appendEnglishMarkingsAsUUID = async (
 };
 
 export {
+  appendEnglishMarkingsAsUUID,
+  createMarking,
+  deleteMarking,
   getAllMarkings,
   getMarkingById,
   getMarkingsByCritterId,
-  updateMarking,
-  createMarking,
-  deleteMarking,
-  appendEnglishMarkingsAsUUID
+  updateMarking
 };
