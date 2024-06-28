@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import {
   CollectionUnitCategoryIdSchema,
   CollectionUnitCategoryQuerySchema,
+  CollectionUnitTaxonQuerySchema,
   MeasurementIdsQuerySchema,
   MeasurementSearchQuery
 } from '../../schemas/xref-schema';
@@ -21,6 +22,7 @@ export const XrefRouter = (db: ICbDatabase) => {
    * @query category_name - Name of the collection cateogory.
    * @query itis_scientific_name - ITIS scientific name.
    *
+   * NOTE: This might be deprecated - taxon-collection-units is preferred
    */
   xrefRouter.get(
     '/collection-units',
@@ -31,6 +33,24 @@ export const XrefRouter = (db: ICbDatabase) => {
         category_name,
         itis_scientific_name
       );
+
+      return res.status(200).json(response);
+    })
+  );
+
+  /**
+   * Endpoint to retrieve 'taxon collection units'.
+   *
+   * @query category_name - Name of the collection cateogory.
+   * @query tsn - ITIS TSN.
+   *
+   */
+  xrefRouter.get(
+    '/taxon-collection-units',
+    catchErrors(async (req: Request, res: Response) => {
+      const { tsn } = CollectionUnitTaxonQuerySchema.parse(req.query);
+
+      const response = await db.xrefService.findCollectionUnitsFromTsn(tsn);
 
       return res.status(200).json(response);
     })
@@ -72,7 +92,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnCollectionCategories(tsn, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -91,7 +111,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnMarkingBodyLocations(tsn, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -111,7 +131,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnQualitativeMeasurements(tsn, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -131,7 +151,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getQualitativeMeasurementsByIds(taxon_measurement_ids, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -150,7 +170,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnQuantitativeMeasurements(tsn, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -170,7 +190,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getQuantitativeMeasurementsByIds(taxon_measurement_ids, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -189,7 +209,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.getTsnMeasurements(tsn, format);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
@@ -218,7 +238,7 @@ export const XrefRouter = (db: ICbDatabase) => {
 
       const response = await db.xrefService.searchForMeasurements(search);
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     })
   );
 
