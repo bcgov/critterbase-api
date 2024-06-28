@@ -1,6 +1,8 @@
+-- Update existing tables with new taxa-based variables
+
+
 --Update measurement measurement_descs
 -- Surely there has to be a way to refine this code to make it less repetitive, I keep trying different things and I just get errors.
-
 
 UPDATE xref_taxon_measurement_quantitative 
 SET measurement_desc = CASE 
@@ -49,44 +51,106 @@ SET measurement_desc = CASE
     ELSE measurement_desc
 END;
 
+--Insert data related to Fish specific variables
+--Need to watch out for duplications and for previous tsn's that would show up at other species levels.
+--Years and unitys as a type will likely need to be created
+-- The concept of Age structure and age sample is probably bad. This represents how it was in the old system but this needs to be broken down into its smaller subparts and their specific units i.e otolths need to be counted in ringsvs fin ray units - whatever that is. -- changed to millimeters for testing purposes from age sample. Make sure this is changed back
 
+--161051 coelocanth and 161039 lungfish cannot be condensed into the higher order of sarcopteryggi as this includes tetrapods etc 
 
-    /*
+-- Chondrichthyes - 159785 - Also need to be added to all of the aspects.
 
+INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
+VALUES
+    (161061, 'fish total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
+    (161061, 'fish standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161051, 'fish total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
+    (161051, 'fish standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161039, 'fish total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
+    (161039, 'fish standard length', 0, 10000, 'millimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+
+    (161061, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
+    (161051, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
+    (161039, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
+    (161061, 'genetic sample', 0, 1000, 'millimeter', 'A unique identification assigned to each body structure used to determine genetic.'),
+    (161051, 'genetic sample', 0, 1000, 'millimeter', 'A unique identification assigned to each body structure used to determine age.'),
+    (161039, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each body structure used to determine age.'),
+    (161061, 'age', 0, 1000, 'millimeter', 'Age in years.'),
+    (161051, 'age', 0, 1000, 'millimeter', 'Age in years.'),
+    (161039, 'age', 0, 1000, 'millimeter', 'Age in years.');
+
+-- First, insert and capture the results
 WITH MeasurementIDs AS (
-    INSERT INTO xref_taxon_measurement_qualitative (itis_tsn, measurement_measurement_name)
+    INSERT INTO xref_taxon_measurement_qualitative (itis_tsn, measurement_name)
     VALUES
-        (179913, 'fur colour (primary)'),
-        (179913, 'fur colour (secondary)'),
-        (174371, 'life stage'),
-        (180692, 'antler configuration'),
-        (202423, 'sex')
-    RETURNING itis_tsn, taxon_itis_tsn, measurement_measurement_name
+        (161061, 'sex'),
+        (161051, 'sex'),
+        (161039, 'sex'),
+        (161061, 'maturity'),
+        (161051, 'maturity'),
+        (161039, 'maturity'),
+        (161061, 'Age structure'),
+        (161051, 'Age structure'),
+        (161039, 'Age structure'),
+        (161061, 'Genetic structure'),
+        (161051, 'Genetic structure'),
+        (161039, 'Genetic structure')
+    RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
-INSERT INTO xref_taxon_measurement_qualitative_option (taxon_itis_tsn, option_label, option_value)
-SELECT m.taxon_itis_tsn, o.option_label, o.option_value
+
+INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_value)
+SELECT m.taxon_measurement_id, o.option_label, o.option_value
 FROM (
     SELECT * FROM (
         VALUES
-            (179913, 'fur colour (primary)', 'black', 0),
-            (179913, 'fur colour (primary)', 'brown', 1),
-            (179913, 'fur colour (primary)', 'grey', 2),
-            (179913, 'fur colour (primary)', 'white', 3),
-            (179913, 'fur colour (primary)', 'orange', 4),
-            (179913, 'fur colour (secondary)', 'black', 5),
-            (179913, 'fur colour (secondary)', 'brown', 6),
-            (179913, 'fur colour (secondary)', 'grey', 7),
-            (179913, 'fur colour (secondary)', 'white', 8),
-            (179913, 'fur colour (secondary)', 'orange', 9),
-            (174371, 'life stage', 'nestling', 0),
-            (174371, 'life stage', 'fledgling', 1),
-            (174371, 'life stage', 'hatch year (HY)', 2),
-            (174371, 'life stage', 'after hatch year (AHY)', 3),
-            (180692, 'antler configuration', 'less than 3 points', 0),
-            (180692, 'antler configuration', 'more than 3 points', 1),
-            (202423, 'sex', 'male', 0),
-            (202423, 'sex', 'female', 1)
-    ) AS option_data (itis_tsn, measurement_measurement_name, option_label, option_value)
+            (161061, 'sex', 'male', 0),
+            (161061, 'sex', 'female', 1),
+            (161051, 'sex', 'male', 0),
+            (161051, 'sex', 'female', 1),
+            (161039, 'sex', 'male', 0),
+            (161039, 'sex', 'female', 1),
+            (161061, 'maturity', 'immature', 0),
+            (161061, 'maturity', 'maturing', 1),
+            (161061, 'maturity', 'mature', 2),
+            (161061, 'maturity', 'spawnbound', 3),
+            (161061, 'maturity', 'spawning', 4),
+            (161061, 'maturity', 'spent', 5),
+            (161061, 'maturity', 'undetermined', 6),
+            (161051, 'maturity', 'immature', 0),
+            (161051, 'maturity', 'maturing', 1),
+            (161051, 'maturity', 'mature', 2),
+            (161051, 'maturity', 'spawnbound', 3),
+            (161051, 'maturity', 'spawning', 4),
+            (161051, 'maturity', 'spent', 5),
+            (161051, 'maturity', 'undetermined', 6),
+            (161039, 'maturity', 'immature', 0),
+            (161039, 'maturity', 'maturing', 1),
+            (161039, 'maturity', 'mature', 2),
+            (161039, 'maturity', 'spawnbound', 3),
+            (161039, 'maturity', 'spawning', 4),
+            (161039, 'maturity', 'spent', 5),
+            (161039, 'maturity', 'undetermined', 6),
+            (161061, 'age structure', 'cleithum', 0),
+            (161061, 'age structure', 'fin ray', 1),
+            (161061, 'age structure', 'operculum', 2),
+            (161061, 'age structure', 'otolith', 3),
+            (161061, 'age structure', 'scale', 4),
+            (161051, 'age structure', 'cleithum', 0),
+            (161051, 'age structure', 'fin ray', 1),
+            (161051, 'age structure', 'operculum', 2),
+            (161051, 'age structure', 'otolith', 3),
+            (161051, 'age structure', 'scale', 4),
+            (161039, 'age structure', 'cleithum', 0),
+            (161039, 'age structure', 'fin ray', 1),
+            (161039, 'age structure', 'operculum', 2),
+            (161039, 'age structure', 'otolith', 3),
+            (161039, 'age structure', 'scale', 4),
+            (161061, 'genetic structure', 'fin ray', 0),
+            (161061, 'genetic structure', 'tissue plug', 1),
+            (161051, 'genetic structure', 'fin ray', 0),
+            (161051, 'genetic structure', 'tissue plug', 1),
+            (161039, 'genetic structure', 'fin ray', 0),
+            (161039, 'genetic structure', 'tissue plug', 1)
+    ) AS option_data (itis_tsn, measurement_name, option_label, option_value)
 ) AS o
-JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_measurement_name = m.measurement_measurement_name;
-*/
+JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_name = m.measurement_name;
