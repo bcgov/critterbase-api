@@ -1,6 +1,6 @@
 import { XrefRepository } from '../repositories/xref-repository';
 import {
-  ICollectionCategoryDef,
+  ICollectionCategory,
   ICollectionUnit,
   IMeasurementSearch,
   IMeasurementWithTsnHierarchy,
@@ -53,7 +53,7 @@ export class XrefService implements Service {
    * @async
    * @param {string} category_id - uuid primary key of xref_collection_unit.
    * @param {boolean} [asSelect] - Optional UI format indicator.
-   * @returns {Promise<ICollectionUnitDef[] | ISelect[]>}
+   * @returns {Promise<ICollectionCategory[] | ISelect[]>}
    */
   async getCollectionUnitsFromCategoryId(
     category_id: string,
@@ -98,6 +98,20 @@ export class XrefService implements Service {
   }
 
   /**
+   * Get collection units from category name AND ITIS TSN.
+   *
+   * @async
+   * @param {string} categoryName - Name of the collection category ie: `Population Unit`
+   * @param {number} tsn - ITIS TSN identifier
+   * @returns {Promise<[TODO:type]>} [TODO:description]
+   */
+  async findCollectionUnitsFromTsn(tsn: number) {
+    const tsns = await this.itisService.getTsnHierarchy(tsn);
+
+    return this.repository.findCollectionUnitsFromTsns(tsns);
+  }
+
+  /**
    * Get 'collection unit categories' for a TSN.
    *
    * Includes all 'collection unit categories' for hierarchies above.
@@ -105,9 +119,9 @@ export class XrefService implements Service {
    * @async
    * @param {number} tsn - ITIS TSN identifier.
    * @param {boolean} [asSelect] - Format of the response.
-   * @returns {Promise<ICollectionCategoryDef[] | ISelect[]>}
+   * @returns {Promise<ICollectionCategory[] | ISelect[]>}
    */
-  async getTsnCollectionCategories(tsn: number, asSelect = false): Promise<ICollectionCategoryDef[] | ISelect[]> {
+  async getTsnCollectionCategories(tsn: number, asSelect = false): Promise<ICollectionCategory[] | ISelect[]> {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
 
     const data = await this.repository.getTsnCollectionCategories(tsns);

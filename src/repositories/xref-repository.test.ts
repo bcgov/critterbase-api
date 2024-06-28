@@ -1,4 +1,4 @@
-import { ICollectionCategoryDef, ITsnMarkingBodyLocation } from '../schemas/xref-schema';
+import { ICollectionCategory, ITsnMarkingBodyLocation } from '../schemas/xref-schema';
 import { XrefRepository } from './xref-repository';
 
 describe('xref-repository', () => {
@@ -99,7 +99,7 @@ describe('xref-repository', () => {
     });
 
     it('should return a collection category for a TSN successfully', async () => {
-      const mockResult: ICollectionCategoryDef[] = [
+      const mockResult: ICollectionCategory[] = [
         {
           category_name: 'name',
           collection_category_id: '1',

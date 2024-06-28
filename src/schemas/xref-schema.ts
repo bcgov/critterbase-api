@@ -1,5 +1,4 @@
 import {
-  lk_collection_category,
   measurement_unit,
   xref_collection_unit,
   xref_taxon_marking_body_location,
@@ -83,6 +82,15 @@ export const CollectionUnitSchema = implement<Omit<xref_collection_unit, AuditCo
   description: z.string().nullable()
 });
 
+export const CollectionUnitWithCategorySchema = CollectionUnitSchema.extend({ category_name: z.string() });
+
+export const CollectionCategorySchema = z.object({
+  collection_category_id: zodID,
+  category_name: z.string(),
+  description: z.string().nullable(),
+  itis_tsn: z.number()
+});
+
 export const TsnMeasurementsSchema = z.object({
   qualitative: TsnQualitativeMeasurementSchema.array(),
   quantitative: TsnQuantitativeMeasurementSchema.array()
@@ -120,13 +128,19 @@ export type ITsnQualitativeMeasurementOption = z.infer<typeof TsnQualitativeMeas
 
 export type ITsnMeasurements = z.infer<typeof TsnMeasurementsSchema>;
 
-export type ICollectionCategoryDef = Omit<lk_collection_category, AuditColumns> & { itis_tsn: number };
+export type ICollectionCategory = z.infer<typeof CollectionCategorySchema>;
 
 export type ICollectionUnit = z.infer<typeof CollectionUnitSchema>;
+
+export type ICollectionUnitWithCategory = z.infer<typeof CollectionUnitWithCategorySchema>;
 
 export const CollectionUnitCategoryQuerySchema = z.object({
   category_name: z.string(),
   itis_scientific_name: z.string().optional()
+});
+
+export const CollectionUnitTaxonQuerySchema = z.object({
+  tsn: z.coerce.number()
 });
 
 export const CollectionUnitCategoryIdSchema = z.object({
