@@ -62,12 +62,12 @@ END;
 
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
-    (161061, 'fish total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
-    (161061, 'fish standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-    (161051, 'fish total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
-    (161051, 'fish standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-    (161039, 'fish total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
-    (161039, 'fish standard length', 0, 10000, 'millimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161061, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
+    (161061, 'standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161051, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
+    (161051, 'standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161039, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
+    (161039, 'standard length', 0, 10000, 'millimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
 
     (161061, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
     (161051, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
