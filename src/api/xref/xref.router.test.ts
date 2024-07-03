@@ -9,7 +9,8 @@ const mockXrefService = {
   getTsnCollectionCategories: jest.fn().mockResolvedValue(true),
   getTsnMeasurements: jest.fn().mockResolvedValue(true),
   getTsnQualitativeMeasurements: jest.fn().mockResolvedValue(true),
-  getTsnQuantitativeMeasurements: jest.fn().mockResolvedValue(true)
+  getTsnQuantitativeMeasurements: jest.fn().mockResolvedValue(true),
+  findCollectionUnitsFromTsn: jest.fn().mockResolvedValue(true)
 } satisfies Partial<Record<keyof Partial<XrefService>, jest.Mock>>;
 
 const request = supertest(makeApp({ xrefService: mockXrefService } as any));
@@ -73,6 +74,21 @@ describe('ROUTER', () => {
     it('should format the response asSelect', async () => {
       const res = await request.get('/api/xref/taxon-measurements').query({ tsn, format: 'asSelect' });
       expect(mockXrefService.getTsnMeasurements.mock.calls[0][1]).toBe(true);
+    });
+  });
+
+  describe('GET taxon-collection-units', () => {
+    it('should respond with status 200 and return response', async () => {
+      const res = await request.get('/api/xref/taxon-collection-units').query({ tsn });
+      expect(res.status).toBe(200);
+      expect(res.body).toBe(true);
+      expect(mockXrefService.findCollectionUnitsFromTsn.mock.calls[0][0]).toBe(tsn);
+    });
+
+    it('should format the response asSelect', async () => {
+      const res = await request.get('/api/xref/taxon-measurements').query({ tsn, format: 'asSelect' });
+      expect(res.status).toBe(200);
+      expect(res.body).toBe(true);
     });
   });
 });

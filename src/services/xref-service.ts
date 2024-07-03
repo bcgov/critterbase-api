@@ -98,12 +98,11 @@ export class XrefService implements Service {
   }
 
   /**
-   * Get collection units from category name AND ITIS TSN.
+   * Get 'collection units' from tsn hierarchy.
    *
    * @async
-   * @param {string} categoryName - Name of the collection category ie: `Population Unit`
-   * @param {number} tsn - ITIS TSN identifier
-   * @returns {Promise<[TODO:type]>} [TODO:description]
+   * @param {number} tsn - ITIS TSN Identifier.
+   * @returns {Promise<ICollectionUnitWithCategory[]>}
    */
   async findCollectionUnitsFromTsn(tsn: number) {
     const tsns = await this.itisService.getTsnHierarchy(tsn);
