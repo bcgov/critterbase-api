@@ -1,15 +1,10 @@
--- Update existing tables with new taxa-based variables
-
 ----------------------------------------------------------------------------------------
--- Edit enum list
+-- Migration to update existing tables with new taxa-based variables
 ----------------------------------------------------------------------------------------
 
-ALTER TYPE critterbase.measurement_unit ADD VALUE 'rings';
-ALTER TYPE critterbase.measurement_unit ADD VALUE 'years';
-COMMIT;
-
+----------------------------------------------------------------------------------------
 -- Add some new marking locations for caribou.
-
+----------------------------------------------------------------------------------------
 INSERT into lk_marking_type
 (name, description)
 VALUES
@@ -25,8 +20,6 @@ VALUES
     'Satellite collar',
     'A collar that transmits real-time location data via satellite, enabling continuous tracking of the caribou over large distances.'
 );
-
---Neck is specific to Vertebrates
 INSERT into xref_taxon_marking_body_location
 (body_location, description, itis_tsn)
 VALUES
@@ -36,11 +29,17 @@ VALUES
     331030
 );
 
+----------------------------------------------------------------------------------------
+-- Edit enum list to include some more units
+----------------------------------------------------------------------------------------
 
+ALTER TYPE critterbase.measurement_unit ADD VALUE 'rings';
+ALTER TYPE critterbase.measurement_unit ADD VALUE 'years';
+COMMIT;
 
-
---Update measurement measurement_descs
--- Surely there has to be a way to refine this code to make it less repetitive, I keep trying different things and I just get errors.
+----------------------------------------------------------------------------------------
+--Update measurement measurement_descs as a lot of them were NULL before
+----------------------------------------------------------------------------------------
 
 UPDATE xref_taxon_measurement_quantitative 
 SET measurement_desc = CASE 
@@ -89,22 +88,27 @@ SET measurement_desc = CASE
     ELSE measurement_desc
 END;
 
+
+----------------------------------------------------------------------------------------
+--Todo list and needs to be removed
+----------------------------------------------------------------------------------------
 --Update ages unit to year
 -- UPDATE xref_taxon_measurement_quantitative 
 -- SET UNIT = CASE 
 --     WHEN itis_tSN = 202423 AND measurement_name = 'age' THEN 'years'
 -- END;
-
-
 --Insert data related to Fish specific variables
 --Need to watch out for duplications and for previous tsn's that would show up at other species levels.
 --Years and unitys as a type will likely need to be created
 -- The concept of Age structure and age sample is probably bad. This represents how it was in the old system but this needs to be broken down into its smaller subparts and their specific units i.e otolths need to be counted in ringsvs fin ray units - whatever that is. -- changed to millimeters for testing purposes from age sample. Make sure this is changed back
-
---161051 coelocanth and 161039 lungfish cannot be condensed into the higher order of sarcopteryggi as this includes tetrapods etc 
-
 -- Chondrichthyes - 159785 - Also need to be added to all of the aspects.
 
+
+
+
+----------------------------------------------------------------------------------------
+--Adding some more options based off fish taxa
+----------------------------------------------------------------------------------------
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
     (161061, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
