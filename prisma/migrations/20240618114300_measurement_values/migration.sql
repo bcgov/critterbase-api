@@ -1,5 +1,43 @@
 -- Update existing tables with new taxa-based variables
 
+----------------------------------------------------------------------------------------
+-- Edit enum list
+----------------------------------------------------------------------------------------
+
+ALTER TYPE critterbase.measurement_unit ADD VALUE 'rings';
+ALTER TYPE critterbase.measurement_unit ADD VALUE 'years';
+COMMIT;
+
+-- Add some new marking locations for caribou.
+
+INSERT into lk_marking_type
+(name, description)
+VALUES
+(
+    'VHF collar',
+    'A collar that emits a radio signal detectable by a receiver, used for tracking the caribou location over shorter distances.'
+),
+(
+    'GPS collar',
+    'A collar that uses satellite technology to provide precise location data, which can be accessed remotely or when retrieved.'
+),
+(
+    'Satellite collar',
+    'A collar that transmits real-time location data via satellite, enabling continuous tracking of the caribou over large distances.'
+);
+
+--Neck is specific to Vertebrates
+INSERT into xref_taxon_marking_body_location
+(body_location, description, itis_tsn)
+VALUES
+(
+    'Neck',
+    NULL,
+    331030
+);
+
+
+
 
 --Update measurement measurement_descs
 -- Surely there has to be a way to refine this code to make it less repetitive, I keep trying different things and I just get errors.
@@ -51,6 +89,13 @@ SET measurement_desc = CASE
     ELSE measurement_desc
 END;
 
+--Update ages unit to year
+-- UPDATE xref_taxon_measurement_quantitative 
+-- SET UNIT = CASE 
+--     WHEN itis_tSN = 202423 AND measurement_name = 'age' THEN 'years'
+-- END;
+
+
 --Insert data related to Fish specific variables
 --Need to watch out for duplications and for previous tsn's that would show up at other species levels.
 --Years and unitys as a type will likely need to be created
@@ -63,11 +108,11 @@ END;
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
     (161061, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
-    (161061, 'standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161061, 'standard length', 0, 10000, 'centimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161051, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
-    (161051, 'standard length', 0, 10000, 'millimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161051, 'standard length', 0, 10000, 'centimeter', 'standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161039, 'total length', 0, 10000, 'centimeter', 'total length is measured from the tip of the snout (or mouth) to the end of the longest lobe of the caudal (tail) fin, when the lobes are compressed along the midline.'),
-    (161039, 'standard length', 0, 10000, 'millimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161039, 'standard length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
 
     (161061, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
     (161051, 'age sample', 0, 1000, 'millimeter', 'A unique identification assigned to each genetic sample.'),
