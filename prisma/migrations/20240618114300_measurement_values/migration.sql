@@ -19,6 +19,10 @@ VALUES
 (
     'Satellite collar',
     'A collar that transmits real-time location data via satellite, enabling continuous tracking of the caribou over large distances.'
+),
+(
+    'Sleeve',
+    'A "sleeve" in the context of animal marking is a durable, weather-resistant leg band or collar used to identify and track individual animals, such as caribou, without impeding their natural movement.'
 );
 INSERT into xref_taxon_marking_body_location
 (body_location, description, itis_tsn)
@@ -27,8 +31,27 @@ VALUES
     'Neck',
     NULL,
     331030
+),
+(
+    'Left Forelimb (Anterior)'
+    'The front left limb.',
+    914181
+),
+(
+    'Right Forelimb (Anterior)'
+    'The front right limb.',
+    914181
+),
+(
+    'Left Hindlimb (Posterior)'
+    'The rear left limb',
+    914181
+),
+(
+    'Right Hindlimb (Posterior)'
+    'The rear right limb.',
+    914181
 );
-
 ----------------------------------------------------------------------------------------
 -- Edit enum list to include some more units
 ----------------------------------------------------------------------------------------
