@@ -33,22 +33,22 @@ VALUES
     331030
 ),
 (
-    'Left Forelimb (Anterior)'
+    'Left Forelimb (Anterior)',
     'The front left limb.',
     914181
 ),
 (
-    'Right Forelimb (Anterior)'
+    'Right Forelimb (Anterior)',
     'The front right limb.',
     914181
 ),
 (
-    'Left Hindlimb (Posterior)'
+    'Left Hindlimb (Posterior)',
     'The rear left limb',
     914181
 ),
 (
-    'Right Hindlimb (Posterior)'
+    'Right Hindlimb (Posterior)',
     'The rear right limb.',
     914181
 );
@@ -111,20 +111,27 @@ SET measurement_desc = CASE
     ELSE measurement_desc
 END;
 
+----------------------------------------------------------------------------------------
+--Update year unit in age. Already added to enum
+----------------------------------------------------------------------------------------
+-- Update ages unit to year
+UPDATE xref_taxon_measurement_quantitative 
+SET unit = CASE 
+    WHEN itis_tsn = 202423 AND measurement_name = 'age' THEN 'years'
+    ELSE unit
+END;
+
 
 ----------------------------------------------------------------------------------------
 --Todo list and needs to be removed
 ----------------------------------------------------------------------------------------
---Update ages unit to year
--- UPDATE xref_taxon_measurement_quantitative 
--- SET UNIT = CASE 
---     WHEN itis_tSN = 202423 AND measurement_name = 'age' THEN 'years'
--- END;
+
 --Insert data related to Fish specific variables
 --Need to watch out for duplications and for previous tsn's that would show up at other species levels.
 --Years and unitys as a type will likely need to be created
 -- The concept of Age structure and age sample is probably bad. This represents how it was in the old system but this needs to be broken down into its smaller subparts and their specific units i.e otolths need to be counted in ringsvs fin ray units - whatever that is. -- changed to millimeters for testing purposes from age sample. Make sure this is changed back
 -- Chondrichthyes - 159785 - Also need to be added to all of the aspects.
+--Does baculum need to be changed. What is the itis_tsn right now, and what could/should it be?
 
 
 
