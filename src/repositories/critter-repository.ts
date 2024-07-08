@@ -114,25 +114,31 @@ export class CritterRepository extends Repository {
           c.sex,
           c.responsible_region_nr_id,
           c.critter_comment,
-          json_agg(json_build_object(
-            'mortality_id', m.mortality_id,
-            'mortality_timestamp', m.mortality_timestamp
-          )) as mortality,
-          json_agg(json_build_object(
-            'critter_collection_unit_id', u.critter_collection_unit_id,
-            'collection_category_id', l.collection_category_id,
-            'collection_unit_id', x.collection_unit_id,
-            'unit_name', x.unit_name,
-            'category_name', l.category_name
-          )) as collection_units
+          COALESCE(
+            json_agg(json_build_object(
+              'mortality_id', m.mortality_id,
+              'mortality_timestamp', m.mortality_timestamp
+            )) FILTER(WHERE m.mortality_id IS NOT NULL),
+            '[]'
+          ) as mortality,
+          COALESCE(
+            json_agg(json_build_object(
+              'critter_collection_unit_id', u.critter_collection_unit_id,
+              'collection_category_id', l.collection_category_id,
+              'collection_unit_id', x.collection_unit_id,
+              'unit_name', x.unit_name,
+              'category_name', l.category_name
+            )) FILTER(WHERE u.critter_collection_unit_id IS NOT NULL),
+            '[]'
+          ) as collection_units
         FROM critter c
-        JOIN mortality m
+        LEFT JOIN mortality m
           ON c.critter_id = m.critter_id
-        JOIN critter_collection_unit u
+        LEFT JOIN critter_collection_unit u
           ON c.critter_id = u.critter_id
-        JOIN xref_collection_unit x
+        LEFT JOIN xref_collection_unit x
           ON x.collection_unit_id = u.collection_unit_id
-        JOIN lk_collection_category l
+        LEFT JOIN lk_collection_category l
           ON l.collection_category_id = x.collection_category_id
         WHERE c.critter_id = ANY(${critter_ids}::uuid[])
         GROUP BY c.critter_id;`,
