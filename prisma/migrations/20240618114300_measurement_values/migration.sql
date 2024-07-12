@@ -54,9 +54,9 @@ VALUES
 );
 ----------------------------------------------------------------------------------------
 -- Edit enum list to include some more units
--- Macgregor and MAc have raised seperately that this doesnt need to be in a transaction block, 
+-- Macgregor and Mac have raised seperately that this doesnt need to be in a transaction block, 
 --but I can't get it to work or update the enum list without it being in a block.
-----------------------------------------------------------------------------------------BEGIN
+----------------------------------------------------------------------------------------
 BEGIN;
 ALTER TYPE critterbase.measurement_unit ADD VALUE 'years';
 COMMIT;
@@ -127,9 +127,6 @@ END;
 --Todo list and needs to be removed
 ----------------------------------------------------------------------------------------
 --Does baculum need to be changed? What is the itis_tsn right now, and what could/should it be?
-
-
-
 
 ----------------------------------------------------------------------------------------
 --Adding some more options based off fish taxa
