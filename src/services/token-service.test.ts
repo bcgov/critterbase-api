@@ -1,7 +1,7 @@
-import { Jwt } from 'jsonwebtoken';
-import { TokenService } from './token-service';
-import { JwksClient } from 'jwks-rsa';
 import * as jsonwebtoken from 'jsonwebtoken';
+import { Jwt } from 'jsonwebtoken';
+import { JwksClient } from 'jwks-rsa';
+import { TokenService } from './token-service';
 
 const mockToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
@@ -10,7 +10,7 @@ describe('TokenService', () => {
   describe('constructor', () => {
     it('should assign the correct properties', () => {
       const verifier = new TokenService({ tokenURI: 'A', tokenIssuer: 'B' });
-      expect(verifier._tokenClient).toBeInstanceOf(JwksClient);
+      expect(verifier.jwtClient).toBeInstanceOf(JwksClient);
       expect(verifier._tokenIssuer).toBe('B');
     });
   });
@@ -65,7 +65,7 @@ describe('TokenService', () => {
         getSigningKey: jest.fn().mockResolvedValue({ getPublicKey: jest.fn().mockReturnValue('PUBLIC KEY') })
       };
 
-      verifier._tokenClient = mockGetSigningKey as unknown as JwksClient;
+      verifier.jwtClient = mockGetSigningKey as unknown as JwksClient;
 
       const publicKey = await verifier._getPublicKeyFromTokenKeyId('ABC');
 
@@ -94,10 +94,10 @@ describe('TokenService', () => {
       jest.spyOn(verifier, '_verifyToken').mockImplementation(() => 'E' as any);
 
       await verifier.getVerifiedToken('Bearer Token');
-      expect(verifier._getDecodedToken).toHaveBeenCalledWith('A');
+      expect(verifier._getDecodedToken).toHaveBeenCalledWith('Bearer Token');
       expect(verifier._getTokenKeyId).toHaveBeenCalledWith('B');
       expect(verifier._getPublicKeyFromTokenKeyId).toHaveBeenCalledWith('C');
-      expect(verifier._verifyToken).toHaveBeenCalledWith('A', 'D');
+      expect(verifier._verifyToken).toHaveBeenCalledWith('Bearer Token', 'D');
     });
   });
 });

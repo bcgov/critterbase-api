@@ -1,8 +1,11 @@
-import { Repository } from './base-repository';
+import { Prisma } from '@prisma/client';
 import {
+  CollectionCategorySchema,
   CollectionUnitSchema,
-  ICollectionCategoryDef,
+  CollectionUnitWithCategorySchema,
+  ICollectionCategory,
   ICollectionUnit,
+  ICollectionUnitWithCategory,
   IMeasurementSearch,
   ITsnMarkingBodyLocation,
   ITsnQualitativeMeasurement,
@@ -10,7 +13,7 @@ import {
   ITsnQuantitativeMeasurement,
   TsnQualitativeMeasurementSchema
 } from '../schemas/xref-schema';
-import { Prisma } from '@prisma/client';
+import { Repository } from './base-repository';
 
 export class XrefRepository extends Repository {
   /**
@@ -39,7 +42,7 @@ export class XrefRepository extends Repository {
    * @returns {Promise<ICollectionUnit[]>}
    */
   async getCollectionUnitsFromCategoryOrTsns(category_name: string, tsns?: number[]): Promise<ICollectionUnit[]> {
-    const result = this.safeQuery(
+    const result = await this.safeQuery(
       Prisma.sql`
         SELECT c.collection_unit_id, c.collection_category_id, c.unit_name, c.description
         FROM xref_collection_unit c
@@ -54,20 +57,49 @@ export class XrefRepository extends Repository {
   }
 
   /**
+   * Get 'collection units' from tsn hierarchy.
+   *
+   * @async
+   * @param {number[]} tsns - ITIS TSN Identifiers.
+   * @returns {Promise<ICollectionUnitWithCategory[]>}
+   */
+  async findCollectionUnitsFromTsns(tsns: number[]): Promise<ICollectionUnitWithCategory[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+        SELECT
+          c.collection_unit_id,
+          c.collection_category_id,
+          l.category_name,
+          c.unit_name,
+          c.description
+        FROM xref_collection_unit c
+        JOIN lk_collection_category l
+          ON c.collection_category_id = l.collection_category_id
+        JOIN xref_taxon_collection_category x
+          ON l.collection_category_id = x.collection_category_id
+        WHERE x.itis_tsn = ANY(${tsns});`,
+      CollectionUnitWithCategorySchema.array()
+    );
+    return result;
+  }
+
+  /**
    * Get 'collection categories' for a TSN.
    *
    * @async
    * @param {number} tsns - ITIS TSN identifiers.
-   * @returns {Promise<ICollectionCategoryDef[]>}
+   * @returns {Promise<ICollectionCategory[]>}
    */
-  async getTsnCollectionCategories(tsns: number[]): Promise<ICollectionCategoryDef[]> {
-    const result = await this.prisma.$queryRaw<ICollectionCategoryDef[]>`
+  async getTsnCollectionCategories(tsns: number[]): Promise<ICollectionCategory[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
       SELECT cc.collection_category_id, cc.category_name, cc.description, x.itis_tsn
       FROM lk_collection_category cc
       INNER JOIN xref_taxon_collection_category x
       ON x.collection_category_id = cc.collection_category_id
-      AND x.itis_tsn = ANY(${tsns});`;
-
+      AND x.itis_tsn = ANY(${tsns});`,
+      CollectionCategorySchema.array()
+    );
     return result;
   }
 

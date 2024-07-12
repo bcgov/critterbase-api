@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
-import { catchErrors } from '../../utils/middleware';
-import swaggerUIExpress from 'swagger-ui-express';
 import { Prisma } from '@prisma/client';
+import express, { Request, Response } from 'express';
+import swaggerUIExpress from 'swagger-ui-express';
+import { authenticateRequest } from '../../authentication/auth';
 import { yaml } from '../../swagger';
-import express from 'express';
 import { ICbDatabase } from '../../utils/database';
+import { catchErrors } from '../../utils/middleware';
 
 /**
  * Access Router

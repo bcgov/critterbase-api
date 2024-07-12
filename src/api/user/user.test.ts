@@ -1,5 +1,4 @@
 import { user } from '@prisma/client';
-import { apiError } from '../../utils/types';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { CreateUser, UserSchema } from '../../schemas/user-schema';

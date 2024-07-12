@@ -1,19 +1,25 @@
 import express, { Request, Response } from 'express';
-import { catchErrors } from '../../utils/middleware';
-import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../capture/capture.utils';
-import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
+import { z } from 'zod';
+import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
+import { BulkCritterCreateSchema, CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
-import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
-import { BulkCreationSchema, filterAndRemoveDeletes } from './bulk.utils';
+import { ICbDatabase } from '../../utils/database';
+import { catchErrors } from '../../utils/middleware';
+import { zodID } from '../../utils/zod_helpers';
 import {
   CollectionUnitCreateBodySchema,
   CollectionUnitDeleteSchema,
   CollectionUnitUpsertSchema
 } from '../collectionUnit/collectionUnit.utils';
-import { z } from 'zod';
-import { LocationUpdateSchema } from '../location/location.utils';
-import { zodID } from '../../utils/zod_helpers';
-import { ICbDatabase } from '../../utils/database';
+import {
+  FamilyChildCreateBodySchema,
+  FamilyChildDeleteSchema,
+  FamilyCreateBodySchema,
+  FamilyParentCreateBodySchema,
+  FamilyParentDeleteSchema
+} from '../family/family.utils';
+import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
 import {
   QualitativeCreateSchema,
   QualitativeDeleteSchema,
@@ -22,14 +28,8 @@ import {
   QuantitativeDeleteSchema,
   QuantitativeUpdateSchema
 } from '../measurement/measurement.utils';
-import {
-  FamilyChildCreateBodySchema,
-  FamilyChildDeleteSchema,
-  FamilyCreateBodySchema,
-  FamilyParentCreateBodySchema,
-  FamilyParentDeleteSchema
-} from '../family/family.utils';
-import { BulkCritterCreateSchema, CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
+import { BulkCreationSchema, getBulkDeletes, getBulkUpdates } from './bulk.utils';
 
 export const BulkRouter = (db: ICbDatabase) => {
   const bulkRouter = express.Router();
@@ -106,7 +106,7 @@ export const BulkRouter = (db: ICbDatabase) => {
 
       const familyChildren = families?.children ? z.array(FamilyChildCreateBodySchema).parse(families.children) : [];
 
-      const results = await db.bulkCreateData({
+      const results = await db.bulkService.repository.createEntities({
         critters: crittersAppend,
         collections: parsedCollections,
         markings: markingsAppend,
@@ -138,28 +138,36 @@ export const BulkRouter = (db: ICbDatabase) => {
         families
       } = BulkCreationSchema.parse(req.body);
 
-      const markingDeletes = filterAndRemoveDeletes(markings);
-      const collectionDeletes = filterAndRemoveDeletes(collections);
-      const qualDeletes = filterAndRemoveDeletes(qualitative_measurements);
-      const quantDeletes = filterAndRemoveDeletes(quantitative_measurements);
-      const captureDeletes = filterAndRemoveDeletes(captures);
-      const mortalityDeletes = filterAndRemoveDeletes(mortalities);
-      const parentDeletes = filterAndRemoveDeletes(families?.parents);
-      const childDeletes = filterAndRemoveDeletes(families?.children);
+      const critterUpdates = getBulkUpdates(critters);
+      const markingUpdates = getBulkUpdates(markings);
+      const collectionUpdates = getBulkUpdates(collections);
+      const qualUpdates = getBulkUpdates(qualitative_measurements);
+      const quantUpdates = getBulkUpdates(quantitative_measurements);
+      const captureUpdates = getBulkUpdates(captures);
+      const mortalityUpdates = getBulkUpdates(mortalities);
+
+      const markingDeletes = getBulkDeletes(markings);
+      const collectionDeletes = getBulkDeletes(collections);
+      const qualDeletes = getBulkDeletes(qualitative_measurements);
+      const quantDeletes = getBulkDeletes(quantitative_measurements);
+      const captureDeletes = getBulkDeletes(captures);
+      const mortalityDeletes = getBulkDeletes(mortalities);
+      const parentDeletes = getBulkDeletes(families?.parents);
+      const childDeletes = getBulkDeletes(families?.children);
 
       const updateBody: IBulkMutate = {
-        critters: critters
-          ? z.array(CritterUpdateSchema.extend({ critter_id: zodID })).parse(critters, {
+        critters: critterUpdates
+          ? z.array(CritterUpdateSchema.extend({ critter_id: zodID })).parse(critterUpdates, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'critters')
             })
           : [],
-        collections: collections
-          ? z.array(CollectionUnitUpsertSchema).parse(collections, {
+        collections: collectionUpdates
+          ? z.array(CollectionUnitUpsertSchema).parse(collectionUpdates, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'collections')
             })
           : [],
-        markings: markings
-          ? z.array(MarkingUpdateByIdSchema).parse(markings, {
+        markings: markingUpdates
+          ? z.array(MarkingUpdateByIdSchema).parse(markingUpdates, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'markings')
             })
           : [],
@@ -168,35 +176,35 @@ export const BulkRouter = (db: ICbDatabase) => {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'locations')
             })
           : [],
-        captures: captures
-          ? z.array(CaptureUpdateSchema.extend({ capture_id: zodID })).parse(captures, {
+        captures: captureUpdates
+          ? z.array(CaptureUpdateSchema.extend({ capture_id: zodID })).parse(captureUpdates, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'captures')
             })
           : [],
-        mortalities: mortalities
-          ? z.array(MortalityUpdateSchema.extend({ mortality_id: zodID })).parse(mortalities, {
+        mortalities: mortalityUpdates
+          ? z.array(MortalityUpdateSchema.extend({ mortality_id: zodID })).parse(mortalityUpdates, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'mortalities')
             })
           : [],
-        qualitative_measurements: qualitative_measurements
+        qualitative_measurements: qualUpdates
           ? z
               .array(
                 QualitativeUpdateSchema.required({
                   measurement_qualitative_id: true
                 })
               )
-              .parse(qualitative_measurements, {
+              .parse(qualUpdates, {
                 errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'qualitative_measurements')
               })
           : [],
-        quantitative_measurements: quantitative_measurements
+        quantitative_measurements: quantUpdates
           ? z
               .array(
                 QuantitativeUpdateSchema.required({
                   measurement_quantitative_id: true
                 })
               )
-              .parse(quantitative_measurements, {
+              .parse(quantUpdates, {
                 errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'quantitative_measurements')
               })
           : []

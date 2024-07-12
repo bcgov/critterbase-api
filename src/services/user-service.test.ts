@@ -1,6 +1,6 @@
 import { UserService } from './user-service';
 
-describe('mortality-service', () => {
+describe('user-service', () => {
   let repository;
   const userService = UserService.init();
 

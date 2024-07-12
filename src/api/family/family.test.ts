@@ -1,40 +1,30 @@
-import { apiError } from '../../utils/types';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
+import { apiError } from '../../utils/types';
 import {
+  createNewFamily as _createNewFamily,
+  deleteFamily as _deleteFamily,
+  getAllChildren as _getAllChildren,
   getAllFamilies as _getAllFamilies,
   getAllParents as _getAllParents,
-  getAllChildren as _getAllChildren,
-  getFamilyById as _getFamilyById,
-  updateFamily as _updateFamily,
-  deleteFamily as _deleteFamily,
-  getFamilyByLabel as _getFamilyByLabel,
-  getParentsOfCritterId as _getParentsOfCritterId,
   getChildrenOfCritterId as _getChildrenOfCritterId,
+  getFamilyById as _getFamilyById,
+  getFamilyByLabel as _getFamilyByLabel,
+  getImmediateFamily as _getImmediateFamily,
+  getParentsOfCritterId as _getParentsOfCritterId,
   getSiblingsOfCritterId as _getSiblingsOfCritterId,
-  createNewFamily as _createNewFamily,
-  removeChildOfFamily as _removeChildOfFamily,
-  removeParentOfFamily as _removeParentOfFamily,
   makeChildOfFamily as _makeChildOfFamily,
   makeParentOfFamily as _makeParentOfFamily,
-  getImmediateFamily as _getImmediateFamily
+  removeChildOfFamily as _removeChildOfFamily,
+  removeParentOfFamily as _removeParentOfFamily,
+  updateFamily as _updateFamily
 } from './family.service';
-import {
-  FamilyChildCreateBodySchema,
-  FamilyCreateBodySchema,
-  FamilyParentCreateBodySchema,
-  ImmediateFamily,
-  ImmediateFamilyCritter,
-  FamilyUpdate,
-  FamilyCreate,
-  FamilyChildCreate,
-  FamilyParentCreate
-} from './family.utils';
+import { ImmediateFamily, ImmediateFamilyCritter } from './family.utils';
 
-import { randomUUID } from 'crypto';
 import { critter, family, family_child, family_parent, sex } from '.prisma/client';
+import { randomUUID } from 'crypto';
 
 // Mock Location Objects
 const ID = randomUUID();

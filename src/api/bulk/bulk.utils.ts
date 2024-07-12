@@ -19,13 +19,30 @@ const BulkCreationSchema = z.object({
     .optional()
 });
 
-const filterAndRemoveDeletes = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
-  return arr?.filter((val, idx, arr) => {
-    if (val._delete) {
-      arr.splice(idx, 1);
-    }
-    return val._delete;
-  });
+/**
+ * Get records to update.
+ *
+ * Returns only objects without a _delete property or with a _delete property set to false.
+ *
+ * @template T
+ * @param {((T & { _delete?: boolean }[]) | undefined)} arr
+ * @return {*}
+ */
+const getBulkUpdates = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
+  return arr?.filter((val) => !val._delete);
 };
 
-export { BulkCreationSchema, filterAndRemoveDeletes };
+/**
+ * Get records to delete.
+ *
+ * Returns only objects with a _delete property set to true.
+ *
+ * @template T
+ * @param {((T & { _delete?: boolean }[]) | undefined)} arr
+ * @return {*}
+ */
+const getBulkDeletes = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
+  return arr?.filter((val) => val._delete);
+};
+
+export { BulkCreationSchema, getBulkDeletes, getBulkUpdates };

@@ -1,8 +1,9 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { isDeepStrictEqual } from 'util';
 import { z } from 'zod';
+import { PrismaClientExtended } from '../client/client';
 import { IS_DEV, prisma } from '../utils/constants';
 import { apiError } from '../utils/types';
-import { isDeepStrictEqual } from 'util';
 
 /**
  * Base class for Critterbase Repositories.
@@ -14,10 +15,10 @@ import { isDeepStrictEqual } from 'util';
  * @class Repository
  */
 export class Repository {
-  prisma: PrismaClient;
+  prisma: PrismaClientExtended;
   transactionTimeoutMilliseconds: number;
 
-  constructor(prismaClient: PrismaClient = prisma, transactionTimeout = 5000) {
+  constructor(prismaClient: PrismaClientExtended = prisma, transactionTimeout = 5000) {
     this.prisma = prismaClient;
     this.transactionTimeoutMilliseconds = transactionTimeout;
   }
@@ -51,7 +52,7 @@ export class Repository {
       const startTimer = performance.now(); // start transaction timer
 
       return await this.prisma.$transaction(async (transactionClient) => {
-        this.prisma = transactionClient as PrismaClient; // set prisma client to transaction client
+        this.prisma = transactionClient as PrismaClientExtended; // set prisma client to transaction client
 
         const transactionData = await transactions(); // run transactions with prisma transaction client
 
@@ -85,22 +86,22 @@ export class Repository {
    * @throws {apiError.sqlExecuteIssue} - if query response fails validation.
    * @returns {Promise<z.TypeOf<TSchema>>} inferred type from zod schema.
    */
-  async safeQuery<TSchema extends z.ZodTypeAny>(sql: Prisma.Sql, schema: TSchema) {
-    const result = await this.prisma.$queryRaw<z.infer<TSchema>>(sql);
+  async safeQuery<TSchema extends z.ZodTypeAny>(sql: Prisma.Sql, schema: TSchema): Promise<z.infer<TSchema>> {
+    const result = await this.prisma.$queryRaw(sql);
 
     if (!IS_DEV) {
-      return result; // eslint-disable-line
+      return result;
     }
 
     const parsed = schema.safeParse(result);
 
     if (!parsed.success) {
-      console.log(parsed.error.errors, { result });
+      console.log(parsed.error.errors, JSON.stringify(result, null, 2));
 
       throw apiError.requestIssue('Failed to parse raw sql with provided Zod schema.', parsed.error.errors);
     }
 
-    return result; // eslint-disable-line
+    return result;
   }
 
   /**

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {
+  lk_capture_method,
   lk_collection_category,
   lk_colour,
   lk_marking_material,
@@ -74,13 +75,20 @@ const collectionUnitCategoriesFormats: FormatParse = {
   }
 };
 
+const captureMethodsFormats: FormatParse = {
+  asSelect: {
+    schema: ResponseSchema.transform((val) => toSelect<lk_capture_method>(val, 'capture_method_id', 'method_name'))
+  }
+};
+
 export {
-  regionEnvFormats,
-  regionNrFormats,
+  captureMethodsFormats,
   codFormats,
-  wmuFormats,
+  collectionUnitCategoriesFormats,
+  colourFormats,
   markingMaterialsFormats,
   markingTypesFormats,
-  collectionUnitCategoriesFormats,
-  colourFormats
+  regionEnvFormats,
+  regionNrFormats,
+  wmuFormats
 };

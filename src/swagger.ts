@@ -1,19 +1,18 @@
 import { createDocument } from 'zod-openapi';
+import { accessPaths } from './api/access/access.swagger';
+import { artifactPaths } from './api/artifact/artifact.swagger';
+import { bulkPaths } from './api/bulk/bulk.swagger';
+import { capturePaths } from './api/capture/capture.swagger';
 import { collectionUnitsPaths } from './api/collectionUnit/collectionUnit.swagger';
 import { critterPaths, critterSchemas } from './api/critter/critter.swagger';
-import { capturePaths } from './api/capture/capture.swagger';
-import { bulkPaths } from './api/bulk/bulk.swagger';
-import { artifactPaths } from './api/artifact/artifact.swagger';
-import { locationPaths } from './api/location/location.swagger';
-import { userPaths } from './api/user/user.swagger';
-import { PORT } from './utils/constants';
-import { accessPaths } from './api/access/access.swagger';
+import { familyPaths } from './api/family/family.swagger';
 import { enumPaths, lookupSchemas } from './api/lookup/lookup.swagger';
 import { markingPaths } from './api/marking/marking.swagger';
-import { familyPaths } from './api/family/family.swagger';
-import { mortalityPaths } from './api/mortality/mortality.swagger';
-import { xrefPaths, xrefSchemas } from './api/xref/xref.swagger';
 import { measurementPaths } from './api/measurement/measurement.swagger';
+import { mortalityPaths } from './api/mortality/mortality.swagger';
+import { userPaths } from './api/user/user.swagger';
+import { xrefPaths, xrefSchemas } from './api/xref/xref.swagger';
+import { PORT } from './utils/constants';
 
 const document = createDocument({
   openapi: '3.1.0',
@@ -74,7 +73,6 @@ const document = createDocument({
     ...markingPaths,
     ...bulkPaths,
     ...artifactPaths,
-    ...locationPaths,
     ...userPaths,
     ...accessPaths,
     ...enumPaths,

@@ -1,9 +1,9 @@
-import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { z } from 'zod';
-import { SwagDesc, SwagErr, SwagUnauthorized } from '../../utils/swagger_helpers';
-import { tsnQuerySchema, XrefCollectionUnitSchema, XrefTaxonCollectionCategorySchema } from '../../utils/zod_helpers';
+import { ZodOpenApiOperationObject } from 'zod-openapi';
 import {
   CollectionUnitCategoryIdSchema,
+  CollectionUnitTaxonQuerySchema,
+  CollectionUnitWithCategorySchema,
   MeasurementIdsQuerySchema,
   MeasurementSearchQuery,
   MeasurementsWithTsnHierarchy,
@@ -13,7 +13,9 @@ import {
   TsnQuantitativeMeasurementSchema
 } from '../../schemas/xref-schema';
 import { routes } from '../../utils/constants';
+import { SwagDesc, SwagErr, SwagUnauthorized } from '../../utils/swagger_helpers';
 import { QueryFormats } from '../../utils/types';
+import { XrefCollectionUnitSchema, XrefTaxonCollectionCategorySchema, tsnQuerySchema } from '../../utils/zod_helpers';
 
 const TAG = 'Xref';
 
@@ -27,6 +29,27 @@ export const xrefSchemas = {
 };
 
 const formats = z.enum([QueryFormats.asSelect]).optional();
+
+const taxonCollectionUnits: ZodOpenApiOperationObject = {
+  operationId: 'taxonCollectionUnits',
+  summary: 'Search for collection units from ITIS TSN.',
+  tags: [TAG],
+  requestParams: {
+    query: CollectionUnitTaxonQuerySchema
+  },
+  responses: {
+    '200': {
+      description: SwagDesc.get,
+      content: {
+        'application/json': {
+          schema: CollectionUnitWithCategorySchema.array()
+        }
+      }
+    },
+    ...SwagErr,
+    ...SwagUnauthorized
+  }
+};
 
 const searchMeasurements: ZodOpenApiOperationObject = {
   operationId: 'searchMeasurements',
@@ -305,6 +328,9 @@ const getTsnMeasurements: ZodOpenApiOperationObject = {
 };
 
 export const xrefPaths = {
+  [`${routes.xref}/taxon-collection-units`]: {
+    get: taxonCollectionUnits
+  },
   [`${routes.xref}/collection-units`]: {
     get: getXrefCollectionUnits
   },

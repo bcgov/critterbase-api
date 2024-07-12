@@ -11,11 +11,11 @@
     "build": "tsc",
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll --forceExit",
-    "dev": "nodemon -r dotenv/config ./src/server.ts",
+    "dev": "tsc -w & nodemon -r dotenv/config ./src/server.ts",
     "lint:fix": "eslint . --fix --ignore-pattern 'node_modules' --ext .ts",
     "format:fix": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss}\"",
     "prisma:deploy": "npx prisma migrate deploy",
-    "prisma:dev-setup": "grep NODE_ENV .env | cut -d '=' -f2 | grep 'development' && npx prisma migrate reset -f",
+    "prisma:dev-setup": "npx prisma migrate reset -f",
     "action:format": "prettier --check \"./src/**/*.{js,jsx,ts,tsx,css,scss}\"",
     "action:lint": "eslint . --max-warnings=0",
     "action:deprecated": "knip"
@@ -37,6 +37,7 @@
     "jest": "^29.4.3",
     "nodemon": "^2.0.20",
     "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^3.2.4",
     "prisma": "^4.11.0",
     "typescript": "^5.0.4"
   },

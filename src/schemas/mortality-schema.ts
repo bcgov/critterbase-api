@@ -2,7 +2,7 @@ import { cod_confidence, mortality, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
 import { DeleteSchema, implement, noAudit, zodID } from '../utils/zod_helpers';
-import { LocationBody, LocationCreateSchema, LocationUpdateSchema } from '../api/location/location.utils';
+import { LocationCreate, LocationCreateSchema, LocationUpdate, LocationUpdateSchema } from './location-schema';
 
 /**
  * Mortality base schema (includes audit columns).
@@ -27,21 +27,23 @@ const MortalitySchema = implement<mortality>().with({
 });
 
 const MortalityDetailedSchema = MortalitySchema.extend({
-  location: z.object({
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-    coordinate_uncertainty: z.number().nullable(),
-    wmu_id: zodID.nullable(),
-    region_nr_id: zodID.nullable(),
-    region_env_id: zodID.nullable(),
-    temperature: z.number().nullable(),
-    location_comment: z.string().nullable(),
-    region_env_name: z.string().nullable(),
-    region_nr_name: z.string().nullable(),
-    wmu_name: z.string().nullable()
-  }),
-  proximate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string() }),
-  ultimate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string() })
+  location: z
+    .object({
+      latitude: z.number().nullable(),
+      longitude: z.number().nullable(),
+      coordinate_uncertainty: z.number().nullable(),
+      wmu_id: zodID.nullable(),
+      region_nr_id: zodID.nullable(),
+      region_env_id: zodID.nullable(),
+      temperature: z.number().nullable(),
+      location_comment: z.string().nullable(),
+      region_env_name: z.string().nullable(),
+      region_nr_name: z.string().nullable(),
+      wmu_name: z.string().nullable()
+    })
+    .nullable(),
+  proximate_cause_of_death: z.object({ cod_category: z.string(), cod_reason: z.string().nullable() }),
+  ultimate_cause_of_death: z.object({ cod_category: z.string().nullable(), cod_reason: z.string().nullable() })
 });
 
 /**
@@ -50,7 +52,7 @@ const MortalityDetailedSchema = MortalitySchema.extend({
  */
 const MortalityUpdateSchema = implement<
   Omit<Prisma.mortalityUncheckedUpdateManyInput, AuditColumns> & {
-    location?: LocationBody;
+    location?: LocationUpdate;
   }
 >().with(
   MortalitySchema.omit({
@@ -66,7 +68,7 @@ const MortalityUpdateSchema = implement<
  */
 const MortalityCreateSchema = implement<
   Omit<Prisma.mortalityCreateManyInput, AuditColumns> & {
-    location?: LocationBody;
+    location?: LocationCreate;
   }
 >().with(
   MortalitySchema.omit({ ...noAudit })
@@ -97,11 +99,11 @@ type MortalityDetailed = z.infer<typeof MortalityDetailedSchema>;
 
 export {
   MortalityCreate,
-  MortalityUpdate,
   MortalityCreateSchema,
-  MortalityUpdateSchema,
-  MortalitySchema,
   MortalityDeleteSchema,
+  MortalityDetailed,
   MortalityDetailedSchema,
-  MortalityDetailed
+  MortalitySchema,
+  MortalityUpdate,
+  MortalityUpdateSchema
 };

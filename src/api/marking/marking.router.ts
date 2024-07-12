@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
 import { array } from 'zod';
 import { prisma } from '../../utils/constants';
+import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
 import {
@@ -11,7 +12,6 @@ import {
   MarkingVerificationType,
   markingResponseSchema
 } from './marking.utils';
-import { ICbDatabase } from '../../utils/database';
 
 export const MarkingRouter = (db: ICbDatabase) => {
   const markingRouter = express.Router();

@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
@@ -22,6 +22,14 @@ const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEY
  */
 const authService = new AuthService(tokenService, UserService.init());
 
+/**
+ * Express request handler callback
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<Response>}
+ */
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
 /**
@@ -86,18 +94,45 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  /**
+   * Zod validation errors
+   * @description Incorrect request body or params
+   *
+   */
   if (err instanceof ZodError) {
     return res.status(400).json({ error: 'Zod validation failed.', issues: err.issues });
   }
+  /**
+   * ApiError
+   * @description Manually thrown errors from repository / service methods
+   */
   if (err instanceof apiError) {
     return res.status(err.status).json({ error: err.message, issues: err.errors });
   }
+  /**
+   * Known prisma errors
+   * @description Database constraint failed
+   *
+   */
   if (err instanceof PrismaClientKnownRequestError) {
     const { status, error } = prismaErrorMsg(err);
     return res.status(status).json({ error, issues: [err.meta] });
   }
+  /**
+   * Prisma Validation Errors
+   * @description Incorrect raw prisma query syntax
+   *
+   */
+  if (err instanceof PrismaClientValidationError) {
+    return res.status(500).json({ error: 'Prisma query syntax error', issues: ['View logs'] });
+  }
+  /**
+   * Error
+   * @description Fallback for all other types of errors
+   *
+   */
   if (err instanceof Error) {
-    return res.status(400).json({ error: err.message || 'unknown error' });
+    return res.status(400).json({ error: err.message || 'Unknown error' });
   }
   next(err);
 };

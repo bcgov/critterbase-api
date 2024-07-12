@@ -1,5 +1,6 @@
 import { MarkingVerificationType } from '../api/marking/marking.utils';
 import { MarkingRepository } from '../repositories/marking-repository';
+import { IDetailedCritterMarking } from '../schemas/critter-schema';
 import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
@@ -55,5 +56,16 @@ export class MarkingService implements Service {
       verified: allVerified,
       invalid_markings: invalidMarkingIds
     };
+  }
+
+  /**
+   * Find a critter's markings.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<IDetailedCritterMarking[]>} markings.
+   */
+  async findCritterMarkings(critterId: string): Promise<IDetailedCritterMarking[]> {
+    return this.repository.findCritterMarkings(critterId);
   }
 }

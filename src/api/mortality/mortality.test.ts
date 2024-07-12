@@ -1,10 +1,9 @@
+import { critter, mortality } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
-import { prisma } from '../../utils/constants';
-import { apiError } from '../../utils/types';
-import { critter, lk_cause_of_death, mortality } from '@prisma/client';
+import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { ICbDatabase } from '../../utils/database';
-import supertest from 'supertest';
+import { apiError } from '../../utils/types';
 
 const createMortality = jest.fn();
 const deleteMortality = jest.fn();

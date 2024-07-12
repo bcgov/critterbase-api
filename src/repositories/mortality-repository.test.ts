@@ -1,4 +1,3 @@
-import { prisma } from '../utils/constants';
 import { MortalityRepository } from './mortality-repository';
 
 const mockMortalities = [{ mortality: 1 }, { mortality: 2 }];
@@ -72,13 +71,13 @@ describe('mortality-repository', () => {
         ) as ultimate_cause_of_death
         FROM mortality m
         JOIN lk_cause_of_death d1 ON m.proximate_cause_of_death_id = d1.cod_id
-        JOIN lk_cause_of_death d2 ON m.ultimate_cause_of_death_id = d2.cod_id
-        JOIN location l ON m.location_id = l.location_id
-        JOIN lk_region_env re ON re.region_env_id = l.region_env_id
-        JOIN lk_region_nr rn ON rn.region_nr_id = l.region_nr_id
-        JOIN lk_wildlife_management_unit rw ON rw.wmu_id = l.wmu_id
-        JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
-        JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
+        LEFT JOIN lk_cause_of_death d2 ON m.ultimate_cause_of_death_id = d2.cod_id
+        LEFT JOIN location l ON m.location_id = l.location_id
+        LEFT JOIN lk_region_env re ON re.region_env_id = l.region_env_id
+        LEFT JOIN lk_region_nr rn ON rn.region_nr_id = l.region_nr_id
+        LEFT JOIN lk_wildlife_management_unit rw ON rw.wmu_id = l.wmu_id
+        LEFT JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
+        LEFT JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
         WHERE mortality_id = ?::uuid;`.replace(/ /g, '')
       );
     });
@@ -131,13 +130,13 @@ describe('mortality-repository', () => {
         ) as ultimate_cause_of_death
         FROM mortality m
         JOIN lk_cause_of_death d1 ON m.proximate_cause_of_death_id = d1.cod_id
-        JOIN lk_cause_of_death d2 ON m.ultimate_cause_of_death_id = d2.cod_id
-        JOIN location l ON m.location_id = l.location_id
-        JOIN lk_region_env re ON re.region_env_id = l.region_env_id
-        JOIN lk_region_nr rn ON rn.region_nr_id = l.region_nr_id
-        JOIN lk_wildlife_management_unit rw ON rw.wmu_id = l.wmu_id
-        JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
-        JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
+        LEFT JOIN lk_cause_of_death d2 ON m.ultimate_cause_of_death_id = d2.cod_id
+        LEFT JOIN location l ON m.location_id = l.location_id
+        LEFT JOIN lk_region_env re ON re.region_env_id = l.region_env_id
+        LEFT JOIN lk_region_nr rn ON rn.region_nr_id = l.region_nr_id
+        LEFT JOIN lk_wildlife_management_unit rw ON rw.wmu_id = l.wmu_id
+        LEFT JOIN lk_cause_of_death c1 ON c1.cod_id = m.proximate_cause_of_death_id
+        LEFT JOIN lk_cause_of_death c2 ON c2.cod_id = m.ultimate_cause_of_death_id
         WHERE critter_id = ?::uuid;`.replace(/ /g, '')
       );
     });

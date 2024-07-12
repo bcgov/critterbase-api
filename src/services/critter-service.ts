@@ -1,7 +1,4 @@
-import { defaultFormat } from '../utils/constants';
 import { CritterRepository } from '../repositories/critter-repository';
-import { Service } from './base-service';
-import { QueryFormats } from '../utils/types';
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
@@ -10,7 +7,20 @@ import {
   IDetailedManyCritter,
   SimilarCritterQuery
 } from '../schemas/critter-schema';
+import { defaultFormat } from '../utils/constants';
+import { QueryFormats } from '../utils/types';
+import { Service } from './base-service';
+import { CaptureService } from './capture-service';
 import { ItisService } from './itis-service';
+import { MarkingService } from './marking-service';
+import { MortalityService } from './mortality-service';
+
+type CritterAttributeServices = {
+  itisService: ItisService;
+  mortalityService: MortalityService;
+  markingService: MarkingService;
+  captureService: CaptureService;
+};
 
 /**
  * Critter Service
@@ -21,17 +31,26 @@ import { ItisService } from './itis-service';
  */
 export class CritterService implements Service {
   repository: CritterRepository;
+  /**
+   * Service Dependencies
+   */
   itisService: ItisService;
+  mortalityService: MortalityService;
+  markingService: MarkingService;
+  captureService: CaptureService;
 
   /**
    * Construct CritterService class.
    *
    * @param {CritterRepository} repository - Critter repository dependency.
-   * @param {ItisService} itisService - Itis service dependency.
    */
-  constructor(repository: CritterRepository, itisService: ItisService) {
+  constructor(repository: CritterRepository, services: CritterAttributeServices) {
     this.repository = repository;
-    this.itisService = itisService;
+
+    this.itisService = services.itisService;
+    this.mortalityService = services.mortalityService;
+    this.markingService = services.markingService;
+    this.captureService = services.captureService;
   }
 
   /**
@@ -41,7 +60,13 @@ export class CritterService implements Service {
    * @returns {CritterService}
    */
   static init(): CritterService {
-    return new CritterService(new CritterRepository(), new ItisService());
+    return new CritterService(new CritterRepository(), {
+      itisService: new ItisService(),
+      mortalityService: MortalityService.init(),
+      markingService: MarkingService.init(),
+      captureService: CaptureService.init()
+      // TODO: fill in missing services once refactor finalized
+    });
   }
 
   /**
@@ -72,6 +97,49 @@ export class CritterService implements Service {
   }
 
   /**
+   * Get critter by critter id as `detailed` format.
+   * Includes additional critter meta.
+   *
+   * @async
+   * @param {string} critterId - critter id.
+   * @returns {Promise<IDetailedCritter>} detailed critter
+   */
+  async getCritterByIdDetailed(critterId: string): Promise<IDetailedCritter> {
+    const [
+      critter,
+      markings,
+      captures,
+      qualitative,
+      quantitative,
+      collection_units,
+      mortality,
+      family_parent,
+      family_child
+    ] = await Promise.all([
+      this.repository.getCritterById(critterId),
+      this.markingService.findCritterMarkings(critterId),
+      this.captureService.findCritterCaptures(critterId),
+      this.repository.findCritterQualitativeMeasurements(critterId),
+      this.repository.findCritterQuantitativeMeasurements(critterId),
+      this.repository.findCritterCollectionUnits(critterId),
+      this.mortalityService.findCritterMortalities(critterId),
+      this.repository.findCritterParents(critterId),
+      this.repository.findCritterChildren(critterId)
+    ]);
+
+    return {
+      ...critter,
+      markings,
+      captures,
+      collection_units,
+      measurements: { qualitative, quantitative },
+      mortality,
+      family_parent,
+      family_child
+    };
+  }
+
+  /**
    * Get critter by critter id.
    *
    * @async
@@ -81,38 +149,7 @@ export class CritterService implements Service {
    */
   async getCritterById(critterId: string, format = defaultFormat): Promise<ICritter | IDetailedCritter> {
     if (format === QueryFormats.detailed) {
-      const [
-        critter,
-        markings,
-        captures,
-        qualitative,
-        quantitative,
-        collection_units,
-        mortality,
-        family_parent,
-        family_child
-      ] = await Promise.all([
-        this.repository.getCritterById(critterId),
-        this.repository.findCritterMarkings(critterId),
-        this.repository.findCritterCaptures(critterId),
-        this.repository.findCritterQualitativeMeasurements(critterId),
-        this.repository.findCritterQuantitativeMeasurements(critterId),
-        this.repository.findCritterCollectionUnits(critterId),
-        this.repository.findCritterMortalities(critterId),
-        this.repository.findCritterParents(critterId),
-        this.repository.findCritterChildren(critterId)
-      ]);
-
-      return {
-        ...critter,
-        markings,
-        captures,
-        collection_units,
-        measurements: { qualitative, quantitative },
-        mortality,
-        family_parent,
-        family_child
-      };
+      return this.getCritterByIdDetailed(critterId);
     }
     return this.repository.getCritterById(critterId);
   }
