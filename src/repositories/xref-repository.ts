@@ -73,9 +73,9 @@ export class XrefRepository extends Repository {
           c.unit_name,
           c.description
         FROM xref_collection_unit c
-        JOIN xref_taxon_collection_category x
-          ON c.collection_category_id = x.collection_category_id
         JOIN lk_collection_category l
+          ON c.collection_category_id = l.collection_category_id
+        JOIN xref_taxon_collection_category x
           ON l.collection_category_id = x.collection_category_id
         WHERE x.itis_tsn = ANY(${tsns});`,
       CollectionUnitWithCategorySchema.array()
