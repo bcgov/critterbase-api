@@ -1,6 +1,6 @@
-import { Repository } from './base-repository';
 import { CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
 import { apiError } from '../utils/types';
+import { Repository } from './base-repository';
 
 export class UserRepository extends Repository {
   /**

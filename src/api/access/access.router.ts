@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 import express, { Request, Response } from 'express';
 import swaggerUIExpress from 'swagger-ui-express';
-import { authenticateRequest } from '../../authentication/auth';
 import { yaml } from '../../swagger';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';

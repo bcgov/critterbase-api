@@ -62,17 +62,17 @@ const defaultFormat = QueryFormats.default;
 const prisma = prismaClient;
 
 export {
-  PORT,
+  ALLOWED_AUDIENCES,
+  BYPASS_AUTHENTICATION,
   IS_DEV,
   IS_PROD,
   IS_TEST,
-  NO_AUTH,
-  KEYCLOAK_URL,
   KEYCLOAK_ISSUER,
-  ALLOWED_AUDIENCES,
-  BYPASS_AUTHENTICATION,
-  prisma,
+  KEYCLOAK_URL,
+  NO_AUTH,
+  PORT,
   // request,
   defaultFormat,
+  prisma,
   routes
 };

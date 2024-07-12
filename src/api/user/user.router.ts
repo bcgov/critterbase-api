@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
+import { CreateUserSchema, UpdateUserSchema } from '../../schemas/user-schema';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
-import { CreateUserSchema, UpdateUserSchema } from '../../schemas/user-schema';
 
 export const UserRouter = (db: ICbDatabase) => {
   const userRouter = express.Router();

@@ -12,8 +12,8 @@ import { CritterService } from '../services/critter-service';
 import { ItisService } from '../services/itis-service';
 import { MarkingService } from '../services/marking-service';
 import { MortalityService } from '../services/mortality-service';
-import { XrefService } from '../services/xref-service';
 import { UserService } from '../services/user-service';
+import { XrefService } from '../services/xref-service';
 
 /**
  * Data services

@@ -1,12 +1,12 @@
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
+import { AuthService } from '../services/auth-service';
+import { TokenService } from '../services/token-service';
+import { UserService } from '../services/user-service';
 import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
-import { UserService } from '../services/user-service';
-import { TokenService } from '../services/token-service';
-import { AuthService } from '../services/auth-service';
 
 /**
  * Token Service

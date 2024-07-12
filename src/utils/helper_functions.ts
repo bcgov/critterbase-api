@@ -98,4 +98,4 @@ const prisMock = (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     .mockResolvedValue(returns);
 
-export { prisMock, prismaErrorMsg, formatParse, getFormat, intersect, toSelect, isSelectFormat, toSelectFormat };
+export { formatParse, getFormat, intersect, isSelectFormat, prisMock, prismaErrorMsg, toSelect, toSelectFormat };

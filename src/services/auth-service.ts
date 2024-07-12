@@ -1,12 +1,12 @@
 import { IncomingHttpHeaders } from 'http';
-import { TokenService } from './token-service';
-import { UserService } from './user-service';
 import { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
-import { ALLOWED_AUDIENCES } from '../utils/constants';
-import { apiError } from '../utils/types';
-import { AuthenticatedUser } from '../schemas/user-schema';
 import { ZodError } from 'zod';
 import { AuthHeadersSchema } from '../schemas/auth-schema';
+import { AuthenticatedUser } from '../schemas/user-schema';
+import { ALLOWED_AUDIENCES } from '../utils/constants';
+import { apiError } from '../utils/types';
+import { TokenService } from './token-service';
+import { UserService } from './user-service';
 
 /**
  * Authentication / Authorization Service

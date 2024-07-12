@@ -1,6 +1,6 @@
+import { Jwt, JwtPayload, decode, verify } from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';
 import { apiError } from '../utils/types';
-import { Jwt, JwtPayload, decode, verify } from 'jsonwebtoken';
 
 /**
  * TokenService constructor config

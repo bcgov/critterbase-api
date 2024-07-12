@@ -1,5 +1,5 @@
 import { UserRepository } from '../repositories/user-repository';
-import { CreateUser, AuthenticatedUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
+import { AuthenticatedUser, CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
 import { apiError } from '../utils/types';
 import { Service } from './base-service';
 
