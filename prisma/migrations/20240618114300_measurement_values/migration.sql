@@ -54,9 +54,10 @@ VALUES
 );
 ----------------------------------------------------------------------------------------
 -- Edit enum list to include some more units
-----------------------------------------------------------------------------------------
-
-ALTER TYPE critterbase.measurement_unit ADD VALUE 'rings';
+-- Macgregor and MAc have raised seperately that this doesnt need to be in a transaction block, 
+--but I can't get it to work or update the enum list without it being in a block.
+----------------------------------------------------------------------------------------BEGIN
+BEGIN;
 ALTER TYPE critterbase.measurement_unit ADD VALUE 'years';
 COMMIT;
 
@@ -125,20 +126,7 @@ END;
 ----------------------------------------------------------------------------------------
 --Todo list and needs to be removed
 ----------------------------------------------------------------------------------------
-
---Insert data related to Fish specific variables
---Need to watch out for duplications and for previous tsn's that would show up at other species levels.
---Years and units as a type will likely need to be created
-
--- The concept of Age structure and age sample is probably bad. This represents how it was in the old system but this needs to be broken down into its smaller subparts and their specific units i.e otolths need to be counted in ringsvs fin ray units - whatever that is.
-
--- changed to millimeters for testing purposes from age sample. Make sure this is changed back - This all needs to be deleted.
-----First, I need to establish the right units for all the new "age" concepts. 
-----Then they need to be added as quantitative measurements with descriptions. 
-----All the old ones need to be deleted. Just leaving Age as a quant measurement for animalia, Then the other quant tat are fish specific at whatever taxon makes sense for them,
-
--- Chondrichthyes - 159785 - Also need to be added to all of the aspects.
---Does baculum need to be changed. What is the itis_tsn right now, and what could/should it be?
+--Does baculum need to be changed? What is the itis_tsn right now, and what could/should it be?
 
 
 
@@ -152,13 +140,20 @@ VALUES
     (161061, 'length from snout to caudal fin', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161051, 'length from snout to caudal fin', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161039, 'length from snout to caudal fin', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (159785, 'length from snout to caudal fin', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
 
-    (161061, 'otolith rings', 0, 1000, 'rings', 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
-    (161051, 'otolith rings', 0, 1000, 'rings', 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
-    (161039, 'otolith rings', 0, 1000, 'rings', 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.');
+    (161061, 'otolith growth rings (count)', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
+    (161051, 'otolith growth rings (count)', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
+    (161039, 'otolith growth rings (count)', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
 
+    (161061, 'cleithrum growth rings (count)', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings'),
+    (161051, 'cleithrum growth rings (count)', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings'),
+    (161039, 'cleithrum growth rings (count)', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings'),
 
--- First, insert and capture the results
+    (161061, 'operculum growth rings (count)', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.'),
+    (161051, 'operculum growth rings (count)', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.'),
+    (161039, 'operculum growth rings (count)', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.');
+
 WITH MeasurementIDs AS (
     INSERT INTO xref_taxon_measurement_qualitative (itis_tsn, measurement_name)
     VALUES
@@ -167,8 +162,6 @@ WITH MeasurementIDs AS (
         (161039, 'maturity')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
-
-
 INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_value)
 SELECT m.taxon_measurement_id, o.option_label, o.option_value
 FROM (
