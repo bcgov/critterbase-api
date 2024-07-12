@@ -1,11 +1,17 @@
-import { PrismaClient } from '@prisma/client';
+jest.mock('../repositories/xref-repository');
+
+import { PrismaClientExtended } from '../client/client';
 import { XrefRepository } from '../repositories/xref-repository';
 import { ItisService } from './itis-service';
 import { XrefService } from './xref-service';
 
 const mockRepository: jest.Mocked<XrefRepository> = {
-  prisma: {} as PrismaClient,
+  prisma: {} as unknown as PrismaClientExtended,
   safeQuery: jest.fn(),
+  transactionHandler: jest.fn(),
+  transactionTimeoutMilliseconds: 1,
+  validateSameResponse: jest.fn(),
+  findCollectionUnitsFromTsns: jest.fn(),
   getCollectionUnitsFromCategoryId: jest.fn(),
   searchForQualitativeMeasurements: jest.fn(),
   searchForQuantitativeMeasurements: jest.fn(),
@@ -14,7 +20,9 @@ const mockRepository: jest.Mocked<XrefRepository> = {
   getTsnMarkingBodyLocations: jest.fn(),
   getTsnQualitativeMeasurements: jest.fn(),
   getTsnQuantitativeMeasurements: jest.fn(),
-  getQualitativeMeasurementOptions: jest.fn()
+  getQualitativeMeasurementOptions: jest.fn(),
+  getQualitativeMeasurementsByIds: jest.fn(),
+  getQuantitativeMeasurementsByIds: jest.fn()
 };
 
 const mockItisService = {
@@ -110,6 +118,19 @@ describe('xref-service', () => {
         quantitative: [{ ...mockQuantResult[0], tsnHierarchy: [1, 2] }],
         qualitative: [{ ...mockQualResult[0], tsnHierarchy: [1, 2] }]
       });
+    });
+  });
+
+  describe('findCollectionUnitsFromTsns', () => {
+    it('should get tsns from itis and pass values to repository', async () => {
+      const getTsnCollectionsMock = mockRepository.getTsnCollectionCategories.mockResolvedValue([]);
+      const tsnHierarchyMock = mockItisService.getTsnHierarchy.mockResolvedValue([1, 2]);
+
+      const data = await xrefService.getTsnCollectionCategories(1);
+
+      expect(getTsnCollectionsMock).toHaveBeenCalledWith([1, 2]);
+      expect(tsnHierarchyMock).toHaveBeenCalledWith(1);
+      expect(data).toStrictEqual([]);
     });
   });
 });
