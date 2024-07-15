@@ -6,14 +6,14 @@ import { z } from 'zod';
  *
   message: `Bearer token is undefined. 'Bearer xxxx.yyyy.xxxx'`
  */
-const BearerTokenSchema = z.preprocess((value) => (value as string).split(' ')?.[1], z.string());
+export const BearerTokenSchema = z.preprocess((value) => (value as string).split(' ')?.[1], z.string());
 
 /**
  * User header schema.
  * @example '{"keycloak_guid": "AAA", "username": "SteveBrule"}'
  *
  */
-const UserHeaderSchema = z.string().transform((value, ctx) => {
+export const UserHeaderSchema = z.string().transform((value, ctx) => {
   try {
     const jsonUser = JSON.parse(value) as unknown;
     const parsedUser = z.object({ keycloak_guid: z.string(), username: z.string() }).parse(jsonUser);

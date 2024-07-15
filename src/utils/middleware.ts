@@ -1,10 +1,11 @@
 import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
 import { AuthService } from '../services/auth-service';
 import { TokenService } from '../services/token-service';
 import { UserService } from '../services/user-service';
-import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
+import { BYPASS_AUTHENTICATION, IS_PROD, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
 
@@ -161,4 +162,36 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
   next();
 });
 
-export { auth, catchErrors, errorHandler, errorLogger, logger };
+/**
+ * Middleware: Rate Limiter (`Denial of Service` attack prevention)
+ * Limits subsequent requests within a set timeframe.
+ *
+ * Note: Currently these values are hard coded, if more tweaking is needed
+ * put these values into the ENV.
+ *
+ */
+const limiter = rateLimit({
+  // 5 minutes in milliseconds,
+  windowMs: 10 * 60 * 1000,
+
+  // Request limit for `windowMs`
+  limit: 50,
+
+  /**
+   * Generates the rate limit key used to identify requests from same user or service.
+   *
+   * Note: Using IP and user header to prevent unessescary limiting of external service accounts.
+   *
+   * @param {Request} req - Express request
+   * @returns {string} Rate limit key
+   */
+  keyGenerator: (req): string => `${req.ip}-${String(req.headers['user'])}`,
+
+  /**
+   * Skip rate limiting if not 'production'.
+   *
+   */
+  skip: (): boolean => !IS_PROD
+});
+
+export { auth, catchErrors, errorHandler, errorLogger, limiter, logger };

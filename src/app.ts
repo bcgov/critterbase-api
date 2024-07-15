@@ -16,7 +16,7 @@ import { UserRouter } from './api/user/user.router';
 import { XrefRouter } from './api/xref/xref.router';
 import { routes } from './utils/constants';
 import { ICbDatabase } from './utils/database';
-import { auth, errorHandler, errorLogger, logger } from './utils/middleware';
+import { auth, errorHandler, errorLogger, limiter, logger } from './utils/middleware';
 import { apiError } from './utils/types';
 
 /**
@@ -32,7 +32,9 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(helmet());
   app.use(express.json());
 
-  app.use(logger); // Logs all incomming requests
+  app.use(limiter); // Rate limiter
+
+  app.use(logger); // Log incomming requests
 
   app.use(routes.home, AccessRouter(db)); // Accessible without authentication
 
@@ -54,7 +56,7 @@ export const makeApp = (db: ICbDatabase) => {
     throw apiError.notFound(`${req.method} ${req.url} -> route not found`);
   });
 
-  app.use(errorLogger); // Logs thrown errors
+  app.use(errorLogger); // Log thrown errors
   app.use(errorHandler); // Catches all errors thrown from endpoints and passes to errorLogger
 
   return app;
