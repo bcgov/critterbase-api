@@ -62,7 +62,7 @@ run-postgres: ## Runs the postgres db containers
 	@echo "==============================================="
 	@echo "Make: run-postgres - running postgres db images"
 	@echo "==============================================="
-	@docker-compose -f docker-compose.yml up -d critterbase-db crtterbase-db_setup
+	@docker-compose -f docker-compose.yml up -d critterbase-db critterbase-db_setup
 
 
 ## ------------------------------------------------------------------------------
