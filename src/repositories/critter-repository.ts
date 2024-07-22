@@ -268,32 +268,38 @@ export class CritterRepository extends Repository {
     const result = await this.safeQuery(
       Prisma.sql`
           WITH 
-          captures AS (
-              SELECT
-                  json_build_object(
-                      'capture_id', ca.capture_id,
-                      'coordinates', ARRAY[cl.latitude, cl.longitude]::NUMERIC[]
-                  ) AS geometry
-              FROM capture ca
-              JOIN location cl ON ca.capture_location_id = cl.location_id
-              WHERE ca.critter_id = ANY(${critter_ids}::uuid[])
-          ),
-          mortalities AS (
-              SELECT
-                  json_build_object(
-                      'mortality_id', m.mortality_id,
-                      'coordinates', ARRAY[ml.latitude, ml.longitude]::NUMERIC[]
-                  ) AS geometry
-              FROM mortality m
-              JOIN location ml ON m.location_id = ml.location_id
-              WHERE m.critter_id = ANY(${critter_ids}::uuid[])
-          )
-          SELECT
-              COALESCE(json_agg(captures.geometry), '[]'::json) AS captures,
-              COALESCE(json_agg(mortalities.geometry), '[]'::json) AS mortalities
-          FROM
-              captures, mortalities;
-          `,
+    captures AS (
+        SELECT
+            ca.critter_id,
+            json_build_object(
+                'capture_id', ca.capture_id,
+                'coordinates', ARRAY[cl.latitude, cl.longitude]::NUMERIC[]
+            ) AS geometry
+        FROM capture ca
+        JOIN location cl ON ca.capture_location_id = cl.location_id
+        WHERE ca.critter_id = ANY(${critter_ids}::uuid[])
+    ),
+    mortalities AS (
+        SELECT
+            m.critter_id,
+            json_build_object(
+                'mortality_id', m.mortality_id,
+                'coordinates', ARRAY[ml.latitude, ml.longitude]::NUMERIC[]
+            ) AS geometry
+        FROM mortality m
+        JOIN location ml ON m.location_id = ml.location_id
+        WHERE m.critter_id = ANY(${critter_ids}::uuid[])
+    )
+    SELECT
+      (
+        SELECT COALESCE(json_agg(c.geometry), '[]'::json)
+        FROM captures c
+      ) AS captures,
+      (
+        SELECT COALESCE(json_agg(m.geometry), '[]'::json)
+        FROM mortalities m
+      ) AS mortalities;
+      `,
       z.array(CaptureMortalityGeometrySchema)
     );
 
