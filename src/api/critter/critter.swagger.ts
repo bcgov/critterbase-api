@@ -116,8 +116,7 @@ export const critterPaths = {
             'application/json': {
               schema: {
                 oneOf: [
-                  { $ref: '#/components/schemas/defaultCritterResponseArray' },
-                  { $ref: '#/components/schemas/detailedManyCritterResponseArray' }
+                  { $ref: '#/components/schemas/defaultCritterGeometryResponse' }
                 ]
               }
             }
