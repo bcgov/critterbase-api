@@ -19,6 +19,7 @@ import {
   IDetailedManyCritter,
   SimilarCritterQuery
 } from '../schemas/critter-schema';
+import { CaptureMortalityGeometry, CaptureMortalityGeometrySchema } from '../schemas/spatial-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
@@ -96,6 +97,10 @@ export class CritterRepository extends Repository {
    * Additional properties include:
    *    mortality: mortality_id + mortality_timestamp.
    *    collection_units: relevant collection_unit related properties.
+   *    captures, including:
+   *      - markings
+   *      - quantitative measurements
+   *      - qualitative measurements
    *
    * @async
    * @param {string[]} critter_ids - array of critter ids.
@@ -105,41 +110,201 @@ export class CritterRepository extends Repository {
   async getMultipleCrittersByIdsDetailed(critter_ids: string[]): Promise<IDetailedManyCritter[]> {
     const result = await this.safeQuery(
       Prisma.sql`
+      WITH 
+    -- Mortality CTE
+    mortality AS (
         SELECT
-          c.critter_id,
-          c.itis_tsn,
-          c.itis_scientific_name,
-          c.wlh_id,
-          c.animal_id,
-          c.sex,
-          c.responsible_region_nr_id,
-          c.critter_comment,
-          json_agg(json_build_object(
-            'mortality_id', m.mortality_id,
-            'mortality_timestamp', m.mortality_timestamp
-          )) as mortality,
-          json_agg(json_build_object(
-            'critter_collection_unit_id', u.critter_collection_unit_id,
-            'collection_category_id', l.collection_category_id,
-            'collection_unit_id', x.collection_unit_id,
-            'unit_name', x.unit_name,
-            'category_name', l.category_name
-          )) as collection_units
+            m.critter_id,
+            json_agg(json_build_object(
+                'mortality_id', m.mortality_id,
+                'mortality_timestamp', m.mortality_timestamp
+            )) AS mortality
+        FROM mortality m
+        WHERE m.critter_id = ANY(${critter_ids}::uuid[])
+        GROUP BY m.critter_id
+    ),
+
+    -- Collection units CTE
+    collection_units AS (
+        SELECT
+            u.critter_id,
+            json_agg(json_build_object(
+                'critter_collection_unit_id', u.critter_collection_unit_id,
+                'collection_category_id', l.collection_category_id,
+                'collection_unit_id', x.collection_unit_id,
+                'unit_name', x.unit_name,
+                'category_name', l.category_name
+            )) AS collection_units
+        FROM critter_collection_unit u
+        JOIN xref_collection_unit x ON u.collection_unit_id = x.collection_unit_id
+        JOIN lk_collection_category l ON x.collection_category_id = l.collection_category_id
+        WHERE u.critter_id = ANY(${critter_ids}::uuid[])
+        GROUP BY u.critter_id
+    ),
+
+    -- Captures CTE
+    captures AS (
+        SELECT
+            c.critter_id,
+            COALESCE(json_agg(json_build_object(
+                'capture_id', ca.capture_id,
+                'capture_comment', ca.capture_comment,
+                'release_comment', ca.release_comment,
+                'capture_location', json_build_object(
+                    'location_id', capture_loc.location_id,
+                    'latitude', capture_loc.latitude,
+                    'longitude', capture_loc.longitude,
+                    'coordinate_uncertainty', capture_loc.coordinate_uncertainty,
+                    'coordinate_uncertainty_unit', capture_loc.coordinate_uncertainty_unit,
+                    'location_comment', capture_loc.location_comment
+                ),
+                'release_location', json_build_object(
+                    'location_id', release_loc.location_id,
+                    'latitude', release_loc.latitude,
+                    'longitude', release_loc.longitude,
+                    'coordinate_uncertainty', release_loc.coordinate_uncertainty,
+                    'coordinate_uncertainty_unit', release_loc.coordinate_uncertainty_unit,
+                    'location_comment', release_loc.location_comment
+                ),
+                'markings', COALESCE(markings.markings, '[]'::json),
+                'quantitative_measurements', COALESCE(quan.quantitative_measurements, '[]'::json),
+                'qualitative_measurements', COALESCE(qual.qualitative_measurements, '[]'::json)
+            )), '[]'::json) AS captures
         FROM critter c
-        JOIN mortality m
-          ON c.critter_id = m.critter_id
-        JOIN critter_collection_unit u
-          ON c.critter_id = u.critter_id
-        JOIN xref_collection_unit x
-          ON x.collection_unit_id = u.collection_unit_id
-        JOIN lk_collection_category l
-          ON l.collection_category_id = x.collection_category_id
+        LEFT JOIN capture ca ON c.critter_id = ca.critter_id
+        LEFT JOIN location capture_loc ON capture_loc.location_id = ca.capture_location_id
+        LEFT JOIN location release_loc ON release_loc.location_id = ca.release_location_id
+        LEFT JOIN (
+            SELECT
+                m.capture_id,
+                json_agg(json_build_object(
+                    'marking_id', m.marking_id,
+                    'identifier', m.identifier,
+                    'frequency', m.frequency,
+                    'frequency_unit', m.frequency_unit,
+                    'comment', m.comment,
+                    'taxon_marking_body_location', tmbl.body_location,
+                    'marking_type', mt.name,
+                    'primary_colour', lc_primary.colour,
+                    'secondary_colour', lc_secondary.colour
+                )) AS markings
+            FROM marking m
+            LEFT JOIN xref_taxon_marking_body_location tmbl ON tmbl.taxon_marking_body_location_id = m.taxon_marking_body_location_id
+            LEFT JOIN lk_marking_type mt ON mt.marking_type_id = m.marking_type_id
+            LEFT JOIN lk_colour lc_primary ON lc_primary.colour_id = m.primary_colour_id
+            LEFT JOIN lk_colour lc_secondary ON lc_secondary.colour_id = m.secondary_colour_id
+            GROUP BY m.capture_id
+        ) AS markings ON markings.capture_id = ca.capture_id
+        LEFT JOIN (
+            SELECT
+                mq.capture_id,
+                json_agg(json_build_object(
+                    'measurement_quantitative_id', mq.measurement_quantitative_id,
+                    'measurement_name', xtmq.measurement_name,
+                    'value', mq.value,
+                    'comment', mq.measurement_comment
+                )) AS quantitative_measurements
+            FROM measurement_quantitative mq
+            LEFT JOIN xref_taxon_measurement_quantitative xtmq ON xtmq.taxon_measurement_id = mq.taxon_measurement_id
+            GROUP BY mq.capture_id
+        ) AS quan ON quan.capture_id = ca.capture_id
+        LEFT JOIN (
+            SELECT
+                mq.capture_id,
+                json_agg(json_build_object(
+                    'measurement_qualitative_id', mq.measurement_qualitative_id,
+                    'measurement_name', xtmq.measurement_name,
+                    'value', xtmqo.option_label,
+                    'comment', mq.measurement_comment
+                )) AS qualitative_measurements
+            FROM measurement_qualitative mq
+            LEFT JOIN xref_taxon_measurement_qualitative xtmq ON xtmq.taxon_measurement_id = mq.taxon_measurement_id
+            LEFT JOIN xref_taxon_measurement_qualitative_option xtmqo ON xtmqo.qualitative_option_id = mq.qualitative_option_id
+            GROUP BY mq.capture_id
+        ) AS qual ON qual.capture_id = ca.capture_id
         WHERE c.critter_id = ANY(${critter_ids}::uuid[])
-        GROUP BY c.critter_id;`,
+        GROUP BY c.critter_id
+    )
+
+    -- Main query combining all CTEs
+    SELECT
+        c.critter_id,
+        c.itis_tsn,
+        c.itis_scientific_name,
+        c.wlh_id,
+        c.animal_id,
+        c.sex,
+        c.responsible_region_nr_id,
+        c.critter_comment,
+        COALESCE(m.mortality, '[]'::json) AS mortality,
+        COALESCE(cu.collection_units, '[]'::json) AS collection_units,
+        COALESCE(ca.captures, '[]'::json) AS captures
+    FROM 
+        critter c
+    LEFT JOIN 
+        mortality m ON c.critter_id = m.critter_id
+    LEFT JOIN 
+        collection_units cu ON c.critter_id = cu.critter_id
+    LEFT JOIN 
+        captures ca ON c.critter_id = ca.critter_id
+    WHERE 
+        c.critter_id = ANY(${critter_ids}::uuid[]);
+    `,
       z.array(DetailedManyCritterSchema)
     );
 
     return result;
+  }
+
+  /**
+   * Get capture and mortality geometry for multiple critters
+   *
+   * @async
+   * @param {string[]} critter_ids
+   * @returns {Promise<ICaptureMortalityGeometrySchema>}
+   *
+   */
+  async getMultipleCrittersGeometryByIds(critter_ids: string[]): Promise<CaptureMortalityGeometry> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+          WITH 
+          captures AS (
+              SELECT
+                  json_build_object(
+                      'capture_id', ca.capture_id,
+                      'coordinates', ARRAY[cl.latitude, cl.longitude]::NUMERIC[]
+                  ) AS geometry
+              FROM capture ca
+              JOIN location cl ON ca.capture_location_id = cl.location_id
+              WHERE ca.critter_id = ANY(${critter_ids}::uuid[])
+          ),
+          mortalities AS (
+              SELECT
+                  json_build_object(
+                      'mortality_id', m.mortality_id,
+                      'coordinates', ARRAY[ml.latitude, ml.longitude]::NUMERIC[]
+                  ) AS geometry
+              FROM mortality m
+              JOIN location ml ON m.location_id = ml.location_id
+              WHERE m.critter_id = ANY(${critter_ids}::uuid[])
+          )
+          SELECT
+              COALESCE(json_agg(captures.geometry), '[]'::json) AS captures,
+              COALESCE(json_agg(mortalities.geometry), '[]'::json) AS mortalities
+          FROM
+              captures, mortalities;
+          `,
+      z.array(CaptureMortalityGeometrySchema)
+    );
+
+    if (!result[0]) {
+      throw apiError.notFound(`Failed to find critter geometry.`, [
+        'CritterRepository -> getMultipleCrittersGeometryById',
+        'result was undefined'
+      ]);
+    }
+
+    return result[0];
   }
 
   /**

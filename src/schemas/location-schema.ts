@@ -30,6 +30,14 @@ export const LocationSchema = implement<Location>()
   .openapi({ description: 'Responds with default location' });
 
 /**
+ * Schema for a GeoJSON Point
+ */
+export const PointSchema = z.object({
+  type: z.literal('Point'),
+  coordinates: z.array(z.number())
+});
+
+/**
  * Create location schema
  *
  */
