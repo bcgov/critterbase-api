@@ -115,9 +115,7 @@ export const critterPaths = {
           content: {
             'application/json': {
               schema: {
-                oneOf: [
-                  { $ref: '#/components/schemas/defaultCritterGeometryResponse' }
-                ]
+                oneOf: [{ $ref: '#/components/schemas/defaultCritterGeometryResponse' }]
               }
             }
           }
