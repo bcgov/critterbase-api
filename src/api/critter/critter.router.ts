@@ -54,6 +54,22 @@ export const CritterRouter = (db: ICbDatabase) => {
   );
 
   /**
+   * Fetch capture and mortality locations for multiple critters
+   * Note: Post Request.
+   *
+   */
+  critterRouter.post(
+    '/spatial',
+    catchErrors(async (req: Request, res: Response) => {
+      const { critter_ids } = CritterIdsRequestSchema.parse(req.body);
+
+      const response = await db.critterService.getMultipleCrittersGeometryByIds(critter_ids);
+
+      return res.status(200).json(response);
+    })
+  );
+
+  /**
    * Find critters by semi-unique attributes.
    *
    */
