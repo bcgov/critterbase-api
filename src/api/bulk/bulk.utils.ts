@@ -1,20 +1,59 @@
 import { z } from 'zod';
-import { ResponseSchema } from '../../utils/zod_helpers';
+import { BulkCaptureCreateSchema } from '../../schemas/capture-schema';
+import { BulkCritterCreateSchema } from '../../schemas/critter-schema';
+import { LocationBulkCreateSchema } from '../../schemas/location-schema';
+import { MortalityCreateSchema } from '../../schemas/mortality-schema';
+import { CollectionUnitCreateBodySchema } from '../collectionUnit/collectionUnit.utils';
+import {
+  FamilyChildCreateBodySchema,
+  FamilyCreateBodySchema,
+  FamilyParentCreateBodySchema
+} from '../family/family.utils';
+import { MarkingCreateBodySchema } from '../marking/marking.utils';
+import { QualitativeCreateSchema, QuantitativeCreateSchema } from '../measurement/measurement.utils';
 
-const BulkCreationSchema = z.object({
-  critters: z.array(ResponseSchema).optional(),
-  collections: z.array(ResponseSchema).optional(),
-  markings: z.array(ResponseSchema).optional(),
-  locations: z.array(ResponseSchema).optional(),
-  captures: z.array(ResponseSchema).optional(),
-  mortalities: z.array(ResponseSchema).optional(),
-  quantitative_measurements: z.array(ResponseSchema).optional(),
-  qualitative_measurements: z.array(ResponseSchema).optional(),
+const OptionalRecordArraySchema = z.array(z.record(z.string(), z.unknown())).optional();
+
+/**
+ * Pre parse bulk create schema
+ *
+ */
+const BulkShapeSchema = z.object({
+  critters: OptionalRecordArraySchema,
+  collections: OptionalRecordArraySchema,
+  markings: OptionalRecordArraySchema,
+  locations: OptionalRecordArraySchema,
+  captures: OptionalRecordArraySchema,
+  mortalities: OptionalRecordArraySchema,
+  quantitative_measurements: OptionalRecordArraySchema,
+  qualitative_measurements: OptionalRecordArraySchema,
   families: z
     .object({
-      families: z.array(ResponseSchema).optional(),
-      parents: z.array(ResponseSchema).optional(),
-      children: z.array(ResponseSchema).optional()
+      families: OptionalRecordArraySchema,
+      parents: OptionalRecordArraySchema,
+      children: OptionalRecordArraySchema
+    })
+    .optional()
+});
+
+/**
+ * Bulk create schema - after parsed with BulkShapeSchema
+ *
+ */
+const BulkCreationSchema = z.object({
+  critters: z.array(BulkCritterCreateSchema).optional(),
+  collections: z.array(CollectionUnitCreateBodySchema).optional(),
+  markings: z.array(MarkingCreateBodySchema).optional(),
+  locations: z.array(LocationBulkCreateSchema).optional(),
+  captures: z.array(BulkCaptureCreateSchema).optional(),
+  mortalities: z.array(MortalityCreateSchema).optional(),
+  quantitative_measurements: z.array(QuantitativeCreateSchema).optional(),
+  qualitative_measurements: z.array(QualitativeCreateSchema).optional(),
+  families: z
+    .object({
+      families: z.array(FamilyCreateBodySchema).optional(),
+      parents: z.array(FamilyParentCreateBodySchema).optional(),
+      children: z.array(FamilyChildCreateBodySchema).optional()
     })
     .optional()
 });
@@ -45,4 +84,4 @@ const getBulkDeletes = <T>(arr: (T & { _delete?: boolean }[]) | undefined) => {
   return arr?.filter((val) => val._delete);
 };
 
-export { BulkCreationSchema, getBulkDeletes, getBulkUpdates };
+export { BulkCreationSchema, BulkShapeSchema, getBulkDeletes, getBulkUpdates };

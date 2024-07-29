@@ -16,8 +16,8 @@ extendZodWithOpenApi(z);
 export const LocationSchema = implement<Location>()
   .with({
     location_id: zodID,
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
+    latitude: z.number().min(-90).max(90).nullable(),
+    longitude: z.number().min(-180).max(180).nullable(),
     coordinate_uncertainty: z.number().nullable(),
     coordinate_uncertainty_unit: z.nativeEnum(coordinate_uncertainty_unit).nullable(),
     wmu_id: zodID.nullable(),
@@ -36,6 +36,14 @@ export const LocationSchema = implement<Location>()
 export const LocationCreateSchema = implement<Partial<Omit<Location, 'location_id'>>>()
   .with(LocationSchema.omit({ location_id: true }).strict().partial().shape)
   .openapi({ description: 'Responds with created location' });
+
+/**
+ * Create bulk location schema
+ *
+ */
+export const LocationBulkCreateSchema = LocationSchema.partial().openapi({
+  description: 'Responds with created location'
+});
 
 /**
  * Update location schema

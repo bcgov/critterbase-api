@@ -60,6 +60,15 @@ export const CaptureCreateSchema = z
   .strict();
 
 /**
+ * Create bulk captures schema.
+ *
+ */
+export const BulkCaptureCreateSchema = CaptureCreateSchema.extend({
+  capture_location_id: zodID.nullish(),
+  release_location_id: zodID.nullish()
+}).omit({ capture_location: true, release_location: true });
+
+/**
  * Update capture schema.
  *
  */

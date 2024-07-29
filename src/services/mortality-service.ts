@@ -80,16 +80,14 @@ export class MortalityService implements Service {
   }
 
   /**
-   * Append the default cause of death (`Unknown`) id to the body
-   * if `proximate_cause_of_death_id` not provided.
+   * Get the default `cause of death (cod)` id.
    *
    * @async
    * @template T
-   * @param {T} body - Object containing `proximate_cause_of_death_id`.
-   * @returns {Promise<T>} Body object.
+   * @returns {Promise<string>} Default cause of death id
    */
-  async appendDefaultCOD<T extends { proximate_cause_of_death_id?: string }>(body: T): Promise<T> {
-    return this.repository.appendDefaultCOD(body);
+  async getDefaultCauseOfDeathId(): Promise<string> {
+    return this.repository.getDefaultCauseOfDeathId();
   }
 
   /**
