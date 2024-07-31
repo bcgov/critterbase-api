@@ -15,7 +15,12 @@ import { QualitativeCreateSchema, QuantitativeCreateSchema } from '../measuremen
 const OptionalRecordArraySchema = z.array(z.record(z.string(), z.unknown())).optional();
 
 /**
- * Pre parse bulk create schema
+ * Bulk shape schema - pre-parse for BulkCreateSchema
+ *
+ * This validates the request body contains the correct properties (arrays of critter attributes)
+ * before parsing with BulkCreationSchema.
+ *
+ * Why? Makes patching the request body easier with defined properties existing. (critters: [], markings: [] etc)
  *
  */
 const BulkShapeSchema = z.object({
@@ -37,7 +42,7 @@ const BulkShapeSchema = z.object({
 });
 
 /**
- * Bulk create schema - after parsed with BulkShapeSchema
+ * Bulk creation schema - after parsing with BulkShapeSchema
  *
  */
 const BulkCreationSchema = z.object({
