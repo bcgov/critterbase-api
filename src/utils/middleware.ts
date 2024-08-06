@@ -4,13 +4,28 @@ import {
   PrismaClientValidationError
 } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
-import { loginUser } from '../api/access/access.service';
-import { setUserContext } from '../api/user/user.service';
-import { authenticateRequest } from '../authentication/auth';
-import { IS_TEST, NO_AUTH } from './constants';
+import { AuthService } from '../services/auth-service';
+import { TokenService } from '../services/token-service';
+import { UserService } from '../services/user-service';
+import { BYPASS_AUTHENTICATION, IS_PROD, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
+
+/**
+ * Token Service
+ *
+ * @description Verifies jwt token against issuer.
+ */
+const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
+
+/**
+ * Auth Service
+ *
+ * @description Handles authentication and authorization.
+ */
+const authService = new AuthService(tokenService, UserService.init());
 
 /**
  * Express request handler callback
@@ -23,7 +38,8 @@ import { apiError } from './types';
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
 /**
- * Catches errors on API routes. Used instead of wrapping try / catch on every endpoint.
+ * Catches errors on API routes.
+ * Used instead of wrapping try / catch on every endpoint.
  *
  * @param {ExpressHandler} fn - Express Handler callback.
  */
@@ -32,11 +48,12 @@ const catchErrors = (fn: ExpressHandler) => (req: Request, res: Response, next: 
 };
 
 /**
- * Middleware: Logs the incoming requests.
+ * Middleware: Logs incomming requests.
  *
  * @param {Request} req - Express Request.
  * @param {Response} _res - Express Response.
  * @param {NextFunction} next - Express Next callback.
+ * @returns {void}
  */
 const logger = (req: Request, _res: Response, next: NextFunction) => {
   if (!IS_TEST) {
@@ -48,7 +65,7 @@ const logger = (req: Request, _res: Response, next: NextFunction) => {
 /**
  * Middleware: Logs server errors.
  *
- * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - [TODO:description]
+ * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err
  * @param {Request} req - Express Request.
  * @param {Response} _res - Express Response.
  * @param {NextFunction} next - Express Next callback.
@@ -67,7 +84,8 @@ const errorLogger = (
 };
 
 /**
- * Middleware: Generic express error handler. Will handle any errors catchErrors catches.
+ * Middleware: Express error handler.
+ * Handles any caught errors via `catchErrors`.
  *
  * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - supported errors.
  * @param {Request} _req - Express Request.
@@ -133,53 +151,59 @@ const errorHandler = (
 };
 
 /**
- * Middleware: Authorization.
- * Authorizes a user into Critterbase and sets the user context in DB.
+ * Middleware: Auth (Authentication and Authorization).
+ * Authenticates and authorizes a user into Critterbase.
  *
- * Note: Will bypass auth if NODE_ENV=TEST or AUTHENTICATE=NO_AUTH useful for development.
+ * Note: Auth middleware is bypassed if NODE_ENV=TEST or AUTHENTICATE=FALSE.
  *
  * @async
- * @returns {Promise<void>}
+ * @returns {void}
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
-  /**
-   * Bypass if NODE_ENV is `TEST` or AUTHETICATE is 'FALSE'
-   */
-  if (IS_TEST || NO_AUTH) {
+  // If running test suite or authentication disabled: skip
+  if (BYPASS_AUTHENTICATION) {
     return next();
   }
-  /**
-   * Authenticate the incomming request via Bearer token
-   */
-  const kc = await authenticateRequest(req);
-  /**
-   * Login the user to critterbase
-   * Note: User needs to already exist
-   *
-   */
-  const user = await loginUser({ keycloak_uuid: kc.keycloak_uuid });
-  /**
-   * Set the user context in the database
-   * Note: This populates the audit columns for all subsequent requests
-   *
-   */
-  await setUserContext(kc.keycloak_uuid, kc.system_name);
-  /**
-   * Log the important user details
-   *
-   */
-  console.log(
-    JSON.stringify({
-      user_identifier: user.user_identifier,
-      keycloak_uuid: user?.keycloak_uuid,
-      user_id: user.user_id
-    })
-  );
-  /**
-   * Pass the request to the next request handler
-   *
-   */
+
+  // Authenticate the request: Verify token, user and audience from headers
+  const authenticatedUser = await authService.authenticate(req.headers);
+
+  // Authorize user: Login user and set database context for auditing
+  await authService.authorize(authenticatedUser);
+
   next();
 });
 
-export { auth, catchErrors, errorHandler, errorLogger, logger };
+/**
+ * Middleware: Rate Limiter (`Denial of Service` attack prevention)
+ * Limits subsequent requests within a set timeframe.
+ *
+ * Note: Currently these values are hard coded, if more tweaking is needed
+ * put these values into the ENV.
+ *
+ */
+const limiter = rateLimit({
+  // 5 minutes in milliseconds,
+  windowMs: 10 * 60 * 1000,
+
+  // Request limit for `windowMs`
+  limit: 50,
+
+  /**
+   * Generates the rate limit key used to identify requests from same user or service.
+   *
+   * Note: Using IP and user header to prevent unessescary limiting of external service accounts.
+   *
+   * @param {Request} req - Express request
+   * @returns {string} Rate limit key
+   */
+  keyGenerator: (req): string => `${req.ip}-${String(req.headers['user'])}`,
+
+  /**
+   * Skip rate limiting if not 'production'.
+   *
+   */
+  skip: (): boolean => !IS_PROD
+});
+
+export { auth, catchErrors, errorHandler, errorLogger, limiter, logger };

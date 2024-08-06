@@ -38,7 +38,7 @@ export class XrefService implements Service {
   }
 
   /**
-   * Instantiate MortalityService and inject dependencies.
+   * Instantiate XrefService and inject dependencies.
    *
    * @static
    * @returns {XrefService}

@@ -16,24 +16,6 @@ import { PORT } from './utils/constants';
 
 const document = createDocument({
   openapi: '3.1.0',
-  components: {
-    schemas: {
-      ...critterSchemas,
-      ...lookupSchemas,
-      ...xrefSchemas
-    },
-    //TODO: add keycloak authentication into securitySchemes for service accounts.
-    securitySchemes: {
-      userAuth: {
-        type: 'apiKey',
-        in: 'header',
-        name: 'user',
-        description: `
-          Key value pair for keycloak_guid and username.This header is used to identify specific users from external systems that authenticate with keycloak service account.
-          example: {"keycloak_guid":"0000ABC0000CBD0000EFG","username":"John Smith"}`
-      }
-    }
-  },
   info: {
     title: 'Critterbase API',
     version: '1.0.0',
@@ -42,6 +24,47 @@ const document = createDocument({
       name: 'MIT'
     }
   },
+  components: {
+    schemas: {
+      ...critterSchemas,
+      ...lookupSchemas,
+      ...xrefSchemas
+    },
+    securitySchemes: {
+      bearerAuth: {
+        description: 'Keycloak token from `allowed` service account. (SIMS / BCTW)',
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
+      }
+    },
+    headers: {
+      user: {
+        description: 'User credentials for critterbase auditing.',
+        required: true,
+        schema: {
+          type: 'object',
+          properties: {
+            keycloak_guid: {
+              description: `User's assigned keycloak identifier.`,
+              type: 'string',
+              format: 'uuid'
+            },
+            username: {
+              description: `User's external system username or identifier.`,
+              type: 'string'
+            }
+          },
+          example: { keycloak_guid: '0000ABC0000CBD0000EFG', username: 'Steve Brule' }
+        }
+      }
+    }
+  },
+  security: [
+    {
+      beaerAuth: []
+    }
+  ],
   paths: {
     ...critterPaths,
     ...capturePaths,
@@ -59,25 +82,20 @@ const document = createDocument({
   },
   servers: [
     {
-      url: PORT ? `http://localhost:${PORT}` : 'http://localhost:9000',
-      description: 'local api via node'
+      url: `http://localhost:${PORT}`,
+      description: 'Local development API.'
     },
     {
       url: 'https://moe-critterbase-api-dev.apps.silver.devops.gov.bc.ca',
-      description: 'deployed api in dev environment'
+      description: 'Deployed API in Openshift DEV environment.'
     },
     {
       url: 'https://moe-critterbase-api-test.apps.silver.devops.gov.bc.ca',
-      description: 'deployed api in test environment'
+      description: 'Deployed API in Openshift TEST environment.'
     },
     {
       url: 'https://moe-critterbase-api-prod.apps.silver.devops.gov.bc.ca',
-      description: 'deployed api in prod environment'
-    }
-  ],
-  security: [
-    {
-      userAuth: []
+      description: 'Deployed API in PROD environment.'
     }
   ]
 });

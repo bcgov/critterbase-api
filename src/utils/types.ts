@@ -60,15 +60,15 @@ class apiError extends Error {
   /**
    ** Authorization headers are missing or incorrect
    */
-  static unauthorized(message: string) {
-    return new apiError(message, 401, 'unauthorized');
+  static unauthorized(message: string, errors?: CustomError[]) {
+    return new apiError(message, 401, 'unauthorized', errors);
   }
 
   /**
    ** Internal server issue or problem occurs
    */
-  static serverIssue(message = 'Internal Server Error') {
-    return new apiError(message, 500, 'serverIssue');
+  static serverIssue(message = 'Internal Server Error', errors?: CustomError[]) {
+    return new apiError(message, 500, 'serverIssue', errors);
   }
 
   static sqlExecuteIssue(message: string, errors?: CustomError[]) {
@@ -78,12 +78,12 @@ class apiError extends Error {
   /**
    ** Request conflicts with current state of the target resource
    */
-  static conflictIssue(message: string) {
-    return new apiError(message, 409, 'conflict');
+  static conflictIssue(message: string, errors?: CustomError[]) {
+    return new apiError(message, 409, 'conflict', errors);
   }
 
-  static forbidden(message: string) {
-    return new apiError(message, 403, 'forbidden');
+  static forbidden(message: string, errors?: CustomError[]) {
+    return new apiError(message, 403, 'forbidden', errors);
   }
 
   toString(): string {
