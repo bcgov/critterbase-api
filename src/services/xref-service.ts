@@ -322,36 +322,28 @@ export class XrefService implements Service {
    *
    * @async
    * @param {IMeasurementSearch} search - Search properties.
-   * @returns {Promise<IMeasurementWithTsnHiearchy[]>}
+   * @returns {Promise<IMeasurementWithTsnHierarchy[]>}
    */
   async searchForMeasurements(search: IMeasurementSearch): Promise<IMeasurementWithTsnHierarchy> {
-    // Search for the measurements
+    // Initialize an empty array for TSNs
+    let tsns: number[] = [];
+
+    // Fetch TSNs hierarchy if search.tsns exists and has items
+    if (search.tsns?.length) {
+      const tsnsWithHierarchy = await this.itisService.getTsnsHierarchy(search.tsns);
+      tsns = Array.from(new Set(tsnsWithHierarchy.flatMap((tsn) => tsn.hierarchy)));
+    }
+
+    // Perform searches concurrently
     const [qualitative, quantitative] = await Promise.all([
-      this.repository.searchForQualitativeMeasurements(search),
-      this.repository.searchForQuantitativeMeasurements(search)
+      this.repository.searchForQualitativeMeasurements(search, tsns),
+      this.repository.searchForQuantitativeMeasurements(search, tsns)
     ]);
 
-    // Get the tsns of the measurements
-    const qualitativeTsns = qualitative.map((measurement) => measurement.itis_tsn);
-    const quantitativeTsns = quantitative.map((measurement) => measurement.itis_tsn);
-
-    // Get the tsnHiearchy map for each tsn
-    const tsnHiearchyMap = await this.itisService.getTsnsHierarchyMap([...qualitativeTsns, ...quantitativeTsns]);
-
-    // Inject the tsn hiearchy into the measurements.
-    const qualitativeWithHiearchy = qualitative.map((measurement) => ({
-      ...measurement,
-      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? []
-    }));
-
-    const quantitativeWithHieararchy = quantitative.map((measurement) => ({
-      ...measurement,
-      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? []
-    }));
-
+    // Return the results
     return {
-      quantitative: quantitativeWithHieararchy,
-      qualitative: qualitativeWithHiearchy
+      quantitative,
+      qualitative
     };
   }
 }

@@ -97,16 +97,18 @@ export const TsnMeasurementsSchema = z.object({
 });
 
 export const MeasurementsWithTsnHierarchy = z.object({
-  qualitative: TsnQualitativeMeasurementSchema.extend({
-    tsnHierarchy: z.number().array()
-  }).array(),
-  quantitative: TsnQuantitativeMeasurementSchema.extend({
-    tsnHierarchy: z.number().array()
-  }).array()
+  qualitative: z.array(TsnQualitativeMeasurementSchema),
+  quantitative: z.array(TsnQuantitativeMeasurementSchema)
 });
 
 export const MeasurementSearchQuery = z.object({
-  name: z.string()
+  name: z.string(),
+  tsns: z.preprocess((val) => {
+    if (Array.isArray(val)) {
+      return val.map(Number);
+    }
+    return val;
+  }, z.array(z.number()).optional())
 });
 
 /**
@@ -150,3 +152,8 @@ export const CollectionUnitCategoryIdSchema = z.object({
 export const MeasurementIdsQuerySchema = z.object({
   taxon_measurement_ids: z.string().uuid().array()
 });
+
+export type TSNWithHierarchy = {
+  tsn: number;
+  hierarchy: number[];
+};

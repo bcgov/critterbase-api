@@ -268,12 +268,17 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {IMeasurementSearch} search - Search properties.
+   * @param {number[]} tsns - filters for measurements applied to any of the specified TSNs
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
-  async searchForQuantitativeMeasurements(search: IMeasurementSearch): Promise<ITsnQuantitativeMeasurement[]> {
+  async searchForQuantitativeMeasurements(
+    search: IMeasurementSearch,
+    tsns?: number[]
+  ): Promise<ITsnQuantitativeMeasurement[]> {
     const result = await this.prisma.xref_taxon_measurement_quantitative.findMany({
       where: {
-        measurement_name: { contains: search.name, mode: 'insensitive' }
+        measurement_name: { contains: search.name, mode: 'insensitive' },
+        ...(tsns && tsns.length > 0 ? { itis_tsn: { in: tsns } } : {})
       },
       select: {
         taxon_measurement_id: true,
@@ -295,32 +300,44 @@ export class XrefRepository extends Repository {
    *
    * @async
    * @param {IMeasurementSearch} search - Search properties.
+   * @param {number[]} tsns - filters for measurements applied to any of the specified TSNs
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
-  async searchForQualitativeMeasurements(search: IMeasurementSearch): Promise<ITsnQualitativeMeasurement[]> {
+  async searchForQualitativeMeasurements(
+    search: IMeasurementSearch,
+    tsns?: number[]
+  ): Promise<ITsnQualitativeMeasurement[]> {
     const partialMatchTerm = `%${search.name}%`;
-    const result = await this.safeQuery(
-      Prisma.sql`
-      SELECT
-        q.taxon_measurement_id,
-        q.itis_tsn,
-        q.measurement_name,
-        q.measurement_desc,
-        json_agg(
-          json_build_object(
-            'qualitative_option_id', o.qualitative_option_id,
-            'option_label', o.option_label,
-            'option_value', o.option_value,
-            'option_desc', o.option_desc
-          )
-        ) as options
-      FROM xref_taxon_measurement_qualitative q
-      LEFT JOIN xref_taxon_measurement_qualitative_option o
-        ON q.taxon_measurement_id = o.taxon_measurement_id
-      WHERE q.measurement_name ILIKE ${partialMatchTerm}
-      GROUP BY q.taxon_measurement_id;`,
-      TsnQualitativeMeasurementSchema.array()
-    );
+
+    // Build the base query
+    const baseQuery = Prisma.sql`
+    SELECT
+      q.taxon_measurement_id,
+      q.itis_tsn,
+      q.measurement_name,
+      q.measurement_desc,
+      json_agg(
+        json_build_object(
+          'qualitative_option_id', o.qualitative_option_id,
+          'option_label', o.option_label,
+          'option_value', o.option_value,
+          'option_desc', o.option_desc
+        )
+      ) AS options
+    FROM xref_taxon_measurement_qualitative q
+    LEFT JOIN xref_taxon_measurement_qualitative_option o
+      ON q.taxon_measurement_id = o.taxon_measurement_id
+    WHERE q.measurement_name ILIKE ${partialMatchTerm}
+  `;
+
+    // Conditionally add the itis_tsn filter if tsns is provided and has values
+    const tsnsCondition = tsns && tsns.length > 0 ? Prisma.sql`AND q.itis_tsn = ANY(${tsns})` : Prisma.sql``;
+
+    // Final query combining base query with optional condition
+    const finalQuery = Prisma.sql`${baseQuery} ${tsnsCondition} GROUP BY q.taxon_measurement_id;`;
+
+    // Execute the query
+    const result = await this.safeQuery(finalQuery, TsnQualitativeMeasurementSchema.array());
 
     return result;
   }
