@@ -13,7 +13,16 @@ jobs:
           cache: "npm"
 
       - name: Create ENV file
-        run: touch .env && cp -f ./.docker/env.docker .env
+        run: cp -f ./.docker/env.docker .env
+
+      - name: Help 1
+        run: docker-compose --help
+
+      - name: Help 2
+        run: pwd
+
+      - name: Help 3
+        run: cat .env
 
       - name: Clean containers
         run: make clean
