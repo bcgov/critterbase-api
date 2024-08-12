@@ -174,8 +174,8 @@ export class CritterRepository extends Repository {
                 'quantitative_measurements', COALESCE(quan.quantitative_measurements, '[]'::json),
                 'qualitative_measurements', COALESCE(qual.qualitative_measurements, '[]'::json)
             )), '[]'::json) AS captures
-        FROM critter c
-        LEFT JOIN capture ca ON c.critter_id = ca.critter_id
+        FROM capture ca
+        LEFT JOIN critter c ON c.critter_id = ca.critter_id
         LEFT JOIN location capture_loc ON capture_loc.location_id = ca.capture_location_id
         LEFT JOIN location release_loc ON release_loc.location_id = ca.release_location_id
         LEFT JOIN (
