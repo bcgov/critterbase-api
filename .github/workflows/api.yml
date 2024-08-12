@@ -13,7 +13,7 @@ jobs:
           cache: "npm"
 
       - name: Create ENV file
-        run: touch .env && yes | make env
+        run: touch .env && yes && make env
 
       - name: Clean containers
         run: make clean
