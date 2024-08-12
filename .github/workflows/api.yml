@@ -13,10 +13,7 @@ jobs:
           cache: "npm"
 
       - name: Create ENV file
-        run: touch .env
-
-      - name: Populate ENV values
-        run: yes | make env
+        run: cp ./.docker/env.docker .env
 
       - name: Clean containers
         run: make clean
