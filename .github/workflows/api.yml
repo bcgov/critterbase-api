@@ -15,9 +15,6 @@ jobs:
       - name: Create ENV file
         run: touch .env && yes | make env
 
-      - name: Clean containers
-        run: make clean
-
       - name: Build containers (db, db_setup, api)
         run: make build-backend
 
