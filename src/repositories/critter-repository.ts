@@ -110,7 +110,7 @@ export class CritterRepository extends Repository {
   async getMultipleCrittersByIdsDetailed(critter_ids: string[]): Promise<IDetailedManyCritter[]> {
     const result = await this.safeQuery(
       Prisma.sql`
-      WITH 
+      WITH
     -- Mortality CTE
     mortality AS (
         SELECT
@@ -148,6 +148,10 @@ export class CritterRepository extends Repository {
             c.critter_id,
             COALESCE(json_agg(json_build_object(
                 'capture_id', ca.capture_id,
+                'capture_date', ca.capture_date,
+                'release_date', ca.release_date,
+                'capture_time', ca.capture_time,
+                'release_time', ca.release_time,
                 'capture_comment', ca.capture_comment,
                 'release_comment', ca.release_comment,
                 'capture_location', json_build_object(
@@ -239,15 +243,15 @@ export class CritterRepository extends Repository {
         COALESCE(m.mortality, '[]'::json) AS mortality,
         COALESCE(cu.collection_units, '[]'::json) AS collection_units,
         COALESCE(ca.captures, '[]'::json) AS captures
-    FROM 
+    FROM
         critter c
-    LEFT JOIN 
+    LEFT JOIN
         mortality m ON c.critter_id = m.critter_id
-    LEFT JOIN 
+    LEFT JOIN
         collection_units cu ON c.critter_id = cu.critter_id
-    LEFT JOIN 
+    LEFT JOIN
         captures ca ON c.critter_id = ca.critter_id
-    WHERE 
+    WHERE
         c.critter_id = ANY(${critter_ids}::uuid[]);
     `,
       z.array(DetailedManyCritterSchema)
@@ -267,7 +271,7 @@ export class CritterRepository extends Repository {
   async getMultipleCrittersGeometryByIds(critter_ids: string[]): Promise<CaptureMortalityGeometry> {
     const result = await this.safeQuery(
       Prisma.sql`
-          WITH 
+          WITH
     captures AS (
         SELECT
             ca.critter_id,
