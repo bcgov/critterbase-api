@@ -13,7 +13,7 @@ jobs:
           cache: "npm"
 
       - name: Create ENV file
-        run: cp ./.docker/env.docker .env
+        run: cp -f ./.docker/env.docker .env
 
       - name: Clean containers
         run: make clean
