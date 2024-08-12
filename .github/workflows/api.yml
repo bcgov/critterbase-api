@@ -22,13 +22,13 @@ jobs:
         run: make build-backend
 
       - name: Run database container
-        run: docker-compose -f docker-compose.yml up -d critterbase-db
+        run: docker compose -f docker-compose.yml up -d critterbase-db
 
       - name: Run database setup container
-        run: docker-compose -f docker-compose.yml up --exit-code-from critterbase-db_setup
+        run: docker compose -f docker-compose.yml up --exit-code-from critterbase-db_setup
 
       - name: Run API container
-        run: docker-compose -f docker-compose.yml up -d critterbase-api
+        run: docker compose -f docker-compose.yml up -d critterbase-api
 
       - name: Check database health
         uses: stringbean/docker-healthcheck-action@v1
