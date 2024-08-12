@@ -15,14 +15,8 @@ jobs:
       - name: Create ENV file
         run: cp -f ./.docker/env.docker .env
 
-      - name: Help 1
-        run: docker-compose --help
-
-      - name: Help 2
-        run: pwd
-
-      - name: Help 3
-        run: cat .env
+      - name: Install docker-compose
+        run: sudo apt-get install docker-compose-plugin
 
       - name: Clean containers
         run: make clean
