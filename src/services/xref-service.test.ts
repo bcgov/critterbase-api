@@ -27,7 +27,7 @@ const mockRepository: jest.Mocked<XrefRepository> = {
 
 const mockItisService = {
   getTsnHierarchy: jest.fn(),
-  getTsnsHierarchyMap: jest.fn()
+  getTsnsHierarchy: jest.fn()
 };
 
 const xrefService = new XrefService(mockRepository, mockItisService as unknown as ItisService);
@@ -89,34 +89,49 @@ describe('xref-service', () => {
         measurement_desc: 'desc'
       }
     ];
-
-    const map = new Map().set(1, [1, 2]);
+    const mockTsns = [1, 2]
+    const mockHierarchyResult = [
+      {
+        tsn: mockTsns[0],
+        hierarchy: [1, 2]
+      },
+      {
+        tsn: mockTsns[1],
+        hierarchy: [2, 3]
+      }
+    ];
+    const mockHierarchyResponse = [1, 2, 3]
 
     mockRepository.searchForQuantitativeMeasurements.mockResolvedValue(mockQuantResult);
     mockRepository.searchForQualitativeMeasurements.mockResolvedValue(mockQualResult);
-
-    mockItisService.getTsnsHierarchyMap.mockReturnValue(map);
+    mockItisService.getTsnsHierarchy.mockReturnValue(mockHierarchyResult);
 
     it('should pass search to repository methods', async () => {
-      await xrefService.searchForMeasurements({ name: 'carl' });
+      await xrefService.searchForMeasurements({ name: 'age', tsns: mockTsns });
 
-      expect(mockRepository.searchForQuantitativeMeasurements).toHaveBeenCalledWith({ name: 'carl' });
+      expect(mockRepository.searchForQuantitativeMeasurements).toHaveBeenCalledWith(
+        { name: 'age', tsns: mockTsns },
+        mockHierarchyResponse
+      );
 
-      expect(mockRepository.searchForQualitativeMeasurements).toHaveBeenCalledWith({ name: 'carl' });
+      expect(mockRepository.searchForQualitativeMeasurements).toHaveBeenCalledWith(
+        { name: 'age', tsns: mockTsns },
+        mockHierarchyResponse
+      );
     });
 
     it("should pass returned itis_tsn's to itisService method", async () => {
-      await xrefService.searchForMeasurements({ name: 'carl' });
+      await xrefService.searchForMeasurements({ name: 'age', tsns: mockTsns });
 
-      expect(mockItisService.getTsnsHierarchyMap).toHaveBeenCalledWith([1, 1]);
+      expect(mockItisService.getTsnsHierarchy).toHaveBeenCalledWith(mockTsns);
     });
 
-    it('should return measurements with injected tsn hierarchies', async () => {
-      const result = await xrefService.searchForMeasurements({ name: 'carl' });
+    it('should return measurements', async () => {
+      const result = await xrefService.searchForMeasurements({ name: 'age', tsns: mockTsns });
 
       expect(result).toStrictEqual({
-        quantitative: [{ ...mockQuantResult[0], tsnHierarchy: [1, 2] }],
-        qualitative: [{ ...mockQualResult[0], tsnHierarchy: [1, 2] }]
+        quantitative: mockQuantResult,
+        qualitative: mockQualResult
       });
     });
   });
