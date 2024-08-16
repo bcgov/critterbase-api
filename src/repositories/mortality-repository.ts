@@ -11,6 +11,8 @@ import {
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
+const UNKNOWN_CAUSE_OF_DEATH = 'Unknown';
+
 /**
  * Mortality Repository
  *
@@ -85,22 +87,18 @@ export class MortalityRepository extends Repository {
   }
 
   /**
-   * Append the default cause of death (`Unknown`) id to the body
-   * if `proximate_cause_of_death_id` not provided.
+   * Get the default `cause of death (cod)` id.
    *
    * @async
    * @template T
-   * @param {T} body - Object containing `proximate_cause_of_death_id`.
-   * @returns {Promise<T>} Body object.
+   * @returns {Promise<string>} Default cause of death id
    */
-  async appendDefaultCOD<T extends { proximate_cause_of_death_id?: string }>(body: T): Promise<T> {
-    const cod_res = await this.prisma.lk_cause_of_death.findFirstOrThrow({
-      where: { cod_category: 'Unknown' }
+  async getDefaultCauseOfDeathId(): Promise<string> {
+    const response = await this.prisma.lk_cause_of_death.findFirstOrThrow({
+      where: { cod_category: UNKNOWN_CAUSE_OF_DEATH }
     });
-    if (!body.proximate_cause_of_death_id) {
-      body.proximate_cause_of_death_id = cod_res.cod_id; //This is just a temp solution, ideally they should be forced to provide this.
-    }
-    return body;
+
+    return response.cod_id;
   }
 
   /**

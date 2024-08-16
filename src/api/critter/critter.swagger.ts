@@ -8,6 +8,7 @@ import {
   DetailedManyCritterSchema,
   SimilarCritterQuerySchema
 } from '../../schemas/critter-schema';
+import { CaptureMortalityGeometrySchema } from '../../schemas/spatial-schema';
 import { routes } from '../../utils/constants';
 import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 import { QueryFormats } from '../../utils/types';
@@ -19,7 +20,8 @@ export const critterSchemas = {
   defaultCritterResponse: CritterSchema,
   detailedCritterResponse: DetailedCritterSchema,
   defaultCritterResponseArray: z.array(CritterSchema),
-  detailedManyCritterResponseArray: z.array(DetailedManyCritterSchema)
+  detailedManyCritterResponseArray: z.array(DetailedManyCritterSchema),
+  defaultCritterGeometryResponse: CaptureMortalityGeometrySchema
 };
 
 export const critterPaths = {
@@ -81,6 +83,39 @@ export const critterPaths = {
                   { $ref: '#/components/schemas/defaultCritterResponseArray' },
                   { $ref: '#/components/schemas/detailedManyCritterResponseArray' }
                 ]
+              }
+            }
+          }
+        },
+        ...SwagErr,
+        ...SwagUnauthorized,
+        ...SwagNotFound
+      }
+    }
+  },
+  [`${routes.critters}/spatial`]: {
+    /**
+     * Get capture and mortality geometry for multiple critter IDs
+     *
+     */
+    post: {
+      operationId: 'crittersGeometryByIds',
+      summary: 'Retrieve capture and mortality geometry for specific critters by their critter ids.',
+      tags: [TAG],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: CritterIdsRequestSchema
+          }
+        }
+      },
+      responses: {
+        '200': {
+          description: SwagDesc.get,
+          content: {
+            'application/json': {
+              schema: {
+                oneOf: [{ $ref: '#/components/schemas/defaultCritterGeometryResponse' }]
               }
             }
           }

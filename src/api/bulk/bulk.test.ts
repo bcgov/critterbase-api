@@ -1,4 +1,4 @@
-import { capture, critter, critter_collection_unit, location, marking, mortality } from '@prisma/client';
+import { critter, critter_collection_unit, location, marking, mortality } from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { PrismaClientExtended } from '../../client/client';
@@ -13,9 +13,8 @@ const bulkUpdateData = jest.fn();
 const bulkDeleteData = jest.fn();
 const updateCapture = jest.fn();
 const updateMortality = jest.fn();
-const appendEnglishTaxonAsUUID = jest.fn();
+const getDefaultCodId = jest.fn();
 const appendEnglishMarkingsAsUUID = jest.fn();
-const appendDefaultCOD = jest.fn();
 const deleteMarking = jest.fn();
 const deleteCollectionUnit = jest.fn();
 const patchTsnAndScientificName = jest.fn();
@@ -27,13 +26,12 @@ const db: any = {
   bulkUpdateData,
   bulkDeleteData,
   updateMortality,
-  appendEnglishTaxonAsUUID,
   appendEnglishMarkingsAsUUID,
   deleteMarking,
   deleteCollectionUnit,
   bulkService: { repository: { createEntities } },
   itisService: { patchTsnAndScientificName },
-  mortalityService: { appendDefaultCOD, updateMortality },
+  mortalityService: { getDefaultCauseOfDeathId: getDefaultCodId, updateMortality },
   captureService: { updateCapture, deleteMultipleCaptures }
 };
 
@@ -80,11 +78,11 @@ const MARKING: marking = {
   update_timestamp: new Date()
 };
 
-const CAPTURE: capture = {
+const CAPTURE = {
   capture_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
   critter_id: CRITTER_ID,
   capture_method_id: '1af85263-6a7e-4b76-8ca6-118fd3c43f50',
-  capture_location_id: null,
+  capture_location_id: 'capture_location_id',
   release_location_id: null,
   capture_date: new Date(),
   capture_time: new Date(),
@@ -398,9 +396,8 @@ describe('API: Bulk', () => {
   describe('ROUTER', () => {
     describe('POST /api/bulk', () => {
       it('should return status 201', async () => {
-        appendEnglishTaxonAsUUID.mockResolvedValue({ ...CRITTER });
+        getDefaultCodId.mockResolvedValue('COD');
         appendEnglishMarkingsAsUUID.mockResolvedValue({ ...MARKING });
-        appendDefaultCOD.mockResolvedValue({ ...MORTALITY });
         patchTsnAndScientificName.mockResolvedValue({
           ...CRITTER,
           itis_scientific_name: 'Biggus Moosus'
