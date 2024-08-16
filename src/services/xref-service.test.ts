@@ -89,7 +89,7 @@ describe('xref-service', () => {
         measurement_desc: 'desc'
       }
     ];
-    const mockTsns = [1, 2]
+    const mockTsns = [1, 2];
     const mockHierarchyResult = [
       {
         tsn: mockTsns[0],
@@ -100,7 +100,7 @@ describe('xref-service', () => {
         hierarchy: [2, 3]
       }
     ];
-    const mockHierarchyResponse = [1, 2, 3]
+    const mockHierarchyResponse = [1, 2, 3];
 
     mockRepository.searchForQuantitativeMeasurements.mockResolvedValue(mockQuantResult);
     mockRepository.searchForQualitativeMeasurements.mockResolvedValue(mockQualResult);
