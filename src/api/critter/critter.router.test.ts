@@ -6,6 +6,7 @@ const id = '3277ea2a-38ee-4aa4-a9af-b2c40d8cb940';
 const mockCritterService = {
   getAllCritters: jest.fn(),
   getMultipleCrittersByIds: jest.fn(),
+  getMultipleCrittersGeometryByIds: jest.fn(),
   getCritterById: jest.fn(),
   getAllCrittersOrCrittersWithWlhId: jest.fn(),
   updateCritter: jest.fn(),
@@ -88,6 +89,18 @@ describe('Critter Router', () => {
         const res = await request.post(`/api/critters/unique`).send(payload);
 
         expect(mockCritterService.findSimilarCritters.mock.calls[0][0]).toStrictEqual(payload);
+        expect(res.status).toBe(200);
+        expect(res.body).toBe(true);
+      });
+    });
+
+    describe('POST critter/spatial - get capture and mortality geometry for multiple critters', () => {
+      it('should respond with status 200 and return response', async () => {
+        mockCritterService.getMultipleCrittersGeometryByIds.mockResolvedValueOnce(true);
+        const payload = { critter_ids: [id] };
+        const res = await request.post(`/api/critters/spatial`).send(payload);
+
+        expect(mockCritterService.getMultipleCrittersGeometryByIds.mock.calls[0][0]).toStrictEqual([id]);
         expect(res.status).toBe(200);
         expect(res.body).toBe(true);
       });

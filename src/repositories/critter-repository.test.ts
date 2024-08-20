@@ -176,6 +176,43 @@ describe('xref-repository', () => {
     });
   });
 
+  describe('getMultipleCrittersGeometryByIds', () => {
+    beforeEach(() => {
+      mockPrismaClient = {
+        $queryRaw: jest.fn()
+      };
+    });
+
+    it('should return capture and mortality geometries successfully', async () => {
+      const mockCaptureResult = [
+        {
+          capture_id: 'capture1',
+          coordinates: [12.35, -134.33]
+        },
+        {
+          capture_id: 'capture2',
+          coordinates: [14.39, -119.48]
+        }
+      ];
+
+      const mockMortalityResult = [
+        {
+          mortality_id: 'mortality1',
+          coordinates: [14.39, -119.48]
+        }
+      ];
+
+      const mockResponse = { captures: mockCaptureResult, mortalities: mockMortalityResult };
+
+      mockPrismaClient.$queryRaw.mockResolvedValue([mockResponse]);
+
+      const critterRepository = new CritterRepository(mockPrismaClient);
+      const result = await critterRepository.getMultipleCrittersGeometryByIds(['critter1', 'critter2']);
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   describe('getCritterById', () => {
     beforeEach(() => {
       mockPrismaClient = {
