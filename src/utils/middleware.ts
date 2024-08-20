@@ -1,4 +1,8 @@
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientValidationError
+} from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
@@ -125,7 +129,15 @@ const errorHandler = (
    *
    */
   if (err instanceof PrismaClientValidationError) {
-    return res.status(500).json({ error: 'Prisma query syntax error', issues: ['View logs'] });
+    return res.status(500).json({ error: 'Database query syntax error', issues: ['View logs'] });
+  }
+  /**
+   * Prisma Unknown Errors
+   * @description Usually custom database constraint failed
+   *
+   */
+  if (err instanceof PrismaClientUnknownRequestError) {
+    return res.status(500).json({ error: 'Database query failed.', issues: ['View logs'] });
   }
   /**
    * Error

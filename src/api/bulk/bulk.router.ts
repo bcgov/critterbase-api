@@ -1,35 +1,23 @@
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
-import { CaptureCreateSchema, CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
-import { BulkCritterCreateSchema, CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
+import { CritterUpdateSchema } from '../../schemas/critter-schema';
 import { LocationUpdateSchema } from '../../schemas/location-schema';
-import { MortalityCreateSchema, MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
+import { MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { zodID } from '../../utils/zod_helpers';
+import { CollectionUnitDeleteSchema, CollectionUnitUpsertSchema } from '../collectionUnit/collectionUnit.utils';
+import { FamilyChildDeleteSchema, FamilyParentDeleteSchema } from '../family/family.utils';
+import { MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
 import {
-  CollectionUnitCreateBodySchema,
-  CollectionUnitDeleteSchema,
-  CollectionUnitUpsertSchema
-} from '../collectionUnit/collectionUnit.utils';
-import {
-  FamilyChildCreateBodySchema,
-  FamilyChildDeleteSchema,
-  FamilyCreateBodySchema,
-  FamilyParentCreateBodySchema,
-  FamilyParentDeleteSchema
-} from '../family/family.utils';
-import { MarkingCreateBodySchema, MarkingDeleteSchema, MarkingUpdateByIdSchema } from '../marking/marking.utils';
-import {
-  QualitativeCreateSchema,
   QualitativeDeleteSchema,
   QualitativeUpdateSchema,
-  QuantitativeCreateSchema,
   QuantitativeDeleteSchema,
   QuantitativeUpdateSchema
 } from '../measurement/measurement.utils';
 import { IBulkDelete, IBulkMutate, bulkErrMap } from './bulk.service';
-import { BulkCreationSchema, getBulkDeletes, getBulkUpdates } from './bulk.utils';
+import { BulkCreationSchema, BulkShapeSchema, getBulkDeletes, getBulkUpdates } from './bulk.utils';
 
 export const BulkRouter = (db: ICbDatabase) => {
   const bulkRouter = express.Router();
@@ -37,88 +25,58 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.post(
     '/',
     catchErrors(async (req: Request, res: Response) => {
-      const {
-        critters,
-        collections,
-        markings,
-        locations,
-        captures,
-        mortalities,
-        qualitative_measurements,
-        quantitative_measurements,
-        families
-      } = await BulkCreationSchema.parseAsync(req.body);
+      // Cast request body to make patching easier
+      const preParsed = BulkShapeSchema.parse(req.body);
 
-      const crittersAppend = critters
-        ? await Promise.all(
-            critters.map(async (critter: Record<string, unknown>) => {
-              CritterCreateSchema.parse(critter);
-              const patchedCritter = await db.itisService.patchTsnAndScientificName(critter);
-              return BulkCritterCreateSchema.parse(patchedCritter);
-            })
-          )
-        : [];
+      // Patch critters to contain itis_tsn and scientific_name
+      const patchCritterPromises =
+        preParsed?.critters?.map((critter) => {
+          return db.itisService.patchTsnAndScientificName(critter);
+        }) ?? [];
 
-      const critterTsnLookup: Record<string, number> = {};
+      // Patch markings to swap marking values for UUIDs
+      const patchMarkingPromises =
+        preParsed?.markings?.map((marking) => {
+          return db.appendEnglishMarkingsAsUUID(marking);
+        }) ?? [];
 
-      if (crittersAppend.length) {
-        for (const critter of crittersAppend) {
-          if (critter.critter_id) {
-            critterTsnLookup[critter.critter_id] = critter.itis_tsn;
+      const patchedCritters = await Promise.all(patchCritterPromises);
+      const patchedMarkings = await Promise.all(patchMarkingPromises);
+      let patchedMortalities: Record<string, unknown>[] = [];
+
+      // Patch mortalities to include default cause of death id ('Unknown') if missing
+      if (preParsed?.mortalities?.length) {
+        const unknownCodId = await db.mortalityService.getDefaultCauseOfDeathId();
+
+        patchedMortalities = preParsed?.mortalities?.map((mortality) => {
+          if (!mortality?.cod_id) {
+            mortality.cod_id = unknownCodId;
           }
-        }
+          return mortality;
+        });
       }
 
-      const markingsAppend = markings
-        ? await Promise.all(
-            markings.map(async (marking: Record<string, unknown>) => {
-              await db.appendEnglishMarkingsAsUUID(marking);
-              return MarkingCreateBodySchema.parseAsync(marking);
-            })
-          )
-        : [];
-
-      const parsedCaptures = captures ? captures.map((c: Record<string, unknown>) => CaptureCreateSchema.parse(c)) : [];
-
-      const parsedMortalities = mortalities
-        ? await Promise.all(
-            mortalities.map(async (m: Record<string, unknown>) => {
-              await db.mortalityService.appendDefaultCOD(m);
-              return MortalityCreateSchema.parse(m);
-            })
-          )
-        : [];
-
-      const parsedCollections = collections ? z.array(CollectionUnitCreateBodySchema).parse(collections) : [];
-
-      const parsedQualitativeMeasurements = qualitative_measurements
-        ? z.array(QualitativeCreateSchema).parse(qualitative_measurements)
-        : [];
-
-      const parsedQuantitativeMeasurements = quantitative_measurements
-        ? z.array(QuantitativeCreateSchema).parse(quantitative_measurements)
-        : [];
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const familyUnits = families?.families ? z.array(FamilyCreateBodySchema).parse(families.families) : [];
-
-      const familyParents = families?.parents ? z.array(FamilyParentCreateBodySchema).parse(families.parents) : [];
-
-      const familyChildren = families?.children ? z.array(FamilyChildCreateBodySchema).parse(families.children) : [];
+      const parsed = BulkCreationSchema.parse({
+        ...req.body,
+        critters: patchedCritters,
+        markings: patchedMarkings,
+        mortalities: patchedMortalities
+      });
 
       const results = await db.bulkService.repository.createEntities({
-        critters: crittersAppend,
-        collections: parsedCollections,
-        markings: markingsAppend,
-        locations: locations ?? [],
-        captures: parsedCaptures,
-        mortalities: parsedMortalities,
-        qualitative_measurements: parsedQualitativeMeasurements,
-        quantitative_measurements: parsedQuantitativeMeasurements,
-        families: familyUnits,
-        family_children: familyChildren,
-        family_parents: familyParents
+        critters: parsed.critters ?? [],
+        collections: parsed.collections ?? [],
+        markings: parsed.markings ?? [],
+        locations: parsed.locations ?? [],
+        captures: parsed.captures ?? [],
+        mortalities: parsed.mortalities ?? [],
+        qualitative_measurements: parsed.qualitative_measurements ?? [],
+        quantitative_measurements: parsed.quantitative_measurements ?? [],
+        families: parsed.families?.families ?? [],
+        family_children: parsed.families?.children ?? [],
+        family_parents: parsed.families?.parents ?? []
       });
+
       return res.status(201).json(results);
     })
   );
@@ -126,34 +84,24 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.patch(
     '/',
     catchErrors(async (req: Request, res: Response) => {
-      const {
-        critters,
-        collections,
-        markings,
-        locations,
-        captures,
-        mortalities,
-        qualitative_measurements,
-        quantitative_measurements,
-        families
-      } = BulkCreationSchema.parse(req.body);
+      const preParsed = BulkShapeSchema.parse(req.body);
 
-      const critterUpdates = getBulkUpdates(critters);
-      const markingUpdates = getBulkUpdates(markings);
-      const collectionUpdates = getBulkUpdates(collections);
-      const qualUpdates = getBulkUpdates(qualitative_measurements);
-      const quantUpdates = getBulkUpdates(quantitative_measurements);
-      const captureUpdates = getBulkUpdates(captures);
-      const mortalityUpdates = getBulkUpdates(mortalities);
+      const critterUpdates = getBulkUpdates(preParsed.critters);
+      const markingUpdates = getBulkUpdates(preParsed.markings);
+      const collectionUpdates = getBulkUpdates(preParsed.collections);
+      const qualUpdates = getBulkUpdates(preParsed.qualitative_measurements);
+      const quantUpdates = getBulkUpdates(preParsed.quantitative_measurements);
+      const captureUpdates = getBulkUpdates(preParsed.captures);
+      const mortalityUpdates = getBulkUpdates(preParsed.mortalities);
 
-      const markingDeletes = getBulkDeletes(markings);
-      const collectionDeletes = getBulkDeletes(collections);
-      const qualDeletes = getBulkDeletes(qualitative_measurements);
-      const quantDeletes = getBulkDeletes(quantitative_measurements);
-      const captureDeletes = getBulkDeletes(captures);
-      const mortalityDeletes = getBulkDeletes(mortalities);
-      const parentDeletes = getBulkDeletes(families?.parents);
-      const childDeletes = getBulkDeletes(families?.children);
+      const markingDeletes = getBulkDeletes(preParsed.markings);
+      const collectionDeletes = getBulkDeletes(preParsed.collections);
+      const qualDeletes = getBulkDeletes(preParsed.qualitative_measurements);
+      const quantDeletes = getBulkDeletes(preParsed.quantitative_measurements);
+      const captureDeletes = getBulkDeletes(preParsed.captures);
+      const mortalityDeletes = getBulkDeletes(preParsed.mortalities);
+      const parentDeletes = getBulkDeletes(preParsed.families?.parents);
+      const childDeletes = getBulkDeletes(preParsed.families?.children);
 
       const updateBody: IBulkMutate = {
         critters: critterUpdates
@@ -171,8 +119,8 @@ export const BulkRouter = (db: ICbDatabase) => {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'markings')
             })
           : [],
-        locations: locations
-          ? z.array(LocationUpdateSchema.extend({ location_id: zodID })).parse(locations, {
+        locations: preParsed.locations
+          ? z.array(LocationUpdateSchema.extend({ location_id: zodID })).parse(preParsed.locations, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'locations')
             })
           : [],

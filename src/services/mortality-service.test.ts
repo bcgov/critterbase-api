@@ -34,13 +34,13 @@ describe('mortality-service', () => {
     });
   });
 
-  describe('appendDefaultCOD', () => {
+  describe('getDefaultCauseOfDeathId', () => {
     it('should call correct repository method and pass body', async () => {
-      repository = { appendDefaultCOD: jest.fn() };
+      repository = { getDefaultCauseOfDeathId: jest.fn() };
 
       const mortalityService = new MortalityService(repository, itisService);
-      await mortalityService.appendDefaultCOD({ proximate_cause_of_death_id: 'a' });
-      expect(repository.appendDefaultCOD).toHaveBeenCalledWith({ proximate_cause_of_death_id: 'a' });
+      await mortalityService.getDefaultCauseOfDeathId();
+      expect(repository.getDefaultCauseOfDeathId).toHaveBeenCalled();
     });
   });
 
