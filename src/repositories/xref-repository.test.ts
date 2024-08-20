@@ -1,4 +1,4 @@
-import { ICollectionCategoryDef, ITsnMarkingBodyLocation } from '../schemas/xref-schema';
+import { ICollectionCategory, ITsnMarkingBodyLocation } from '../schemas/xref-schema';
 import { XrefRepository } from './xref-repository';
 
 describe('xref-repository', () => {
@@ -99,7 +99,7 @@ describe('xref-repository', () => {
     });
 
     it('should return a collection category for a TSN successfully', async () => {
-      const mockResult: ICollectionCategoryDef[] = [
+      const mockResult: ICollectionCategory[] = [
         {
           category_name: 'name',
           collection_category_id: '1',
@@ -312,6 +312,44 @@ describe('xref-repository', () => {
           unit: true
         }
       });
+    });
+  });
+
+  describe('findCollectionUnitsFromTsns', () => {
+    beforeEach(() => {
+      mockPrismaClient = {};
+    });
+
+    it('should return some collection units successfully', async () => {
+      const mockResult = [
+        {
+          taxon_measurement_id: '1',
+          itis_tsn: 123456,
+          measurement_name: 'name',
+          measurement_desc: 'desc',
+          min_value: 1,
+          max_value: 100,
+          unit: null
+        },
+        {
+          taxon_measurement_id: '2',
+          itis_tsn: 456789,
+          measurement_name: 'name',
+          measurement_desc: 'desc',
+          min_value: 1,
+          max_value: 100,
+          unit: null
+        }
+      ];
+
+      const xrefRepository = new XrefRepository(mockPrismaClient);
+
+      const mockSafeQuery = jest.spyOn(xrefRepository, 'safeQuery').mockResolvedValue(mockResult);
+
+      const result = await xrefRepository.findCollectionUnitsFromTsns([123456, 456789]);
+
+      expect(result).toEqual(mockResult);
+      expect(mockSafeQuery).toHaveBeenCalledTimes(1);
     });
   });
 });

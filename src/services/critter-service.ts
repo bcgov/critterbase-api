@@ -7,6 +7,7 @@ import {
   IDetailedManyCritter,
   SimilarCritterQuery
 } from '../schemas/critter-schema';
+import { CaptureMortalityGeometry } from '../schemas/spatial-schema';
 import { defaultFormat } from '../utils/constants';
 import { QueryFormats } from '../utils/types';
 import { Service } from './base-service';
@@ -94,6 +95,17 @@ export class CritterService implements Service {
       return this.repository.getMultipleCrittersByIdsDetailed(critterIds);
     }
     return this.repository.getMultipleCrittersByIds(critterIds);
+  }
+
+  /**
+   * Get capture and mortality geometry for multiple critter IDs
+   *
+   * @async
+   * @param {string[]} critterIds - array of critter ids.
+   * @returns {Promise<ICritter[] | IDetailedManyCritter[]>} default or detailed critter objects.
+   */
+  async getMultipleCrittersGeometryByIds(critterIds: string[]): Promise<CaptureMortalityGeometry> {
+    return this.repository.getMultipleCrittersGeometryByIds(critterIds);
   }
 
   /**
