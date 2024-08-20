@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
 import { CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
@@ -125,15 +127,10 @@ export class UserRepository extends Repository {
    * @returns {Promise<void>}
    */
   async setDatabaseUserContext(keycloakUuid: string, systemName: string): Promise<void> {
-    const result: [{ api_set_context: string }] = await this.prisma
-      .$queryRaw`SELECT * FROM api_set_context(${keycloakUuid}, ${systemName})`;
-
-    if (!result[0].api_set_context) {
-      throw apiError.sqlExecuteIssue(`Unable to set api context in database`, [
-        'UserRepository->setDatabaseUserContext',
-        'database function returned null'
-      ]);
-    }
+    await this.safeQuery(
+      Prisma.sql` SELECT * FROM api_set_context(${keycloakUuid}, ${systemName});`,
+      z.object({ api_set_context: z.string() }).array()
+    );
   }
 
   /**

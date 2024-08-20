@@ -16,7 +16,7 @@ import { UserRouter } from './api/user/user.router';
 import { XrefRouter } from './api/xref/xref.router';
 import { routes } from './utils/constants';
 import { ICbDatabase } from './utils/database';
-import { auth, errorHandler, errorLogger, limiter, logger } from './utils/middleware';
+import { auth, errorHandler, errorLogger, logger } from './utils/middleware';
 import { apiError } from './utils/types';
 
 /**
@@ -31,8 +31,6 @@ export const makeApp = (db: ICbDatabase) => {
   app.use(cors());
   app.use(helmet());
   app.use(express.json());
-
-  app.use(limiter); // Rate limiter
 
   app.use(logger); // Log incomming requests
 

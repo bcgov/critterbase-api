@@ -94,13 +94,13 @@ describe('user-service', () => {
   describe('loginUser', () => {
     it('should call correct repository method and pass id', async () => {
       repository = {
-        createOrGetUser: jest.fn().mockResolvedValue({ keycloak_uuid: 'A' }),
+        createOrGetUser: jest.fn(),
         setDatabaseUserContext: jest.fn()
       };
 
       const userService = new UserService(repository);
-      await userService.loginUser({ keycloak_uuid: 'B', user_identifier: 'Carl', system_name: 'TEST' });
-      expect(repository.createOrGetUser).toHaveBeenCalledWith({ keycloak_uuid: 'B', user_identifier: 'Carl' });
+      await userService.loginUser({ keycloak_uuid: 'A', user_identifier: 'Carl', system_name: 'TEST' });
+      expect(repository.createOrGetUser).toHaveBeenCalledWith({ keycloak_uuid: 'A', user_identifier: 'Carl' });
       expect(repository.setDatabaseUserContext).toHaveBeenCalledWith('A', 'TEST');
     });
   });

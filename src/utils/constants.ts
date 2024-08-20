@@ -15,8 +15,6 @@ const KEYCLOAK_URL = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK
 
 const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}`;
 
-const ALLOWED_AUDIENCES = String(process.env.ALLOWED_AUD).split(' ');
-
 const BYPASS_AUTHENTICATION = NO_AUTH || IS_TEST;
 
 declare global {
@@ -62,7 +60,6 @@ const defaultFormat = QueryFormats.default;
 const prisma = prismaClient;
 
 export {
-  ALLOWED_AUDIENCES,
   BYPASS_AUTHENTICATION,
   IS_DEV,
   IS_PROD,

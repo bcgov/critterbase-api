@@ -4,28 +4,20 @@ import {
   PrismaClientValidationError
 } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
-import rateLimit from 'express-rate-limit';
+import { TokenExpiredError } from 'jsonwebtoken';
 import { ZodError } from 'zod';
-import { AuthService } from '../services/auth-service';
-import { TokenService } from '../services/token-service';
 import { UserService } from '../services/user-service';
-import { BYPASS_AUTHENTICATION, IS_PROD, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
+import { authenticate } from './auth';
+import { BYPASS_AUTHENTICATION, IS_TEST } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
 
 /**
- * Token Service
+ * User Service
  *
- * @description Verifies jwt token against issuer.
+ * @description Handles logging in users
  */
-const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
-
-/**
- * Auth Service
- *
- * @description Handles authentication and authorization.
- */
-const authService = new AuthService(tokenService, UserService.init());
+const userService = UserService.init();
 
 /**
  * Express request handler callback
@@ -140,6 +132,12 @@ const errorHandler = (
     return res.status(500).json({ error: 'Database query failed.', issues: ['View logs'] });
   }
   /**
+   * Expired token errors.
+   */
+  if (err instanceof TokenExpiredError) {
+    throw apiError.forbidden(`Access Denied: JWT bearer token has expired.`);
+  }
+  /**
    * Error
    * @description Fallback for all other types of errors
    *
@@ -166,44 +164,12 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
   }
 
   // Authenticate the request: Verify token, user and audience from headers
-  const authenticatedUser = await authService.authenticate(req.headers);
+  const authenticatedUser = await authenticate(req.headers);
 
   // Authorize user: Login user and set database context for auditing
-  await authService.authorize(authenticatedUser);
+  await userService.loginUser(authenticatedUser);
 
   next();
 });
 
-/**
- * Middleware: Rate Limiter (`Denial of Service` attack prevention)
- * Limits subsequent requests within a set timeframe.
- *
- * Note: Currently these values are hard coded, if more tweaking is needed
- * put these values into the ENV.
- *
- */
-const limiter = rateLimit({
-  // 5 minutes in milliseconds,
-  windowMs: 10 * 60 * 1000,
-
-  // Request limit for `windowMs`
-  limit: 50,
-
-  /**
-   * Generates the rate limit key used to identify requests from same user or service.
-   *
-   * Note: Using IP and user header to prevent unessescary limiting of external service accounts.
-   *
-   * @param {Request} req - Express request
-   * @returns {string} Rate limit key
-   */
-  keyGenerator: (req): string => `${req.ip}-${String(req.headers['user'])}`,
-
-  /**
-   * Skip rate limiting if not 'production'.
-   *
-   */
-  skip: (): boolean => !IS_PROD
-});
-
-export { auth, catchErrors, errorHandler, errorLogger, limiter, logger };
+export { auth, catchErrors, errorHandler, errorLogger, logger };

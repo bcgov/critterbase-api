@@ -2,6 +2,7 @@ import { user } from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { CreateUser, UserSchema } from '../../schemas/user-schema';
+import { apiError } from '../../utils/types';
 
 // Mock User Objects
 const ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
