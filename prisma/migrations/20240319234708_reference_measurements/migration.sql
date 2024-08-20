@@ -67,7 +67,7 @@ VALUES
     (180692, 'antler point count', 0, 10000, NULL, NULL),
     (202423, 'age', 0, 10000, NULL, 'The number of years that the animal has been alive for'),
     (202423, 'offspring count', 0, 10000, NULL, NULL),
-    (202423, 'tail length', 0, 10000, 'centimeter', NULL);
+    (158852, 'tail length', 0, 10000, 'centimeter', NULL);
 
 WITH MeasurementIDs AS (
     INSERT INTO xref_taxon_measurement_qualitative (itis_tsn, measurement_name)
