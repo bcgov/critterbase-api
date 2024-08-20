@@ -30,7 +30,18 @@ VALUES
     'Right forelimb',
     'The front right limb.',
     914181
+),
+(
+    'Left hindlimb',
+    'The rear left limb.',
+    914181 -- tetrapoda
+),
+(
+    'Right hindlimb',
+    'The rear right limb.',
+    914181
 );
+
 
 ----------------------------------------------------------------------------------------
 -- Edit enum list to include some more units
@@ -121,7 +132,7 @@ END;
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
     -- Length
-    (161061, 'caudal fin–snout legth', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
+    (161061, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161051, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161039, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (159785, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
