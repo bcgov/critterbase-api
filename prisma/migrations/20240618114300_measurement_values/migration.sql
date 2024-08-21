@@ -2,7 +2,7 @@
 -- Updates existing tables with new taxa-based lookup values
 ----------------------------------------------------------------------------------------
 UPDATE xref_taxon_measurement_quantitative
-SET itis_tsn = 158852
+SET itis_tsn = 158852, measurement_desc = 'Tail length is the measurement from the base of an animals tail, where it connects to the body, to the tip of the tail, used to assess growth, health, and species characteristics in ecological studies.'
 WHERE itis_tsn = 202423
   AND measurement_name = 'tail length';
 ----------------------------------------------------------------------------------------
