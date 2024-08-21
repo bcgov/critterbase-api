@@ -116,18 +116,19 @@ END;
 
 
 ----------------------------------------------------------------------------------------
--- Todo list and needs to be removed
+-- Todo list
 ----------------------------------------------------------------------------------------
 -- Does baculum need to be changed? What is the itis_tsn right now, and what could/should it be?
+-- Fish need a 
 
 ----------------------------------------------------------------------------------------
 -- Adding some more options based off fish taxa
 --
 -- There are 4 "real" fish taxa:
---      Actinopterygii
---      Latimeriidae
---      Dipnoi
---      Chondrichthyes
+--      Actinopterygii 161061
+--      Latimeriidae 161051
+--      Dipnoi 161039
+--      Chondrichthyes 159785
 -- 
 -- "Real" is in quotes because humans are technically fish within the taxonomic tree. To allow all fish to have 
 -- fin length while preventing humans from having fin length, fin length needs to be assigned to each of the fish taxa spearately.
@@ -158,7 +159,11 @@ WITH MeasurementIDs AS (
         (161061, 'life stage'),
         (161061, 'maturity'),
         (161051, 'life stage'),
-        (161039, 'life stage')
+        (161051, 'maturity'),
+        (161039, 'life stage'),
+        (161039, 'maturity'),
+        (159785, 'life stage'),
+        (159785, 'maturity')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
 INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_desc, option_value )
@@ -204,6 +209,16 @@ FROM (
             (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
             squeezed (also referred to as gravid).', 3),
             (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
+            sperm.', 4), 
+            (159785, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
+            (159785, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
+            distinguishable to the naked eye.', 1),
+            (159785, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+            (159785, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
+            squeezed (also referred to as gravid).', 3),
+            (159785, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
             and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
             sperm.', 4)
     ) AS option_data (itis_tsn, measurement_name, option_label, option_desc, option_value)
