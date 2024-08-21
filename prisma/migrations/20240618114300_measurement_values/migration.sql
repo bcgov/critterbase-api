@@ -1,7 +1,10 @@
 ----------------------------------------------------------------------------------------
 -- Updates existing tables with new taxa-based lookup values
 ----------------------------------------------------------------------------------------
-
+UPDATE xref_taxon_measurement_quantitative
+SET itis_tsn = 158852
+WHERE itis_tsn = 202423
+  AND measurement_name = 'tail length';
 ----------------------------------------------------------------------------------------
 -- New markings and body locations
 ----------------------------------------------------------------------------------------
@@ -147,34 +150,50 @@ WITH MeasurementIDs AS (
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
 INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_desc, option_value )
-SELECT m.taxon_measurement_id, o.option_label, o.option_value
+SELECT m.taxon_measurement_id, o.option_label, o.option_desc, o.option_value
 FROM (
     SELECT * FROM (
         VALUES
-            (161061, 'life stage', 'Immature', 'immature', 0),
-            (161061, 'life stage', 'Maturing', 'maturing', 1),
-            (161061, 'life stage', 'Mature', 'mature', 2),
-            (161061, 'life stage', 'Spawnbound', 'spawnbound', 3),
-            (161061, 'life stage', 'Spawning', 'spawning', 4),
-            (161061, 'life stage', 'Spent', 'spent', 5),
-            (161051, 'life stage', 'Immature', 'immature', 0),
-            (161051, 'life stage', 'Maturing', 'maturing', 1),
-            (161051, 'life stage', 'Mature', 'mature', 2),
-            (161051, 'life stage', 'Spawnbound', 'spawnbound', 3),
-            (161051, 'life stage', 'Spawning', 'spawning', 4),
-            (161051, 'life stage', 'Spent', 'spent', 5),
-            (161039, 'life stage', 'Immature', 'immature', 0),
-            (161039, 'life stage', 'Maturing', 'maturing', 1),
-            (161039, 'life stage', 'Mature', 'mature', 2),
-            (161039, 'life stage', 'Spawnbound', 'spawnbound', 3),
-            (161039, 'life stage', 'Spawning', 'spawning', 4),
-            (161039, 'life stage', 'Spent', 'spent', 5),
-            (161061, 'life stage', 'Immature', 'immature', 0),
-            (161061, 'life stage', 'Maturing', 'maturing', 1),
-            (161061, 'life stage', 'Mature', 'mature', 2),
-            (161061, 'life stage', 'Spawnbound', 'spawnbound', 3),
-            (161061, 'life stage', 'Spawning', 'spawning', 4),
-            (161061, 'life stage', 'Spent', 'spent', 5)
-    ) AS option_data (itis_tsn, measurement_name, option_label, option_value)
+            (161061, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
+            (161061, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
+            distinguishable to the naked eye.', 1),
+            (161061, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+            (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
+            squeezed (also referred to as gravid).', 3),
+            (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
+            sperm.', 4),
+            (161051, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
+            (161051, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
+            distinguishable to the naked eye.', 1),
+            (161051, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+            (161051, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
+            squeezed (also referred to as gravid).', 3),
+            (161051, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
+            sperm.', 4),
+            (161039, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
+            (161039, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
+            distinguishable to the naked eye.', 1),
+            (161039, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+            (161039, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
+            squeezed (also referred to as gravid).', 3),
+            (161039, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
+            sperm.', 4),
+            (161061, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
+            (161061, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
+            distinguishable to the naked eye.', 1),
+            (161061, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+            (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
+            squeezed (also referred to as gravid).', 3),
+            (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
+            sperm.', 4)
+    ) AS option_data (itis_tsn, measurement_name, option_label, option_desc, option_value)
 ) AS o
 JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_name = m.measurement_name;
