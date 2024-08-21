@@ -156,6 +156,7 @@ WITH MeasurementIDs AS (
     INSERT INTO xref_taxon_measurement_qualitative (itis_tsn, measurement_name)
     VALUES
         (161061, 'life stage'),
+        (161061, 'maturity'),
         (161051, 'life stage'),
         (161039, 'life stage')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
