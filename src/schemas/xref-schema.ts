@@ -111,8 +111,6 @@ export const MeasurementSearchQuery = z.object({
  *
  */
 
-export type IMeasurementWithTsnHierarchy = z.infer<typeof TsnMeasurementsSchema>;
-
 export type IMeasurementSearch = z.infer<typeof MeasurementSearchQuery>;
 
 export type ITsnMarkingBodyLocation = z.infer<typeof TsnMarkingBodyLocationSchema>;
