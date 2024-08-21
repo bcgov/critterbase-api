@@ -1,49 +1,32 @@
 ----------------------------------------------------------------------------------------
--- Updates existing tables with new taxa-based lookup values
+-- Updates quant measurement table so that tail belongs to vertebrates and has a description (was previously attributed to all animals)
 ----------------------------------------------------------------------------------------
 UPDATE xref_taxon_measurement_quantitative
 SET itis_tsn = 158852, measurement_desc = 'Tail length is the measurement from the base of an animals tail, where it connects to the body, to the tip of the tail, used to assess growth, health, and species characteristics in ecological studies.'
 WHERE itis_tsn = 202423
   AND measurement_name = 'tail length';
+
+
 ----------------------------------------------------------------------------------------
--- New markings and body locations
+-- New markings type "Sleeve"
 ----------------------------------------------------------------------------------------
 INSERT into lk_marking_type
 (name, description)
 VALUES
-(
-    'Sleeve',
-    'A durable, weather-resistant band typically placed on a leg.'
-);
+('Sleeve', 'A durable, weather-resistant band typically placed on a leg.');
 
+
+----------------------------------------------------------------------------------------
+-- New marking body locations for vertebrates and tetrapods.
+----------------------------------------------------------------------------------------
 INSERT into xref_taxon_marking_body_location
 (body_location, description, itis_tsn)
 VALUES
-(
-    'Neck',
-    NULL,
-    331030 -- vertebrates
-),
-(
-    'Left forelimb',
-    'The front left limb.',
-    914181 -- tetrapoda
-),
-(
-    'Right forelimb',
-    'The front right limb.',
-    914181
-),
-(
-    'Left hindlimb',
-    'The rear left limb.',
-    914181 -- tetrapoda
-),
-(
-    'Right hindlimb',
-    'The rear right limb.',
-    914181
-);
+('Neck', NULL, 331030),
+('Left forelimb', 'The front left limb.', 914181),
+('Right forelimb', 'The front right limb.', 914181),
+('Left hindlimb', 'The rear left limb.', 914181),
+('Right hindlimb', 'The rear right limb.', 914181);
 
 
 ----------------------------------------------------------------------------------------
@@ -57,7 +40,6 @@ COMMIT;
 ----------------------------------------------------------------------------------------
 -- Add descriptions to measurements
 ----------------------------------------------------------------------------------------
-
 UPDATE xref_taxon_measurement_quantitative 
 SET measurement_desc = CASE 
     WHEN itis_tsn = 331030 AND measurement_name = 'skull length' THEN 'The distance between the anterior-most and posterior-most parts of the skull.'
@@ -105,6 +87,7 @@ SET measurement_desc = CASE
     ELSE measurement_desc
 END;
 
+
 ----------------------------------------------------------------------------------------
 -- Update year unit in age
 ----------------------------------------------------------------------------------------
@@ -116,22 +99,7 @@ END;
 
 
 ----------------------------------------------------------------------------------------
--- Todo list
-----------------------------------------------------------------------------------------
--- Does baculum need to be changed? What is the itis_tsn right now, and what could/should it be?
--- Fish need a 
-
-----------------------------------------------------------------------------------------
--- Adding some more options based off fish taxa
---
--- There are 4 "real" fish taxa:
---      Actinopterygii 161061
---      Latimeriidae 161051
---      Dipnoi 161039
---      Chondrichthyes 159785
--- 
--- "Real" is in quotes because humans are technically fish within the taxonomic tree. To allow all fish to have 
--- fin length while preventing humans from having fin length, fin length needs to be assigned to each of the fish taxa spearately.
+-- Create fin length, otoliths and operculum quant measurements for all 4 fish taxa
 ----------------------------------------------------------------------------------------
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
@@ -140,19 +108,20 @@ VALUES
     (161051, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (161039, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
     (159785, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-
     (161061, 'otolith growth rings count', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
     (161051, 'otolith growth rings count', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
     (161039, 'otolith growth rings count', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
-
-    (161061, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings'),
-    (161051, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings'),
-    (161039, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings'),
-
+    (161061, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings.'),
+    (161051, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings.'),
+    (161039, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings.'),
     (161061, 'operculum growth rings count', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.'),
     (161051, 'operculum growth rings count', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.'),
     (161039, 'operculum growth rings count', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.');
 
+
+----------------------------------------------------------------------------------------
+-- Add new qualitative measurements lifestage and maturity to the 4 fish taxa
+----------------------------------------------------------------------------------------
 WITH MeasurementIDs AS (
     INSERT INTO xref_taxon_measurement_qualitative (itis_tsn, measurement_name)
     VALUES
@@ -166,61 +135,96 @@ WITH MeasurementIDs AS (
         (159785, 'maturity')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
+
+
+----------------------------------------------------------------------------------------
+-- Insert measurement options for maturiy for all fish taxa
+-- Update measurement options for fish life stage
+----------------------------------------------------------------------------------------
 INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_desc, option_value )
 SELECT m.taxon_measurement_id, o.option_label, o.option_desc, o.option_value
 FROM (
     SELECT * FROM (
         VALUES
-            (161061, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
-            (161061, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
-            distinguishable to the naked eye.', 1),
-            (161061, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
-            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
-            (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
-            squeezed (also referred to as gravid).', 3),
-            (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
-            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
-            sperm.', 4),
-            (161051, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
-            (161051, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
-            distinguishable to the naked eye.', 1),
-            (161051, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
-            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
-            (161051, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
-            squeezed (also referred to as gravid).', 3),
-            (161051, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
-            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
-            sperm.', 4),
-            (161039, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
-            (161039, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
-            distinguishable to the naked eye.', 1),
-            (161039, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
-            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
-            (161039, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
-            squeezed (also referred to as gravid).', 3),
-            (161039, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
-            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
-            sperm.', 4),
-            (161061, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
-            (161061, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
-            distinguishable to the naked eye.', 1),
-            (161061, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
-            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
-            (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
-            squeezed (also referred to as gravid).', 3),
-            (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
-            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
-            sperm.', 4), 
-            (159785, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads', 0),
-            (159785, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs
-            distinguishable to the naked eye.', 1),
-            (159785, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
-            females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
-            (159785, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly
-            squeezed (also referred to as gravid).', 3),
-            (159785, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
-            and genital opening is inflamed; gonads empty except for a few remaining eggs or residual
-            sperm.', 4)
+        (161061, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads.', 0),
+        (161061, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs distinguishable to the naked eye.', 1),
+        (161061, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+        females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+        (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly squeezed.', 3),
+        (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+        and genital opening is inflamed; gonads empty except for a few remaining eggs or residual sperm.', 4),
+        (161051, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads.', 0),
+        (161051, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs distinguishable to the naked eye.', 1),
+        (161051, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+        females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+        (161051, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly squeezed.', 3),
+        (161051, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+        and genital opening is inflamed; gonads empty except for a few remaining eggs or residual sperm.', 4),
+        (161039, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads.', 0),
+        (161039, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs distinguishable to the naked eye.', 1),
+        (161039, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+        females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+        (161039, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly squeezed.', 3),
+        (161039, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+        and genital opening is inflamed; gonads empty except for a few remaining eggs or residual sperm.', 4),
+        (161061, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads.', 0),
+        (161061, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs distinguishable to the naked eye.', 1),
+        (161061, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+        females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+        (161061, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly squeezed.', 3),
+        (161061, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+        and genital opening is inflamed; gonads empty except for a few remaining eggs or residual sperm.', 4), 
+        (159785, 'maturity', 'Immature', 'Young individuals that have not yet reproduced; fish with underdeveloped gonads.', 0),
+        (159785, 'maturity', 'Maturing', 'Ovaries and testes begin to fill out and take up a large part of the body cavity; eggs distinguishable to the naked eye.', 1),
+        (159785, 'maturity', 'Mature', 'Fish in full spawning colours; gonads at maximum size; body cavity feels full, especially
+        females; roe or milt is not produced if the body cavity is lightly squeezed.', 2),
+        (159785, 'maturity', 'Spawning', 'Fish in full spawning colours; eggs and milt are expelled when body cavity is lightly squeezed.', 3),
+        (159785, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
+        and genital opening is inflamed; gonads empty except for a few remaining eggs or residual sperm.', 4),
+        (161061, 'life stage', 'fry', 'Recently hatched fish.', 0),
+        (161061, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
+        (161061, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2),
+        (161051, 'life stage', 'fry', 'Recently hatched fish.', 0),
+        (161051, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
+        (161051, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2),
+        (161039, 'life stage', 'fry', 'Recently hatched fish.', 0),
+        (161039, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
+        (161039, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2),
+        (159785, 'life stage', 'fry', 'Recently hatched fish.', 0),
+        (159785, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
+        (159785, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2)
     ) AS option_data (itis_tsn, measurement_name, option_label, option_desc, option_value)
 ) AS o
 JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_name = m.measurement_name;
+
+
+----------------------------------------------------------------------------------------
+-- Update measurement desc for lifestage and maturity.
+----------------------------------------------------------------------------------------
+UPDATE xref_taxon_measurement_qualitative
+SET measurement_desc = 'Maturity in fish data refers to the stage at which an individual fish has developed the physiological ability to reproduce, typically indicated by the presence of mature gonads.'
+WHERE itis_tsn IN (161061, 161051, 161039, 159785)
+  AND measurement_name = 'maturity';
+
+
+----------------------------------------------------------------------------------------
+-- Todo list
+----------------------------------------------------------------------------------------
+-- 1) Does baculum need to be changed? What is the itis_tsn right now, and what could/should it be?
+
+-- Note: There are 4 "real" fish taxa:
+--          Actinopterygii 161061
+--          Latimeriidae 161051
+--          Dipnoi 161039
+--          Chondrichthyes 159785
+
+-- 2) Why do none of the rows in xref_taxon_measurement_qualitative or the xref_taxon_measurement_qualitative_options have values for measurement_descriptions?
+
+-- 3) Life stage in previous migrations set for 180596 - Duplicate and camel case formatting needs to be removed.
+
+-- 4) Do we need to make sure we have all the options for a set list of existing species in BC. Too mcuh is missing and this needs some serious work. 
+--      Excluding Invertebrates, there is about 140 mammal species, 500 bird species, 22 repitiles, 20 Amphibians and 70 freshwater species of fish. (then 1000s of inverts)
+--      These main groups should get covered tothe best degree they can, going one level lower in some cases. Where to start? How granular do we realisticlaly get? 
+--      Will this be considered an ongoing refinement over the future or does it need to get completed ASAP?
+
+----------------------------------------------------------------------------------------
