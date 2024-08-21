@@ -271,10 +271,8 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - filters for measurements applied to any of the specified TSNs
    * @returns {Promise<ITsnQuantitativeMeasurement[]>}
    */
-  async searchForQuantitativeMeasurements(
-    search: IMeasurementSearch,
-    tsns?: number[]
-  ): Promise<ITsnQuantitativeMeasurement[]> {
+  async searchForQuantitativeMeasurements(search: IMeasurementSearch): Promise<ITsnQuantitativeMeasurement[]> {
+    const tsns = search.tsns;
     const result = await this.prisma.xref_taxon_measurement_quantitative.findMany({
       where: {
         measurement_name: { contains: search.name, mode: 'insensitive' },
@@ -303,10 +301,8 @@ export class XrefRepository extends Repository {
    * @param {number[]} tsns - filters for measurements applied to any of the specified TSNs
    * @returns {Promise<ITsnQualitativeMeasurement[]>}
    */
-  async searchForQualitativeMeasurements(
-    search: IMeasurementSearch,
-    tsns?: number[]
-  ): Promise<ITsnQualitativeMeasurement[]> {
+  async searchForQualitativeMeasurements(search: IMeasurementSearch): Promise<ITsnQualitativeMeasurement[]> {
+    const tsns = search.tsns;
     const partialMatchTerm = `%${search.name}%`;
 
     // Build the base query

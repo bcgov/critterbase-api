@@ -100,7 +100,6 @@ describe('xref-service', () => {
         hierarchy: [2, 3]
       }
     ];
-    const mockHierarchyResponse = [1, 2, 3];
 
     mockRepository.searchForQuantitativeMeasurements.mockResolvedValue(mockQuantResult);
     mockRepository.searchForQualitativeMeasurements.mockResolvedValue(mockQualResult);
@@ -109,15 +108,15 @@ describe('xref-service', () => {
     it('should pass search to repository methods', async () => {
       await xrefService.searchForMeasurements({ name: 'age', tsns: mockTsns });
 
-      expect(mockRepository.searchForQuantitativeMeasurements).toHaveBeenCalledWith(
-        { name: 'age', tsns: mockTsns },
-        mockHierarchyResponse
-      );
+      expect(mockRepository.searchForQuantitativeMeasurements).toHaveBeenCalledWith({
+        name: 'age',
+        tsns: [1, 2, 3]
+      });
 
-      expect(mockRepository.searchForQualitativeMeasurements).toHaveBeenCalledWith(
-        { name: 'age', tsns: mockTsns },
-        mockHierarchyResponse
-      );
+      expect(mockRepository.searchForQualitativeMeasurements).toHaveBeenCalledWith({
+        name: 'age',
+        tsns: [1, 2, 3]
+      });
     });
 
     it("should pass returned itis_tsn's to itisService method", async () => {

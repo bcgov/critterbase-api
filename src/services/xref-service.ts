@@ -3,7 +3,6 @@ import {
   ICollectionCategory,
   ICollectionUnit,
   IMeasurementSearch,
-  IMeasurementWithTsnHierarchy,
   ITsnMarkingBodyLocation,
   ITsnMeasurements,
   ITsnQualitativeMeasurement,
@@ -322,25 +321,20 @@ export class XrefService implements Service {
    *
    * @async
    * @param {IMeasurementSearch} search - Search properties.
-   * @returns {Promise<IMeasurementWithTsnHierarchy[]>}
+   * @returns {Promise<ITsnMeasurements[]>}
    */
-  async searchForMeasurements(search: IMeasurementSearch): Promise<IMeasurementWithTsnHierarchy> {
-    // Initialize an empty array for TSNs
-    let tsns: number[] = [];
-
-    // Fetch TSNs hierarchy if search.tsns exists and has items
+  async searchForMeasurements(search: IMeasurementSearch): Promise<ITsnMeasurements> {
     if (search.tsns?.length) {
       const tsnsWithHierarchy = await this.itisService.getTsnsHierarchy(search.tsns);
-      tsns = Array.from(new Set(tsnsWithHierarchy.flatMap((tsn) => tsn.hierarchy)));
+      // Spread the hierarchy results into the original search.tsns to include measurements applied to parent TSNs
+      search.tsns = Array.from(new Set([...search.tsns, ...tsnsWithHierarchy.flatMap((tsn) => tsn.hierarchy)]));
     }
 
-    // Perform searches concurrently
     const [qualitative, quantitative] = await Promise.all([
-      this.repository.searchForQualitativeMeasurements(search, tsns),
-      this.repository.searchForQuantitativeMeasurements(search, tsns)
+      this.repository.searchForQualitativeMeasurements(search),
+      this.repository.searchForQuantitativeMeasurements(search)
     ]);
 
-    // Return the results
     return {
       quantitative,
       qualitative
