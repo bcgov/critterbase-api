@@ -205,26 +205,3 @@ UPDATE xref_taxon_measurement_qualitative
 SET measurement_desc = 'Maturity in fish data refers to the stage at which an individual fish has developed the physiological ability to reproduce, typically indicated by the presence of mature gonads.'
 WHERE itis_tsn IN (161061, 161051, 161039, 159785)
   AND measurement_name = 'maturity';
-
-
-----------------------------------------------------------------------------------------
--- Todo list
-----------------------------------------------------------------------------------------
--- 1) Does baculum need to be changed? What is the itis_tsn right now, and what could/should it be?
-
--- Note: There are 4 "real" fish taxa:
---          Actinopterygii 161061
---          Latimeriidae 161051
---          Dipnoi 161039
---          Chondrichthyes 159785
-
--- 2) Why do none of the rows in xref_taxon_measurement_qualitative or the xref_taxon_measurement_qualitative_options have values for measurement_descriptions?
-
--- 3) Life stage in previous migrations set for 180596 - Duplicate and camel case formatting needs to be removed.
-
--- 4) Do we need to make sure we have all the options for a set list of existing species in BC. Too mcuh is missing and this needs some serious work. 
---      Excluding Invertebrates, there is about 140 mammal species, 500 bird species, 22 repitiles, 20 Amphibians and 70 freshwater species of fish. (then 1000s of inverts)
---      These main groups should get covered tothe best degree they can, going one level lower in some cases. Where to start? How granular do we realisticlaly get? 
---      Will this be considered an ongoing refinement over the future or does it need to get completed ASAP?
-
-----------------------------------------------------------------------------------------
