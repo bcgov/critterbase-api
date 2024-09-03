@@ -38,13 +38,13 @@ close: ## Closes all project containers
 	@echo "==============================================="
 	@echo "Make: close - closing Docker containers"
 	@echo "==============================================="
-	@docker compose -f docker-compose.yml down
+	@docker compose down
 
 clean: ## Closes and cleans (removes) all project containers
 	@echo "==============================================="
 	@echo "Make: clean - closing and cleaning Docker containers"
 	@echo "==============================================="
-	@docker compose -f docker-compose.yml down -v --rmi all --remove-orphans
+	@docker compose down -v --rmi all --remove-orphans
 
 
 ## ------------------------------------------------------------------------------
@@ -56,13 +56,13 @@ build-postgres: ## Builds the postgres db containers
 	@echo "==============================================="
 	@echo "Make: build-postgres - building postgres db images"
 	@echo "==============================================="
-	@docker compose -f docker-compose.yml build critterbase-db critterbase-db_setup
+	@docker compose build critterbase-db critterbase-db_setup
 
 run-postgres: ## Runs the postgres db containers
 	@echo "==============================================="
 	@echo "Make: run-postgres - running postgres db images"
 	@echo "==============================================="
-	@docker compose -f docker-compose.yml up -d critterbase-db critterbase-db_setup
+	@docker compose up -d critterbase-db critterbase-db_setup
 
 
 ## ------------------------------------------------------------------------------
@@ -74,13 +74,13 @@ build-backend: ## Builds all backend containers
 	@echo "==============================================="
 	@echo "Make: build-backend - building backend images"
 	@echo "==============================================="
-	@docker compose -f docker-compose.yml build critterbase-db critterbase-db_setup critterbase-api
+	@docker compose build critterbase-db critterbase-db_setup critterbase-api
 
 run-backend: ## Runs all backend containers
 	@echo "==============================================="
 	@echo "Make: run-backend - running backend images"
 	@echo "==============================================="
-	@docker compose -f docker-compose.yml up -d critterbase-db critterbase-db_setup critterbase-api
+	@docker compose up -d critterbase-db critterbase-db_setup critterbase-api
 
 
 ## ------------------------------------------------------------------------------
