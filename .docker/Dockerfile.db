@@ -3,13 +3,13 @@
 ####                      OPENSHIFT BUILD DEPENDS ON                        ####
 ################################################################################
 
-FROM postgres:15-bullseye as postgres
+FROM postgres:15-bullseye AS postgres
 
 # Default to 5432 if PGPORT not defined
-ENV PGPORT 5432
+ENV PGPORT=5432
 
 # This is our time zone
-ENV TZ America/Vancouver
+ENV TZ=America/Vancouver
 
 # Install PostGIS
 RUN apt-get update
