@@ -18,7 +18,8 @@ describe('xref-repository', () => {
     beforeEach(() => {
       mockPrismaClient = {
         critter: {
-          findMany: jest.fn()
+          findMany: jest.fn(),
+          $queryRaw: jest.fn()
         }
       };
     });
@@ -30,7 +31,7 @@ describe('xref-repository', () => {
           itis_tsn: 1234,
           itis_scientific_name: 'Aaa',
           animal_id: 'aaaa',
-          sex: 'Male',
+          sex_qualitative_option_id: 'Male',
           wlh_id: null,
           responsible_region_nr_id: null,
           critter_comment: null
@@ -40,7 +41,7 @@ describe('xref-repository', () => {
           itis_tsn: 1234,
           itis_scientific_name: 'Bbb',
           animal_id: 'bbbb',
-          sex: 'Female',
+          sex_qualitative_option_id: 'Female',
           wlh_id: null,
           responsible_region_nr_id: null,
           critter_comment: null
@@ -62,7 +63,7 @@ describe('xref-repository', () => {
           itis_tsn: true,
           itis_scientific_name: true,
           animal_id: true,
-          sex: true,
+          sex_qualitative_option_id: true,
           wlh_id: true,
           responsible_region_nr_id: true,
           critter_comment: true
@@ -85,7 +86,7 @@ describe('xref-repository', () => {
           itis_tsn: true,
           itis_scientific_name: true,
           animal_id: true,
-          sex: true,
+          sex_qualitative_option_id: true,
           wlh_id: true,
           responsible_region_nr_id: true,
           critter_comment: true
@@ -97,9 +98,7 @@ describe('xref-repository', () => {
   describe('getMultipleCrittersByIds', () => {
     beforeEach(() => {
       mockPrismaClient = {
-        critter: {
-          findMany: jest.fn()
-        }
+        $queryRaw: jest.fn()
       };
     });
 
@@ -110,7 +109,7 @@ describe('xref-repository', () => {
           itis_tsn: 1234,
           itis_scientific_name: 'Aaa',
           animal_id: 'aaaa',
-          sex: 'Male',
+          sex_qualitative_option_id: 'Male',
           wlh_id: null,
           responsible_region_nr_id: null,
           critter_comment: null
@@ -120,59 +119,29 @@ describe('xref-repository', () => {
           itis_tsn: 1234,
           itis_scientific_name: 'Bbb',
           animal_id: 'bbbb',
-          sex: 'Female',
+          sex_qualitative_option_id: 'Female',
           wlh_id: null,
           responsible_region_nr_id: null,
           critter_comment: null
         }
       ];
 
-      mockPrismaClient.critter.findMany.mockResolvedValue(mockResult);
+      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
 
       const critterRepository = new CritterRepository(mockPrismaClient);
       const result = await critterRepository.getMultipleCrittersByIds(['aaaa', 'bbbb']);
 
       expect(result).toEqual(mockResult);
-      expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
-        orderBy: {
-          create_timestamp: 'desc'
-        },
-        where: { critter_id: { in: ['aaaa', 'bbbb'] } },
-        select: {
-          critter_id: true,
-          itis_tsn: true,
-          itis_scientific_name: true,
-          animal_id: true,
-          sex: true,
-          wlh_id: true,
-          responsible_region_nr_id: true,
-          critter_comment: true
-        }
-      });
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled();
     });
 
     it('should return empty array if no critters are found', async () => {
-      mockPrismaClient.critter.findMany.mockResolvedValue([]);
+      mockPrismaClient.$queryRaw.mockResolvedValue([]);
       const critterRepository = new CritterRepository(mockPrismaClient);
       const res = await critterRepository.getMultipleCrittersByIds(['cccc', 'dddd']);
       expect(res).toStrictEqual([]);
 
-      expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
-        orderBy: {
-          create_timestamp: 'desc'
-        },
-        where: { critter_id: { in: ['cccc', 'dddd'] } },
-        select: {
-          critter_id: true,
-          itis_tsn: true,
-          itis_scientific_name: true,
-          animal_id: true,
-          sex: true,
-          wlh_id: true,
-          responsible_region_nr_id: true,
-          critter_comment: true
-        }
-      });
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled();
     });
   });
 
@@ -216,9 +185,7 @@ describe('xref-repository', () => {
   describe('getCritterById', () => {
     beforeEach(() => {
       mockPrismaClient = {
-        critter: {
-          findUnique: jest.fn()
-        }
+        $queryRaw: jest.fn()
       };
     });
 
@@ -228,61 +195,35 @@ describe('xref-repository', () => {
         itis_tsn: 1234,
         itis_scientific_name: 'Aaa',
         animal_id: 'aaaa',
-        sex: 'Male',
+        sex_qualitative_option_id: 'Male',
         wlh_id: null,
         responsible_region_nr_id: null,
         critter_comment: null
       };
 
-      mockPrismaClient.critter.findUnique.mockResolvedValue(mockResult);
+      mockPrismaClient.$queryRaw.mockResolvedValue([mockResult]);
 
       const critterRepository = new CritterRepository(mockPrismaClient);
       const result = await critterRepository.getCritterById('aaaa');
 
       expect(result).toEqual(mockResult);
-      expect(mockPrismaClient.critter.findUnique).toHaveBeenCalledWith({
-        where: { critter_id: 'aaaa' },
-        select: {
-          critter_id: true,
-          itis_tsn: true,
-          itis_scientific_name: true,
-          animal_id: true,
-          sex: true,
-          wlh_id: true,
-          responsible_region_nr_id: true,
-          critter_comment: true
-        }
-      });
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled()
     });
 
     it('should throw an error if no critter is found', async () => {
-      mockPrismaClient.critter.findUnique.mockResolvedValue(null);
+      mockPrismaClient.$queryRaw.mockResolvedValue([]);
       const critterRepository = new CritterRepository(mockPrismaClient);
 
       await expect(critterRepository.getCritterById('cccc')).rejects.toThrow('Failed to find specific critter.');
 
-      expect(mockPrismaClient.critter.findUnique).toHaveBeenCalledWith({
-        where: { critter_id: 'cccc' },
-        select: {
-          critter_id: true,
-          itis_tsn: true,
-          itis_scientific_name: true,
-          animal_id: true,
-          sex: true,
-          wlh_id: true,
-          responsible_region_nr_id: true,
-          critter_comment: true
-        }
-      });
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled()
     });
   });
 
   describe('getCrittersByWlhId', () => {
     beforeEach(() => {
       mockPrismaClient = {
-        critter: {
-          findMany: jest.fn()
-        }
+        $queryRaw: jest.fn()
       };
     });
 
@@ -293,59 +234,29 @@ describe('xref-repository', () => {
           itis_tsn: 1234,
           itis_scientific_name: 'Aaa',
           animal_id: 'aaaa',
-          sex: 'Male',
+          sex_qualitative_option_id: 'Male',
           wlh_id: null,
           responsible_region_nr_id: null,
           critter_comment: null
         }
       ];
 
-      mockPrismaClient.critter.findMany.mockResolvedValue(mockResult);
+      mockPrismaClient.$queryRaw.mockResolvedValue(mockResult);
 
       const critterRepository = new CritterRepository(mockPrismaClient);
       const result = await critterRepository.getCrittersByWlhId('aaaa');
 
       expect(result).toEqual(mockResult);
-      expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
-        orderBy: {
-          create_timestamp: 'desc'
-        },
-        where: { wlh_id: 'aaaa' },
-        select: {
-          critter_id: true,
-          itis_tsn: true,
-          itis_scientific_name: true,
-          animal_id: true,
-          sex: true,
-          wlh_id: true,
-          responsible_region_nr_id: true,
-          critter_comment: true
-        }
-      });
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled()
     });
 
     it('should return an empty array if no critter is found', async () => {
-      mockPrismaClient.critter.findMany.mockResolvedValue([]);
+      mockPrismaClient.$queryRaw.mockResolvedValue([]);
       const critterRepository = new CritterRepository(mockPrismaClient);
       const res = await critterRepository.getCrittersByWlhId('cccc');
       expect(res).toStrictEqual([]);
 
-      expect(mockPrismaClient.critter.findMany).toHaveBeenCalledWith({
-        orderBy: {
-          create_timestamp: 'desc'
-        },
-        where: { wlh_id: 'cccc' },
-        select: {
-          critter_id: true,
-          itis_tsn: true,
-          itis_scientific_name: true,
-          animal_id: true,
-          sex: true,
-          wlh_id: true,
-          responsible_region_nr_id: true,
-          critter_comment: true
-        }
-      });
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled();
     });
   });
 
@@ -361,9 +272,8 @@ describe('xref-repository', () => {
     it('should insert a critter successfully', async () => {
       const mockUpdate: CritterUpdate = {
         itis_tsn: 1234,
-        //itis_scientific_name: "test",
         animal_id: 'aaaa',
-        sex: 'Male',
+        sex_qualitative_option_id: 'Male',
         wlh_id: null,
         responsible_region_nr_id: null,
         critter_comment: null
@@ -374,7 +284,7 @@ describe('xref-repository', () => {
         itis_tsn: 1234,
         itis_scientific_name: 'Aaa',
         animal_id: 'aaaa',
-        sex: 'Male',
+        sex_qualitative_option_id: 'Male',
         wlh_id: null,
         responsible_region_nr_id: null,
         critter_comment: null
@@ -394,7 +304,7 @@ describe('xref-repository', () => {
           itis_tsn: true,
           itis_scientific_name: true,
           animal_id: true,
-          sex: true,
+          sex_qualitative_option_id: true,
           wlh_id: true,
           responsible_region_nr_id: true,
           critter_comment: true
@@ -416,7 +326,7 @@ describe('xref-repository', () => {
           itis_tsn: true,
           itis_scientific_name: true,
           animal_id: true,
-          sex: true,
+          sex_qualitative_option_id: true,
           wlh_id: true,
           responsible_region_nr_id: true,
           critter_comment: true
@@ -439,7 +349,7 @@ describe('xref-repository', () => {
         itis_tsn: 1234,
         itis_scientific_name: 'Aaa',
         animal_id: 'aaaa',
-        sex: 'Male',
+        sex_qualitative_option_id: 'Male',
         wlh_id: null,
         responsible_region_nr_id: null,
         critter_comment: null
@@ -450,7 +360,7 @@ describe('xref-repository', () => {
         itis_tsn: 1234,
         itis_scientific_name: 'Aaa',
         animal_id: 'aaaa',
-        sex: 'Male',
+        sex_qualitative_option_id: 'Male',
         wlh_id: null,
         responsible_region_nr_id: null,
         critter_comment: null
@@ -469,7 +379,7 @@ describe('xref-repository', () => {
           itis_tsn: true,
           itis_scientific_name: true,
           animal_id: true,
-          sex: true,
+          sex_qualitative_option_id: true,
           wlh_id: true,
           responsible_region_nr_id: true,
           critter_comment: true
@@ -492,7 +402,7 @@ describe('xref-repository', () => {
           itis_tsn: true,
           itis_scientific_name: true,
           animal_id: true,
-          sex: true,
+          sex_qualitative_option_id: true,
           wlh_id: true,
           responsible_region_nr_id: true,
           critter_comment: true
@@ -521,7 +431,7 @@ describe('xref-repository', () => {
           itis_tsn: 1234,
           itis_scientific_name: 'Aaa',
           animal_id: 'da290f16-53f9-4c26-939e-d7f56c4c4513',
-          sex: 'Male',
+          sex_qualitative_option_id: 'Male',
           wlh_id: null,
           responsible_region_nr_id: null,
           critter_comment: null
