@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import {
+  CreateCritterSchema,
   CritterCreateSchema,
   CritterIdsRequestSchema,
-  CritterSchema,
   CritterUpdateSchema,
   DetailedCritterSchema,
   DetailedManyCritterSchema,
+  GetCritterSchema,
   SimilarCritterQuerySchema
 } from '../../schemas/critter-schema';
 import { CaptureMortalityGeometrySchema } from '../../schemas/spatial-schema';
@@ -17,9 +18,9 @@ import { zodID } from '../../utils/zod_helpers';
 const TAG = 'Critter';
 
 export const critterSchemas = {
-  defaultCritterResponse: CritterSchema,
+  defaultCritterResponse: GetCritterSchema,
   detailedCritterResponse: DetailedCritterSchema,
-  defaultCritterResponseArray: z.array(CritterSchema),
+  defaultCritterResponseArray: z.array(GetCritterSchema),
   detailedManyCritterResponseArray: z.array(DetailedManyCritterSchema),
   defaultCritterGeometryResponse: CaptureMortalityGeometrySchema
 };
@@ -44,7 +45,7 @@ export const critterPaths = {
           description: 'Returned all critters successfully, or all critters matching WLH ID if provided.',
           content: {
             'application/json': {
-              schema: CritterSchema.array()
+              schema: GetCritterSchema.array()
             }
           }
         },
@@ -149,7 +150,7 @@ export const critterPaths = {
           description: 'Returned all critters successfully, or all critters matching WLH ID if provided.',
           content: {
             'application/json': {
-              schema: CritterSchema.array()
+              schema: GetCritterSchema.array()
             }
           }
         },
@@ -180,7 +181,7 @@ export const critterPaths = {
           description: SwagDesc.create,
           content: {
             'application/json': {
-              schema: CritterSchema
+              schema: GetCritterSchema
             }
           }
         },
@@ -245,7 +246,7 @@ export const critterPaths = {
           description: SwagDesc.update,
           content: {
             'application/json': {
-              schema: CritterSchema
+              schema: GetCritterSchema
             }
           }
         },

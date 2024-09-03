@@ -1,7 +1,7 @@
-import { critter, frequency_unit, sex } from '@prisma/client';
+import { critter, frequency_unit } from '@prisma/client';
 import { z } from 'zod';
 import { AuditColumns } from '../utils/types';
-import { implement, zodID } from '../utils/zod_helpers';
+import { zodID } from '../utils/zod_helpers';
 import { DetailedCaptureSchema } from './capture-schema';
 import { LocationSchema } from './location-schema';
 
@@ -14,18 +14,41 @@ export enum eCritterStatus {
  * @table critter
  *
  * Base Critter schema omitting audit columns.
- * Using 'implement' to keep zod schema in sync with prisma type.
  *
  */
-export const CritterSchema = implement<ICritter>().with({
-  critter_id: zodID,
+export const CritterSchemaBase = z.object({
+  critter_id: z.string().uuid(),
   itis_tsn: z.number(),
   itis_scientific_name: z.string(),
   wlh_id: z.string().nullable(),
   animal_id: z.string().nullable(),
-  sex: z.nativeEnum(sex),
-  responsible_region_nr_id: zodID.nullable(),
+  responsible_region_nr_id: z.string().uuid().nullable(),
   critter_comment: z.string().nullable()
+});
+
+/**
+ * @table critter
+ *
+ * Base Critter schema omitting audit columns.
+ *
+ */
+export const GetCritterSchema = CritterSchemaBase.extend({
+  sex: z
+    .object({
+      qualitative_option_id: z.string().uuid(),
+      label: z.string()
+    })
+    .nullable()
+});
+
+/**
+ * @table critter
+ *
+ * Base Critter schema omitting audit columns.
+ *
+ */
+export const CreateCritterSchema = CritterSchemaBase.extend({
+  sex_qualitative_option_id: z.string().uuid().nullable()
 });
 
 /**
@@ -33,14 +56,14 @@ export const CritterSchema = implement<ICritter>().with({
  * should only include itis_tsn or itis_scientific_name to prevent
  * tsn and scientific name from becoming out of sync
  */
-export const CritterCreateSchema = CritterSchema.partial()
-  .required({ sex: true })
+export const CritterCreateSchema = CreateCritterSchema.partial()
+  .required({ sex_qualitative_option_id: true })
   .refine(
     (schema) => (schema.itis_tsn && !schema.itis_scientific_name) || (!schema.itis_tsn && schema.itis_scientific_name),
     'must include itis_tsn or itis_scientific_name but not both'
   );
 
-export const BulkCritterCreateSchema = CritterSchema.partial().required({
+export const BulkCritterCreateSchema = CreateCritterSchema.partial().required({
   critter_id: true,
   sex: true,
   itis_tsn: true,
@@ -50,12 +73,12 @@ export const BulkCritterCreateSchema = CritterSchema.partial().required({
 /**
  * Update critter schema used in update / patch requests
  */
-export const CritterUpdateSchema = CritterSchema.omit({
+export const CritterUpdateSchema = CreateCritterSchema.omit({
   critter_id: true,
   itis_scientific_name: true
 }).partial();
 
-export const BulkCritterUpdateSchema = CritterSchema.partial().omit({
+export const BulkCritterUpdateSchema = CreateCritterSchema.partial().omit({
   itis_scientific_name: true
 });
 
@@ -64,7 +87,7 @@ export const BulkCritterUpdateSchema = CritterSchema.partial().omit({
  *
  */
 export const SimilarCritterQuerySchema = z.object({
-  critter: CritterSchema.partial().optional(),
+  critter: GetCritterSchema.partial().optional(),
   markings: z
     .array(
       z
@@ -92,6 +115,8 @@ export const WlhIdQuerySchema = z.object({ wlh_id: z.string().optional() }); //A
 /**
  * Inferred types from zod schemas.
  */
+export type ICritterForView = z.infer<typeof GetCritterSchema>;
+
 export type ICritter = Omit<critter, AuditColumns>; // Omitting audit columns.
 
 export type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
@@ -199,7 +224,7 @@ export const DetailedCritterChildSchema = z
   })
   .strict();
 
-export const DetailedCritterSchema = CritterSchema.extend({
+export const DetailedCritterSchema = GetCritterSchema.extend({
   markings: DetailedCritterMarkingSchema.array(),
   captures: DetailedCaptureSchema.array(),
   collection_units: DetailedCritterCollectionUnit.array(),
@@ -212,7 +237,7 @@ export const DetailedCritterSchema = CritterSchema.extend({
   family_child: DetailedCritterChildSchema.array()
 }).strict();
 
-export const DetailedManyCritterSchema = CritterSchema.extend({
+export const DetailedManyCritterSchema = GetCritterSchema.extend({
   mortality: z.object({ mortality_id: zodID, mortality_timestamp: z.coerce.date() }).array(),
   collection_units: DetailedCritterCollectionUnit.array()
 });

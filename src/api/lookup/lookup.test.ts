@@ -1,4 +1,4 @@
-import { sex } from '.prisma/client';
+
 import {
   Prisma,
   cod_confidence,
@@ -56,7 +56,6 @@ describe('API: Lookup', () => {
   describe('ROUTERS', () => {
     describe('/lookups/enum', () => {
       const e = [
-        { route: 'sex', enum: Object.keys(sex) },
         { route: 'critter-status', enum: Object.keys(eCritterStatus) },
         { route: 'cod-confidence', enum: Object.keys(cod_confidence) },
         { route: 'coordinate-uncertainty-unit', enum: Object.keys(cuu) },

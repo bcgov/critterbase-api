@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { ZodOpenApiOperationObject } from 'zod-openapi';
-import { CritterSchema } from '../../schemas/critter-schema';
 import { routes } from '../../utils/constants';
 import { SwagDesc, SwagErr, SwagNotFound, SwagUnauthorized } from '../../utils/swagger_helpers';
 import { zodID } from '../../utils/zod_helpers';
@@ -12,9 +11,10 @@ import {
   FamilyParentSchema,
   FamilySchema
 } from './family.utils';
+import { GetCritterSchema } from '../../schemas/critter-schema';
 
 const TAG = 'Family';
-const critterArr = CritterSchema.array();
+const critterArr = GetCritterSchema.array();
 
 const defaultFamilyContent = {
   content: {
