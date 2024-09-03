@@ -2,7 +2,6 @@ import { CritterRepository } from '../repositories/critter-repository';
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
-  ICritter,
   ICritterForView,
   IDetailedCritter,
   IDetailedManyCritter,

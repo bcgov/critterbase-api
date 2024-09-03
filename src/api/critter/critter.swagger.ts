@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import {
-  CreateCritterSchema,
   CritterCreateSchema,
   CritterIdsRequestSchema,
   CritterUpdateSchema,

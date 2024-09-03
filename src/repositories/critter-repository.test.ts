@@ -207,7 +207,7 @@ describe('xref-repository', () => {
       const result = await critterRepository.getCritterById('aaaa');
 
       expect(result).toEqual(mockResult);
-      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled()
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled();
     });
 
     it('should throw an error if no critter is found', async () => {
@@ -216,7 +216,7 @@ describe('xref-repository', () => {
 
       await expect(critterRepository.getCritterById('cccc')).rejects.toThrow('Failed to find specific critter.');
 
-      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled()
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled();
     });
   });
 
@@ -247,7 +247,7 @@ describe('xref-repository', () => {
       const result = await critterRepository.getCrittersByWlhId('aaaa');
 
       expect(result).toEqual(mockResult);
-      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled()
+      expect(mockPrismaClient.$queryRaw).toHaveBeenCalled();
     });
 
     it('should return an empty array if no critter is found', async () => {
