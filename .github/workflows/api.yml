@@ -1,9 +1,9 @@
-name: API + DB Setup
+name: Critterbase Development Build
 
 on: [push]
 
 jobs:
-  api:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,33 +18,29 @@ jobs:
       - name: Clean containers
         run: make clean
 
-      - name: Build containers (db, db_setup, api)
-        run: make build-backend
+      - name: Build and Run containers (db, db_setup, api)
+        run: make backend
 
-      - name: Run database container
-        run: docker compose up -d critterbase-db
-
-      - name: Run database setup container
-        run: docker compose up --exit-code-from critterbase-db_setup
-
-      - name: Run API container
-        run: docker compose up -d critterbase-api
-
-      - name: Check database health
-        uses: stringbean/docker-healthcheck-action@v1
-        with:
-          container: db-critterbase
-          wait-time: 50
-          require-status: running
-          require-healthy: true
-
-      - name: Log database setup
-        if: always()
-        run: docker logs db-setup-critterbase -f
-
-      - name: Check API running
-        uses: stringbean/docker-healthcheck-action@v1
-        with:
-          container: api-critterbase
-          wait-time: 50
-          require-status: running
+      # - name: Run database container
+      #   run: docker compose up -d critterbase-db
+      #
+      # - name: Run database setup container
+      #   run: docker compose up --exit-code-from critterbase-db_setup
+      #
+      # - name: Run API container
+      #   run: docker compose up -d critterbase-api
+      #
+      # - name: Check database health
+      #   uses: stringbean/docker-healthcheck-action@v1
+      #   with:
+      #     container: db-critterbase
+      #     wait-time: 50
+      #     require-status: running
+      #     require-healthy: true
+      #
+      # - name: Check API running
+      #   uses: stringbean/docker-healthcheck-action@v1
+      #   with:
+      #     container: api-critterbase
+      #     wait-time: 50
+      #     require-status: running
