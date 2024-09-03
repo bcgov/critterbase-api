@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { CaptureCreateSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
-import { CritterCreateSchema, CritterUpdateSchema } from '../../schemas/critter-schema';
+import { BulkCritterCreateSchema, UpdateCritterSchema } from '../../schemas/critter-schema';
 import { LocationCreateSchema, LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityCreateSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { routes } from '../../utils/constants';
@@ -19,7 +19,7 @@ const bulkCreation: ZodOpenApiOperationObject = {
     content: {
       'application/json': {
         schema: z.object({
-          critters: CritterCreateSchema.array(),
+          critters: BulkCritterCreateSchema.array(),
           markings: MarkingCreateBodySchema.extend({
             primary_colour: z.string().optional(),
             secondary_colour: z.string().optional(),
@@ -54,7 +54,7 @@ const bulkUpdate: ZodOpenApiOperationObject = {
     content: {
       'application/json': {
         schema: z.object({
-          critters: CritterUpdateSchema.extend({ critter_id: zodID }).array(),
+          critters: UpdateCritterSchema.extend({ critter_id: zodID }).array(),
           markings: MarkingCreateBodySchema.extend({
             marking_id: zodID.optional(),
             _delete: z.boolean().optional()

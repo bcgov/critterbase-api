@@ -23,16 +23,18 @@ export const CritterSchemaBase = z.object({
   wlh_id: z.string().nullable(),
   animal_id: z.string().nullable(),
   responsible_region_nr_id: z.string().uuid().nullable(),
-  critter_comment: z.string().nullable()
+  critter_comment: z.string().nullable(),
+  sex_qualitative_option_id: z.string().uuid().nullable()
 });
 
 /**
  * @table critter
  *
- * Base Critter schema omitting audit columns.
+ * Base Critter schema omitting audit columns. Also omits sex_qualitative_option_id because an object called 'sex' is
+ * returned to include the option_label (eg. male, female, etc.).
  *
  */
-export const GetCritterSchema = CritterSchemaBase.extend({
+export const GetCritterSchema = CritterSchemaBase.omit({ sex_qualitative_option_id: true }).extend({
   sex: z
     .object({
       qualitative_option_id: z.string().uuid(),
@@ -42,30 +44,18 @@ export const GetCritterSchema = CritterSchemaBase.extend({
 });
 
 /**
- * @table critter
- *
- * Base Critter schema omitting audit columns.
- *
- */
-export const CreateCritterSchema = CritterSchemaBase.extend({
-  sex_qualitative_option_id: z.string().uuid().nullable()
-});
-
-/**
  * Create critter schema used in post requests
  * should only include itis_tsn or itis_scientific_name to prevent
  * tsn and scientific name from becoming out of sync
  */
-export const CritterCreateSchema = CreateCritterSchema.partial()
-  .required({ sex_qualitative_option_id: true })
+export const CreateCritterSchema = CritterSchemaBase.partial()
   .refine(
     (schema) => (schema.itis_tsn && !schema.itis_scientific_name) || (!schema.itis_tsn && schema.itis_scientific_name),
     'must include itis_tsn or itis_scientific_name but not both'
   );
 
-export const BulkCritterCreateSchema = CreateCritterSchema.partial().required({
+export const BulkCritterCreateSchema = CritterSchemaBase.partial().required({
   critter_id: true,
-  sex: true,
   itis_tsn: true,
   itis_scientific_name: true
 });
@@ -73,12 +63,12 @@ export const BulkCritterCreateSchema = CreateCritterSchema.partial().required({
 /**
  * Update critter schema used in update / patch requests
  */
-export const CritterUpdateSchema = CreateCritterSchema.omit({
+export const UpdateCritterSchema = CritterSchemaBase.omit({
   critter_id: true,
   itis_scientific_name: true
 }).partial();
 
-export const BulkCritterUpdateSchema = CreateCritterSchema.partial().omit({
+export const BulkUpdateCritterSchema = CritterSchemaBase.partial().omit({
   itis_scientific_name: true
 });
 
@@ -119,17 +109,17 @@ export type ICritterForView = z.infer<typeof GetCritterSchema>;
 
 export type ICritter = Omit<critter, AuditColumns>; // Omitting audit columns.
 
-export type CritterUpdate = z.infer<typeof CritterUpdateSchema>;
+export type CritterUpdate = z.infer<typeof UpdateCritterSchema>;
 
-export type BulkCritterUpdateSchema = z.infer<typeof BulkCritterUpdateSchema>;
+export type BulkUpdateCritterSchema = z.infer<typeof BulkUpdateCritterSchema>;
 
 export type BulkCritterCreateSchema = z.infer<typeof BulkCritterCreateSchema>;
 
-export type CritterCreateOptionalItis = z.infer<typeof CritterCreateSchema>;
+export type CritterCreateOptionalItis = z.infer<typeof CreateCritterSchema>;
 
 export type SimilarCritterQuery = z.infer<typeof SimilarCritterQuerySchema>;
 
-export type CritterCreateRequiredItis = z.infer<typeof CritterCreateSchema> &
+export type CritterCreateRequiredItis = z.infer<typeof CreateCritterSchema> &
   Pick<ICritter, 'itis_scientific_name' | 'itis_tsn'>;
 
 /**

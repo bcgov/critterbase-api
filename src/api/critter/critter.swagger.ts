@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import {
-  CritterCreateSchema,
+  BulkCritterCreateSchema,
   CritterIdsRequestSchema,
-  CritterUpdateSchema,
   DetailedCritterSchema,
   DetailedManyCritterSchema,
   GetCritterSchema,
-  SimilarCritterQuerySchema
+  SimilarCritterQuerySchema,
+  UpdateCritterSchema
 } from '../../schemas/critter-schema';
 import { CaptureMortalityGeometrySchema } from '../../schemas/spatial-schema';
 import { routes } from '../../utils/constants';
@@ -171,7 +171,7 @@ export const critterPaths = {
       requestBody: {
         content: {
           'application/json': {
-            schema: CritterCreateSchema
+            schema: BulkCritterCreateSchema
           }
         }
       },
@@ -236,7 +236,7 @@ export const critterPaths = {
       requestBody: {
         content: {
           'application/json': {
-            schema: CritterUpdateSchema
+            schema: UpdateCritterSchema
           }
         }
       },

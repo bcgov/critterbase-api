@@ -3,12 +3,12 @@ Changes critter sex from an enum to a quantitative measurement to allow for spec
 
 */
 
--- Step 1: Add a temporary column for UUID values
+-- Step 1: Add new column for UUID values
 ALTER TABLE critter ADD COLUMN sex_qualitative_option_id UUID;
 
 -- Step 2: Update the temporary column with mapped UUIDs
 -- The only critters with sex values are animals, so we can just consider the sex measurement assigned to Animalia (202423)
-WITH quantitative_measurements AS (
+WITH w_sex_measurement_options AS (
     SELECT qo.option_label AS sex_option_label, qo.qualitative_option_id
     FROM xref_taxon_measurement_qualitative_option qo
     JOIN xref_taxon_measurement_qualitative q
@@ -17,7 +17,8 @@ WITH quantitative_measurements AS (
 )
 UPDATE critter
 SET sex_qualitative_option_id = qm.qualitative_option_id
-FROM quantitative_measurements qm
+FROM w_sex_measurement_options qm
+-- finds measurement_option_ids by matching on the labels (eg. "male" in the old sex column -> sex measurement labelled "male")
 WHERE LOWER(critter.sex::TEXT) = LOWER(qm.sex_option_label);
 
 -- Step 3: Drop the old column and rename the new column

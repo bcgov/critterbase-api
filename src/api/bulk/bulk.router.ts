@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
 import { CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
-import { CritterUpdateSchema } from '../../schemas/critter-schema';
+import { UpdateCritterSchema } from '../../schemas/critter-schema';
 import { LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
 import { ICbDatabase } from '../../utils/database';
@@ -105,7 +105,7 @@ export const BulkRouter = (db: ICbDatabase) => {
 
       const updateBody: IBulkMutate = {
         critters: critterUpdates
-          ? z.array(CritterUpdateSchema.extend({ critter_id: zodID })).parse(critterUpdates, {
+          ? z.array(UpdateCritterSchema.extend({ critter_id: zodID })).parse(critterUpdates, {
               errorMap: (issue, ctx) => bulkErrMap(issue, ctx, 'critters')
             })
           : [],

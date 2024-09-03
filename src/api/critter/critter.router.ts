@@ -5,10 +5,10 @@ import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
 
 import {
-  CritterCreateSchema,
+  CreateCritterSchema,
   CritterIdsRequestSchema,
-  CritterUpdateSchema,
   SimilarCritterQuerySchema,
+  UpdateCritterSchema,
   WlhIdQuerySchema
 } from '../../schemas/critter-schema';
 import { ICbDatabase } from '../../utils/database';
@@ -91,7 +91,7 @@ export const CritterRouter = (db: ICbDatabase) => {
   critterRouter.post(
     '/create',
     catchErrors(async (req: Request, res: Response) => {
-      const payload = CritterCreateSchema.parse(req.body);
+      const payload = CreateCritterSchema.parse(req.body);
 
       const response = await db.critterService.createCritter(payload);
 
@@ -133,7 +133,7 @@ export const CritterRouter = (db: ICbDatabase) => {
     .patch(
       catchErrors(async (req: Request, res: Response) => {
         const critterId = req.params.id;
-        const payload = CritterUpdateSchema.parse(req.body);
+        const payload = UpdateCritterSchema.parse(req.body);
 
         const response = await db.critterService.updateCritter(critterId, payload);
 
