@@ -145,22 +145,26 @@ describe('ItisService', () => {
       });
     });
 
-    describe('getTsnsHierarchyMap', () => {
+    describe('getTsnsHierarchy', () => {
       it('should format tsn query', async () => {
-        await service.getTsnsHierarchyMap([1, 2]);
+        await service.getTsnsHierarchy([1, 2]);
         expect(solrSearchSpy.mock.calls[0][0]).toBe('tsn:1+tsn:2');
       });
 
       it('should strip out duplicate tsns from array', async () => {
-        await service.getTsnsHierarchyMap([1, 2, 2]);
+        await service.getTsnsHierarchy([1, 2, 2]);
         expect(solrSearchSpy.mock.calls[0][0]).toBe('tsn:1+tsn:2');
       });
 
-      it('should return map with hierarchies', async () => {
-        const response = await service.getTsnsHierarchyMap([1, 2]);
-        const map = new Map();
-        map.set(1, [1, 2]);
-        expect(response).toStrictEqual(map);
+      it('should return tsns with hierarchies', async () => {
+        const response = await service.getTsnsHierarchy([1, 2]);
+        const expectedResponse = [
+          {
+            tsn: 1,
+            hierarchy: [1, 2]
+          }
+        ];
+        expect(response).toStrictEqual(expectedResponse);
       });
     });
 
