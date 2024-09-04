@@ -7,7 +7,7 @@ Changes critter sex from an enum to a quantitative measurement to allow for spec
 ALTER TABLE critter ADD COLUMN sex_qualitative_option_id UUID;
 
 -- Step 2: Update the temporary column with mapped UUIDs
--- The only critters with sex values are animals, so we can just consider the sex measurement assigned to Animalia (202423)
+-- The only critters with sex values are in kingdom Animalia, so we can just consider the sex measurement assigned to Animalia (202423)
 WITH w_sex_measurement_options AS (
     SELECT qo.option_label AS sex_option_label, qo.qualitative_option_id
     FROM xref_taxon_measurement_qualitative_option qo
