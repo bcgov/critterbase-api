@@ -1,8 +1,8 @@
 import type { mortality } from '@prisma/client';
-import { prismaClient } from '../client/client';
 import { MortalityRepository } from '../repositories/mortality-repository';
 import { IDetailedCritterMortality } from '../schemas/critter-schema';
 import { MortalityCreate, MortalityDetailed, MortalityUpdate } from '../schemas/mortality-schema';
+import { prisma } from '../utils/constants';
 import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
@@ -35,7 +35,7 @@ export class MortalityService implements Service {
    * @returns {MortalityService}
    */
   static init(): MortalityService {
-    return new MortalityService(new MortalityRepository(prismaClient), new ItisService());
+    return new MortalityService(new MortalityRepository(prisma), new ItisService());
   }
 
   /**

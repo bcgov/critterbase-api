@@ -69,8 +69,6 @@ describe('base-repository', () => {
   });
 
   describe('transactionHandler', () => {
-    //const repo = new Repository();
-
     beforeEach(() => {
       jest.useFakeTimers();
       mockPrismaClient = {

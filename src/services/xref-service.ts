@@ -1,4 +1,3 @@
-import { prismaClient } from '../client/client';
 import { XrefRepository } from '../repositories/xref-repository';
 import {
   ICollectionCategory,
@@ -10,6 +9,7 @@ import {
   ITsnQualitativeMeasurementOption,
   ITsnQuantitativeMeasurement
 } from '../schemas/xref-schema';
+import { prisma } from '../utils/constants';
 import { toSelectFormat } from '../utils/helper_functions';
 import { ISelect, ISelectChildren } from '../utils/types';
 import { Service } from './base-service';
@@ -44,7 +44,7 @@ export class XrefService implements Service {
    * @returns {XrefService}
    */
   static init(): XrefService {
-    return new XrefService(new XrefRepository(prismaClient), new ItisService());
+    return new XrefService(new XrefRepository(prisma), new ItisService());
   }
 
   /**

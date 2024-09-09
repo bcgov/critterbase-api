@@ -1,5 +1,5 @@
-import { prismaClient } from '../client/client';
 import { BulkRepository } from '../repositories/bulk-repository';
+import { prisma } from '../utils/constants';
 import { Service } from './base-service';
 
 /**
@@ -29,6 +29,6 @@ export class BulkService implements Service {
    * @returns {BulkService}
    */
   static init(): BulkService {
-    return new BulkService(new BulkRepository(prismaClient));
+    return new BulkService(new BulkRepository(prisma));
   }
 }

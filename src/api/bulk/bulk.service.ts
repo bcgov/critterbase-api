@@ -1,6 +1,5 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { prismaClient } from '../../client/client';
 import { Repository } from '../../repositories/base-repository';
 import { CaptureDeleteSchema, CaptureUpdate } from '../../schemas/capture-schema';
 import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
@@ -185,7 +184,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     deleted: {}
   };
 
-  const repository = new Repository(prismaClient);
+  const repository = new Repository(prisma);
 
   //TODO: Update this service to use Promise.all once all services are refactored
 
