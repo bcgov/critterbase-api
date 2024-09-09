@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { prismaClient } from '../client/client';
 import { CaptureRepository } from '../repositories/capture-repository';
 import { Capture, CaptureCreate, CaptureUpdate, DetailedCapture } from '../schemas/capture-schema';
 import { Service } from './base-service';
@@ -29,7 +30,7 @@ export class CaptureService implements Service {
    * @returns {MarkingService}
    */
   static init(): CaptureService {
-    return new CaptureService(new CaptureRepository());
+    return new CaptureService(new CaptureRepository(prismaClient));
   }
 
   /**

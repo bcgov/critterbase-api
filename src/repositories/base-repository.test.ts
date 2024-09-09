@@ -1,5 +1,6 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { PrismaClientExtended } from '../client/client';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
@@ -8,13 +9,13 @@ describe('base-repository', () => {
 
   describe('constructor', () => {
     it('should set variables to defaults', () => {
-      const repo = new Repository();
+      const repo = new Repository({} as unknown as PrismaClientExtended);
       expect(repo.transactionTimeoutMilliseconds).toBeDefined();
       expect(repo.prisma).toBeDefined();
     });
 
     it('should be able to inject new dependencies', () => {
-      const repo = new Repository('test' as unknown as PrismaClient, 1);
+      const repo = new Repository('test' as unknown as PrismaClientExtended, 1);
       expect(repo.transactionTimeoutMilliseconds).toBe(1);
       expect(repo.prisma).toBe('test');
     });
@@ -129,7 +130,7 @@ describe('base-repository', () => {
   });
 
   describe('validateSameResponse', () => {
-    const repo = new Repository();
+    const repo = new Repository(mockPrismaClient);
     it('should return new response when both objects are equal', () => {
       expect(repo.validateSameResponse({ a: 1 }, { a: 1 })).toBeTruthy();
       expect(repo.validateSameResponse([{ a: 1 }], [{ a: 1 }])).toBeTruthy();

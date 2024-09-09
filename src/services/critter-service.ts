@@ -1,3 +1,4 @@
+import { prismaClient } from '../client/client';
 import { CritterRepository } from '../repositories/critter-repository';
 import {
   CritterCreateOptionalItis,
@@ -61,7 +62,7 @@ export class CritterService implements Service {
    * @returns {CritterService}
    */
   static init(): CritterService {
-    return new CritterService(new CritterRepository(), {
+    return new CritterService(new CritterRepository(prismaClient), {
       itisService: new ItisService(),
       mortalityService: MortalityService.init(),
       markingService: MarkingService.init(),

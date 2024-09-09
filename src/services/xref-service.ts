@@ -1,3 +1,4 @@
+import { prismaClient } from '../client/client';
 import { XrefRepository } from '../repositories/xref-repository';
 import {
   ICollectionCategory,
@@ -43,7 +44,7 @@ export class XrefService implements Service {
    * @returns {XrefService}
    */
   static init(): XrefService {
-    return new XrefService(new XrefRepository(), new ItisService());
+    return new XrefService(new XrefRepository(prismaClient), new ItisService());
   }
 
   /**
