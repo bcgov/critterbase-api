@@ -3,7 +3,6 @@ import {
   ICollectionCategory,
   ICollectionUnit,
   IMeasurementSearch,
-  IMeasurementWithTsnHierarchy,
   ITsnMarkingBodyLocation,
   ITsnMeasurements,
   ITsnQualitativeMeasurement,
@@ -322,36 +321,23 @@ export class XrefService implements Service {
    *
    * @async
    * @param {IMeasurementSearch} search - Search properties.
-   * @returns {Promise<IMeasurementWithTsnHiearchy[]>}
+   * @returns {Promise<ITsnMeasurements[]>}
    */
-  async searchForMeasurements(search: IMeasurementSearch): Promise<IMeasurementWithTsnHierarchy> {
-    // Search for the measurements
+  async searchForMeasurements(search: IMeasurementSearch): Promise<ITsnMeasurements> {
+    if (search.tsns?.length) {
+      const tsnsWithHierarchy = await this.itisService.getTsnsHierarchy(search.tsns);
+      // Spread the hierarchy results into the original search.tsns to include measurements applied to parent TSNs
+      search.tsns = Array.from(new Set([...search.tsns, ...tsnsWithHierarchy.flatMap((tsn) => tsn.hierarchy)]));
+    }
+
     const [qualitative, quantitative] = await Promise.all([
       this.repository.searchForQualitativeMeasurements(search),
       this.repository.searchForQuantitativeMeasurements(search)
     ]);
 
-    // Get the tsns of the measurements
-    const qualitativeTsns = qualitative.map((measurement) => measurement.itis_tsn);
-    const quantitativeTsns = quantitative.map((measurement) => measurement.itis_tsn);
-
-    // Get the tsnHiearchy map for each tsn
-    const tsnHiearchyMap = await this.itisService.getTsnsHierarchyMap([...qualitativeTsns, ...quantitativeTsns]);
-
-    // Inject the tsn hiearchy into the measurements.
-    const qualitativeWithHiearchy = qualitative.map((measurement) => ({
-      ...measurement,
-      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? []
-    }));
-
-    const quantitativeWithHieararchy = quantitative.map((measurement) => ({
-      ...measurement,
-      tsnHierarchy: tsnHiearchyMap.get(measurement.itis_tsn) ?? []
-    }));
-
     return {
-      quantitative: quantitativeWithHieararchy,
-      qualitative: qualitativeWithHiearchy
+      quantitative,
+      qualitative
     };
   }
 }

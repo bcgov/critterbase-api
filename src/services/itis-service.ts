@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { IItisProperties, IItisSolrStub } from '../schemas/itis-schema';
+import { TSNWithHierarchy } from '../schemas/xref-schema';
 import { apiError } from '../utils/types';
 import { ExternalService } from './base-service';
 
@@ -140,22 +141,15 @@ export class ItisService extends ExternalService {
     return tsnHierarchy;
   }
 
-  async getTsnsHierarchyMap(searchTsns: number[]) {
+  async getTsnsHierarchy(searchTsns: number[]): Promise<TSNWithHierarchy[]> {
     const uniqueSearchTsns = [...new Set(searchTsns)];
     const solrQuery = uniqueSearchTsns.map((tsn) => `tsn:${tsn}`).join('+');
     const result = await this._itisSolrSearch(solrQuery);
 
-    const tsnHiearchyMap = new Map<number, number[]>();
-
-    for (const tsn of searchTsns) {
-      const solrTaxon = result.find((taxon) => taxon.tsn === String(tsn));
-
-      if (solrTaxon) {
-        tsnHiearchyMap.set(tsn, this._splitSolrHierarchyStringToArray(solrTaxon.hierarchyTSN[0]));
-      }
-    }
-
-    return tsnHiearchyMap;
+    return result.map((taxon) => ({
+      tsn: Number(taxon.tsn),
+      hierarchy: this._splitSolrHierarchyStringToArray(taxon.hierarchyTSN[0])
+    }));
   }
 
   /**

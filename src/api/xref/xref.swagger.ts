@@ -6,7 +6,6 @@ import {
   CollectionUnitWithCategorySchema,
   MeasurementIdsQuerySchema,
   MeasurementSearchQuery,
-  MeasurementsWithTsnHierarchy,
   TsnMarkingBodyLocationSchema,
   TsnMeasurementsSchema,
   TsnQualitativeMeasurementSchema,
@@ -64,7 +63,7 @@ const searchMeasurements: ZodOpenApiOperationObject = {
       description: SwagDesc.get,
       content: {
         'application/json': {
-          schema: MeasurementsWithTsnHierarchy
+          schema: TsnMeasurementsSchema
         }
       }
     },
