@@ -1,4 +1,4 @@
-import { prismaClient } from '../client/client';
+import { getPrismaClient } from '../client/client';
 import { QueryFormats } from './types';
 
 declare global {
@@ -15,6 +15,9 @@ declare global {
     }
   }
 }
+
+// Get the Prisma client singleton.
+const prisma = getPrismaClient();
 
 const api = '/api';
 const routes = {
@@ -49,8 +52,5 @@ const IS_TEST = process.env.NODE_ENV === 'test';
 const NO_AUTH = process.env.AUTHENTICATE === 'false';
 
 const defaultFormat = QueryFormats.default;
-
-// TODO: Update all prisma imports to client.ts
-const prisma = prismaClient;
 
 export { IS_DEV, IS_PROD, IS_TEST, NO_AUTH, PORT, defaultFormat, prisma, routes };

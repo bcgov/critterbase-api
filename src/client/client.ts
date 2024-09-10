@@ -1,5 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { captureExtension } from './extensions';
+/**
+ * Prevents multiple unwated instances of PrismaClient when hot reloading (development).
+ * Note: Global variables are not affected on hot-reloads.
+ *
+ * @link https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
+ */
+const globalPrismaClient = global as unknown as { prisma: PrismaClientExtended };
 
 /**
  * Extended Prisma client.
@@ -13,13 +20,14 @@ const extendedPrismaClient = new PrismaClient().$extends(captureExtension);
 export type PrismaClientExtended = typeof extendedPrismaClient;
 
 /**
- * Prevents multiple unwated instances of PrismaClient when hot reloading (development).
- * Note: Global variables are not affected on hot-reloads.
+ * Get the Prisma client singleton.
  *
- * @link https://www.prisma.io/docs/guides/performance-and-optimization/connection-management#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
+ * @returns {PrismaClientExtended} The extended Prisma client.
  */
-const globalPrisma = global as unknown as { prisma: PrismaClientExtended };
+export const getPrismaClient = (): PrismaClientExtended => {
+  if (!globalPrismaClient.prisma) {
+    globalPrismaClient.prisma = extendedPrismaClient;
+  }
 
-export const prismaClient = globalPrisma.prisma || extendedPrismaClient;
-
-if (process.env.NODE_ENV !== 'production') globalPrisma.prisma = prismaClient;
+  return globalPrismaClient.prisma;
+};

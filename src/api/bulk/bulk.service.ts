@@ -184,7 +184,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     deleted: {}
   };
 
-  const repository = new Repository();
+  const repository = new Repository(prisma);
 
   //TODO: Update this service to use Promise.all once all services are refactored
 
