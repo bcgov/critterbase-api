@@ -6,7 +6,7 @@ import { prisma } from '../../utils/constants';
  *
  * @async
  * @param {Prisma.ModelName} model - Database table name
- * @returns {Promise<>}
+ * @returns {*}
  */
 export const getTableDataTypes = async (model: Prisma.ModelName) => {
   const results = await prisma.$queryRaw`

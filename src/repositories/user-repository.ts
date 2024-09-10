@@ -128,7 +128,7 @@ export class UserRepository extends Repository {
    */
   async setDatabaseUserContext(keycloakUuid: string, systemName: string): Promise<void> {
     await this.safeQuery(
-      Prisma.sql` SELECT * FROM api_set_context(${keycloakUuid}, ${systemName});`,
+      Prisma.sql`SELECT * FROM api_set_context(${keycloakUuid}, ${systemName});`,
       z.object({ api_set_context: z.string() }).array()
     );
   }

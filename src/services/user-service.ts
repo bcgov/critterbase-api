@@ -1,5 +1,6 @@
 import { UserRepository } from '../repositories/user-repository';
 import { AuthenticatedUser, CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
+import { prisma } from '../utils/constants';
 import { apiError } from '../utils/types';
 import { Service } from './base-service';
 
@@ -22,7 +23,7 @@ export class UserService implements Service {
    * @returns {XrefService}
    */
   static init(): UserService {
-    return new UserService(new UserRepository());
+    return new UserService(new UserRepository(prisma));
   }
 
   /**

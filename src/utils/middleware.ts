@@ -178,8 +178,8 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
       return next();
     }
     // 2. Get the auth token and user from the request headers
-    const authToken = getAuthToken(req.headers);
-    const authUser = getAuthUser(req.headers);
+    const authToken = getAuthToken(req.headers); // authorization 'Bearer xxx.yyy.zzz'
+    const authUser = getAuthUser(req.headers); // user '{"keycloak_guid": "xxx", "user_identifier": "yyy"}'
 
     // 3. Verify the token against the issuer
     const verifiedToken = await tokenService.getVerifiedToken<JwtPayload>(authToken);
@@ -208,7 +208,9 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
 /**
  * Middleware: Rate Limiter
  *
- * @description Limits the number of requests per token audience.
+ * Note: This will bypass rate limiting for tests and allowed audiences.
+ *
+ * @description Limits the number of requests per IP.
  */
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -218,9 +220,9 @@ export const rateLimiter = rateLimit({
     if (IS_TEST) {
       return true;
     }
-
     // Decode the token (unverified)
     const token = tokenService.getDecodedToken(getAuthToken(req.headers));
+    // Get the token audience
     const audience = getAuthTokenAudience(token.payload as JwtPayload);
 
     // Skip rate limiting for allowed audiences
