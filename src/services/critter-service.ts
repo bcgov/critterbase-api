@@ -8,7 +8,7 @@ import {
   SimilarCritterQuery
 } from '../schemas/critter-schema';
 import { CaptureMortalityGeometry } from '../schemas/spatial-schema';
-import { defaultFormat } from '../utils/constants';
+import { defaultFormat, prisma } from '../utils/constants';
 import { QueryFormats } from '../utils/types';
 import { Service } from './base-service';
 import { CaptureService } from './capture-service';
@@ -61,7 +61,7 @@ export class CritterService implements Service {
    * @returns {CritterService}
    */
   static init(): CritterService {
-    return new CritterService(new CritterRepository(), {
+    return new CritterService(new CritterRepository(prisma), {
       itisService: new ItisService(),
       mortalityService: MortalityService.init(),
       markingService: MarkingService.init(),

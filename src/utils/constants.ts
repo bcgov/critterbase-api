@@ -1,4 +1,4 @@
-import { prismaClient } from '../client/client';
+import { getPrismaClient } from '../client/client';
 import { QueryFormats } from './types';
 
 const PORT = process.env.PORT ?? 9000;
@@ -30,6 +30,9 @@ declare global {
   }
 }
 
+// Get the Prisma client singleton.
+const prisma = getPrismaClient();
+
 const api = '/api';
 const routes = {
   home: api,
@@ -53,9 +56,6 @@ const routes = {
 };
 
 const defaultFormat = QueryFormats.default;
-
-// TODO: Update all prisma imports to client.ts
-const prisma = prismaClient;
 
 export {
   BYPASS_AUTHENTICATION,

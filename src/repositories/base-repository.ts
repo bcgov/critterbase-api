@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { isDeepStrictEqual } from 'util';
 import { z } from 'zod';
 import { PrismaClientExtended } from '../client/client';
-import { IS_DEV, prisma } from '../utils/constants';
+import { IS_DEV } from '../utils/constants';
 import { apiError } from '../utils/types';
 
 /**
@@ -18,7 +18,7 @@ export class Repository {
   prisma: PrismaClientExtended;
   transactionTimeoutMilliseconds: number;
 
-  constructor(prismaClient: PrismaClientExtended = prisma, transactionTimeout = 5000) {
+  constructor(prismaClient: PrismaClientExtended, transactionTimeout = 5000) {
     this.prisma = prismaClient;
     this.transactionTimeoutMilliseconds = transactionTimeout;
   }
