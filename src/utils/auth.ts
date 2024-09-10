@@ -1,66 +1,66 @@
 import { IncomingHttpHeaders } from 'http';
 import { JwtPayload } from 'jsonwebtoken';
-import { AuthHeadersSchema } from '../schemas/auth-schema';
-import { AuthenticatedUser } from '../schemas/user-schema';
-import { TokenService } from '../services/token-service';
-import { KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
+import { z } from 'zod';
 import { apiError } from './types';
 
 /**
- * Token Service
+ * Get the allowed audience list from the environment.
  *
- * @description Verifies jwt token against issuer.
+ * Note: ENV variable `ALLOWED_AUD` is a space separated list of allowed audiences.
+ *
+ * @returns {string[]} List of allowed audiences
  */
-const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
+export const getAllowList = (): string[] => {
+  return String(process.env.ALLOWED_AUD).split(' ');
+};
 
 /**
- * Get allowed audiences from ENV.
+ * Get the token audience from the token payload.
  *
- * @returns {string[]}
+ * @throws {apiError} - If token audience is invalid
+ * @param {JwtPayload} token - Decoded token
  */
-const getAllowedAudiences = (): string[] => String(process.env.ALLOWED_AUD).split(' ');
+export const getAuthTokenAudience = (token: JwtPayload): string => {
+  if (typeof token.aud !== 'string') {
+    throw new apiError('Token audience invalid.');
+  }
+
+  return token.aud;
+};
 
 /**
- * Authenticate the request's bearer token (JWT), audience and user header.
+ * Get the bearer token from the request headers.
  *
- * Authentication criteria:
- *  1. Must provide correct auth headers ie: user + authorization (jwt bearer token).
- *  2. Token must be verifiable against the issuer (keycloak).
- *  3. Token audience (origin) must be allowed by Critterbase.
- *
- * @async
  * @param {IncomingHttpHeaders} headers - Request headers
- * @throws {apiError}  If token invalid, audience not supported or request is missing required headers
- * @returns {Promise<AuthenticatedUser>}
+ * @throws {apiError.forbidden} If token is invalid
+ * @returns {string} Authorization token
  */
-export const authenticate = async (headers: IncomingHttpHeaders): Promise<AuthenticatedUser> => {
-  // 1. Parse auth headers
-  const validation = AuthHeadersSchema.safeParse(headers);
+export const getAuthToken = (headers: IncomingHttpHeaders): string => {
+  const token = headers.authorization?.split(' ')[1];
 
-  // Invalid auth headers
-  if (!validation.success) {
-    throw apiError.forbidden(`Access Denied: Invalid auth headers.`, [validation.error.issues]);
+  if (typeof token !== 'string') {
+    throw new apiError(`Invalid authorization token.`);
   }
 
-  // 2. Verify jwt token against issuer
-  const verifiedToken = await tokenService.getVerifiedToken<JwtPayload>(validation.data.token);
+  return token;
+};
 
-  // 3. Validate the token audience is allowed
-  const allowedAudiences = getAllowedAudiences();
+/**
+ * Get the auth user from the request headers.
+ *
+ * @param {IncomingHttpHeaders} headers - Request headers
+ * @throws {apiError.forbidden} - If user header is malformed
+ * @returns {AuthUser}
+ */
+export const getAuthUser = (headers: IncomingHttpHeaders) => {
+  try {
+    const jsonUser = JSON.parse(headers.user as string) as { keycloak_guid: unknown; username: unknown };
+    const parsedUser = z.object({ keycloak_guid: z.string(), username: z.string() }).parse(jsonUser);
 
-  // Invalid token audience
-  if (typeof verifiedToken.aud !== 'string') {
-    throw apiError.forbidden(`Access Denied: Token audience invalid type.`);
+    return { keycloak_uuid: parsedUser.keycloak_guid, user_identifier: parsedUser.username };
+  } catch (err) {
+    throw new apiError(
+      `Malformed auth user header. Expecting user header '{"keycloak_guid": "AAA", "username": "SteveBrule"}'`
+    );
   }
-
-  if (!allowedAudiences.includes(verifiedToken.aud)) {
-    throw apiError.forbidden(`Access Denied: Token audience not allowed. ${verifiedToken.aud}`);
-  }
-
-  //4. Return the authenticated user
-  return {
-    keycloak_uuid: validation.data.keycloak_uuid,
-    user_identifier: validation.data.user_identifier,
-    system_name: verifiedToken.aud
-  };
 };

@@ -16,7 +16,7 @@ import { UserRouter } from './api/user/user.router';
 import { XrefRouter } from './api/xref/xref.router';
 import { routes } from './utils/constants';
 import { ICbDatabase } from './utils/database';
-import { auth, errorHandler, errorLogger, logger } from './utils/middleware';
+import { auth, errorHandler, errorLogger, logger, rateLimiter } from './utils/middleware';
 import { apiError } from './utils/types';
 
 /**
@@ -36,7 +36,8 @@ export const makeApp = (db: ICbDatabase) => {
 
   app.use(routes.home, AccessRouter(db)); // Accessible without authentication
 
-  app.use(auth); // All routers below this point require authentication
+  app.use(rateLimiter, auth); // All routers below this point require authentication
+
   app.use(routes.critters, CritterRouter(db));
   app.use(routes.markings, MarkingRouter(db));
   app.use(routes.users, UserRouter(db));

@@ -4,11 +4,13 @@ import {
   PrismaClientValidationError
 } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
-import { TokenExpiredError } from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
+import { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { ZodError } from 'zod';
+import { TokenService } from '../services/token-service';
 import { UserService } from '../services/user-service';
-import { authenticate } from './auth';
-import { BYPASS_AUTHENTICATION, IS_TEST } from './constants';
+import { getAllowList, getAuthToken, getAuthTokenAudience, getAuthUser } from './auth';
+import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
 
@@ -18,6 +20,13 @@ import { apiError } from './types';
  * @description Handles logging in users
  */
 const userService = UserService.init();
+
+/**
+ * Token Service
+ *
+ * @description Verifies jwt token against issuer.
+ */
+const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
 
 /**
  * Express request handler callback
@@ -93,6 +102,7 @@ const errorHandler = (
 ) => {
   /**
    * Zod validation errors
+   *
    * @description Incorrect request body or params
    *
    */
@@ -101,6 +111,7 @@ const errorHandler = (
   }
   /**
    * ApiError
+   *
    * @description Manually thrown errors from repository / service methods
    */
   if (err instanceof apiError) {
@@ -108,6 +119,7 @@ const errorHandler = (
   }
   /**
    * Known prisma errors
+   *
    * @description Database constraint failed
    *
    */
@@ -117,30 +129,32 @@ const errorHandler = (
   }
   /**
    * Prisma Validation Errors
-   * @description Incorrect raw prisma query syntax
    *
+   * @description Incorrect raw prisma query syntax
    */
   if (err instanceof PrismaClientValidationError) {
     return res.status(500).json({ error: 'Database query syntax error', issues: ['View logs'] });
   }
   /**
    * Prisma Unknown Errors
-   * @description Usually custom database constraint failed
    *
+   * @description Usually custom database constraint failed
    */
   if (err instanceof PrismaClientUnknownRequestError) {
     return res.status(500).json({ error: 'Database query failed.', issues: ['View logs'] });
   }
   /**
    * Expired token errors.
+   *
+   * @description JWT token has expired
    */
   if (err instanceof TokenExpiredError) {
-    throw apiError.forbidden(`Access Denied: JWT bearer token has expired.`);
+    return res.status(500).json({ error: 'JWT bearer token has expired' });
   }
   /**
    * Error
-   * @description Fallback for all other types of errors
    *
+   * @description Fallback for all other types of errors
    */
   if (err instanceof Error) {
     return res.status(400).json({ error: err.message || 'Unknown error' });
@@ -158,18 +172,65 @@ const errorHandler = (
  * @returns {void}
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
-  // If running test suite or authentication disabled: skip
-  if (BYPASS_AUTHENTICATION) {
-    return next();
+  try {
+    // 1. If running test suite or authentication is disabled: skip
+    if (BYPASS_AUTHENTICATION) {
+      return next();
+    }
+    // 2. Get the auth token and user from the request headers
+    const authToken = getAuthToken(req.headers);
+    const authUser = getAuthUser(req.headers);
+
+    // 3. Verify the token against the issuer
+    const verifiedToken = await tokenService.getVerifiedToken<JwtPayload>(authToken);
+
+    // 4. Get the token audience (system name)
+    const audience = getAuthTokenAudience(verifiedToken);
+
+    // 5. Check if the token audience is allowed
+    if (!getAllowList().includes(audience)) {
+      throw new apiError('Token audience not allowed.');
+    }
+
+    // 6. Authorize user: Login user and set database context for auditing
+    await userService.loginUser({
+      keycloak_uuid: authUser.keycloak_uuid,
+      user_identifier: authUser.user_identifier,
+      system_name: audience
+    });
+  } catch (error) {
+    throw apiError.forbidden(`Access Denied: ${(error as apiError).message}`, [error]);
   }
 
-  // Authenticate the request: Verify token, user and audience from headers
-  const authenticatedUser = await authenticate(req.headers);
-
-  // Authorize user: Login user and set database context for auditing
-  await userService.loginUser(authenticatedUser);
-
   next();
+});
+
+/**
+ * Middleware: Rate Limiter
+ *
+ * @description Limits the number of requests per token audience.
+ */
+// eslint-disable-next-line @typescript-eslint/require-await
+export const rateLimiter = catchErrors(async (req: Request, res: Response, next: NextFunction) => {
+  const limit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+    skip: (req: Request) => {
+      // Skip rate limiting for tests
+      if (IS_TEST) {
+        return true;
+      }
+
+      // Decode the token (unverified)
+      const token = tokenService.getDecodedToken(getAuthToken(req.headers));
+      const audience = getAuthTokenAudience(token.payload as JwtPayload);
+
+      // Skip rate limiting for allowed audiences
+      return getAllowList().includes(audience);
+    }
+  });
+
+  limit(req, res, next);
 });
 
 export { auth, catchErrors, errorHandler, errorLogger, logger };

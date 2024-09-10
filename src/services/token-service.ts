@@ -45,24 +45,6 @@ export class TokenService {
   }
 
   /**
-   * Get decoded token.
-   *
-   * @memberof TokenService
-   * @throws {apiError} - If unabled to decode token
-   * @returns {Jwt} Jwt token
-   */
-  _getDecodedToken(tokenString: string): Jwt {
-    // Get decoded jwt token
-    const jwtToken = decode(tokenString, { complete: true, json: true });
-
-    if (!jwtToken) {
-      throw new apiError('Decoded token was undefined.');
-    }
-
-    return jwtToken;
-  }
-
-  /**
    * Get token key id.
    *
    * @memberof TokenService
@@ -123,6 +105,24 @@ export class TokenService {
   }
 
   /**
+   * Get decoded token (unverified).
+   *
+   * @memberof TokenService
+   * @throws {apiError} - If unabled to decode token
+   * @returns {Jwt} Jwt token
+   */
+  getDecodedToken(tokenString: string): Jwt {
+    // Get decoded jwt token
+    const jwtToken = decode(tokenString, { complete: true, json: true });
+
+    if (!jwtToken) {
+      throw new apiError('Decoded token was undefined.');
+    }
+
+    return jwtToken;
+  }
+
+  /**
    * Retrieve and verify auth-header token against issuer.
    *
    * @async
@@ -133,7 +133,7 @@ export class TokenService {
    */
   async getVerifiedToken<T extends JwtPayload>(bearerToken: string): Promise<T> {
     // Decode the jwt token
-    const jwtToken = this._getDecodedToken(bearerToken);
+    const jwtToken = this.getDecodedToken(bearerToken);
 
     // Get the key identifier from the jwt token
     const tokenKeyId = this._getTokenKeyId(jwtToken);
