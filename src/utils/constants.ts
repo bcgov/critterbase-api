@@ -9,13 +9,11 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 const IS_TEST = process.env.NODE_ENV === 'test';
 
-const NO_AUTH = process.env.AUTHENTICATE === 'false';
-
 const KEYCLOAK_URL = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/certs`;
 
 const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}`;
 
-const BYPASS_AUTHENTICATION = NO_AUTH || IS_TEST;
+const BYPASS_AUTHENTICATION = process.env.AUTHENTICATE === 'false' || IS_TEST;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -66,7 +64,6 @@ export {
   IS_TEST,
   KEYCLOAK_ISSUER,
   KEYCLOAK_URL,
-  NO_AUTH,
   PORT,
   // request,
   defaultFormat,

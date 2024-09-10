@@ -15,10 +15,10 @@ describe('TokenService', () => {
     });
   });
 
-  describe('_getDecodedToken', () => {
+  describe('getDecodedToken', () => {
     it('should decode a valid token', () => {
       const verifier = new TokenService({ tokenURI: 'A', tokenIssuer: 'B' });
-      const token = verifier._getDecodedToken(mockToken);
+      const token = verifier.getDecodedToken(mockToken);
       expect(token).toStrictEqual({
         header: { alg: 'HS256', typ: 'JWT' },
         payload: { sub: '1234567890', name: 'John Doe', iat: 1516239022 },
@@ -30,7 +30,7 @@ describe('TokenService', () => {
       expect.assertions(1);
       const verifier = new TokenService({ tokenURI: 'A', tokenIssuer: 'B' });
       try {
-        verifier._getDecodedToken('IM A BAD TOKEN');
+        verifier.getDecodedToken('IM A BAD TOKEN');
       } catch (err) {
         expect(err.message).toContain('Decoded token was undefined');
       }
@@ -88,13 +88,13 @@ describe('TokenService', () => {
     it('should pass correct values to each method', async () => {
       const verifier = new TokenService({ tokenURI: 'A', tokenIssuer: 'B' });
 
-      jest.spyOn(verifier, '_getDecodedToken').mockImplementation(() => 'B' as any);
+      jest.spyOn(verifier, 'getDecodedToken').mockImplementation(() => 'B' as any);
       jest.spyOn(verifier, '_getTokenKeyId').mockImplementation(() => 'C');
       jest.spyOn(verifier, '_getPublicKeyFromTokenKeyId').mockImplementation(() => 'D' as any);
       jest.spyOn(verifier, '_verifyToken').mockImplementation(() => 'E' as any);
 
       await verifier.getVerifiedToken('Bearer Token');
-      expect(verifier._getDecodedToken).toHaveBeenCalledWith('Bearer Token');
+      expect(verifier.getDecodedToken).toHaveBeenCalledWith('Bearer Token');
       expect(verifier._getTokenKeyId).toHaveBeenCalledWith('B');
       expect(verifier._getPublicKeyFromTokenKeyId).toHaveBeenCalledWith('C');
       expect(verifier._verifyToken).toHaveBeenCalledWith('Bearer Token', 'D');

@@ -210,27 +210,22 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
  *
  * @description Limits the number of requests per token audience.
  */
-// eslint-disable-next-line @typescript-eslint/require-await
-export const rateLimiter = catchErrors(async (req: Request, res: Response, next: NextFunction) => {
-  const limit = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-    skip: (req: Request) => {
-      // Skip rate limiting for tests
-      if (IS_TEST) {
-        return true;
-      }
-
-      // Decode the token (unverified)
-      const token = tokenService.getDecodedToken(getAuthToken(req.headers));
-      const audience = getAuthTokenAudience(token.payload as JwtPayload);
-
-      // Skip rate limiting for allowed audiences
-      return getAllowList().includes(audience);
+export const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  skip: (req: Request) => {
+    // Skip rate limiting for tests
+    if (IS_TEST) {
+      return true;
     }
-  });
 
-  limit(req, res, next);
+    // Decode the token (unverified)
+    const token = tokenService.getDecodedToken(getAuthToken(req.headers));
+    const audience = getAuthTokenAudience(token.payload as JwtPayload);
+
+    // Skip rate limiting for allowed audiences
+    return getAllowList().includes(audience);
+  }
 });
 
 export { auth, catchErrors, errorHandler, errorLogger, logger };
