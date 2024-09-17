@@ -127,17 +127,18 @@ export class UserService implements Service {
    */
   async loginUser(payload: AuthenticatedUser): Promise<void> {
     try {
-      const createOrGetUserPromise = this.repository.createOrGetUser({
+      // Try to get existing user
+      // If exists, set context, return
+      // If not exits, set null context, create, set context, return
+
+      await this.repository.setDatabaseUserContext(null, payload.system_name);
+
+      const createOrGetUserPromise = await this.repository.createOrGetUser({
         keycloak_uuid: payload.keycloak_uuid,
         user_identifier: payload.user_identifier
       });
 
-      const setDatabaseContextPromise = this.repository.setDatabaseUserContext(
-        payload.keycloak_uuid,
-        payload.system_name
-      );
-
-      await Promise.all([createOrGetUserPromise, setDatabaseContextPromise]);
+      await this.repository.setDatabaseUserContext(createOrGetUserPromise.keycloak_uuid, payload.system_name);
     } catch (err) {
       throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', err]);
     }

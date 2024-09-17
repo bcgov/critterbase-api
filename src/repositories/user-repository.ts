@@ -122,11 +122,11 @@ export class UserRepository extends Repository {
   /**
    * Sets the database user context - used for audit columns.
    * @async
-   * @param {string} keycloakUuid - Keycloak primary identifier
+   * @param {(string | null)} keycloakUuid - Keycloak primary identifier
    * @param {string} systemName - System name ie: `SIMS`
    * @returns {Promise<void>}
    */
-  async setDatabaseUserContext(keycloakUuid: string, systemName: string): Promise<void> {
+  async setDatabaseUserContext(keycloakUuid: string | null, systemName: string): Promise<void> {
     await this.safeQuery(
       Prisma.sql`SELECT * FROM api_set_context(${keycloakUuid}, ${systemName});`,
       z.object({ api_set_context: z.string() }).array()
