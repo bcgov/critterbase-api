@@ -404,7 +404,7 @@ model mortality {
 model user {
   user_id                                                                                               String                                      @id @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
   user_identifier                                                                                       String
-  keycloak_uuid                                                                                         String?                                     @unique(map: "critterbase_user_keycloak_uuid_unq") @db.Char(32)
+  keycloak_uuid                                                                                         String?                                     @unique(map: "critterbase_user_keycloak_uuid_unq") @db.VarChar(36)
   create_user                                                                                           String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   update_user                                                                                           String                                      @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                                                                      DateTime                                    @default(now()) @db.Timestamptz(6)

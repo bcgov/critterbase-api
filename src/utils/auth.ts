@@ -55,7 +55,7 @@ export const getAuthToken = (headers: IncomingHttpHeaders): string => {
 export const getAuthUser = (headers: IncomingHttpHeaders) => {
   try {
     const jsonUser = JSON.parse(headers.user as string) as { keycloak_guid: unknown; username: unknown };
-    const parsedUser = z.object({ keycloak_guid: z.string(), username: z.string() }).parse(jsonUser);
+    const parsedUser = z.object({ keycloak_guid: z.string().max(36), username: z.string() }).parse(jsonUser);
 
     return { keycloak_uuid: parsedUser.keycloak_guid, user_identifier: parsedUser.username };
   } catch (err) {

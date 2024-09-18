@@ -60,6 +60,7 @@ const logger = (req: Request, _res: Response, next: NextFunction) => {
   if (!IS_TEST) {
     console.log(`${req.method} ${req.originalUrl}`);
   }
+
   next();
 };
 
