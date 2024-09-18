@@ -1,6 +1,7 @@
 import { MarkingVerificationType } from '../api/marking/marking.utils';
 import { MarkingRepository } from '../repositories/marking-repository';
 import { IDetailedCritterMarking } from '../schemas/critter-schema';
+import { prisma } from '../utils/constants';
 import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
@@ -33,7 +34,7 @@ export class MarkingService implements Service {
    * @returns {MarkingService}
    */
   static init(): MarkingService {
-    return new MarkingService(new MarkingRepository(), new ItisService());
+    return new MarkingService(new MarkingRepository(prisma), new ItisService());
   }
 
   /**
