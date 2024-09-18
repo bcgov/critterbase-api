@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
-import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
 export class UserRepository extends Repository {
@@ -16,29 +15,14 @@ export class UserRepository extends Repository {
   };
 
   /**
-   * Adds a user to the database.
+   * Create a new user.
    *
    * @async
    * @param {CreateUser} user - User data
    * @returns {User} Critterbase user
    */
-  async createOrGetUser(user: CreateUser) {
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        keycloak_uuid: user.keycloak_uuid
-      },
-      select: this._userProperties
-    });
-
-    if (existingUser) {
-      // If querying by keycloak_uuid is successfull - keycloak_uuid is defined
-      return existingUser as UserWithKeycloakUuid;
-    }
-
-    const newUser = await this.prisma.user.create({ data: user, select: this._userProperties });
-
-    // If creating a user is successfull with CreateUser payload - keycloak_uuid is defined
-    return newUser as UserWithKeycloakUuid;
+  async createUser(user: CreateUser): Promise<User> {
+    return this.prisma.user.create({ data: user, select: this._userProperties });
   }
 
   /**
@@ -134,24 +118,20 @@ export class UserRepository extends Repository {
   }
 
   /**
-   * Get user by Keycloak uuid.
+   * Find user by Keycloak uuid.
    *
    * @async
    * @param {string} keycloakUuid - Keycloak primary identifier
    * @throws {apiError.notFound} - User not found
-   * @returns {Promise<User>}
+   * @returns {Promise<User | null>}
    */
-  async getUserByKeycloakUuid(keycloakUuid: string): Promise<UserWithKeycloakUuid> {
+  async findUserByKeycloakUuid(keycloakUuid: string): Promise<UserWithKeycloakUuid | null> {
     const user = await this.prisma.user.findFirst({
       where: {
         keycloak_uuid: keycloakUuid
       }
     });
 
-    if (!user) {
-      throw apiError.notFound('User not found', ['UserRepository->getUserByKeycloakUuid', 'response was null']);
-    }
-
-    return user as UserWithKeycloakUuid;
+    return user as UserWithKeycloakUuid | null;
   }
 }

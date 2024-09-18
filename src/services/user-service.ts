@@ -27,14 +27,14 @@ export class UserService implements Service {
   }
 
   /**
-   * Adds a user to the database.
+   * Create a new user.
    *
    * @async
    * @param {CreateUser} user - User data
    * @returns {User} Critterbase user
    */
-  async createOrGetUser(user: CreateUser): Promise<User> {
-    return this.repository.createOrGetUser(user);
+  async createUser(user: CreateUser): Promise<User> {
+    return this.repository.createUser(user);
   }
 
   /**
@@ -95,30 +95,37 @@ export class UserService implements Service {
   /**
    * Sets the database user context - used for audit columns.
    *
+   * Note: Setting the keycloak uuid to null will default to the SYSTEM context.
+   *
    * @async
-   * @param {string} keycloakUuid - Keycloak primary identifier
+   * @param {string | null} keycloakUuid - Keycloak primary identifier
    * @param {string} systemName - System name ie: `SIMS`
    * @returns {Promise<void>}
    */
-  async setDatabaseUserContext(keycloakUuid: string, systemName: string): Promise<void> {
+  async setDatabaseUserContext(keycloakUuid: string | null, systemName: string): Promise<void> {
     return this.repository.setDatabaseUserContext(keycloakUuid, systemName);
   }
 
   /**
-   * Get user by Keycloak uuid.
+   * Find user by Keycloak uuid.
    *
    * @async
    * @param {string} keycloakUuid - Keycloak primary identifier
    * @throws {apiError.notFound} - User not found
-   * @returns {Promise<User>}
+   * @returns {Promise<UserWithKeycloakUuid | null>}
    */
-  async getUserByKeycloakUuid(keycloakUuid: string): Promise<UserWithKeycloakUuid> {
-    return this.repository.getUserByKeycloakUuid(keycloakUuid);
+  async findUserByKeycloakUuid(keycloakUuid: string): Promise<UserWithKeycloakUuid | null> {
+    return this.repository.findUserByKeycloakUuid(keycloakUuid);
   }
 
   /**
-   * Login the user to critterbase and set database context
-   * Note: The database context allows subsequent requests to populate the audit columns
+   * Login the user and set the database context.
+   *
+   * Note: The database context allows subsequent requests to populate the audit columns.
+   *
+   * Flows:
+   *    New user: Set context (SYSTEM) -> Create user -> Set context (User)
+   *    Existing user: Find user (Keycloak UUID) -> Set user context (User)
    *
    * @async
    * @param {AuthenticatedUser} payload - User to login
@@ -127,18 +134,23 @@ export class UserService implements Service {
    */
   async loginUser(payload: AuthenticatedUser): Promise<void> {
     try {
-      // Try to get existing user
-      // If exists, set context, return
-      // If not exits, set null context, create, set context, return
+      const user = await this.findUserByKeycloakUuid(payload.keycloak_uuid);
 
-      await this.repository.setDatabaseUserContext(null, payload.system_name);
+      if (user) {
+        // User exists, set the context and return
+        return this.setDatabaseUserContext(user.keycloak_uuid, payload.system_name);
+      }
 
-      const createOrGetUserPromise = await this.repository.createOrGetUser({
+      // Set the context to null (SYSTEM)
+      await this.setDatabaseUserContext(null, payload.system_name);
+
+      const newUser = await this.createUser({
         keycloak_uuid: payload.keycloak_uuid,
         user_identifier: payload.user_identifier
       });
 
-      await this.repository.setDatabaseUserContext(createOrGetUserPromise.keycloak_uuid, payload.system_name);
+      // Set the context to the new user
+      await this.setDatabaseUserContext(newUser.keycloak_uuid, payload.system_name);
     } catch (err) {
       throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', err]);
     }

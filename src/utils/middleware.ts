@@ -177,6 +177,7 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
     if (BYPASS_AUTHENTICATION) {
       return next();
     }
+
     // 2. Get the auth token and user from the request headers
     const authToken = getAuthToken(req.headers); // authorization 'Bearer xxx.yyy.zzz'
     const authUser = getAuthUser(req.headers); // user '{"keycloak_guid": "xxx", "user_identifier": "yyy"}'
@@ -188,7 +189,9 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
     const audience = getAuthTokenAudience(verifiedToken);
 
     // 5. Check if the token audience is allowed
-    if (!getAllowList().includes(audience)) {
+    const audienceNotAllowed = !getAllowList().includes(audience);
+
+    if (audienceNotAllowed) {
       throw new apiError('Token audience not allowed.');
     }
 
