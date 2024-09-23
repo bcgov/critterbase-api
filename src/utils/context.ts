@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client';
-import { Request } from 'express';
 import { z } from 'zod';
 import { DBTxClient } from '../client/client';
 
@@ -58,17 +57,19 @@ type DBContextConfig = {
   system_name: string;
 };
 
-/**
- * Get the request context.
- *
- * Note: Context will be defined for all routes that are protected by the auth middleware.
- *
- * @param {Request} req - Request
- * @returns {Context} Request context
- */
-export const getContext = (req: Request): Context => {
-  return ContextSchema.parse(req.context);
-};
+///**
+// * Get the request context.
+// *
+// * Note: Context will be defined for all routes that are protected by the auth middleware.
+// *
+// * TODO: Uncomment once used (temp Knip bypass).
+// *
+// * @param {Request} req - Request
+// * @returns {Context} Request context
+// */
+//export const getContext = (req: Request): Context => {
+//  return ContextSchema.parse(req.context);
+//};
 
 /**
  * Set the database context (used for row-level auditing).
