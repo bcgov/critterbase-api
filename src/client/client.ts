@@ -45,14 +45,23 @@ export const getDBClient = (): DBClient => {
   return globalPrismaClient.prisma;
 };
 
-export const transaction = async (callback: (txClient: DBTxClient) => Promise<void>, ctx: Context) => {
+/**
+ * Execute a transaction.
+ *
+ * @async
+ * @param {(txClient: DBTxClient) => Promise<void>} callback - The transaction callback
+ * @param {Context} ctx - Request context
+ * @throws {apiError.serverIssue} - If transaction takes longer than 5 seconds
+ * @returns {Promise<void>}
+ */
+export const transaction = async (ctx: Context, callback: (txClient: DBTxClient) => Promise<void>) => {
   const client = getDBClient();
 
   return client.$transaction(async (txClient: DBTxClient) => {
     const startTimer = performance.now(); // start transaction timer
 
-    await setDBContext(txClient, ctx); // set database context
-    const response = await callback(txClient);
+    await setDBContext({ txClient, keycloak_uuid: ctx.keycloak_uuid, system_name: ctx.system_name }); // set database context
+    await callback(txClient); // execute transaction callback
 
     const endTimer = performance.now(); // end transaction timer
 
@@ -61,7 +70,6 @@ export const transaction = async (callback: (txClient: DBTxClient) => Promise<vo
     if (transactionsTimedOut) {
       throw apiError.serverIssue(`Transaction request took longer than ${5000} ms rolling back...`);
     }
-
-    return response; // if no errors thrown prisma commits transactions
+    // transaction completed successfully
   });
 };

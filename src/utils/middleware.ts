@@ -190,9 +190,7 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
     const audience = getAuthTokenAudience(verifiedToken);
 
     // 5. Check if the token audience is allowed
-    const audienceNotAllowed = !getAllowList().includes(audience);
-
-    if (audienceNotAllowed) {
+    if (!getAllowList().includes(audience)) {
       throw new apiError('Token audience not allowed.');
     }
 

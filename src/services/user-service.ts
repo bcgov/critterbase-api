@@ -126,7 +126,8 @@ export class UserService implements Service {
    * Note: The database context allows subsequent requests to populate the audit columns.
    *
    * TODO: Update this method when the new design is implemented.
-   * Eventually the routes will be handling the transactions, which will set the context.
+   * Eventually the routes will be handling the transactions, which will set the context and
+   * make the request under the same transaction client.
    *
    * Flows:
    *    New user: Set context (SYSTEM) -> Create user -> Set context (User)
@@ -138,16 +139,24 @@ export class UserService implements Service {
    * @returns {Promise<void>}
    */
   async loginUser(payload: AuthenticatedUser): Promise<User> {
+    /**
+     * WARNING: There is a race condition with `setDatabaseUserContext` when multiple requests
+     * are made at the same time. The setDatabaseUserContext will set the context for the incomming request,
+     * but if another request is made before the first one completes, the context will be overwritten.
+     * This will create issues with the audit columns.
+     */
     try {
       const user = await this.findUserByKeycloakUuid(payload.keycloak_uuid);
 
       if (user) {
         // User exists, set the context and return
+        // TODO: Drop this once the new design is implemented
         await this.setDatabaseUserContext(user.keycloak_uuid, payload.system_name);
         return user;
       }
 
       // Set the context to null (SYSTEM)
+      // NOTE: This will stay, context will need to be set to SYSTEM for a new user
       await this.setDatabaseUserContext(null, payload.system_name);
 
       const newUser = await this.createUser({
@@ -156,6 +165,7 @@ export class UserService implements Service {
       });
 
       // Set the context to the new user
+      // TODO: Drop this once the new design is implemented
       await this.setDatabaseUserContext(newUser.keycloak_uuid, payload.system_name);
 
       return newUser;
