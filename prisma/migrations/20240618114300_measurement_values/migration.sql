@@ -2,7 +2,7 @@
 -- Updates quant measurement table so that tail belongs to vertebrates and has a description (was previously attributed to all animals)
 ----------------------------------------------------------------------------------------
 UPDATE xref_taxon_measurement_quantitative
-SET itis_tsn = 158852, measurement_desc = 'Tail length is the measurement from the base of an animals tail, where it connects to the body, to the tip of the tail, used to assess growth, health, and species characteristics in ecological studies.'
+SET itis_tsn = 158852, measurement_desc = 'The distance between the base and tip of the tail.'
 WHERE itis_tsn = 202423
   AND measurement_name = 'tail length';
 
@@ -52,7 +52,7 @@ SET measurement_desc = CASE
     WHEN itis_tsn = 173747 AND measurement_name = 'body mass' THEN 'The total weight of the animal.'
     WHEN itis_tsn = 202422 AND measurement_name = 'Diameter at breast height (DBH)' THEN 'The diameter of a tree measured at 1.3 meters (4.5 feet) above the ground.'
     WHEN itis_tsn = 179913 AND measurement_name = 'baculum length' THEN 'The length of the baculum (penis bone).'
-    WHEN itis_tsn = 179913 AND measurement_name = 'chest circumference' THEN 'The circumference around the chest, usually measured just behind the forelimbs.'
+    WHEN itis_tsn = 179913 AND measurement_name = 'chest circumference' THEN 'The circumference around the chest, measured at its widest point.'
     WHEN itis_tsn = 179913 AND measurement_name = 'abdomen circumference' THEN 'The circumference around the abdomen at its widest point.'
     WHEN itis_tsn = 179913 AND measurement_name = 'canine length' THEN 'The length of the canine teeth from the base to the tip.'
     WHEN itis_tsn = 179913 AND measurement_name = 'canine width' THEN 'The width of the canine teeth at their base.'
@@ -77,7 +77,7 @@ SET measurement_desc = CASE
     WHEN itis_tsn = 174371 AND measurement_name = 'cavity opening diameter' THEN 'The diameter of the entrance to a nest cavity.'
     WHEN itis_tsn = 174371 AND measurement_name = 'nest height' THEN 'The vertical distance from the ground to the top of the nest.'
     WHEN itis_tsn = 174371 AND measurement_name = 'body mass' THEN 'The total weight of the animal.'
-    WHEN itis_tsn = 174371 AND measurement_name = 'tarsus length' THEN 'The length of the tarsus (the part of a birds leg between the knee and the ankle).'
+    WHEN itis_tsn = 174371 AND measurement_name = 'tarsus length' THEN 'The length of the tarsus (the part of a bird''s leg between the knee and the ankle).'
     WHEN itis_tsn = 174371 AND measurement_name = 'tarsus width' THEN 'The width of the tarsus at its widest point.'
     WHEN itis_tsn = 174371 AND measurement_name = 'wing chord' THEN 'The length of the wing from the shoulder to the tip of the longest primary feather.'
     WHEN itis_tsn = 180692 AND measurement_name = 'antler point count' THEN 'The number of points on an antler.'
@@ -104,19 +104,19 @@ END;
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
     -- Length
-    (161061, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-    (161051, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-    (161039, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-    (159785, 'caudal fin–snout length', 0, 10000, 'centimeter', 'Standard length is measured from the tip of the snout (or mouth) to the end of the last vertebra or the base of the caudal fin, excluding the length of the tail fin.'),
-    (161061, 'otolith growth rings count', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
-    (161051, 'otolith growth rings count', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
-    (161039, 'otolith growth rings count', 0, 1000, NULL, 'Otolith rings are concentric growth layers in fish otoliths, used to determine the age and growth history of the fish through annual ring count analysis.'),
-    (161061, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings.'),
-    (161051, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings.'),
-    (161039, 'cleithrum growth rings count', 0, 1000, NULL, 'The cleithrum is a bone in the pectoral girdle of fish that is used to determine age by counting its annual growth rings.'),
-    (161061, 'operculum growth rings count', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.'),
-    (161051, 'operculum growth rings count', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.'),
-    (161039, 'operculum growth rings count', 0, 1000, NULL, 'The operculum is a bony plate covering the gills of fish, used to determine age by counting its annual growth rings.');
+    (161061, 'caudal fin–snout length', 0, 10000, 'centimeter', 'The distance between the tip of the snout and the base of the caudal fin.'),
+    (161051, 'caudal fin–snout length', 0, 10000, 'centimeter', 'The distance between the tip of the snout and the base of the caudal fin.'),
+    (161039, 'caudal fin–snout length', 0, 10000, 'centimeter', 'The distance between the tip of the snout and the base of the caudal fin.'),
+    (159785, 'caudal fin–snout length', 0, 10000, 'centimeter', 'The distance between the tip of the snout and the base of the caudal fin.'),
+    (161061, 'otolith growth rings count', 0, 1000, NULL, 'The number of growth rings in the otolith.'),
+    (161051, 'otolith growth rings count', 0, 1000, NULL, 'The number of growth rings in the otolith.'),
+    (161039, 'otolith growth rings count', 0, 1000, NULL, 'The number of growth rings in the otolith.'),
+    (161061, 'cleithrum growth rings count', 0, 1000, NULL, 'The number of growth rings in the cleithrum.'),
+    (161051, 'cleithrum growth rings count', 0, 1000, NULL, 'The number of growth rings in the cleithrum.'),
+    (161039, 'cleithrum growth rings count', 0, 1000, NULL, 'The number of growth rings in the cleithrum.'),
+    (161061, 'operculum growth rings count', 0, 1000, NULL, 'The number of growth rings in the operculum.'),
+    (161051, 'operculum growth rings count', 0, 1000, NULL, 'The number of growth rings in the operculum.'),
+    (161039, 'operculum growth rings count', 0, 1000, NULL, 'The number of growth rings in the operculum.');
 
 
 ----------------------------------------------------------------------------------------
@@ -182,17 +182,17 @@ FROM (
         (159785, 'maturity', 'Spent', 'Still have spawning colours; eggs and sperm totally discharged; body cavity feels empty
         and genital opening is inflamed; gonads empty except for a few remaining eggs or residual sperm.', 4),
         (161061, 'life stage', 'fry', 'Recently hatched fish.', 0),
-        (161061, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
-        (161061, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2),
+        (161061, 'life stage', 'juvenile', 'An individual resembling an adult that is not yet able to reproduce.', 1),
+        (161061, 'life stage', 'adult', 'An individual able to reproduce.', 2),
         (161051, 'life stage', 'fry', 'Recently hatched fish.', 0),
-        (161051, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
-        (161051, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2),
+        (161051, 'life stage', 'juvenile', 'An individual resembling an adult that is not yet able to reproduce.', 1),
+        (161051, 'life stage', 'adult', 'An individual able to reproduce.', 2),
         (161039, 'life stage', 'fry', 'Recently hatched fish.', 0),
-        (161039, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
-        (161039, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2),
+        (161039, 'life stage', 'juvenile', 'An individual resembling an adult that is not yet able to reproduce.', 1),
+        (161039, 'life stage', 'adult', 'An individual able to reproduce.', 2),
         (159785, 'life stage', 'fry', 'Recently hatched fish.', 0),
-        (159785, 'life stage', 'juvenile', 'A young individual resembling an adult of its kind except in size and reproductive activity.', 1),
-        (159785, 'life stage', 'adult', 'An adult fish is a lifestage characterized by full sexual maturity, enabling the individual to reproduce.', 2)
+        (159785, 'life stage', 'juvenile', 'An individual resembling an adult that is not yet able to reproduce.', 1),
+        (159785, 'life stage', 'adult', 'An individual able to reproduce.', 2)
     ) AS option_data (itis_tsn, measurement_name, option_label, option_desc, option_value)
 ) AS o
 JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_name = m.measurement_name;
@@ -202,6 +202,6 @@ JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_name = m.meas
 -- Update measurement desc for lifestage and maturity.
 ----------------------------------------------------------------------------------------
 UPDATE xref_taxon_measurement_qualitative
-SET measurement_desc = 'Maturity in fish data refers to the stage at which an individual fish has developed the physiological ability to reproduce, typically indicated by the presence of mature gonads.'
+SET measurement_desc = 'An individual''s reproductive state.'
 WHERE itis_tsn IN (161061, 161051, 161039, 159785)
   AND measurement_name = 'maturity';
