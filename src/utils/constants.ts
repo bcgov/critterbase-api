@@ -1,4 +1,5 @@
-import { getPrismaClient } from '../client/client';
+import { getDBClient } from '../client/client';
+import { Context } from './context';
 import { QueryFormats } from './types';
 
 const PORT = process.env.PORT ?? 9000;
@@ -30,8 +31,15 @@ declare global {
   }
 }
 
+// Augment the Express Request interface.
+declare module 'express-serve-static-core' {
+  export interface Request {
+    context?: Context;
+  }
+}
+
 // Get the Prisma client singleton.
-const prisma = getPrismaClient();
+const prisma = getDBClient();
 
 const api = '/api';
 const routes = {

@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { isDeepStrictEqual } from 'util';
 import { z } from 'zod';
-import { PrismaClientExtended } from '../client/client';
+import { DBClient } from '../client/client';
 import { IS_DEV } from '../utils/constants';
 import { apiError } from '../utils/types';
 
@@ -15,11 +15,11 @@ import { apiError } from '../utils/types';
  * @class Repository
  */
 export class Repository {
-  prisma: PrismaClientExtended;
+  prisma: DBClient;
   transactionTimeoutMilliseconds: number;
 
-  constructor(prismaClient: PrismaClientExtended, transactionTimeout = 5000) {
-    this.prisma = prismaClient;
+  constructor(client: DBClient, transactionTimeout = 5000) {
+    this.prisma = client;
     this.transactionTimeoutMilliseconds = transactionTimeout;
   }
 
@@ -52,7 +52,7 @@ export class Repository {
       const startTimer = performance.now(); // start transaction timer
 
       return await this.prisma.$transaction(async (transactionClient) => {
-        this.prisma = transactionClient as PrismaClientExtended; // set prisma client to transaction client
+        this.prisma = transactionClient as DBClient; // set prisma client to transaction client
 
         const transactionData = await transactions(); // run transactions with prisma transaction client
 

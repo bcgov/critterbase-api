@@ -95,6 +95,8 @@ export class UserService implements Service {
   /**
    * Sets the database user context - used for audit columns.
    *
+   * @deprecated Eventually this will be replaced with `setDBContext` from context.ts.
+   *
    * Note: Setting the keycloak uuid to null will default to the SYSTEM context.
    *
    * @async
@@ -123,6 +125,9 @@ export class UserService implements Service {
    *
    * Note: The database context allows subsequent requests to populate the audit columns.
    *
+   * TODO: Update this method when the new design is implemented.
+   * Eventually the routes will be handling the transactions, which will set the context.
+   *
    * Flows:
    *    New user: Set context (SYSTEM) -> Create user -> Set context (User)
    *    Existing user: Find user (Keycloak UUID) -> Set user context (User)
@@ -132,13 +137,14 @@ export class UserService implements Service {
    * @throws {apiError.unauthorized} - User is unauthorized
    * @returns {Promise<void>}
    */
-  async loginUser(payload: AuthenticatedUser): Promise<void> {
+  async loginUser(payload: AuthenticatedUser): Promise<User> {
     try {
       const user = await this.findUserByKeycloakUuid(payload.keycloak_uuid);
 
       if (user) {
         // User exists, set the context and return
-        return this.setDatabaseUserContext(user.keycloak_uuid, payload.system_name);
+        await this.setDatabaseUserContext(user.keycloak_uuid, payload.system_name);
+        return user;
       }
 
       // Set the context to null (SYSTEM)
@@ -151,6 +157,8 @@ export class UserService implements Service {
 
       // Set the context to the new user
       await this.setDatabaseUserContext(newUser.keycloak_uuid, payload.system_name);
+
+      return newUser;
     } catch (err) {
       throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', err]);
     }

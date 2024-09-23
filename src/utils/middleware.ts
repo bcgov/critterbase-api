@@ -197,11 +197,19 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
     }
 
     // 6. Authorize user: Login user and set database context for auditing
-    await userService.loginUser({
+    const user = await userService.loginUser({
       keycloak_uuid: authUser.keycloak_uuid,
       user_identifier: authUser.user_identifier,
       system_name: audience
     });
+
+    // 7. Set the request context
+    req.context = {
+      user_id: user.user_id,
+      keycloak_uuid: authUser.keycloak_uuid,
+      user_identifier: authUser.user_identifier,
+      system_name: audience
+    };
   } catch (error) {
     throw apiError.forbidden(`Access Denied: ${(error as apiError).message}`, [error]);
   }

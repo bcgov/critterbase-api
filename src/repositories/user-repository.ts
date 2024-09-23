@@ -105,6 +105,9 @@ export class UserRepository extends Repository {
 
   /**
    * Sets the database user context - used for audit columns.
+   *
+   * @deprecated Eventually this will be replaced with `setDBContext` from context.ts.
+   *
    * @async
    * @param {(string | null)} keycloakUuid - Keycloak primary identifier
    * @param {string} systemName - System name ie: `SIMS`

@@ -16,7 +16,7 @@ export const UserRouter = (db: ICbDatabase) => {
     '/create',
     catchErrors(async (req: Request, res: Response) => {
       const userData = CreateUserSchema.parse(req.body);
-      const newUser = await db.userService.createOrGetUser(userData);
+      const newUser = await db.userService.createUser(userData);
       return res.status(201).json(newUser);
     })
   );
