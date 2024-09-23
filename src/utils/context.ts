@@ -8,7 +8,7 @@ const ContextSchema = z.object({
    * Critterbase User ID.
    *
    */
-  user_id: z.string(),
+  user_id: z.string().uuid(),
   /**
    * Keycloak UUID or unique identifier.
    *

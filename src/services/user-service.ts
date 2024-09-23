@@ -159,7 +159,7 @@ export class UserService implements Service {
       // NOTE: This will stay, context will need to be set to SYSTEM for a new user
       await this.setDatabaseUserContext(null, payload.system_name);
 
-      const newUser = await this.createUser({
+      const newUser = await this.upsertUser({
         keycloak_uuid: payload.keycloak_uuid,
         user_identifier: payload.user_identifier
       });
