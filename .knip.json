@@ -1,5 +1,18 @@
 {
-  "entry": ["src/index.{js,ts}", "prisma/seed.{js,ts}", "src/openapi/root-api-doc.{js,ts}"],
-  "project": ["**/*.{js,ts}"],
-  "ignoreDependencies": ["@swc/core", "ts-node", "@types/jest"],
+  "entry": [
+    "src/index.{js,ts}",
+    "prisma/seed.{js,ts}",
+    "src/openapi/root-api-doc.{js,ts}"
+  ],
+  "project": [
+    "**/*.{js,ts}"
+  ],
+  "ignoreDependencies": [
+    "@swc/core",
+    "ts-node",
+    "@types/jest"
+  ],
+  "ignore": [
+    "src/utils/context.ts"
+  ]
 }
