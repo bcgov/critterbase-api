@@ -23,7 +23,7 @@ const RETURN_USER: user = {
 };
 
 const userService = {
-  createOrGetUser: jest.fn(),
+  createUser: jest.fn(),
   upsertUser: jest.fn(),
   getUserById: jest.fn(),
   updateUser: jest.fn(),
@@ -36,7 +36,7 @@ const request = supertest(makeApp({ userService } as any));
 beforeEach(() => {
   // Set default returns
   userService.getUserById.mockResolvedValue(RETURN_USER);
-  userService.createOrGetUser.mockResolvedValue(RETURN_USER);
+  userService.createUser.mockResolvedValue(RETURN_USER);
 });
 
 describe('API: User', () => {
@@ -45,7 +45,7 @@ describe('API: User', () => {
       it('returns status 201', async () => {
         const res = await request.post('/api/users/create').send(NEW_USER);
         expect.assertions(2);
-        expect(userService.createOrGetUser.mock.calls.length).toBe(1);
+        expect(userService.createUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
       });
 
@@ -53,14 +53,14 @@ describe('API: User', () => {
         const res = await request.post('/api/users/create').send(NEW_USER);
         const user = res.body;
         expect.assertions(2);
-        expect(userService.createOrGetUser.mock.calls.length).toBe(1);
+        expect(userService.createUser.mock.calls.length).toBe(1);
         expect(UserSchema.safeParse(user).success).toBe(true);
       });
 
       it('strips invalid fields from data', async () => {
         const res = await request.post('/api/users/create').send({ ...NEW_USER, invalidField: 'qwerty123' });
         expect.assertions(3);
-        expect(userService.createOrGetUser.mock.calls.length).toBe(1);
+        expect(userService.createUser.mock.calls.length).toBe(1);
         expect(res.status).toBe(201);
         expect(res.body).not.toHaveProperty('invalidField');
       });
@@ -70,7 +70,7 @@ describe('API: User', () => {
           keycloak_uuid: ID
         });
         expect.assertions(2);
-        expect(userService.createOrGetUser.mock.calls.length).toBe(0);
+        expect(userService.createUser.mock.calls.length).toBe(0);
         expect(res.status).toBe(400);
       });
     });

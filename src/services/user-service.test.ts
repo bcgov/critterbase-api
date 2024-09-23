@@ -11,13 +11,13 @@ describe('user-service', () => {
     });
   });
 
-  describe('createOrGetUser', () => {
+  describe('createUser', () => {
     it('should call correct repository method', async () => {
-      repository = { createOrGetUser: jest.fn() };
+      repository = { createUser: jest.fn() };
 
       const userService = new UserService(repository);
-      await userService.createOrGetUser({ keycloak_uuid: 'BLAH', user_identifier: 'A' });
-      expect(repository.createOrGetUser).toHaveBeenCalled();
+      await userService.createUser({ keycloak_uuid: 'BLAH', user_identifier: 'A' });
+      expect(repository.createUser).toHaveBeenCalled();
     });
   });
 
@@ -81,27 +81,13 @@ describe('user-service', () => {
     });
   });
 
-  describe('getUserByKeycloakUuid', () => {
+  describe('findUserByKeycloakUuid', () => {
     it('should call correct repository method and pass id', async () => {
-      repository = { getUserByKeycloakUuid: jest.fn() };
+      repository = { findUserByKeycloakUuid: jest.fn() };
 
       const userService = new UserService(repository);
-      await userService.getUserByKeycloakUuid('id');
-      expect(repository.getUserByKeycloakUuid).toHaveBeenCalledWith('id');
-    });
-  });
-
-  describe('loginUser', () => {
-    it('should call correct repository method and pass id', async () => {
-      repository = {
-        createOrGetUser: jest.fn(),
-        setDatabaseUserContext: jest.fn()
-      };
-
-      const userService = new UserService(repository);
-      await userService.loginUser({ keycloak_uuid: 'A', user_identifier: 'Carl', system_name: 'TEST' });
-      expect(repository.createOrGetUser).toHaveBeenCalledWith({ keycloak_uuid: 'A', user_identifier: 'Carl' });
-      expect(repository.setDatabaseUserContext).toHaveBeenCalledWith('A', 'TEST');
+      await userService.findUserByKeycloakUuid('id');
+      expect(repository.findUserByKeycloakUuid).toHaveBeenCalledWith('id');
     });
   });
 });

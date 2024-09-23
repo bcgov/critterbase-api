@@ -1,42 +1,20 @@
 import { UserRepository } from './user-repository';
 
 describe('UserRepository', () => {
-  describe('createOrGetUser', () => {
+  describe('createUser', () => {
     it('should return user if found by keycloak uuid', async () => {
-      const mockPrisma = { user: { findFirst: jest.fn().mockResolvedValue('user') } };
+      const mockPrisma = { user: { create: jest.fn().mockResolvedValue('user') } };
 
       const userRespository = new UserRepository(mockPrisma);
 
-      const user = await userRespository.createOrGetUser({ keycloak_uuid: 'BLAH', user_identifier: 'A' });
-
-      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
-        where: { keycloak_uuid: 'BLAH' },
-        select: { user_id: true, keycloak_uuid: true, user_identifier: true }
-      });
-
-      expect(user).toEqual('user');
-    });
-
-    it('should create a new user if keycloak uuid does not exist', async () => {
-      const mockPrisma = {
-        user: { findFirst: jest.fn().mockResolvedValue(undefined), create: jest.fn().mockResolvedValue('foundUser') }
-      };
-
-      const userRespository = new UserRepository(mockPrisma);
-
-      const user = await userRespository.createOrGetUser({ keycloak_uuid: 'BLAH', user_identifier: 'A' });
-
-      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
-        where: { keycloak_uuid: 'BLAH' },
-        select: { user_id: true, keycloak_uuid: true, user_identifier: true }
-      });
+      const user = await userRespository.createUser({ keycloak_uuid: 'BLAH', user_identifier: 'A' });
 
       expect(mockPrisma.user.create).toHaveBeenCalledWith({
         data: { keycloak_uuid: 'BLAH', user_identifier: 'A' },
         select: { user_id: true, keycloak_uuid: true, user_identifier: true }
       });
 
-      expect(user).toEqual('foundUser');
+      expect(user).toEqual('user');
     });
   });
 
@@ -127,27 +105,19 @@ describe('UserRepository', () => {
     });
   });
 
-  describe('getUserByKeycloakUuid', () => {
+  describe('findUserByKeycloakUuid', () => {
     it('should return a user by keycloak uuid', async () => {
       const mockPrisma = { user: { findFirst: jest.fn().mockResolvedValue('user') } };
 
       const userRespository = new UserRepository(mockPrisma);
 
-      const user = await userRespository.getUserByKeycloakUuid('id');
+      const user = await userRespository.findUserByKeycloakUuid('id');
 
       expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
         where: { keycloak_uuid: 'id' }
       });
 
       expect(user).toEqual('user');
-    });
-
-    it('should throw an error if user is not found', async () => {
-      const mockPrisma = { user: { findFirst: jest.fn().mockResolvedValue(undefined) } };
-
-      const userRespository = new UserRepository(mockPrisma);
-
-      await expect(userRespository.getUserByKeycloakUuid('id')).rejects.toThrow('User not found');
     });
   });
 });
