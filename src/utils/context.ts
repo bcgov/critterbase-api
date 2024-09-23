@@ -3,37 +3,35 @@ import { Request } from 'express';
 import { z } from 'zod';
 import { DBTxClient } from '../client/client';
 
+const ContextSchema = z.object({
+  /**
+   * Critterbase User ID.
+   *
+   */
+  user_id: z.string(),
+  /**
+   * Keycloak UUID or unique identifier.
+   *
+   */
+  keycloak_uuid: z.string(),
+  /**
+   * User identifier AKA Username.
+   *
+   */
+  user_identifier: z.string(),
+  /**
+   * External system name or service account name.
+   *
+   */
+  system_name: z.string()
+});
+
 /**
  * Request context.
  *
  * @description Injected into all requests that are protected by the auth middleware.
  */
-export type Context = {
-  /**
-   * User ID (UUID).
-   *
-   * @type {string}
-   */
-  user_id: string;
-  /**
-   * Keycloak UUID.
-   *
-   * @type {string}
-   */
-  keycloak_uuid: string;
-  /**
-   * User Identifier (Username).
-   *
-   * @type {string}
-   */
-  user_identifier: string;
-  /**
-   * System Name.
-   *
-   * @type {string}
-   */
-  system_name: string;
-};
+export type Context = z.infer<typeof ContextSchema>;
 
 /**
  * Database context configuration.
@@ -69,14 +67,7 @@ type DBContextConfig = {
  * @returns {Context} Request context
  */
 export const getContext = (req: Request): Context => {
-  return z
-    .object({
-      user_id: z.string(),
-      keycloak_uuid: z.string().max(36),
-      user_identifier: z.string(),
-      system_name: z.string()
-    })
-    .parse(req.context);
+  return ContextSchema.parse(req.context);
 };
 
 /**
