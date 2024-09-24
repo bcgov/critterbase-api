@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
+import { transaction } from '../../client/client';
 import { CreateUserSchema, UpdateUserSchema } from '../../schemas/user-schema';
+import { UserService } from '../../services/user-service';
+import { getContext } from '../../utils/context';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { uuidParamsSchema } from '../../utils/zod_helpers';
@@ -15,9 +18,17 @@ export const UserRouter = (db: ICbDatabase) => {
   userRouter.post(
     '/create',
     catchErrors(async (req: Request, res: Response) => {
-      const userData = CreateUserSchema.parse(req.body);
-      const newUser = await db.userService.createUser(userData);
-      return res.status(201).json(newUser);
+      const ctx = getContext(req);
+
+      // Create user in a transaction
+      const response = await transaction(ctx, async (txClient) => {
+        const userService = UserService.init(txClient);
+        const userData = CreateUserSchema.parse(req.body);
+
+        return userService.createUser(userData);
+      });
+
+      return res.status(201).json(response);
     })
   );
 
@@ -39,7 +50,10 @@ export const UserRouter = (db: ICbDatabase) => {
      */
     .get(
       catchErrors(async (req: Request, res: Response) => {
-        const user = await db.userService.getUserById(req.params.id);
+        const userService = UserService.init(db.client);
+
+        const user = await userService.getUserById(req.params.id);
+
         return res.status(200).json(user);
       })
     )
@@ -49,8 +63,11 @@ export const UserRouter = (db: ICbDatabase) => {
      */
     .patch(
       catchErrors(async (req: Request, res: Response) => {
+        const userService = UserService.init(db.client);
         const userData = UpdateUserSchema.parse(req.body);
-        const user = await db.userService.updateUser(req.params.id, userData);
+
+        const user = await userService.updateUser(req.params.id, userData);
+
         return res.status(200).json(user);
       })
     );

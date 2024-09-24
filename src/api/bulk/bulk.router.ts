@@ -1,9 +1,12 @@
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
+import { transaction } from '../../client/client';
 import { CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
 import { CritterUpdateSchema } from '../../schemas/critter-schema';
 import { LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
+import { BulkService } from '../../services/bulk-service';
+import { getContext } from '../../utils/context';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { zodID } from '../../utils/zod_helpers';
@@ -25,6 +28,8 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.post(
     '/',
     catchErrors(async (req: Request, res: Response) => {
+      const ctx = getContext(req);
+
       // Cast request body to make patching easier
       const preParsed = BulkShapeSchema.parse(req.body);
 
@@ -63,21 +68,25 @@ export const BulkRouter = (db: ICbDatabase) => {
         mortalities: patchedMortalities
       });
 
-      const results = await db.bulkService.repository.createEntities({
-        critters: parsed.critters ?? [],
-        collections: parsed.collections ?? [],
-        markings: parsed.markings ?? [],
-        locations: parsed.locations ?? [],
-        captures: parsed.captures ?? [],
-        mortalities: parsed.mortalities ?? [],
-        qualitative_measurements: parsed.qualitative_measurements ?? [],
-        quantitative_measurements: parsed.quantitative_measurements ?? [],
-        families: parsed.families?.families ?? [],
-        family_children: parsed.families?.children ?? [],
-        family_parents: parsed.families?.parents ?? []
+      const response = await transaction(ctx, async (txClient) => {
+        const bulkService = BulkService.init(txClient);
+
+        return bulkService.repository.createEntities({
+          critters: parsed.critters ?? [],
+          collections: parsed.collections ?? [],
+          markings: parsed.markings ?? [],
+          locations: parsed.locations ?? [],
+          captures: parsed.captures ?? [],
+          mortalities: parsed.mortalities ?? [],
+          qualitative_measurements: parsed.qualitative_measurements ?? [],
+          quantitative_measurements: parsed.quantitative_measurements ?? [],
+          families: parsed.families?.families ?? [],
+          family_children: parsed.families?.children ?? [],
+          family_parents: parsed.families?.parents ?? []
+        });
       });
 
-      return res.status(201).json(results);
+      return res.status(201).json(response);
     })
   );
 

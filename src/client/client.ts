@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { Context, setDBContext } from '../utils/context';
+import { apiError } from '../utils/types';
 import { captureExtension } from './extensions';
 
 /**
@@ -43,33 +45,39 @@ export const getDBClient = (): DBClient => {
   return globalPrismaClient.prisma;
 };
 
-///**
-// * Execute a transaction.
-// *
-// * TODO: Uncomment once used (temp Knip bypass).
-// *
-// * @async
-// * @param {(txClient: DBTxClient) => Promise<void>} callback - The transaction callback
-// * @param {Context} ctx - Request context
-// * @throws {apiError.serverIssue} - If transaction takes longer than 5 seconds
-// * @returns {Promise<void>}
-// */
-//export const transaction = async (ctx: Context, callback: (txClient: DBTxClient) => Promise<void>) => {
-//  const client = getDBClient();
-//
-//  return client.$transaction(async (txClient: DBTxClient) => {
-//    const startTimer = performance.now(); // start transaction timer
-//
-//    await setDBContext({ txClient, keycloak_uuid: ctx.keycloak_uuid, system_name: ctx.system_name }); // set database context
-//    await callback(txClient); // execute transaction callback
-//
-//    const endTimer = performance.now(); // end transaction timer
-//
-//    const transactionsTimedOut = endTimer - startTimer >= 5000; // 5 seconds
-//
-//    if (transactionsTimedOut) {
-//      throw apiError.serverIssue(`Transaction request took longer than ${5000} ms rolling back...`);
-//    }
-//    // transaction completed successfully
-//  });
-//};
+/**
+ * Execute a transaction.
+ *
+ * TODO: Uncomment once used (temp Knip bypass).
+ *
+ * @async
+ * @template T - Transaction return.
+ * @param {(txClient: DBTxClient) => Promise<T>} callback - The transaction callback
+ * @param {Context} ctx - Request context
+ * @throws {apiError.serverIssue} - If transaction takes longer than 5 seconds
+ * @returns {Promise<void>}
+ */
+export const transaction = async <T>(ctx: Context, callback: (txClient: DBTxClient) => Promise<T>): Promise<T> => {
+  const client = getDBClient();
+
+  // Override the unassigned typescript warning via: ! (non-null assertion operator)
+  // transactionData will be defined after the transaction callback is executed.
+  let transactionData!: T;
+
+  await client.$transaction(async (txClient: DBTxClient) => {
+    const startTimer = performance.now(); // start transaction timer
+
+    await setDBContext({ txClient, keycloak_uuid: ctx.keycloak_uuid, system_name: ctx.system_name }); // set database context
+    transactionData = await callback(txClient); // execute transaction callback
+
+    const endTimer = performance.now(); // end transaction timer
+
+    const transactionsTimedOut = endTimer - startTimer >= 5000; // 5 seconds
+
+    if (transactionsTimedOut) {
+      throw apiError.serverIssue(`Transaction request took longer than ${5000} ms rolling back...`);
+    }
+  });
+
+  return transactionData;
+};

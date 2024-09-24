@@ -6,14 +6,20 @@ import * as family from '../api/family/family.service';
 import * as lookup from '../api/lookup/lookup.service';
 import * as marking from '../api/marking/marking.service';
 import * as measurement from '../api/measurement/measurement.service';
+import { getDBClient } from '../client/client';
 import { BulkService } from '../services/bulk-service';
 import { CaptureService } from '../services/capture-service';
 import { CritterService } from '../services/critter-service';
 import { ItisService } from '../services/itis-service';
 import { MarkingService } from '../services/marking-service';
 import { MortalityService } from '../services/mortality-service';
-import { UserService } from '../services/user-service';
 import { XrefService } from '../services/xref-service';
+
+/**
+ * Database client
+ *
+ */
+const client = getDBClient();
 
 /**
  * Data services
@@ -22,7 +28,6 @@ import { XrefService } from '../services/xref-service';
 const critterService = CritterService.init();
 const markingService = MarkingService.init();
 const mortalityService = MortalityService.init();
-const userService = UserService.init();
 const captureService = CaptureService.init();
 const bulkService = BulkService.init();
 
@@ -43,6 +48,7 @@ const itisService = new ItisService();
  *
  */
 export const db = {
+  client,
   // Eventually these old services will be converted into the new format
   // OLD
   ...access,
@@ -55,7 +61,6 @@ export const db = {
   ...marking,
   // NEW
   bulkService,
-  userService,
   mortalityService,
   critterService,
   xrefService,

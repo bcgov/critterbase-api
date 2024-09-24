@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { Repository } from '../../repositories/base-repository';
+import { DBTxClient } from '../../client/client';
 import { CaptureDeleteSchema, CaptureUpdate } from '../../schemas/capture-schema';
 import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
 import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
@@ -169,7 +169,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
   return counts;
 };
 
-const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
+const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase, txClient: DBTxClient) => {
   const {
     _deleteMarkings,
     _deleteUnits,
@@ -184,69 +184,53 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase) => {
     deleted: {}
   };
 
-  const repository = new Repository(prisma);
-
   //TODO: Update this service to use Promise.all once all services are refactored
 
-  await repository.transactionHandler(async () => {
-    for (let i = 0; i < _deleteMarkings.length; i++) {
-      const _dma = _deleteMarkings[i];
-      counts.deleted.markings = i + 1;
-      await db.deleteMarking(_dma.marking_id, repository.prisma as unknown as PrismaTransactionClient);
-    }
-    for (let i = 0; i < _deleteUnits.length; i++) {
-      const _dma = _deleteUnits[i];
-      counts.deleted.collections = i + 1;
-      await db.deleteCollectionUnit(
-        _dma.critter_collection_unit_id,
-        repository.prisma as unknown as PrismaTransactionClient
-      );
-    }
+  for (let i = 0; i < _deleteMarkings.length; i++) {
+    const _dma = _deleteMarkings[i];
+    counts.deleted.markings = i + 1;
+    await db.deleteMarking(_dma.marking_id, txClient as unknown as PrismaTransactionClient);
+  }
+  for (let i = 0; i < _deleteUnits.length; i++) {
+    const _dma = _deleteUnits[i];
+    counts.deleted.collections = i + 1;
+    await db.deleteCollectionUnit(_dma.critter_collection_unit_id, txClient as unknown as PrismaTransactionClient);
+  }
 
-    const captureIds = _deleteCaptures.map((capture) => capture.capture_id);
-    const captureCount = await db.captureService.deleteMultipleCaptures(captureIds);
-    counts.deleted.captures = captureCount.count;
+  const captureIds = _deleteCaptures.map((capture) => capture.capture_id);
+  const captureCount = await db.captureService.deleteMultipleCaptures(captureIds);
+  counts.deleted.captures = captureCount.count;
 
-    for (let i = 0; i < _deleteMoralities.length; i++) {
-      const _dma = _deleteMoralities[i];
-      counts.deleted.mortalities = i + 1;
-      await db.mortalityService.deleteMortality(_dma.mortality_id);
-    }
-    for (let i = 0; i < _deleteQual.length; i++) {
-      const _dma = _deleteQual[i];
-      counts.deleted.qualitative_measurements = i + 1;
-      await db.deleteQualMeasurement(
-        _dma.measurement_qualitative_id,
-        repository.prisma as unknown as PrismaTransactionClient
-      );
-    }
-    for (let i = 0; i < _deleteQuant.length; i++) {
-      const _dma = _deleteQuant[i];
-      counts.deleted.captures = i + 1;
-      await db.deleteQuantMeasurement(
-        _dma.measurement_quantitative_id,
-        repository.prisma as unknown as PrismaTransactionClient
-      );
-    }
-    for (let i = 0; i < _deleteParents.length; i++) {
-      const _dma = _deleteParents[i];
-      counts.deleted.family_parents = i + 1;
-      await db.removeParentOfFamily(
-        _dma.family_id,
-        _dma.parent_critter_id,
-        repository.prisma as unknown as PrismaTransactionClient
-      );
-    }
-    for (let i = 0; i < _deleteChildren.length; i++) {
-      const _dma = _deleteChildren[i];
-      counts.deleted.family_children = i + 1;
-      await db.removeChildOfFamily(
-        _dma.family_id,
-        _dma.child_critter_id,
-        repository.prisma as unknown as PrismaTransactionClient
-      );
-    }
-  });
+  for (let i = 0; i < _deleteMoralities.length; i++) {
+    const _dma = _deleteMoralities[i];
+    counts.deleted.mortalities = i + 1;
+    await db.mortalityService.deleteMortality(_dma.mortality_id);
+  }
+  for (let i = 0; i < _deleteQual.length; i++) {
+    const _dma = _deleteQual[i];
+    counts.deleted.qualitative_measurements = i + 1;
+    await db.deleteQualMeasurement(_dma.measurement_qualitative_id, txClient as unknown as PrismaTransactionClient);
+  }
+  for (let i = 0; i < _deleteQuant.length; i++) {
+    const _dma = _deleteQuant[i];
+    counts.deleted.captures = i + 1;
+    await db.deleteQuantMeasurement(_dma.measurement_quantitative_id, txClient as unknown as PrismaTransactionClient);
+  }
+  for (let i = 0; i < _deleteParents.length; i++) {
+    const _dma = _deleteParents[i];
+    counts.deleted.family_parents = i + 1;
+    await db.removeParentOfFamily(
+      _dma.family_id,
+      _dma.parent_critter_id,
+      txClient as unknown as PrismaTransactionClient
+    );
+  }
+  for (let i = 0; i < _deleteChildren.length; i++) {
+    const _dma = _deleteChildren[i];
+    counts.deleted.family_children = i + 1;
+    await db.removeChildOfFamily(_dma.family_id, _dma.child_critter_id, txClient as unknown as PrismaTransactionClient);
+  }
+
   return counts;
 };
 

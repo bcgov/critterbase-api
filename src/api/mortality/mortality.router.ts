@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import express, { NextFunction } from 'express';
+import { transaction } from '../../client/client';
 import { MortalityCreateSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
+import { MortalityService } from '../../services/mortality-service';
+import { getContext } from '../../utils/context';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { zodID } from '../../utils/zod_helpers';
@@ -106,9 +109,14 @@ export const MortalityRouter = (db: ICbDatabase) => {
      */
     .delete(
       catchErrors(async (req: Request, res: Response) => {
+        const ctx = getContext(req);
         const mortality_id = req.params.mortality_id;
 
-        const response = await db.mortalityService.deleteMortality(mortality_id);
+        const response = await transaction(ctx, async (txClient) => {
+          const mortalityService = MortalityService.init(txClient);
+
+          return mortalityService.deleteMortality(mortality_id);
+        });
 
         res.status(200).json(response);
       })

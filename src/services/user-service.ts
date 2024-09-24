@@ -1,6 +1,6 @@
+import { DBClient, DBTxClient } from '../client/client';
 import { UserRepository } from '../repositories/user-repository';
 import { AuthenticatedUser, CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
-import { prisma } from '../utils/constants';
 import { apiError } from '../utils/types';
 import { Service } from './base-service';
 
@@ -20,10 +20,11 @@ export class UserService implements Service {
    * Instantiate UserService and inject dependencies.
    *
    * @static
+   * @param {DBTxClient | DBClient} client - Database client
    * @returns {XrefService}
    */
-  static init(): UserService {
-    return new UserService(new UserRepository(prisma));
+  static init(client: DBTxClient | DBClient): UserService {
+    return new UserService(new UserRepository(client));
   }
 
   /**

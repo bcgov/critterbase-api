@@ -7,19 +7,13 @@ import type { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { ZodError } from 'zod';
+import { getDBClient } from '../client/client';
 import { TokenService } from '../services/token-service';
 import { UserService } from '../services/user-service';
 import { getAllowList, getAuthToken, getAuthTokenAudience, getAuthUser } from './auth';
 import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
-
-/**
- * User Service
- *
- * @description Handles logging in users
- */
-const userService = UserService.init();
 
 /**
  * Token Service
@@ -194,20 +188,28 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
       throw new apiError('Token audience not allowed.');
     }
 
-    // 6. Authorize user: Login user and set database context for auditing
-    const user = await userService.loginUser({
-      keycloak_uuid: authUser.keycloak_uuid,
-      user_identifier: authUser.user_identifier,
-      system_name: audience
-    });
+    const client = getDBClient();
 
-    // 7. Set the request context
-    req.context = {
-      user_id: user.user_id,
-      keycloak_uuid: authUser.keycloak_uuid,
-      user_identifier: authUser.user_identifier,
-      system_name: audience
-    };
+    // Intentionally not using the `transaction` handler here because the context is defined after this point.
+    await client.$transaction(async (txClient) => {
+      // Initialize the user service with the transaction client
+      const userService = UserService.init(txClient);
+
+      // 6. Authorize user: Login user and set database context for auditing
+      const user = await userService.loginUser({
+        keycloak_uuid: authUser.keycloak_uuid,
+        user_identifier: authUser.user_identifier,
+        system_name: audience
+      });
+
+      // 7. Set the request context
+      req.context = {
+        user_id: user.user_id,
+        keycloak_uuid: authUser.keycloak_uuid,
+        user_identifier: authUser.user_identifier,
+        system_name: audience
+      };
+    });
   } catch (error) {
     throw apiError.forbidden(`Access Denied: ${(error as apiError).message}`, [error]);
   }

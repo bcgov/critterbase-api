@@ -245,22 +245,21 @@ export class MortalityRepository extends Repository {
    * @returns {Promise<mortality>} Critter mortality.
    */
   async deleteMortality(mortality_id: string): Promise<mortality> {
-    return this.transactionHandler(async () => {
-      const mortality = await this.prisma.mortality.delete({
+    const mortality = await this.prisma.mortality.delete({
+      where: {
+        mortality_id: mortality_id
+      }
+    });
+
+    if (mortality.location_id) {
+      await this.prisma.location.delete({
         where: {
-          mortality_id: mortality_id
+          location_id: mortality.location_id
         }
       });
+    }
 
-      if (mortality.location_id) {
-        await this.prisma.location.delete({
-          where: {
-            location_id: mortality.location_id
-          }
-        });
-      }
-      return mortality;
-    });
+    return mortality;
   }
 
   /**
