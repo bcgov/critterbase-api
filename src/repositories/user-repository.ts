@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { CreateUser, UpdateUser, User, UserWithKeycloakUuid } from '../schemas/user-schema';
+import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
 export class UserRepository extends Repository {
@@ -17,12 +18,40 @@ export class UserRepository extends Repository {
   /**
    * Create a new user.
    *
+   * Note: Using `ON CONFLICT DO NOTHING` to prevent race conditions with when loggin in a user.
+   *
    * @async
    * @param {CreateUser} user - User data
    * @returns {User} Critterbase user
    */
   async createUser(user: CreateUser): Promise<User> {
-    return this.prisma.user.create({ data: user, select: this._userProperties });
+    const result = await this.safeQuery(
+      Prisma.sql`
+        INSERT INTO "user" (
+          keycloak_uuid,
+          user_identifier
+        )
+        VALUES (
+          ${user.keycloak_uuid},
+          ${user.user_identifier}
+        )
+        ON CONFLICT (keycloak_uuid) DO NOTHING
+        RETURNING user_id, keycloak_uuid, user_identifier
+      `,
+      z
+        .object({
+          user_id: z.string(),
+          keycloak_uuid: z.string(),
+          user_identifier: z.string()
+        })
+        .array()
+    );
+
+    if (!result.length) {
+      throw apiError.sqlExecuteIssue('Error creating user', ['UserService->createUser', 'Response length was 0']);
+    }
+
+    return result[0];
   }
 
   /**

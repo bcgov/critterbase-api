@@ -3,16 +3,17 @@ import { UserRepository } from './user-repository';
 describe('UserRepository', () => {
   describe('createUser', () => {
     it('should return user if found by keycloak uuid', async () => {
-      const mockPrisma = { user: { create: jest.fn().mockResolvedValue('user') } };
+      const mockPrisma = { $queryRaw: jest.fn().mockResolvedValue('user') };
+      mockPrisma.$queryRaw.mockResolvedValueOnce(['user']);
 
       const userRespository = new UserRepository(mockPrisma);
 
+      const mockSafeQuery = jest.spyOn(userRespository, 'safeQuery');
+
       const user = await userRespository.createUser({ keycloak_uuid: 'BLAH', user_identifier: 'A' });
 
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: { keycloak_uuid: 'BLAH', user_identifier: 'A' },
-        select: { user_id: true, keycloak_uuid: true, user_identifier: true }
-      });
+      expect(mockSafeQuery).toHaveBeenCalled();
+      expect(mockPrisma.$queryRaw).toHaveBeenCalled();
 
       expect(user).toEqual('user');
     });

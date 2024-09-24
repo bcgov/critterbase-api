@@ -159,7 +159,7 @@ export class UserService implements Service {
       // NOTE: This will stay, context will need to be set to SYSTEM for a new user
       await this.setDatabaseUserContext(null, payload.system_name);
 
-      const newUser = await this.upsertUser({
+      const newUser = await this.createUser({
         keycloak_uuid: payload.keycloak_uuid,
         user_identifier: payload.user_identifier
       });
@@ -169,8 +169,13 @@ export class UserService implements Service {
       await this.setDatabaseUserContext(newUser.keycloak_uuid, payload.system_name);
 
       return newUser;
-    } catch (err) {
-      throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', err]);
+    } catch (err: unknown) {
+      if (err instanceof apiError) {
+        const errors = err.errors?.length ? ['UserService->loginUser', ...err.errors] : ['UserService->loginUser'];
+        throw apiError.unauthorized('Login failed. User is not authorized', errors);
+      }
+
+      throw err;
     }
   }
 }
