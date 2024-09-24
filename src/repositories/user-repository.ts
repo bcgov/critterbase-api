@@ -35,7 +35,8 @@ export class UserRepository extends Repository {
           ${user.keycloak_uuid},
           ${user.user_identifier}
         )
-        ON CONFLICT (keycloak_uuid) DO NOTHING
+        ON CONFLICT (keycloak_uuid) DO UPDATE SET
+          keycloak_uuid = EXCLUDED.keycloak_uuid
         RETURNING user_id, keycloak_uuid, user_identifier
       `,
       z
