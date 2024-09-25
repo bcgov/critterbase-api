@@ -1,5 +1,18 @@
-import { getPrismaClient } from '../client/client';
+import { getDBClient } from '../client/client';
+import { Context } from './context';
 import { QueryFormats } from './types';
+
+const PORT = process.env.PORT ?? 9000;
+
+const IS_DEV = process.env.NODE_ENV === 'development';
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+const IS_TEST = process.env.NODE_ENV === 'test';
+
+const KEYCLOAK_URL = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/certs`;
+
+const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}`;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -16,8 +29,15 @@ declare global {
   }
 }
 
+// Augment the Express Request interface.
+declare module 'express-serve-static-core' {
+  export interface Request {
+    context?: Context;
+  }
+}
+
 // Get the Prisma client singleton.
-const prisma = getPrismaClient();
+const prisma = getDBClient();
 
 const api = '/api';
 const routes = {
@@ -41,16 +61,17 @@ const routes = {
   id: ':id'
 };
 
-const PORT = process.env.PORT ?? 9000;
-
-const IS_DEV = process.env.NODE_ENV === 'development';
-
-const IS_PROD = process.env.NODE_ENV === 'production';
-
-const IS_TEST = process.env.NODE_ENV === 'test';
-
-const NO_AUTH = process.env.AUTHENTICATE === 'false';
-
 const defaultFormat = QueryFormats.default;
 
-export { IS_DEV, IS_PROD, IS_TEST, NO_AUTH, PORT, defaultFormat, prisma, routes };
+export {
+  IS_DEV,
+  IS_PROD,
+  IS_TEST,
+  KEYCLOAK_ISSUER,
+  KEYCLOAK_URL,
+  PORT,
+  // request,
+  defaultFormat,
+  prisma,
+  routes
+};

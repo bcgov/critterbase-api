@@ -25,6 +25,9 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.post(
     '/',
     catchErrors(async (req: Request, res: Response) => {
+      const client = db.getDBClient();
+      const ctx = db.getContext(req);
+
       // Cast request body to make patching easier
       const preParsed = BulkShapeSchema.parse(req.body);
 
@@ -63,27 +66,34 @@ export const BulkRouter = (db: ICbDatabase) => {
         mortalities: patchedMortalities
       });
 
-      const results = await db.bulkService.repository.createEntities({
-        critters: parsed.critters ?? [],
-        collections: parsed.collections ?? [],
-        markings: parsed.markings ?? [],
-        locations: parsed.locations ?? [],
-        captures: parsed.captures ?? [],
-        mortalities: parsed.mortalities ?? [],
-        qualitative_measurements: parsed.qualitative_measurements ?? [],
-        quantitative_measurements: parsed.quantitative_measurements ?? [],
-        families: parsed.families?.families ?? [],
-        family_children: parsed.families?.children ?? [],
-        family_parents: parsed.families?.parents ?? []
+      const response = await db.transaction(ctx, client, async (txClient) => {
+        const bulkService = db.services.BulkService.init(txClient);
+
+        return bulkService.repository.createEntities({
+          critters: parsed.critters ?? [],
+          collections: parsed.collections ?? [],
+          markings: parsed.markings ?? [],
+          locations: parsed.locations ?? [],
+          captures: parsed.captures ?? [],
+          mortalities: parsed.mortalities ?? [],
+          qualitative_measurements: parsed.qualitative_measurements ?? [],
+          quantitative_measurements: parsed.quantitative_measurements ?? [],
+          families: parsed.families?.families ?? [],
+          family_children: parsed.families?.children ?? [],
+          family_parents: parsed.families?.parents ?? []
+        });
       });
 
-      return res.status(201).json(results);
+      return res.status(201).json(response);
     })
   );
 
   bulkRouter.patch(
     '/',
     catchErrors(async (req: Request, res: Response) => {
+      const client = db.getDBClient();
+      const ctx = db.getContext(req);
+
       const preParsed = BulkShapeSchema.parse(req.body);
 
       const critterUpdates = getBulkUpdates(preParsed.critters);
@@ -169,9 +179,14 @@ export const BulkRouter = (db: ICbDatabase) => {
         _deleteParents: parentDeletes ? z.array(FamilyParentDeleteSchema).parse(parentDeletes) : []
       };
 
-      const updateRes = await db.bulkUpdateData(updateBody, db);
-      const deleteRes = await db.bulkDeleteData(deleteBody, db);
-      return res.status(200).json({ ...updateRes, ...deleteRes });
+      const response = await db.transaction(ctx, client, async (txClient) => {
+        const updateRes = await db.bulkUpdateData(updateBody, db, txClient);
+        const deleteRes = await db.bulkDeleteData(deleteBody, db, txClient);
+
+        return { ...updateRes, ...deleteRes };
+      });
+
+      return res.status(200).json(response);
     })
   );
 

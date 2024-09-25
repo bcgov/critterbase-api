@@ -4,13 +4,23 @@ import {
   PrismaClientValidationError
 } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
+import { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { ZodError } from 'zod';
-import { loginUser } from '../api/access/access.service';
-import { setUserContext } from '../api/user/user.service';
-import { authenticateRequest } from '../authentication/auth';
-import { IS_TEST, NO_AUTH } from './constants';
+import { getDBClient } from '../client/client';
+import { TokenService } from '../services/token-service';
+import { UserService } from '../services/user-service';
+import { getAllowList, getAuthToken, getAuthTokenAudience, getAuthUser } from './auth';
+import { IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
+
+/**
+ * Token Service
+ *
+ * @description Verifies jwt token against issuer.
+ */
+const tokenService = new TokenService({ tokenURI: KEYCLOAK_URL, tokenIssuer: KEYCLOAK_ISSUER });
 
 /**
  * Express request handler callback
@@ -23,7 +33,8 @@ import { apiError } from './types';
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => Promise<Response> | Promise<void>;
 
 /**
- * Catches errors on API routes. Used instead of wrapping try / catch on every endpoint.
+ * Catches errors on API routes.
+ * Used instead of wrapping try / catch on every endpoint.
  *
  * @param {ExpressHandler} fn - Express Handler callback.
  */
@@ -32,23 +43,25 @@ const catchErrors = (fn: ExpressHandler) => (req: Request, res: Response, next: 
 };
 
 /**
- * Middleware: Logs the incoming requests.
+ * Middleware: Logs incomming requests.
  *
  * @param {Request} req - Express Request.
  * @param {Response} _res - Express Response.
  * @param {NextFunction} next - Express Next callback.
+ * @returns {void}
  */
 const logger = (req: Request, _res: Response, next: NextFunction) => {
   if (!IS_TEST) {
     console.log(`${req.method} ${req.originalUrl}`);
   }
+
   next();
 };
 
 /**
  * Middleware: Logs server errors.
  *
- * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - [TODO:description]
+ * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err
  * @param {Request} req - Express Request.
  * @param {Response} _res - Express Response.
  * @param {NextFunction} next - Express Next callback.
@@ -67,7 +80,8 @@ const errorLogger = (
 };
 
 /**
- * Middleware: Generic express error handler. Will handle any errors catchErrors catches.
+ * Middleware: Express error handler.
+ * Handles any caught errors via `catchErrors`.
  *
  * @param {apiError | ZodError | Error | PrismaClientKnownRequestError} err - supported errors.
  * @param {Request} _req - Express Request.
@@ -83,6 +97,7 @@ const errorHandler = (
 ) => {
   /**
    * Zod validation errors
+   *
    * @description Incorrect request body or params
    *
    */
@@ -91,6 +106,7 @@ const errorHandler = (
   }
   /**
    * ApiError
+   *
    * @description Manually thrown errors from repository / service methods
    */
   if (err instanceof apiError) {
@@ -98,6 +114,7 @@ const errorHandler = (
   }
   /**
    * Known prisma errors
+   *
    * @description Database constraint failed
    *
    */
@@ -107,24 +124,32 @@ const errorHandler = (
   }
   /**
    * Prisma Validation Errors
-   * @description Incorrect raw prisma query syntax
    *
+   * @description Incorrect raw prisma query syntax
    */
   if (err instanceof PrismaClientValidationError) {
     return res.status(500).json({ error: 'Database query syntax error', issues: ['View logs'] });
   }
   /**
    * Prisma Unknown Errors
-   * @description Usually custom database constraint failed
    *
+   * @description Usually custom database constraint failed
    */
   if (err instanceof PrismaClientUnknownRequestError) {
     return res.status(500).json({ error: 'Database query failed.', issues: ['View logs'] });
   }
   /**
-   * Error
-   * @description Fallback for all other types of errors
+   * Expired token errors.
    *
+   * @description JWT token has expired
+   */
+  if (err instanceof TokenExpiredError) {
+    return res.status(500).json({ error: 'JWT bearer token has expired' });
+  }
+  /**
+   * Error
+   *
+   * @description Fallback for all other types of errors
    */
   if (err instanceof Error) {
     return res.status(400).json({ error: err.message || 'Unknown error' });
@@ -133,53 +158,91 @@ const errorHandler = (
 };
 
 /**
- * Middleware: Authorization.
- * Authorizes a user into Critterbase and sets the user context in DB.
+ * Middleware: Auth (Authentication and Authorization).
+ * Authenticates and authorizes a user into Critterbase.
  *
- * Note: Will bypass auth if NODE_ENV=TEST or AUTHENTICATE=NO_AUTH useful for development.
+ * Note: Auth middleware is bypassed if NODE_ENV=TEST or AUTHENTICATE=FALSE.
  *
  * @async
- * @returns {Promise<void>}
+ * @returns {void}
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
-  /**
-   * Bypass if NODE_ENV is `TEST` or AUTHETICATE is 'FALSE'
-   */
-  if (IS_TEST || NO_AUTH) {
-    return next();
+  try {
+    // 1. If running test suite: skip
+    if (IS_TEST) {
+      return next();
+    }
+
+    const client = getDBClient();
+
+    // 2. Get the auth token and user from the request headers
+    const authToken = getAuthToken(req.headers); // authorization 'Bearer xxx.yyy.zzz'
+    const authUser = getAuthUser(req.headers); // user '{"keycloak_guid": "xxx", "user_identifier": "yyy"}'
+
+    // 3. Verify the token against the issuer
+    const verifiedToken = await tokenService.getVerifiedToken<JwtPayload>(authToken);
+
+    // 4. Get the token audience (system name)
+    const audience = getAuthTokenAudience(verifiedToken);
+
+    // 5. Check if the token audience is allowed
+    if (!getAllowList().includes(audience)) {
+      throw new apiError('Token audience not allowed.');
+    }
+
+    /**
+     * Intentionally not using the `transaction` handler here,
+     * as the context is defined after this point.
+     */
+    const user = await client.$transaction(async (txClient) => {
+      // Initialize the user service with the transaction client
+      const userService = UserService.init(txClient);
+
+      // 6. Authorize user: Login user and set database context for auditing
+      return await userService.loginUser({
+        keycloak_uuid: authUser.keycloak_uuid,
+        user_identifier: authUser.user_identifier,
+        system_name: audience
+      });
+    });
+
+    // 7. Set the request context
+    req.context = {
+      user_id: user.user_id,
+      keycloak_uuid: authUser.keycloak_uuid,
+      user_identifier: authUser.user_identifier,
+      system_name: audience
+    };
+  } catch (error) {
+    throw apiError.forbidden(`Access Denied: ${(error as apiError).message}`, [error]);
   }
-  /**
-   * Authenticate the incomming request via Bearer token
-   */
-  const kc = await authenticateRequest(req);
-  /**
-   * Login the user to critterbase
-   * Note: User needs to already exist
-   *
-   */
-  const user = await loginUser({ keycloak_uuid: kc.keycloak_uuid });
-  /**
-   * Set the user context in the database
-   * Note: This populates the audit columns for all subsequent requests
-   *
-   */
-  await setUserContext(kc.keycloak_uuid, kc.system_name);
-  /**
-   * Log the important user details
-   *
-   */
-  console.log(
-    JSON.stringify({
-      user_identifier: user.user_identifier,
-      keycloak_uuid: user?.keycloak_uuid,
-      user_id: user.user_id
-    })
-  );
-  /**
-   * Pass the request to the next request handler
-   *
-   */
+
   next();
+});
+
+/**
+ * Middleware: Rate Limiter
+ *
+ * Note: This will bypass rate limiting for tests and allowed audiences.
+ *
+ * @description Limits the number of requests per IP.
+ */
+export const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  skip: (req: Request) => {
+    // Skip rate limiting for tests
+    if (IS_TEST) {
+      return true;
+    }
+    // Decode the token (unverified)
+    const token = tokenService.getDecodedToken(getAuthToken(req.headers));
+    // Get the token audience
+    const audience = getAuthTokenAudience(token.payload as JwtPayload);
+
+    // Skip rate limiting for allowed audiences
+    return getAllowList().includes(audience);
+  }
 });
 
 export { auth, catchErrors, errorHandler, errorLogger, logger };

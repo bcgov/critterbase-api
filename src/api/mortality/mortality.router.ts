@@ -106,9 +106,17 @@ export const MortalityRouter = (db: ICbDatabase) => {
      */
     .delete(
       catchErrors(async (req: Request, res: Response) => {
+        const client = db.getDBClient();
+        const ctx = db.getContext(req);
+
         const mortality_id = req.params.mortality_id;
 
-        const response = await db.mortalityService.deleteMortality(mortality_id);
+        // Delete mortality record and associated locations in a transaction.
+        const response = await db.transaction(ctx, client, async (txClient) => {
+          const mortalityService = db.services.MortalityService.init(txClient);
+
+          return mortalityService.deleteMortality(mortality_id);
+        });
 
         res.status(200).json(response);
       })

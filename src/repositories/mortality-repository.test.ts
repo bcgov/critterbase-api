@@ -206,7 +206,6 @@ describe('mortality-repository', () => {
 
       mockPrismaClient.mortality.delete.mockResolvedValue(mockMortality);
       mockPrismaClient.location.delete.mockResolvedValue(true);
-      jest.spyOn(mortalityRepository, 'transactionHandler').mockImplementation((callback) => callback());
 
       const result = await mortalityRepository.deleteMortality('mortality_id');
 
@@ -228,7 +227,6 @@ describe('mortality-repository', () => {
         throw 'test';
       });
       mockPrismaClient.location.delete.mockResolvedValue(true);
-      jest.spyOn(mortalityRepository, 'transactionHandler').mockImplementation((callback) => callback());
 
       try {
         await mortalityRepository.deleteMortality('mortality_id');

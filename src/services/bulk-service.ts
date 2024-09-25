@@ -1,5 +1,5 @@
+import { DBClient, DBTxClient } from '../client/client';
 import { BulkRepository } from '../repositories/bulk-repository';
-import { prisma } from '../utils/constants';
 import { Service } from './base-service';
 
 /**
@@ -26,9 +26,10 @@ export class BulkService implements Service {
    * Instantiate BulkService and inject dependencies.
    *
    * @static
+   * @param {DBTxClient | DBClient} client - Database client
    * @returns {BulkService}
    */
-  static init(): BulkService {
-    return new BulkService(new BulkRepository(prisma));
+  static init(client: DBTxClient | DBClient): BulkService {
+    return new BulkService(new BulkRepository(client));
   }
 }

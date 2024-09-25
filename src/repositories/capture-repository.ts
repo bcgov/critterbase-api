@@ -111,7 +111,6 @@ export class CaptureRepository extends Repository {
    * @returns {Promise<Capture>} Created capture
    */
   async createCapture(payload: CaptureCreate): Promise<Capture> {
-    console.log(payload?.capture_time);
     return this.prisma.capture.create({
       data: {
         capture_id: payload.capture_id,
