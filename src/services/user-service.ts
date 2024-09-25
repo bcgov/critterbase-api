@@ -171,12 +171,8 @@ export class UserService implements Service {
 
       return newUser;
     } catch (err: unknown) {
-      if (err instanceof apiError) {
-        const errors = err.errors?.length ? ['UserService->loginUser', ...err.errors] : ['UserService->loginUser'];
-        throw apiError.unauthorized('Login failed. User is not authorized', errors);
-      }
-
-      throw err;
+      const errors = err instanceof apiError && err.errors?.length ? err.errors : [];
+      throw apiError.unauthorized('Login failed. User is not authorized', ['UserService->loginUser', ...errors]);
     }
   }
 }

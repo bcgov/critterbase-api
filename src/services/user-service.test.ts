@@ -2,10 +2,10 @@ import { UserService } from './user-service';
 
 describe('user-service', () => {
   let repository;
-  const userService = UserService.init();
 
   describe('init', () => {
     it('should instantiate UserService with all its dependencies', () => {
+      const userService = UserService.init({} as any);
       expect(userService).toBeInstanceOf(UserService);
       expect(userService.repository).toBeDefined();
     });
@@ -88,6 +88,57 @@ describe('user-service', () => {
       const userService = new UserService(repository);
       await userService.findUserByKeycloakUuid('id');
       expect(repository.findUserByKeycloakUuid).toHaveBeenCalledWith('id');
+    });
+  });
+
+  describe('loginUser', () => {
+    it('should only call the setDatabaseUserContext once when user exists', async () => {
+      repository = {
+        findUserByKeycloakUuid: jest.fn().mockResolvedValue({ keycloak_uuid: 'user_keycloak' }),
+        setDatabaseUserContext: jest.fn()
+      };
+
+      const userService = new UserService(repository);
+      const user = await userService.loginUser({ keycloak_uuid: 'id', user_identifier: 'A', system_name: 'system' });
+
+      expect(repository.findUserByKeycloakUuid).toHaveBeenCalledWith('id');
+      expect(repository.setDatabaseUserContext).toHaveBeenCalledTimes(1);
+      expect(repository.setDatabaseUserContext).toHaveBeenCalledWith('user_keycloak', 'system');
+
+      expect(user).toEqual({ keycloak_uuid: 'user_keycloak' });
+    });
+
+    it('should call the setDatabaseUserContext twice when user does not exist', async () => {
+      repository = {
+        findUserByKeycloakUuid: jest.fn().mockResolvedValue(undefined),
+        setDatabaseUserContext: jest.fn(),
+        createUser: jest.fn().mockResolvedValue({ keycloak_uuid: 'user_keycloak' })
+      };
+
+      const userService = new UserService(repository);
+      const user = await userService.loginUser({ keycloak_uuid: 'id', user_identifier: 'A', system_name: 'system' });
+
+      expect(repository.findUserByKeycloakUuid).toHaveBeenCalledWith('id');
+      expect(repository.setDatabaseUserContext).toHaveBeenCalledTimes(2);
+      expect(repository.setDatabaseUserContext).toHaveBeenNthCalledWith(1, null, 'system');
+      expect(repository.setDatabaseUserContext).toHaveBeenNthCalledWith(2, 'user_keycloak', 'system');
+
+      expect(user).toEqual({ keycloak_uuid: 'user_keycloak' });
+    });
+
+    it('should format error if request fails', async () => {
+      repository = {
+        findUserByKeycloakUuid: jest.fn().mockRejectedValue(new Error('FAILED'))
+      };
+
+      const userService = new UserService(repository);
+
+      try {
+        await userService.loginUser({ keycloak_uuid: 'id', user_identifier: 'A', system_name: 'system' });
+        fail();
+      } catch (err) {
+        expect(err.message).toBe('Login failed. User is not authorized');
+      }
     });
   });
 });

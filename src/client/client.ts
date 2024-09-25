@@ -48,7 +48,7 @@ export const getDBClient = (): DBClient => {
 /**
  * Execute a transaction.
  *
- * Note: All contents in the callback function will be executed in a transaction.
+ * Note: All contents of the callback function will be executed in a transaction.
  * If at any point an error is thrown (internally or timeout), the transaction will be rolled back.
  *
  * @async
