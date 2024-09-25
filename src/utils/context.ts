@@ -3,28 +3,30 @@ import { Request } from 'express';
 import { z } from 'zod';
 import { DBTxClient } from '../client/client';
 
-const ContextSchema = z.object({
-  /**
-   * Critterbase User ID.
-   *
-   */
-  user_id: z.string().uuid(),
-  /**
-   * Keycloak UUID or unique identifier.
-   *
-   */
-  keycloak_uuid: z.string(),
-  /**
-   * User identifier AKA Username.
-   *
-   */
-  user_identifier: z.string(),
-  /**
-   * External system name or service account name.
-   *
-   */
-  system_name: z.string()
-});
+const ContextSchema = z
+  .object({
+    /**
+     * Critterbase User ID.
+     *
+     */
+    user_id: z.string().uuid(),
+    /**
+     * Keycloak UUID or unique identifier.
+     *
+     */
+    keycloak_uuid: z.string(),
+    /**
+     * User identifier AKA Username.
+     *
+     */
+    user_identifier: z.string(),
+    /**
+     * External system name or service account name.
+     *
+     */
+    system_name: z.string()
+  })
+  .strict();
 
 /**
  * Request context.

@@ -9,20 +9,20 @@ export const mockContext = {
   user_id: '00000000-0000-0000-0000-000000000000',
   keycloak_uuid: '0064CF4823A644309BE399C34B6B0F43',
   system_name: 'CRITTERBASE',
-  user_name: 'MOCK'
+  user_identifier: 'MOCK'
 };
 
 // Mock client object, can be improved upon to include more properties if useful
 export const mockClient = {};
 
 // Mock context function that returns the mock context object
-export const getContextMock = jest.fn().mockReturnValue(mockContext);
+const getContextMock = jest.fn().mockReturnValue(mockContext);
 
 // Mock client function that returns the mock client object
-export const getDBClientMock = jest.fn().mockReturnValue(mockClient);
+const getDBClientMock = jest.fn().mockReturnValue(mockClient);
 
 // Mock transaction function that calls the callback function with the mock client
-export const transactionMock = jest
+const transactionMock = jest
   .spyOn(client, 'transaction')
   .mockImplementation((_ctx, _client, txCallback) => txCallback(_client));
 
@@ -35,7 +35,7 @@ export const transactionMock = jest
  */
 export const getDBMock = (serviceMethodMocks: DBServices, propOverrides?: DBProps) => {
   return {
-    getDBClient: jest.fn().mockReturnValue(mockClient),
+    getDBClient: getDBClientMock,
     getContext: getContextMock,
     transaction: transactionMock,
     services: {
