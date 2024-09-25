@@ -12,6 +12,7 @@ import { CaptureService } from '../services/capture-service';
 import { CritterService } from '../services/critter-service';
 import { ItisService } from '../services/itis-service';
 import { MarkingService } from '../services/marking-service';
+import { MortalityService } from '../services/mortality-service';
 import { UserService } from '../services/user-service';
 import { XrefService } from '../services/xref-service';
 import { getContext } from './context';
@@ -41,6 +42,7 @@ export const db = {
    * Also, restructure existing endpoints to use init() method syntax.
    */
   critterService: CritterService.init(client),
+  mortalityService: MortalityService.init(client),
   xrefService: XrefService.init(client),
   markingService: MarkingService.init(client),
   itisService: new ItisService(),

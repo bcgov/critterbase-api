@@ -28,11 +28,7 @@ export const CritterRouter = (db: ICbDatabase) => {
   critterRouter.get(
     '/',
     catchErrors(async (req: Request, res: Response) => {
-      const client = db.getClient();
-
       const { wlh_id } = WlhIdQuerySchema.parse(req.query);
-
-      const critterService = db.CritterService.init(client);
 
       const response = await db.critterService.getAllCrittersOrCrittersWithWlhId(wlh_id);
 

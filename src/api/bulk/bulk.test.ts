@@ -1,12 +1,13 @@
 import { critter, critter_collection_unit, location, marking, mortality } from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
+import { DBClient, DBTxClient } from '../../client/client';
 import { BulkRepository } from '../../repositories/bulk-repository';
 import { BulkService } from '../../services/bulk-service';
+import { getDBMock } from '../../utils/mocks';
 import { apiError } from '../../utils/types';
 import { bulkDeleteData as _bulkDeleteData, bulkUpdateData as _bulkUpdateData, bulkErrMap } from './bulk.service';
 
-const bulkCreateData = jest.fn();
 const bulkUpdateData = jest.fn();
 const bulkDeleteData = jest.fn();
 const updateCapture = jest.fn();
@@ -19,21 +20,21 @@ const patchTsnAndScientificName = jest.fn();
 const deleteMultipleCaptures = jest.fn().mockResolvedValue({ count: 1 });
 const createEntities = jest.fn();
 
-const db: any = {
-  bulkCreateData,
-  bulkUpdateData,
-  bulkDeleteData,
-  updateMortality,
-  appendEnglishMarkingsAsUUID,
-  deleteMarking,
-  deleteCollectionUnit,
-  bulkService: { repository: { createEntities } },
-  itisService: { patchTsnAndScientificName },
-  mortalityService: { getDefaultCauseOfDeathId: getDefaultCodId, updateMortality },
-  captureService: { updateCapture, deleteMultipleCaptures }
-};
+const db = getDBMock(
+  { BulkService: { repository: { createEntities } } },
+  {
+    bulkUpdateData,
+    bulkDeleteData,
+    appendEnglishMarkingsAsUUID,
+    deleteMarking,
+    deleteCollectionUnit,
+    itisService: { patchTsnAndScientificName },
+    mortalityService: { getDefaultCauseOfDeathId: getDefaultCodId, updateMortality },
+    captureService: { updateCapture, deleteMultipleCaptures }
+  }
+);
 
-const request = supertest(makeApp(db));
+const request = supertest(makeApp(db as any));
 
 const CRITTER_ID = '11084b96-5cbd-421e-8106-511ecfb51f7a';
 const WLH_ID = '12-1234';
@@ -197,7 +198,7 @@ describe('API: Bulk', () => {
           count: 1
         });
 
-        const bulkService = new BulkService(new BulkRepository(prismaMock as unknown as PrismaClientExtended));
+        const bulkService = new BulkService(new BulkRepository(prismaMock as unknown as DBClient));
         await bulkService.repository.createEntities({
           critters: [CRITTER],
           collections: [COLLECTION],
@@ -230,7 +231,7 @@ describe('API: Bulk', () => {
         updateCapture.mockResolvedValue(CAPTURE);
         updateMortality.mockResolvedValue(MORTALITY);
 
-        const result = await _bulkUpdateData(
+        await _bulkUpdateData(
           {
             critters: [CRITTER],
             collections: [COLLECTION],
@@ -241,7 +242,8 @@ describe('API: Bulk', () => {
             qualitative_measurements: [],
             quantitative_measurements: []
           },
-          db
+          db,
+          prismaMock as unknown as DBTxClient
         );
 
         expect.assertions(6);
@@ -267,7 +269,8 @@ describe('API: Bulk', () => {
                 qualitative_measurements: [],
                 quantitative_measurements: []
               },
-              db
+              db,
+              prismaMock as unknown as DBTxClient
             )
         ).rejects.toThrow(apiError.requiredProperty('capture_id'));
       });
@@ -286,7 +289,8 @@ describe('API: Bulk', () => {
                 qualitative_measurements: [],
                 quantitative_measurements: []
               },
-              db
+              db,
+              prismaMock as unknown as DBTxClient
             )
         ).rejects.toThrow(apiError.requiredProperty('mortality_id'));
       });
@@ -309,7 +313,8 @@ describe('API: Bulk', () => {
             qualitative_measurements: [],
             quantitative_measurements: []
           },
-          db
+          db,
+          prismaMock as unknown as DBTxClient
         );
         expect(prismaMock.marking.create.mock.calls.length).toBe(1);
       });
@@ -338,7 +343,8 @@ describe('API: Bulk', () => {
             _deleteParents: [],
             _deleteChildren: []
           },
-          db
+          db,
+          prismaMock as unknown as DBTxClient
         );
         expect(deleteMarking.mock.calls.length).toBe(1);
         expect(deleteCollectionUnit.mock.calls.length).toBe(1);
@@ -361,7 +367,8 @@ describe('API: Bulk', () => {
             qualitative_measurements: [],
             quantitative_measurements: []
           },
-          db
+          db,
+          prismaMock as unknown as DBTxClient
         );
         expect(prismaMock.critter_collection_unit.create.mock.calls.length).toBe(1);
       });
@@ -416,6 +423,7 @@ describe('API: Bulk', () => {
           families: { families: [], parents: [], children: [] }
         };
         const res = await request.post('/api/bulk').send(body);
+        console.log(res.body);
         expect.assertions(1);
         expect(res.status).toBe(201);
       });

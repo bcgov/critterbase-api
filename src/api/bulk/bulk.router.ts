@@ -1,12 +1,9 @@
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
-import { transaction } from '../../client/client';
 import { CaptureDeleteSchema, CaptureUpdateSchema } from '../../schemas/capture-schema';
 import { CritterUpdateSchema } from '../../schemas/critter-schema';
 import { LocationUpdateSchema } from '../../schemas/location-schema';
 import { MortalityDeleteSchema, MortalityUpdateSchema } from '../../schemas/mortality-schema';
-import { BulkService } from '../../services/bulk-service';
-import { getContext } from '../../utils/context';
 import { ICbDatabase } from '../../utils/database';
 import { catchErrors } from '../../utils/middleware';
 import { zodID } from '../../utils/zod_helpers';
@@ -28,7 +25,10 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.post(
     '/',
     catchErrors(async (req: Request, res: Response) => {
-      const ctx = getContext(req);
+      const client = db.getDBClient();
+      const ctx = db.getContext(req);
+
+      console.log({ client, ctx });
 
       // Cast request body to make patching easier
       const preParsed = BulkShapeSchema.parse(req.body);
@@ -68,8 +68,8 @@ export const BulkRouter = (db: ICbDatabase) => {
         mortalities: patchedMortalities
       });
 
-      const response = await transaction(ctx, async (txClient) => {
-        const bulkService = BulkService.init(txClient);
+      const response = await db.transaction(ctx, client, async (txClient) => {
+        const bulkService = db.services.BulkService.init(txClient);
 
         return bulkService.repository.createEntities({
           critters: parsed.critters ?? [],
@@ -93,7 +93,9 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.patch(
     '/',
     catchErrors(async (req: Request, res: Response) => {
-      const ctx = getContext(req);
+      const client = db.getDBClient();
+      const ctx = db.getContext(req);
+
       const preParsed = BulkShapeSchema.parse(req.body);
 
       const critterUpdates = getBulkUpdates(preParsed.critters);
@@ -179,7 +181,7 @@ export const BulkRouter = (db: ICbDatabase) => {
         _deleteParents: parentDeletes ? z.array(FamilyParentDeleteSchema).parse(parentDeletes) : []
       };
 
-      const response = await transaction(ctx, async (txClient) => {
+      const response = await db.transaction(ctx, client, async (txClient) => {
         const updateRes = await db.bulkUpdateData(updateBody, db, txClient);
         const deleteRes = await db.bulkDeleteData(deleteBody, db, txClient);
 
