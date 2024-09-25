@@ -27,19 +27,19 @@ export const db = {
   getDBClient: getDBClient,
   getContext: getContext,
   transaction: transaction,
-  /**
-   * NOTE: Eventually all services should exist in the `services` object below.
-   * Temporarily, services exist in the `db` object for backwards compatibility.
-   *
-   * ie: db.userService.getUser() -> db.UserService.init(client).getUser();
-   */
   services: {
+    CritterService,
+    MortalityService,
+    XrefService,
+    MarkingService,
+    CaptureService,
     UserService,
     BulkService
   },
   /**
-   * TODO: Move the classes below into the `services` object above.
-   * Also, restructure existing endpoints to use init() method syntax.
+   * NOTE: This is backwards compatibility for the old services structure.
+   * Eventually these will be removed and only exist in the above `services` object.
+   * This will include changes in all of the endpoints that use these services.
    */
   critterService: CritterService.init(client),
   mortalityService: MortalityService.init(client),

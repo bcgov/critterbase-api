@@ -173,6 +173,8 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
       return next();
     }
 
+    const client = getDBClient();
+
     // 2. Get the auth token and user from the request headers
     const authToken = getAuthToken(req.headers); // authorization 'Bearer xxx.yyy.zzz'
     const authUser = getAuthUser(req.headers); // user '{"keycloak_guid": "xxx", "user_identifier": "yyy"}'
@@ -192,25 +194,25 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
      * Intentionally not using the `transaction` handler here,
      * as the context is defined after this point.
      */
-    await getDBClient().$transaction(async (txClient) => {
+    const user = await client.$transaction(async (txClient) => {
       // Initialize the user service with the transaction client
       const userService = UserService.init(txClient);
 
       // 6. Authorize user: Login user and set database context for auditing
-      const user = await userService.loginUser({
+      return await userService.loginUser({
         keycloak_uuid: authUser.keycloak_uuid,
         user_identifier: authUser.user_identifier,
         system_name: audience
       });
-
-      // 7. Set the request context
-      req.context = {
-        user_id: user.user_id,
-        keycloak_uuid: authUser.keycloak_uuid,
-        user_identifier: authUser.user_identifier,
-        system_name: audience
-      };
     });
+
+    // 7. Set the request context
+    req.context = {
+      user_id: user.user_id,
+      keycloak_uuid: authUser.keycloak_uuid,
+      user_identifier: authUser.user_identifier,
+      system_name: audience
+    };
   } catch (error) {
     throw apiError.forbidden(`Access Denied: ${(error as apiError).message}`, [error]);
   }

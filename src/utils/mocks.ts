@@ -40,7 +40,8 @@ export const getDBMock = (serviceMethodMocks: DBServices, propOverrides?: DBProp
     transaction: transactionMock,
     services: {
       UserService: { init: jest.fn().mockReturnValue(serviceMethodMocks.UserService) },
-      BulkService: { init: jest.fn().mockReturnValue(serviceMethodMocks.BulkService) }
+      BulkService: { init: jest.fn().mockReturnValue(serviceMethodMocks.BulkService) },
+      MortalityService: { init: jest.fn().mockReturnValue(serviceMethodMocks.MortalityService) }
     },
     ...propOverrides
   };

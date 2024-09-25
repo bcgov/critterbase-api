@@ -28,8 +28,6 @@ export const BulkRouter = (db: ICbDatabase) => {
       const client = db.getDBClient();
       const ctx = db.getContext(req);
 
-      console.log({ client, ctx });
-
       // Cast request body to make patching easier
       const preParsed = BulkShapeSchema.parse(req.body);
 

@@ -423,7 +423,6 @@ describe('API: Bulk', () => {
           families: { families: [], parents: [], children: [] }
         };
         const res = await request.post('/api/bulk').send(body);
-        console.log(res.body);
         expect.assertions(1);
         expect(res.status).toBe(201);
       });
