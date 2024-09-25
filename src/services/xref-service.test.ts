@@ -1,15 +1,13 @@
 jest.mock('../repositories/xref-repository');
 
-import { PrismaClientExtended } from '../client/client';
+import { DBClient } from '../client/client';
 import { XrefRepository } from '../repositories/xref-repository';
 import { ItisService } from './itis-service';
 import { XrefService } from './xref-service';
 
 const mockRepository: jest.Mocked<XrefRepository> = {
-  prisma: {} as unknown as PrismaClientExtended,
+  prisma: {} as unknown as DBClient,
   safeQuery: jest.fn(),
-  transactionHandler: jest.fn(),
-  transactionTimeoutMilliseconds: 1,
   validateSameResponse: jest.fn(),
   findCollectionUnitsFromTsns: jest.fn(),
   getCollectionUnitsFromCategoryId: jest.fn(),

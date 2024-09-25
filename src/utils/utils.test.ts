@@ -1,34 +1,16 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { Request } from 'express';
-// import { app } from "../server";
-import {
-  formatParse,
-  getFormat,
-  intersect,
-  prismaErrorMsg,
-  prisMock,
-  sessionHours,
-  toSelect
-} from './helper_functions';
-// import { catchErrors, errorHandler, errorLogger } from "./middleware";
 import { randomUUID } from 'crypto';
+import { Request } from 'express';
 import { ZodError, ZodIssueCode } from 'zod';
+import { formatParse, getFormat, intersect, prisMock, prismaErrorMsg, toSelect } from './helper_functions';
 import * as mw from './middleware';
-import { apiError, FormatParse, QueryFormats } from './types';
+import { FormatParse, QueryFormats, apiError } from './types';
 import { NumberToString, ResponseSchema } from './zod_helpers';
 
 const ID = 'e47da43e-bb5b-46e9-8403-f0eff31e5522';
-const KEYCLOAK_ID = 'ababababababababababababababababab';
 describe('Utils', () => {
   describe('File: helper_functions.ts', () => {
-    describe(sessionHours.name, () => {
-      it('should equal num hours * 3600000', () => {
-        expect(sessionHours(1)).toBe(3600000);
-      });
-    });
     describe(intersect.name, () => {
-      const aArr = [1, 2, 3];
-      const bArr = [1];
       it('should fully merge both obj arrays', () => {
         expect(intersect([1, 2, 3], [1, 2, 3])).toEqual([1, 2, 3]);
       });

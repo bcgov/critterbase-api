@@ -6,31 +6,47 @@ import * as family from '../api/family/family.service';
 import * as lookup from '../api/lookup/lookup.service';
 import * as marking from '../api/marking/marking.service';
 import * as measurement from '../api/measurement/measurement.service';
-import * as user from '../api/user/user.service';
-import * as mortality from '../repositories/mortality-repository';
+import { getDBClient, transaction } from '../client/client';
 import { BulkService } from '../services/bulk-service';
 import { CaptureService } from '../services/capture-service';
 import { CritterService } from '../services/critter-service';
 import { ItisService } from '../services/itis-service';
 import { MarkingService } from '../services/marking-service';
 import { MortalityService } from '../services/mortality-service';
+import { UserService } from '../services/user-service';
 import { XrefService } from '../services/xref-service';
+import { getContext } from './context';
+
+const client = getDBClient();
 
 /**
- * Instantiating Services.
+ * Critterbase Data Layer
  *
  */
-const itisService = new ItisService();
-
-const critterService = CritterService.init();
-const xrefService = XrefService.init();
-const markingService = MarkingService.init();
-const mortalityService = MortalityService.init();
-const captureService = CaptureService.init();
-const bulkService = BulkService.init();
-
 export const db = {
-  // Eventually these old services will be converted into the new format
+  getDBClient: getDBClient,
+  getContext: getContext,
+  transaction: transaction,
+  services: {
+    CritterService,
+    MortalityService,
+    XrefService,
+    MarkingService,
+    CaptureService,
+    UserService,
+    BulkService
+  },
+  /**
+   * NOTE: This is backwards compatibility for the old services structure.
+   * Eventually these will be removed and only exist in the above `services` object.
+   * This will include changes in all of the endpoints that use these services.
+   */
+  critterService: CritterService.init(client),
+  mortalityService: MortalityService.init(client),
+  xrefService: XrefService.init(client),
+  markingService: MarkingService.init(client),
+  itisService: new ItisService(),
+  captureService: CaptureService.init(client),
   // OLD
   ...access,
   ...artifact,
@@ -38,18 +54,8 @@ export const db = {
   ...collectionUnit,
   ...family,
   ...lookup,
-  ...marking,
   ...measurement,
-  ...mortality,
-  ...user,
-  // NEW,
-  bulkService,
-  mortalityService,
-  critterService,
-  xrefService,
-  markingService,
-  captureService,
-  itisService
+  ...marking
 };
 
 export type ICbDatabase = typeof db;

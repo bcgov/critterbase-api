@@ -2,6 +2,20 @@ import { Prisma, capture } from '@prisma/client';
 import { toPgDateString, toPgTimeString } from '../utils/datetime';
 
 /**
+ * Prisma $queryRaw extension.
+ *
+ * Why? Prisma does not have a built-in $queryRaw method when extending the client.
+ *
+ */
+export const rawQueryExtension = Prisma.defineExtension({
+  query: {
+    $queryRaw({ args, query }) {
+      return query(args);
+    }
+  }
+});
+
+/**
  * Prisma capture extension.
  *
  * Why? Prisma will format 'time' / 'date' columns on request to js Date objects.

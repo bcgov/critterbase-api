@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
 import { ICbDatabase } from '../../utils/database';
+import { getDBMock, mockClient, mockContext } from '../../utils/mocks';
 import { apiError } from '../../utils/types';
 
 const createMortality = jest.fn();
@@ -31,7 +32,7 @@ const MORTALITY: mortality = {
   mortality_id: MORTALITY_ID,
   critter_id: CRITTER_ID,
   location_id: null,
-  mortality_timestamp: new Date(),
+  mortality_timestamp: new Date().toISOString() as unknown as Date,
   proximate_cause_of_death_id: '11084b96-5cbd-421e-8106-511ecfb51f7a',
   proximate_cause_of_death_confidence: null,
   proximate_predated_by_itis_tsn: null,
@@ -41,8 +42,8 @@ const MORTALITY: mortality = {
   mortality_comment: null,
   create_user: '11084b96-5cbd-421e-8106-511ecfb51f7a',
   update_user: '11084b96-5cbd-421e-8106-511ecfb51f7a',
-  create_timestamp: new Date(),
-  update_timestamp: new Date()
+  create_timestamp: new Date().toISOString() as unknown as Date,
+  update_timestamp: new Date().toISOString() as unknown as Date
 };
 
 const LOCATION = {
@@ -171,10 +172,22 @@ describe('API: Critter', () => {
     });
     describe('DELETE /api/mortality/:mortality_id', () => {
       it('should return status 200', async () => {
-        const mort = await request.delete('/api/mortality/' + MORTALITY_ID);
-        expect.assertions(2);
-        expect(deleteMortality.mock.calls.length).toBe(1);
-        expect(mort.status).toBe(200);
+        const deleteMortalityMock = jest.fn().mockResolvedValue(MORTALITY);
+
+        const dbMock = getDBMock({ MortalityService: { deleteMortality: deleteMortalityMock } });
+        const request = supertest(makeApp(dbMock as any));
+
+        const res = await request.delete('/api/mortality/' + MORTALITY_ID);
+
+        expect(dbMock.getContext).toHaveBeenCalled();
+        expect(dbMock.getDBClient).toHaveBeenCalled();
+        expect(dbMock.transaction.mock.calls[0][0]).toBe(mockContext);
+        expect(dbMock.transaction.mock.calls[0][1]).toBe(mockClient);
+        expect(dbMock.services.MortalityService.init).toHaveBeenCalledWith(mockClient);
+
+        expect(deleteMortalityMock).toHaveBeenCalledWith(MORTALITY_ID);
+        expect(res.status).toBe(200);
+        expect(res.body).toStrictEqual(MORTALITY);
       });
     });
   });

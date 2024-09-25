@@ -1,3 +1,4 @@
+import { DBClient, DBTxClient } from '../client/client';
 import { CritterRepository } from '../repositories/critter-repository';
 import {
   CritterCreateOptionalItis,
@@ -8,7 +9,7 @@ import {
   SimilarCritterQuery
 } from '../schemas/critter-schema';
 import { CaptureMortalityGeometry } from '../schemas/spatial-schema';
-import { defaultFormat, prisma } from '../utils/constants';
+import { defaultFormat } from '../utils/constants';
 import { QueryFormats } from '../utils/types';
 import { Service } from './base-service';
 import { CaptureService } from './capture-service';
@@ -58,14 +59,15 @@ export class CritterService implements Service {
    * Instantiate CritterService and inject dependencies.
    *
    * @static
+   * @param {DBTxClient | DBClient} client - Database client
    * @returns {CritterService}
    */
-  static init(): CritterService {
-    return new CritterService(new CritterRepository(prisma), {
+  static init(client: DBTxClient | DBClient): CritterService {
+    return new CritterService(new CritterRepository(client), {
       itisService: new ItisService(),
-      mortalityService: MortalityService.init(),
-      markingService: MarkingService.init(),
-      captureService: CaptureService.init()
+      mortalityService: MortalityService.init(client),
+      markingService: MarkingService.init(client),
+      captureService: CaptureService.init(client)
       // TODO: fill in missing services once refactor finalized
     });
   }
