@@ -11,8 +11,5 @@
     "@swc/core",
     "ts-node",
     "@types/jest"
-  ],
-  "ignore": [
-    "src/utils/context.ts"
   ]
 }

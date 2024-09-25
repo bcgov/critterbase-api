@@ -52,30 +52,33 @@ export const getDBClient = (): DBClient => {
  * @template T - Transaction return.
  * @param {(txClient: DBTxClient) => Promise<T>} callback - The transaction callback
  * @param {Context} ctx - Request context
+ * @param {number} [timeoutMs] - Request timeout cap in milliseconds
  * @throws {apiError.serverIssue} - If transaction takes longer than 5 seconds
  * @returns {Promise<void>}
  */
 export const transaction = async <T>(
   ctx: Context,
   client: DBClient,
-  callback: (txClient: DBTxClient) => Promise<T>
+  callback: (txClient: DBTxClient) => Promise<T>,
+  timeoutMs = 5000
 ): Promise<T> => {
   return client.$transaction(async (txClient: DBTxClient) => {
     // start transaction timer
     const startTimer = performance.now();
 
-    // Set the database context used for auditing
+    // set the database context used for auditing
     await setDBContext({ txClient, keycloak_uuid: ctx.keycloak_uuid, system_name: ctx.system_name }); // set database context
 
     // execute transaction callback
     const transactionData = await callback(txClient);
 
     // check if transaction took longer than 5 seconds
-    const transactionTimedOut = performance.now() - startTimer >= 5000;
+    const transactionTimedOut = performance.now() - startTimer >= timeoutMs;
 
     if (transactionTimedOut) {
-      throw apiError.serverIssue(`Transaction request took longer than ${5000} ms rolling back...`);
+      throw apiError.serverIssue(`Transaction request took longer than ${timeoutMs} ms rolling back...`);
     }
+
     return transactionData;
   });
 };
