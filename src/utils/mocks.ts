@@ -35,14 +35,15 @@ const transactionMock = jest
  */
 export const getDBMock = (serviceMethodMocks: DBServices, propOverrides?: DBProps) => {
   return {
+    ...propOverrides,
     getDBClient: getDBClientMock,
     getContext: getContextMock,
     transaction: transactionMock,
     services: {
       UserService: { init: jest.fn().mockReturnValue(serviceMethodMocks.UserService) },
       BulkService: { init: jest.fn().mockReturnValue(serviceMethodMocks.BulkService) },
-      MortalityService: { init: jest.fn().mockReturnValue(serviceMethodMocks.MortalityService) }
-    },
-    ...propOverrides
+      MortalityService: { init: jest.fn().mockReturnValue(serviceMethodMocks.MortalityService) },
+      CaptureService: { init: jest.fn().mockReturnValue(serviceMethodMocks.CaptureService) }
+    }
   };
 };

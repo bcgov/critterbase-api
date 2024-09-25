@@ -17,11 +17,19 @@ export const CaptureRouter = (db: ICbDatabase) => {
   captureRouter.post(
     '/create',
     catchErrors(async (req: Request, res: Response) => {
+      const client = db.getDBClient();
+      const ctx = db.getContext(req);
+
       const parsed = CaptureCreateSchema.parse(req.body);
 
-      const result = await db.captureService.createCapture(parsed);
+      // Create a capture in a transaction
+      const response = await db.transaction(ctx, client, async (txClient) => {
+        const captureService = db.services.CaptureService.init(txClient);
 
-      return res.status(201).json(result);
+        return captureService.createCapture(parsed);
+      });
+
+      return res.status(201).json(response);
     })
   );
 
@@ -31,11 +39,15 @@ export const CaptureRouter = (db: ICbDatabase) => {
   captureRouter.get(
     '/critter/:id',
     catchErrors(async (req: Request, res: Response) => {
+      const client = db.getDBClient();
+
       const parsed = uuidParamsSchema.parse(req.params);
 
-      const result = await db.captureService.findCritterCaptures(parsed.id);
+      const captureService = db.services.CaptureService.init(client);
 
-      res.status(200).json(result);
+      const response = await captureService.findCritterCaptures(parsed.id);
+
+      res.status(200).json(response);
     })
   );
 
@@ -50,36 +62,55 @@ export const CaptureRouter = (db: ICbDatabase) => {
         next();
       })
     )
+
     /**
      * Get capture by id
      */
     .get(
       catchErrors(async (req: Request, res: Response) => {
-        const result = await db.captureService.getCaptureById(req.params.id);
+        const client = db.getDBClient();
 
-        return res.status(200).json(result);
+        const captureService = db.services.CaptureService.init(client);
+
+        const response = await captureService.getCaptureById(req.params.id);
+
+        return res.status(200).json(response);
       })
     )
+
     /**
      * Update capture by id
      */
     .patch(
       catchErrors(async (req: Request, res: Response) => {
+        const client = db.getDBClient();
+        const ctx = db.getContext(req);
+
         const parsed = CaptureUpdateSchema.parse(req.body);
 
-        const result = await db.captureService.updateCapture(req.params.id, parsed);
+        // Update capture in a transaction
+        const response = await db.transaction(ctx, client, async (txClient) => {
+          const captureService = db.services.CaptureService.init(txClient);
 
-        res.status(200).json(result);
+          return captureService.updateCapture(req.params.id, parsed);
+        });
+
+        res.status(200).json(response);
       })
     )
+
     /**
      * Delete capture by id
      */
     .delete(
       catchErrors(async (req: Request, res: Response) => {
-        const result = await db.captureService.deleteCapture(req.params.id);
+        const client = db.getDBClient();
 
-        res.status(200).json(result);
+        const captureService = db.services.CaptureService.init(client);
+
+        const response = await captureService.deleteCapture(req.params.id);
+
+        res.status(200).json(response);
       })
     );
 

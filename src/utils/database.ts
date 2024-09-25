@@ -46,7 +46,7 @@ export const db = {
   xrefService: XrefService.init(client),
   markingService: MarkingService.init(client),
   itisService: new ItisService(),
-  captureService: CaptureService.init(client),
+  //captureService: CaptureService.init(client),
   // OLD
   ...access,
   ...artifact,

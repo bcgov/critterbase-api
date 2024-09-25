@@ -65,6 +65,10 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase, txClient
     qualitative_measurements,
     quantitative_measurements
   } = bulkParams;
+
+  // Initialize services
+  const captureService = db.services.CaptureService.init(txClient);
+
   const counts: Omit<IBulkResCount, 'created' | 'deleted'> = {
     updated: {}
   };
@@ -110,7 +114,7 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase, txClient
     if (!c.capture_id) {
       throw apiError.requiredProperty('capture_id');
     }
-    await db.captureService.updateCapture(c.capture_id, c);
+    await captureService.updateCapture(c.capture_id, c);
   }
   for (let i = 0; i < mortalities.length; i++) {
     const m = mortalities[i];
@@ -174,6 +178,10 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase, txClient
     _deleteParents,
     _deleteChildren
   } = bulkParams;
+
+  // Initialize services
+  const captureService = db.services.CaptureService.init(txClient);
+
   const counts: Omit<IBulkResCount, 'created' | 'updated'> = {
     deleted: {}
   };
@@ -192,7 +200,7 @@ const bulkDeleteData = async (bulkParams: IBulkDelete, db: ICbDatabase, txClient
   }
 
   const captureIds = _deleteCaptures.map((capture) => capture.capture_id);
-  const captureCount = await db.captureService.deleteMultipleCaptures(captureIds);
+  const captureCount = await captureService.deleteMultipleCaptures(captureIds);
   counts.deleted.captures = captureCount.count;
 
   for (let i = 0; i < _deleteMoralities.length; i++) {
