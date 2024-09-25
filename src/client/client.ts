@@ -48,12 +48,15 @@ export const getDBClient = (): DBClient => {
 /**
  * Execute a transaction.
  *
+ * Note: All contents in the callback function will be executed in a transaction.
+ * If at any point an error is thrown (internally or timeout), the transaction will be rolled back.
+ *
  * @async
  * @template T - Transaction return.
  * @param {(txClient: DBTxClient) => Promise<T>} callback - The transaction callback
  * @param {Context} ctx - Request context
- * @param {number} [timeoutMs] - Request timeout cap in milliseconds
- * @throws {apiError.serverIssue} - If transaction takes longer than 5 seconds
+ * @param {number} [timeoutMs] - Request timeout cap in milliseconds (default: 5000 / 5 seconds)
+ * @throws {apiError.serverIssue} - If transaction takes longer than allowed via timeoutMs
  * @returns {Promise<void>}
  */
 export const transaction = async <T>(

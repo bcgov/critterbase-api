@@ -61,9 +61,11 @@ type DBContextConfig = {
 };
 
 /**
- * Get the request context.
+ * Get the request context - injected into the transaction handler for auditing.
  *
  * Note: Context will be defined for all routes that are protected by the auth middleware.
+ *
+ * @see utils/client.ts - transaction()
  *
  * @param {Request} req - Request
  * @returns {Context} Request context
@@ -74,6 +76,11 @@ export const getContext = (req: Request): Context => {
 
 /**
  * Set the database context (used for row-level auditing).
+ * This allows the database to automatically inject the correct values for audit columns for the request.
+ *
+ * Note: This function needs to be called inside a transaction if called manually.
+ *
+ * @see utils/client.ts - transaction()
  *
  * @async
  * @param {DBContextConfig} config - Database context configuration
