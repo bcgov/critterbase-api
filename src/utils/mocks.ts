@@ -18,7 +18,7 @@ export const transactionMock = jest
 
 export const getDBMock = (serviceMethodMocks: Partial<Record<keyof ICbDatabase['services'], unknown>>) => {
   return {
-    getClient: jest.fn().mockReturnValue(mockClient),
+    getDBClient: jest.fn().mockReturnValue(mockClient),
     getContext: getContextMock,
     transaction: transactionMock,
     services: {

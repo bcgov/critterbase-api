@@ -1,10 +1,8 @@
 import { critter, critter_collection_unit, location, marking, mortality } from '@prisma/client';
 import supertest from 'supertest';
 import { makeApp } from '../../app';
-import { PrismaClientExtended } from '../../client/client';
 import { BulkRepository } from '../../repositories/bulk-repository';
 import { BulkService } from '../../services/bulk-service';
-import { prisma } from '../../utils/constants';
 import { apiError } from '../../utils/types';
 import { bulkDeleteData as _bulkDeleteData, bulkUpdateData as _bulkUpdateData, bulkErrMap } from './bulk.service';
 
@@ -182,9 +180,6 @@ const prismaMock = {
   },
   $transaction: (callback: any) => callback(prismaMock)
 };
-jest
-  .spyOn(prisma, '$transaction')
-  .mockImplementation((callback) => callback(prismaMock as unknown as PrismaClientExtended));
 
 describe('API: Bulk', () => {
   describe('SERVICES', () => {

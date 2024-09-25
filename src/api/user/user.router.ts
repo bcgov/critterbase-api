@@ -15,7 +15,7 @@ export const UserRouter = (db: ICbDatabase) => {
   userRouter.post(
     '/create',
     catchErrors(async (req: Request, res: Response) => {
-      const client = db.getClient();
+      const client = db.getDBClient();
       const ctx = db.getContext(req);
 
       const userData = CreateUserSchema.parse(req.body);
@@ -49,7 +49,7 @@ export const UserRouter = (db: ICbDatabase) => {
      */
     .get(
       catchErrors(async (req: Request, res: Response) => {
-        const client = db.getClient();
+        const client = db.getDBClient();
 
         const userService = db.services.UserService.init(client);
 
@@ -64,7 +64,7 @@ export const UserRouter = (db: ICbDatabase) => {
      */
     .patch(
       catchErrors(async (req: Request, res: Response) => {
-        const client = db.getClient();
+        const client = db.getDBClient();
         const context = db.getContext(req);
 
         const userData = UpdateUserSchema.parse(req.body);

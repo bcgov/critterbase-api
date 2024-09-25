@@ -35,7 +35,7 @@ describe('API: User', () => {
         const res = await request.post('/api/users/create').send(NEW_USER);
 
         expect(dbMock.getContext).toHaveBeenCalled();
-        expect(dbMock.getClient).toHaveBeenCalled();
+        expect(dbMock.getDBClient).toHaveBeenCalled();
         expect(dbMock.transaction.mock.calls[0][0]).toBe(mockContext);
         expect(dbMock.transaction.mock.calls[0][1]).toBe(mockClient);
         expect(dbMock.services.UserService.init).toHaveBeenCalledWith(mockClient);
@@ -110,7 +110,7 @@ describe('API: User', () => {
         const res = await request.patch(`/api/users/${ID}`).send({ keycloak_uuid: ID });
 
         expect(dbMock.getContext).toHaveBeenCalled();
-        expect(dbMock.getClient).toHaveBeenCalled();
+        expect(dbMock.getDBClient).toHaveBeenCalled();
         expect(dbMock.transaction.mock.calls[0][0]).toBe(mockContext);
         expect(dbMock.transaction.mock.calls[0][1]).toBe(mockClient);
         expect(dbMock.services.UserService.init).toHaveBeenCalledWith(mockClient);

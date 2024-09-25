@@ -16,24 +16,35 @@ import { UserService } from '../services/user-service';
 import { XrefService } from '../services/xref-service';
 import { getContext } from './context';
 
+const client = getDBClient();
+
 /**
  * Critterbase Data Layer
  *
  */
 export const db = {
-  getClient: getDBClient,
+  getDBClient: getDBClient,
   getContext: getContext,
   transaction: transaction,
+  /**
+   * NOTE: Eventually all services should exist in the `services` object below.
+   * Temporarily, services exist in the `db` object for backwards compatibility.
+   *
+   * ie: db.userService.getUser() -> db.UserService.init(client).getUser();
+   */
   services: {
     UserService,
-    BulkService,
-    CritterService,
-    XrefService,
-    MarkingService,
-    ItisService,
-    CaptureService
+    BulkService
   },
-  // Eventually these old services will be converted into the new format
+  /**
+   * TODO: Move the classes below into the `services` object above.
+   * Also, restructure existing endpoints to use init() method syntax.
+   */
+  critterService: CritterService.init(client),
+  xrefService: XrefService.init(client),
+  markingService: MarkingService.init(client),
+  itisService: new ItisService(),
+  captureService: CaptureService.init(client),
   // OLD
   ...access,
   ...artifact,
