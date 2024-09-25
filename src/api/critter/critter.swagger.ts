@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {
-  BulkCritterCreateSchema,
+  CreateCritterSchema,
   CritterIdsRequestSchema,
   DetailedCritterSchema,
   DetailedManyCritterSchema,
@@ -171,7 +171,7 @@ export const critterPaths = {
       requestBody: {
         content: {
           'application/json': {
-            schema: BulkCritterCreateSchema
+            schema: CreateCritterSchema
           }
         }
       },

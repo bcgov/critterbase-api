@@ -44,13 +44,12 @@ export const GetCritterSchema = CritterSchemaBase.omit({ sex_qualitative_option_
 });
 
 /**
- * Create critter schema used in post requests
- * should only include itis_tsn or itis_scientific_name to prevent
- * tsn and scientific name from becoming out of sync
+ * Create critter schema used in post requests.
+ * Must include at least one of itis_tsn or itis_scientific_name.
  */
 export const CreateCritterSchema = CritterSchemaBase.partial().refine(
-  (schema) => (schema.itis_tsn && !schema.itis_scientific_name) || (!schema.itis_tsn && schema.itis_scientific_name),
-  'must include itis_tsn or itis_scientific_name but not both'
+  (schema) => schema.itis_tsn || schema.itis_scientific_name,
+  'must include at least one of itis_tsn or itis_scientific_name'
 );
 
 export const BulkCritterCreateSchema = CritterSchemaBase.partial().required({
