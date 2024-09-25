@@ -587,6 +587,7 @@ enum measurement_unit {
   milligram
   gram
   kilogram
+  years
 }
 
 enum sex {
