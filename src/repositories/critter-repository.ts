@@ -477,7 +477,7 @@ export class CritterRepository extends Repository {
         where: {
           critter_id: critterId
         },
-        data: { ...critterData },
+        data: critterData,
         select: this._critterProperties
       });
 
@@ -502,7 +502,7 @@ export class CritterRepository extends Repository {
   async createCritter(critterData: CritterCreateRequiredItis): Promise<ICritter> {
     try {
       const result = await this.prisma.critter.create({
-        data: { ...critterData },
+        data: critterData,
         select: this._critterProperties
       });
 
