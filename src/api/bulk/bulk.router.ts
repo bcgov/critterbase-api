@@ -93,6 +93,7 @@ export const BulkRouter = (db: ICbDatabase) => {
   bulkRouter.patch(
     '/',
     catchErrors(async (req: Request, res: Response) => {
+      const ctx = getContext(req);
       const preParsed = BulkShapeSchema.parse(req.body);
 
       const critterUpdates = getBulkUpdates(preParsed.critters);
@@ -178,9 +179,14 @@ export const BulkRouter = (db: ICbDatabase) => {
         _deleteParents: parentDeletes ? z.array(FamilyParentDeleteSchema).parse(parentDeletes) : []
       };
 
-      const updateRes = await db.bulkUpdateData(updateBody, db);
-      const deleteRes = await db.bulkDeleteData(deleteBody, db);
-      return res.status(200).json({ ...updateRes, ...deleteRes });
+      const response = await transaction(ctx, async (txClient) => {
+        const updateRes = await db.bulkUpdateData(updateBody, db, txClient);
+        const deleteRes = await db.bulkDeleteData(deleteBody, db, txClient);
+
+        return { ...updateRes, ...deleteRes };
+      });
+
+      return res.status(200).json(response);
     })
   );
 

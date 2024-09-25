@@ -4,7 +4,6 @@ import { DBTxClient } from '../../client/client';
 import { CaptureDeleteSchema, CaptureUpdate } from '../../schemas/capture-schema';
 import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
 import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
-import { prisma } from '../../utils/constants';
 import { ICbDatabase } from '../../utils/database';
 import { PrismaTransactionClient, apiError } from '../../utils/types';
 import { CollectionUnitDeleteSchema, CollectionUnitUpsertType } from '../collectionUnit/collectionUnit.utils';
@@ -55,7 +54,7 @@ interface IBulkResCount {
   deleted: Partial<Record<keyof IBulkCreate, number>>;
 }
 
-const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
+const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase, txClient: DBTxClient) => {
   const {
     critters,
     collections,
@@ -69,103 +68,98 @@ const bulkUpdateData = async (bulkParams: IBulkMutate, db: ICbDatabase) => {
   const counts: Omit<IBulkResCount, 'created' | 'deleted'> = {
     updated: {}
   };
-  await prisma.$transaction(
-    async (prisma) => {
-      for (let i = 0; i < critters.length; i++) {
-        const c = critters[i];
-        counts.updated.critters = i + 1;
-        await prisma.critter.update({
-          where: { critter_id: c.critter_id },
-          data: c
-        });
-      }
-      for (let i = 0; i < collections.length; i++) {
-        const c = collections[i];
-        counts.updated.collections = i + 1;
-        if (c.critter_collection_unit_id) {
-          await prisma.critter_collection_unit.update({
-            where: { critter_collection_unit_id: c.critter_collection_unit_id },
-            data: c
-          });
-        } else if (c.critter_id !== undefined) {
-          await prisma.critter_collection_unit.create({
-            data: {
-              //XOR typing seems to force me to use the connect syntax here
-              critter: { connect: { critter_id: c.critter_id } },
-              xref_collection_unit: {
-                connect: { collection_unit_id: c.collection_unit_id }
-              }
-            }
-          });
+  for (let i = 0; i < critters.length; i++) {
+    const c = critters[i];
+    counts.updated.critters = i + 1;
+    await txClient.critter.update({
+      where: { critter_id: c.critter_id },
+      data: c
+    });
+  }
+  for (let i = 0; i < collections.length; i++) {
+    const c = collections[i];
+    counts.updated.collections = i + 1;
+    if (c.critter_collection_unit_id) {
+      await txClient.critter_collection_unit.update({
+        where: { critter_collection_unit_id: c.critter_collection_unit_id },
+        data: c
+      });
+    } else if (c.critter_id !== undefined) {
+      await txClient.critter_collection_unit.create({
+        data: {
+          //XOR typing seems to force me to use the connect syntax here
+          critter: { connect: { critter_id: c.critter_id } },
+          xref_collection_unit: {
+            connect: { collection_unit_id: c.collection_unit_id }
+          }
         }
-      }
-      for (let i = 0; i < locations.length; i++) {
-        const l = locations[i];
-        counts.updated.locations = i + 1;
-        await prisma.location.update({
-          where: { location_id: l.location_id as string },
-          data: l
-        });
-      }
-      for (let i = 0; i < captures.length; i++) {
-        const c = captures[i];
-        counts.updated.captures = i + 1;
-        if (!c.capture_id) {
-          throw apiError.requiredProperty('capture_id');
-        }
-        await db.captureService.updateCapture(c.capture_id, c);
-      }
-      for (let i = 0; i < mortalities.length; i++) {
-        const m = mortalities[i];
-        counts.updated.mortalities = i + 1;
-        if (!m.mortality_id) {
-          throw apiError.requiredProperty('mortality_id');
-        }
-        await db.mortalityService.updateMortality(m.mortality_id, m);
-      }
-      for (let i = 0; i < markings.length; i++) {
-        const ma = markings[i];
-        counts.updated.markings = i + 1;
-        if (ma.marking_id) {
-          await prisma.marking.update({
-            where: { marking_id: ma.marking_id },
-            data: ma
-          });
-        } else {
-          await prisma.marking.create({
-            data: ma
-          });
-        }
-      }
-      for (let i = 0; i < qualitative_measurements.length; i++) {
-        const meas = qualitative_measurements[i];
-        counts.updated.qualitative_measurements = i + 1;
-        if (!meas.measurement_qualitative_id) {
-          throw apiError.requiredProperty('measurement_qualitative_id');
-        }
-        await prisma.measurement_qualitative.update({
-          where: {
-            measurement_qualitative_id: meas.measurement_qualitative_id as string
-          },
-          data: meas
-        });
-      }
-      for (let i = 0; i < quantitative_measurements.length; i++) {
-        const meas = quantitative_measurements[i];
-        counts.updated.quantitative_measurements = i + 1;
-        if (!meas.measurement_quantitative_id) {
-          throw apiError.requiredProperty('measurement_qualitative_id');
-        }
-        await prisma.measurement_quantitative.update({
-          where: {
-            measurement_quantitative_id: meas.measurement_quantitative_id as string
-          },
-          data: meas
-        });
-      }
-    },
-    { timeout: 90000 }
-  );
+      });
+    }
+  }
+  for (let i = 0; i < locations.length; i++) {
+    const l = locations[i];
+    counts.updated.locations = i + 1;
+    await txClient.location.update({
+      where: { location_id: l.location_id as string },
+      data: l
+    });
+  }
+  for (let i = 0; i < captures.length; i++) {
+    const c = captures[i];
+    counts.updated.captures = i + 1;
+    if (!c.capture_id) {
+      throw apiError.requiredProperty('capture_id');
+    }
+    await db.captureService.updateCapture(c.capture_id, c);
+  }
+  for (let i = 0; i < mortalities.length; i++) {
+    const m = mortalities[i];
+    counts.updated.mortalities = i + 1;
+    if (!m.mortality_id) {
+      throw apiError.requiredProperty('mortality_id');
+    }
+    await db.mortalityService.updateMortality(m.mortality_id, m);
+  }
+  for (let i = 0; i < markings.length; i++) {
+    const ma = markings[i];
+    counts.updated.markings = i + 1;
+    if (ma.marking_id) {
+      await txClient.marking.update({
+        where: { marking_id: ma.marking_id },
+        data: ma
+      });
+    } else {
+      await txClient.marking.create({
+        data: ma
+      });
+    }
+  }
+  for (let i = 0; i < qualitative_measurements.length; i++) {
+    const meas = qualitative_measurements[i];
+    counts.updated.qualitative_measurements = i + 1;
+    if (!meas.measurement_qualitative_id) {
+      throw apiError.requiredProperty('measurement_qualitative_id');
+    }
+    await txClient.measurement_qualitative.update({
+      where: {
+        measurement_qualitative_id: meas.measurement_qualitative_id as string
+      },
+      data: meas
+    });
+  }
+  for (let i = 0; i < quantitative_measurements.length; i++) {
+    const meas = quantitative_measurements[i];
+    counts.updated.quantitative_measurements = i + 1;
+    if (!meas.measurement_quantitative_id) {
+      throw apiError.requiredProperty('measurement_qualitative_id');
+    }
+    await txClient.measurement_quantitative.update({
+      where: {
+        measurement_quantitative_id: meas.measurement_quantitative_id as string
+      },
+      data: meas
+    });
+  }
   return counts;
 };
 

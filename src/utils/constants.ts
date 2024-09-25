@@ -14,8 +14,6 @@ const KEYCLOAK_URL = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK
 
 const KEYCLOAK_ISSUER = `${process.env.KEYCLOAK_HOST}/realms/${process.env.KEYCLOAK_REALM}`;
 
-const BYPASS_AUTHENTICATION = process.env.AUTHENTICATE === 'false' || IS_TEST;
-
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
@@ -66,7 +64,6 @@ const routes = {
 const defaultFormat = QueryFormats.default;
 
 export {
-  BYPASS_AUTHENTICATION,
   IS_DEV,
   IS_PROD,
   IS_TEST,

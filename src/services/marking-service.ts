@@ -1,7 +1,7 @@
 import { MarkingVerificationType } from '../api/marking/marking.utils';
+import { DBClient, DBTxClient } from '../client/client';
 import { MarkingRepository } from '../repositories/marking-repository';
 import { IDetailedCritterMarking } from '../schemas/critter-schema';
-import { prisma } from '../utils/constants';
 import { Service } from './base-service';
 import { ItisService } from './itis-service';
 
@@ -33,8 +33,8 @@ export class MarkingService implements Service {
    * @static
    * @returns {MarkingService}
    */
-  static init(): MarkingService {
-    return new MarkingService(new MarkingRepository(prisma), new ItisService());
+  static init(client: DBClient | DBTxClient): MarkingService {
+    return new MarkingService(new MarkingRepository(client), new ItisService());
   }
 
   /**

@@ -11,7 +11,7 @@ import { getDBClient } from '../client/client';
 import { TokenService } from '../services/token-service';
 import { UserService } from '../services/user-service';
 import { getAllowList, getAuthToken, getAuthTokenAudience, getAuthUser } from './auth';
-import { BYPASS_AUTHENTICATION, IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
+import { IS_TEST, KEYCLOAK_ISSUER, KEYCLOAK_URL } from './constants';
 import { prismaErrorMsg } from './helper_functions';
 import { apiError } from './types';
 
@@ -168,8 +168,8 @@ const errorHandler = (
  */
 const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction) => {
   try {
-    // 1. If running test suite or authentication is disabled: skip
-    if (BYPASS_AUTHENTICATION) {
+    // 1. If running test suite: skip
+    if (IS_TEST) {
       return next();
     }
 
@@ -188,10 +188,11 @@ const auth = catchErrors(async (req: Request, _res: Response, next: NextFunction
       throw new apiError('Token audience not allowed.');
     }
 
-    const client = getDBClient();
-
-    // Intentionally not using the `transaction` handler here because the context is defined after this point.
-    await client.$transaction(async (txClient) => {
+    /**
+     * Intentionally not using the `transaction` handler here,
+     * as the context is defined after this point.
+     */
+    await getDBClient().$transaction(async (txClient) => {
       // Initialize the user service with the transaction client
       const userService = UserService.init(txClient);
 

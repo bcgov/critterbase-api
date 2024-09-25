@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Context, setDBContext } from '../utils/context';
 import { apiError } from '../utils/types';
-import { captureExtension } from './extensions';
+import { captureExtension, rawQueryExtension } from './extensions';
 
 /**
  * Database client (PrismaClient)
@@ -30,7 +30,7 @@ const globalPrismaClient = global as unknown as { prisma: DBClient };
  *
  * @example const prismaClient = prisma.$extends(extensionA).$extends(extensionB)
  */
-const extendedPrismaClient = new PrismaClient().$extends(captureExtension);
+const extendedPrismaClient = new PrismaClient().$extends(captureExtension).$extends(rawQueryExtension);
 
 /**
  * Get the Prisma client singleton.
@@ -48,8 +48,6 @@ export const getDBClient = (): DBClient => {
 /**
  * Execute a transaction.
  *
- * TODO: Uncomment once used (temp Knip bypass).
- *
  * @async
  * @template T - Transaction return.
  * @param {(txClient: DBTxClient) => Promise<T>} callback - The transaction callback
@@ -57,27 +55,27 @@ export const getDBClient = (): DBClient => {
  * @throws {apiError.serverIssue} - If transaction takes longer than 5 seconds
  * @returns {Promise<void>}
  */
-export const transaction = async <T>(ctx: Context, callback: (txClient: DBTxClient) => Promise<T>): Promise<T> => {
-  const client = getDBClient();
+export const transaction = async <T>(
+  ctx: Context,
+  client: DBClient,
+  callback: (txClient: DBTxClient) => Promise<T>
+): Promise<T> => {
+  return client.$transaction(async (txClient: DBTxClient) => {
+    // start transaction timer
+    const startTimer = performance.now();
 
-  // Override the unassigned typescript warning via: ! (non-null assertion operator)
-  // transactionData will be defined after the transaction callback is executed.
-  let transactionData!: T;
-
-  await client.$transaction(async (txClient: DBTxClient) => {
-    const startTimer = performance.now(); // start transaction timer
-
+    // Set the database context used for auditing
     await setDBContext({ txClient, keycloak_uuid: ctx.keycloak_uuid, system_name: ctx.system_name }); // set database context
-    transactionData = await callback(txClient); // execute transaction callback
 
-    const endTimer = performance.now(); // end transaction timer
+    // execute transaction callback
+    const transactionData = await callback(txClient);
 
-    const transactionsTimedOut = endTimer - startTimer >= 5000; // 5 seconds
+    // check if transaction took longer than 5 seconds
+    const transactionTimedOut = performance.now() - startTimer >= 5000;
 
-    if (transactionsTimedOut) {
+    if (transactionTimedOut) {
       throw apiError.serverIssue(`Transaction request took longer than ${5000} ms rolling back...`);
     }
+    return transactionData;
   });
-
-  return transactionData;
 };

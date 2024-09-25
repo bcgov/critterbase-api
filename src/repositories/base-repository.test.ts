@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { PrismaClientExtended } from '../client/client';
+import { DBClient } from '../client/client';
 import { apiError } from '../utils/types';
 import { Repository } from './base-repository';
 
@@ -9,14 +9,12 @@ describe('base-repository', () => {
 
   describe('constructor', () => {
     it('should set variables to defaults', () => {
-      const repo = new Repository({} as unknown as PrismaClientExtended);
-      expect(repo.transactionTimeoutMilliseconds).toBeDefined();
+      const repo = new Repository({} as unknown as DBClient);
       expect(repo.prisma).toBeDefined();
     });
 
     it('should be able to inject new dependencies', () => {
-      const repo = new Repository('test' as unknown as PrismaClientExtended, 1);
-      expect(repo.transactionTimeoutMilliseconds).toBe(1);
+      const repo = new Repository('test' as unknown as DBClient);
       expect(repo.prisma).toBe('test');
     });
   });
@@ -65,65 +63,6 @@ describe('base-repository', () => {
       const response = await repo.safeQuery(Prisma.sql`select 1 as id;`, schema);
 
       expect(response).toEqual({ id: 1 });
-    });
-  });
-
-  describe('transactionHandler', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-      mockPrismaClient = {
-        $transaction: (callback: any) => callback(jest.fn())
-      };
-    });
-
-    afterEach(() => {
-      jest.clearAllTimers();
-    });
-
-    it('should set prisma client to transaction client and back to original', async () => {
-      const repo = new Repository(mockPrismaClient);
-      const originalPrisma = repo.prisma;
-      await repo.transactionHandler(async () => {
-        jest.advanceTimersByTime(1);
-        expect(repo.prisma).not.toEqual(originalPrisma);
-        return 'test';
-      });
-      expect(repo.prisma).toEqual(originalPrisma);
-    });
-
-    it('should set prisma client to orignal client if transactions fail', async () => {
-      const repo = new Repository(mockPrismaClient);
-      const originalPrisma = repo.prisma;
-      try {
-        await repo.transactionHandler(async () => {
-          jest.advanceTimersByTime(1);
-          throw 'error';
-        });
-        expect(true).toBe(false);
-      } catch (err) {
-        expect(err).toBe('error');
-      }
-      expect(repo.prisma).toEqual(originalPrisma);
-    });
-
-    it('should throw apiError if transactions take longer than allowed', async () => {
-      const mockRepo = new Repository(mockPrismaClient, 1);
-      try {
-        await mockRepo.transactionHandler(async () => {
-          jest.advanceTimersByTime(1);
-        });
-        expect(true).toBe(false);
-      } catch (err) {
-        expect(err).toBeInstanceOf(apiError);
-      }
-    });
-
-    it('should call transactions and return data', async () => {
-      const mockRepo = new Repository(mockPrismaClient, 1);
-      const transactionsMock = jest.fn().mockResolvedValue(true);
-      const res = await mockRepo.transactionHandler(transactionsMock);
-      expect(transactionsMock).toHaveBeenCalled();
-      expect(res).toBe(true);
     });
   });
 
