@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import {
-  CritterCreateSchema,
+  CreateCritterSchema,
   CritterIdsRequestSchema,
-  CritterSchema,
-  CritterUpdateSchema,
   DetailedCritterSchema,
   DetailedManyCritterSchema,
-  SimilarCritterQuerySchema
+  GetCritterSchema,
+  SimilarCritterQuerySchema,
+  UpdateCritterSchema
 } from '../../schemas/critter-schema';
 import { CaptureMortalityGeometrySchema } from '../../schemas/spatial-schema';
 import { routes } from '../../utils/constants';
@@ -17,9 +17,9 @@ import { zodID } from '../../utils/zod_helpers';
 const TAG = 'Critter';
 
 export const critterSchemas = {
-  defaultCritterResponse: CritterSchema,
+  defaultCritterResponse: GetCritterSchema,
   detailedCritterResponse: DetailedCritterSchema,
-  defaultCritterResponseArray: z.array(CritterSchema),
+  defaultCritterResponseArray: z.array(GetCritterSchema),
   detailedManyCritterResponseArray: z.array(DetailedManyCritterSchema),
   defaultCritterGeometryResponse: CaptureMortalityGeometrySchema
 };
@@ -44,7 +44,7 @@ export const critterPaths = {
           description: 'Returned all critters successfully, or all critters matching WLH ID if provided.',
           content: {
             'application/json': {
-              schema: CritterSchema.array()
+              schema: GetCritterSchema.array()
             }
           }
         },
@@ -149,7 +149,7 @@ export const critterPaths = {
           description: 'Returned all critters successfully, or all critters matching WLH ID if provided.',
           content: {
             'application/json': {
-              schema: CritterSchema.array()
+              schema: GetCritterSchema.array()
             }
           }
         },
@@ -171,7 +171,7 @@ export const critterPaths = {
       requestBody: {
         content: {
           'application/json': {
-            schema: CritterCreateSchema
+            schema: CreateCritterSchema
           }
         }
       },
@@ -180,7 +180,7 @@ export const critterPaths = {
           description: SwagDesc.create,
           content: {
             'application/json': {
-              schema: CritterSchema
+              schema: GetCritterSchema
             }
           }
         },
@@ -236,7 +236,7 @@ export const critterPaths = {
       requestBody: {
         content: {
           'application/json': {
-            schema: CritterUpdateSchema
+            schema: UpdateCritterSchema
           }
         }
       },
@@ -245,7 +245,7 @@ export const critterPaths = {
           description: SwagDesc.update,
           content: {
             'application/json': {
-              schema: CritterSchema
+              schema: GetCritterSchema
             }
           }
         },

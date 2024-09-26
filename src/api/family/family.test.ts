@@ -23,7 +23,7 @@ import {
 } from './family.service';
 import { ImmediateFamily, ImmediateFamilyCritter } from './family.utils';
 
-import { critter, family, family_child, family_parent, sex } from '.prisma/client';
+import { critter, family, family_child, family_parent } from '.prisma/client';
 import { randomUUID } from 'crypto';
 
 // Mock Location Objects
@@ -40,10 +40,11 @@ const mockAuditColumns = {
 
 const mockCritter: critter = {
   critter_id: ID,
-  taxon_id: ID,
+  itis_tsn: 1,
+  itis_scientific_name: 'test',
   wlh_id: ID,
   animal_id: ID,
-  sex: sex.Male,
+  sex_qualitative_option_id: null,
   responsible_region_nr_id: ID,
   critter_comment: 'test',
   ...mockAuditColumns

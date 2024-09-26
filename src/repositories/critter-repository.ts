@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import {
   CritterCreateRequiredItis,
-  CritterSchema,
   CritterUpdate,
   DetailedCritterChildSchema,
   DetailedCritterCollectionUnit,
@@ -10,7 +9,9 @@ import {
   DetailedCritterQualitativeMeasurementSchema,
   DetailedCritterQuantitativeMeasurementSchema,
   DetailedManyCritterSchema,
+  GetCritterSchema,
   ICritter,
+  ICritterForView,
   IDetailedCritterChild,
   IDetailedCritterCollectionUnit,
   IDetailedCritterParent,
@@ -40,7 +41,7 @@ export class CritterRepository extends Repository {
     itis_tsn: true,
     itis_scientific_name: true,
     animal_id: true,
-    sex: true,
+    sex_qualitative_option_id: true,
     wlh_id: true,
     responsible_region_nr_id: true,
     critter_comment: true
@@ -76,16 +77,42 @@ export class CritterRepository extends Repository {
    *
    * @async
    * @param {string[]} critter_ids - array of critter ids.
-   * @returns {Promise<ICritter[]>} array of critter objects.
+   * @returns {Promise<ICritterForView[]>} array of critter objects.
    */
-  async getMultipleCrittersByIds(critter_ids: string[]): Promise<ICritter[]> {
-    const result = await this.prisma.critter.findMany({
-      where: { critter_id: { in: critter_ids } },
-      select: this._critterProperties,
-      orderBy: {
-        create_timestamp: 'desc'
-      }
-    });
+  async getMultipleCrittersByIds(critter_ids: string[]): Promise<ICritterForView[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+      WITH w_sex AS (
+        SELECT
+            c.critter_id,
+            CASE 
+                WHEN qmo.qualitative_option_id IS NOT NULL 
+                THEN jsonb_build_object(
+                    'qualitative_option_id', qmo.qualitative_option_id,
+                    'label', qmo.option_label
+                )
+                ELSE NULL
+            END AS sex
+        FROM critter c
+        LEFT JOIN xref_taxon_measurement_qualitative_option qmo
+            ON qmo.qualitative_option_id = c.sex_qualitative_option_id
+      )
+      SELECT
+          c.critter_id,
+          c.itis_tsn,
+          c.itis_scientific_name,
+          c.wlh_id,
+          c.animal_id,
+          s.sex,
+          c.responsible_region_nr_id,
+          c.critter_comment
+      FROM critter c
+      LEFT JOIN w_sex s
+          ON c.critter_id = s.critter_id
+      WHERE c.critter_id = ANY(${critter_ids}::uuid[]);
+    `,
+      z.array(GetCritterSchema)
+    );
 
     return result;
   }
@@ -228,7 +255,23 @@ export class CritterRepository extends Repository {
         ) AS qual ON qual.capture_id = ca.capture_id
         WHERE c.critter_id = ANY(${critter_ids}::uuid[])
         GROUP BY c.critter_id
-    )
+    ),
+    
+    w_sex AS (
+        SELECT
+            c.critter_id,
+            CASE 
+                WHEN qmo.qualitative_option_id IS NOT NULL 
+                THEN jsonb_build_object(
+                    'qualitative_option_id', qmo.qualitative_option_id,
+                    'label', qmo.option_label
+                )
+                ELSE NULL
+            END AS sex
+        FROM critter c
+        LEFT JOIN xref_taxon_measurement_qualitative_option qmo
+            ON qmo.qualitative_option_id = c.sex_qualitative_option_id
+      )
 
     -- Main query combining all CTEs
     SELECT
@@ -237,7 +280,7 @@ export class CritterRepository extends Repository {
         c.itis_scientific_name,
         c.wlh_id,
         c.animal_id,
-        c.sex,
+        s.sex,
         c.responsible_region_nr_id,
         c.critter_comment,
         COALESCE(m.mortality, '[]'::json) AS mortality,
@@ -251,6 +294,8 @@ export class CritterRepository extends Repository {
         collection_units cu ON c.critter_id = cu.critter_id
     LEFT JOIN
         captures ca ON c.critter_id = ca.critter_id
+    LEFT JOIN
+        w_sex s ON s.critter_id = c.critter_id
     WHERE
         c.critter_id = ANY(${critter_ids}::uuid[]);
     `,
@@ -323,22 +368,51 @@ export class CritterRepository extends Repository {
    * @async
    * @param {string} critterId - critter id.
    * @throws {apiError.notFound} - if query returns no critter.
-   * @returns {Promise<ICritter>} critter object.
+   * @returns {Promise<ICritterForView>} critter object.
    */
-  async getCritterById(critterId: string): Promise<ICritter> {
-    const result = await this.prisma.critter.findUnique({
-      where: { critter_id: critterId },
-      select: this._critterProperties
-    });
+  async getCritterById(critterId: string): Promise<ICritterForView> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+      WITH w_sex AS (
+        SELECT
+            c.critter_id,
+            CASE 
+                WHEN qmo.qualitative_option_id IS NOT NULL 
+                THEN jsonb_build_object(
+                    'qualitative_option_id', qmo.qualitative_option_id,
+                    'label', qmo.option_label
+                )
+                ELSE NULL
+            END AS sex
+        FROM critter c
+        LEFT JOIN xref_taxon_measurement_qualitative_option qmo
+            ON qmo.qualitative_option_id = c.sex_qualitative_option_id
+      )
+      SELECT
+          c.critter_id,
+          c.itis_tsn,
+          c.itis_scientific_name,
+          c.wlh_id,
+          c.animal_id,
+          s.sex,
+          c.responsible_region_nr_id,
+          c.critter_comment
+      FROM critter c
+      LEFT JOIN w_sex s
+          ON c.critter_id = s.critter_id
+      WHERE c.critter_id = ${critterId}::uuid;
+    `,
+      z.array(GetCritterSchema)
+    );
 
-    if (!result) {
+    if (!result.length) {
       throw apiError.notFound(`Failed to find specific critter.`, [
         'CritterRepository -> getCritterById',
         'result was undefined'
       ]);
     }
 
-    return result;
+    return result[0];
   }
 
   /**
@@ -348,16 +422,42 @@ export class CritterRepository extends Repository {
    *
    * @async
    * @param {string} wlhId - wildlife health id.
-   * @returns {Promise<ICritter[]>} array of critter objects.
+   * @returns {Promise<ICritterForView[]>} array of critter objects.
    */
-  async getCrittersByWlhId(wlhId: string): Promise<ICritter[]> {
-    const result = await this.prisma.critter.findMany({
-      where: { wlh_id: wlhId },
-      select: this._critterProperties,
-      orderBy: {
-        create_timestamp: 'desc'
-      }
-    });
+  async getCrittersByWlhId(wlhId: string): Promise<ICritterForView[]> {
+    const result = await this.safeQuery(
+      Prisma.sql`
+      WITH w_sex AS (
+        SELECT
+            c.critter_id,
+            CASE 
+                WHEN qmo.qualitative_option_id IS NOT NULL 
+                THEN jsonb_build_object(
+                    'qualitative_option_id', qmo.qualitative_option_id,
+                    'label', qmo.option_label
+                )
+                ELSE NULL
+            END AS sex
+        FROM critter c
+        LEFT JOIN xref_taxon_measurement_qualitative_option qmo
+            ON qmo.qualitative_option_id = c.sex_qualitative_option_id
+      )
+      SELECT
+          c.critter_id,
+          c.itis_tsn,
+          c.itis_scientific_name,
+          c.wlh_id,
+          c.animal_id,
+          s.sex,
+          c.responsible_region_nr_id,
+          c.critter_comment
+      FROM critter c
+      LEFT JOIN w_sex s
+          ON c.critter_id = s.critter_id
+      WHERE c.wlh_id= ${wlhId};
+    `,
+      z.array(GetCritterSchema)
+    );
 
     return result;
   }
@@ -427,18 +527,33 @@ export class CritterRepository extends Repository {
    *
    * @async
    * @param {SimilarCritterQuery} query - critter query.
-   * @returns {Promise<ICritter[]>} critters.
+   * @returns {Promise<ICritterForView[]>} critters.
    */
-  async findSimilarCritters(query: SimilarCritterQuery): Promise<ICritter[]> {
+  async findSimilarCritters(query: SimilarCritterQuery): Promise<ICritterForView[]> {
     const result = await this.safeQuery(
       Prisma.sql`
+        WITH w_sex AS (
+          SELECT
+              c.critter_id,
+              CASE 
+                  WHEN qmo.qualitative_option_id IS NOT NULL 
+                  THEN jsonb_build_object(
+                      'qualitative_option_id', qmo.qualitative_option_id,
+                      'label', qmo.option_label
+                  )
+                  ELSE NULL
+              END AS sex
+          FROM critter c
+          LEFT JOIN xref_taxon_measurement_qualitative_option qmo
+              ON qmo.qualitative_option_id = c.sex_qualitative_option_id
+        )
         SELECT
           c.critter_id,
           c.itis_tsn,
           c.itis_scientific_name,
           c.wlh_id,
           c.animal_id,
-          c.sex,
+          s.sex,
           c.responsible_region_nr_id,
           c.critter_comment
         FROM critter c
@@ -450,6 +565,8 @@ export class CritterRepository extends Repository {
           ON x.taxon_marking_body_location_id = m.taxon_marking_body_location_id
         JOIN lk_marking_type t
           ON t.marking_type_id = m.marking_type_id
+        LEFT JOIN
+          w_sex s ON s.critter_id = c.critter_id
         WHERE
           c.wlh_id = ${query.critter?.wlh_id}
         OR
@@ -462,7 +579,7 @@ export class CritterRepository extends Repository {
         OR
           (t.name ILIKE ANY(${query.markings?.map((marking) => marking.marking_type)})
           AND m.identifier ILIKE ANY(${query.markings?.map((marking) => marking.identifier)}));`,
-      z.array(CritterSchema)
+      z.array(GetCritterSchema)
     );
 
     return result;

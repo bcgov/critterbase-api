@@ -3,7 +3,7 @@ import { CritterRepository } from '../repositories/critter-repository';
 import {
   CritterCreateOptionalItis,
   CritterUpdate,
-  ICritter,
+  ICritterForView,
   IDetailedCritter,
   IDetailedManyCritter,
   SimilarCritterQuery
@@ -87,12 +87,12 @@ export class CritterService implements Service {
    *
    * @async
    * @param {string[]} critterIds - array of critter ids.
-   * @returns {Promise<ICritter[] | IDetailedManyCritter[]>} default or detailed critter objects.
+   * @returns {Promise<ICritterForView[] | IDetailedManyCritter[]>} default or detailed critter objects.
    */
   async getMultipleCrittersByIds(
     critterIds: string[],
     format = defaultFormat
-  ): Promise<ICritter[] | IDetailedManyCritter[]> {
+  ): Promise<ICritterForView[] | IDetailedManyCritter[]> {
     if (format === QueryFormats.detailed) {
       return this.repository.getMultipleCrittersByIdsDetailed(critterIds);
     }
@@ -159,9 +159,9 @@ export class CritterService implements Service {
    * @async
    * @param {string} critterId - critter id.
    * @param {QueryFormats} format - additional response format (supports detailed).
-   * @returns {Promise<ICritter | IDetailedCritter>} default or detailed critter object.
+   * @returns {Promise<ICritterForView | IDetailedCritter>} default or detailed critter object.
    */
-  async getCritterById(critterId: string, format = defaultFormat): Promise<ICritter | IDetailedCritter> {
+  async getCritterById(critterId: string, format = defaultFormat): Promise<ICritterForView | IDetailedCritter> {
     if (format === QueryFormats.detailed) {
       return this.getCritterByIdDetailed(critterId);
     }

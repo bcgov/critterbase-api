@@ -44,11 +44,10 @@ export const seedCritters = async () => {
       critter_id: STATIC_UUIDS.CRITTER_A,
       wlh_id: '123-45',
       animal_id: 'Carl',
-      sex: 'Male',
+      sex_qualitative_option_id: null,
       critter_comment: 'Carl the critter.',
       itis_tsn: ITIS_TSN.CARIBOU,
-      itis_scientific_name: 'Alces alces',
-      responsible_region_nr_id: caribouNrRegion[0].region_nr_id
+      itis_scientific_name: 'Alces alces'
     }
   });
 

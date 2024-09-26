@@ -72,30 +72,33 @@ model capture {
 }
 
 model critter {
-  critter_id                     String                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
-  wlh_id                         String?
-  animal_id                      String?
-  sex                            sex
-  responsible_region_nr_id       String?                    @default(dbgenerated("get_nr_region_id('Unknown'::text)")) @db.Uuid
-  create_user                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  update_user                    String                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
-  create_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
-  update_timestamp               DateTime                   @default(now()) @db.Timestamptz(6)
-  critter_comment                String?
-  itis_scientific_name           String
-  itis_tsn                       Int
-  artifact                       artifact[]
-  capture                        capture[]
-  lk_region_nr                   lk_region_nr?              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
-  user_critter_create_userTouser user                       @relation("critter_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_create_user")
-  user_critter_update_userTouser user                       @relation("critter_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_update_user")
-  critter_collection_unit        critter_collection_unit[]
-  family_child                   family_child[]
-  family_parent                  family_parent[]
-  marking                        marking[]
-  measurement_qualitative        measurement_qualitative[]
-  measurement_quantitative       measurement_quantitative[]
-  mortality                      mortality[]
+  critter_id                                String                                     @id(map: "critter_real_pk") @default(dbgenerated("crypto.gen_random_uuid()")) @db.Uuid
+  wlh_id                                    String?
+  animal_id                                 String?
+  responsible_region_nr_id                  String?                                    @default(dbgenerated("get_nr_region_id('Unknown'::text)")) @db.Uuid
+  create_user                               String                                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  update_user                               String                                     @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
+  create_timestamp                          DateTime                                   @default(now()) @db.Timestamptz(6)
+  update_timestamp                          DateTime                                   @default(now()) @db.Timestamptz(6)
+  critter_comment                           String?
+  itis_scientific_name                      String
+  itis_tsn                                  Int
+  sex_qualitative_option_id                 String?                                    @db.Uuid
+  artifact                                  artifact[]
+  capture                                   capture[]
+  lk_region_nr                              lk_region_nr?                              @relation(fields: [responsible_region_nr_id], references: [region_nr_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_nrr_fk")
+  xref_taxon_measurement_qualitative_option xref_taxon_measurement_qualitative_option? @relation(fields: [sex_qualitative_option_id], references: [qualitative_option_id], onDelete: NoAction, onUpdate: NoAction, map: "critter_sex_fkey")
+  user_critter_create_userTouser            user                                       @relation("critter_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_create_user")
+  user_critter_update_userTouser            user                                       @relation("critter_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_critter_update_user")
+  critter_collection_unit                   critter_collection_unit[]
+  family_child                              family_child[]
+  family_parent                             family_parent[]
+  marking                                   marking[]
+  measurement_qualitative                   measurement_qualitative[]
+  measurement_quantitative                  measurement_quantitative[]
+  mortality                                 mortality[]
+
+  @@index([sex_qualitative_option_id], map: "critter_idx1")
 }
 
 model critter_collection_unit {
@@ -527,6 +530,7 @@ model xref_taxon_measurement_qualitative_option {
   update_user                                                      String                             @default(dbgenerated("getuserid('SYSTEM'::text)")) @db.Uuid
   create_timestamp                                                 DateTime                           @default(now()) @db.Timestamptz(6)
   update_timestamp                                                 DateTime                           @default(now()) @db.Timestamptz(6)
+  critter                                                          critter[]
   measurement_qualitative                                          measurement_qualitative[]
   user_xref_taxon_measurement_qualitative_option_create_userTouser user                               @relation("xref_taxon_measurement_qualitative_option_create_userTouser", fields: [create_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_option_create_user")
   user_xref_taxon_measurement_qualitative_option_update_userTouser user                               @relation("xref_taxon_measurement_qualitative_option_update_userTouser", fields: [update_user], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_xref_taxon_measurement_qualitative_option_update_user")

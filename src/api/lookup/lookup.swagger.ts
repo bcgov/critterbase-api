@@ -1,4 +1,4 @@
-import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit, sex } from '@prisma/client';
+import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit } from '@prisma/client';
 import { z } from 'zod';
 import { ZodOpenApiOperationObject } from 'zod-openapi';
 import { eCritterStatus } from '../../schemas/critter-schema';
@@ -25,28 +25,6 @@ const lookupCommon = {
   },
   tags: [TAG]
 };
-const enumSex: ZodOpenApiOperationObject = {
-  operationId: 'enumSex',
-  requestParams: {
-    query: z.object({ format: z.enum(['asSelect']).optional() })
-  },
-  tags: [TAG],
-  responses: {
-    '200': {
-      description: availValues,
-      content: {
-        'application/json': {
-          schema: z
-            .string()
-            .array()
-            .openapi({ example: Object.keys(sex) })
-        }
-      }
-    },
-    ...SwagUnauthorized
-  }
-};
-
 const enumCritterStatus: ZodOpenApiOperationObject = {
   operationId: 'enumCritterStatus',
   tags: [TAG],
@@ -337,9 +315,6 @@ export const lookupSchemas = {
 };
 
 export const enumPaths = {
-  [`${routes.lookups}/enum/sex`]: {
-    get: enumSex
-  },
   [`${routes.lookups}/enum/critter-status`]: {
     get: enumCritterStatus
   },

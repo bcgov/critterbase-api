@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { sex } from '.prisma/client';
 import { cod_confidence, coordinate_uncertainty_unit, frequency_unit, measurement_unit } from '@prisma/client';
 import express, { Request, Response } from 'express';
 import { eCritterStatus } from '../../schemas/critter-schema';
@@ -22,15 +21,6 @@ import {
 export const LookupRouter = (_db: ICbDatabase) => {
   const lookupRouter = express.Router();
   const order = 'asc';
-
-  /**
-   * Critter sex
-   * @example 'Male' or 'Female'
-   */
-  lookupRouter.get(
-    '/enum/sex',
-    catchErrors(async (_req: Request, res: Response) => res.status(200).json(Object.keys(sex)))
-  );
 
   /**
    * Critter life status

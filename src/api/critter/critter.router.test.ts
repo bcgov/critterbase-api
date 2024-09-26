@@ -50,7 +50,7 @@ describe('Critter Router', () => {
     describe('POST critter/create/ - create a critter', () => {
       it('should respond with status 201 and return response', async () => {
         mockCritterService.createCritter.mockResolvedValueOnce(true);
-        const payload = { sex: 'Male', itis_tsn: 1 };
+        const payload = { sex_qualitative_option_id: null, itis_tsn: 1 };
         const res = await request.post('/api/critters/create').send(payload);
 
         expect(mockCritterService.createCritter.mock.calls[0][0]).toStrictEqual(payload);

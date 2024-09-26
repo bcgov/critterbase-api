@@ -76,6 +76,11 @@ export const seedTaxonQualitativeMeasurements = async () => {
       itis_tsn: ITIS_TSN.ANIMALIA,
       options: ["False", "True"],
     },
+    {
+      name: "Sex",
+      itis_tsn: ITIS_TSN.ANIMALIA,
+      options: ["Male", "Female"],
+    },
   ];
 
   console.log(

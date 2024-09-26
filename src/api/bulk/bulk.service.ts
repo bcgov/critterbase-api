@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { DBTxClient } from '../../client/client';
 import { CaptureDeleteSchema, CaptureUpdate } from '../../schemas/capture-schema';
-import { BulkCritterUpdateSchema } from '../../schemas/critter-schema';
+import { BulkUpdateCritterSchema } from '../../schemas/critter-schema';
 import { MortalityDeleteSchema, MortalityUpdate } from '../../schemas/mortality-schema';
 import { ICbDatabase } from '../../utils/database';
 import { PrismaTransactionClient, apiError } from '../../utils/types';
@@ -26,7 +26,7 @@ interface IBulkCreate {
 }
 
 interface IBulkMutate {
-  critters: BulkCritterUpdateSchema[];
+  critters: BulkUpdateCritterSchema[];
   collections: CollectionUnitUpsertType[];
   markings: z.infer<typeof MarkingUpdateByIdSchema>[];
   locations: Prisma.locationUpdateInput[];
