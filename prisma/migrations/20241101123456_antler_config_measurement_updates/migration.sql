@@ -80,13 +80,7 @@ FROM (
 ) AS o (option_label, option_desc, option_value)
 JOIN rangiferMeasurementIDs r ON r.measurement_name = 'antler configuration';
 
-
-
-
-
-
 -- Insert new qualitative measurement for 'antler configuration - Oswald 1997 standards' for Alces (itis_tsn: 180702)
-
 WITH oswaldMeasurementIDs AS (
     INSERT INTO "xref_taxon_measurement_qualitative" (itis_tsn, measurement_name)
     VALUES
@@ -140,6 +134,9 @@ FROM (
         ('Prime Bulls', 'Mature bulls with well-developed, complex antlers, indicating peak age and fitness.', 2)
 ) AS v (option_label, option_desc, option_value)
 JOIN maleCompositionIDs m ON m.measurement_name = 'antler configuration - male composition';
+
+
+-- Hunting and Trapping classification standards for Alces
 
 WITH maleCompositionIDs AS (
     INSERT INTO "xref_taxon_measurement_qualitative" (itis_tsn, measurement_name)
