@@ -61,18 +61,3 @@ VALUES
     (179985, 'wing span', 0, 10000, 'centimeter', 'The distance from the tip of one wing to the tip of the other when fully extended.'),
     (180704, 'horn length', 0, 10000, 'centimeter', 'The measurement from the base of the horn to the tip.'), 
     (180693, 'antler spread', 0, 10000, 'centimeter', 'The measured widest point of the antlers.');
-
-INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_desc, option_value )
-SELECT m.taxon_measurement_id, o.option_label, o.option_desc, o.option_value
-FROM (
-    SELECT * FROM (
-        VALUES
-        (180702, 'Antler Configuration', 'Spike fork', 'Antlers with no branching.', 0), 
-        (180702, 'Antler Configuration', 'Subprime', 'Small, undeveloped antlers not meeting trophy standards.', 1), 
-        (180702, 'Antler Configuration', 'Prime', 'Large, fully developed antlers.', 2), 
-        (180702, 'Antler Configuration', 'Raghorn', 'Small, irregular, or incomplete antlers.', 3), 
-        (180702, 'Antler Configuration', 'Less than or equal to 3', 'Less than or equal to 3.', 4), 
-        (180702, 'Antler Configuration', 'Greater than 3', 'Greater than or equal to 4.', 5)
-
-) AS o
-JOIN MeasurementIDs m ON o.itis_tsn = m.itis_tsn AND o.measurement_name = m.measurement_name;
