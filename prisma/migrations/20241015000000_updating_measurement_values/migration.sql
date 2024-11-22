@@ -14,6 +14,10 @@ BEGIN
     END IF;
 END $$;
 
+CREATE TYPE critterbase.measurement_unit AS ENUM (
+    'kHz'
+);
+
 
 ----------------------------------------------------------------------------------------
 -- New markings type "Pit Tags"
@@ -60,4 +64,5 @@ VALUES
     (174371, 'wing span', 0, 10000, 'centimeter', 'The distance from the tip of one wing to the tip of the other when fully extended.'),
     (179985, 'wing span', 0, 10000, 'centimeter', 'The distance from the tip of one wing to the tip of the other when fully extended.'),
     (180704, 'horn length', 0, 10000, 'centimeter', 'The measurement from the base of the horn to the tip.'), 
+    (179985, 'call frequency',0,1000, 'kHz', 'The frequency of a call'),
     (180693, 'antler spread', 0, 10000, 'centimeter', 'The measured widest point of the antlers.');
