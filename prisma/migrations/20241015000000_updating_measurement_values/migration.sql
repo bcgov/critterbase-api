@@ -14,10 +14,19 @@ BEGIN
     END IF;
 END $$;
 
-CREATE TYPE critterbase.measurement_unit AS ENUM (
-    'kHz'
-);
 
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_type t 
+        JOIN pg_enum e ON t.oid = e.enumtypid
+        JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+        WHERE t.typname = 'measurement_unit' AND e.enumlabel = 'kHz' AND n.nspname = 'critterbase'
+    ) THEN
+        ALTER TYPE critterbase.measurement_unit ADD VALUE 'kHz';
+    END IF;
+END $$;
 
 ----------------------------------------------------------------------------------------
 -- New markings type "Pit Tags"
