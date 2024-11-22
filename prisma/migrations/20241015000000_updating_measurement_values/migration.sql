@@ -27,6 +27,7 @@ BEGIN
         ALTER TYPE critterbase.measurement_unit ADD VALUE 'kHz';
     END IF;
 END $$;
+COMMIT;
 
 ----------------------------------------------------------------------------------------
 -- New markings type "Pit Tags"
