@@ -3,8 +3,10 @@
 ----------------------------------------------------------------------------------------
 INSERT INTO xref_taxon_measurement_quantitative (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
 VALUES
-    (161061, 'caudal fin–snout length', 0, 10000, 'centimeter', 'The distance between the tip of the snout and the base of the caudal fin.'),
-    (161039, 'operculum growth rings count', 0, 1000, NULL, 'The number of growth rings in the operculum.');
+    (202422, 'Circumference at breast height (CBH)', 0, 100000, 'centimeter', 'The circumference of a tree measured at 1.3 meters (4.5 feet) above the ground.'),
+    (202422, 'Height to live crown', 0, 1000, 'meter', 'The height to effective portion of the live crown for growth.'),
+    (202422, 'Height', 0, 1000, 'meter', 'The measured or estimated height.'), 
+    (202422, 'Percent Cover', 0, 100, 'percent', 'The measured or estimated height.');
 
 
 ----------------------------------------------------------------------------------------
