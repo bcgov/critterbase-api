@@ -47,22 +47,9 @@ SET itis_tsn = 179913
 WHERE body_location = 'Left Ear' OR body_location = 'Right Ear';
 
 INSERT INTO xref_taxon_marking_body_location (body_location, description, itis_tsn)
-VALUES ('Peritoneal cavity', 'The abdominal space containing organs, lined by the peritoneum membrane.', 161061),
-('Dorsal fin', 'Fin located on the dorsal, or back, side of aquatic animals.', 161061), 
-('Dorsal lymph sac', 'A fluid-filled structure located subcutaneously on the dorsal or back side of an animal.', 173423), 
-('Flank', 'The side of an animals body between the ribs and hips.', 179913), 
-('Ventral torso', 'The lower, stomach region of an animals body, on the underside.', 179913), 
-('Dorsal torso', 'The upper, back region of an animals body, along the spine.', 179913), 
-('Tail base', 'The area where the tail meets the body.', 179913),
-('Tail base', 'The area where the tail meets the body.', 948936),
-('Tail Proximate', 'Near the tail.', 174118),
-('Head Proximate', 'Near the head.', 174118),
-('Middle body', 'The mid portion of the serpent body.', 174118),
-('Head', 'The region between the snout and the neck, just before the widening of the body.', 174118),
-('Scales', 'Overlapping, protective plates made of keratin.', 174118),
-('Tail', 'The region of the body spanning between the cloaca and the tail tip.', 174118), 
-('Ventral torso', 'The lower, stomach region of a birds body, on the underside.', 174371), 
-('Dorsal torso', 'The upper, back region of a birds body, along the spine.', 174371);
+VALUES ('Torso', 'The central region of the animal between the head and limbs, or fins.', 202423),
+('Fin', 'Fin located on the dorsal, or pectoral, side of aquatic animals.', 161061), 
+('Tail', 'The tail of the animal.', 202423);
 
 ---------------------------------------------------------------------------------------
 -- Adding quantitative measurements
@@ -76,3 +63,18 @@ VALUES
     (180704, 'horn length', 0, 10000, 'centimeter', 'The measurement from the base of the horn to the tip.'), 
     (179985, 'call frequency',0,1000, 'kHz', 'The frequency of a call'),
     (180693, 'antler spread', 0, 10000, 'centimeter', 'The measured widest point of the antlers.');
+
+ ---------------------------------------------------------------------------------------
+-- Adding unclassified to life stage and sex 
+----------------------------------------------------------------------------------------   
+INSERT INTO xref_taxon_measurement_qualitative_option (taxon_measurement_id, option_label, option_desc, option_value)
+SELECT 
+    xq.taxon_measurement_id, 
+    'Unclassified' AS option_label, 
+    'The measurement is unclassified' AS option_desc, 
+    COALESCE(MAX(xqo.option_value),0)+1
+FROM xref_taxon_measurement_qualitative xq
+LEFT JOIN xref_taxon_measurement_qualitative_option xqo
+ON xq.taxon_measurement_id = xqo.taxon_measurement_id
+WHERE xq.measurement_name IN ('life stage', 'sex')
+GROUP BY xq.taxon_measurement_id;
