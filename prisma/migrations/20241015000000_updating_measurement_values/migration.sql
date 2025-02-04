@@ -76,5 +76,5 @@ SELECT
 FROM xref_taxon_measurement_qualitative xq
 LEFT JOIN xref_taxon_measurement_qualitative_option xqo
 ON xq.taxon_measurement_id = xqo.taxon_measurement_id
-WHERE xq.measurement_name IN ('life stage', 'sex')
+WHERE LOWER(xq.measurement_name) = ANY (ARRAY['life stage', 'sex'])
 GROUP BY xq.taxon_measurement_id;
