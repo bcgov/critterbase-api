@@ -1,6 +1,26 @@
--- Delete existing quantitative measurements for 'antler point count'
-DELETE FROM "xref_taxon_measurement_quantitative"
+-- Insert new column for the 3 tables
+ALTER TABLE xref_taxon_measurement_qualitative_option ADD COLUMN valid_till Date;
+ALTER TABLE xref_taxon_measurement_qualitative ADD COLUMN valid_till Date;
+ALTER TABLE xref_taxon_measurement_quantitative ADD COLUMN valid_till Date;
+
+-- Deprecate values we longer use
+
+UPDATE "xref_taxon_measurement_qualitative_option"
+SET valid_till = CURRENT_DATE
+WHERE taxon_measurement_id IN (
+    SELECT taxon_measurement_id
+    FROM "xref_taxon_measurement_qualitative"
+    WHERE measurement_name = 'antler configuration'
+);
+
+UPDATE "xref_taxon_measurement_qualitative"
+SET valid_till = CURRENT_DATE
+WHERE measurement_name = 'antler configuration';
+
+UPDATE "xref_taxon_measurement_quantitative"
+SET valid_till = CURRENT_DATE
 WHERE measurement_name = 'antler point count';
+
 
 -- Insert new quantitative measurements related to antler points
 INSERT INTO "xref_taxon_measurement_quantitative" (itis_tsn, measurement_name, min_value, max_value, unit, measurement_desc)
@@ -9,15 +29,9 @@ VALUES
     (180692, 'antler point count - left', 0, 10000, NULL, 'Number of antler points on the left side, used to assess asymmetry and overall antler development'),
     (180692, 'antler point count - right', 0, 10000, NULL, 'Number of antler points on the right side, used to assess asymmetry and overall antler development');
 
--- Delete existing qualitative options for antler configuration
-DELETE FROM "xref_taxon_measurement_qualitative_option"
-WHERE taxon_measurement_id IN (
-    SELECT taxon_measurement_id
-    FROM "xref_taxon_measurement_qualitative"
-    WHERE measurement_name = 'antler configuration'
-);
-DELETE FROM "xref_taxon_measurement_qualitative"
-WHERE measurement_name = 'antler configuration';
+
+
+
 
 -- Insert new qualitative measurement for 'antler configuration' for Cervus (itis_tsn: 180694)
 
@@ -47,8 +61,6 @@ WITH odocoileusMeasurementIDs AS (
         (180697, 'antler configuration')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
-
--- Insert qualitative options for the new 'antler configuration' measurement
 INSERT INTO "xref_taxon_measurement_qualitative_option" (taxon_measurement_id, option_label, option_desc, option_value)
 SELECT n.taxon_measurement_id, o.option_label, o.option_desc, o.option_value
 FROM (
@@ -67,8 +79,6 @@ WITH rangiferMeasurementIDs AS (
         (180700, 'antler configuration')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
-
--- Insert qualitative options for the new 'antler configuration' measurement
 INSERT INTO "xref_taxon_measurement_qualitative_option" (taxon_measurement_id, option_label, option_desc, option_value)
 SELECT r.taxon_measurement_id, o.option_label, o.option_desc, o.option_value
 FROM (
@@ -87,7 +97,6 @@ WITH oswaldMeasurementIDs AS (
         (180702, 'antler configuration - Oswald 1997 standards')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
--- Insert qualitative options for the new 'antler configuration - Oswald 1997 standards' measurement
 INSERT INTO "xref_taxon_measurement_qualitative_option" (taxon_measurement_id, option_label, option_desc, option_value)
 SELECT o.taxon_measurement_id, v.option_label, v.option_desc, v.option_value
 FROM (
@@ -117,14 +126,15 @@ FROM (
 ) AS v (option_label, option_desc, option_value)
 JOIN riscMeasurementIDs r ON r.measurement_name = 'antler configuration - RISC standards';
 
+
 -- Insert new qualitative measurement for 'antler configuration - male composition' for Alces (itis_tsn: 180702)
+
 WITH maleCompositionIDs AS (
     INSERT INTO "xref_taxon_measurement_qualitative" (itis_tsn, measurement_name)
     VALUES
         (180702, 'antler configuration - male composition')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
--- Insert qualitative options for the new 'antler configuration - male composition' measurement
 INSERT INTO "xref_taxon_measurement_qualitative_option" (taxon_measurement_id, option_label, option_desc, option_value)
 SELECT m.taxon_measurement_id, v.option_label, v.option_desc, v.option_value
 FROM (
@@ -144,7 +154,6 @@ WITH maleCompositionIDs AS (
         (180702, 'Hunting & trapping classifications')
     RETURNING itis_tsn, taxon_measurement_id, measurement_name
 )
--- Insert qualitative options for the new 'antler configuration - male composition' measurement
 INSERT INTO "xref_taxon_measurement_qualitative_option" (taxon_measurement_id, option_label, option_desc, option_value)
 SELECT m.taxon_measurement_id, v.option_label, v.option_desc, v.option_value
 FROM (
