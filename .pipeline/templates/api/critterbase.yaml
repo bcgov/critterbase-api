@@ -1,0 +1,202 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: critterbase
+  labels:
+    app: critterbase
+parameters:
+  # Openshift namespace config
+  - name: NAMESPACE_PREFIX
+    description: Openshift namespace prefix
+    value: d9ccb0
+  - name: NAMESPACE_ENVIRONMENT
+    description: Openshift namespace environment suffix ie. 'dev', 'test', 'prod' or 'tools'
+    value: ''
+  - name: APP_NAME
+    value: critterbase
+  - name: TEMPLATE_TAG
+    description: Tag to group template objects together
+    value: temp
+  - name: BASE_IMAGE_REGISTRY_URL
+    description: The base image registry URL
+    value: image-registry.openshift-image-registry.svc:5000
+  # Openshift resources
+  - name: CPU_REQUEST
+    value: 100m
+  - name: CPU_LIMIT
+    value: 350m
+  - name: MEMORY_REQUEST
+    value: 250Mi
+  - name: MEMORY_LIMIT
+    value: 1Gi
+  - name: REPLICAS
+    value: '1'
+  # Database
+  - name: DATABASE_PORT
+    value: '5432'
+  # Secret keys
+  - name: DATABASE_URL_KEY
+    value: critterbase-db-prisma-url
+  # Pod config
+  - name: NODE_ENV
+    value: production
+  - name: API_PORT
+    value: '8080'
+  # Pod config: Keycloak
+  - name: KEYCLOAK_HOST
+    value: https://loginproxy.gov.bc.ca/auth
+  - name: KEYCLOAK_REALM
+    value: standard
+  - name: ALLOWED_AUD
+    description: Space delimited list of allowed JWT token audiences that can access Critterbase API.
+    value: sims-svc-4464 bctw-service-4987
+  # Pod config: Itis Web Service
+  - name: ITIS_WEB_SERVICE
+    value: http://www.itis.gov/ITISWebService/jsonservice/ITISService
+  - name: ITIS_SOLR_SERVICE
+    value: https://services.itis.gov
+objects:
+    # API Service
+    - kind: Service
+      apiVersion: v1
+      metadata:
+        name: ${APP_NAME}-api-service
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-api-service
+          tag: ${TEMPLATE_TAG}
+      spec:
+        ports:
+          - name: ${APP_NAME}-api-service
+            protocol: TCP
+            port: ${{API_PORT}}
+            targetPort: ${{API_PORT}}
+        selector:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-api
+        sessionAffinity: None
+        type: ClusterIP
+
+    # Database Service
+    - kind: Service
+      apiVersion: v1
+      metadata:
+        name: ${APP_NAME}-db-service
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-db-service
+          tag: ${TEMPLATE_TAG}
+      spec:
+        ports:
+          - name: ${APP_NAME}-db-service
+            protocol: TCP
+            port: ${{DATABASE_PORT}}
+            targetPort: ${{DATABASE_PORT}}
+        selector:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-db
+        ipFamilyPolicy: SingleStack
+        sessionAffinity: None
+        type: ClusterIP
+
+    # API Route
+    - kind: Route
+      apiVersion: route.openshift.io/v1
+      metadata:
+        annotations:
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-api-route
+          tag: ${TEMPLATE_TAG}
+        name: ${APP_NAME}-api-route
+      spec:
+        host: moe-critterbase-api-${NAMESPACE_ENVIRONMENT}.apps.silver.devops.gov.bc.ca
+        path: /api/
+        to:
+          kind: Service
+          name: ${APP_NAME}-api-service
+          weight: 100
+        port:
+          targetPort: ${APP_NAME}-api-service
+        tls:
+          insecureEdgeTerminationPolicy: Redirect
+          termination: edge
+        wildcardPolicy: None
+      status:
+        ingress: null
+
+    # API Deployment
+    - kind: Deployment
+      apiVersion: apps/v1
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftWebConsole
+        generation: 0
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-api
+          tag: ${TEMPLATE_TAG}
+        name: ${APP_NAME}-api
+      spec:
+        replicas: ${{REPLICAS}}
+        revisionHistoryLimit: 2
+        selector:
+          matchLabels:
+            name: ${APP_NAME}-api
+        strategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+        template:
+          metadata:
+            annotations: null
+            labels:
+              app: ${APP_NAME}
+              name: ${APP_NAME}-api
+              tag: ${TEMPLATE_TAG}
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    cpu: ${CPU_LIMIT}
+                    memory: ${MEMORY_LIMIT}
+                  requests:
+                    cpu: ${CPU_REQUEST}
+                    memory: ${MEMORY_REQUEST}
+                terminationMessagePath: /dev/termination-log
+                name: ${APP_NAME}-api
+                env:
+                  - name: NODE_ENV
+                    value: ${NODE_ENV}
+                  - name: API_PORT
+                    value: ${API_PORT}
+                  - name: DATABASE_URL
+                    valueFrom:
+                      secretKeyRef:
+                        name: ${DATABASE_URL_KEY}
+                        key: url
+                  - name: KEYCLOAK_HOST
+                    value: ${KEYCLOAK_HOST}
+                  - name: KEYCLOAK_REALM
+                    value: ${KEYCLOAK_REALM}
+                  - name: ALLOWED_AUD
+                    value: ${ALLOWED_AUD}
+                  - name: ITIS_WEB_SERVICE
+                    value: ${ITIS_WEB_SERVICE}
+                  - name: ITIS_SOLR_SERVICE
+                    value: ${ITIS_SOLR_SERVICE}
+                ports:
+                  - containerPort: ${{API_PORT}}
+                    protocol: TCP
+                imagePullPolicy: IfNotPresent
+                terminationMessagePolicy: File
+                envFrom:
+                  - secretRef:
+                      name: object-store-service
+                image: ${BASE_IMAGE_REGISTRY_URL}/${NAMESPACE_PREFIX}-tools/${APP_NAME}-api:${NAMESPACE_ENVIRONMENT}
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30
+            dnsPolicy: ClusterFirst
+            securityContext: {}
+            schedulerName: default-scheduler
