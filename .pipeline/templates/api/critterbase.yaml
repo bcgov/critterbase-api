@@ -56,11 +56,12 @@ parameters:
   - name: ITIS_SOLR_SERVICE
     value: https://services.itis.gov
 objects:
-    # API Service
+    # API Service <NAMESPACE_ENVIRONMENT>
     - kind: Service
       apiVersion: v1
       metadata:
         name: ${APP_NAME}-api-service
+        namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
         labels:
           app: ${APP_NAME}
           name: ${APP_NAME}-api-service
@@ -77,11 +78,12 @@ objects:
         sessionAffinity: None
         type: ClusterIP
 
-    # Database Service
+    # Database Service <NAMESPACE_ENVIRONMENT>
     - kind: Service
       apiVersion: v1
       metadata:
         name: ${APP_NAME}-db-service
+        namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
         labels:
           app: ${APP_NAME}
           name: ${APP_NAME}-db-service
@@ -99,16 +101,17 @@ objects:
         sessionAffinity: None
         type: ClusterIP
 
-    # API Route
+    # API Route <NAMESPACE_ENVIRONMENT>
     - kind: Route
       apiVersion: route.openshift.io/v1
       metadata:
+        name: ${APP_NAME}-api-route
+        namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
         annotations:
         labels:
           app: ${APP_NAME}
           name: ${APP_NAME}-api-route
           tag: ${TEMPLATE_TAG}
-        name: ${APP_NAME}-api-route
       spec:
         host: moe-critterbase-api-${NAMESPACE_ENVIRONMENT}.apps.silver.devops.gov.bc.ca
         path: /api/
@@ -125,10 +128,12 @@ objects:
       status:
         ingress: null
 
-    # API Deployment
+    # API Deployment <NAMESPACE_ENVIRONMENT>
     - kind: Deployment
       apiVersion: apps/v1
       metadata:
+        name: ${APP_NAME}-api
+        namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
         annotations:
           openshift.io/generated-by: OpenShiftWebConsole
         generation: 0
@@ -136,7 +141,6 @@ objects:
           app: ${APP_NAME}
           name: ${APP_NAME}-api
           tag: ${TEMPLATE_TAG}
-        name: ${APP_NAME}-api
       spec:
         replicas: ${{REPLICAS}}
         revisionHistoryLimit: 2
