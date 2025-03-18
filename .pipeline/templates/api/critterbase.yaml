@@ -20,29 +20,78 @@ parameters:
   - name: BASE_IMAGE_REGISTRY_URL
     description: The base image registry URL
     value: image-registry.openshift-image-registry.svc:5000
-  # Openshift resources
-  - name: CPU_REQUEST
+
+  # General config
+  - name: CRITTERBASE_GITHUB_URL
+    value: https://github.com/bcgov/critterbase-api.git
+
+  # API container resources
+  - name: API_CPU_REQUEST
     value: 100m
-  - name: CPU_LIMIT
+  - name: API_CPU_LIMIT
     value: 350m
-  - name: MEMORY_REQUEST
+  - name: API_MEMORY_REQUEST
     value: 250Mi
-  - name: MEMORY_LIMIT
+  - name: API_MEMORY_LIMIT
     value: 1Gi
-  - name: REPLICAS
+  - name: API_REPLICAS
     value: '1'
-  # Database
+
+  # API build resources
+  - name: API_BUILD_CPU_REQUEST
+    value: 50m
+  - name: API_BUILD_CPU_LIMIT
+    value: 1000m
+  - name: API_BUILD_MEMORY_REQUEST
+    value: 100Mi
+  - name: API_BUILD_MEMORY_LIMIT
+    value: 4Gi
+
+  # DB container resources
+  - name: DB_CPU_REQUEST
+    value: 50m
+  - name: DB_CPU_LIMIT
+    value: 250Mi
+  - name: DB_MEMORY_REQUEST
+    value: 50Mi
+  - name: DB_MEMORY_LIMIT
+    value: 500Mi
+  - name: DB_REPLICAS
+    value: '1'
+
+  # Secrets and keys
+  - name: CRITTERBASE_GITHUB_WEBHOOK_SECRET
+    value: critterbase-api-build-webhook
+  - name: DATABASE_CONNECTION_SECRET
+    description: The name of the secret that stores the full connection string
+    value: critterbase-db-prisma-url
+  - name: DATABASE_CONNECTION_KEY
+    description: The name of the key that holds the connection string
+    value: url
+  - name: DATABASE_CREDENTIALS_SECRET
+    description: The name of the key that stores the database credentials
+    value: postgresql
+  - name: DATABASE_PASSWORD_KEY
+    description: The name of the key that stores the database password
+    value: database-password
+  - name: DATABASE_USER_KEY
+    description: The name of the key that stores the database user
+    value: database-user
+  - name: DATABASE_NAME_KEY
+    description: The name of the key that stores the database name
+    value: database-name
+
+  # Database config
   - name: DATABASE_PORT
     value: '5432'
-  # Secret keys
-  - name: DATABASE_URL_KEY
-    value: critterbase-db-prisma-url
-  # Pod config
+
+  # API config
   - name: NODE_ENV
     value: production
   - name: API_PORT
     value: '8080'
-  # Pod config: Keycloak
+
+  # API config: Keycloak
   - name: KEYCLOAK_HOST
     value: https://loginproxy.gov.bc.ca/auth
   - name: KEYCLOAK_REALM
@@ -50,11 +99,13 @@ parameters:
   - name: ALLOWED_AUD
     description: Space delimited list of allowed JWT token audiences that can access Critterbase API.
     value: sims-svc-4464 bctw-service-4987
-  # Pod config: Itis Web Service
+
+  # API config: Itis Web Service
   - name: ITIS_WEB_SERVICE
     value: http://www.itis.gov/ITISWebService/jsonservice/ITISService
   - name: ITIS_SOLR_SERVICE
     value: https://services.itis.gov
+
 objects:
     # API Service <NAMESPACE_ENVIRONMENT>
     - kind: Service
@@ -142,8 +193,8 @@ objects:
           name: ${APP_NAME}-api
           tag: ${TEMPLATE_TAG}
       spec:
-        replicas: ${{REPLICAS}}
-        revisionHistoryLimit: 2
+        replicas: ${{API_REPLICAS}}
+        revisionHistoryLimit: 1
         selector:
           matchLabels:
             name: ${APP_NAME}-api
@@ -163,11 +214,11 @@ objects:
             containers:
               - resources:
                   limits:
-                    cpu: ${CPU_LIMIT}
-                    memory: ${MEMORY_LIMIT}
+                    cpu: ${API_CPU_LIMIT}
+                    memory: ${API_MEMORY_LIMIT}
                   requests:
-                    cpu: ${CPU_REQUEST}
-                    memory: ${MEMORY_REQUEST}
+                    cpu: ${API_CPU_REQUEST}
+                    memory: ${API_MEMORY_REQUEST}
                 terminationMessagePath: /dev/termination-log
                 name: ${APP_NAME}-api
                 env:
@@ -178,8 +229,8 @@ objects:
                   - name: DATABASE_URL
                     valueFrom:
                       secretKeyRef:
-                        name: ${DATABASE_URL_KEY}
-                        key: url
+                        name: ${DATABASE_CONNECTION_SECRET}
+                        key: ${DATABASE_CONNECTION_KEY}
                   - name: KEYCLOAK_HOST
                     value: ${KEYCLOAK_HOST}
                   - name: KEYCLOAK_REALM
@@ -204,3 +255,175 @@ objects:
             dnsPolicy: ClusterFirst
             securityContext: {}
             schedulerName: default-scheduler
+
+    # API Image Stream <TOOLS>
+    - kind: ImageStream
+      apiVersion: image.openshift.io/v1
+      metadata:
+        name: ${APP_NAME}-api-build
+        namespace: ${NAMESPACE_PREFIX}-tools
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-api-build
+          tag: ${TEMPLATE_TAG}
+      spec:
+        lookupPolicy:
+          local: false
+        tags:
+          - name: prod
+          - name: prod-backup
+          - name: test
+          - name: dev
+
+    # API Build Config <TOOLS>
+    - kind: BuildConfig
+      apiVersion: build.openshift.io/v1
+      metadata:
+        name: ${APP_NAME}-api-build
+        namespace: ${NAMESPACE_PREFIX}-tools
+        annotations:
+          openshift.io/generated-by: OpenShiftWebConsole
+        generation: 0
+        labels:
+          app: ${APP_NAME}
+          name: ${APP_NAME}-api-build
+          tag: ${TEMPLATE_TAG}
+      spec:
+        nodeSelector: null
+        output:
+          to:
+            kind: ImageStreamTag
+            name: ${APP_NAME}-api-build:${NAMESPACE_ENVIRONMENT}
+        resources:
+          limits:
+            cpu: ${API_BUILD_CPU_LIMIT}
+            memory: ${API_BUILD_MEMORY_LIMIT}
+          requests:
+            cpu: ${API_BUILD_CPU_REQUEST}
+            memory: ${API_BUILD_MEMORY_REQUEST}
+        successfulBuildsHistoryLimit: 1
+        failedBuildsHistoryLimit: 1
+        strategy:
+          sourceStrategy:
+            from:
+              kind: ImageStreamTag
+              name: 'nodejs-18:latest'
+        postCommit: {}
+        source:
+          type: Git
+          git:
+            uri: ${CRITTERBASE_GITHUB_URL}
+            ref: main
+          contextDir: /
+        triggers:
+          - type: ImageChange
+            imageChange:
+              lastTriggeredImageID: ${BASE_IMAGE_REGISTRY_URL}/${NAMESPACE_PREFIX}-tools/nodejs-18:latest
+          # Note: Currently this only triggers a build on initial build creation, this will be changed in the future
+          # to re-build on ALL config changes
+          - type: ConfigChange
+          - type: GitHub
+            github:
+              secretReference:
+                name: ${CRITTERBASE_GITHUB_WEBHOOK_SECRET}
+        runPolicy: Serial
+
+    # Database PVC
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: ${APP_NAME}-db
+        namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Mi
+        storageClassName: netapp-block-standard
+        volumeMode: Filesystem
+
+    # # Database Deployment <NAMESPACE_ENVIRONMENT>
+    # - kind: Deployment
+    #   apiVersion: apps/v1
+    #   metadata:
+    #     name: ${APP_NAME}-db
+    #     namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
+    #     annotations:
+    #       openshift.io/generated-by: OpenShiftWebConsole
+    #     generation: 0
+    #     labels:
+    #       app: ${APP_NAME}
+    #       name: ${APP_NAME}-db
+    #       tag: ${TEMPLATE_TAG}
+    #   spec:
+    #   strategy:
+    #     type: Rolling
+    #     rollingParams:
+    #       updatePeriodSeconds: 1
+    #       intervalSeconds: 1
+    #       timeoutSeconds: 600
+    #       maxUnavailable: 25%
+    #       maxSurge: 25%
+    #     resources: {}
+    #     activeDeadlineSeconds: 21600
+    #   replicas: ${{DB_REPLICAS}}
+    #   revisionHistoryLimit: 1
+    #   test: false
+    #   selector:
+    #     app: ${APP_NAME}
+    #     name: ${APP_NAME}-db
+    #   template:
+    #     metadata:
+    #       creationTimestamp: null
+    #       labels:
+    #         app: ${APP_NAME}
+    #         name: ${APP_NAME}-db
+    #         tag: ${TEMPLATE_TAG}
+    #     spec:
+    #       volumes:
+    #         - name: ${APP_NAME}-db
+    #           persistentVolumeClaim:
+    #             claimName: ${APP_NAME}-db
+    #       containers:
+    #         - resources:
+    #             limits:
+    #               cpu: ${DB_CPU_LIMIT}
+    #               memory: ${DB_MEMORY_LIMIT}
+    #             requests:
+    #               cpu: ${DB_CPU_REQUEST}
+    #               memory: ${DB_MEMORY_LIMIT}
+    #           terminationMessagePath: /dev/termination-log
+    #           name: ${APP_NAME}-db
+    #           env:
+    #             - name: POSTGRES_PASSWORD
+    #               valueFrom:
+    #                 secretKeyRef:
+    #                   name: ${DATABASE_CREDENTIALS_SECRET}
+    #                   key: ${DATABASE_PASSWORD_KEY}
+    #             - name: POSTGRES_USER
+    #               valueFrom:
+    #                 secretKeyRef:
+    #                   name: ${DATABASE_CREDENTIALS_SECRET}
+    #                   key: ${DATABASE_USER_KEY}
+    #             - name: POSTGRES_DATABASE
+    #               valueFrom:
+    #                 secretKeyRef:
+    #                   name: ${DATABASE_CREDENTIALS_SECRET}
+    #                   key: ${DATABASE_NAME_KEY}
+    #             - name: PGDATA
+    #               value: /var/lib/pgsql/data/pgdata
+    #           ports:
+    #             - containerPort: ${{DATABASE_PORT}}
+    #               protocol: TCP
+    #           imagePullPolicy: Always
+    #           volumeMounts:
+    #             - name: ${APP_NAME}-db
+    #               mountPath: /var/lib/pgsql/data
+    #           terminationMessagePolicy: File
+    #           image: ${BASE_IMAGE_REGISTRY_URL}/${NAMESPACE_PREFIX}-tools/postgres-postgis:latest
+    #       restartPolicy: Always
+    #       terminationGracePeriodSeconds: 30
+    #       dnsPolicy: ClusterFirst
+    #       securityContext: {}
+    #       schedulerName: default-scheduler
