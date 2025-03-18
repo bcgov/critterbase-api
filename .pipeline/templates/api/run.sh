@@ -10,7 +10,7 @@ if [[ "$1" != "dev" && "$1" != "test" && "$1" != "prod" ]]; then
 fi
 
 if [[ -z "$2" ]]; then
-  echo "Invalid template tag. Please provide a valid tag or PR number."
+  echo "Invalid template tag. Please provide a valid tag or identifier (PR number)."
   exit 1
 fi
 
