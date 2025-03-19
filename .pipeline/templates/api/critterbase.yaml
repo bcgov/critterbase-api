@@ -97,12 +97,12 @@ parameters:
 
   # API config: Keycloak
   - name: KEYCLOAK_HOST
-    value: https://loginproxy.gov.bc.ca/auth
+    value: '' # Value needs to be injected into the template ie: -p
   - name: KEYCLOAK_REALM
     value: standard
   - name: ALLOWED_AUD
     description: Space delimited list of allowed JWT token audiences that can access Critterbase API.
-    value: sims-svc-4464 bctw-service-4987
+    value: 'sims-4461 sims-svc-4464'
 
   # API config: Itis Web Service
   - name: ITIS_WEB_SERVICE
