@@ -58,6 +58,8 @@ parameters:
     value: 500Mi
   - name: DB_REPLICAS
     value: '1'
+  - name: DB_PVC_SIZE
+    value: '' #  Value needs to be injected into the template ie: -p
 
   # Secrets and keys
   - name: CRITTERBASE_GITHUB_WEBHOOK_SECRET
@@ -198,7 +200,7 @@ objects:
           tag: ${TEMPLATE_TAG}
       spec:
         replicas: ${{API_REPLICAS}}
-        revisionHistoryLimit: 1
+        revisionHistoryLimit: 5
         selector:
           matchLabels:
             name: ${APP_NAME}-api
@@ -223,6 +225,28 @@ objects:
                   requests:
                     cpu: ${API_CPU_REQUEST}
                     memory: ${API_MEMORY_REQUEST}
+                readinessProbe:
+                  httpGet:
+                    path: /api
+                    port: ${{API_PORT}}
+                    scheme: HTTP
+                  # API needs to be ready in 120 seconds
+                  # Delay 30s + (3 failures X 30s) = 120 seconds
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 1
+                  successThreshold: 1
+                  failureThreshold: 3
+                # Check API alive every 60 seconds
+                livenessProbe:
+                  httpGet:
+                    path: /api
+                    port: ${{API_PORT}}
+                    scheme: HTTP
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 1
+                  failureThreshold: 1
                 terminationMessagePath: /dev/termination-log
                 name: ${APP_NAME}-api
                 env:
@@ -275,17 +299,13 @@ objects:
           tag: ${TEMPLATE_TAG}
       spec:
         strategy:
-          type: RollingUpdate
-          rollingParams:
-            updatePeriodSeconds: 1
-            intervalSeconds: 1
-            timeoutSeconds: 600
-            maxUnavailable: 25%
-            maxSurge: 25%
+          type: Recreate
+          maxSurge: 50%
+          maxUnavailable: 0
           resources: {}
           activeDeadlineSeconds: 21600
         replicas: ${{DB_REPLICAS}}
-        revisionHistoryLimit: 1
+        revisionHistoryLimit: 5
         test: false
         selector:
           matchLabels:
@@ -361,7 +381,7 @@ objects:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 500Mi
+            storage: ${DB_PVC_SIZE}
         storageClassName: netapp-block-standard
         volumeMode: Filesystem
 
@@ -489,6 +509,31 @@ objects:
           - name: prod-backup
           - name: test
           - name: dev
+
+    # NodeJS 18 Image Stream <TOOLS>
+    - kind: ImageStream
+      apiVersion: image.openshift.io/v1
+      metadata:
+        name: nodejs-18
+        namespace: ${NAMESPACE_PREFIX}-tools
+        labels:
+          app: ${APP_NAME}
+          name: nodejs-18
+          tag: ${TEMPLATE_TAG}
+      spec:
+        lookupPolicy:
+          local: false
+        tags:
+          - name: latest
+            annotations: null
+            from:
+              kind: DockerImage
+              name: registry.redhat.io/rhel8/nodejs-18
+            generation: 2
+            importPolicy:
+              importMode: Legacy
+            referencePolicy:
+              type: Local
 
     # Postgres PostGis Image Stream <TOOLS>
     - kind: ImageStream

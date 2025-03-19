@@ -40,7 +40,8 @@ if [[ "$1" == "dev" ]]; then
   oc process -f critterbase.yaml \
     -p TEMPLATE_TAG=$TEMPLATE_TAG \
     -p NAMESPACE_ENVIRONMENT=$NAMESPACE_ENVIRONMENT \
-    -p KEYCLOAK_HOST=https://dev.loginproxy.gov.bc.ca \
+    -p KEYCLOAK_HOST=https://dev.loginproxy.gov.bc.ca/auth \
+    -p DB_PVC_SIZE='500Mi' \
     | oc apply -f -
   exit 0
 fi
@@ -49,7 +50,8 @@ if [[ "$1" == "test" ]]; then
   oc process -f critterbase.yaml \
     -p TEMPLATE_TAG=$TEMPLATE_TAG \
     -p NAMESPACE_ENVIRONMENT=$NAMESPACE_ENVIRONMENT \
-    -p KEYCLOAK_HOST=https://test.loginproxy.gov.bc.ca \
+    -p KEYCLOAK_HOST=https://test.loginproxy.gov.bc.ca/auth \
+    -p DB_PVC_SIZE='500Mi' \
     | oc apply -f -
   exit 0
 fi
@@ -58,7 +60,8 @@ if [[ "$1" == "prod" ]]; then
   oc process -f critterbase.yaml \
     -p TEMPLATE_TAG=$TEMPLATE_TAG \
     -p NAMESPACE_ENVIRONMENT=$NAMESPACE_ENVIRONMENT \
-    -p KEYCLOAK_HOST=https://loginproxy.gov.bc.ca \
+    -p KEYCLOAK_HOST=https://loginproxy.gov.bc.ca/auth \
+    -p DB_PVC_SIZE='5Gi' \
     | oc apply -f -
   exit 0
 fi
