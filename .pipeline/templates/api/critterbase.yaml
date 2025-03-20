@@ -225,28 +225,35 @@ objects:
                   requests:
                     cpu: ${API_CPU_REQUEST}
                     memory: ${API_MEMORY_REQUEST}
+                # Check the API pod is ready to startup every 10 seconds (max 10 times)
+                startupProbe:
+                  httpGet:
+                    path: /api
+                    port: ${{API_PORT}}
+                    scheme: HTTP
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 10
+                # Check the API pod is ready every 30 seconds
                 readinessProbe:
                   httpGet:
                     path: /api
                     port: ${{API_PORT}}
                     scheme: HTTP
-                  # API needs to be ready in 120 seconds
-                  # Delay 30s + (3 failures X 30s) = 120 seconds
-                  initialDelaySeconds: 30
                   periodSeconds: 30
-                  timeoutSeconds: 1
+                  timeoutSeconds: 5
                   successThreshold: 1
                   failureThreshold: 3
-                # Check API alive every 60 seconds
+                # Check API pod is alive every 30 seconds
                 livenessProbe:
                   httpGet:
                     path: /api
                     port: ${{API_PORT}}
                     scheme: HTTP
-                  initialDelaySeconds: 30
                   periodSeconds: 30
-                  timeoutSeconds: 1
-                  failureThreshold: 1
+                  timeoutSeconds: 5
+                  successThreshold: 1
+                  failureThreshold: 3
                 terminationMessagePath: /dev/termination-log
                 name: ${APP_NAME}-api
                 env:
@@ -419,17 +426,6 @@ objects:
           type: Git
           git:
             uri: ${CRITTERBASE_GITHUB_URL}
-          secrets:
-            - secret:
-                name: etc-pki-entitlement
-              destinationDir: etc-pki-entitlement
-          configMaps:
-            - configMap:
-                name: rhsm-conf
-              destinationDir: rhsm-conf
-            - configMap:
-                name: rhsm-ca
-              destinationDir: rhsm-ca
         triggers:
           - type: ConfigChange
           - type: GitHub
