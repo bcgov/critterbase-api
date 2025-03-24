@@ -4,7 +4,7 @@
 ################################################################################
 
 # FROM postgres:15-bullseye AS postgres
-FROM --platform=linux/amd64 quay.io/fedora/postgresql-15
+FROM quay.io/fedora/postgresql-15
 
 # Default to 5432 if PGPORT not defined
 ENV PGPORT=5432
