@@ -426,7 +426,7 @@ objects:
           type: Git
           git:
             uri: ${CRITTERBASE_GITHUB_URL}
-            ref: mdOpenshiftDeployment #main REPLACE ME ONCE BUILD COMPLETES
+            ref: main
           contextDir: /
         triggers:
           - type: ConfigChange
