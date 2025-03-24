@@ -89,4 +89,4 @@ parameters:
     displayName: FROM Image Tag
     description: Base image to build from.  Docker creds or Artificatory setup may be needed to alleviate docker rate-limiting
     required: true
-    value: quay.io/fedora/postgresql-16
+    value: image-registry.openshift-image-registry.svc:5000/d9ccb0-tools/postgres-postgis:latest
