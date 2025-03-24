@@ -43,6 +43,7 @@ if [[ "$1" == "dev" ]]; then
     -p KEYCLOAK_HOST=https://dev.loginproxy.gov.bc.ca/auth \
     -p DB_PVC_SIZE='500Mi' \
     | oc apply -f -
+
   exit 0
 fi
 
@@ -53,6 +54,7 @@ if [[ "$1" == "test" ]]; then
     -p KEYCLOAK_HOST=https://test.loginproxy.gov.bc.ca/auth \
     -p DB_PVC_SIZE='500Mi' \
     | oc apply -f -
+
   exit 0
 fi
 
@@ -63,6 +65,13 @@ if [[ "$1" == "prod" ]]; then
     -p KEYCLOAK_HOST=https://loginproxy.gov.bc.ca/auth \
     -p DB_PVC_SIZE='5Gi' \
     | oc apply -f -
+
+  # Create the backup build objects
+  oc process -f backup/backup-build.yaml | oc apply -f -
+
+  # Create the backup deployment objects
+  oc process -f backup/backup-deploy.yaml | oc apply -f -
+
   exit 0
 fi
 
