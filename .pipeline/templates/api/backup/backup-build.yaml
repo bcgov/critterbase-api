@@ -9,6 +9,9 @@ objects:
     metadata:
       name: ${NAME}
       namespace: ${NAMESPACE_NAME}
+      labels:
+        app: ${APP_NAME}
+        name: ${NAME}
 
   - kind: BuildConfig
     apiVersion: v1
@@ -16,7 +19,8 @@ objects:
       name: ${NAME}
       namespace: ${NAMESPACE_NAME}
       labels:
-        app: ${NAME}
+        app: ${APP_NAME}
+        name: ${NAME}
     spec:
       triggers:
         - type: ImageChange
@@ -46,6 +50,11 @@ parameters:
     description: The name assigned to all of the resources.  Use 'backup-{database name}' depending on your database provider
     required: true
     value: backup-critterbase-db
+  - name: APP_NAME
+    displayName: Application Name
+    description: The application name assigned to all resources.
+    required: true
+    value: critterbase
   - name: NAMESPACE_NAME
     displayName: Namespace Name
     description: The name of the namespace being deployed to..

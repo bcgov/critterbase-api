@@ -143,6 +143,26 @@ objects:
                     secretKeyRef:
                       name: ${DATABASE_DEPLOYMENT_NAME}
                       key: ${DATABASE_PASSWORD_KEY_NAME}
+                - name: S3_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${S3_CREDENTIALS_SECRET}
+                      key: ${S3_USER}
+                - name: S3_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${S3_CREDENTIALS_SECRET}
+                      key: ${S3_PASSWORD}
+                - name: S3_BUCKET
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${S3_CREDENTIALS_SECRET}
+                      key: ${S3_BUCKET}
+                - name: S3_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${S3_CREDENTIALS_SECRET}
+                      key: ${S3_ENDPOINT}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -173,7 +193,7 @@ parameters:
     displayName: App Name
     description: Used to group resources together.  Defaults to backup-container
     required: true
-    value: backup-container
+    value: critterbase
   - name: ROLE
     displayName: ROLE
     description: The role assigned to all of the resources.  Defaults to backup-container
@@ -338,3 +358,14 @@ parameters:
     description: The resources Memory limit (in Mi, Gi, etc) for this build.
     required: true
     value: 0Mi
+    # S3 Credentials
+  - name: S3_CREDENTIALS_SECRET
+    value: object-store-service
+  - name: S3_USER
+    value: OBJECT_STORE_ACCESS_KEY_ID
+  - name: S3_PASSWORD
+    value: OBJECT_STORE_SECRET_KEY_ID
+  - name: S3_BUCKET
+    value: OBJECT_STORE_BACKUP_BUCKET
+  - name: S3_ENDPOINT
+    value: OBJECT_STORE_URL
