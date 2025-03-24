@@ -360,12 +360,27 @@ parameters:
     value: 0Mi
     # S3 Credentials
   - name: S3_CREDENTIALS_SECRET
+    displayName: The S3 Secret Name
+    description: S3 Object Store Credential Secret Name
+    required: true
     value: object-store-service
   - name: S3_USER
+    displayName: The S3 User
+    description: S3 Object Store User Secret Key
+    required: true
     value: OBJECT_STORE_ACCESS_KEY_ID
   - name: S3_PASSWORD
+    displayName: The S3 Password
+    description: S3 Object Store Password Secret Key
+    required: true
     value: OBJECT_STORE_SECRET_KEY_ID
   - name: S3_BUCKET
+    displayName: The S3 Backup Bucket
+    description: S3 Object Store Backup Bucket Secret Key
+    required: true
     value: OBJECT_STORE_BACKUP_BUCKET
   - name: S3_ENDPOINT
+    displayName: The S3 Endpoint
+    description: S3 Object Store Endpoint Secret Key
+    required: true
     value: OBJECT_STORE_URL
