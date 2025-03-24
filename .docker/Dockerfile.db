@@ -20,8 +20,8 @@ RUN apt-get install -y --no-install-recommends postgresql-15-postgis-3-scripts
 # Install Curl
 RUN apt-get install curl -y
 
-# Install dnf
-RUN apt-get install dnf -y
+# Install yum
+RUN apt-get install yum -y
 
 # Set the time zone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
