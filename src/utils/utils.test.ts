@@ -1,5 +1,4 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { randomUUID } from 'crypto';
 import { Request } from 'express';
 import { ZodError, ZodIssueCode } from 'zod';
 import { formatParse, getFormat, intersect, prisMock, prismaErrorMsg, toSelect } from './helper_functions';
@@ -184,11 +183,9 @@ describe('Utils', () => {
       });
       it('should parse headers if not test and auth enabled', () => {
         process.env.NODE_ENV = 'development';
-        process.env.API_KEY = ID;
         mockReq.headers = {
           'user-id': ID,
-          'keycloak-uuid': ID,
-          'api-key': ID
+          'keycloak-uuid': ID
         };
         jest.resetModules();
         jest.mock('../api/access/access.service', () => ({
@@ -202,11 +199,9 @@ describe('Utils', () => {
       });
       it('should return 401 if the api key is not valid', () => {
         process.env.NODE_ENV = 'development';
-        process.env.API_KEY = ID;
         mockReq.headers = {
           'user-id': ID,
-          'keycloak-uuid': ID,
-          'api-key': randomUUID()
+          'keycloak-uuid': ID
         };
         jest.resetModules();
         jest.mock('../api/access/access.service', () => ({
