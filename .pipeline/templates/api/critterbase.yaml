@@ -432,7 +432,6 @@ objects:
               secretReference:
                 name: ${CRITTERBASE_GITHUB_WEBHOOK_SECRET}
 
-
     # API Build Config <TOOLS>
     - kind: BuildConfig
       apiVersion: build.openshift.io/v1
