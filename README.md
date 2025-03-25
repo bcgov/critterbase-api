@@ -9,9 +9,10 @@ Critterbase is a shared component of BiodiversityHubBC that manages information 
 1. [Tech Stack](#tech-stack)
 2. [API Endpoints](#api-endpoints)
 3. [Environment Variables](#environment-variables)
-4. [Run Locally](#run-locally)
+4. [Running Locally](#running-locally)
 5. [Running Tests](#running-tests)
-6. [Authors](#authors)
+6. [Running Pipeline](#running-critterbase-pipeline)
+7. [Authors](#authors)
 
 ## Tech Stack
 
@@ -86,6 +87,19 @@ To run tests, run the following command
 ```bash
   npm run test
 ```
+
+## Running Critterbase Pipeline
+
+Template: `./.pipeline/templates/api/critterbase.yaml`
+Script: `./.pipeline/templates/api/pipeline.sh`
+
+To update Openshift templates and resources run:
+
+```bash
+./.pipeline/templates/api/pipeline.sh <dev|test|prod>
+```
+
+Note: This will take the templates from `./.pipeline/templates/api/critterbase.yaml` and update the targeted namespace environment
 
 ## Authors
 

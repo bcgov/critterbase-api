@@ -20,7 +20,6 @@ declare global {
     interface ProcessEnv {
       PORT?: string;
       NODE_ENV: 'development' | 'test' | 'production';
-      API_KEY: string;
       DB_URL: string;
       AUTHENTICATE: string;
       ITIS_WEB_SERVICE: string;
