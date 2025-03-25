@@ -592,6 +592,8 @@ enum measurement_unit {
   gram
   kilogram
   years
+  celsius
+  kHz
 }
 
 enum sex {
