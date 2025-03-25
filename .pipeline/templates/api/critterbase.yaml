@@ -279,7 +279,7 @@ objects:
                 ports:
                   - containerPort: ${{API_PORT}}
                     protocol: TCP
-                imagePullPolicy: IfNotPresent
+                imagePullPolicy: Always
                 terminationMessagePolicy: File
                 envFrom:
                   - secretRef:
