@@ -6,5 +6,5 @@
 -- the enum.
 
 
-ALTER TYPE "measurement_unit" ADD VALUE 'celsius';
-ALTER TYPE "measurement_unit" ADD VALUE 'kHz';
+ALTER TYPE "measurement_unit" ADD VALUE IF NOT EXISTS 'celsius';
+ALTER TYPE "measurement_unit" ADD VALUE IF NOT EXISTS 'kHz';
