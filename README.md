@@ -12,7 +12,8 @@ Critterbase is a shared component of BiodiversityHubBC that manages information 
 4. [Running Locally](#running-locally)
 5. [Running Tests](#running-tests)
 6. [Running Pipeline](#running-critterbase-pipeline)
-7. [Authors](#authors)
+7. [Promoting Environments](#promoting-environments)
+8. [Authors](#authors)
 
 ## Tech Stack
 
@@ -100,6 +101,13 @@ To update Openshift templates and resources run:
 ```
 
 Note: This will take the templates from `./.pipeline/templates/api/critterbase.yaml` and update the targeted namespace environment
+
+## Promoting Environments
+
+The environment promotion tools exist in Openshift as a Pipeline in d9ccb0-tools.
+To promote an environment, run one of the tools from the URL below: `promote-test` or `promote-prod`
+
+[Promote Critterbase Application](https://console.apps.silver.devops.gov.bc.ca/pipelines/ns/d9ccb0-tools)
 
 ## Authors
 

@@ -193,6 +193,20 @@ objects:
         namespace: ${NAMESPACE_PREFIX}-${NAMESPACE_ENVIRONMENT}
         annotations:
           openshift.io/generated-by: OpenShiftWebConsole
+          # Note: Due to a limitation of Deployments in Openshift / Kubernetes, we need to use Annotations to trigger a deployment rollout
+          # See: https://docs.redhat.com/en/documentation/openshift_container_platform/3.11/html/developer_guide/dev-guide-managing-images#image-stream-kubernetes-resources
+          # To view existing deployment triggers run: oc set triggers deploy/critterbase-api
+          image.openshift.io/triggers: |-
+            [
+              {
+                "from": {
+                  "kind": "ImageStreamTag",
+                  "name": "${APP_NAME}-api:${NAMESPACE_ENVIRONMENT}",
+                  "namespace": "${NAMESPACE_PREFIX}-tools"
+                },
+                "fieldPath": "spec.template.spec.containers[0].image"
+              }
+            ]
         generation: 0
         labels:
           app: ${APP_NAME}
@@ -496,8 +510,6 @@ objects:
           name: ${APP_NAME}-api
           tag: ${TEMPLATE_TAG}
       spec:
-        lookupPolicy:
-          local: false
         tags:
           - name: prod
           - name: prod-backup
