@@ -3,8 +3,20 @@
  */
 export const DEVELOPERS = [
   {
-    user_identifier: 'MAC DELUCA',
-    keycloak_uuid: '0054CF4823A744309BE399C34B6B0F43'
+    user_identifier: 'achirico',
+    keycloak_uuid: 'E3A279530D164485BF43C6FE7A49E175'
+  },
+  {
+    user_identifier: 'mauberti',
+    keycloak_uuid: '62EC624E50844486A046DC9709854F8D'
+  },
+  {
+    user_identifier: 'anthomps',
+    keycloak_uuid: '543C3CE2F4DE472DB3A569FD0024B244'
+  },
+  {
+    user_identifier: 'ameijer',
+    keycloak_uuid: '74231B32026141A7ACEC6BCC0284F038'
   }
 ];
 
