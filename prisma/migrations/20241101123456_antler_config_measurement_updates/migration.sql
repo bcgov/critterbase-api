@@ -31,8 +31,6 @@ VALUES
     (180692, 'antler point count - right', 0, 10000, NULL, 'Number of antler points on the right side, used to assess asymmetry and overall antler development');
 
 
-
-
 -----------CERVUS----------------
 
 -- Insert new qualitative measurement for 'antler configuration' for Cervus (itis_tsn: 180694)
@@ -349,4 +347,3 @@ FROM (
     ('Unclassified Age/Sex', 'Moose for which both age (calf/adult) and sex (bull/cow) are not classified or determined.', 4)
 ) AS v (option_label, option_desc, option_value)
 JOIN maleCompositionIDs m ON m.measurement_name = 'Hunting & trapping classifications';
-
