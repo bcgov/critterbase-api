@@ -134,10 +134,6 @@ export class ItisService extends ExternalService {
   async getTsnHierarchy(searchTsn: number) {
     const { tsnHierarchy } = await this.searchSolrByTsn(searchTsn);
 
-    if (tsnHierarchy[tsnHierarchy.length - 1] !== searchTsn) {
-      throw apiError.requestIssue(`ITIS TSN produced invalid hierarchy.`, ['ItisWebService -> getTsnHierarchy']);
-    }
-
     return tsnHierarchy;
   }
 

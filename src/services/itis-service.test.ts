@@ -102,12 +102,6 @@ describe('ItisService', () => {
         expect(data).toBeDefined();
         expect(data.length).toBe(2);
       });
-
-      it('should throw error if no hierarchy returned', async () => {
-        expect(async () => {
-          await service.getTsnHierarchy(focalTsn);
-        }).rejects.toThrow('ITIS TSN produced invalid hierarchy.');
-      });
     });
 
     describe('getScientificNameFromTsn', () => {
